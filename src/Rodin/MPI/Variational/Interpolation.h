@@ -18,6 +18,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Geometry/Region.h"
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/Variational/Interpolation.h"
 #include "Rodin/Variational/P0/ForwardDecls.h"

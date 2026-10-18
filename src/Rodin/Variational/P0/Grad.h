@@ -76,14 +76,17 @@ namespace Rodin::Variational
         Grad<GridFunction<P0<Range, Mesh>, Data>>>
   {
     public:
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
-
       /// @brief Mesh type.
       using MeshType = Mesh;
 
       /// @brief Finite element space type.
-      using FESType = P0<RangeType, MeshType>;
+      using FESType = P0<Range, MeshType>;
+
+      /// @brief Scalar coefficient type.
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      /// @brief Gradient value with one entry per ambient coordinate.
+      using RangeType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
@@ -121,11 +124,21 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Interpolates the broken gradient at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Evaluation point carrying optional sampling metadata.
+       */
+      void interpolate(RangeType& out, const IntegrationPoint& ip) const
+      {
+        interpolate(out, ip.getPoint());
+      }
+
+      /**
        * @brief Interpolates at a geometric point.
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
-      void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
+      void interpolate(RangeType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -151,7 +164,6 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -184,20 +196,8 @@ namespace Rodin::Variational
         else // Evaluating on a cell
         {
           assert(d == mesh.getDimension());
-          const auto& gf = this->getOperand();
-          const auto& fes = gf.getFiniteElementSpace();
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto& rc = p.getReferenceCoordinates();
-          SpatialVectorType res(d);
-          res.setZero();
-          for (size_t local = 0; local < fe.getCount(); local++)
-          {
-            const auto basis = fe.getBasis(local);
-            const auto coefficient = gf[fes.getGlobalIndex({d, i}, local)];
-            for (size_t axis = 0; axis < d; ++axis)
-              res[axis] += coefficient * basis.template getDerivative<1>(axis)(rc);
-          }
-          out = p.getJacobianInverse().transpose() * res;
+          out.resize(mesh.getSpaceDimension());
+          out.setZero();
         }
       }
 
@@ -298,6 +298,17 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
+      }
+
+      /**
+       * @brief Reports a degree bound for the identically zero broken gradient.
+       * @param polytope Mesh entity; the bound does not depend on it.
+       * @returns Zero, sufficient to integrate the zero expression.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
+      {
+        return 0;
       }
 
       /**

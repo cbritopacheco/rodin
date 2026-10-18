@@ -11,6 +11,7 @@
 #include <memory>
 #include <type_traits>
 #include <vector>
+#include <boost/container/small_vector.hpp>
 
 #include "Rodin/Assembly/Default.h"
 #include "Rodin/FormLanguage/Traits.h"
@@ -124,6 +125,16 @@ namespace Rodin::Variational
        * change from one polytope to the next. The kernel owns a copy of the
        * coefficient, so that each thread assembling with its own copy of the
        * kernel also evaluates its own copy of the coefficient.
+       *
+       * ## Architecture
+       *
+       * Reference preparation owns one basis-pair matrix per quadrature sample.
+       * Trial values are evaluated once into point-local scratch before the
+       * test-basis loop. Thus @f$N_qN_r@f$ trial evaluations suffice instead of
+       * @f$N_qN_tN_r@f$, without changing the dot products or the retained
+       * reference-matrix layout. The scratch is local to preparation, not a
+       * second persistent reference cache. Empty test ranges do not evaluate
+       * trial bases. Subsequent cells retain the original weighted accumulation.
        */
       class Kernel
       {
@@ -201,18 +212,24 @@ namespace Rodin::Variational
               m_trialCount = trialFE.getCount();
               m_testCount = testFE.getCount();
               m_reference.resize(qf.getSize());
+              using TrialValue = typename FormLanguage::Traits<TrialFES>::RangeType;
+              /// @brief Inline storage for scalar Point and linear-Segment controls.
+              constexpr size_t TrialInlineCapacity = 2;
+              boost::container::small_vector<TrialValue, TrialInlineCapacity> trialValues(
+                m_testCount == 0 ? 0 : m_trialCount);
               for (size_t qp = 0; qp < qf.getSize(); ++qp)
               {
                 auto& matrix = m_reference[qp];
                 matrix.resize(testFE.getCount(), trialFE.getCount());
                 const auto& reference = qf.getPoint(qp);
+                for (size_t tr = 0; tr < trialValues.size(); ++tr)
+                  trialValues[tr] = trialFE.getBasis(tr)(reference);
                 for (size_t te = 0; te < testFE.getCount(); ++te)
                 {
                   const auto testValue = testFE.getBasis(te)(reference);
                   for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
                   {
-                    matrix(te, tr) =
-                      Math::dot(trialFE.getBasis(tr)(reference), testValue);
+                    matrix(te, tr) = Math::dot(trialValues[tr], testValue);
                   }
                 }
               }
@@ -295,7 +312,8 @@ namespace Rodin::Variational
        * @param[in] v Test function.
        */
       template <class L>
-        requires std::is_same_v<CoefficientDerived,
+        requires(!std::is_base_of_v<FormLanguage::Base, L>) &&
+        std::is_same_v<CoefficientDerived,
           typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>
       MassForm(const L& c, const TrialFunction<SolutionType, TrialFESType>& u,
         const TestFunction<TestFESType>& v)
@@ -478,14 +496,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class Solution, class TrialFES, class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L>)
   MassForm(const L& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type>;
 }
 
 #endif

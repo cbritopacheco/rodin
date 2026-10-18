@@ -80,14 +80,17 @@ namespace Rodin::Variational
 
       /**
        * @brief Interpolates ∇u at point p (always zero for P0g).
+       *
+       * The zero vector has one entry per ambient coordinate, independently
+       * of the dimension of the cell, face or point being evaluated.
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& poly = p.getPolytope();
-        const size_t d = poly.getDimension(); // works for cell or face
-        out.resize(d);
+        const size_t spaceDimension = poly.getMesh().getSpaceDimension();
+        out.resize(spaceDimension);
         out.setZero();
       }
 
@@ -185,6 +188,15 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Forwards the trial or test leaf of the constant operand.
+       * @returns The leaf borrowed by this expression.
+       */
+      constexpr const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      /**
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
@@ -197,20 +209,20 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Only this expression's cursor and zero storage change. The borrowed
+       * constant operand has no derivative-evaluation state to synchronize.
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        // Keep operand aligned (even though basis is constant).
-        m_u.get().setIntegrationPoint(ip);
         m_ip = &ip;
 
-        // Dimension comes from the polytope we are integrating on.
         const auto& poly = ip.getPoint().getPolytope();
-        const size_t d = poly.getDimension();
+        const size_t spaceDimension = poly.getMesh().getSpaceDimension();
 
-        m_zero.resize(d);
+        m_zero.resize(spaceDimension);
         m_zero.setZero();
 
         return *this;

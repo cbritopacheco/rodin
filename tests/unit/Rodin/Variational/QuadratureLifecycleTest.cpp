@@ -4,7 +4,22 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Local quadrature ownership checked against analytic field contractions. */
+/**
+ * @file
+ * @brief Local quadrature ownership checked against analytic field contractions.
+ *
+ * Affine fields are interpolated through degree-of-freedom functionals on
+ * segments and triangles, in real/complex P1 and quadratic H1 spaces. Matched
+ * quadrature integrates the analytic density independently of local entries.
+ * The same action is checked after rebinding, copying, moving and polymorphic
+ * cloning. Complex rank-one coefficients exercise conjugation of the test
+ * action in coincident and distinct spaces, with shared and distinct coefficient
+ * identities. In particular, @f$B=2iA@f$ gives
+ * @f$(A:J(u))\overline{(B:J(u))}=-2i|A:J(u)|^2@f$, so even a coincident
+ * trial/test space must retain both triangles for this non-Hermitian form.
+ * These are fixed-mesh numerical and lifecycle regressions, not refinement-rate
+ * or distributed certification.
+ */
 #include <gtest/gtest.h>
 #include <functional>
 #include <memory>
@@ -19,6 +34,9 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  /// @brief Absolute dimensionless action budget for unit-box quadrature roundoff.
+  constexpr Real ActionTolerance = 1e-10;
+
   template <class Scalar, bool HigherOrder>
   void checkLocalQuadratureLifecycle(size_t dimension)
   {
@@ -75,13 +93,17 @@ namespace
           value[1] = factor * (-2 + 2 * p.x() + 4 * p.y());
         return value;
       });
-    GridFunction scalarField(scalarSpace), vectorField(vectorSpace),
-      otherVectorField(otherVectorSpace);
+    GridFunction scalarField(scalarSpace);
+    GridFunction vectorField(vectorSpace);
+    GridFunction otherVectorField(otherVectorSpace);
     scalarField = scalarFunction;
     vectorField = vectorFunction;
     otherVectorField = vectorFunction;
-    TrialFunction u(scalarSpace), w(vectorSpace);
-    TestFunction v(scalarSpace), z(vectorSpace), otherZ(otherVectorSpace);
+    TrialFunction u(scalarSpace);
+    TrialFunction w(vectorSpace);
+    TestFunction v(scalarSpace);
+    TestFunction z(vectorSpace);
+    TestFunction otherZ(otherVectorSpace);
     RealFunction coefficient([](const Point& p) { return 1 + p.x(); });
     using BilinearBase = LocalBilinearFormIntegratorBase<Scalar>;
     using LinearBase = LinearFormIntegratorBase<Scalar>;
@@ -104,7 +126,7 @@ namespace
           const Point point(cell, formula.getPoint(sample));
           expected += formula.getWeight(sample) * point.getDistortion() * density(point);
         }
-        EXPECT_LT(std::abs(action(integrator, cell) - expected), 1e-10);
+        EXPECT_LT(std::abs(action(integrator, cell) - expected), ActionTolerance);
       };
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
@@ -255,6 +277,23 @@ namespace
       bilinear(Integral(Dot(complexCoefficient, Jacobian(w)),
                  Dot(complexCoefficient, Jacobian(otherZ))),
         vectorField, otherVectorField, density);
+      const auto distinctCoefficient =
+        MatrixFunction(dimension, dimension, [complexCoefficient](const Point& p) {
+          auto value = complexCoefficient(p);
+          value *= Scalar(0, 2);
+          return value;
+        });
+      // Distinct coefficient identities require full assembly, including when
+      // the finite element space is shared. The analytic density is given above.
+      const auto distinctDensity = [density](const Point& p) {
+        return Scalar(0, -2) * density(p);
+      };
+      bilinear(Integral(Dot(complexCoefficient, Jacobian(w)),
+                 Dot(distinctCoefficient, Jacobian(z))),
+        vectorField, vectorField, distinctDensity);
+      bilinear(Integral(Dot(complexCoefficient, Jacobian(w)),
+                 Dot(distinctCoefficient, Jacobian(otherZ))),
+        vectorField, otherVectorField, distinctDensity);
     }
     linear(Integral(scalarFunction, v), scalarField, scalarMass);
     linear(Integral(vectorFunction, z), vectorField, vectorMass);

@@ -26,6 +26,50 @@ target_link_libraries(RodinVariationalDistinctSpaceQuadratureTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalDistinctSpaceQuadratureTest
   PROPERTIES LABELS unit TIMEOUT 300)
+add_executable(RodinVariationalMassFormTest MassFormTest.cpp)
+target_link_libraries(RodinVariationalMassFormTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMassFormTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalConvectionQuadratureTest ConvectionQuadratureTest.cpp)
+target_link_libraries(RodinVariationalConvectionQuadratureTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalConvectionQuadratureTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalReferenceTabulationTest ReferenceTabulationTest.cpp)
+target_link_libraries(RodinVariationalReferenceTabulationTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalReferenceTabulationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalComplexNamedFormTest ComplexNamedFormTest.cpp)
+target_link_libraries(RodinVariationalComplexNamedFormTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalComplexNamedFormTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalIntegrationPointTest IntegrationPointTest.cpp)
+target_link_libraries(RodinVariationalIntegrationPointTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalIntegrationPointTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalWeightedH1JacobianTest WeightedH1JacobianTest.cpp)
+target_link_libraries(RodinVariationalWeightedH1JacobianTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalWeightedH1JacobianTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1JacobianBlocksTest H1JacobianBlocksTest.cpp)
+target_link_libraries(RodinVariationalH1JacobianBlocksTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1JacobianBlocksTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1CoefficientTabulationTest H1CoefficientTabulationTest.cpp)
+target_link_libraries(RodinVariationalH1CoefficientTabulationTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1CoefficientTabulationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalEmbeddedJacobianTest EmbeddedJacobianTest.cpp)
+target_link_libraries(RodinVariationalEmbeddedJacobianTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalEmbeddedJacobianTest PROPERTIES LABELS unit)
 
 add_executable(RodinVariationalWeightedComplexQuadratureTest
   WeightedComplexQuadratureTest.cpp)
@@ -799,6 +843,11 @@ add_executable(RodinVariationalMatrixQuadratureTest MatrixQuadratureTest.cpp)
 target_link_libraries(RodinVariationalMatrixQuadratureTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalMatrixQuadratureTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalShapeFunctionTest ShapeFunctionTest.cpp)
+target_link_libraries(RodinVariationalShapeFunctionTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalShapeFunctionTest PROPERTIES LABELS unit)
 
 add_executable(RodinVariationalCoefficientEvaluationTest CoefficientEvaluationTest.cpp)
 target_link_libraries(RodinVariationalCoefficientEvaluationTest

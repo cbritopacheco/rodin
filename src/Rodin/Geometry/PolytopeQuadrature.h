@@ -47,29 +47,29 @@
  * - @f$ d @f$ is the polytope dimension,
  * - @f$ i @f$ is the polytope index within that dimension.
  *
- * Each slot stores:
- * - one hot entry for the fastest repeated-hit access path,
- * - one small bounded ring buffer of owned cached quadratures.
+ * Each dimension stores formula-version entries, each owning a dense array of
+ * polytope slots. A hot formula pointer and a bounded formula lookup accelerate
+ * access; the complete formula index retains every published version.
  *
  * Lookup order is:
  * - hot entry,
- * - bounded per-slot cache,
+ * - bounded formula lookup and complete formula index,
  * - lazy construction on miss.
  *
- * Hits in the bounded cache are promoted to the hot slot. Misses are inserted
- * into the bounded cache in round-robin order and then promoted to the hot slot.
+ * Hits are promoted to the hot formula pointer. New versions are appended to
+ * stable owned storage; previously borrowed quadratures are not replaced.
  *
  * # Key
  *
- * The cache key is the address of the quadrature formula object:
+ * The formula key is its process-local lifetime/assignment identity:
  *
  * @f[
- *   \texttt{const QF::QuadratureFormulaBase*}
+ *   \operatorname{identity}(Q).
  * @f]
  *
- * This design assumes that callers obtain quadrature formulas from a canonical
- * source such as @ref Rodin::QF::PolytopeQuadratureFormula, so that the
- * same logical formula has a stable object identity.
+ * Canonical formulas reuse one version. Assignment and storage reuse create
+ * new entries without destroying old mapped samples. Formula changes must not
+ * overlap evaluation; all entries are released on mesh geometry flush.
  */
 
 #include <algorithm>
@@ -87,7 +87,7 @@
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Types.h"
-#include "Rodin/QF/ForwardDecls.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Point.h"
 
 namespace Rodin::Geometry
@@ -120,6 +120,14 @@ namespace Rodin::Geometry
     public:
       /**
        * @brief Constructs the realized quadrature on a polytope.
+       *
+       * The formula remains immutable throughout construction. After bulk
+       * Jacobian evaluation, the returned array supplies point-storage size
+       * and logical sample order. Debug builds independently assert agreement
+       * with the formula size; release construction does not query size again.
+       * No additional retained cache or collective operation is introduced.
+       * Sample order, reference coordinates and owned Jacobians are unchanged.
+       *
        * @param[in] polytope Concrete mesh polytope
        * @param[in] qf Reference quadrature formula
        */
@@ -135,6 +143,21 @@ namespace Rodin::Geometry
       {
         assert(m_qf);
         return *m_qf;
+      }
+
+      /**
+       * @brief Identifies the formula version used to construct the owned samples.
+       *
+       * The snapshot remains unchanged if the borrowed formula is subsequently
+       * assigned. Consumers can then reject reference-table reuse without
+       * comparing point coordinates. Copying or moving the quadrature retains
+       * this association with its owned samples.
+       *
+       * @returns Logical construction-time formula identity.
+       */
+      size_t getQuadratureFormulaIdentity() const noexcept
+      {
+        return m_qfIdentity;
       }
 
       /**
@@ -163,6 +186,7 @@ namespace Rodin::Geometry
 
     private:
       const QF::QuadratureFormulaBase* m_qf; ///< Source quadrature formula
+      size_t m_qfIdentity; ///< Formula version defining the owned reference samples.
       std::vector<Point> m_ps;                         ///< Mapped quadrature points
   };
 
@@ -296,10 +320,12 @@ namespace Rodin::Geometry
        *
        * Formula and quadrature pointers are resolved atomically on repeated
        * accesses. A miss creates stable owned storage under a narrow lock.
+       * Formula assignment or reconstruction at the same address selects a new
+       * entry; earlier mapped samples remain alive until clear().
        *
-       * @note Cache mutation, including clear(), must not overlap use of a
-       *       returned reference. Mesh geometry must remain unchanged during
-       *       variational evaluation.
+       * @note Clearing or restructuring the index must not overlap use of a
+       *       returned reference. Formula mutation must not overlap cache
+       *       access. Mesh geometry must remain unchanged during evaluation.
        *
        * @throws Rodin::Alert::Exception if:
        * - the dimension is outside the initialized range,
@@ -333,15 +359,16 @@ namespace Rodin::Geometry
             << Alert::Raise;
         }
 
+        const size_t identity = qf.getCacheIdentity();
         auto& dim = m_dimensions[d];
         Formula* formula = dim.hot.load(std::memory_order_acquire);
-        if (!formula || formula->qf != &qf)
+        if (!formula || formula->identity != identity)
         {
           formula = nullptr;
           for (const auto& entry : dim.lookup)
           {
             Formula* candidate = entry.load(std::memory_order_acquire);
-            if (candidate && candidate->qf == &qf)
+            if (candidate && candidate->identity == identity)
             {
               formula = candidate;
               break;
@@ -353,7 +380,7 @@ namespace Rodin::Geometry
             std::lock_guard<std::mutex> lock(dim.mutex);
             for (const auto& candidate : dim.formulas)
             {
-              if (candidate->qf == &qf)
+              if (candidate->identity == identity)
               {
                 formula = candidate.get();
                 break;
@@ -362,7 +389,7 @@ namespace Rodin::Geometry
 
             if (!formula)
             {
-              dim.formulas.emplace_back(std::make_unique<Formula>(&qf, count));
+              dim.formulas.emplace_back(std::make_unique<Formula>(identity, count));
               formula = dim.formulas.back().get();
               for (auto& entry : dim.lookup)
               {
@@ -418,12 +445,12 @@ namespace Rodin::Geometry
           static constexpr size_t MutexCount = 64;
           /**
            * @brief Initializes the quadrature formula cache.
-           * @param qf Quadrature formula whose point slots are cached.
+         * @param identity Formula lifetime/assignment identity.
            * @param count Required number of cache slots.
            */
 
-          Formula(const QF::QuadratureFormulaBase* qf, size_t count)
-            : qf(qf),
+        Formula(size_t identity, size_t count)
+          : identity(identity),
               slots(count),
               publishedSize(count)
           {}
@@ -442,7 +469,7 @@ namespace Rodin::Geometry
             publishedSize.store(slots.size(), std::memory_order_release);
         }
 
-        const QF::QuadratureFormulaBase* qf;
+        size_t identity;
         std::deque<Slot> slots;
         std::atomic<size_t> publishedSize;
         std::mutex resizeMutex;

@@ -44,10 +44,12 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y clang-format-18
           pip install clang-format==18.1.8
+      - name: Test formatter indentation configuration
+        run: python3 -m unittest discover -s dev -p test_format_config.py -v
       - name: Check formatting of changed lines
         run: >-
           python3 dev/check_format.py --base "$BASE_REF" --head HEAD
-          --binary clang-format --git-clang-format git-clang-format-18
+          --binary clang-format
 
   StyleLint:
     runs-on: ubuntu-24.04

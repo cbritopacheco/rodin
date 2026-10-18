@@ -134,6 +134,19 @@ gtest_discover_tests(RodinGeometryPolytopeQuadratureIndexTest
     LABELS unit
 )
 
+add_executable(RodinGeometryPolytopeQuadratureTest PolytopeQuadratureTest.cpp)
+target_link_libraries(RodinGeometryPolytopeQuadratureTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::QF)
+gtest_discover_tests(RodinGeometryPolytopeQuadratureTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinGeometryPolytopeTransformationIndexTest
   PolytopeTransformationIndexTest.cpp)
 target_link_libraries(RodinGeometryPolytopeTransformationIndexTest

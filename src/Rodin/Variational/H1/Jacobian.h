@@ -11,8 +11,11 @@
  * This file provides specialized implementations of the Jacobian matrix
  * operator for H1 vector-valued GridFunctions and ShapeFunctions.
  *
- * For a vector function @f$ \mathbf{u} : \Omega \to \mathbb{R}^d @f$, the
- * Jacobian is the @f$ d \times d @f$ matrix:
+ * On a cell of reference dimension @f$d@f$ embedded in @f$\mathbb{R}^s@f$,
+ * a field with @f$m@f$ components has an @f$m\times s@f$ tangential Jacobian
+ * @f$J(u)=\widehat J(u)J_K^{\dagger}@f$. The geometric inverse has shape
+ * @f$d\times s@f$; ambient derivative columns are retained independently of
+ * the reference and field dimensions. When @f$m=s=d@f$, this is the matrix:
  * @f[
  *   \mathbf{J}(\mathbf{u}) = \begin{pmatrix}
  *     \frac{\partial u_1}{\partial x_1} & \cdots & \frac{\partial u_1}{\partial x_d} \\
@@ -21,7 +24,8 @@
  *   \end{pmatrix}
  * @f]
  *
- * For H1<K> elements, the Jacobian is polynomial of degree K-1 on each element.
+ * The physical derivative includes the current inverse geometric Jacobian;
+ * a curved mapping does not generally preserve reference polynomial degree.
  *
  * @see <a href="_jacobian_8h.html">Jacobian</a>
  * @see <a href="_variational_2_h1_8h.html">H1</a>
@@ -82,11 +86,17 @@ namespace Rodin::Variational
    *
    * Computes the Jacobian matrix of an H1<K> vector-valued grid function:
    * @f[
-   *   \mathbf{J}(\mathbf{u})|_K = \sum_{i=1}^{n_{dof} \cdot d} u_i \nabla \phi_i \otimes \mathbf{e}_j
+   *   \mathbf{J}(\mathbf{u})|_K
+   *   = \sum_{\alpha=1}^{N_s}\sum_{c=0}^{m-1} u_{\alpha c}\,
+   *     \mathbf{e}_c\otimes
+   *     \bigl((J_K^{\dagger})^T\widehat\nabla\widehat\phi_\alpha\bigr)
    * @f]
-   * where @f$ j = i \mod d @f$ and @f$ n_{dof} @f$ is the number of DOFs per element.
+   * where @f$N_s@f$ is the scalar basis count and @f$m@f$ the field component
+   * count. Reference gradients have @f$d@f$ entries; physical gradients retain
+   * all @f$s@f$ ambient entries.
    *
-   * The Jacobian is polynomial of degree K-1 on each element for H1<K> functions.
+   * The inverse geometric Jacobian is evaluated at the current sample. Curved
+   * mappings need not produce polynomial physical derivatives.
    *
    * ## Applications
    * - Strain tensor in elasticity: @f$ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) @f$
@@ -174,13 +184,15 @@ namespace Rodin::Variational
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
-        if (!ip.getQuadratureFormula())
+        if (!ip.getReferenceQuadratureFormula() ||
+          p.getPolytope().getDimension() != p.getPolytope().getMesh().getDimension())
         {
           interpolate(out, p);
           return;
         }
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index i = polytope.getIndex();
 
         const auto& gf  = this->getOperand();
@@ -189,15 +201,15 @@ namespace Rodin::Variational
 
         const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
         const size_t nscalar = feS.getCount();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         assert(qf);
         const auto& tab = feS.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
-        SpatialVectorType phys(d);
+        SpatialVectorType phys(spaceDimension);
 
-        out.resize(vdim, d);
+        out.resize(vdim, spaceDimension);
         out.setZero();
 
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
@@ -212,7 +224,7 @@ namespace Rodin::Variational
           {
             const size_t local = alpha * vdim + comp;
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            for (size_t j = 0; j < d; ++j)
+            for (size_t j = 0; j < spaceDimension; ++j)
               out(comp, j) += uval * phys(j);
           }
         }
@@ -230,6 +242,7 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
+        const size_t spaceDimension = mesh.getSpaceDimension();
 
         if (d == meshDim - 1) // face
         {
@@ -288,19 +301,17 @@ namespace Rodin::Variational
 
         const auto geom = polytope.getGeometry();
         const auto feS = H1Element<K, ScalarType>(geom);
-        const size_t nscalar = feS.getCount();
         const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
-        SpatialVectorType phys(d);
+        SpatialVectorType phys(spaceDimension);
 
-        out.resize(vdim, d);
+        out.resize(vdim, spaceDimension);
         out.setZero();
 
-        for (size_t alpha = 0; alpha < nscalar; ++alpha)
-        {
-          const auto gref = feS.getBasis(alpha).getGradient()(rc);
+        feS.evaluateGradients(
+          [&](size_t alpha, const auto& gref) {
           for (size_t j = 0; j < d; ++j)
             ref(j) = gref(j);
 
@@ -310,10 +321,11 @@ namespace Rodin::Variational
           {
             const size_t local = alpha * vdim + comp;
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            for (size_t j = 0; j < d; ++j)
+              for (size_t j = 0; j < spaceDimension; ++j)
               out(comp, j) += uval * phys(j);
           }
-        }
+          },
+          rc);
       }
   };
 
@@ -329,6 +341,11 @@ namespace Rodin::Variational
   /**
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 ShapeFunction object.
+   *
+   * Each basis Jacobian has one row per field component and one column per
+   * ambient coordinate. Reference gradients have @f$d@f$ entries, while their
+   * physical images under @f$(J_K^{\dagger})^T@f$ have @f$s@f$ entries, including
+   * on embedded cells and zero-dimensional points.
    */
   template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>> final
@@ -365,80 +382,11 @@ namespace Rodin::Variational
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      /// @brief Per-cell tabulation cache.
+      /// @brief Physical derivatives prepared by the current integration-point bind.
       struct Cache
       {
-          /// @brief Key identifying a cached tabulation.
-          struct Key
-          {
-              /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom;
-              /// @brief Spatial dimension.
-              size_t dim;
-              /// @brief Cached cell tabulation.
-              Index cell;
-
-              /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf;
-              /// @brief Logical lifetime and assignment identity of the formula.
-              size_t identity;
-              /// @brief Index of the quadrature point.
-              size_t qp;
-
-              /// @brief Whether the key holds a cached entry.
-              bool valid;
-
-              /// @brief Constructs an invalid quadrature cache key.
-              Key()
-                : geom(Geometry::Polytope::Type::Point),
-                  dim(0),
-                  cell(0),
-                  qf(nullptr),
-                  identity(0),
-                  qp(0),
-                  valid(false)
-              {}
-
-              /**
-               * @brief Tests whether the key holds a cached entry.
-               * @returns True if the key identifies a cached entry; false otherwise.
-               */
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
-
-              /**
-               * @brief Equality comparison.
-               * @returns Whether the operands compare equal.
-               * @param o Key to compare with this key.
-               */
-              bool operator==(const Key& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return geom == o.geom && dim == o.dim && cell == o.cell && qf == o.qf &&
-                  identity == o.identity && qp == o.qp;
-              }
-
-              /// @brief Invalidates the cached tabulation.
-              void invalidate() noexcept
-              {
-                valid = false;
-                geom = Geometry::Polytope::Type::Point;
-                dim = 0;
-                cell = 0;
-                qf = nullptr;
-                identity = 0;
-                qp = 0;
-              }
-        };
-
-        // minimal cache: physical gradients for scalar basis indices alpha
-        /// @brief Cached physical gradients per scalar DOF (size = nscalar).
+        /// @brief Prepared physical derivatives in local basis order.
         std::vector<SpatialVectorType> gradPhys;
-        /// @brief Key identifying the cached entry.
-        Key key;
       };
 
       /**
@@ -527,6 +475,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Every explicit bind prepares physical derivatives from the supplied
+       * point. Cell and formula identities do not identify geometry state:
+       * deformation may preserve both while changing the inverse Jacobian.
+       * Only reference tabulation and working storage are reused across binds.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -535,27 +489,12 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
-        const size_t d   = poly.getDimension();
-        const Index  cell = poly.getIndex();
-
-        typename Cache::Key key;
-        key.geom  = geom;
-        key.dim   = d;
-        key.cell  = cell;
-        key.qf = qf;
-        key.identity = qf ? qf->getCacheIdentity() : 0;
-        key.qp    = qp;
-        key.valid = true;
-
-        if (qf && m_cache.key == key)
-          return *this;
-
-        m_cache.key = key;
+        const size_t d = poly.getDimension();
 
         // scalar element for geometry-only tabulation
         const H1Element<K, ScalarType> feS(geom);
@@ -594,25 +533,23 @@ namespace Rodin::Variational
        */
       RangeType getBasis(size_t local) const
       {
-        assert(m_cache.key);
-
         const auto& fes = this->getFiniteElementSpace();
         const std::uint8_t vdim = fes.getVectorDimension();
 
         const auto& p = this->getIntegrationPoint().getPoint();
-        const std::uint8_t d = p.getPolytope().getDimension();
+        const std::uint8_t spaceDimension = p.getPolytope().getMesh().getSpaceDimension();
 
         const size_t alpha = local / vdim;
         const size_t comp  = local % vdim;
 
         assert(alpha < m_cache.gradPhys.size());
         assert(vdim <= RangeType::MaxSize);
-        assert(d <= RangeType::MaxSize);
+        assert(spaceDimension <= RangeType::MaxSize);
 
-        RangeType J(vdim, d);
+        RangeType J(vdim, spaceDimension);
         J.setZero();
 
-        for (std::uint8_t j = 0; j < d; ++j)
+        for (std::uint8_t j = 0; j < spaceDimension; ++j)
           J(comp, j) = m_cache.gradPhys[alpha](j);
 
         return J;

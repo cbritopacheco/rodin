@@ -1171,6 +1171,20 @@ namespace Rodin::Assembly
       {}
 
       /**
+       * @brief Copies the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
+
+      /**
        * @brief Executes full problem assembly.
        * @param axb Output linear system.
        * @param input Problem assembly input.
@@ -1929,6 +1943,20 @@ namespace Rodin::Assembly
         : Parent(std::move(other)),
           m_threadCount(other.m_threadCount)
       {}
+
+      /**
+       * @brief Copies the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
 
       /**
        * @brief Executes full mixed problem assembly.

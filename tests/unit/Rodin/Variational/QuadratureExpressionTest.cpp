@@ -5,7 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file @brief Generic bilinear quadrature value-reuse regression tests.
+ * @file
+ * @brief Generic bilinear quadrature value-reuse regression tests.
+ *
  * The test-only reference retains the original quadrature/trial/test loop.
  * Every local entry must agree exactly, with unchanged summation order and
  * trial-first, test-second conjugation. Assembled comparisons use DOF maps,
@@ -28,7 +30,7 @@ namespace Rodin::Tests::Unit
 {
   namespace
   {
-    /** Observes retention requests without altering mesh-cache lifetimes. */
+    /// @brief Observes retention requests without altering mesh-cache lifetimes.
     class ObservedMesh : public LocalMesh
     {
       public:
@@ -47,7 +49,7 @@ namespace Rodin::Tests::Unit
         mutable size_t requests;
     };
 
-    /** @brief Original entry evaluation, independent of the production rule. */
+    /// @brief Original entry evaluation, independent of the production rule.
     template <class I>
     auto reference(const I& integral, const Polytope& cell, size_t order)
     {
@@ -224,6 +226,204 @@ namespace Rodin::Tests::Unit
     {
       protected:
         /**
+         * @brief Compares reused P1 derivatives with fresh direct-point evaluation.
+         *
+         * Quadrature indices are traversed on one retained cell. Every basis
+         * component is compared exactly, including rational pyramidal functions.
+         * A constant geometric Jacobian does not imply constant reference basis
+         * derivatives. The oracle has no formula association or previous state.
+         *
+         * @param space Native scalar or vector P1 space.
+         */
+        template <class FES>
+        void checkP1SampleDerivatives(FES& space)
+        {
+          TestFunction u(space);
+          const auto cell = *space.getMesh().getCell();
+          const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+          const PolytopeQuadrature points(cell, formula);
+          const auto exercise = [&](auto& reused, auto makeFresh) {
+            using Value = std::remove_cvref_t<decltype(reused.getBasis(size_t(0)))>;
+            for (size_t qp = 0; qp < formula.getSize(); ++qp)
+            {
+              SCOPED_TRACE(::testing::Message() << "sample " << qp);
+              const IntegrationPoint indexed(points, qp);
+              const IntegrationPoint direct(points.getPoint(qp));
+              reused.setIntegrationPoint(indexed);
+              auto fresh = makeFresh(u);
+              fresh.setIntegrationPoint(direct);
+              for (size_t local = 0; local < reused.getDOFs(cell); ++local)
+              {
+                const auto actual = reused.getBasis(local);
+                const auto expected = fresh.getBasis(local);
+                if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
+                {
+                  ASSERT_EQ(actual.rows(), expected.rows());
+                  ASSERT_EQ(actual.cols(), expected.cols());
+                  for (Eigen::Index row = 0; row < actual.rows(); ++row)
+                  {
+                    for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                      EXPECT_EQ(actual(row, column), expected(row, column));
+                  }
+                }
+                else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
+                {
+                  ASSERT_EQ(actual.size(), expected.size());
+                  for (size_t j = 0; j < actual.size(); ++j)
+                    EXPECT_EQ(actual(j), expected(j));
+                }
+                else
+                  EXPECT_EQ(actual, expected);
+              }
+            }
+
+            TrialFunction trialUnknown(space);
+            auto trial = makeFresh(trialUnknown);
+            auto test = makeFresh(u);
+            // A sum selects generic contraction rather than a native-P1 rule.
+            auto integrand = Dot(trial, test + test);
+            Integral integral(integrand);
+            integral.setOrder(4);
+            integral.setPolytope(cell);
+            using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
+            const size_t count = reused.getDOFs(cell);
+            Math::Matrix<Scalar> expected(count, count);
+            expected.setZero();
+            for (size_t qp = 0; qp < formula.getSize(); ++qp)
+            {
+              const auto& point = points.getPoint(qp);
+              const IntegrationPoint direct(point);
+              integrand.setIntegrationPoint(direct);
+              const Real weight = formula.getWeight(qp) * point.getDistortion();
+              for (size_t tr = 0; tr < count; ++tr)
+              {
+                const auto lhs = integrand.getLHS().getBasis(tr);
+                for (size_t te = 0; te < count; ++te)
+                {
+                  expected(te, tr) +=
+                    weight * Math::dot(lhs, integrand.getRHS().getBasis(te));
+                }
+              }
+            }
+            for (size_t tr = 0; tr < count; ++tr)
+            {
+              for (size_t te = 0; te < count; ++te)
+                EXPECT_EQ(integral.integrate(tr, te), expected(te, tr));
+            }
+          };
+          if constexpr (FormLanguage::IsVectorRange<
+                          typename FormLanguage::Traits<FES>::RangeType>::Value)
+          {
+            auto jacobian = Jacobian(u);
+            exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+            auto divergence = Div(u);
+            exercise(divergence, [](auto& unknown) { return Div(unknown); });
+          }
+          else
+          {
+            auto gradient = Grad(u);
+            exercise(gradient, [](auto& unknown) { return Grad(unknown); });
+          }
+        }
+
+        /**
+         * @brief Checks physical vector derivatives after geometry-only mutation.
+         *
+         * The formula, sample index and cell identity remain fixed. A uniform
+         * dilation by two must halve every component of each basis Jacobian
+         * and divergence. Fresh expressions provide an independent cache-state
+         * control; comparisons are exact and use no coordinate tolerance.
+         *
+         * @param space Vector-valued finite element space.
+         * @param mesh Mutable geometry associated with the space.
+         */
+        template <class FES>
+        void checkDerivativeGeometry(FES& space, LocalMesh& mesh)
+        {
+          TestFunction u(space);
+          const auto cell = *mesh.getCell();
+          const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+          const auto exercise = [&](auto& cached, auto makeFresh) {
+            using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
+            using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
+            const PolytopeQuadrature before(cell, formula);
+            const IntegrationPoint first(before, 0);
+            cached.setIntegrationPoint(first);
+            std::vector<Value> original;
+            for (size_t local = 0; local < cached.getDOFs(cell); ++local)
+              original.push_back(cached.getBasis(local));
+            for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+            {
+              auto coordinates = mesh.getVertexCoordinates(vertex);
+              coordinates *= 2;
+              mesh.setVertexCoordinates(vertex, coordinates);
+            }
+            const PolytopeQuadrature after(cell, formula);
+            const IntegrationPoint second(after, 0);
+            cached.setIntegrationPoint(second);
+            auto fresh = makeFresh(u);
+            fresh.setIntegrationPoint(second);
+            bool nonzero = false;
+            for (size_t local = 0; local < original.size(); ++local)
+            {
+              const auto actual = cached.getBasis(local);
+              const auto expected = fresh.getBasis(local);
+              if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
+              {
+                ASSERT_EQ(actual.rows(), expected.rows());
+                ASSERT_EQ(actual.cols(), expected.cols());
+                for (Eigen::Index row = 0; row < actual.rows(); ++row)
+                {
+                  for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                  {
+                    EXPECT_EQ(actual(row, column), expected(row, column));
+                    EXPECT_EQ(
+                      Scalar(2) * actual(row, column), original[local](row, column));
+                    nonzero = nonzero || original[local](row, column) != Scalar(0);
+                  }
+                }
+              }
+              else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
+              {
+                ASSERT_EQ(actual.size(), expected.size());
+                for (size_t j = 0; j < actual.size(); ++j)
+                {
+                  EXPECT_EQ(actual(j), expected(j));
+                  EXPECT_EQ(Scalar(2) * actual(j), original[local](j));
+                  nonzero = nonzero || original[local](j) != Scalar(0);
+                }
+              }
+              else
+              {
+                EXPECT_EQ(actual, expected);
+                EXPECT_EQ(Scalar(2) * actual, original[local]);
+                nonzero = nonzero || original[local] != Scalar(0);
+              }
+            }
+            EXPECT_TRUE(nonzero);
+            for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+            {
+              auto coordinates = mesh.getVertexCoordinates(vertex);
+              coordinates *= Real(0.5);
+              mesh.setVertexCoordinates(vertex, coordinates);
+            }
+          };
+          if constexpr (FormLanguage::IsVectorRange<
+                          typename FormLanguage::Traits<FES>::RangeType>::Value)
+          {
+            auto jacobian = Jacobian(u);
+            exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+            auto divergence = Div(u);
+            exercise(divergence, [](auto& unknown) { return Div(unknown); });
+          }
+          else
+          {
+            auto gradient = Grad(u);
+            exercise(gradient, [](auto& unknown) { return Grad(unknown); });
+          }
+        }
+
+        /**
          * @brief Compares reused expressions with independently constructed expressions.
          *
          * Reconstruction and assignment retain the formula address and point
@@ -256,8 +456,8 @@ namespace Rodin::Tests::Unit
                 ASSERT_NE(formula->getCacheIdentity(), identity);
               }
               identity = formula->getCacheIdentity();
-              Point point(*cell, formula->getPoint(0));
-              const IntegrationPoint ip(point, &*formula, 0);
+              const PolytopeQuadrature points(*cell, *formula);
+              const IntegrationPoint ip(points, 0);
               TestFunction freshUnknown(space);
               decltype(auto) fresh = makeFresh(freshUnknown);
               cached.setIntegrationPoint(ip);
@@ -359,6 +559,94 @@ namespace Rodin::Tests::Unit
       };
       ranges.template operator()<Real>();
       ranges.template operator()<Complex>();
+    }
+
+    /**
+     * @brief H1 vector physical derivatives follow geometry-only rebinding.
+     *
+     * Degrees one through six, both scalar fields and all positive-dimensional
+     * reference families retain their cell and formula identities through a
+     * binary dilation. Jacobians and divergence must satisfy the exact inverse
+     * scaling law independently of any previous expression state.
+     */
+    TEST_P(QuadratureExpression, VectorDerivativesGeometryRebind)
+    {
+      const auto ranges = [&]<class Scalar>() {
+        Utility::ForIndex<6>([&](auto degree) {
+          constexpr size_t K = degree.value + 1;
+          SCOPED_TRACE(::testing::Message() << "degree " << K);
+          auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+          H1<K, Math::SpatialVector<Scalar>, LocalMesh> space(
+            std::integral_constant<size_t, K>{}, mesh, mesh.getDimension());
+          checkDerivativeGeometry(space, mesh);
+        });
+      };
+      ranges.template operator()<Real>();
+      ranges.template operator()<Complex>();
+    }
+
+    /**
+     * @brief Native P1 sample sweeps agree with independent pointwise evaluation.
+     *
+     * The default geometric maps provide controls for real and complex scalar
+     * gradients, vector Jacobians and divergence on all seven cell families.
+     */
+    TEST_P(QuadratureExpression, P1DerivativeSamplesNativeGeometry)
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+      const auto fields = [&]<class Scalar>() {
+        P1<Scalar, LocalMesh> scalar(mesh);
+        P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, mesh.getDimension());
+        checkP1SampleDerivatives(scalar);
+        checkP1SampleDerivatives(vector);
+      };
+      fields.template operator()<Real>();
+      fields.template operator()<Complex>();
+    }
+
+    /**
+     * @brief Native P1 physical derivatives follow geometry-only rebinding.
+     *
+     * Uniform binary dilation preserves topology, cell and quadrature indices,
+     * and map order, but halves every physical derivative. Both scalar fields
+     * and all three differential operators are checked exactly against fresh
+     * expressions, without coordinate matching or tolerances.
+     */
+    TEST_P(QuadratureExpression, P1DerivativeGeometryRebind)
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+      const auto fields = [&]<class Scalar>() {
+        P1<Scalar, LocalMesh> scalar(mesh);
+        P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, mesh.getDimension());
+        checkDerivativeGeometry(scalar, mesh);
+        checkDerivativeGeometry(vector, mesh);
+      };
+      fields.template operator()<Real>();
+      fields.template operator()<Complex>();
+    }
+
+    /**
+     * @brief Affine map order does not suppress nonconstant P1 reference derivatives.
+     *
+     * Every cell uses an explicit identity map. In particular, pyramidal basis
+     * derivatives remain sample-dependent although the geometric Jacobian is
+     * constant. Both scalar fields and all three differential operators are
+     * compared exactly against fresh, non-indexed evaluations.
+     */
+    TEST_P(QuadratureExpression, P1DerivativeSamplesIdentityGeometry)
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+      const auto cell = *mesh.getCell();
+      mesh.setPolytopeTransformation({cell.getDimension(), cell.getIndex()},
+        new IdentityTransformation(mesh.getDimension()));
+      const auto fields = [&]<class Scalar>() {
+        P1<Scalar, LocalMesh> scalar(mesh);
+        P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, mesh.getDimension());
+        checkP1SampleDerivatives(scalar);
+        checkP1SampleDerivatives(vector);
+      };
+      fields.template operator()<Real>();
+      fields.template operator()<Complex>();
     }
 
     template <class F>
@@ -560,7 +848,7 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge));
 
-    /** @brief Reuse is established by integer counts, not timing thresholds. */
+    /// @brief Reuse is established by integer counts, not timing thresholds.
     TEST(QuadratureExpressionRegression, CountsAndCoefficientRebinds)
     {
       auto mesh = Convergence::UniformGrid(Polytope::Type::Triangle).makeMesh(3);

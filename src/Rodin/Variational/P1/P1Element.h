@@ -34,6 +34,7 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/Variational/ReferenceTabulation.h"
 
 #include "ForwardDecls.h"
 
@@ -100,6 +101,35 @@ namespace Rodin::Variational
 
       /// Type of range
       using RangeType = ScalarType;
+
+      /// @brief Reference values and derivatives in this element's vertex order.
+      using Tabulation = typename ReferenceTabulation<P1Element<Scalar>, Scalar>::Table;
+
+      /**
+       * @brief Reuses the element's own basis at quadrature reference samples.
+       *
+       * The canonical reference store is shared across cells on this thread.
+       * Tensor-product, wedge and rational pyramid basis formulas are retained;
+       * no H1 basis or coefficient-order conversion is performed.
+       *
+       * @param formula Reference samples with a logical lifetime/assignment identity.
+       * @returns A table borrowed until a later insertion evicts its slot.
+       */
+      const Tabulation& getTabulation(const QF::QuadratureFormulaBase& formula) const
+      {
+        return ReferenceTabulation<P1Element<Scalar>, Scalar>::get(*this, formula);
+      }
+
+      /**
+       * @brief Borrows an existing table without reading its source formula.
+       * @param identity Logical formula lifetime/assignment identity.
+       * @returns The matching table on this thread, or no value after eviction.
+       */
+      Optional<std::reference_wrapper<const Tabulation>> findTabulation(
+        size_t identity) const
+      {
+        return ReferenceTabulation<P1Element<Scalar>, Scalar>::find(*this, identity);
+      }
 
       /// @brief Represents a linear form of a P1 scalar element.
       class LinearForm
@@ -669,9 +699,9 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static const BasisFunction s_basis(0, g);
+            static constexpr BasisFunction basis(0, Geometry::Polytope::Type::Point);
             assert(i == 0);
-            return s_basis;
+            return basis;
           }
           case Geometry::Polytope::Type::Segment:
           {
@@ -679,13 +709,15 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Segment);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Segment);
+                return basis;
               }
               default:
               {
@@ -701,18 +733,21 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Triangle);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Triangle);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Triangle);
+                return basis;
               }
               default:
               {
@@ -728,23 +763,27 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               default:
               {
@@ -760,23 +799,27 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               default:
               {
@@ -792,28 +835,33 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 4:
               {
-                static const BasisFunction s_basis(4, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  4, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               default:
               {
@@ -829,33 +877,33 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(0, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(1, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(2, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(3, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 4:
               {
-                static const BasisFunction s_basis(4, g);
-                return s_basis;
+                static constexpr BasisFunction basis(4, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 5:
               {
-                static const BasisFunction s_basis(5, g);
-                return s_basis;
+                static constexpr BasisFunction basis(5, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               default:
               {
@@ -872,43 +920,51 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 4:
               {
-                static const BasisFunction s_basis(4, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  4, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 5:
               {
-                static const BasisFunction s_basis(5, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  5, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 6:
               {
-                static const BasisFunction s_basis(6, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  6, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 7:
               {
-                static const BasisFunction s_basis(7, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  7, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               default:
               {

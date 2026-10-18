@@ -38,8 +38,12 @@ namespace Rodin::Tests
       {}
 
       /**
-       * @brief Evaluates an explicit integrand when an integral hides its expression.
-       * @param integrand Trial/test expression copied into the independent evaluator.
+       * @brief Constructs the original-loop oracle from the expression itself.
+       *
+       * This permits qualification of public integrator specializations that
+       * do not expose their owned integrand. No production accessor is needed.
+       *
+       * @param integrand Trial/test expression to evaluate independently.
        */
       explicit QuadratureReference(const Integrand& integrand)
         : m_integrand(integrand),
@@ -71,7 +75,7 @@ namespace Rodin::Tests
           const auto& p = quadrature.getPoint(qp);
           const Scalar weight = static_cast<Scalar>(m_qf->getWeight(qp)) *
             static_cast<Scalar>(p.getDistortion());
-          const Variational::IntegrationPoint ip(p, m_qf, qp);
+          const Variational::IntegrationPoint ip(quadrature, qp);
           m_integrand.setIntegrationPoint(ip);
           for (size_t tr = 0; tr < nr; ++tr)
           {
@@ -85,6 +89,15 @@ namespace Rodin::Tests
       const Math::Matrix<Scalar>& getOperator() const
       {
         return m_matrix;
+      }
+
+      /**
+       * @brief Returns the owned expression for an unbound reference copy.
+       * @returns Expression independently evaluated by the reference algorithm.
+       */
+      const Integrand& getIntegrand() const
+      {
+        return m_integrand;
       }
 
     private:
@@ -106,16 +119,27 @@ namespace Rodin::Tests
       using Parent = Variational::LocalBilinearFormIntegratorBase<Scalar>;
 
       explicit ReferenceIntegral(const Integral& integral)
+        : ReferenceIntegral(integral, integral.getIntegrand())
+      {}
+
+      /**
+       * @brief Constructs an oracle without requiring a production expression accessor.
+       * @param integral Region, attributes and quadrature-order policy to retain.
+       * @param integrand Expression independently evaluated inside every entry loop.
+       * @pre The expression represents the same form and spaces as the integral.
+       */
+      ReferenceIntegral(const Integral& integral,
+        const typename QuadratureReference<Integral>::Integrand& integrand)
         : Parent(integral),
           m_integral(integral),
-          m_reference(integral),
+          m_reference(integrand),
           m_polytope(nullptr)
       {}
 
       ReferenceIntegral(const ReferenceIntegral& other)
         : Parent(other),
           m_integral(other.m_integral),
-          m_reference(m_integral),
+          m_reference(other.m_reference.getIntegrand()),
           m_polytope(nullptr)
       {}
 

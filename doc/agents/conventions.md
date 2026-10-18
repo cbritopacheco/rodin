@@ -20,6 +20,29 @@ introduced or removed, especially in numerical convergence and stopping logic.
 If the implementation differs from a paper or specification, establish whether
 the difference was deliberate before editing the code.
 
+## Indentation and access sections
+
+Use two spaces per indentation level, including declarations, method bodies
+and their documentation. Members and documentation following `public:`,
+`protected:` or `private:` must be indented two spaces beyond the access label;
+they must not be aligned with it. Access labels are indented two spaces beyond
+the enclosing record's brace, while plain structs without explicit access
+sections retain one two-space member level. Nested records follow the same rule.
+
+The repository formatter expresses this with `IndentWidth: 2`,
+`IndentAccessModifiers: true`. Since clang-format also adds an unwanted extra
+level in plain structs, `dev/format_cpp.py` removes that level after formatting.
+Use this canonical entry point rather than raw clang-format. The CI changed-line
+check uses the same operation. Keep the configuration and
+`dev/test_format_config.py` regressions consistent; do not use
+formatting-disable comments to obtain this layout. Formatting enforcement
+remains changed-lines-only rather than a whole-tree reformat. Apply the ratchet
+locally with `python3 dev/check_format.py --base REF --fix [paths...]`; reserve
+full-file formatting for new files or intentional complete-file passes.
+Comment reflow remains disabled to preserve mathematical documentation;
+existing block-comment indentation may be retained by clang-format. Align
+each documentation block with its declaration when editing it.
+
 ## Const correctness
 
 **`const_cast` is forbidden.** Operations that update assembly or evaluation
@@ -94,7 +117,18 @@ allocation, communication and sanitizer effects. Do not weaken numerical
 requirements or classify a case as merely slow without this analysis. Preserve
 the reproducing benchmark and numerical regressions for any resulting repair.
 
-## Error handling in PETSc-facing code
+## Error handling
+
+Use Rodin's streamable `Alert::Exception` family rather than throwing standard
+library exceptions for errors diagnosed by Rodin. Prefer
+`Alert::MemberFunctionException(*this, __func__)` for member-function failures,
+or the applicable class, namespace, or domain-specific Alert exception, so the
+diagnostic retains its context. Complete the diagnostic with `Alert::Raise`.
+Use `assert` for internal invariants, not for invalid public inputs that must
+also be diagnosed in release builds. Do not replace exceptions originating
+inside third-party libraries merely to change their type.
+
+### PETSc-facing code
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
 uniform house idiom. Do not introduce a checking macro, and do not convert

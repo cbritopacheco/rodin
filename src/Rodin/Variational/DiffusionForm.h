@@ -216,13 +216,35 @@ namespace Rodin::Variational
                 testGradients.reserve(testFE.getCount());
                 for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
                 {
-                  trialGradients.emplace_back(
-                    trialFE.getBasis(tr).getGradient()(reference));
+                  if constexpr (requires { trialFE.getBasis(tr).getGradient(); })
+                    trialGradients.emplace_back(
+                      trialFE.getBasis(tr).getGradient()(reference));
+                  else
+                  {
+                    // Constant-space bases expose directional derivatives,
+                    // not a gradient convenience wrapper.
+                    auto& gradient = trialGradients.emplace_back(reference.size());
+                    for (size_t j = 0; j < static_cast<size_t>(reference.size()); ++j)
+                    {
+                      gradient(j) =
+                        trialFE.getBasis(tr).template getDerivative<1>(j)(reference);
+                    }
+                  }
                 }
                 for (size_t te = 0; te < testFE.getCount(); ++te)
                 {
-                  testGradients.emplace_back(
-                    testFE.getBasis(te).getGradient()(reference));
+                  if constexpr (requires { testFE.getBasis(te).getGradient(); })
+                    testGradients.emplace_back(
+                      testFE.getBasis(te).getGradient()(reference));
+                  else
+                  {
+                    auto& gradient = testGradients.emplace_back(reference.size());
+                    for (size_t j = 0; j < static_cast<size_t>(reference.size()); ++j)
+                    {
+                      gradient(j) =
+                        testFE.getBasis(te).template getDerivative<1>(j)(reference);
+                    }
+                  }
                 }
               }
             }
@@ -240,7 +262,7 @@ namespace Rodin::Variational
               if constexpr (HasCoefficient)
               {
                 weight *= static_cast<ScalarType>(
-                  m_coefficient->getValue(IntegrationPoint(point, &qf, qp)));
+                  m_coefficient->getValue(IntegrationPoint(quadrature, qp)));
               }
               const auto& jacobianInverse = point.getJacobianInverse();
               const auto metric = jacobianInverse * jacobianInverse.transpose();
@@ -319,7 +341,8 @@ namespace Rodin::Variational
        * @param[in] v Test function.
        */
       template <class L>
-        requires std::is_same_v<CoefficientDerived,
+        requires(!std::is_base_of_v<FormLanguage::Base, L>) &&
+        std::is_same_v<CoefficientDerived,
           typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>
       DiffusionForm(const L& c, const TrialFunction<SolutionType, TrialFESType>& u,
         const TestFunction<TestFESType>& v)
@@ -503,14 +526,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class Solution, class TrialFES, class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L>)
   DiffusionForm(const L& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> DiffusionForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type>;
 }
 
 #endif

@@ -1,606 +1,310 @@
-# Spatial value benchmarks
+# Library performance benchmarks
 
-The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
-executable and benchmark publication workflow. Build an optimized configuration
-with `RODIN_BUILD_BENCHMARKS=ON`, then run:
+This module measures the cost of library operations used by finite-element
+assembly and solution. Its hierarchy follows the production modules, from
+spatial arithmetic and reference data to mapped geometry, element kernels,
+global assembly and solvers. Interpolation and projection are measured as
+library operations in their own right.
 
-```sh
-build/tests/benchmarks/RodinBenchmarks \
-  --benchmark_filter='^Spatial(Vector|Matrix|Tensor[34])/' \
-  --benchmark_min_time=0.1s --benchmark_repetitions=3 \
-  --benchmark_out=spatial-algebra.json --benchmark_out_format=json
+The purpose is to locate work, distinguish its mathematical and implementation
+dependencies, and evaluate proposed repairs without changing the discrete
+problem. Local measurements are observations for a specified configuration,
+not architecture-independent performance guarantees. This README therefore
+defines measurement scopes and coverage gaps rather than recording timings,
+speedup rankings or the chronology of individual investigations.
+
+## Module architecture
+
+```text
+tests/benchmarks/
+├── Workloads/                 Shared forms, inputs and numerical oracles
+├── Rodin/
+│   ├── Math/                  Spatial arithmetic and sparse algebra
+│   ├── QF/                    Reference quadrature
+│   ├── Geometry/              Connectivity, transformations and mapped points
+│   ├── Variational/
+│   │   ├── P1/                Low-order space-specific operations
+│   │   └── H1/                High-order basis and local quadrature operations
+│   ├── Solid/                 LinearElasticity element kernels
+│   ├── Assembly/              Assembly stages and complete physical operators
+│   ├── Solver/                Fixed-system solves and preconditioning
+│   ├── Location/              Spatial search
+│   ├── IO/                    Mesh input
+│   ├── MPI/                   Distributed module specializations
+│   └── PETSc/                 PETSc module specializations
+└── convergence/               Verification-support profiling
 ```
 
-Each result measures one construction, copy, addition, scalar multiplication,
-inner product, or contraction. Operand initialization, counters and independent
-reference checks run outside the timed loop. Compiler barriers expose input
-objects and materialize outputs on each iteration. Timings include these
-barriers, so very small operations should be compared under the same compiler,
-optimization flags and hardware. `entries` reports the active input entries;
-`object_bytes` reports the complete object size, including unused capacity and
-metadata. Throughput counts active entries (multiply-accumulate terms for
-`MatMat`), not floating-point operations.
+Placement follows the operation being measured, not the physical context of
+its caller. A spatial-matrix product belongs to Math; an element integral
+belongs to Variational or Solid; global insertion belongs to Assembly or its
+backend specialization. Shared workloads contain forms and reference checks,
+not a second assembly policy. Qualified `Rodin/...` includes resolve to
+production headers before mirrored benchmark fixtures.
 
-Both real and complex values are registered. Vectors cover sizes zero through
-three. Matrices cover the empty shape and all nine nonempty shapes, with all
-27 compatible matrix-product dimension combinations. Rank-three and rank-four
-tensors cover the empty shape, uniform axis extents one through three, and two
-rectangular shapes each. These tensor cases are representative, not an exhaustive
-axis-extent sweep or coverage of every possible rank.
+Module and component executables are opt-in (`EXCLUDE_FROM_ALL`) and are not
+registered with CTest. The compatibility executable `RodinBenchmarks` retains
+the historical publication registration set. New standalone profilers are not
+added to that publication workflow. Executables normally reside in
+`build/tests/benchmarks/`; an explicitly configured runtime output directory
+takes precedence.
 
-`Contract` measures matrix-vector, rank-three tensor-vector, or rank-four
-tensor-matrix multiplication. Products use ordinary linear contractions, checked
-against independent sums before timing. `Dot` measures each type's existing
-method: complex vector `dot` is bilinear, while complex matrix and tensor `dot`
-conjugate the second operand. Their complex timings therefore measure different
-arithmetic contracts.
+The pressure-spectrum profiler under `convergence/` measures verification
+support, not a production Stokes solver. A root-owned spectral calculation and
+its result communication must not be interpreted as distributed assembly
+imbalance. Such measurements do not count as production solver coverage.
 
-`SpatialTensor` owns a fixed-capacity `std::array` of entries. Its capacity is
-three to the power of its compile-time rank under the current configuration;
-changing runtime extents does not allocate storage. A local tensor stores that
-array on the stack; a tensor embedded in another object shares that object's
-storage duration. Rank-three and rank-four real tensors reserve 27 and 81 scalar
-entries, respectively. The object size counter also includes their extents and
-active-entry count.
+## Mathematical measurement model
 
-The separate `RodinSpatialMatrixBenchmarks` executable measures finite-element
-assembly against nine scalar assemblies. It uses total process CPU time, including
-OpenMP workers, and separates complete assembly, triplet generation, element
-binding, cached entry scans and sparse conversion. Those assembly costs should
-not be inferred from these value-operation timings.
+Let $\mathcal{T}_h$ be a mesh of $\Omega\subset\mathbb{R}^{D}$, with
+reference cells $\widehat K\subset\mathbb{R}^{d}$ and maps
+$F_K:\widehat K\to K$. The embedding dimension $D$ and reference dimension
+$d$ are distinct. Let $V_h,W_h$ be finite-element trial and test spaces over
+$\mathbb{F}\in\{\mathbb{R},\mathbb{C}\}$, with scalar, vector or matrix
+values as supported by the operation. Their local basis counts are $N_u,N_v$.
 
-# Assembly performance methodology
+For a quadrature rule $\{(\widehat x_q,w_q)\}_{q=1}^{N_q}$, a local
+bilinear operator is represented by
 
-The assembly benchmarks measure computational cost separately from the
-multi-resolution accuracy assertions in `tests/convergence`. The performance
-track complements convergence certification: timings do not replace accuracy,
-rate, or backend-equivalence checks. The initial suite introduces no assembly
-optimization; later comparisons must retain the same mathematical workload.
+$$
+A^K_{ba}=\sum_{q=1}^{N_q}w_q\mu_K(\widehat x_q)
+\mathcal{B}\bigl(\phi_a,\psi_b;c\bigr)(F_K(\widehat x_q)),
+\qquad
+\mu_K=\sqrt{\det(J_K^{\mathsf T}J_K)},\quad J_K=DF_K.
+$$
 
-These standalone assembly executables are opt-in local profiling tools, not
-CTest tests or CI gates. Build them explicitly with
-`RODIN_BUILD_BENCHMARKS=ON` and the desired target. Their internal checks guard
-local measurements; they do not contribute to convergence certification.
-The historical `RodinBenchmarks` publication workflow remains separate and
-does not build these standalone assembly targets.
+Here $c$ denotes prescribed coefficients; $\mathcal{B}$ includes the required
+pullbacks, derivatives and contractions. For full-dimensional cells the
+measure factor is $|\det J_K|$. Point cells use the discrete point-measure
+convention rather than this positive-dimensional derivative formula.
 
-## Implemented workload
+If $R_K^u,R_K^v$ restrict global coefficients to a cell, unconstrained assembly
+has the algebraic structure
 
-`RodinPhysicsAssemblyBenchmarks` measures warmed real `H1<1>` and `H1<2>`
-bilinear-form assembly on unit-box affine meshes. Each context covers segment,
-triangle, quadrilateral, tetrahedron, pyramid, hexahedron, and wedge with
-`n=3,5,9` grid points per axis, $h=1/(n-1)$: 126 registered cases.
+$$
+A_h=\sum_{K\in\mathcal{T}_h}(R_K^v)^*A^K R_K^u.
+$$
 
-| Context | Timed form $a(u,v)$ | Affine oracle field | Expected $a(u,u)$ |
-| --- | --- | --- | --- |
-| Poisson | $\int_\Omega\nabla u\cdot\nabla v\,\mathrm{d}x$ | $u=\sum_jx_j$ | $d$ |
-| Conductivity | $\int_\Omega\gamma\nabla u\cdot\nabla v\,\mathrm{d}x$, $\gamma=1+\sum_jx_j$ | $u=\sum_jx_j$ | $d(1+d/2)$ |
-| Linear elasticity | $\int_\Omega\lambda\operatorname{div}u\operatorname{div}v+2\mu\varepsilon(u):\varepsilon(v)\,\mathrm{d}x$ | $u_i=(i+1)\sum_jx_j$ | $\lambda C^2+\mu(dS+C^2)$ |
+The adjoint $*$ is transpose-conjugation over $\mathbb{C}$. Constraint
+expansion, insertion and completion are additional operations, not part of a
+reference-basis microbenchmark. A component benchmark isolates one dependency
+of this construction; an assembly consumer checks whether its cost matters to
+the complete operation.
 
-Here $d=\dim\Omega$, $\lambda=1.5$, $\mu=0.5$,
-$\varepsilon(u)=(Du+Du^T)/2$, $C=d(d+1)/2$, and
-$S=d(d+1)(2d+1)/6$. Component indices are zero-based. Quadrature order
-6 is held fixed and recorded; this is not the order-12 convergence workload.
-Affine fields are interpolated through the space's DOF functionals rather
-than assuming nodal coefficient layouts.
+Comparisons record actual work, including $N_q,N_u,N_v$, component counts,
+cells, global DOFs and stored nonzeros where applicable. A basis-value sweep
+produces $N_qN_u$ scalar entries; a complete reference-derivative sweep produces
+$dN_qN_u$. A general local matrix contains $N_vN_u$ entries. Equal mesh
+parameters or polynomial degrees do not imply equal work across geometries.
+Large dimensional differences require attribution to these counts and to
+measured stages before they are explained as an architectural limitation.
 
-Before timing, the matrix $A$ and an original-loop reference matrix
-$A_{\mathrm{baseline}}$ are assembled through the same backend. The relative energy error
-$|z^TAz/a(u,u)-1|$ must be below $10^{-9}$, where $z$ represents the oracle
-field. Operator comparison and subsequent repeat assembly must satisfy
-$\|A-A_{\mathrm{baseline}}\|_F<10^{-12}\max(1,\|A_{\mathrm{baseline}}\|_F)$.
-Both checks are repeated after the timed loop. A failed check marks the
-benchmark as erroneous and makes the executable return nonzero, including in
-optimized builds. These checks detect incorrect energy and accumulation;
-they are not full operator equivalence proofs for future optimizations.
+## Hierarchical coverage ledger
 
-The timed public `BilinearForm::assemble` operation includes traversal,
-kernel evaluation, scatter, allocation/replacement as performed by that
-backend, and sparse-matrix completion. Mesh/space/form construction,
-interpolation, warmup, matrix comparisons, and energy evaluation are excluded.
-No boundary constraints, loads, solve, or error integration are included.
-This is repeated complete operator assembly, not isolated kernel timing or
-cold-cache construction. Existing integrator benchmarks remain separate.
+The middle column records available benchmark scopes, not exhaustive validated
+or profiled coverage. Each scope has its own registrations and numerical
+guards. The final column states the principal gaps; the presence of an
+executable does not close them.
 
-Eigen sequential or OpenMP assembly is selected by `RODIN_USE_OPENMP` and
-reported in the output context. Wall time is measured with `UseRealTime`;
-cell count, global DOF count, nonzeros, components, degree, quadrature order,
-and cell throughput are emitted as counters. Timing comparisons must retain
-the same geometry, degree, quadrature, build, and thread configuration.
-
-Configure with `RODIN_BUILD_BENCHMARKS=ON` and an optimized build. For example:
-
-```sh
-cmake --build build --target RodinPhysicsAssemblyBenchmarks -j4
-OMP_NUM_THREADS=1 build/tests/benchmarks/RodinPhysicsAssemblyBenchmarks \
-  --benchmark_filter='/3/real_time$' --benchmark_min_time=0.01s
-OMP_NUM_THREADS=4 build/tests/benchmarks/RodinPhysicsAssemblyBenchmarks \
-  --benchmark_filter='LinearElasticity/P2/Pyramid' \
-  --benchmark_repetitions=5 --benchmark_out=/tmp/assembly.json \
-  --benchmark_out_format=json
-```
-
-The first command is a small-mesh numerical smoke run, not a performance
-baseline. Run performance studies in isolation, without concurrent CTest or
-build jobs. Record CPU, compiler, optimization flags, dependencies, sanitizer
-status, affinity, thread counts, and repetitions. Report dispersion; vary
-registration order to detect cache-order artefacts. Sanitized timings are not
-interchangeable with optimized unsanitized measurements. No timing threshold
-is imposed on general-purpose CI runners.
-
-## Sequential stage measurements
-
-`RodinPhysicsStageBenchmarks` registers four overlapping scopes for the same
-three contexts, P1/P2 spaces, seven geometries, and `n=3,5,9`: 504 cases.
-The stage policy is explicitly sequential even in an OpenMP-enabled build.
-The canonical full operator supplies a comparison baseline; independently
-contracting local entries with the affine coefficients must recover the
-analytic energy before and after timing. The matrix generated from triplets
-must satisfy the same energy and Frobenius-norm checks as full assembly.
-
-| Scope | Timed operations | Excluded operations |
+| Layer / owning module | Available measurement scopes | Principal remaining coverage |
 | --- | --- | --- |
-| Binding | Cell traversal and each local integrator's `setPolytope` | Entry extraction, global scatter, sparse completion |
-| Kernel | Binding plus extraction and checksum of every local entry | Global scatter and sparse completion |
-| Triplets | Library sequential triplet assembly: binding, entry extraction, nonzero filtering, scatter and vector growth | Sparse completion |
-| Finalize | `setFromTriplets` into a fixed-size matrix, including duplicate reduction and replacement | Triplet generation and local kernels |
+| Spatial and sparse algebra / Math | Scalar, vector and matrix contractions; mixed-scalar products; storage lifecycles; sparse products, dots and norms | Broader assembly-consumer attribution, mixed operators and distributed representations |
+| Reference quadrature / QF | Construction, copying, traversal, repeated lookup and changes of rule identity/order | Process-first allocation, concurrent access and systematic order-dependent profiles |
+| Reference elements / Variational, P1, H1 | Values and derivatives; scalar/vector/matrix basis production; prepared reference consumption; first binding and changing working sets | Complete controlled degree/order profiles, DOF functionals and component-expansion attribution |
+| Transformations / Geometry | Pointwise and bulk Jacobians; construction, copy, move and rebinding; mapped coordinates, inverse and measure; mapped-quadrature lookup | Independent geometry-degree, curvature and embedding matrix; inverse-map stages |
+| Mesh and space setup / Geometry, Variational, MPI | Mesh/connectivity construction, P1 setup and selected distributed construction | P0/P0g/H1 setup, restrictions, reconciliation and systematic degree scaling |
+| Fields / Variational | Interpolation, mass projection, point evaluation, coefficient lookup, derivatives and reference contractions | Complete constant-space, matrix-range, high-degree and backend parity; norms and boundary restriction |
+| Expressions and lifecycles / Variational | Named and generic forms, scalar operand order, basis scaling, Problem construction and assignment | Complete promotion/range matrix, cold expression construction and state-transition costs |
+| Local integrators / Variational | Mass, weighted mass, directional derivative forms, gradient/Jacobian contractions and mixed Stokes bindings | Boundary/interface and nonlinear stage isolation; broader mixed degrees, embeddings and distributed consumers |
+| Named mass kernels / Variational | Fresh-kernel and retained-reference preparation, coefficient replacement and component contractions | Component-expanded reference storage, other spaces and wider mapped/backend coverage |
+| Local physical kernels / Solid | LinearElasticity first/repeated cell kernels, low-order and quadratic fields, affine and quadratic maps | Higher degrees, complex fields, coefficient variation and embedded formulations where applicable |
+| Global assembly / Assembly | Complete operators/loads, sequential binding/kernel/scatter/completion stages, constrained scalar problems | Separate sparsity/setup costs; OpenMP merge, vector/mixed constraints and identification |
+| Backend assembly / PETSc, MPI | Complete local/distributed physical, mass and constrained assembly consumers | Insertion/completion/communication attribution, ownership-sensitive costs and backend scaling |
+| Linear solvers / Solver | Fixed-system CG and GMRES, diagonal setup/application, selected mixed direct solves | Factorization stages, broader preconditioners, distributed solves and setup/reuse separation |
+| Complete workflows / owning modules | Interpolation/projection and assembly/solve consumer measurements | Matched setup/assembly/solve/postprocessing accounting across the applicable matrix |
+| Supporting modules / Location, IO | Search and mesh-input benchmarks | Outside the assembly-first tranche; broader workflow attribution remains separate |
 
-Binding is not merely cache preparation: the current quadrature rules assemble
-their local matrix inside `setPolytope`. Consequently, a costly Binding scope
-can identify local integration work, while `integrate(m,l)` reads an already
-computed entry. With $T_B,T_K,T_T,T_F$ denoting the measured scopes, no identity
-$T_A=T_B+T_K+T_T+T_F$ is asserted. In particular, $T_B$ is contained in both
-$T_K$ and $T_T$. Differences between independently timed scopes are diagnostic
-estimates, not exact stage accounting. Kernel checksum work is not performed
-by the production triplet assembler.
+### Physical contexts
 
-For the generic quadrature path with $N_Q$ points and $n_r,n_t$ trial/test
-basis functions, the original test-side expression evaluation occurred
-$N_Q n_r n_t$ times per cell. Point-local owning tabulation now reduces this
-count to $N_Q n_t$; the $N_Q n_r n_t$ dot products remain. Values are refreshed
-after every `setIntegrationPoint`, not reused across points, cells, or changed
-coefficients. Scratch capacity is retained per integrator; OpenMP integrator
-copies own independent scratch. Existing H1 tabulations/mapped-gradient caches
-and specialized quadrature dispatch are unchanged. Scalar–spatial-matrix
-products now promote real/complex scalar types in both operand orders.
+| Context | Quantity measured and purpose | Important exclusions or gaps |
+| --- | --- | --- |
+| Mass, reaction and projection | Operator/load assembly and selected projection solves; distinguishes basis preparation, weighting and global insertion | Complete projection-solve/backend matrix, mixed/global couplings and component-storage attribution |
+| Poisson, conductivity and reaction–diffusion | Diffusion/reaction operators and constrained manufactured problems; distinguishes geometry, coefficient and boundary-data evaluation | Vector/mixed constraints, broader boundary variants and distributed stage profiles |
+| Complex Helmholtz | Complex assembly and fixed-system GMRES; separates operator construction from indefinite-system solution | Broader mapped/backend matrix and repeatable size-dependent solver attribution |
+| Coupled reaction–diffusion | Block assembly and fixed-system solution; exposes coupling and scalar-promotion costs | Broader mixed spaces, backend parity and block-preconditioner stages |
+| Stokes | Stable mixed velocity/pressure operators, pressure-mean coupling, local bindings and selected fixed-system solves | Wider degree/mesh/backend profiles; production solver timings remain distinct from the verification spectrum |
+| LinearElasticity | Element and complete assembly kernels; measures symmetric-gradient/constitutive contractions | Higher degrees, complex and mapped/backend parity where supported |
+| Nonlinear Poisson | Residual, tangent and source assembly at prescribed fields; isolates state-dependent kernels | Full Newton workflows, natural-boundary terms, PETSc/MPI parity and solver stages |
 
-Whole-process sampling traces also include framework startup, CPU-frequency
-estimation, and untimed numerical checks. Attribute samples to the assembly
-call path before reporting stage percentages. In particular, Google
-Benchmark's frequency-estimation PRNG is not an assembly workload. Sampling
-weights and unprofiled benchmark wall times are different measurements.
+Darcy and NAFEMS remain deferred. Available mass benchmarks do not establish
+completion of the remaining performance matrix.
 
-Counters report cells, DOFs, nonzeros, local-entry count summed across terms,
-stored triplets, components, degree, quadrature order, and points per cell.
-All stages are warmed; repeated Triplets retains vector capacity. Initial allocation,
-mesh/space construction, constraints, PETSc insertion, and MPI communication
-remain outside this executable's coverage. The 168 smallest-mesh stage cases
-are available for opt-in local runs, without timing thresholds.
+### Coverage axes and applicability
 
-```sh
-cmake --build build --target RodinPhysicsStageBenchmarks -j4
-build/tests/benchmarks/RodinPhysicsStageBenchmarks \
-  --benchmark_filter='LinearElasticity/P2/Hexahedron/5/real_time$' \
-  --benchmark_repetitions=5 --benchmark_out=/tmp/stages.json \
-  --benchmark_out_format=json
-```
+The intended matrix distinguishes real/complex scalar fields; supported
+scalar/vector/matrix ranges; P0, P0g, P1 and high-order H1 spaces; field degree;
+reference-cell family; geometry degree and embedding; and native sequential,
+OpenMP, PETSc-local and MPI execution. Reference-element drivers include H1
+degree sweeps through six, while complete physical workloads generally cover
+a smaller degree range. These are not interchangeable coverage claims.
 
-## PETSc local and MPI workload
+The eight reference families are Point, Segment, Triangle, Quadrilateral,
+Tetrahedron, Hexahedron, Pyramid and Wedge. Point algebra and basis checks do
+not constitute a positive-dimensional PDE experiment. Constant spaces do not
+provide conforming diffusion approximations; mixed problems require applicable
+stable pairs. Unsupported combinations are excluded with a mathematical reason,
+not silently counted as measurements or described as unimplemented physics.
+A real-scalar PETSc installation does not certify complex PETSc behavior.
 
-`RodinPETScPhysicsAssemblyBenchmarks` uses the same `PhysicsForm` definitions,
-affine energy oracles, degrees, geometries, sizes, and quadrature order as the
-Eigen executable. The target requires `RODIN_USE_PETSC=ON` and
-`RODIN_USE_MPI=ON`, including for the local-context mode. Local assembly uses
-PETSc sequential/OpenMP according to `RODIN_USE_OPENMP`; `--assembly_mpi`
-selects distributed assembly. This batch measures real fields with real-scalar
-PETSc; complex-scalar PETSc builds and complex fields are not claimed as
-verified coverage.
+Mesh-based scaling requires at least three sizes; reference-element scaling
+uses at least three quadrature orders. Field degree, geometry degree and
+quadrature order remain independent inputs. Fixed quadrature defines a discrete
+operator, not an exactness or convergence guarantee. In particular, rational
+pyramidal bases and nonaffine maps require their own integration analysis.
 
-Each case uses three fixed iterations to keep all ranks on the same collective
-sequence. With rank elapsed times $t_r$, the manual wall-time sample is
-$T_A=\max_r t_r$. A barrier precedes each sample; neither that barrier nor the
-timing reduction is included in $T_A$. Communication and matrix finalization
-performed by `assemble` are included. Google Benchmark reports CPU time from
-its own timer, which is not this maximum-rank assembly metric. Only manual
-wall time and counters derived from it are used for distributed comparisons.
+## Measurement boundaries: what, how and why
 
-Workload metadata includes global owned-cell count $N_K$, global DOFs and
-nonzeros, rank count $R$, minimum/maximum owned cells, and cell imbalance
-$I_K=R\max_r N_{K,r}/N_K$. Ghost cells are excluded. The matrix difference
-is measured in a global Frobenius norm and the energy by the distributed form
-action; neither compares rank-local coefficient layouts. Empty owned-cell
-partitions are included in the smallest segment cases at three/four ranks.
+Each benchmark defines its input state, timed operation and excluded work in
+the owning fixture documentation. The following distinctions are essential.
 
-Only rank zero writes benchmark reports/JSON; other ranks still execute every
-case. Failures may emit rank-local diagnostics. Random
-benchmark interleaving and user-specified adaptive warmup are rejected to
-prevent rank-dependent collective order. Local mode requires one process.
-An empty benchmark selection returns nonzero rather than passing a smoke job.
+| Scope | Measurement boundary | Interpretation |
+| --- | --- | --- |
+| Construction/lifecycle | Creation, copy, move, assignment or destruction of a named object | Separates setup/ownership costs from evaluation; construction is not implicitly included in a warm kernel |
+| Reference preparation | Basis/rule construction or production at specified reference samples | Isolates degree, shape and quadrature dependence without global scatter |
+| Mapped preparation | Coordinates, Jacobians, pullbacks, measure and cell binding | Exposes geometry-dependent work and distinguishes reference reuse from physical-state reuse |
+| Local kernel | Preparation and/or entry evaluation for one cell, as explicitly named | Measures contractions before backend insertion; complete binding and repeated-entry reads are distinct scopes |
+| Global assembly | Operator/load replacement, with setup/constraints/completion included only when stated | Determines whether an isolated change benefits its actual assembly consumer |
+| Fixed-system solve | Solve on an already assembled operator, with preconditioner setup/reuse explicitly specified | Prevents assembly cost from being attributed to the solver or reuse from being confused with first setup |
+| Interpolation/projection | Public DOF-functional interpolation or mass-system projection | Distinguishes coefficient construction from solving an approximation problem |
 
-```sh
-build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks \
-  --benchmark_filter='/3/iterations:3/manual_time$'
-mpiexec -n 4 build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks \
-  --assembly_mpi --benchmark_filter='LinearElasticity/P2' \
-  --benchmark_repetitions=5 --benchmark_out=/tmp/assembly-mpi.json \
-  --benchmark_out_format=json
-```
+Cold/first-use, retained-reference and repeated-use states are separate
+experiments. Changes of cell, rule, coefficient and geometry must remain visible
+to the operation. Prepared-reference measurements do not represent ordinary
+unprepared public calls. Setup, reference integration and numerical checks are
+excluded from timing unless their inclusion is the stated measurement scope.
 
-Opt-in local runs support local and MPI (1–4 ranks) smallest-mesh cases in
-sequential/OpenMP builds and JSON output without timing thresholds. Full
-three-size registrations support fixed-global-work comparisons across ranks;
-no weak-scaling sequence or speedup claim follows merely from registration.
+For distributed scopes, wall time is reported using the maximum participating
+rank when the driver implements that protocol. Alignment and timing reduction
+are excluded from the operation interval and documented separately. Owned and
+halo work, empty shards and imbalance metadata are distinguished. No collective
+is introduced into production code merely to simplify a local benchmark.
+Strong scaling fixes global work; weak scaling fixes work per rank. Neither is
+established by changing rank count and problem size without declaring which
+quantity is held fixed.
 
-Full Eigen/PETSc operators are compared against a test-only `ReferenceIntegral`
-which retains the original quadrature/trial/test evaluation loop and passes
-through the same assembly backend. Thus the comparison includes backend
-scatter, constraints present in the workload, and MPI ownership/reduction;
-the current workload still has no boundary constraints. The original loop is
-not a second production dispatch path.
+## Numerical qualification and regression evidence
 
-## Paired generic-expression benchmarks and regression coverage
+Convergence certification belongs to [the convergence module](../convergence/README.md).
+Benchmark guards establish that a measurement still evaluates its stated
+discrete operation; they do not certify an approximation rate. Unit,
+manufactured and convergence regressions remain the correctness gates.
+Benchmark execution contributes to source coverage only when it is explicitly
+instrumented and included in the coverage collection; registration alone does
+not contribute coverage.
 
-`RodinQuadratureExpressionBenchmarks` measures local binding only, with paired
-`Original` and `Reuse` registrations. Both retain expression and matrix storage
-across binds, own mapped quadrature only for the bound cell, and exclude setup and
-entry comparisons from timing. The original loop lives in the shared test-only
-`tests/QuadratureReference.h`. Every local entry must agree exactly before and
-after timing; a mismatch returns nonzero. Comparisons are separate measurements,
-not simultaneous timers. Registration order, frequency variation and profiling
-overhead must still be controlled before claiming speedup.
+Qualification uses applicable independent identities, original-entry-loop
+comparisons, manufactured residuals and coefficient-state changes. Shared
+reference dependencies are stated: an entrywise oracle sharing production
+mapping does not independently validate that map. Reference memory must follow
+the intended cell lifecycle rather than changing the timed working set.
 
-The matrix includes P0, P0g, P1 and H1 orders 1–3, real/complex scalar/vector
-fields, all seven geometries, and `n=2,3,5`: 1008 registrations. Vector P1/H1
-uses the compound symmetric-gradient form; scalar and constant spaces use
-compound mass forms. Scalar constant cases have $n_r=1$ and are explicit
-overhead controls rather than expected evaluation-count improvements. These
-are sequential kernel measurements even in an OpenMP build. The 336
-smallest-mesh registrations are available for opt-in local measurements.
-
-The unit regression suite compares local entries against the original loop,
-assembled operators through logical DOF maps, and exact integer callback
-counts. It covers changing points/cells/orders/coefficients, copies and moves,
-mixed trial/test sizes, complex phases/conjugation, a curved triangle and facet
-integrators. The scalar-promotion regression checks both operand orders and
-all spatial matrix dimensions from 0 through 3, including inactive-storage
-zeros. Explicit `Conjugate` nodes are tested on scalar expressions; existing
-explicit vector `Conjugate` support is outside this change. Complex vector
-forms test the implicit test-side conjugation in `Math::dot` with non-real
-phases. Real-scalar PETSc does not certify complex PETSc assembly.
-
-An isolated Apple M1 Pro measurement with Apple Clang 21, Release `-O3`,
-no sanitizers, sequential Eigen, order-6 quadrature and 64 hexahedra (`n=5`)
-gave the following paired binding medians over five repetitions:
-
-| H1 P2 expression | Original loop (ms) | Owning reuse (ms) | Ratio | CV, original/reuse |
-| --- | ---: | ---: | ---: | ---: |
-| Real symmetric gradient | 846.9 | 190.3 | 4.45 | 3.54% / 0.41% |
-| Complex symmetric gradient | 1135.9 | 260.9 | 4.35 | 1.47% / 0.74% |
-
-The complex reference uses the repaired scalar promotion; it is not a timing
-of the formerly uncompilable expression. Scalar H1 P2 compound mass decreased
-from 0.9673 to 0.7929 ms. Scalar P0 and P0g controls increased by approximately
-1.6% and 1.3%, respectively (0.06568 to 0.06675 ms and 0.01615 to 0.01637 ms).
-These small costs are reported rather than treated as evaluation-count gains:
-both constant scalar cases have only one local trial function. The measurements
-are workload-specific observations, not CI thresholds or universal speedups.
-
-These historical paired measurements predate the reference oracle's bounded
-mapped-point ownership. Fresh comparisons must use the current ownership
-contract on both sides; the historical numbers are not a baseline for that
-lifecycle change.
-
-With matched original-header and repaired-header builds of the full physics
-benchmark, real P2 linear-elasticity assembly decreased from 886.8 to 208.7 ms
-(five-repeat medians; CV 4.54% and 0.45%). The specialized Poisson control
-measured 5.08–5.16 ms in the original-header build and 5.24–5.34 ms in the
-repaired build across both execution orders. The observed 1.5–5.1% shift and
-varying dispersion do not establish performance neutrality for that control;
-its specialized quadrature dispatch and numerical results remain unchanged.
-
-## Full mass/reaction operators and projection loads
-
-`RodinMassAssemblyBenchmarks` extends local-kernel coverage to full Eigen
-sequential/OpenMP operator and load assembly. The matrix contains P0, P0g, P1,
-H1 P1/P2/P3, real/complex scalar/vector fields, seven affine geometries, and
-`n=3,5,9` grid points per axis: 2016 registrations. Each context has separate
-`Operator` and `Load` registrations; neither includes a projection solve.
-
-For a scalar or $r$-component field, define
-$a_\rho(u,v)=\int_\Omega\rho\sum_{j=1}^r u_j\overline{v_j}\,\mathrm{d}x$
-and $L(v)=a_\rho(c,v)$. Mass uses $\rho=1$; reaction uses
-$\rho=s\alpha(1+\sum_{k=1}^d x_k)$, with $s=1$ during timing and
-$\alpha=1$ over the reals or $\alpha=1+i/2$ over the complex numbers.
-The constant field has components $c_j=j\eta$, using one-based component
-indices and $\eta=1$ or $1+2i$, respectively. Scalars use $r=1$ and vectors
-use $r=d$. These fields belong to every tested space, including P0g.
-
-If $z$ is obtained by interpolation through the space's DOF functionals,
-the assembled operator and load must satisfy $Mz=b$. On the unit box the
-independent analytic action is
-$z^*Mz=|\eta|^2\sum_{j=1}^r j^2$ for mass and
-$z^*Mz=s\alpha(1+d/2)|\eta|^2\sum_{j=1}^r j^2$ for reaction.
-Complex reaction is not claimed to be Hermitian. The unweighted mass equation
-is the ordinary $L^2$ projection equation; its right-hand-side assembly is
-measured here, not its solution time or approximation error.
-
-Before and after timing, the analytic action has relative tolerance $10^{-10}$.
-With $M_0,b_0$ the initial operator and load, the checks also require
-$\|M-sM_0\|_F<10^{-11}\max(1,s\|M_0\|_F)$,
-$\|Mz-b\|_2<10^{-11}\max(1,\|b\|_2)$, and
-$\|b-sb_0\|_2<10^{-11}\max(1,\|b\|_2)$.
-Here $M_0$ is assembled through the original quadrature loop, while $b_0$
-is a snapshot of the initial load; $s=1$ throughout the mass workload.
-Reaction coefficients are doubled after timing, and both outputs must equal
-twice their initial values. This checks replacement and changing coefficient
-state, not merely a second assembly with identical data. Checks, interpolation,
-reference assembly, and coefficient updates are untimed. A failed check or a
-filter matching no case returns nonzero.
-
-Quadrature order 8 is fixed and recorded, together with the actual number of
-points. Degree-three polynomial products with an affine coefficient have
-degree at most seven on simplices; pyramidal bases and mapped tensor-product
-spaces require their own exactness analysis. No blanket claim of exact mass
-entries on every geometry follows from this order. The constant-field
-identities provide an analytic check independent of the basis and geometry
-enumeration, while the original loop checks the implemented quadrature matrix.
-
-`RodinPETScMassAssemblyBenchmarks` uses the same mathematical workload with
-PETSc local/MPI storage and sequential/OpenMP-enabled builds. It registers
-1008 cases for the PETSc installation's scalar type, uses three aligned manual
-iterations, and reports maximum-rank time with owned-cell imbalance metadata.
-The installed real-scalar PETSc certifies only real workloads; a complex-scalar
-PETSc build must be compiled and tested separately. P0g here uses per-cell
-integrals assembled into shared global constant DOFs; it does not cover the
-separate global-integrator lists or mixed multiplier couplings.
-
-Smallest-mesh filters support opt-in local Eigen and native-scalar PETSc runs
-locally and at MPI ranks one through four, in both OpenMP configurations.
-These runs are not CI gates; registrations do not establish passing results
-or three-size performance qualification. Larger-size runs should use
-`--benchmark_min_time=1x` for numerical checks, or controlled repeated timings
-for performance studies; H1 P3 vector reference matrices can be costly.
-
-The smallest segment mesh has two cells, so three- and four-rank runs
-explicitly exercise empty shards. A P0g shard can be empty while retaining
-access to shared global constant DOFs whose unique owner is rank zero.
-Distributed interpolation selects an eligible entity using logical distributed
-indices and evaluates its finite-element functionals before updating storage.
-Only DOF owners commit the resulting coefficients; ghost copies are refreshed
-from their owners. For $P_{0g}$, the selected source can be on another rank,
-including when the DOF owner's shard is empty. Empty selections preserve the
-existing coefficients. Source selection and evaluation are implemented in the
-MPI layer independently of PETSc storage. The mesh dimension is the maximum
-over shard dimensions, while an empty shard retains local dimension zero.
-Numerical smoke runs establish correctness checks, not isolated performance
-baselines.
-
-## Full constrained scalar problems
-
-`RodinConstrainedAssemblyBenchmarks` measures complete Eigen problem assembly,
-including volume loads, nonhomogeneous Dirichlet evaluation/elimination, and
-matrix/vector completion. `RodinPETScConstrainedAssemblyBenchmarks` measures
-the same forms in PETSc local/MPI contexts. Mesh/space/problem construction,
-interpolation, reference assembly, checks, and solves are excluded. There is
-no solve in this workload. The PETSc target requires MPI support even for
-single-rank local mode. Eigen uses wall time; PETSc uses three aligned
-iterations and maximum-rank wall time, excluding the preceding barrier and
-timing reduction as in the existing distributed benchmarks.
-
-The unit-box problem is
+For a discrete matrix comparison, a typical normalized discrepancy is
 
 $$
--\nabla\cdot(\gamma\nabla u)+\rho u=f\quad\text{in }\Omega=(0,1)^d,
-\qquad u=g\quad\text{on }\partial\Omega.
+e_A=\frac{\|A_h-A_{\mathrm{ref}}\|_F}
+{\max(1,\|A_{\mathrm{ref}}\|_F)}.
 $$
 
-Poisson uses $\gamma=s$, $\rho=0$; conductivity uses
-$\gamma=s(1+\sum_jx_j)$, $\rho=0$; reaction--diffusion uses the latter
-diffusion coefficient and $\rho=s$. The manufactured field is
+This normalization presumes the workload's nondimensional numerical scale.
+For dimensional physical quantities, a declared reference scale and an
+absolute budget in matching units are required. Tolerances are fixture-specific
+numerical policies, not performance thresholds. Where unchanged arithmetic is
+the contract, exact entry comparisons are retained. Logical evaluation counts,
+identity, ownership and invalidation are checked by indices/state, not inferred
+from coordinate tolerances. Negative controls must demonstrate that an oracle
+rejects an incorrect result; a repair's regression must fail without the repair.
+
+Mass scopes use
 
 $$
-g=u=\eta t\left[1+\sum_{j=1}^{d}(x_j+\chi x_j^2)\right],
-\qquad f=-\nabla\cdot(\gamma\nabla u)+\rho u,
-$$
-
-where $\chi=0$ at degree one and $\chi=1$ at degrees two/three;
-$\eta=1$ for real fields and $\eta=1+2i$ for complex fields. Thus degree-one
-Poisson has zero volume forcing, while conductivity and reaction--diffusion
-exercise nonzero loads at every degree. The other Poisson cases have nonzero
-forcing. Fields are interpolated through DOF functionals, not coefficient
-layout assumptions. All seven positive-dimensional geometries, H1 degrees
-one through three, and `n=3,5,9` are registered: 378 Eigen cases across both
-scalar fields, and 189 PETSc cases for the installed scalar field. P0/P0g
-are excluded because these conforming diffusion problems require H1 spaces;
-point/0D physics and curved maps remain separate workplan items.
-
-The production constrained operator is compared against the original-loop
-quadrature reference, assembled through the same backend and constraints.
-The load reference shares the production load integrator; its independent
-check is the manufactured residual, not an independent entrywise load oracle.
-With $z=I_hu$, each initial, repeated, timed-final and changed-state assembly
-must satisfy
-
-$$
-\frac{\|Az-b\|_2}{\max(1,\|b\|_2)}<10^{-10},\qquad
-\|A-A_{\mathrm{ref}}\|_F<10^{-11}\max(1,\|A_{\mathrm{ref}}\|_F),
-$$
-
-and $\|b-b_{\mathrm{ref}}\|_2<10^{-11}\max(1,\|b\|_2)$.
-An intentionally incorrect coefficient vector $z+\mathbf{1}$ must give a
-normalized residual greater than $10^{-4}$; this checks sensitivity of the
-oracle, not a physically constant field in a nonnodal basis. After timing,
-$s$ changes from $1$ to $1.5$ and $t$ from $1$ to $2$, exercising both
-coefficient re-evaluation and changing essential data. Quadrature order is
-eight at degree one and twelve otherwise; these choices are part of the
-workload and are reported, not a blanket exactness claim on rational bases.
-Opt-in local runs cover the smallest-mesh registrations, including PETSc local
-and MPI at one through four ranks in both OpenMP configurations. Small segment
-partitions include empty shards. An empty benchmark filter or failed oracle
-returns nonzero. Performance claims require separate isolated repeated runs.
-
-## Prescribed-state nonlinear Poisson assembly
-
-`RodinNonlinearPoissonAssemblyBenchmarks` isolates warmed native residual and
-tangent assembly at a prescribed field. The active native backend is sequential
-or OpenMP according to the build configuration. Degrees one through three,
-all seven positive-dimensional geometries, grid-point counts $n=3,5,9$, and
-quadrature orders eight and sixteen give 252 registrations per configuration.
-An additional 216 `CurvedQ2` registrations use degree-two geometry on all six
-two- and three-dimensional geometries, with the same field degrees, sizes and
-quadrature orders. The existing `CurvedGeometry` utility installs
-$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}$ on cells and traces before spaces are built.
-For $d\ge2$, $\det D\Phi=1$ and $x_0=\xi_0$. Consequently the physical affine
-state, its gradient, and both analytic actions below are unchanged on
-$\Omega=\Phi((0,1)^d)$. This comparison changes geometry evaluation while
-holding the physical integrand and domain moments fixed. Segment shear is
-excluded from this comparison because neither identity holds in dimension one.
-The order-sixteen cases match the volume quadrature order of the nonlinear
-natural-boundary convergence studies; these are not complete boundary-problem
-or Newton-solve timings.
-
-For $\Omega=(0,1)^d$, the interpolated state is $q_s(x)=s(1+x_0)$. The timed
-forms are
-
-$$
-R(q_s;v)=\int_\Omega\left[\nabla q_s\cdot\nabla v+(q_s+q_s^3)v\right]\,dx,
+m_\rho(u,v)=\int_\Omega\rho\langle u,v\rangle\,dx,
 \qquad
-J(q_s;w,v)=\int_\Omega\left[\nabla w\cdot\nabla v+(1+3q_s^2)wv\right]\,dx.
+m_1(\Pi_h f,v)=\int_\Omega\langle f,v\rangle\,dx.
 $$
 
-The affine field is interpolated through DOF functionals, without assumptions
-about coefficient numbering. Before and after timing, the analytic actions
+The pairing conjugates the test value for complex fields and is Frobenius for
+matrix fields. A complex coefficient does not imply a Hermitian operator.
+Component-block checks retain structural zeros; arbitrary fields and component
+couplings must not be replaced by an assumed nodal or interleaved DOF layout.
+Basis-reuse contracts are checked by exact matrices and counted basis
+evaluations, including mixed-degree and independent-copy states. Numerical
+qualification alone does not establish a performance benefit.
 
-$$
-R(q_s;q_s)=\frac{10}{3}s^2+\frac{31}{5}s^4,
-\qquad
-J(q_s;q_s,q_s)=\frac{10}{3}s^2+\frac{93}{5}s^4
-$$
+Solver qualification records true residuals and iterations, not just successful
+return codes. A performance repair must preserve applicable operators, loads,
+constraints and solution behavior. Changes to numerical stopping policy must
+not be presented as source-kernel speedups.
 
-must agree to relative tolerance $10^{-9}$. The tangent is also compared with
-the original test-only quadrature loop to relative Frobenius tolerance
-$10^{-11}$, using denominator $\max(1,\|J_{\mathrm{ref}}\|_F)$.
-An assembled central difference in the direction $w=1+x_0$, with step
-$\varepsilon=10^{-5}$, must agree with $J(q_1)w$ to tolerance $10^{-7}$,
-normalized by $\max(1,\|J(q_1)w\|_2)$. These are numerical oracle policies,
-not performance thresholds. After timing, $s$ changes from one to two and
-both forms are reassembled, checking state-update visibility and replacement
-rather than accumulation. Omitting the cubic contribution would change the
-analytic residual action by more than ten percent.
+## Portable comparison protocol
 
-Setup, interpolation, independent checks and state changes are untimed. The
-residual and tangent scopes exclude source terms, natural-boundary integrals,
-constraints, SNES/KSP, and error norms. PETSc/MPI parity and separate timings for those excluded operations
-remain required before attributing a full distributed solve's cost to this
-benchmark. Counters report cells, global native DOFs, nonzeros, field and geometry degrees,
-quadrature order and points per cell. Smallest-mesh cases are available for
-opt-in local numerical checks, without timing thresholds.
+Before/after comparisons hold the discrete workload, build configuration,
+compiler options, dependency versions, backend, thread/rank counts and timed
+scope fixed. Repetitions and reversed execution order distinguish candidate
+effects from drift. Unchanged controls and actual work counts accompany the
+comparison. An isolated kernel result requires confirmation in its consuming
+operation before an end-to-end benefit is claimed.
 
-### Physical-coordinate-dependent source
+Elapsed time, CPU time, allocation and memory observations answer different
+questions. Sampled inclusive stack weights can overlap and are not additive
+stage times. A frame filter is not a timed-region boundary: untimed setup or
+oracle calls can appear on the same stacks. Instrumented profiles locate work;
+uninstrumented runs establish elapsed comparisons. Platform-specific profilers
+are optional evidence collectors, not library requirements or portable gates.
 
-Separate `Source` registrations measure replacement assembly of
+Results retain source revisions, case/filter, dimensions and counts, build and
+runtime metadata, repetition policy, numerical qualification and profiler scope.
+Machine-specific measurements and exploratory logs belong with their experiment
+artifacts or review evidence, not in this architectural coverage document.
+No portable speedup follows from one machine. Timing thresholds require a
+controlled environment and characterized variability; these standalone
+benchmarks impose no CTest timing gates.
 
-$$
-L_s(v)=s\int_\Omega (1+x_0+x_{d-1}^2)v\,dx.
-$$
+Mass reference-storage profiling must distinguish scalar basis structure from
+component expansion; its size depends on quadrature and local component/basis
+counts. A compact representation requires a proven separability contract, not
+numerical zero pruning. First-assembly attribution must distinguish setup,
+allocation, kernel work and backend completion before assigning a cause to a
+timing difference.
 
-These loads exercise physical-coordinate evaluation, which the prescribed-state
-residual and tangent do not require. Field degrees one through three, all seven
-positive-dimensional geometries, affine and exact quadratic geometry,
-$n=3,5,9$, and quadrature orders eight and sixteen give 252 source registrations
-per backend configuration. Setup and reference integration remain untimed.
+## Building and selecting measurements
 
-With the quadratic amplitude $a=0.1$ (or $a=0$ for affine geometry), the
-constant-test action in dimensions two and three is
-
-$$
-L_s(1)=s\left(\frac{11}{6}+\frac{a}{3}+\frac{a^2}{5}\right).
-$$
-
-The curved segment is included in this scope: its image is $(0,\ell)$ with
-$\ell=1+a$, so
-
-$$
-L_s(1)=s\left(\ell+\frac{\ell^2}{2}+\frac{\ell^3}{3}\right).
-$$
-
-Every coefficient is compared with an independent pointwise mapping, Jacobian
-and basis integration loop, using relative vector tolerance $10^{-11}$ with
-denominator $\max(1,\|b_{\mathrm{ref}}\|_2)$. The analytic action uses relative
-tolerance $10^{-9}$. Gates run before and after timing and after changing
-$s=1$ to $s=2$. Omitting the quadratic source term changes the analytic action
-by more than ten percent. These are accuracy gates, not timing thresholds.
-The source workload is not a nonlinear solve or a distributed assembly benchmark.
-
-The independent quadrature oracle owns mapped points only for its currently
-bound cell, just as production assembly does. It does not request or evict
-mesh-owned borrowed quadratures. This prevents untimed validation from retaining
-all cells' quadrature points during timed assembly. Integer request-count
-regressions enforce that lifecycle separately from numerical agreement.
-
-Mapped-quadrature construction prepares the current cell's Jacobians in one
-bulk transformation call. H1 geometry reuses its existing reference derivative
-table, but mapped matrices remain owned by each geometric point. The same
-assembly benchmark therefore measures this change without a separate assembly
-path. Pointwise-versus-bulk exact comparisons, logical formula-lifetime checks,
-and point copy/move/rebinding tests gate the geometry operation independently
-of the assembled numerical oracles. Assembly introduces no MPI collective for
-this operation and retains mapped points only for its currently bound cells;
-the explicit mesh-owned quadrature cache remains a separate public facility.
+Configure the ordinary build with `RODIN_BUILD_BENCHMARKS=ON`, then select an
+opt-in target and inspect its registrations before choosing a scope:
 
 ```sh
-build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks \
-  --benchmark_filter='^NonlinearPoisson/(Residual|Tangent)/P1/Tetrahedron/' \
+cmake --build build --target RodinNamedMassKernelBenchmarks -j1
+build/tests/benchmarks/RodinNamedMassKernelBenchmarks --benchmark_list_tests=true
+build/tests/benchmarks/RodinNamedMassKernelBenchmarks \
+  --benchmark_filter='^NamedMassKernel/H1/P2/Complex/Matrix/Hexahedron/Weighted/FreshKernel/2/3/real_time$' \
   --benchmark_min_time=0.1s --benchmark_repetitions=5 \
-  --benchmark_out=nonlinear-volume.json --benchmark_out_format=json
+  --benchmark_out=mass-kernel.json --benchmark_out_format=json
 ```
 
-Paired optimization measurements must hold the compiler, assembly backend,
-thread count, mesh, degree, quadrature and benchmark scope fixed. Independent
-repetitions are required; a smallest-mesh numerical smoke run is not evidence
-of a speedup or of complete convergence certification.
+The duration and repetition count above are invocation examples, not sufficient
+qualification or a prescribed statistical confidence level. Executable/filter
+selection affects initial cache population; aggregate and single-case processes
+must not be compared as though they had identical histories. A numerical-only
+smoke run establishes neither scaling nor repeatable performance. Only one
+numerical workload is run at a time; a distributed workload may use multiple
+ranks and an OpenMP workload may use multiple threads.
 
-For the curved pyramid geometry-evaluation workload, use the same executable:
+## Remaining work and completion criteria
 
-```sh
-build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks \
-  --benchmark_filter='^NonlinearPoisson/CurvedQ2/(Residual|Tangent)/P1/Pyramid/3/16/real_time$' \
-  --benchmark_min_time=0.2s --benchmark_repetitions=5 \
-  --benchmark_out=nonlinear-curved-pyramid.json --benchmark_out_format=json
-```
-
-The pyramid modal derivative evaluates only the Bernstein factors required by
-the selected coordinate direction. This removes unused evaluations without
-changing the returned expression, apex policy, or nodal transformation.
-`PyramidDirectionalDerivativesPreserveArithmetic` compares every modal
-derivative exactly with the unpruned expression for orders one through six,
-at quadrature points, vertices and near-apex points. Independent analytic
-gradient tests and the assembly oracles above remain separate checks.
-Compare baseline and candidate binaries in separate processes, reversing their
-execution order, and retain unchanged-geometry controls. A single selected
-case per process fixes initial cache-population order; random interleaving of
-multiple cases is a different experiment. Neither check supplies a portable
-wall-time threshold or certifies the complete nonlinear convergence matrix.
-If an unchanged-geometry control shifts, inspect both generated instructions
-and helper placement before attributing the shift to its numerical kernel.
-A diagnostic relink with matched helper placement can distinguish binary-layout
-effects from added arithmetic; it is an experimental control, not a production
-linker policy. Repeat optimization comparisons after changes to shared caches.
-
-## Remaining performance workplan
-
-| Extension | Required measurement or evidence |
-| --- | --- |
-| Extended workload/constraint parity | Full constrained scalar Poisson/conductivity/reaction--diffusion assembly is implemented; extend to vector physics, mixed boundary conditions and identification constraints |
-| Complex Helmholtz, coupled reaction–diffusion, Taylor–Hood Stokes, nonlinear Poisson | Loads/block forms and residual/tangent assembly; nonlinear Poisson has prescribed-state native volume assembly through degree three, with PETSc/MPI and boundary parity remaining; stable mixed spaces |
-| Projection solves, global couplings, and higher-order H1 physics | Mass/reaction and constrained scalar diffusion through degree three are implemented; extend to projection solves, mixed/global-integrator couplings, degree-four/vector physics, and meaningful point/0D forms |
-| Remaining setup and stage isolation | Cold allocation, mesh/space setup, PETSc/MPI insertion and completion, constraints, solve, and norm timings; warmed sequential binding/kernel/triplet/finalization scopes are implemented |
-| Curved geometry and boundary variants | Map degree/regularity, quadrature-point counts, constraints and boundary workload metadata |
-| Scaling and regression baselines | At least three sizes; fixed-global-work strong scaling and fixed-per-rank-work weak scaling; controlled runner and established variance before thresholds |
-
-All meaningful combinations of existing contexts, supported spaces, the seven
-positive-dimensional geometries, and assembly backends remain the intended
-coverage matrix. Unsupported combinations are stated explicitly, not counted
-as completed measurements. Darcy remains deferred. Any subsequent optimization
-requires independently checked operators/loads/constraints and baseline-
-equivalent solution behavior, residuals, and solver iterations.
+The remaining work comprises the gaps in the ledger: complete mapped/embedded
+and space/degree coverage, distributed stage attribution, constraints and
+boundary/interface kernels,
+nonlinear workflows, solver setup/factorization/preconditioning, and matched
+multi-size end-to-end profiles. Follow-up priorities follow the assembly call
+tree and measured source attribution. Benchmark availability, numerical
+qualification, controlled timings, source attribution and consumer validation
+are separate deliverables; no percentage is inferred from registration counts.

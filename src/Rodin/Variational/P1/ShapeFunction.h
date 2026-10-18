@@ -238,7 +238,7 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
@@ -459,6 +459,11 @@ namespace Rodin::Variational
 
       /**
        * @brief Binds the integration point and prepares local basis values.
+       *
+       * Both matrix dimensions and the local basis count identify the owned
+       * component layout. A space assignment can change rows and columns while
+       * preserving the formula, sample and total component count.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -468,9 +473,13 @@ namespace Rodin::Variational
         const auto& poly = ip.getPoint().getPolytope();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(
           poly.getDimension(), poly.getIndex());
-        if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
-          m_qfIdentity != ip.getQuadratureFormula()->getCacheIdentity() ||
-          m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
+        if (!ip.getReferenceQuadratureFormula() ||
+          m_qf != ip.getReferenceQuadratureFormula() ||
+          m_qfIdentity != ip.getReferenceQuadratureFormula()->getCacheIdentity() ||
+          m_qp != ip.getIndex() || m_geometry != poly.getGeometry() ||
+          m_basis.size() != fe.getCount() || m_basis.empty() ||
+          m_basis.front().rows() != fe.getRows() ||
+          m_basis.front().cols() != fe.getColumns())
         {
           m_basis.resize(fe.getCount());
           const auto& scalar = fe.getScalarElement();
@@ -487,7 +496,7 @@ namespace Rodin::Variational
               basis(c / fe.getColumns(), c % fe.getColumns()) = value;
             }
           }
-          m_qf = ip.getQuadratureFormula();
+          m_qf = ip.getReferenceQuadratureFormula();
           m_qfIdentity = m_qf ? m_qf->getCacheIdentity() : 0;
           m_qp = ip.getIndex();
           m_geometry = poly.getGeometry();

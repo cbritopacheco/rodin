@@ -18,7 +18,9 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/PolytopeQuadrature.h>
 #include <Rodin/QF/Centroid.h>
+#include <Rodin/QF/GaussLegendre.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include "../../../convergence/Convergence.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -75,6 +77,68 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&quadrature.getPoint(0), stored);
     EXPECT_EQ((stored->getPhysicalCoordinates() - coordinates).norm(), 0);
   }
+
+  class QuadratureVersionTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
+
+  /**
+   * @brief Formula assignment and storage reuse create distinct stable entries.
+   *
+   * Retained mapped samples keep their original coordinates until mesh flush.
+   * New requests use the current formula version, even at the same address.
+   * More than sixteen versions exercise the full index beyond its fast lookup.
+   */
+  TEST_P(QuadratureVersionTest, FormulaVersionsRetainBorrowedSamples)
+  {
+    auto mesh = GetParam() == Polytope::Type::Point
+      ? LocalMesh::Builder().initialize(3).nodes(1).vertex({0, 0, 0}).finalize()
+      : Convergence::UniformGrid(GetParam()).makeMesh(3);
+    const auto cell = *mesh.getCell();
+    Optional<QF::GaussLegendre> formula;
+    formula.emplace(GetParam(), 2);
+    const auto* address = &*formula;
+    std::vector<const PolytopeQuadrature*> retained;
+    std::vector<Math::SpatialPoint> coordinates;
+    std::vector<size_t> identities;
+    for (size_t version = 0; version < 20; ++version)
+    {
+      if (version == 1)
+        *formula = QF::GaussLegendre(GetParam(), 3);
+      else if (version > 1)
+        formula.emplace(GetParam(), version % 2 + 2);
+      ASSERT_EQ(&*formula, address);
+      const auto& quadrature = cell.getQuadrature(*formula);
+      EXPECT_EQ(&quadrature, &cell.getQuadrature(*formula));
+      EXPECT_EQ(quadrature.getQuadratureFormulaIdentity(), formula->getCacheIdentity());
+      ASSERT_EQ(quadrature.getSize(), formula->getSize());
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& actual = quadrature.getPoint(q).getReferenceCoordinates();
+        const auto& expected = formula->getPoint(q);
+        ASSERT_EQ(actual.size(), expected.size());
+        for (size_t j = 0; j < actual.size(); ++j)
+          EXPECT_EQ(actual(j), expected(j));
+      }
+      for (const auto* previous : retained)
+        EXPECT_NE(&quadrature, previous);
+      retained.push_back(&quadrature);
+      coordinates.push_back(formula->getPoint(0));
+      identities.push_back(formula->getCacheIdentity());
+      for (size_t old = 0; old < retained.size(); ++old)
+      {
+        EXPECT_EQ(retained[old]->getQuadratureFormulaIdentity(), identities[old]);
+        const auto& point = retained[old]->getPoint(0).getReferenceCoordinates();
+        for (size_t j = 0; j < point.size(); ++j)
+          EXPECT_EQ(point(j), coordinates[old](j));
+      }
+    }
+  }
+
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, QuadratureVersionTest,
+    ::testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge));
 
   /// @brief Verifies caches single formula per polytope for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, CachesSingleFormulaPerPolytope)

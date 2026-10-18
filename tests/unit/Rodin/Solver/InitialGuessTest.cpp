@@ -24,8 +24,12 @@ using Rodin::Solver::SparseLU;
 namespace Rodin::Tests::Unit::InitialGuess
 {
   /**
-   * A full assemble() must seed the linear system's solution vector (the
-   * initial guess) from the trial function data.
+   * @brief Checks initial-guess seeding on first assembly and reassembly.
+   *
+   * Full assembly imports the trial field, replacing any separately updated
+   * linear-system solution. This is the contract required by assembly-only
+   * projection benchmarks; solving the system directly does not write back
+   * into the trial field.
    */
   TEST(Rodin_Solver_InitialGuess, AssembleSeedsGuessFromTrialFunction)
   {
@@ -50,6 +54,16 @@ namespace Rodin::Tests::Unit::InitialGuess
     const auto& data = u.getSolution().getData();
     ASSERT_EQ(guess.size(), data.size());
     EXPECT_EQ((guess - data).norm(), 0.0);
+
+    // A direct system update must not silently become the next trial guess.
+    poisson.getLinearSystem().getSolution().setConstant(-7);
+    ASSERT_FALSE((guess.array() == data.array()).all());
+    poisson.assemble();
+    EXPECT_TRUE((guess.array() == data.array()).all());
+
+    u.getSolution() = RealFunction(3);
+    poisson.assemble();
+    EXPECT_TRUE((guess.array() == data.array()).all());
   }
 
   /**

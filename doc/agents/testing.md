@@ -6,7 +6,8 @@
 tests/unit/Rodin/<Module>/...      GoogleTest, mirrors src/Rodin exactly
 tests/manufactured/Rodin/...       Manufactured solutions + fixed-mesh regressions
 tests/convergence/{h,p,hp,...}/... Multi-resolution convergence-rate validation
-tests/benchmarks/                  Google Benchmark (target RodinBenchmarks)
+tests/benchmarks/Rodin/<Module>/   Module/component Google Benchmark executables
+tests/benchmarks/Workloads/        Shared benchmark forms and numerical oracles
 tests/installation/                Install-tree consumption checks
 src/Rodin/Test/                    Library-side helpers (Random functions, Utility)
 ```
@@ -32,6 +33,10 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   `isoparametric/`). They use enough discretizations to establish the stated
   rate interval, integrate error norms independently of the solved field, and
   assert every observed rate.
+- Library benchmarks mirror source modules, including MPI/PETSc mirrors.
+  Module and component executables are opt-in and are not CTest timing gates.
+  `RodinBenchmarks` retains the historical publication registration set;
+  verification-support profiling lives separately in `benchmarks/convergence`.
 
 A change is complete after the affected unit test executable passes. Assembly
 and solver changes also require the relevant manufactured tests to pass.

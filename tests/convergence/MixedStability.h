@@ -8,7 +8,10 @@
 #define RODIN_TESTS_CONVERGENCE_MIXED_STABILITY_H
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdlib>
+#include <iostream>
 #include <vector>
 #include <Eigen/Eigenvalues>
 #include <Eigen/Jacobi>
@@ -46,6 +49,13 @@ namespace Rodin::Tests::Convergence
    *
    * Inputs are complete matrices on one process. This measurement introduces
    * no collectives; distributed callers must explicitly provide global inputs.
+   *
+   * ## Diagnostics
+   *
+   * With @c RODIN_PROFILE_STABILITY=1, phase intervals and algebraic dimensions
+   * are written to standard output. These diagnostic wall times are not
+   * controlled benchmark samples or numerical acceptance criteria. No logging
+   * is performed by default; the spectra and consistency budgets are unchanged.
    */
   class MixedStability
   {
@@ -108,6 +118,24 @@ namespace Rodin::Tests::Convergence
         const Eigen::Index blockSize = static_cast<Eigen::Index>(
           std::min(BlockSize, WorkspaceBytes / sizeof(Real) / size_t(nv)));
         ASSERT_GT(blockSize, 0);
+        using Clock = std::chrono::steady_clock;
+        const char* setting = std::getenv("RODIN_PROFILE_STABILITY");
+        Optional<Clock::time_point> previous;
+        if (setting && StringView(setting) == "1")
+          previous = Clock::now();
+        const auto report = [&](const char* phase) {
+          if (!previous)
+            return;
+          const Real seconds =
+            std::chrono::duration<Real>(Clock::now() - *previous).count();
+          std::cout << "[pressure-spectrum] phase=" << phase << " seconds=" << seconds
+                    << " free_velocity=" << nv << " pressure=" << np
+                    << " zero_mean_pressure=" << np - 1 << " block_columns=" << blockSize
+                    << " full_velocity_nnz=" << fullA.nonZeros()
+                    << " full_divergence_nnz=" << fullB.nonZeros() << std::endl;
+          previous = Clock::now();
+        };
+        report("begin");
         std::vector<Eigen::Triplet<Real>> entries;
         for (Eigen::Index col = 0; col < fullA.outerSize(); ++col)
         {
@@ -145,9 +173,11 @@ namespace Rodin::Tests::Convergence
             T(pivot, column++) = -mean(row) / mean(pivot);
           }
         }
+        report("reduction-and-mean-basis");
         Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> factor(A);
         ASSERT_EQ(factor.info(), Eigen::Success);
         ASSERT_GT(factor.vectorD().minCoeff(), 0);
+        report("energy-LDLT");
         Math::Matrix<Real> S0(np - 1, np - 1);
         Real residualSquared = 0, rhsSquared = 0;
         for (Eigen::Index first = 0; first < np - 1; first += blockSize)
@@ -160,15 +190,19 @@ namespace Rodin::Tests::Convergence
           residualSquared += (A * X - rhs).squaredNorm();
           rhsSquared += rhs.squaredNorm();
         }
+        report("Schur-columns");
         const Math::Matrix<Real> M0 = T.transpose() * M * T;
+        report("pressure-metric");
         Eigen::GeneralizedSelfAdjointEigenSolver<Math::Matrix<Real>> spectrum(S0, M0);
         ASSERT_EQ(spectrum.info(), Eigen::Success);
+        report("Schur-generalized-spectrum");
         // P A P^T = L L^T and M0 = C C^T give the independently whitened
         // divergence C^-1 T^T B P^T L^-T, without forming a Schur complement.
         Eigen::SimplicialLLT<Math::SparseMatrix<Real>> cholesky(A);
         Eigen::LLT<Math::Matrix<Real>> pressureCholesky(M0);
         ASSERT_EQ(cholesky.info(), Eigen::Success);
         ASSERT_EQ(pressureCholesky.info(), Eigen::Success);
+        report("independent-factorizations");
         // Z=L^-1 P B^T T. For a block of coordinate columns E,
         // E^T Z=(T^T B P^T L^-T E)^T. Z=Q R then preserves singular
         // values after pressure whitening: Z C^-T=Q (R C^-T).
@@ -216,12 +250,15 @@ namespace Rodin::Tests::Convergence
             }
           }
         }
+        report("whitened-divergence-QR");
         const Math::Matrix<Real> whitened =
           pressureCholesky.matrixL().solve(R.transpose());
+        report("pressure-whitening");
         // Divide-and-conquer retains the independent singular-value oracle;
         // forming another normal-equation spectrum would square conditioning.
         Eigen::BDCSVD<Math::Matrix<Real>> singularSpectrum(whitened);
         ASSERT_EQ(singularSpectrum.info(), Eigen::Success);
+        report("independent-SVD");
         Math::Vector<Real> squaredSingular = Math::Vector<Real>::Zero(np - 1);
         for (Eigen::Index i = 0; i < singularSpectrum.singularValues().size(); ++i)
         {
@@ -255,6 +292,7 @@ namespace Rodin::Tests::Convergence
         result.spectralDifference = scale > 0 ? difference / scale : difference;
         result.velocityResidual =
           std::sqrt(residualSquared) / std::max(Real(1), std::sqrt(rhsSquared));
+        report("consistency-diagnostics");
       }
 
       static void expectConsistent(const Result& result)

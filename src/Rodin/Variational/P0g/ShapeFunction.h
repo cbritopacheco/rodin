@@ -291,6 +291,11 @@ namespace Rodin::Variational
 
       /**
        * @brief Binds the integration point and prepares local basis values.
+       *
+       * Both matrix dimensions and the local basis count identify the owned
+       * component layout. A space assignment can change rows and columns while
+       * preserving the formula, sample and total component count.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -301,7 +306,10 @@ namespace Rodin::Variational
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(
           poly.getDimension(), poly.getIndex());
         if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
-          m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
+          m_qp != ip.getIndex() || m_geometry != poly.getGeometry() ||
+          m_basis.size() != fe.getCount() || m_basis.empty() ||
+          m_basis.front().rows() != fe.getRows() ||
+          m_basis.front().cols() != fe.getColumns())
         {
           m_basis.resize(fe.getCount());
           const auto& scalar = fe.getScalarElement();

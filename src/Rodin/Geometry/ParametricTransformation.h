@@ -12,6 +12,8 @@
  * @brief Parametric transformation for finite-element mesh geometry.
  */
 
+#include <type_traits>
+
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 
@@ -164,7 +166,8 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
         pc.resize(pdim);
         pc.setZero();
-        for (size_t local = 0; local < m_fe.getCount(); local++)
+        const size_t count = m_fe.getCount();
+        for (size_t local = 0; local < count; local++)
         {
           assert(pc.size() == m_pm[local].size());
           pc += m_pm[local] * m_fe.getBasis(local)(rc);
@@ -179,7 +182,8 @@ namespace Rodin::Geometry
         const size_t pdim = getPhysicalDimension();
         pc.resize(pdim, rdim);
         pc.setZero();
-        for (size_t local = 0; local < m_fe.getCount(); local++)
+        const size_t count = m_fe.getCount();
+        for (size_t local = 0; local < count; local++)
         {
           const auto& basis = m_fe.getBasis(local);
           for (size_t i = 0; i < rdim; i++)
@@ -202,6 +206,14 @@ namespace Rodin::Geometry
        * Only reference derivatives are shared across cells; mapped matrices
        * remain specific to the current transformation. Generic scalar elements
        * without a table retain the default pointwise evaluation.
+       * Square three-dimensional maps instantiate the same contraction with
+       * compile-time spatial bounds. This removes repeated small-loop control
+       * without changing the local-basis accumulation order, reference samples,
+       * padding initialization or ownership. Other dimensions use runtime bounds;
+       * no affine-map assumption or derived-metric cache is introduced.
+       * The square-three-dimensional instance accumulates in a local fixed-capacity
+       * matrix and commits it once per sample. Runtime-bound instances write to
+       * retained output directly, avoiding an extra copy for smaller matrices.
        *
        * @param[out] jacobians Jacobian matrices in quadrature-point order.
        * @param[in] qf Reference formula identifying the element tabulation.
@@ -216,23 +228,46 @@ namespace Rodin::Geometry
           assert(table.dim == rdim);
           assert(table.ndof == m_fe.getCount());
           jacobians.resize(table.nqp);
-          for (size_t qp = 0; qp < table.nqp; ++qp)
-          {
-            auto& matrix = jacobians[qp];
-            matrix.resize(pdim, rdim);
-            matrix.setZero();
-            for (size_t local = 0; local < m_fe.getCount(); ++local)
+          const auto contract = [&](auto referenceDimension, auto physicalDimension) {
+            constexpr bool localAccumulation =
+              std::is_same_v<decltype(referenceDimension),
+                std::integral_constant<size_t, 3>>;
+            for (size_t qp = 0; qp < table.nqp; ++qp)
             {
-              const auto gradient = table.getGradient(qp, local);
-              for (size_t i = 0; i < rdim; ++i)
+              decltype(auto) matrix = [&]() -> decltype(auto) {
+                if constexpr (localAccumulation)
+                  return Math::SpatialMatrix<Real>(physicalDimension, referenceDimension);
+                else
+                {
+                  auto& output = jacobians[qp];
+                  output.resize(physicalDimension, referenceDimension);
+                  output.setZero();
+                  return (output);
+                }
+              }();
+              for (size_t local = 0; local < table.ndof; ++local)
               {
-                const Real value = gradient[i];
-                for (size_t j = 0; j < pdim && j < Math::SpatialMatrix<Real>::MaxSize;
-                     ++j)
-                  matrix(j, i) += m_pm(j, local) * value;
+                const auto gradient = table.getGradient(qp, local);
+                for (size_t i = 0; i < referenceDimension; ++i)
+                {
+                  const Real value = gradient[i];
+                  for (size_t j = 0;
+                       j < physicalDimension && j < Math::SpatialMatrix<Real>::MaxSize;
+                       ++j)
+                  {
+                    matrix(j, i) += m_pm(j, local) * value;
+                  }
+                }
               }
+              if constexpr (localAccumulation)
+                jacobians[qp] = matrix;
             }
-          }
+          };
+          if (rdim == 3 && pdim == 3)
+            contract(
+              std::integral_constant<size_t, 3>{}, std::integral_constant<size_t, 3>{});
+          else
+            contract(rdim, pdim);
         }
         else
           Parent::jacobian(jacobians, qf);
@@ -291,7 +326,7 @@ namespace Rodin::Geometry
             assert(qp < table.nqp);
             pc.resize(getPhysicalDimension());
             pc.setZero();
-            for (size_t local = 0; local < m_fe.getCount(); ++local)
+            for (size_t local = 0; local < table.ndof; ++local)
               pc += m_pm[local] * table.getBasis(qp, local);
             return;
           }

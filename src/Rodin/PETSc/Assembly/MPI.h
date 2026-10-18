@@ -109,7 +109,7 @@ namespace Rodin::Assembly
             for (Index c = 0; c < static_cast<Index>(cols.size()); ++c)
             {
               ierr = MatSetValue(out, static_cast<PetscInt>(rows[r]),
-                static_cast<PetscInt>(cols[c]), Math::conj(local(r, c)), ADD_VALUES);
+                static_cast<PetscInt>(cols[c]), local(r, c), ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
           }

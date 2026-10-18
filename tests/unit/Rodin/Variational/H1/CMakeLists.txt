@@ -9,6 +9,35 @@ gtest_discover_tests(RodinVariationalH1LegendrePolynomialTest
     LABELS unit
 )
 
+add_executable(RodinVariationalH1MassQuadratureTest MassQuadratureTest.cpp)
+target_link_libraries(RodinVariationalH1MassQuadratureTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+target_include_directories(RodinVariationalH1MassQuadratureTest PRIVATE
+  ${PROJECT_SOURCE_DIR}/tests)
+gtest_discover_tests(RodinVariationalH1MassQuadratureTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1TabulationTest TabulationTest.cpp)
+target_link_libraries(RodinVariationalH1TabulationTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1TabulationTest
+  PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1ShapeFunctionTest ShapeFunctionTest.cpp)
+target_link_libraries(RodinVariationalH1ShapeFunctionTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1ShapeFunctionTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1GradientEvaluationTest GradientEvaluationTest.cpp)
+target_link_libraries(RodinVariationalH1GradientEvaluationTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1GradientEvaluationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1PyramidIndexTest PyramidIndexTest.cpp)
+target_link_libraries(RodinVariationalH1PyramidIndexTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1PyramidIndexTest
+  PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalH1JacobiPolynomialTest JacobiPolynomialTest.cpp)
 target_link_libraries(RodinVariationalH1JacobiPolynomialTest
   PUBLIC

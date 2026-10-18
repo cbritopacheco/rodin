@@ -21,6 +21,8 @@ TEST_P(GaussLobattoTest, PositiveNormalizedBoundaryInclusive)
   for (size_t count = 2; count <= 12; ++count)
   {
     const QF::GaussLobatto rule(geometry, count);
+    for (size_t q = 0; q < rule.getSize(); ++q)
+      EXPECT_EQ(static_cast<size_t>(rule.getPoint(q).size()), traits.getDimension());
     EXPECT_TRUE(Tests::QF::allWeightsPositive(rule));
     EXPECT_TRUE(Tests::QF::allPointsInside(rule, geometry));
     EXPECT_NEAR(Tests::QF::weightSum(rule), Tests::QF::referenceMeasure(geometry), 1e-13);
@@ -61,11 +63,14 @@ TEST_P(GaussLobattoTest, DirectCachePreservesRulesAndIdentity)
     const size_t count = std::max<size_t>(2, (degree + 4) / 2);
     const auto& rule = QF::GaussLobatto::get(GetParam(), count);
     const QF::GaussLobatto owned(GetParam(), count);
+    const size_t dimension = Geometry::Polytope::Traits(GetParam()).getDimension();
     EXPECT_EQ(&rule, &QF::GaussLobatto::get(GetParam(), count));
     EXPECT_NE(&rule, &QF::PolytopeQuadratureFormula::get(degree, GetParam()));
     ASSERT_EQ(rule.getSize(), owned.getSize());
     for (size_t q = 0; q < rule.getSize(); ++q)
     {
+      EXPECT_EQ(static_cast<size_t>(rule.getPoint(q).size()), dimension);
+      EXPECT_EQ(static_cast<size_t>(owned.getPoint(q).size()), dimension);
       EXPECT_EQ(rule.getWeight(q), owned.getWeight(q));
       EXPECT_EQ((rule.getPoint(q) - owned.getPoint(q)).norm(), Real(0));
     }

@@ -101,6 +101,19 @@ the other backend's API spelling.
 Sesquilinearity is not Hermitian symmetry. Whether `A == A*` is a separate
 property of the particular weak form and coefficients.
 
+`LinearElasticityIntegral` admits Lamé parameter ranges whose multiplication
+preserves the field scalar type. Real parameters may therefore act on complex
+fields, but complex values must not be narrowed into real storage. Geometry
+inverses remain real; complex basis Jacobians use the existing promoted matrix
+product, while the established real in-place arithmetic is retained.
+
+For coincident trial/test spaces, triangular reconstruction is valid when both
+Lamé parameter ranges are real. Complex-valued material ranges do not establish
+$A=A^*$, even when the same space is used twice, so both matrix triangles are
+evaluated. For the currently real-valued basis functions, complex material
+parameters may yield $A^T=A$ without Hermitian symmetry. P1 and generic
+integrators follow the same rule; it is independent of the assembly backend.
+
 ## LinearSystem lifetime
 
 A `Math::LinearSystem` is bound to the spaces that created it. A changed mesh,
@@ -111,6 +124,32 @@ layout/assembly.
 Warm starts are intentional. Reassembly zeroes the operator and right-hand
 side as needed but preserves the solution vector where the backend contract
 does so.
+
+## Physical differential dimensions
+
+Let a reference cell have dimension $d$, its physical embedding have dimension
+$s$, and a vector field have $m$ components. The geometric inverse has shape
+$d\times s$. Physical scalar gradients and vector Jacobians therefore have
+shapes $s$ and $m\times s$, respectively:
+
+$$
+\nabla_K u=(J_K^{\dagger})^T\widehat\nabla u,
+\qquad J_K(u)=\widehat J(u)J_K^{\dagger}.
+$$
+
+For an embedded cell these are tangential derivatives expressed in ambient
+coordinates. Reference-coordinate contractions still have $d$ terms; derivative
+outputs retain all $s$ ambient entries. Neither the field component count nor
+the integration entity's topological dimension determines the output width.
+Constant-space derivatives obey the same shape contract even though all entries
+are zero. On a point embedded in $\mathbb{R}^s$, the empty reference contraction
+produces a correctly shaped ambient zero, not an empty physical differential.
+Direct point evaluation, indexed integration points, shape-function evaluation
+and specialized local integrators must agree on these dimensions.
+
+Global-constant derivative nodes borrow immutable operands and update only their
+own cursor and zero storage. Their derivative does not require mutating the
+operand's evaluation cursor.
 
 ## Quadrature and exactness
 

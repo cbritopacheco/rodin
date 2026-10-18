@@ -1,13 +1,11 @@
-# Rodin house style. Derived empirically from the existing codebase — when in
-# doubt, match the surrounding code, not this file. Enforcement in CI is on
-# changed lines only (git clang-format); see CONTRIBUTING.md.
+# Rodin house style for new and changed code. Untouched legacy layout does not
+# override this configuration. Enforcement in CI is on changed lines only
+# (dev/check_format.py); see CONTRIBUTING.md.
 #
 # Requires clang-format >= 16 (AlignTrailingComments: Leave); CI uses 18.
 #
 # Known deviations clang-format cannot express (accepted, low-churn under
 # changed-lines enforcement):
-#  - members of access-specifier-less structs (Traits blocks) sit at +2 in
-#    the codebase but IndentAccessModifiers indents them to +4;
 #  - the codebase sometimes places `constexpr` on its own line before the
 #    declaration; clang-format joins it;
 #  - manually broken template-argument lists may be repacked.
@@ -22,6 +20,9 @@ TabWidth: 2
 UseTab: Never
 ContinuationIndentWidth: 2
 NamespaceIndentation: All
+# Access labels are inset by two spaces; their members by four spaces.
+# clang-format also adds four spaces in plain structs. dev/format_cpp.py removes
+# that extra level in structs without explicit access sections.
 IndentAccessModifiers: true
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false

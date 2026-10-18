@@ -184,7 +184,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         typename Cache::Key key;
@@ -438,7 +438,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();
@@ -611,6 +611,18 @@ namespace Rodin::Variational
 
       /**
        * @brief Binds the integration point and prepares local basis values.
+       *
+       * Cached component values depend on both matrix dimensions, not only
+       * their product. Reassigning a space can change @f$2\times3@f$ to
+       * @f$3\times2@f$ without changing the local basis count or sample identity.
+       * The owned basis layout therefore participates in cache invalidation.
+       *
+       * A certified reference sample may borrow an already prepared scalar
+       * table during this call. A missing or evicted table retains direct
+       * pointwise evaluation: requesting one matrix value must not construct
+       * values and derivatives for an entire formula. No table borrow is
+       * retained after the owned component basis has been filled.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -620,17 +632,27 @@ namespace Rodin::Variational
         const auto& poly = ip.getPoint().getPolytope();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(
           poly.getDimension(), poly.getIndex());
-        if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
-          m_qfIdentity != ip.getQuadratureFormula()->getCacheIdentity() ||
-          m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
+        if (!ip.getReferenceQuadratureFormula() ||
+          m_qf != ip.getReferenceQuadratureFormula() ||
+          m_qfIdentity != ip.getReferenceQuadratureFormula()->getCacheIdentity() ||
+          m_qp != ip.getIndex() || m_geometry != poly.getGeometry() ||
+          m_basis.size() != fe.getCount() || m_basis.empty() ||
+          m_basis.front().rows() != fe.getRows() ||
+          m_basis.front().cols() != fe.getColumns())
         {
           m_basis.resize(fe.getCount());
           const auto& scalar = fe.getScalarElement();
           const size_t components = fe.getRows() * fe.getColumns();
           const auto& point = ip.getPoint().getReferenceCoordinates();
+          Optional<
+            std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
+            tab;
+          if (const auto* formula = ip.getReferenceQuadratureFormula())
+            tab = scalar.findTabulation(formula->getCacheIdentity());
           for (size_t a = 0; a < scalar.getCount(); ++a)
           {
-            const auto value = scalar.getBasis(a)(point);
+            const auto value =
+              tab ? tab->get().getBasis(ip.getIndex(), a) : scalar.getBasis(a)(point);
             for (size_t c = 0; c < components; ++c)
             {
               auto& basis = m_basis[a * components + c];
@@ -639,7 +661,7 @@ namespace Rodin::Variational
               basis(c / fe.getColumns(), c % fe.getColumns()) = value;
             }
           }
-          m_qf = ip.getQuadratureFormula();
+          m_qf = ip.getReferenceQuadratureFormula();
           m_qfIdentity = m_qf ? m_qf->getCacheIdentity() : 0;
           m_qp = ip.getIndex();
           m_geometry = poly.getGeometry();

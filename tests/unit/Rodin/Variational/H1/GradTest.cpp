@@ -1,4 +1,14 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <initializer_list>
+#include <type_traits>
+#include <vector>
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -14,6 +24,326 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Observes logical DOF queries without changing their mapping.
+   *
+   * The field is bound through the ordinary @ref Rodin::Variational::H1 base reference. Its public
+   * virtual lookup must receive the current entity and each ascending local
+   * basis index. The observer returns the original mapping unchanged; failures
+   * therefore do not depend on coefficient cancellation or numerical roundoff.
+   *
+   * ## Architecture
+   *
+   * Observation is inactive until begin() supplies the current entity. Each
+   * lookup checks that entity and the next local basis index. finish() checks
+   * completeness and clears observation. The underlying mapping is unchanged.
+   *
+   * @tparam K H1 degree.
+   * @tparam Scalar Real or complex scalar field.
+   */
+  template <size_t K, class Scalar>
+  class GradientClosureSpace final : public H1<K, Scalar>
+  {
+    public:
+      /// @brief Original scalar space type.
+      using Base = H1<K, Scalar>;
+      /// @brief Logical entity identified by dimension and local index.
+      using Entity = std::pair<size_t, Index>;
+
+      /**
+       * @brief Constructs the original space with an inactive observer.
+       * @param mesh Mesh supporting the scalar field.
+       */
+      explicit GradientClosureSpace(const LocalMesh& mesh)
+        : Base(std::integral_constant<size_t, K>{}, mesh),
+          m_expected(),
+          m_next(0)
+      {}
+
+      /**
+       * @brief Starts observing one reference-basis sweep.
+       * @param entity Expected logical cell entity.
+       */
+      void begin(const Entity& entity)
+      {
+        m_expected = entity;
+        m_next = 0;
+      }
+
+      /**
+       * @brief Checks the number of queries and ends observation.
+       * @param count Number of scalar basis functions in the cell.
+       */
+      void finish(size_t count)
+      {
+        EXPECT_EQ(m_next, count);
+        m_expected.reset();
+      }
+
+      /**
+       * @brief Checks logical arguments and returns the unchanged global index.
+       * @param entity Entity for the public local-to-global lookup.
+       * @param local Local basis index.
+       * @returns Global index supplied by the original H1 mapping.
+       */
+      Index getGlobalIndex(const Entity& entity, Index local) const override
+      {
+        if (m_expected)
+        {
+          EXPECT_EQ(entity, *m_expected);
+          EXPECT_EQ(local, m_next++);
+        }
+        return Base::getGlobalIndex(entity, local);
+      }
+
+    private:
+      mutable Optional<Entity> m_expected; ///< Logical entity currently observed.
+      mutable size_t m_next; ///< Next local index in the ordered sweep.
+  };
+
+  /**
+   * @brief Checks point gradients against each cell's logical coefficient closure.
+   *
+   * For the closure map @f$I_K(a)@f$, the independent expansion is
+   * @f$\nabla u_h=(J_K^{-1})^T\sum_a
+   * c_{I_K(a)}\widehat\nabla\phi_a@f$. Public single-basis gradients and an
+   * owned closure define the reference; field coefficients are not interpreted
+   * as nodal values. Logical lookup arguments are observed independently of
+   * the numerical result. Every cell is visited in both directions, coefficients
+   * change through @f$1\to2\to1@f$, and each physical component is compared
+   * exactly. A callback must use the current cell's logical entity, rather than
+   * retain a prior cell or assume a global DOF layout. No coordinate matching
+   * or numerical tolerance is used.
+   *
+   * @tparam K H1 degree.
+   * @tparam Scalar Real or complex scalar field.
+   */
+  template <size_t K, class Scalar>
+  void checkGridFunctionGradientClosure()
+  {
+    using G = Polytope::Type;
+    for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
+           G::Pyramid, G::Hexahedron, G::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      const auto subdivisions = dimension == 1 ? std::initializer_list<size_t>{3}
+        : dimension == 2                       ? std::initializer_list<size_t>{3, 3}
+                                               : std::initializer_list<size_t>{3, 3, 3};
+      auto mesh = LocalMesh::UniformGrid(geometry, subdivisions);
+      for (size_t d = dimension; d > 0; --d)
+      {
+        mesh.getConnectivity().compute(d, d - 1);
+        mesh.getConnectivity().compute(d, 0);
+      }
+      ASSERT_GT(mesh.getCellCount(), 1);
+      GradientClosureSpace<K, Scalar> space(mesh);
+      GridFunction field(static_cast<const H1<K, Scalar>&>(space));
+      auto gradient = Grad(field);
+      const Scalar eta = [] {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(1, 0.5);
+        else
+          return Scalar(1);
+      }();
+      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      bool reverse = false;
+      for (const Real scale : {Real(1), Real(2), Real(1)})
+      {
+        for (size_t global = 0; global < space.getSize(); ++global)
+          field.getData()(global) = scale * Real(global + 1) * Real(global + 1) * eta;
+        for (size_t position = 0; position < mesh.getCellCount(); ++position)
+        {
+          const Index index = reverse ? mesh.getCellCount() - 1 - position : position;
+          SCOPED_TRACE(index);
+          const auto cell = mesh.getCell(index);
+          const auto& element = space.getFiniteElement(dimension, index);
+          const IndexArray closure = space.getDOFs(dimension, index);
+          ASSERT_EQ(static_cast<size_t>(closure.size()), element.getCount());
+          for (size_t local = 0; local < element.getCount(); ++local)
+            ASSERT_EQ(closure(local), space.getGlobalIndex({dimension, index}, local));
+          for (size_t qp = 0; qp < std::min(size_t(2), formula.getSize()); ++qp)
+          {
+            const auto& rc = formula.getPoint(qp);
+            const Geometry::Point point(*cell, rc);
+            Math::SpatialVector<Scalar> expected(dimension);
+            expected.setZero();
+            for (size_t local = 0; local < element.getCount(); ++local)
+            {
+              const auto reference = element.getBasis(local).getGradient()(rc);
+              expected += reference * field[closure(local)];
+            }
+            expected = point.getJacobianInverse().transpose() * expected;
+            space.begin({dimension, index});
+            const auto actual = gradient.getValue(point);
+            space.finish(element.getCount());
+            ASSERT_EQ(actual.size(), expected.size());
+            for (size_t j = 0; j < dimension; ++j)
+              ASSERT_EQ(actual(j), expected(j));
+            ASSERT_FALSE(::testing::Test::HasFailure());
+          }
+        }
+        reverse = !reverse;
+      }
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureRealP1)
+  {
+    checkGridFunctionGradientClosure<1, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureRealP2)
+  {
+    checkGridFunctionGradientClosure<2, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureRealP3)
+  {
+    checkGridFunctionGradientClosure<3, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureComplexP1)
+  {
+    checkGridFunctionGradientClosure<1, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureComplexP2)
+  {
+    checkGridFunctionGradientClosure<2, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureComplexP3)
+  {
+    checkGridFunctionGradientClosure<3, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureRealP4)
+  {
+    checkGridFunctionGradientClosure<4, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureRealP5)
+  {
+    checkGridFunctionGradientClosure<5, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureRealP6)
+  {
+    checkGridFunctionGradientClosure<6, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureComplexP4)
+  {
+    checkGridFunctionGradientClosure<4, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureComplexP5)
+  {
+    checkGridFunctionGradientClosure<5, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GridFunctionLogicalClosureComplexP6)
+  {
+    checkGridFunctionGradientClosure<6, Complex>();
+  }
+
+  /**
+   * @brief Rebinds physical gradients after an exact uniform geometry dilation.
+   *
+   * ## State transition
+   *
+   * A dilation by two preserves topology, reference basis and quadrature
+   * identity, but halves every physical gradient. Fresh mapped points and a
+   * freshly bound expression provide independent controls. All components
+   * are compared exactly; no coordinate matching or tolerance is used.
+   *
+   * @tparam K Polynomial degree of the scalar space.
+   * @tparam Scalar Real or complex scalar field.
+   */
+  template <size_t K, class Scalar>
+  void checkGradientGeometryRebind()
+  {
+    using G = Polytope::Type;
+    for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
+           G::Pyramid, G::Hexahedron, G::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const auto dimension = Polytope::Traits(geometry).getDimension();
+      const auto subdivisions = dimension == 1 ? std::initializer_list<size_t>{2}
+        : dimension == 2                       ? std::initializer_list<size_t>{2, 2}
+                                               : std::initializer_list<size_t>{2, 2, 2};
+      auto mesh = LocalMesh::UniformGrid(geometry, subdivisions);
+      for (size_t d = dimension; d > 0; --d)
+      {
+        mesh.getConnectivity().compute(d, d - 1);
+        mesh.getConnectivity().compute(d, 0);
+      }
+      H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
+      TrialFunction u(space);
+      auto gradient = Grad(u);
+      const auto cell = *mesh.getCell();
+      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const PolytopeQuadrature before(cell, formula);
+      const IntegrationPoint first(before.getPoint(0), &formula, 0);
+      gradient.setIntegrationPoint(first);
+      std::vector<Math::SpatialVector<Scalar>> original;
+      for (size_t a = 0; a < gradient.getDOFs(cell); ++a)
+        original.push_back(gradient.getBasis(a));
+
+      for (Index i = 0; i < mesh.getVertexCount(); ++i)
+      {
+        auto coordinates = mesh.getVertexCoordinates(i);
+        coordinates *= 2;
+        mesh.setVertexCoordinates(i, coordinates);
+      }
+      const PolytopeQuadrature after(cell, formula);
+      const IntegrationPoint second(after.getPoint(0), &formula, 0);
+      gradient.setIntegrationPoint(second);
+      auto fresh = Grad(u);
+      fresh.setIntegrationPoint(second);
+      auto copied = gradient;
+      auto moved = std::move(copied);
+      gradient.setIntegrationPoint(second);
+      bool nonzero = false;
+      for (size_t a = 0; a < original.size(); ++a)
+      {
+        const auto actual = gradient.getBasis(a);
+        const auto expected = fresh.getBasis(a);
+        const auto retained = moved.getBasis(a);
+        ASSERT_EQ(actual.size(), dimension);
+        for (size_t j = 0; j < dimension; ++j)
+        {
+          EXPECT_EQ(actual(j), expected(j));
+          EXPECT_EQ(retained(j), expected(j));
+          EXPECT_EQ(Scalar(2) * actual(j), original[a](j));
+          nonzero = nonzero || original[a](j) != Scalar(0);
+        }
+      }
+      EXPECT_TRUE(nonzero);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindRealP1)
+  {
+    checkGradientGeometryRebind<1, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindRealP2)
+  {
+    checkGradientGeometryRebind<2, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindComplexP1)
+  {
+    checkGradientGeometryRebind<1, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindComplexP2)
+  {
+    checkGradientGeometryRebind<2, Complex>();
+  }
+
   /// @brief Verifies shape function construction for variational H1 grad.
   TEST(Rodin_Variational_H1_Grad, ShapeFunction_Construction)
   {

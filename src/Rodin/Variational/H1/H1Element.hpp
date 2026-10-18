@@ -44,119 +44,119 @@ namespace Rodin::Variational
   template <size_t K>
   struct PyramidIndex
   {
-      /// @brief Number of entries.
-      static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
+    /// @brief Number of entries.
+    static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
-      /// @brief Pair of tensor-product indices of a pyramid mode.
-      struct IJ
-      {
-          /// @brief Index of the cached polytope.
-          size_t i;
-          /// @brief Second tensor-product index.
-          size_t j;
-      };
+    /// @brief Pair of tensor-product indices of a pyramid mode.
+    struct IJ
+    {
+      /// @brief Index of the cached polytope.
+      size_t i;
+      /// @brief Second tensor-product index.
+      size_t j;
+    };
 
-      /**
-       * @brief Gets the index offset of a pyramid layer.
-       * @returns The index offset of a pyramid layer.
-       * @param layer Lattice layer index.
-       */
-      static constexpr size_t getLayerOffset(size_t layer)
-      {
-        size_t out = 0;
-        for (size_t k = 0; k < layer; ++k)
-        {
-          const size_t n = K - k + 1;
-          out += n * n;
-        }
-        return out;
-      }
-
-      /**
-       * @brief Gets the linear index of a tensor-product mode.
-       * @param i Index of the requested entry.
-       * @param j Index of the second coordinate.
-       * @returns The linear index of a tensor-product mode.
-       * @param k Index of the requested lattice entry.
-       */
-      static constexpr size_t getIndex(size_t i, size_t j, size_t k)
+    /**
+     * @brief Gets the index offset of a pyramid layer.
+     * @returns The index offset of a pyramid layer.
+     * @param layer Lattice layer index.
+     */
+    static constexpr size_t getLayerOffset(size_t layer)
+    {
+      size_t out = 0;
+      for (size_t k = 0; k < layer; ++k)
       {
         const size_t n = K - k + 1;
-        return getLayerOffset(k) + j * n + i;
+        out += n * n;
       }
+      return out;
+    }
 
-      /**
-       * @brief Decodes a linear index into its tensor-product indices.
-       * @param idx Index of the requested entry.
-       * @param i Index of the requested entry.
-       * @param j Index of the second coordinate.
-       * @param k Storage for the decoded lattice index.
-       */
-      static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
+    /**
+     * @brief Gets the linear index of a tensor-product mode.
+     * @param i Index of the requested entry.
+     * @param j Index of the second coordinate.
+     * @returns The linear index of a tensor-product mode.
+     * @param k Index of the requested lattice entry.
+     */
+    static constexpr size_t getIndex(size_t i, size_t j, size_t k)
+    {
+      const size_t n = K - k + 1;
+      return getLayerOffset(k) + j * n + i;
+    }
+
+    /**
+     * @brief Decodes a linear index into its tensor-product indices.
+     * @param idx Index of the requested entry.
+     * @param i Index of the requested entry.
+     * @param j Index of the second coordinate.
+     * @param k Storage for the decoded lattice index.
+     */
+    static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
+    {
+      size_t rem = idx;
+      for (k = 0; k <= K; ++k)
       {
-        size_t rem = idx;
-        for (k = 0; k <= K; ++k)
+        const size_t n = K - k + 1;
+        const size_t layer = n * n;
+        if (rem < layer)
         {
-          const size_t n = K - k + 1;
-          const size_t layer = n * n;
-          if (rem < layer)
-          {
-            j = rem / n;
-            i = rem % n;
-            return;
-          }
-          rem -= layer;
+          j = rem / n;
+          i = rem % n;
+          return;
         }
-
-        i = j = k = 0;
+        rem -= layer;
       }
 
-      /**
-       * @brief Gets the number of modes on a triangular lattice.
-       * @returns The number of modes on a triangular lattice.
-       * @param alpha Basis or lattice index in the reference element.
-       */
-      static constexpr IJ getTriangleLattice(size_t alpha)
-      {
-        size_t pos = 0;
-        for (size_t j = 0; j <= K; ++j)
-        {
-          for (size_t i = 0; i <= K - j; ++i, ++pos)
-          {
-            if (pos == alpha)
-              return IJ{i, j};
-          }
-        }
-        return IJ{0, 0};
-      }
+      i = j = k = 0;
+    }
 
-      /**
-       * @brief Gets the index of a mode on a pyramid side.
-       * @param local Index in the local numbering.
-       * @returns The index of a mode on a pyramid side.
-       * @param alpha Basis or lattice index in the reference element.
-       */
-      static constexpr size_t getSideIndex(size_t local, size_t alpha)
+    /**
+     * @brief Gets the number of modes on a triangular lattice.
+     * @returns The number of modes on a triangular lattice.
+     * @param alpha Basis or lattice index in the reference element.
+     */
+    static constexpr IJ getTriangleLattice(size_t alpha)
+    {
+      size_t pos = 0;
+      for (size_t j = 0; j <= K; ++j)
       {
-        const auto ij = getTriangleLattice(alpha);
-        const size_t i = ij.i;
-        const size_t k = ij.j;
-        const size_t n = K - k;
-
-        switch (local)
+        for (size_t i = 0; i <= K - j; ++i, ++pos)
         {
-          case 1:
-            return getIndex(i, 0, k);
-          case 2:
-            return getIndex(n, i, k);
-          case 3:
-            return getIndex(n - i, n, k);
-          case 4:
-            return getIndex(0, n - i, k);
-          default:
-            return 0;
+          if (pos == alpha)
+            return IJ{i, j};
         }
       }
+      return IJ{0, 0};
+    }
+
+    /**
+     * @brief Gets the index of a mode on a pyramid side.
+     * @param local Index in the local numbering.
+     * @returns The index of a mode on a pyramid side.
+     * @param alpha Basis or lattice index in the reference element.
+     */
+    static constexpr size_t getSideIndex(size_t local, size_t alpha)
+    {
+      const auto ij = getTriangleLattice(alpha);
+      const size_t i = ij.i;
+      const size_t k = ij.j;
+      const size_t n = K - k;
+
+      switch (local)
+      {
+        case 1:
+          return getIndex(i, 0, k);
+        case 2:
+          return getIndex(n, i, k);
+        case 3:
+          return getIndex(n - i, n, k);
+        case 4:
+          return getIndex(0, n - i, k);
+        default:
+          return 0;
+      }
+    }
   };
 
   /// @brief Bernstein basis on the reference pyramid.
@@ -351,131 +351,202 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class Scalar>
-  auto& H1Element<K, Scalar>::getTabulationCache()
-  {
-    struct CacheEntry
-    {
-      const QF::QuadratureFormulaBase* qf;
-      size_t identity;
-      Geometry::Polytope::Type g;
-      size_t nqp;
-      bool valid;
-      Tabulation tab;
-
-      CacheEntry()
-        : qf(nullptr),
-          identity(0),
-          g(Geometry::Polytope::Type::Point),
-          nqp(0),
-          valid(false),
-          tab()
-      {}
-    };
-
-    struct Cache
-    {
-      std::array<CacheEntry, 8> e;
-      size_t next;
-
-      Cache()
-        : e(),
-          next(0)
-      {}
-    };
-
-    static thread_local Cache s_cache;
-    return s_cache;
-  }
-
-  template <size_t K, class Scalar>
   Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
   H1Element<K, Scalar>::findTabulation(size_t identity) const
   {
-    for (const auto& entry : getTabulationCache().e)
-    {
-      if (entry.valid && entry.identity == identity && entry.g == this->getGeometry())
-        return std::cref(entry.tab);
-    }
-    return {};
+    return ReferenceTabulation<H1Element<K, Scalar>, Scalar>::find(*this, identity);
   }
 
   template <size_t K, class Scalar>
   const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
     const QF::QuadratureFormulaBase& qf) const
   {
-    auto& cache = getTabulationCache();
-
-    const auto g   = this->getGeometry();
-    const auto nqp = qf.getSize();
-    const auto identity = qf.getCacheIdentity();
-
-    // 1) lookup
-    for (auto& ce : cache.e)
-    {
-      if (ce.valid && ce.qf == &qf && ce.identity == identity && ce.g == g &&
-        ce.nqp == nqp)
-        return ce.tab;
-    }
-
-    // 2) miss -> rebuild into an entry
-    auto& ce = cache.e[cache.next];
-    cache.next = (cache.next + 1) % cache.e.size();
-
-    ce.valid = true;
-    ce.qf = &qf;
-    ce.identity = identity;
-    ce.g = g;
-    ce.nqp = nqp;
-
-    Tabulation& t = ce.tab;
-
-    const size_t dim  = Geometry::Polytope::Traits(g).getDimension();
-    const size_t ndof = this->getCount();
-
-    t.nqp  = nqp;
-    t.ndof = ndof;
-    t.dim  = dim;
-
-    t.phi.resize(nqp * ndof);
-    t.dphi.resize(nqp * ndof * dim);
-
-    // Cache basis handles (cheap, avoids repeated getBasis(a) calls)
-    std::vector<std::reference_wrapper<const BasisFunction>> bf;
-    bf.reserve(ndof);
-    for (size_t a = 0; a < ndof; ++a)
-      bf.emplace_back(this->getBasis(a));
-
-    for (size_t qp = 0; qp < nqp; ++qp)
-    {
-      const auto& rc = qf.getPoint(qp);
-
-      Scalar* phi_row  = t.phi.data()  + qp * ndof;
-      Scalar* dphiRow = t.dphi.data() + qp * ndof * dim;
-
-      for (size_t a = 0; a < ndof; ++a)
-      {
-        const auto& bfa = bf[a].get();
-
-        phi_row[a] = bfa(rc);
-
-        Scalar* d = dphiRow + a * dim;
-        for (size_t i = 0; i < dim; ++i)
-          d[i] = bfa.template getDerivative<1>(i)(rc);
-      }
-    }
-
-    return t;
+    return ReferenceTabulation<H1Element<K, Scalar>, Scalar>::get(*this, qf);
   }
 
   template <size_t K, class Scalar>
-  constexpr
-  const Math::SpatialPoint& H1Element<K, Scalar>::getNode(size_t i) const
+  template <bool Values, class Modal>
+  void H1Element<K, Scalar>::tabulateModes(
+    Modal& modal, const Math::SpatialPoint& rc) const
+  {
+    if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
+    {
+      assert(modal.size() == (K + 1) * (K + 2) * (K + 3) / 6);
+      Real a, b, c;
+      DubinerTetrahedron<K>::getCollapsed(a, b, c, rc.x(), rc.y(), rc.z());
+      const Real s1 = 1.0 - rc.y() - rc.z();
+      const Real s2 = 1.0 - rc.z();
+      size_t mode = 0;
+      Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+        constexpr size_t P = pIdx.value;
+        Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+          constexpr size_t Q = qIdx.value;
+          Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
+            constexpr size_t R = rIdx.value;
+            if constexpr (Values)
+              DubinerTetrahedron<K>::template getBasis<P, Q, R>(modal[mode][0], a, b, c);
+            DubinerTetrahedron<K>::template getReferenceGradientFromCollapsed<P, Q, R>(
+              modal[mode][1], modal[mode][2], modal[mode][3], a, b, c, s1, s2);
+            ++mode;
+          });
+        });
+      });
+      assert(mode == modal.size());
+      return;
+    }
+    assert(this->getGeometry() == Geometry::Polytope::Type::Pyramid);
+    assert(modal.size() == PyramidIndex<K>::Count);
+    for (size_t mode = 0; mode < modal.size(); ++mode)
+    {
+      if constexpr (Values)
+        modal[mode][0] = PyramidModal<K>::getBasis(mode, rc);
+      for (size_t direction = 0; direction < 3; ++direction)
+        modal[mode][direction + 1] = PyramidModal<K>::getDerivative(mode, direction, rc);
+    }
+  }
+
+  template <size_t K, class Scalar>
+  void H1Element<K, Scalar>::raiseInvalidGradientCoordinates(
+    size_t required, size_t supplied) const
+  {
+    Alert::MemberFunctionException(*this, "evaluateGradients")
+      << "Reference gradient evaluation requires " << required
+      << " coordinate components, got " << supplied << "." << Alert::Raise;
+  }
+
+  template <size_t K, class Scalar>
+  template <class Consumer>
+  void H1Element<K, Scalar>::evaluateGradients(
+    Consumer&& consumer, const Math::SpatialPoint& rc) const
+  {
+    const size_t dimension =
+      Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+    if (static_cast<size_t>(rc.size()) < dimension)
+      raiseInvalidGradientCoordinates(dimension, static_cast<size_t>(rc.size()));
+    if (this->getGeometry() == Geometry::Polytope::Type::Pyramid ||
+      this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
+    {
+      evaluateModalGradients(consumer, rc);
+      return;
+    }
+    for (size_t local = 0; local < this->getCount(); ++local)
+    {
+      const auto basis = this->getBasis(local);
+      Math::SpatialVector<Scalar> gradient(static_cast<std::uint8_t>(dimension));
+      for (size_t direction = 0; direction < dimension; ++direction)
+        gradient(direction) = basis.template getDerivative<1>(direction)(rc);
+      consumer(local, gradient);
+    }
+  }
+
+  template <size_t K, class Scalar>
+  template <class Consumer>
+  void H1Element<K, Scalar>::evaluateModalGradients(
+    Consumer&& consumer, const Math::SpatialPoint& rc) const
+  {
+    const auto emit = [&](const auto& modal, const auto& inverse) {
+      for (size_t local = 0; local < modal.size(); ++local)
+      {
+        Math::SpatialVector<Scalar> gradient(3);
+        for (size_t direction = 0; direction < 3; ++direction)
+        {
+          Real derivative = 0;
+          for (size_t mode = 0; mode < modal.size(); ++mode)
+            derivative += inverse(mode, local) * modal[mode][direction + 1];
+          gradient(direction) = Scalar(derivative);
+        }
+        consumer(local, gradient);
+      }
+    };
+    if (this->getGeometry() == Geometry::Polytope::Type::Pyramid)
+    {
+      constexpr size_t Count = PyramidIndex<K>::Count;
+      const auto& inverse = VandermondePyramid<K>::getInverse();
+      std::array<std::array<Real, 4>, Count> modal;
+      tabulateModes<false>(modal, rc);
+      emit(modal, inverse);
+      return;
+    }
+    assert(this->getGeometry() == Geometry::Polytope::Type::Tetrahedron);
+    constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
+    const auto& inverse = VandermondeTetrahedron<K>::getInverse();
+    std::array<std::array<Real, 4>, Count> modal;
+    tabulateModes<false>(modal, rc);
+    emit(modal, inverse);
+  }
+
+  template <size_t K, class Scalar>
+  void H1Element<K, Scalar>::tabulate(
+    Tabulation& table, const QF::QuadratureFormulaBase& formula) const
+  {
+    if (table.nqp == 0)
+      return;
+    if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
+    {
+      constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
+      assert(table.ndof == Count && table.dim == 3);
+      const auto& inverse = VandermondeTetrahedron<K>::getInverse();
+      std::array<std::array<Real, 4>, Count> modal;
+      for (size_t qp = 0; qp < table.nqp; ++qp)
+      {
+        const auto& point = formula.getPoint(qp);
+        tabulateModes<true>(modal, point);
+        for (size_t local = 0; local < Count; ++local)
+        {
+          Real value = 0;
+          for (size_t mode = 0; mode < Count; ++mode)
+            value += inverse(mode, local) * modal[mode][0];
+          table.phi[qp * Count + local] = Scalar(value);
+          for (size_t i = 0; i < 3; ++i)
+          {
+            Real derivative = 0;
+            for (size_t mode = 0; mode < Count; ++mode)
+              derivative += inverse(mode, local) * modal[mode][i + 1];
+            table.dphi[(qp * Count + local) * 3 + i] = Scalar(derivative);
+          }
+        }
+      }
+      return;
+    }
+    if (this->getGeometry() != Geometry::Polytope::Type::Pyramid)
+    {
+      ReferenceTabulation<H1Element<K, Scalar>, Scalar>::fill(*this, table, formula);
+      return;
+    }
+    constexpr size_t Count = PyramidIndex<K>::Count;
+    assert(table.ndof == Count && table.dim == 3);
+    const auto& inverse = VandermondePyramid<K>::getInverse();
+    std::array<std::array<Real, 4>, Count> modal;
+    for (size_t qp = 0; qp < table.nqp; ++qp)
+    {
+      const auto& point = formula.getPoint(qp);
+      tabulateModes<true>(modal, point);
+      for (size_t a = 0; a < Count; ++a)
+      {
+        Scalar value = Scalar(0);
+        for (size_t b = 0; b < Count; ++b)
+          value += inverse(b, a) * modal[b][0];
+        table.phi[qp * Count + a] = value;
+        for (size_t i = 0; i < 3; ++i)
+        {
+          Real derivative = 0;
+          for (size_t b = 0; b < Count; ++b)
+            derivative += inverse(b, a) * modal[b][i + 1];
+          table.dphi[(qp * Count + a) * 3 + i] = Scalar(derivative);
+        }
+      }
+    }
+  }
+
+  template <size_t K, class Scalar>
+  constexpr const Math::SpatialPoint& H1Element<K, Scalar>::getNode(size_t i) const
   {
     return this->getNodes(this->getGeometry())[i];
   }
 
   template <size_t K, class Scalar>
-  const typename H1Element<K, Scalar>::LinearForm& H1Element<K, Scalar>::getLinearForm(size_t i) const
+  const typename H1Element<K, Scalar>::LinearForm& H1Element<K, Scalar>::getLinearForm(
+    size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
@@ -541,7 +612,8 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  const typename H1Element<K, Scalar>::BasisFunction& H1Element<K, Scalar>::getBasis(size_t i) const
+  const typename H1Element<K, Scalar>::BasisFunction& H1Element<K, Scalar>::getBasis(
+    size_t i) const
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
@@ -608,7 +680,7 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   Scalar H1Element<K, Scalar>::BasisFunction::operator()(
-      const Math::SpatialPoint& r) const
+    const Math::SpatialPoint& r) const
   {
     switch (m_g)
     {
@@ -658,8 +730,7 @@ namespace Rodin::Variational
         const auto& inverse = VandermondeTetrahedron<K>::getInverse();
 
         Real ac, bc, cc;
-        DubinerTetrahedron<K>::getCollapsed(
-            ac, bc, cc, r.x(), r.y(), r.z());
+        DubinerTetrahedron<K>::getCollapsed(ac, bc, cc, r.x(), r.y(), r.z());
 
         Real result = 0;
         size_t modeIdx = 0;
@@ -694,9 +765,10 @@ namespace Rodin::Variational
       case Geometry::Polytope::Type::Wedge:
       {
         // Number of triangle DOFs (Fekete triangle)
-        constexpr size_t ntri = FeketeTriangle<K>::Count; // same as FeketeTriangle<K>::Count
+        constexpr size_t ntri =
+          FeketeTriangle<K>::Count; // same as FeketeTriangle<K>::Count
 
-        const size_t k     = m_local / ntri; // z-index, 0..K
+        const size_t k = m_local / ntri; // z-index, 0..K
         const size_t alpha = m_local % ntri; // triangle node index
 
         // --- triangle factor: nodal basis on Fekete nodes ---
@@ -730,10 +802,10 @@ namespace Rodin::Variational
         // Tensor product GLL01 × GLL01 × GLL01
         // Node ordering matches getNodes(): i + (K+1)*(j + (K+1)*k)
         const size_t n1 = K + 1;
-        const size_t k  = m_local / (n1 * n1);
+        const size_t k = m_local / (n1 * n1);
         const size_t r2 = m_local % (n1 * n1);
-        const size_t j  = r2 / n1;
-        const size_t i  = r2 % n1;
+        const size_t j = r2 / n1;
+        const size_t i = r2 % n1;
 
         const Real x = r.x();
         const Real y = r.y();
@@ -753,7 +825,7 @@ namespace Rodin::Variational
   template <size_t K, class Scalar>
   template <size_t Order>
   Scalar H1Element<K, Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
-      const Math::SpatialPoint& r) const
+    const Math::SpatialPoint& r) const
   {
     if constexpr (!std::is_same_v<Scalar, Real>)
     {
@@ -779,8 +851,7 @@ namespace Rodin::Variational
         {
           // \partialφ_i / \partialx on [0,1] with GLL01 nodes
           assert(m_i == 0);
-          return LagrangeBasisSegment<K>::getDerivative(
-              m_local, r.value());
+          return LagrangeBasisSegment<K>::getDerivative(m_local, r.value());
         }
 
         case Geometry::Polytope::Type::Triangle:
@@ -962,10 +1033,10 @@ namespace Rodin::Variational
           // Tensor product derivative on [0,1]^3 with GLL nodes.
           // Node ordering: i + (K+1)*(j + (K+1)*k)
           const size_t n1 = K + 1;
-          const size_t k  = m_local / (n1 * n1);
+          const size_t k = m_local / (n1 * n1);
           const size_t r2 = m_local % (n1 * n1);
-          const size_t j  = r2 / n1;
-          const size_t i  = r2 % n1;
+          const size_t j = r2 / n1;
+          const size_t i = r2 % n1;
 
           const Real x = r.x();
           const Real y = r.y();

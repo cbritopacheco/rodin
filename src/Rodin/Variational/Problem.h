@@ -581,7 +581,7 @@ namespace Rodin::Variational
           m_assembled = other.m_assembled;
           m_pb = other.m_pb;
           m_axb = other.m_axb;
-          m_assembly.reset(other.m_assembly->copy());
+          m_assembly = other.m_assembly;
         }
         return *this;
       }
@@ -722,7 +722,23 @@ namespace Rodin::Variational
               typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
           U, V>;
 
-  /// @brief Base for mixed variational problems with three or more functions.
+  /**
+   * @brief Base for mixed variational problems with three or more functions.
+   *
+   * ## Architecture
+   *
+   * Trial/test identities and cumulative DOF offsets are passed directly to
+   * the problem assembly selected by @ref Rodin::Assembly::Default. That single
+   * assembler owns block insertion and completion. No auxiliary sequential
+   * tuple assembler is constructed: its availability must not restrict the
+   * scalar or storage types supported by the selected problem assembler.
+   * The formulation and assembled system are owned; trial/test functions are
+   * borrowed. Assignment replaces these values and bindings while retaining
+   * the destination identity. Cumulative offsets are established at construction
+   * and refreshed at assembly: @f$\sigma_j^U=\sum_{i<j}\dim U_i@f$ and
+   * @f$\sigma_j^V=\sum_{i<j}\dim V_i@f$ for the ordered trial/test spaces.
+   * Unused per-block forms are not materialized.
+   */
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class ProblemUsBase : public ProblemBase<LinearSystem>
   {
@@ -790,24 +806,6 @@ namespace Rodin::Variational
 
     private:
       template <class T>
-      struct GetFES;
-
-      template <class T>
-      struct GetFES<std::reference_wrapper<T>>
-      {
-        using Type = typename FormLanguage::Traits<T>::FESType;
-      };
-
-      template <class T>
-      struct GetSolution;
-
-      template <class T>
-      struct GetSolution<std::reference_wrapper<T>>
-      {
-        using Type = typename FormLanguage::Traits<T>::SolutionType;
-      };
-
-      template <class T>
       struct IsTrialFunctionReferenceWrapper
       {
         static constexpr Boolean Value = false;
@@ -849,36 +847,6 @@ namespace Rodin::Variational
             std::reference_wrapper<Us>...>>()
             .template filter<IsTestFunctionReferenceWrapper>());
 
-      using SolutionTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetSolution>;
-
-      using TrialFESTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetFES>;
-
-      using TestFESTuple = typename Utility::Extract<TestFunctionTuple>::template Type<GetFES>;
-
-      template<class U, class V>
-      using BilinearFormType =
-        BilinearForm<
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
-          >::SolutionType,
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
-          >::FESType,
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<V>::Type>
-          >::FESType,
-          OperatorType
-        >;
-
-      template <class TestFES>
-      using LinearFormType = LinearForm<TestFES, VectorType>;
-
-      using BilinearFormTuple =
-        typename Utility::Product<TrialFunctionTuple, TestFunctionTuple>::template Type<BilinearFormType>;
-
-      using LinearFormTuple =
-        typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
-
     public:
       /**
        * @brief Constructs a mixed problem from trial and test functions.
@@ -893,12 +861,19 @@ namespace Rodin::Variational
                  .template filter<IsTrialFunctionReferenceWrapper>()),
           m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
                  .template filter<IsTestFunctionReferenceWrapper>()),
+          m_trialOffsets{},
+          m_testOffsets{},
           m_assembly(std::make_unique<AssemblyType>())
       {
+        size_t trialSize = 0, testSize = 0;
         m_us.iapply([&](size_t i, const auto& u) {
+          m_trialOffsets[i] = trialSize;
+          trialSize += u.get().getFiniteElementSpace().getSize();
           m_trialUUIDMap.right.insert({i, u.get().getUUID()});
         });
         m_vs.iapply([&](size_t i, const auto& v) {
+          m_testOffsets[i] = testSize;
+          testSize += v.get().getFiniteElementSpace().getSize();
           m_testUUIDMap.right.insert({i, v.get().getUUID()});
         });
       }
@@ -1181,7 +1156,7 @@ namespace Rodin::Variational
       std::unique_ptr<AssemblyType> m_assembly;
   };
 
-  /// @brief Variational problem in three or more unknown fields.
+  /// @brief Variational problem with three or more trial/test functions.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class Problem<LinearSystem, U1, U2, U3, Us...>
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>

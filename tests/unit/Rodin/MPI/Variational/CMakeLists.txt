@@ -30,6 +30,10 @@ target_link_libraries(RodinMPIInterpolationTest
   Rodin::Variational
   Rodin::MPI)
 
+add_executable(RodinMPIDerivativeStateTest DerivativeStateTest.cpp)
+target_link_libraries(RodinMPIDerivativeStateTest
+  PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -44,6 +48,16 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 foreach(np 1 2 3 4)
+  add_test(
+    NAME RodinMPIDerivativeStateTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIDerivativeStateTest>)
+  set_tests_properties(RodinMPIDerivativeStateTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 60)
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIDerivativeStateTest_np${np})
+
   add_test(
     NAME RodinMPIInterpolationTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}

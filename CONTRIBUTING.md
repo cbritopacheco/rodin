@@ -8,7 +8,7 @@ existing code, and the tooling is configured to match it.
 
 | Layer | What | Enforced by |
 |-------|------|-------------|
-| 1. Formatting | Indentation, braces, wrapping | [`.clang-format`](.clang-format) — CI checks **changed lines only** |
+| 1. Formatting | Indentation, braces, wrapping | [`.clang-format`](.clang-format) + [`dev/format_cpp.py`](dev/format_cpp.py) — CI checks **changed lines only** |
 | 2. Naming | Identifier conventions | [`.clang-tidy`](.clang-tidy) + [`dev/check_clang_tidy.py`](dev/check_clang_tidy.py) — ratchet against a findings baseline |
 | 3. House rules | Include guards, license blocks, header docs, loop braces, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
 | 4. Documentation | No new Doxygen warnings | [`dev/check_doxygen_warnings.py`](dev/check_doxygen_warnings.py) |
@@ -20,8 +20,10 @@ line, offending source, and suggested fix.
 
 ## Quick reference: the style itself
 
-- **Formatting**: 2-space indent, Allman braces, `public:` indented inside
-  the class with members one level deeper, constructor initializers one per
+- **Formatting**: 2-space indent and Allman braces. Access labels are indented
+  two spaces beyond the class or struct brace; members and their documentation are indented two
+  spaces beyond `public:`, `protected:` or `private:`. Plain structs retain
+  one two-space member level. Constructor initializers are one per
   line starting with `: ` on their own line, empty bodies as `{}` on their
   own line, pointers/references bind left (`Base* copy()`), includes are
   **never reordered** (order is load-bearing).
@@ -67,7 +69,9 @@ line, offending source, and suggested fix.
 ```sh
 # 1. Formatting — check, then fix, the lines you changed:
 python3 dev/check_format.py --base origin/master
-git clang-format origin/master        # applies the fixes in place
+python3 dev/check_format.py --base origin/master --fix  # changed regions only
+# For a new file, or an intentional complete-file formatting pass:
+python3 dev/format_cpp.py -i <file>
 
 # 2. Naming — full-tree ratchet over the aggregate TU:
 python3 dev/check_clang_tidy.py --flags "-std=c++20 -Isrc -Ibuild/src \
