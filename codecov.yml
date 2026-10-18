@@ -15,7 +15,7 @@ coverage:
         paths:
           - "src/Rodin/"
         # Enforce the library coverage floor on the merged production report.
-        target: 95%
+        target: 96%
         threshold: 0%
     patch:
       default:
