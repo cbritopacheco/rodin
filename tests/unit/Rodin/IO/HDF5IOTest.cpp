@@ -1541,6 +1541,44 @@ namespace Rodin::Tests::Unit
       }
   };
 
+  /// @brief A linear segment retains its node count in a mixed curved topology stream.
+  TEST_F(HDF5InvalidPayload, MixedLinearAndQuadraticSegmentsKeepNodeCounts)
+  {
+    auto mesh = LocalMesh::Builder()
+                  .initialize(1)
+                  .nodes(3)
+                  .vertex({0})
+                  .vertex({1})
+                  .vertex({2})
+                  .polytope(Polytope::Type::Segment, {0, 1})
+                  .polytope(Polytope::Type::Segment, {1, 2})
+                  .finalize();
+    RealH1Element<2> element(Polytope::Type::Segment);
+    PointCloud nodes(1, element.getCount());
+    const auto& original = mesh.getPolytopeTransformation(1, 0);
+    for (size_t i = 0; i < element.getCount(); ++i)
+    {
+      Math::SpatialPoint physical;
+      original.transform(physical, element.getNode(i));
+      nodes(0, i) = physical(0);
+    }
+    mesh.setPolytopeTransformation(
+      {1, 0}, new ParametricTransformation<RealH1Element<2>>(nodes, element));
+
+    // XDMF Edge_3 has three node indices; Polyline also stores its node count.
+    const std::vector<HDF5::U64> expected{34, 0, 1, 2, 2, 2, 3, 4};
+    EXPECT_EQ(HDF5::getXDMFMixedTopologySize(mesh), expected.size());
+    HDF5::writeXDMFMesh(filename, mesh, false);
+    const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    EXPECT_EQ(
+      HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology),
+      expected);
+    EXPECT_EQ(
+      HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize),
+      expected.size());
+  }
+
   /// @brief Truncated connectivity and attribute arrays are rejected during mesh loading.
   TEST_F(HDF5InvalidPayload, TruncatedMeshDatasets)
   {

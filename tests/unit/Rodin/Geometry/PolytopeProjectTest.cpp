@@ -380,6 +380,20 @@ namespace Rodin::Tests::Unit
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief The point face projection resets reused output storage to dimension zero.
+  TEST(Geometry_PolytopeProject, PointFaceProjectionClearsReusedStorage)
+  {
+    const Polytope::Project project(Polytope::Type::Point);
+    const Math::SpatialPoint input;
+    Math::SpatialPoint output{2, -3, 4};
+    project.face(0, output, input);
+    EXPECT_EQ(output.size(), 0);
+    project.face(0, output, input);
+    EXPECT_EQ(output.size(), 0);
+    project.face(0, output, output);
+    EXPECT_EQ(output.size(), 0);
+  }
+
   /// @brief Reference vertices are fixed points of cell and boundary projections.
   TEST(Geometry_PolytopeProject, EveryReferenceVertexIsFixed)
   {
