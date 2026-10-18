@@ -180,20 +180,23 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class RealFunction<FunctionBase<NestedDerived>> final
-    : public RealFunctionBase<FunctionBase<NestedDerived>>
+    : public RealFunctionBase<RealFunction<FunctionBase<NestedDerived>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
 
+      static_assert(std::is_same_v<
+        typename FormLanguage::Traits<FunctionBase<NestedDerived>>::RangeType, Real>);
+
       /// @brief Parent class type.
-      using Parent = RealFunctionBase<FunctionBase<NestedDerived>>;
+      using Parent = RealFunctionBase<RealFunction<FunctionBase<NestedDerived>>>;
 
       /**
        * @brief Constructs a real function wrapper around an existing expression.
        * @param[in] nested Real-valued expression to clone
        */
-      RealFunction(const RealFunctionBase<NestedDerived>& nested)
+      RealFunction(const FunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
       {}
 
@@ -238,12 +241,23 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Forwards trace selection to the owned expression.
+       * @param args Trace attributes forwarded to the expression.
+       * @returns Reference to this wrapper.
+       */
+      template <class... Args>
+      constexpr RealFunction& traceOf(const Args&... args)
+      {
+        m_nested->traceOf(args...);
+        return *this;
+      }
+
+      /**
        * @brief Returns the wrapped function order on a mesh entity.
        * @param[in] geom Entity whose local polynomial order is requested
        * @returns Polynomial order when known
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return m_nested->getOrder(geom);
       }
@@ -263,15 +277,22 @@ namespace Rodin::Variational
    */
   template <class Derived>
   RealFunction(
-    const RealFunctionBase<Derived>& nested) -> RealFunction<FunctionBase<Derived>>;
+    const FunctionBase<Derived>& nested) -> RealFunction<FunctionBase<Derived>>;
+
+  /**
+   * @brief CTAD for a typed real-function base.
+   * @param nested Real-valued expression to clone.
+   */
+  template <class Derived>
+  RealFunction(const RealFunctionBase<Derived>& nested)
+    -> RealFunction<FunctionBase<typename RealFunctionBase<Derived>::Parent>>;
 
   /**
    * @ingroup RealFunctionSpecializations
    * @brief Represents a constant scalar function with type Real.
    */
   template <>
-  class RealFunction<Real> final
-    : public RealFunctionBase<RealFunction<Real>>
+  class RealFunction<Real> final : public RealFunctionBase<RealFunction<Real>>
   {
     public:
       /// @brief Scalar value type.

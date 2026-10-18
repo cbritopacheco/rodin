@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <memory>
+#include <type_traits>
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/QF/Centroid.h"
@@ -196,5 +198,73 @@ namespace Rodin::Tests::Unit
 
     EXPECT_NEAR(f.getValue(p), 2.0, 1e-10);
     EXPECT_NEAR(f.getValue(ip), 19.0, 1e-10);
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Nested real wrappers own their operands and retain dispatch through the CRTP base.
+  TEST(Rodin_Variational_RealFunction, NestedWrapperOwnsOperandAndPreservesDispatch)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto cell = *mesh.getCell();
+    const QF::Centroid rule(Polytope::Type::Triangle);
+    const Point point(cell, rule.getPoint(0));
+    const IntegrationPoint ip(point, &rule, 0);
+    const auto clone = []<class Derived>(const FunctionBase<Derived>& operand) {
+      using Wrapper = RealFunction<FunctionBase<Derived>>;
+      static_assert(std::is_base_of_v<RealFunctionBase<Wrapper>, Wrapper>);
+      Wrapper original(operand);
+      Wrapper copied(original);
+      Wrapper moved(std::move(copied));
+      return std::unique_ptr<RealFunctionBase<Wrapper>>(moved.copy());
+    };
+    // Each temporary operand is destroyed before evaluating its independent copy.
+    const auto constant = clone(RealFunction(Real(2.5)));
+    EXPECT_EQ(constant->getValue(point), 2.5);
+    EXPECT_EQ(constant->getValue(ip), 2.5);
+    EXPECT_EQ((*constant)(point), 2.5);
+    EXPECT_EQ(constant->getOrder(cell), Optional<size_t>(0));
+    const auto callable = clone(RealFunction(IntegrationPointRealCallable{}));
+    EXPECT_EQ(callable->getValue(point), 1);
+    EXPECT_EQ(callable->getValue(ip), 10);
+    EXPECT_FALSE(callable->getOrder(cell));
+
+    RealFunction original(Real(3.5));
+    const RealFunctionBase<decltype(original)>& base = original;
+    const auto deduced = RealFunction(base);
+    EXPECT_EQ(deduced.getValue(point), 3.5);
+    EXPECT_EQ(deduced.getOrder(cell), Optional<size_t>(0));
+  }
+
+  /// @brief A wrapped P1 derivative preserves independent one-sided trace selections.
+  TEST(Rodin_Variational_RealFunction, NestedWrapperCopiesOwnInterfaceTraceSelection)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    mesh.getConnectivity().compute(0, 1);
+    mesh.setAttribute({1, 0}, Attribute(7));
+    mesh.setAttribute({1, 1}, Attribute(11));
+    P1<Real> space(mesh);
+    GridFunction field(space);
+    field = [](const Point& point) {
+      return point.x() <= 1 ? 2 * point.x() : 2 - 4 * (point.x() - 1);
+    };
+    const Point point(*mesh.getVertex(1), Math::SpatialPoint{});
+    const IntegrationPoint ip(point);
+    const auto check = [&]<class Derived>(const FunctionBase<Derived>& operand) {
+      using Wrapper = RealFunction<FunctionBase<Derived>>;
+      Wrapper original(operand);
+      EXPECT_EQ(&original.traceOf(Attribute(7)), &original);
+      EXPECT_EQ(original.getValue(point), 2);
+      std::unique_ptr<Wrapper> copied(original.copy());
+      original.traceOf(FlatSet<Attribute>{Attribute(11)});
+      EXPECT_EQ(original.getValue(ip), -4);
+      EXPECT_EQ(copied->getValue(ip), 2);
+      copied->traceOf(Attribute(11));
+      EXPECT_EQ(copied->getValue(point), -4);
+      EXPECT_EQ(copied->getOrder(*mesh.getCell()), Optional<size_t>(0));
+    };
+    check(Derivative(size_t(0), field));
+    EXPECT_TRUE(field.getTraceDomain().empty());
   }
 }
