@@ -17,3 +17,8 @@ add_executable(RodinSolidActiveFiberLawTest Constitutive/ActiveFiberLawTest.cpp)
 target_link_libraries(RodinSolidActiveFiberLawTest
   PRIVATE GTest::gtest_main Rodin::Solid)
 gtest_discover_tests(RodinSolidActiveFiberLawTest PROPERTIES LABELS unit)
+
+add_executable(RodinSolidMixedInternalVirtualWorkTest Integrators/MixedInternalVirtualWorkTest.cpp)
+target_link_libraries(RodinSolidMixedInternalVirtualWorkTest
+  PRIVATE GTest::gtest_main Rodin::Solid Rodin::Variational)
+gtest_discover_tests(RodinSolidMixedInternalVirtualWorkTest PROPERTIES LABELS unit)

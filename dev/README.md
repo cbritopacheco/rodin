@@ -661,6 +661,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   ordering, symmetry and mapping; `Math/RadTest.cpp` checks angle arithmetic.
   Declaration-only headers, type aliases and compile-time traits likewise
   require inspection rather than fabricated runtime coverage.
+- Function-valued `Potential::getValue` is an incomplete runtime path: it
+  contains an unconditional assertion and dereferences a quadrature pointer
+  that its constructor leaves null, with no public quadrature setter. Its
+  missing counters must not be treated as a supported but merely untested
+  evaluation. Shape-function nonlocal potentials are a separate specialization
+  with existing numerical coverage.
 - Attribute-restricted mesh measures: analytic half-unit-box area, volume and
   exterior measures for all six 2D/3D cell geometries, including combined,
   empty and missing attribute sets. Local and MPI suites pass; the distributed
