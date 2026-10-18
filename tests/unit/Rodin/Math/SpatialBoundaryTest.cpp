@@ -372,4 +372,27 @@ namespace
       }
     }
   }
+
+  /// @brief Empty in-place subtraction, transpose and normalization keep the empty active domain.
+  TYPED_TEST(SpatialBoundary, EmptyVectorInPlaceAndTransposeOperations)
+  {
+    using V = SpatialVector<TypeParam>;
+    V empty = V::Zero(0);
+    const V other = V::Zero(0);
+    EXPECT_EQ(&(empty -= other), &empty);
+    EXPECT_EQ(empty.size(), 0u);
+    const auto row = empty.transpose();
+    EXPECT_EQ(row.rows(), 1u);
+    EXPECT_EQ(row.cols(), 0u);
+    empty.normalize();
+    EXPECT_EQ(empty.size(), 0u);
+    EXPECT_EQ(empty.squaredNorm(), 0);
+    for (size_t i = 0; i < 3; ++i)
+    {
+      EXPECT_EQ(empty.getData()[i], TypeParam(0));
+      for (size_t j = 0; j < 3; ++j)
+        EXPECT_EQ(row.getData()(i, j), TypeParam(0));
+    }
+  }
+
 }
