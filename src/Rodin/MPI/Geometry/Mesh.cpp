@@ -95,6 +95,7 @@ namespace Rodin::Geometry
   MPIMesh& MPIMesh::scale(Real c)
   {
     this->getShard().scale(c);
+    m_quadratures.clear();
     return *this;
   }
 

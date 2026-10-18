@@ -16,6 +16,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/IO.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -441,6 +442,81 @@ TEST(MPI_Geometry_Mesh, HDF5DimensionWithEmptyRootAcrossGeometries)
       EXPECT_EQ(direct.getPolytopeCount(d), mesh.getPolytopeCount(d));
     }
     boost::filesystem::remove(path);
+  }
+}
+
+/// @brief Already reconciled vertex and cell maps retain ownership and coordinates.
+TEST(MPI_Geometry_Mesh, ReconcileVerticesAndCellsPreservesStateWithEmptyRoot)
+{
+  for (const auto geometry : geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = distribute(geometry);
+    const auto coordinates = mesh.getShard().getVertices().getMatrix().eval();
+    for (const size_t dimension : {size_t(0), mesh.getDimension()})
+    {
+      SCOPED_TRACE(dimension);
+      const auto indices = mesh.getShard().getPolytopeMap(dimension).left;
+      const auto owners = mesh.getShard().getOwner(dimension);
+      const auto halo = mesh.getShard().getHalo(dimension);
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        EXPECT_EQ(&mesh.reconcile(dimension), &mesh);
+        EXPECT_EQ(mesh.getShard().getPolytopeMap(dimension).left, indices);
+        EXPECT_EQ(mesh.getShard().getOwner(dimension), owners);
+        EXPECT_EQ(mesh.getShard().getHalo(dimension), halo);
+        EXPECT_EQ(mesh.getShard().getVertices().getMatrix(), coordinates);
+      }
+    }
+  }
+}
+
+/// @brief Cached MPI quadratures reuse formulas and track scaled physical measures.
+TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
+{
+  // Roundoff budget for summing mapped quadrature weights across the grid.
+  constexpr Real tolerance = 1e-12;
+  for (const auto geometry : geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = distribute(geometry);
+    const size_t dimension = mesh.getDimension();
+    const auto& first = QF::PolytopeQuadratureFormula::get(2, geometry);
+    const auto& second = QF::PolytopeQuadratureFormula::get(3, geometry);
+    // distribute() creates three vertices per axis, spanning [0, 2].
+    Real expectedVolume = 1;
+    for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      expectedVolume *= 2;
+    for (size_t phase = 0; phase < 2; ++phase)
+    {
+      SCOPED_TRACE(phase);
+      Real localVolume = 0;
+      const auto& shard = mesh.getShard();
+      for (Index cell = 0; cell < shard.getPolytopeCount(dimension); ++cell)
+      {
+        const auto& quadrature = mesh.getQuadrature(dimension, cell, first);
+        const auto& other = mesh.getQuadrature(dimension, cell, second);
+        EXPECT_NE(&quadrature, &other);
+        EXPECT_EQ(&mesh.getQuadrature(dimension, cell, first), &quadrature);
+        EXPECT_EQ(&quadrature.getQuadratureFormula(), &first);
+        EXPECT_EQ(quadrature.getSize(), first.getSize());
+        for (size_t point = 0; point < quadrature.getSize(); ++point)
+        {
+          const auto& mapped = quadrature.getPoint(point);
+          EXPECT_EQ(&mapped.getPolytope().getMesh(), &mesh);
+          if (shard.isOwned(dimension, cell))
+            localVolume += first.getWeight(point) * mapped.getDistortion();
+        }
+      }
+      const Real volume = boost::mpi::all_reduce(*world, localVolume, std::plus<Real>());
+      EXPECT_NEAR(volume, expectedVolume, tolerance * expectedVolume);
+      if (phase == 0)
+      {
+        EXPECT_EQ(&mesh.scale(2), &mesh);
+        for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+          expectedVolume *= 2;
+      }
+    }
   }
 }
 
