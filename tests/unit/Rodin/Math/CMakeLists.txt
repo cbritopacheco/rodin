@@ -134,3 +134,7 @@ gtest_discover_tests(RodinMathRungeKuttaTest
 add_executable(RodinMathSpatialBoundaryTest SpatialBoundaryTest.cpp)
 target_link_libraries(RodinMathSpatialBoundaryTest PRIVATE GTest::gtest_main Rodin::Math)
 gtest_discover_tests(RodinMathSpatialBoundaryTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathSpatialEigenInteropTest SpatialEigenInteropTest.cpp)
+target_link_libraries(RodinMathSpatialEigenInteropTest PRIVATE GTest::gtest_main Rodin::Math)
+gtest_discover_tests(RodinMathSpatialEigenInteropTest PROPERTIES LABELS unit)
