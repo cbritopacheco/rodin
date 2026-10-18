@@ -32,9 +32,12 @@ namespace
     const auto cell = *mesh.getCell();
     const auto cellId = std::make_pair(dimension, cell.getIndex());
     P1 pressureSpace(mesh);
-    TrialFunction u(space), p(pressureSpace);
-    TestFunction v(space), q(pressureSpace);
-    GridFunction displacement(space), pressure(pressureSpace);
+    TrialFunction u(space);
+    TrialFunction p(pressureSpace);
+    TestFunction v(space);
+    TestFunction q(pressureSpace);
+    GridFunction displacement(space);
+    GridFunction pressure(pressureSpace);
     displacement = [dimension](const Point& x) {
       Math::SpatialVector<Real> value(dimension);
       for (size_t i = 0; i < dimension; ++i)
