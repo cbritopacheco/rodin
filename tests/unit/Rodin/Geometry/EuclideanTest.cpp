@@ -275,8 +275,8 @@ namespace Rodin::Tests::Unit
   template <size_t N, class S>
   struct EuclideanConfiguration
   {
-      static constexpr size_t Dimension = N;
-      using Scalar = S;
+    static constexpr size_t Dimension = N;
+    using Scalar = S;
   };
   template <class Configuration>
   class EuclideanDimensions : public ::testing::Test

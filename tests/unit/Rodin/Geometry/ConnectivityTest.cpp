@@ -1289,8 +1289,8 @@ namespace Rodin::Tests::Unit
   }
   struct SubPolytopeCase
   {
-      Polytope::Type geometry;
-      std::vector<size_t> counts;
+    Polytope::Type geometry;
+    std::vector<size_t> counts;
   };
 
   class ConnectivitySubPolytopes : public testing::TestWithParam<SubPolytopeCase>

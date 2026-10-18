@@ -613,10 +613,10 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          m_assembled    = other.m_assembled;
-          m_us           = other.m_us;
-          m_vs           = other.m_vs;
-          m_pb           = other.m_pb;
+          m_assembled = other.m_assembled;
+          m_us = other.m_us;
+          m_vs = other.m_vs;
+          m_pb = other.m_pb;
           m_trialOffsets = other.m_trialOffsets;
           m_testOffsets  = other.m_testOffsets;
           m_trialUUIDMap = other.m_trialUUIDMap;
@@ -638,10 +638,10 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          m_assembled    = std::exchange(other.m_assembled, false);
-          m_us           = std::move(other.m_us);
-          m_vs           = std::move(other.m_vs);
-          m_pb           = std::move(other.m_pb);
+          m_assembled = std::exchange(other.m_assembled, false);
+          m_us = std::move(other.m_us);
+          m_vs = std::move(other.m_vs);
+          m_pb = std::move(other.m_pb);
           m_trialOffsets = std::move(other.m_trialOffsets);
           m_testOffsets  = std::move(other.m_testOffsets);
           m_trialUUIDMap = std::move(other.m_trialUUIDMap);

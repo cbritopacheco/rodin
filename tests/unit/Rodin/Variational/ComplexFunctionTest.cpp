@@ -292,15 +292,15 @@ TEST(Rodin_Variational_ComplexFunction, PolymorphicCallablePairOutlivesSource)
   const IntegrationPoint ip(point, &qf, 0);
   struct Part
   {
-      Real m_offset;
-      Real operator()(const Point&) const
-      {
-        return m_offset;
-      }
-      Real operator()(const IntegrationPoint& sample) const
-      {
-        return m_offset + 10 + static_cast<Real>(sample.getIndex());
-      }
+    Real m_offset;
+    Real operator()(const Point&) const
+    {
+      return m_offset;
+    }
+    Real operator()(const IntegrationPoint& sample) const
+    {
+      return m_offset + 10 + static_cast<Real>(sample.getIndex());
+    }
   };
   using Function = decltype(ComplexFunction(Part{3}, Part{-2}));
   std::unique_ptr<ComplexFunctionBase<Function>> copied;

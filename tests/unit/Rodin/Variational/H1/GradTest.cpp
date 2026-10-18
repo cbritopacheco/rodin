@@ -6,7 +6,6 @@
  */
 #include <gtest/gtest.h>
 #include <algorithm>
-#include <initializer_list>
 #include <type_traits>
 #include <vector>
 #include "Rodin/Test/Random.h"
@@ -127,9 +126,7 @@ namespace Rodin::Tests::Unit
     {
       SCOPED_TRACE(static_cast<int>(geometry));
       const size_t dimension = Polytope::Traits(geometry).getDimension();
-      const auto subdivisions = dimension == 1 ? std::initializer_list<size_t>{3}
-        : dimension == 2                       ? std::initializer_list<size_t>{3, 3}
-                                               : std::initializer_list<size_t>{3, 3, 3};
+      const Array<size_t> subdivisions = Array<size_t>::Constant(dimension, 3);
       auto mesh = LocalMesh::UniformGrid(geometry, subdivisions);
       for (size_t d = dimension; d > 0; --d)
       {
@@ -270,9 +267,7 @@ namespace Rodin::Tests::Unit
     {
       SCOPED_TRACE(static_cast<int>(geometry));
       const auto dimension = Polytope::Traits(geometry).getDimension();
-      const auto subdivisions = dimension == 1 ? std::initializer_list<size_t>{2}
-        : dimension == 2                       ? std::initializer_list<size_t>{2, 2}
-                                               : std::initializer_list<size_t>{2, 2, 2};
+      const Array<size_t> subdivisions = Array<size_t>::Constant(dimension, 2);
       auto mesh = LocalMesh::UniformGrid(geometry, subdivisions);
       for (size_t d = dimension; d > 0; --d)
       {

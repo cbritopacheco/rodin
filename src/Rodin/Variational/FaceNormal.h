@@ -202,8 +202,8 @@ namespace Rodin::Variational
       RangeType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
-        const auto  d = polytope.getDimension();
-        const auto  i = polytope.getIndex();
+        const auto d = polytope.getDimension();
+        const auto i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const auto& jacobian = p.getJacobian();
 
@@ -258,21 +258,21 @@ namespace Rodin::Variational
           {
             const auto xf = p.getCoordinates();
 
-            if (jacobian.rows() == 3 && jacobian.cols() == 1)
+          if (jacobian.rows() == 3 && jacobian.cols() == 1)
+          {
+            Math::SpatialPoint cellCoordinates;
+            cellPoly.getTransformation().inverse(cellCoordinates, xf);
+            const Geometry::Point cellPoint(cellPoly, std::cref(cellCoordinates), xf);
+            const auto& cellJacobian = cellPoint.getJacobian();
+            SpatialVectorType first(3), second(3), tangent(3);
+            for (size_t axis = 0; axis < 3; ++axis)
             {
-              Math::SpatialPoint cellCoordinates;
-              cellPoly.getTransformation().inverse(cellCoordinates, xf);
-              const Geometry::Point cellPoint(cellPoly, std::cref(cellCoordinates), xf);
-              const auto& cellJacobian = cellPoint.getJacobian();
-              SpatialVectorType first(3), second(3), tangent(3);
-              for (size_t axis = 0; axis < 3; ++axis)
-              {
-                first[axis] = cellJacobian(axis, 0);
-                second[axis] = cellJacobian(axis, 1);
-                tangent[axis] = jacobian(axis, 0);
-              }
-              res = first.cross(second).cross(tangent);
+              first[axis] = cellJacobian(axis, 0);
+              second[axis] = cellJacobian(axis, 1);
+              tangent[axis] = jacobian(axis, 0);
             }
+            res = first.cross(second).cross(tangent);
+          }
 
             const auto rc =
               Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();

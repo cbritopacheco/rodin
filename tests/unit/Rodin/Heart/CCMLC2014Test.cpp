@@ -988,11 +988,11 @@ namespace
   /// @brief Minimal evaluation record consumed by the standalone physics evaluators.
   struct PhysicsEvaluation
   {
-      Real y, yPrev, yMid, pv, pvPrev, pvMid, par, parPrev, parMid, pd, pdPrev, pdMid;
-      Real dt, vel, sqrtC, C, strain1D, diffGreen;
-      Real stressPassive, diffStressPassive, stressViscous, diffStressViscous;
-      Real pAtCur, pAtPrev, cavityFluxCur, cavityFluxPrev;
-      Real dCavityFluxCur_dPv, dCavityFluxCur_dPar;
+    Real y, yPrev, yMid, pv, pvPrev, pvMid, par, parPrev, parMid, pd, pdPrev, pdMid;
+    Real dt, vel, sqrtC, C, strain1D, diffGreen;
+    Real stressPassive, diffStressPassive, stressViscous, diffStressViscous;
+    Real pAtCur, pAtPrev, cavityFluxCur, cavityFluxPrev;
+    Real dCavityFluxCur_dPv, dCavityFluxCur_dPar;
   };
 }
 

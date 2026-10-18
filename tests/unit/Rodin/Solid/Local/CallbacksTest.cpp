@@ -21,43 +21,43 @@ namespace
 {
   struct Injection : Input<Injection>
   {
-      Injection(Real value, const Math::SpatialVector<Real>& direction)
-        : activation(value),
-          fiber(direction)
-      {}
+    Injection(Real value, const Math::SpatialVector<Real>& direction)
+      : activation(value),
+        fiber(direction)
+    {}
 
-      void populate(ConstitutivePoint& point) const
-      {
-        point.set<Tags::Activation>(activation);
-        point.set<Tags::FiberDirection>(fiber);
-      }
+    void populate(ConstitutivePoint& point) const
+    {
+      point.set<Tags::Activation>(activation);
+      point.set<Tags::FiberDirection>(fiber);
+    }
 
-      Real activation;
-      Math::SpatialVector<Real> fiber;
+    Real activation;
+    Math::SpatialVector<Real> fiber;
   };
 
   struct Sample
   {
-      Index cell, quadrature;
-      Real jacobian, invariant;
-      const ConstitutivePoint* point;
-      const void* cache;
+    Index cell, quadrature;
+    Real jacobian, invariant;
+    const ConstitutivePoint* point;
+    const void* cache;
   };
 
   struct Extraction : Output<Extraction>
   {
-      explicit Extraction(const std::shared_ptr<List<Sample>>& destination)
-        : samples(destination)
-      {}
+    explicit Extraction(const std::shared_ptr<List<Sample>>& destination)
+      : samples(destination)
+    {}
 
-      template <class Cache>
-      void extract(const ConstitutivePoint& point, const Cache& cache) const
-      {
-        samples->push_back({point.get<Tags::CellIndex>(),
-          point.get<Tags::QuadraturePointIndex>(), cache.J, cache.I1, &point, &cache});
-      }
+    template <class Cache>
+    void extract(const ConstitutivePoint& point, const Cache& cache) const
+    {
+      samples->push_back({point.get<Tags::CellIndex>(),
+        point.get<Tags::QuadraturePointIndex>(), cache.J, cache.I1, &point, &cache});
+    }
 
-      std::shared_ptr<List<Sample>> samples;
+    std::shared_ptr<List<Sample>> samples;
   };
 }
 

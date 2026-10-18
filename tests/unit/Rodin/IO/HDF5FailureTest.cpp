@@ -32,28 +32,28 @@ namespace
 
   struct Failure
   {
-      Failure()
-        : hits(0)
-      {}
-      Optional<Operation> operation;
-      std::string group;
-      size_t hits;
+    Failure()
+      : hits(0)
+    {}
+    Optional<Operation> operation;
+    std::string group;
+    size_t hits;
 
-      void arm(Operation selected, std::string path = {})
-      {
-        operation = selected;
-        group = std::move(path);
-        hits = 0;
-      }
+    void arm(Operation selected, std::string path = {})
+    {
+      operation = selected;
+      group = std::move(path);
+      hits = 0;
+    }
 
-      bool reject(Operation selected, const char* path = nullptr)
-      {
-        if (operation != selected ||
-          (selected == Operation::CreateGroup && group != path))
-          return false;
-        ++hits;
-        return true;
-      }
+    bool reject(Operation selected, const char* path = nullptr)
+    {
+      if (operation != selected ||
+        (selected == Operation::CreateGroup && group != path))
+        return false;
+      ++hits;
+      return true;
+    }
   };
 
   Failure failure;

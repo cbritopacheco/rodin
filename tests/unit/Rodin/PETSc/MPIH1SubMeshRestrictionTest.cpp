@@ -198,8 +198,8 @@ namespace Rodin::Tests::Unit
           Math::SpatialPoint x = point.getPhysicalCoordinates();
           if (curved)
           {
-              // Independent analytic inverse of the prescribed global map.
-              // This defines field data, not entity/DOF correspondence.
+            // Independent analytic inverse of the prescribed global map.
+            // This defines field data, not entity/DOF correspondence.
             if (x.size() == 1)
               x(0) = 2 * x(0) / (1 + std::sqrt(1 + Real(0.4) * x(0)));
             else
@@ -213,8 +213,8 @@ namespace Rodin::Tests::Unit
           }
           if constexpr (K >= 2)
           {
-              // Normalized mixed degree-K polynomials excite higher modes
-              // without growing the dimensionless field scale with K.
+            // Normalized mixed degree-K polynomials excite higher modes
+            // without growing the dimensionless field scale with K.
             const Real dim = Real(x.size());
             re += std::pow((re - 1) / (dim * (dim + 1) / 2), Real(K));
             im += std::pow((im - 2) / (dim * (dim + 3) / 2), Real(K));

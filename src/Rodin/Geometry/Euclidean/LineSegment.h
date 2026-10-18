@@ -33,93 +33,93 @@ namespace Rodin::Geometry::Euclidean
   class LineSegment : public Base<LineSegment<Dimension, T>, T>
   {
     public:
-    /**
-     * @brief Constructs a line segment from two points.
-     * @param[in] start Start point @f$ p @f$
-     * @param[in] end End point @f$ q @f$
-     */
+      /**
+       * @brief Constructs a line segment from two points.
+       * @param[in] start Start point @f$ p @f$
+       * @param[in] end End point @f$ q @f$
+       */
       constexpr LineSegment(
         const Point<Dimension, T>& start, const Point<Dimension, T>& end);
 
-    /**
-     * @brief Evaluates the parametric representation at parameter @f$ t @f$.
-     *
-     * Given @f$ t \in \mathbb{R} @f$, computes the parametric point
-     * @f$ s(t) @f$ of the line segment parametrization:
-     * @f[
-     *   s(t) = p + t \left(q - p\right)
-     * @f]
-     * where @f$p@f$ and @f$q@f$ are the start and end of the line
-     * segment, respectively.
-     *
-     * @param[in] t Parameter value
-     * @returns @f$ s(t) @f$
-     *
-     * @note For @f$ t \in [0, 1] @f$, the result lies on the segment.
-     * Values outside this range extrapolate beyond the segment endpoints.
-     */
+      /**
+       * @brief Evaluates the parametric representation at parameter @f$ t @f$.
+       *
+       * Given @f$ t \in \mathbb{R} @f$, computes the parametric point
+       * @f$ s(t) @f$ of the line segment parametrization:
+       * @f[
+       *   s(t) = p + t \left(q - p\right)
+       * @f]
+       * where @f$p@f$ and @f$q@f$ are the start and end of the line
+       * segment, respectively.
+       *
+       * @param[in] t Parameter value
+       * @returns @f$ s(t) @f$
+       *
+       * @note For @f$ t \in [0, 1] @f$, the result lies on the segment.
+       * Values outside this range extrapolate beyond the segment endpoints.
+       */
       inline constexpr Point<Dimension, T> operator()(const T& t) const;
 
-    /**
-     * @brief Computes the length of the segment.
-     * @returns Euclidean distance @f$ \|q - p\| @f$
-     */
+      /**
+       * @brief Computes the length of the segment.
+       * @returns Euclidean distance @f$ \|q - p\| @f$
+       */
       inline constexpr T length() const;
 
-    /**
-     * @brief Gets the unit direction vector.
-     * @returns Unit vector from `start()` to `end()`
-     *
-     * Computes:
-     * @f[
-     *   \frac{q - p}{\|q - p\|}
-     * @f]
-     */
+      /**
+       * @brief Gets the unit direction vector.
+       * @returns Unit vector from `start()` to `end()`
+       *
+       * Computes:
+       * @f[
+       *   \frac{q - p}{\|q - p\|}
+       * @f]
+       */
       inline constexpr typename Point<Dimension, T>::Vector direction() const;
 
-    /**
-     * @brief Gets the start point.
-     * @returns Start point @f$ p @f$
-     */
+      /**
+       * @brief Gets the start point.
+       * @returns Start point @f$ p @f$
+       */
       inline constexpr Point<Dimension, T> start() const;
 
-    /**
-     * @brief Gets the end point.
-     * @returns End point @f$ q @f$
-     */
+      /**
+       * @brief Gets the end point.
+       * @returns End point @f$ q @f$
+       */
       inline constexpr Point<Dimension, T> end() const;
 
-    /**
-     * @brief Sets the start point.
-     * @param[in] start New start point
-     * @returns Reference to this segment for method chaining
-     */
+      /**
+       * @brief Sets the start point.
+       * @param[in] start New start point
+       * @returns Reference to this segment for method chaining
+       */
       inline constexpr LineSegment& setStart(const Point<Dimension, T>& start);
 
-    /**
-     * @brief Sets the end point.
-     * @param[in] end New end point
-     * @returns Reference to this segment for method chaining
-     */
+      /**
+       * @brief Sets the end point.
+       * @param[in] end New end point
+       * @returns Reference to this segment for method chaining
+       */
       inline constexpr LineSegment& setEnd(const Point<Dimension, T>& end);
 
-    /**
-     * @brief Returns the reversed segment.
-     * @returns New segment with swapped start and end points
-     */
+      /**
+       * @brief Returns the reversed segment.
+       * @returns New segment with swapped start and end points
+       */
       inline constexpr LineSegment reverse() const;
 
-    /**
-     * @brief Computes the intersection point with another segment.
-     *
-     * Determines if two line segments intersect and returns the intersection
-     * point if it exists.
-     *
-     * @param[in] other Other line segment
-     * @returns Optional intersection point
-     * @retval std::nullopt If the intersection has no unique point
-     * @retval Point The unique intersection point
-     */
+      /**
+       * @brief Computes the intersection point with another segment.
+       *
+       * Determines if two line segments intersect and returns the intersection
+       * point if it exists.
+       *
+       * @param[in] other Other line segment
+       * @returns Optional intersection point
+       * @retval std::nullopt If the intersection has no unique point
+       * @retval Point The unique intersection point
+       */
       inline constexpr Optional<Point<Dimension, T>> intersect(
         const LineSegment<Dimension, T>& other) const;
 

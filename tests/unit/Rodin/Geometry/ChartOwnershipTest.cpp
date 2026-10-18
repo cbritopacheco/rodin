@@ -23,24 +23,24 @@ namespace
   /// @brief A scalar element exposing the documented pointwise interface only.
   struct DirectElement
   {
-      using RangeType = Real;
-      Variational::RealP1Element element;
-      auto getGeometry() const
-      {
-        return element.getGeometry();
-      }
-      size_t getCount() const
-      {
-        return element.getCount();
-      }
-      size_t getOrder() const
-      {
-        return element.getOrder();
-      }
-      const auto& getBasis(size_t local) const
-      {
-        return element.getBasis(local);
-      }
+    using RangeType = Real;
+    Variational::RealP1Element element;
+    auto getGeometry() const
+    {
+      return element.getGeometry();
+    }
+    size_t getCount() const
+    {
+      return element.getCount();
+    }
+    size_t getOrder() const
+    {
+      return element.getOrder();
+    }
+    const auto& getBasis(size_t local) const
+    {
+      return element.getBasis(local);
+    }
   };
 
   class ChartOwnership : public ::testing::TestWithParam<Polytope::Type>

@@ -305,13 +305,13 @@ namespace
     using Matrix = Math::SpatialMatrix<Scalar>;
     struct Entry
     {
-        std::unique_ptr<FiniteElementSpaceBase> space;
-        size_t components, scalarSize, basisCount;
-        bool traces, globalConstant;
-        std::function<std::pair<Index, Index>()> ownership;
-        std::function<size_t()> localSize;
-        std::function<Index(Index)> localToGlobal;
-        std::function<void()> reverseMapping;
+      std::unique_ptr<FiniteElementSpaceBase> space;
+      size_t components, scalarSize, basisCount;
+      bool traces, globalConstant;
+      std::function<std::pair<Index, Index>()> ownership;
+      std::function<size_t()> localSize;
+      std::function<Index(Index)> localToGlobal;
+      std::function<void()> reverseMapping;
     };
     std::vector<Entry> entries;
     auto add = [&](auto source, size_t components, size_t scalarSize, size_t basisCount,

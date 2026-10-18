@@ -17,7 +17,7 @@ namespace Rodin::Tests::Unit
   /// @brief Value whose identity and mutations expose reference aliasing.
   struct ReferenceValue
   {
-      Integer value;  ///< Value shared through borrowing wrappers.
+    Integer value;  ///< Value shared through borrowing wrappers.
   };
 
   /// @brief Engagement and reset preserve the independently owned referent.

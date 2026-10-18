@@ -1969,19 +1969,19 @@ namespace Rodin::Assembly
               }
 
               const auto testPolytope = testseq.getPolytope(te);
-              withTrialFES(uUUID, [&](const auto& uFES) {
-                withTestFES(vUUID, [&](const auto& vFES) {
-                  const auto rows = vFES.getDOFs(tdim, te);
+                withTrialFES(uUUID, [&](const auto& uFES) {
+                  withTestFES(vUUID, [&](const auto& vFES) {
+                    const auto rows = vFES.getDOFs(tdim, te);
 
                   for (PetscInt tr = 0; tr < rcnt; ++tr)
                   {
-                    if (!trialseq.filter(tr))
-                      continue;
+                      if (!trialseq.filter(tr))
+                        continue;
                     if (!trialAttrs.empty())
                     {
                       const auto a = mesh.getAttribute(rdim, tr);
-                      if (!a || !trialAttrs.count(*a))
-                        continue;
+                        if (!a || !trialAttrs.count(*a))
+                          continue;
                     }
 
                     const auto trialPolytope = trialseq.getPolytope(tr);

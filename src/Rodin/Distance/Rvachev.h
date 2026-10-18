@@ -63,12 +63,10 @@ namespace Rodin::Distance
       auto operator()(const Variational::GridFunction<FES, Data>& gf)
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
-        dist =
-          [&](const Geometry::Point& p)
-          {
+        dist = [&](const Geometry::Point& p) {
             const Real u = gf(p);
             Variational::Grad grad(gf);
-            const auto gu = grad.getValue(p);
+          const auto gu = grad.getValue(p);
             return u / Math::sqrt(u * u + gu.squaredNorm());
           };
         return dist;

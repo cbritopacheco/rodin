@@ -49,37 +49,37 @@ namespace Rodin::Hilbert
 
     /// Linear system type for the regularized problem
     using LinearSystemType =
-      Math::LinearSystem<Math::SparseMatrix<ScalarType>, Math::Vector<ScalarType>>;
+        Math::LinearSystem<Math::SparseMatrix<ScalarType>, Math::Vector<ScalarType>>;
 
     /// Solver type (Conjugate Gradient)
     using SolverType = Solver::CG<LinearSystemType>;
 
     static_assert(std::is_same_v<FESRange, Real> ||
-      std::is_same_v<FESRange, Math::SpatialVector<Real>>);
+        std::is_same_v<FESRange, Math::SpatialVector<Real>>);
 
-  public:
+    public:
       /**
        * @brief Constructs an H1a extension operator.
        * @param fes Finite element space for the problem
        */
-    H1a(const FES& fes)
-      : m_fes(fes),
-        m_trial(fes),
-        m_test(fes),
-        m_pb(m_trial, m_test),
-        m_alpha(1)
-    {}
+      H1a(const FES& fes)
+        : m_fes(fes),
+          m_trial(fes),
+          m_test(fes),
+          m_pb(m_trial, m_test),
+          m_alpha(1)
+      {}
 
       /**
        * @brief Sets the regularization parameter @f$ \alpha @f$.
        * @param alpha Regularization length-scale parameter
        * @return Reference to this object for method chaining
        */
-    H1a& setAlpha(Real alpha)
-    {
-      m_alpha = alpha;
-      return *this;
-    }
+      H1a& setAlpha(Real alpha)
+      {
+        m_alpha = alpha;
+        return *this;
+      }
 
       /**
        * @brief Applies the extension operator to a differential form.
@@ -87,25 +87,26 @@ namespace Rodin::Hilbert
        * @param lf Linear functional to extend
        * @return Solution of the regularized extension problem
        */
-    template <class Differential>
-    auto operator()(const Differential& lf) const
-    {
-      auto body = [&]() {
+      template <class Differential>
+      auto operator()(const Differential& lf) const
+      {
+        auto body = [&]() {
         if constexpr (std::is_same_v<FESRange, Real>)
-          return Variational::Integral(m_alpha * m_alpha * Variational::Grad(m_trial),
-                   Variational::Grad(m_test)) +
-            Variational::Integral(m_trial, m_test) - lf;
+            return Variational::Integral(m_alpha * m_alpha * Variational::Grad(m_trial),
+                     Variational::Grad(m_test)) +
+              Variational::Integral(m_trial, m_test) - lf;
         else
-          return Variational::Integral(m_alpha * m_alpha * Variational::Jacobian(m_trial),
-                   Variational::Jacobian(m_test)) +
-            Variational::Integral(m_trial, m_test) - lf;
-      }();
-      body.getDBCs() = m_pb.getBody().getDBCs();
-      m_pb = body;
-      SolverType solver(m_pb);
-      m_pb.solve(solver);
-      return m_trial.getSolution();
-    }
+            return Variational::Integral(
+                     m_alpha * m_alpha * Variational::Jacobian(m_trial),
+                     Variational::Jacobian(m_test)) +
+              Variational::Integral(m_trial, m_test) - lf;
+        }();
+        body.getDBCs() = m_pb.getBody().getDBCs();
+        m_pb = body;
+        SolverType solver(m_pb);
+        m_pb.solve(solver);
+        return m_trial.getSolution();
+      }
 
       /**
        * @brief Adds a Dirichlet boundary condition to the problem.

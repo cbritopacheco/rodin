@@ -584,7 +584,8 @@ namespace Rodin::IO::MEDIT
       else
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Failed to parse keyword: " << std::quoted(expected) << '.' << Alert::Raise;
+          << "Failed to parse keyword: " << std::quoted(expected) << '.'
+          << Alert::Raise;
       }
       return {};
     }
@@ -629,7 +630,8 @@ namespace Rodin::IO::MEDIT
       else
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Failed to parse keyword: " << std::quoted(expected) << '.' << Alert::Raise;
+          << "Failed to parse keyword: " << std::quoted(expected) << '.'
+          << Alert::Raise;
       }
       return {};
     }

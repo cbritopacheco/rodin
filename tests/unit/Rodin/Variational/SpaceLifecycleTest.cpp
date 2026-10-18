@@ -150,11 +150,11 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(2, 1);
     struct Entry
     {
-        std::unique_ptr<FiniteElementSpaceBase> space;
-        size_t components;
-        size_t scalarSize;
-        size_t cellBasisCount;
-        bool traces;
+      std::unique_ptr<FiniteElementSpaceBase> space;
+      size_t components;
+      size_t scalarSize;
+      size_t cellBasisCount;
+      bool traces;
     };
     std::vector<Entry> spaces;
     auto add = [&](auto space, size_t components, size_t size, size_t cellBasisCount,

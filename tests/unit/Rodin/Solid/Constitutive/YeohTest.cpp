@@ -15,8 +15,8 @@ namespace
 {
   struct Response
   {
-      Real energy;
-      Math::SpatialMatrix<Real> stress, tangent;
+    Real energy;
+    Math::SpatialMatrix<Real> stress, tangent;
   };
 
   Response evaluate(const HyperElasticLaw<Yeoh>& law, const Math::SpatialMatrix<Real>& h,

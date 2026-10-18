@@ -33,33 +33,33 @@ namespace
 
   struct Failure
   {
-      Failure()
-        : failedCalls(0),
-          graphsClosed(0),
-          strategiesClosed(0),
-          filesClosed(0),
-          mappingCalls(0),
-          readCalls(0)
-      {}
-      Optional<Operation> operation;
-      Optional<FILE*> stream;
-      size_t failedCalls, graphsClosed, strategiesClosed, filesClosed;
-      size_t mappingCalls, readCalls;
-      std::string mapping;
+    Failure()
+      : failedCalls(0),
+        graphsClosed(0),
+        strategiesClosed(0),
+        filesClosed(0),
+        mappingCalls(0),
+        readCalls(0)
+    {}
+    Optional<Operation> operation;
+    Optional<FILE*> stream;
+    size_t failedCalls, graphsClosed, strategiesClosed, filesClosed;
+    size_t mappingCalls, readCalls;
+    std::string mapping;
 
-      void arm(Operation selected)
-      {
-        operation = selected;
-        failedCalls = graphsClosed = strategiesClosed = filesClosed = readCalls = 0;
-      }
+    void arm(Operation selected)
+    {
+      operation = selected;
+      failedCalls = graphsClosed = strategiesClosed = filesClosed = readCalls = 0;
+    }
 
-      bool reject(Operation selected)
-      {
-        if (operation != selected)
-          return false;
-        ++failedCalls;
-        return true;
-      }
+    bool reject(Operation selected)
+    {
+      if (operation != selected)
+        return false;
+      ++failedCalls;
+      return true;
+    }
   };
   Failure failure;
 }
