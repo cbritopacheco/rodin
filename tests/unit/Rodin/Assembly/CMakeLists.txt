@@ -13,6 +13,11 @@ gtest_discover_tests(RodinAssemblySequentialTest
 )
 
 if (RODIN_USE_OPENMP)
+  add_executable(RodinAssemblyOpenMPIterationTest OpenMPIterationTest.cpp)
+  target_link_libraries(RodinAssemblyOpenMPIterationTest PRIVATE
+    GTest::gtest_main Rodin::Assembly Rodin::Geometry)
+  gtest_discover_tests(RodinAssemblyOpenMPIterationTest PROPERTIES LABELS unit)
+
   add_executable(RodinAssemblyOpenMPTest OpenMPTest.cpp)
   target_link_libraries(RodinAssemblyOpenMPTest
     PUBLIC
