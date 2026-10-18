@@ -5,7 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief PETSc local/MPI warmed physics assembly with aligned iterations. */
+/**
+ * @file
+ * @brief PETSc local/MPI warmed physics assembly with aligned iterations.
+ */
 #include <chrono>
 #include <iostream>
 #include <benchmark/benchmark.h>
@@ -41,158 +44,159 @@ namespace Rodin::Tests::Benchmarks
   class PETScPhysicsAssembly
   {
     public:
-    static void run(benchmark::State& state, Polytope::Type geometry, bool conductivity,
-      const Context::MPI& context)
-    {
-      const auto& comm = context.getCommunicator();
-      auto mesh = [&]() {
-        if constexpr (!Distributed)
-          return Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-        else
-        {
-          Sharder<Context::MPI> sharder(context);
-          if (comm.rank() == 0)
+      static void run(benchmark::State& state, Polytope::Type geometry, bool conductivity,
+        const Context::MPI& context)
+      {
+        const auto& comm = context.getCommunicator();
+        auto mesh = [&]() {
+          if constexpr (!Distributed)
+            return Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+          else
           {
-            auto root = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-            const size_t dim = root.getDimension();
-            root.getConnectivity().compute(dim, dim);
-            root.getConnectivity().compute(dim, 0);
-            root.getConnectivity().compute(dim, dim - 1);
-            root.getConnectivity().compute(dim - 1, dim);
-            root.getConnectivity().compute(dim - 1, 0);
-            BalancedCompactPartitioner partitioner(root);
-            partitioner.partition(static_cast<size_t>(comm.size()));
-            sharder.shard(partitioner);
-            sharder.scatter(0);
+            Sharder<Context::MPI> sharder(context);
+            if (comm.rank() == 0)
+            {
+              auto root = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+              const size_t dim = root.getDimension();
+              root.getConnectivity().compute(dim, dim);
+              root.getConnectivity().compute(dim, 0);
+              root.getConnectivity().compute(dim, dim - 1);
+              root.getConnectivity().compute(dim - 1, dim);
+              root.getConnectivity().compute(dim - 1, 0);
+              BalancedCompactPartitioner partitioner(root);
+              partitioner.partition(static_cast<size_t>(comm.size()));
+              sharder.shard(partitioner);
+              sharder.scatter(0);
+            }
+            return sharder.gather(0);
           }
-          return sharder.gather(0);
-        }
-      }();
+        }();
         // The declared domain dimension is rank-independent; an empty shard
         // need not carry a positive-dimensional local mesh.
-      const size_t dim = Polytope::Traits(geometry).getDimension();
-      using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
-      auto space = [&]() {
-        if constexpr (Elasticity)
-          return H1<Degree, Range, decltype(mesh)>(
-            std::integral_constant<size_t, Degree>{}, mesh, dim);
-        else
-          return H1<Degree, Range, decltype(mesh)>(
-            std::integral_constant<size_t, Degree>{}, mesh);
-      }();
-      PETSc::Variational::TrialFunction u(space);
-      PETSc::Variational::TestFunction v(space);
-      BilinearForm form(u, v);
-      const Real expected =
-        PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
-      form.assemble();
-      BilinearForm baseline(u, v);
-      PhysicsForm<Elasticity>::template configure<true>(
-        u, v, baseline, dim, conductivity);
-      baseline.assemble();
-      PetscReal baselineNorm = 0;
-      auto ierr = MatNorm(baseline.getOperator(), NORM_FROBENIUS, &baselineNorm);
-      assert(ierr == PETSC_SUCCESS);
-      bool callsSucceeded = ierr == PETSC_SUCCESS;
-      const auto valid = [&]() {
-        const auto energy = form(u.getSolution(), u.getSolution());
-        auto difference = form;
-        auto error = MatAXPY(
-          difference.getOperator(), -1, baseline.getOperator(), SAME_NONZERO_PATTERN);
-        assert(error == PETSC_SUCCESS);
-        bool ok = error == PETSC_SUCCESS;
-        PetscReal norm = 0;
-        error = MatNorm(difference.getOperator(), NORM_FROBENIUS, &norm);
-        assert(error == PETSC_SUCCESS);
-        ok = ok && error == PETSC_SUCCESS && callsSucceeded &&
-          std::isfinite(std::abs(energy)) && std::abs(energy / expected - 1) < 1e-9 &&
-          norm < 1e-12 * std::max(Real(1), baselineNorm);
-        if (!ok)
-          std::cerr << "rank=" << comm.rank() << " energy=" << energy
-                    << " expected=" << expected << " difference=" << norm
-                    << " baseline_norm=" << baselineNorm << '\n';
-        if constexpr (Distributed)
-          ok = boost::mpi::all_reduce(comm, ok, std::logical_and<bool>());
-        return ok;
-      };
-      form.assemble();
-      if (!valid())
-      {
-        petscCheckFailed = true;
-        state.SkipWithError("PETSc energy or replacement check failed");
-        return;
-      }
-      for (auto _ : state)
-      {
-        if constexpr (Distributed)
-          comm.barrier();
-        const auto start = std::chrono::steady_clock::now();
+        const size_t dim = Polytope::Traits(geometry).getDimension();
+        using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
+        auto space = [&]() {
+          if constexpr (Elasticity)
+            return H1<Degree, Range, decltype(mesh)>(
+              std::integral_constant<size_t, Degree>{}, mesh, dim);
+          else
+            return H1<Degree, Range, decltype(mesh)>(
+              std::integral_constant<size_t, Degree>{}, mesh);
+        }();
+        PETSc::Variational::TrialFunction u(space);
+        PETSc::Variational::TestFunction v(space);
+        BilinearForm form(u, v);
+        const Real expected =
+          PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
         form.assemble();
-        const auto stop = std::chrono::steady_clock::now();
-        double elapsed = std::chrono::duration<double>(stop - start).count();
-        if constexpr (Distributed)
-          elapsed = boost::mpi::all_reduce(comm, elapsed, boost::mpi::maximum<double>());
-        state.SetIterationTime(elapsed);
-      }
-      if (!valid())
-      {
-        petscCheckFailed = true;
-        state.SkipWithError("Timed PETSc assembly changed operator or energy");
-      }
-      double owned = 0;
-      if constexpr (Distributed)
-      {
-        for (Index i = 0; i < mesh.getShard().getCellCount(); ++i)
+        BilinearForm baseline(u, v);
+        PhysicsForm<Elasticity>::template configure<true>(
+          u, v, baseline, dim, conductivity);
+        baseline.assemble();
+        PetscReal baselineNorm = 0;
+        auto ierr = MatNorm(baseline.getOperator(), NORM_FROBENIUS, &baselineNorm);
+        assert(ierr == PETSC_SUCCESS);
+        bool callsSucceeded = ierr == PETSC_SUCCESS;
+        const auto valid = [&]() {
+          const auto energy = form(u.getSolution(), u.getSolution());
+          auto difference = form;
+          auto error = MatAXPY(
+            difference.getOperator(), -1, baseline.getOperator(), SAME_NONZERO_PATTERN);
+          assert(error == PETSC_SUCCESS);
+          bool ok = error == PETSC_SUCCESS;
+          PetscReal norm = 0;
+          error = MatNorm(difference.getOperator(), NORM_FROBENIUS, &norm);
+          assert(error == PETSC_SUCCESS);
+          ok = ok && error == PETSC_SUCCESS && callsSucceeded &&
+            std::isfinite(std::abs(energy)) && std::abs(energy / expected - 1) < 1e-9 &&
+            norm < 1e-12 * std::max(Real(1), baselineNorm);
+          if (!ok)
+            std::cerr << "rank=" << comm.rank() << " energy=" << energy
+                      << " expected=" << expected << " difference=" << norm
+                      << " baseline_norm=" << baselineNorm << '\n';
+          if constexpr (Distributed)
+            ok = boost::mpi::all_reduce(comm, ok, std::logical_and<bool>());
+          return ok;
+        };
+        form.assemble();
+        if (!valid())
         {
-          if (mesh.getShard().isOwned(dim, i))
-            ++owned;
+          petscCheckFailed = true;
+          state.SkipWithError("PETSc energy or replacement check failed");
+          return;
         }
+        for (auto _ : state)
+        {
+          if constexpr (Distributed)
+            comm.barrier();
+          const auto start = std::chrono::steady_clock::now();
+          form.assemble();
+          const auto stop = std::chrono::steady_clock::now();
+          double elapsed = std::chrono::duration<double>(stop - start).count();
+          if constexpr (Distributed)
+            elapsed =
+              boost::mpi::all_reduce(comm, elapsed, boost::mpi::maximum<double>());
+          state.SetIterationTime(elapsed);
+        }
+        if (!valid())
+        {
+          petscCheckFailed = true;
+          state.SkipWithError("Timed PETSc assembly changed operator or energy");
+        }
+        double owned = 0;
+        if constexpr (Distributed)
+        {
+          for (Index i = 0; i < mesh.getShard().getCellCount(); ++i)
+          {
+            if (mesh.getShard().isOwned(dim, i))
+              ++owned;
+          }
+        }
+        else
+          owned = mesh.getPolytopeCount(dim);
+        double cells = owned;
+        double maximum = owned;
+        double minimum = owned;
+        if constexpr (Distributed)
+        {
+          cells = boost::mpi::all_reduce(comm, owned, std::plus<double>());
+          maximum = boost::mpi::all_reduce(comm, owned, boost::mpi::maximum<double>());
+          minimum = boost::mpi::all_reduce(comm, owned, boost::mpi::minimum<double>());
+        }
+        MatInfo info;
+        ierr = MatGetInfo(form.getOperator(), MAT_GLOBAL_SUM, &info);
+        assert(ierr == PETSC_SUCCESS);
+        if (ierr != PETSC_SUCCESS)
+        {
+          petscCheckFailed = true;
+          state.SkipWithError("PETSc matrix metadata query failed");
+          return;
+        }
+        const double ranks = Distributed ? comm.size() : 1;
+        state.counters["cells"] = cells;
+        state.counters["owned_cells_min"] = minimum;
+        state.counters["owned_cells_max"] = maximum;
+        state.counters["cell_imbalance"] = maximum * ranks / cells;
+        state.counters["dofs"] = space.getSize();
+        state.counters["nnz"] = info.nz_used;
+        state.counters["ranks"] = ranks;
+        state.counters["degree"] = Degree;
+        state.counters["quadrature_order"] = 6;
+        state.counters["components"] = Elasticity ? dim : 1;
+        state.counters["cells_per_second"] =
+          benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate);
       }
-      else
-        owned = mesh.getPolytopeCount(dim);
-      double cells = owned;
-      double maximum = owned;
-      double minimum = owned;
-      if constexpr (Distributed)
-      {
-        cells = boost::mpi::all_reduce(comm, owned, std::plus<double>());
-        maximum = boost::mpi::all_reduce(comm, owned, boost::mpi::maximum<double>());
-        minimum = boost::mpi::all_reduce(comm, owned, boost::mpi::minimum<double>());
-      }
-      MatInfo info;
-      ierr = MatGetInfo(form.getOperator(), MAT_GLOBAL_SUM, &info);
-      assert(ierr == PETSC_SUCCESS);
-      if (ierr != PETSC_SUCCESS)
-      {
-        petscCheckFailed = true;
-        state.SkipWithError("PETSc matrix metadata query failed");
-        return;
-      }
-      const double ranks = Distributed ? comm.size() : 1;
-      state.counters["cells"] = cells;
-      state.counters["owned_cells_min"] = minimum;
-      state.counters["owned_cells_max"] = maximum;
-      state.counters["cell_imbalance"] = maximum * ranks / cells;
-      state.counters["dofs"] = space.getSize();
-      state.counters["nnz"] = info.nz_used;
-      state.counters["ranks"] = ranks;
-      state.counters["degree"] = Degree;
-      state.counters["quadrature_order"] = 6;
-      state.counters["components"] = Elasticity ? dim : 1;
-      state.counters["cells_per_second"] =
-        benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate);
-    }
   };
 
   /// @brief Suppresses non-root reporting without suppressing benchmark execution.
   class SilentReporter final : public benchmark::BenchmarkReporter
   {
     public:
-    bool ReportContext(const Context&) override
-    {
-      return true;
-    }
-    void ReportRuns(const std::vector<Run>&) override {}
+      bool ReportContext(const Context&) override
+      {
+        return true;
+      }
+      void ReportRuns(const std::vector<Run>&) override {}
   };
 
   template <size_t Degree, bool Distributed>

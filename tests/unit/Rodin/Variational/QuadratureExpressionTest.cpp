@@ -225,106 +225,106 @@ namespace Rodin::Tests::Unit
     class QuadratureExpression : public ::testing::TestWithParam<Polytope::Type>
     {
       protected:
-      /**
-       * @brief Compares reused P1 derivatives with fresh direct-point evaluation.
-       *
-       * Quadrature indices are traversed on one retained cell. Every basis
-       * component is compared exactly, including rational pyramidal functions.
-       * A constant geometric Jacobian does not imply constant reference basis
-       * derivatives. The oracle has no formula association or previous state.
-       *
-       * @param space Native scalar or vector P1 space.
-       */
-      template <class FES>
-      void checkP1SampleDerivatives(FES& space)
-      {
-        TestFunction u(space);
-        const auto cell = *space.getMesh().getCell();
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
-        const PolytopeQuadrature points(cell, formula);
-        const auto exercise = [&](auto& reused, auto makeFresh) {
-          using Value = std::remove_cvref_t<decltype(reused.getBasis(size_t(0)))>;
-          for (size_t qp = 0; qp < formula.getSize(); ++qp)
-          {
-            SCOPED_TRACE(::testing::Message() << "sample " << qp);
-            const IntegrationPoint indexed(points, qp);
-            const IntegrationPoint direct(points.getPoint(qp));
-            reused.setIntegrationPoint(indexed);
-            auto fresh = makeFresh(u);
-            fresh.setIntegrationPoint(direct);
-            for (size_t local = 0; local < reused.getDOFs(cell); ++local)
+        /**
+         * @brief Compares reused P1 derivatives with fresh direct-point evaluation.
+         *
+         * Quadrature indices are traversed on one retained cell. Every basis
+         * component is compared exactly, including rational pyramidal functions.
+         * A constant geometric Jacobian does not imply constant reference basis
+         * derivatives. The oracle has no formula association or previous state.
+         *
+         * @param space Native scalar or vector P1 space.
+         */
+        template <class FES>
+        void checkP1SampleDerivatives(FES& space)
+        {
+          TestFunction u(space);
+          const auto cell = *space.getMesh().getCell();
+          const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+          const PolytopeQuadrature points(cell, formula);
+          const auto exercise = [&](auto& reused, auto makeFresh) {
+            using Value = std::remove_cvref_t<decltype(reused.getBasis(size_t(0)))>;
+            for (size_t qp = 0; qp < formula.getSize(); ++qp)
             {
-              const auto actual = reused.getBasis(local);
-              const auto expected = fresh.getBasis(local);
-              if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
+              SCOPED_TRACE(::testing::Message() << "sample " << qp);
+              const IntegrationPoint indexed(points, qp);
+              const IntegrationPoint direct(points.getPoint(qp));
+              reused.setIntegrationPoint(indexed);
+              auto fresh = makeFresh(u);
+              fresh.setIntegrationPoint(direct);
+              for (size_t local = 0; local < reused.getDOFs(cell); ++local)
               {
-                ASSERT_EQ(actual.rows(), expected.rows());
-                ASSERT_EQ(actual.cols(), expected.cols());
-                for (Eigen::Index row = 0; row < actual.rows(); ++row)
+                const auto actual = reused.getBasis(local);
+                const auto expected = fresh.getBasis(local);
+                if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
                 {
-                  for (Eigen::Index column = 0; column < actual.cols(); ++column)
-                    EXPECT_EQ(actual(row, column), expected(row, column));
+                  ASSERT_EQ(actual.rows(), expected.rows());
+                  ASSERT_EQ(actual.cols(), expected.cols());
+                  for (Eigen::Index row = 0; row < actual.rows(); ++row)
+                  {
+                    for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                      EXPECT_EQ(actual(row, column), expected(row, column));
+                  }
+                }
+                else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
+                {
+                  ASSERT_EQ(actual.size(), expected.size());
+                  for (size_t j = 0; j < actual.size(); ++j)
+                    EXPECT_EQ(actual(j), expected(j));
+                }
+                else
+                  EXPECT_EQ(actual, expected);
+              }
+            }
+
+            TrialFunction trialUnknown(space);
+            auto trial = makeFresh(trialUnknown);
+            auto test = makeFresh(u);
+            // A sum selects generic contraction rather than a native-P1 rule.
+            auto integrand = Dot(trial, test + test);
+            Integral integral(integrand);
+            integral.setOrder(4);
+            integral.setPolytope(cell);
+            using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
+            const size_t count = reused.getDOFs(cell);
+            Math::Matrix<Scalar> expected(count, count);
+            expected.setZero();
+            for (size_t qp = 0; qp < formula.getSize(); ++qp)
+            {
+              const auto& point = points.getPoint(qp);
+              const IntegrationPoint direct(point);
+              integrand.setIntegrationPoint(direct);
+              const Real weight = formula.getWeight(qp) * point.getDistortion();
+              for (size_t tr = 0; tr < count; ++tr)
+              {
+                const auto lhs = integrand.getLHS().getBasis(tr);
+                for (size_t te = 0; te < count; ++te)
+                {
+                  expected(te, tr) +=
+                    weight * Math::dot(lhs, integrand.getRHS().getBasis(te));
                 }
               }
-              else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
-              {
-                ASSERT_EQ(actual.size(), expected.size());
-                for (size_t j = 0; j < actual.size(); ++j)
-                  EXPECT_EQ(actual(j), expected(j));
-              }
-              else
-                EXPECT_EQ(actual, expected);
             }
-          }
-
-          TrialFunction trialUnknown(space);
-          auto trial = makeFresh(trialUnknown);
-          auto test = makeFresh(u);
-          // A sum selects generic contraction rather than a native-P1 rule.
-          auto integrand = Dot(trial, test + test);
-          Integral integral(integrand);
-          integral.setOrder(4);
-          integral.setPolytope(cell);
-          using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
-          const size_t count = reused.getDOFs(cell);
-          Math::Matrix<Scalar> expected(count, count);
-          expected.setZero();
-          for (size_t qp = 0; qp < formula.getSize(); ++qp)
-          {
-            const auto& point = points.getPoint(qp);
-            const IntegrationPoint direct(point);
-            integrand.setIntegrationPoint(direct);
-            const Real weight = formula.getWeight(qp) * point.getDistortion();
             for (size_t tr = 0; tr < count; ++tr)
             {
-              const auto lhs = integrand.getLHS().getBasis(tr);
               for (size_t te = 0; te < count; ++te)
-              {
-                expected(te, tr) +=
-                  weight * Math::dot(lhs, integrand.getRHS().getBasis(te));
-              }
+                EXPECT_EQ(integral.integrate(tr, te), expected(te, tr));
             }
-          }
-          for (size_t tr = 0; tr < count; ++tr)
+          };
+          if constexpr (FormLanguage::IsVectorRange<
+                          typename FormLanguage::Traits<FES>::RangeType>::Value)
           {
-            for (size_t te = 0; te < count; ++te)
-              EXPECT_EQ(integral.integrate(tr, te), expected(te, tr));
+            auto jacobian = Jacobian(u);
+            exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+            auto divergence = Div(u);
+            exercise(divergence, [](auto& unknown) { return Div(unknown); });
           }
-        };
-        if constexpr (FormLanguage::IsVectorRange<
-                        typename FormLanguage::Traits<FES>::RangeType>::Value)
-        {
-          auto jacobian = Jacobian(u);
-          exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
-          auto divergence = Div(u);
-          exercise(divergence, [](auto& unknown) { return Div(unknown); });
+          else
+          {
+            auto gradient = Grad(u);
+            exercise(gradient, [](auto& unknown) { return Grad(unknown); });
+          }
         }
-        else
-        {
-          auto gradient = Grad(u);
-          exercise(gradient, [](auto& unknown) { return Grad(unknown); });
-        }
-      }
 
         /**
          * @brief Checks physical vector derivatives after geometry-only mutation.
@@ -337,91 +337,91 @@ namespace Rodin::Tests::Unit
          * @param space Vector-valued finite element space.
          * @param mesh Mutable geometry associated with the space.
          */
-      template <class FES>
-      void checkDerivativeGeometry(FES& space, LocalMesh& mesh)
-      {
-        TestFunction u(space);
-        const auto cell = *mesh.getCell();
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
-        const auto exercise = [&](auto& cached, auto makeFresh) {
-          using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
-          using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
-          const PolytopeQuadrature before(cell, formula);
-          const IntegrationPoint first(before, 0);
-          cached.setIntegrationPoint(first);
-          std::vector<Value> original;
-          for (size_t local = 0; local < cached.getDOFs(cell); ++local)
-            original.push_back(cached.getBasis(local));
-          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-          {
-            auto coordinates = mesh.getVertexCoordinates(vertex);
-            coordinates *= 2;
-            mesh.setVertexCoordinates(vertex, coordinates);
-          }
-          const PolytopeQuadrature after(cell, formula);
-          const IntegrationPoint second(after, 0);
-          cached.setIntegrationPoint(second);
-          auto fresh = makeFresh(u);
-          fresh.setIntegrationPoint(second);
-          bool nonzero = false;
-          for (size_t local = 0; local < original.size(); ++local)
-          {
-            const auto actual = cached.getBasis(local);
-            const auto expected = fresh.getBasis(local);
-            if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
+        template <class FES>
+        void checkDerivativeGeometry(FES& space, LocalMesh& mesh)
+        {
+          TestFunction u(space);
+          const auto cell = *mesh.getCell();
+          const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+          const auto exercise = [&](auto& cached, auto makeFresh) {
+            using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
+            using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
+            const PolytopeQuadrature before(cell, formula);
+            const IntegrationPoint first(before, 0);
+            cached.setIntegrationPoint(first);
+            std::vector<Value> original;
+            for (size_t local = 0; local < cached.getDOFs(cell); ++local)
+              original.push_back(cached.getBasis(local));
+            for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
             {
-              ASSERT_EQ(actual.rows(), expected.rows());
-              ASSERT_EQ(actual.cols(), expected.cols());
-              for (Eigen::Index row = 0; row < actual.rows(); ++row)
+              auto coordinates = mesh.getVertexCoordinates(vertex);
+              coordinates *= 2;
+              mesh.setVertexCoordinates(vertex, coordinates);
+            }
+            const PolytopeQuadrature after(cell, formula);
+            const IntegrationPoint second(after, 0);
+            cached.setIntegrationPoint(second);
+            auto fresh = makeFresh(u);
+            fresh.setIntegrationPoint(second);
+            bool nonzero = false;
+            for (size_t local = 0; local < original.size(); ++local)
+            {
+              const auto actual = cached.getBasis(local);
+              const auto expected = fresh.getBasis(local);
+              if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
               {
-                for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                ASSERT_EQ(actual.rows(), expected.rows());
+                ASSERT_EQ(actual.cols(), expected.cols());
+                for (Eigen::Index row = 0; row < actual.rows(); ++row)
                 {
-                  EXPECT_EQ(actual(row, column), expected(row, column));
-                  EXPECT_EQ(
-                    Scalar(2) * actual(row, column), original[local](row, column));
-                  nonzero = nonzero || original[local](row, column) != Scalar(0);
+                  for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                  {
+                    EXPECT_EQ(actual(row, column), expected(row, column));
+                    EXPECT_EQ(
+                      Scalar(2) * actual(row, column), original[local](row, column));
+                    nonzero = nonzero || original[local](row, column) != Scalar(0);
+                  }
                 }
               }
-            }
-            else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
-            {
-              ASSERT_EQ(actual.size(), expected.size());
-              for (size_t j = 0; j < actual.size(); ++j)
+              else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
               {
-                EXPECT_EQ(actual(j), expected(j));
-                EXPECT_EQ(Scalar(2) * actual(j), original[local](j));
-                nonzero = nonzero || original[local](j) != Scalar(0);
+                ASSERT_EQ(actual.size(), expected.size());
+                for (size_t j = 0; j < actual.size(); ++j)
+                {
+                  EXPECT_EQ(actual(j), expected(j));
+                  EXPECT_EQ(Scalar(2) * actual(j), original[local](j));
+                  nonzero = nonzero || original[local](j) != Scalar(0);
+                }
+              }
+              else
+              {
+                EXPECT_EQ(actual, expected);
+                EXPECT_EQ(Scalar(2) * actual, original[local]);
+                nonzero = nonzero || original[local] != Scalar(0);
               }
             }
-            else
+            EXPECT_TRUE(nonzero);
+            for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
             {
-              EXPECT_EQ(actual, expected);
-              EXPECT_EQ(Scalar(2) * actual, original[local]);
-              nonzero = nonzero || original[local] != Scalar(0);
+              auto coordinates = mesh.getVertexCoordinates(vertex);
+              coordinates *= Real(0.5);
+              mesh.setVertexCoordinates(vertex, coordinates);
             }
-          }
-          EXPECT_TRUE(nonzero);
-          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+          };
+          if constexpr (FormLanguage::IsVectorRange<
+                          typename FormLanguage::Traits<FES>::RangeType>::Value)
           {
-            auto coordinates = mesh.getVertexCoordinates(vertex);
-            coordinates *= Real(0.5);
-            mesh.setVertexCoordinates(vertex, coordinates);
+            auto jacobian = Jacobian(u);
+            exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+            auto divergence = Div(u);
+            exercise(divergence, [](auto& unknown) { return Div(unknown); });
           }
-        };
-        if constexpr (FormLanguage::IsVectorRange<
-                        typename FormLanguage::Traits<FES>::RangeType>::Value)
-        {
-          auto jacobian = Jacobian(u);
-          exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
-          auto divergence = Div(u);
-          exercise(divergence, [](auto& unknown) { return Div(unknown); });
+          else
+          {
+            auto gradient = Grad(u);
+            exercise(gradient, [](auto& unknown) { return Grad(unknown); });
+          }
         }
-        else
-        {
-          auto gradient = Grad(u);
-          exercise(gradient, [](auto& unknown) { return Grad(unknown); });
-        }
-      }
 
         /**
          * @brief Compares reused expressions with independently constructed expressions.

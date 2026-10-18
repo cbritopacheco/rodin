@@ -112,6 +112,11 @@ namespace Rodin::Variational
 
       /**
        * @brief Interpolates at a geometric point.
+       *
+       * The reference sweep owns the cell's logical entity pair. Coefficients
+       * are read from the current operand through the space's public DOF lookup;
+       * no closure array or coefficient values are retained between evaluations.
+       *
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
@@ -182,11 +187,12 @@ namespace Rodin::Variational
           const auto& fe  = fes.getFiniteElement(d, i);
           const auto& rc  = p.getReferenceCoordinates();
 
-          for (size_t local = 0; local < fe.getCount(); ++local)
-          {
-            const auto& basis = fe.getBasis(local);
-            out += basis.getGradient()(rc) * gf[fes.getGlobalIndex({d, i}, local)];
-          }
+          fe.evaluateGradients(
+            [&out, &gf, &fes, entity = std::pair{d, i}](
+              size_t local, const auto& gradient) {
+              out += gradient * gf[fes.getGlobalIndex(entity, local)];
+            },
+            rc);
 
           out = p.getJacobianInverse().transpose() * out;
         }

@@ -23,79 +23,79 @@ namespace Rodin::Tests::Unit
   class ObservedProductFactor final : public QF::QuadratureFormulaBase
   {
     public:
-    /**
-     * @brief Owns samples and weights and initializes query counts.
-     * @param points Factor coordinates.
-     * @param weights Factor weights.
-     */
-    ObservedProductFactor(
-      std::vector<Math::SpatialPoint> points, std::vector<Real> weights)
-      : m_points(std::move(points)),
-        m_weights(std::move(weights)),
-        m_pointReads(0),
-        m_weightReads(0),
-        m_sizeReads(0)
-    {}
+      /**
+       * @brief Owns samples and weights and initializes query counts.
+       * @param points Factor coordinates.
+       * @param weights Factor weights.
+       */
+      ObservedProductFactor(
+        std::vector<Math::SpatialPoint> points, std::vector<Real> weights)
+        : m_points(std::move(points)),
+          m_weights(std::move(weights)),
+          m_pointReads(0),
+          m_weightReads(0),
+          m_sizeReads(0)
+      {}
 
-    /// @brief Gets the factor size and records the query.
-    size_t getSize() const override
-    {
-      ++m_sizeReads;
-      return m_points.size();
-    }
+      /// @brief Gets the factor size and records the query.
+      size_t getSize() const override
+      {
+        ++m_sizeReads;
+        return m_points.size();
+      }
 
-    /**
-     * @brief Reads a weight and records the query.
-     * @param index Factor sample index.
-     * @returns Immutable factor weight.
-     */
-    Real getWeight(size_t index) const override
-    {
-      ++m_weightReads;
-      return m_weights.at(index);
-    }
+      /**
+       * @brief Reads a weight and records the query.
+       * @param index Factor sample index.
+       * @returns Immutable factor weight.
+       */
+      Real getWeight(size_t index) const override
+      {
+        ++m_weightReads;
+        return m_weights.at(index);
+      }
 
-    /**
-     * @brief Reads coordinates and records the query.
-     * @param index Factor sample index.
-     * @returns Immutable factor coordinates.
-     */
-    const Math::SpatialPoint& getPoint(size_t index) const override
-    {
-      ++m_pointReads;
-      return m_points.at(index);
-    }
+      /**
+       * @brief Reads coordinates and records the query.
+       * @param index Factor sample index.
+       * @returns Immutable factor coordinates.
+       */
+      const Math::SpatialPoint& getPoint(size_t index) const override
+      {
+        ++m_pointReads;
+        return m_points.at(index);
+      }
 
-    /// @brief Copies immutable samples with fresh counters and identity.
-    ObservedProductFactor* copy() const noexcept override
-    {
-      return new ObservedProductFactor(m_points, m_weights);
-    }
+      /// @brief Copies immutable samples with fresh counters and identity.
+      ObservedProductFactor* copy() const noexcept override
+      {
+        return new ObservedProductFactor(m_points, m_weights);
+      }
 
-    /// @brief Number of point queries since construction.
-    size_t pointReads() const
-    {
-      return m_pointReads;
-    }
+      /// @brief Number of point queries since construction.
+      size_t pointReads() const
+      {
+        return m_pointReads;
+      }
 
-    /// @brief Number of weight queries since construction.
-    size_t weightReads() const
-    {
-      return m_weightReads;
-    }
+      /// @brief Number of weight queries since construction.
+      size_t weightReads() const
+      {
+        return m_weightReads;
+      }
 
-    /// @brief Number of size queries since construction.
-    size_t sizeReads() const
-    {
-      return m_sizeReads;
-    }
+      /// @brief Number of size queries since construction.
+      size_t sizeReads() const
+      {
+        return m_sizeReads;
+      }
 
     private:
-    std::vector<Math::SpatialPoint> m_points;
-    std::vector<Real> m_weights;
-    mutable size_t m_pointReads;
-    mutable size_t m_weightReads;
-    mutable size_t m_sizeReads;
+      std::vector<Math::SpatialPoint> m_points;
+      std::vector<Real> m_weights;
+      mutable size_t m_pointReads;
+      mutable size_t m_weightReads;
+      mutable size_t m_sizeReads;
   };
 
   /**

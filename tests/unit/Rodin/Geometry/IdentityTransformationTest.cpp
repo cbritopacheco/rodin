@@ -19,78 +19,78 @@ namespace Rodin::Tests::Unit
   class StateTransformation final : public PolytopeTransformation
   {
     public:
-    /// @brief Constructs a unit-scale segment map.
-    constexpr StateTransformation()
-      : PolytopeTransformation(1, 1),
-        m_scale(1)
-    {}
-    /// @brief Preserves constant-evaluated destruction.
-    constexpr ~StateTransformation() override = default;
-    /**
-     * @brief Copies geometry into a fresh state.
-     * @param other Source map.
-     */
-    constexpr StateTransformation(const StateTransformation& other) = default;
-    /**
-     * @brief Moves geometry into a fresh state.
-     * @param other Source map.
-     */
-    constexpr StateTransformation(StateTransformation&& other) noexcept = default;
-    /**
-     * @brief Replaces the geometry state by move assignment.
-     * @param other Source map.
-     * @returns This map.
-     */
-    StateTransformation& operator=(StateTransformation&& other) noexcept = default;
+      /// @brief Constructs a unit-scale segment map.
+      constexpr StateTransformation()
+        : PolytopeTransformation(1, 1),
+          m_scale(1)
+      {}
+      /// @brief Preserves constant-evaluated destruction.
+      constexpr ~StateTransformation() override = default;
+      /**
+       * @brief Copies geometry into a fresh state.
+       * @param other Source map.
+       */
+      constexpr StateTransformation(const StateTransformation& other) = default;
+      /**
+       * @brief Moves geometry into a fresh state.
+       * @param other Source map.
+       */
+      constexpr StateTransformation(StateTransformation&& other) noexcept = default;
+      /**
+       * @brief Replaces the geometry state by move assignment.
+       * @param other Source map.
+       * @returns This map.
+       */
+      StateTransformation& operator=(StateTransformation&& other) noexcept = default;
 
-    /**
-     * @brief Changes scale and invalidates previous physical results.
-     * @param scale New scale factor.
-     */
-    void setScale(Real scale)
-    {
-      m_scale = scale;
-      invalidateCacheIdentity();
-    }
-    /**
-     * @brief Returns the affine map order.
-     * @returns One.
-     */
-    size_t getOrder() const override
-    {
-      return 1;
-    }
-    /**
-     * @brief Applies the scalar dilation.
-     * @param pc Output physical coordinates.
-     * @param rc Reference coordinates.
-     */
-    void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
-    {
-      pc = rc * m_scale;
-    }
-    /**
-     * @brief Evaluates the constant map derivative.
-     * @param jacobian Output derivative matrix.
-     * @param rc Unused reference coordinates.
-     */
-    void jacobian(Math::SpatialMatrix<Real>& jacobian,
-      [[maybe_unused]] const Math::SpatialPoint& rc) const override
-    {
-      jacobian.resize(1, 1);
-      jacobian(0, 0) = m_scale;
-    }
-    /**
-     * @brief Copies the map polymorphically.
-     * @returns A new map owned by the caller.
-     */
-    StateTransformation* copy() const noexcept override
-    {
-      return new StateTransformation(*this);
-    }
+      /**
+       * @brief Changes scale and invalidates previous physical results.
+       * @param scale New scale factor.
+       */
+      void setScale(Real scale)
+      {
+        m_scale = scale;
+        invalidateCacheIdentity();
+      }
+      /**
+       * @brief Returns the affine map order.
+       * @returns One.
+       */
+      size_t getOrder() const override
+      {
+        return 1;
+      }
+      /**
+       * @brief Applies the scalar dilation.
+       * @param pc Output physical coordinates.
+       * @param rc Reference coordinates.
+       */
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
+      {
+        pc = rc * m_scale;
+      }
+      /**
+       * @brief Evaluates the constant map derivative.
+       * @param jacobian Output derivative matrix.
+       * @param rc Unused reference coordinates.
+       */
+      void jacobian(Math::SpatialMatrix<Real>& jacobian,
+        [[maybe_unused]] const Math::SpatialPoint& rc) const override
+      {
+        jacobian.resize(1, 1);
+        jacobian(0, 0) = m_scale;
+      }
+      /**
+       * @brief Copies the map polymorphically.
+       * @returns A new map owned by the caller.
+       */
+      StateTransformation* copy() const noexcept override
+      {
+        return new StateTransformation(*this);
+      }
 
     private:
-    Real m_scale;
+      Real m_scale;
   };
 
   /**

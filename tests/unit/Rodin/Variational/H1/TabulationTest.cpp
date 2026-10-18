@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <vector>
 #include "Rodin/Variational/H1/H1Element.h"
+#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 namespace Rodin::Tests::Unit
@@ -27,60 +28,67 @@ namespace Rodin::Tests::Unit
   class H1SampleFormula final : public QF::QuadratureFormulaBase
   {
     public:
-    /**
-     * @brief Owns a collection of reference samples.
-     * @param points Interior and boundary points to tabulate.
-     */
-    explicit H1SampleFormula(std::vector<Math::SpatialPoint> points)
-      : m_points(std::move(points))
-    {}
+      /**
+       * @brief Owns a collection of reference samples.
+       * @param points Interior and boundary points to tabulate.
+       */
+      explicit H1SampleFormula(std::vector<Math::SpatialPoint> points)
+        : m_points(std::move(points))
+      {}
 
-    /**
-     * @brief Copies samples with a new formula identity.
-     * @param other Sample collection to copy.
-     */
-    H1SampleFormula(const H1SampleFormula& other) = default;
+      /**
+       * @brief Copies samples with a new formula identity.
+       * @param other Sample collection to copy.
+       */
+      H1SampleFormula(const H1SampleFormula& other) = default;
 
-    /**
-     * @brief Gets the sample count.
-     * @returns Number of owned reference samples.
-     */
-    size_t getSize() const override
-    {
-      return m_points.size();
-    }
+      /**
+       * @brief Replaces samples with a new logical formula identity.
+       * @param other Sample collection to copy.
+       * @returns This updated collection.
+       */
+      H1SampleFormula& operator=(const H1SampleFormula& other) = default;
 
-    /**
-     * @brief Gets an unused unit weight.
-     * @param index Sample index, unused because every weight is one.
-     * @returns One, without any quadrature-exactness claim.
-     */
-    Real getWeight([[maybe_unused]] size_t index) const override
-    {
-      return 1;
-    }
+      /**
+       * @brief Gets the sample count.
+       * @returns Number of owned reference samples.
+       */
+      size_t getSize() const override
+      {
+        return m_points.size();
+      }
 
-    /**
-     * @brief Gets a reference sample.
-     * @param index Sample index.
-     * @returns The owned reference coordinates.
-     */
-    const Math::SpatialPoint& getPoint(size_t index) const override
-    {
-      return m_points.at(index);
-    }
+      /**
+       * @brief Gets an unused unit weight.
+       * @param index Sample index, unused because every weight is one.
+       * @returns One, without any quadrature-exactness claim.
+       */
+      Real getWeight([[maybe_unused]] size_t index) const override
+      {
+        return 1;
+      }
 
-    /**
-     * @brief Copies the owned samples with independent identity.
-     * @returns An owned copy.
-     */
-    H1SampleFormula* copy() const noexcept override
-    {
-      return new H1SampleFormula(*this);
-    }
+      /**
+       * @brief Gets a reference sample.
+       * @param index Sample index.
+       * @returns The owned reference coordinates.
+       */
+      const Math::SpatialPoint& getPoint(size_t index) const override
+      {
+        return m_points.at(index);
+      }
+
+      /**
+       * @brief Copies the owned samples with independent identity.
+       * @returns An owned copy.
+       */
+      H1SampleFormula* copy() const noexcept override
+      {
+        return new H1SampleFormula(*this);
+      }
 
     private:
-    std::vector<Math::SpatialPoint> m_points;
+      std::vector<Math::SpatialPoint> m_points;
   };
 
   /**
@@ -211,6 +219,114 @@ namespace Rodin::Tests::Unit
           }
         }
       }
+    }
+  }
+
+  TYPED_TEST(H1TabulationTest, TetrahedronCollapsedBoundarySamples)
+  {
+    using Element = TypeParam;
+    const Element element(Geometry::Polytope::Type::Tetrahedron);
+    // Exactly representable distances exercise both branches of the collapsed
+    // chart near its vertex and edge, without a coordinate-tolerance decision.
+    const Real gap = std::ldexp(Real(1), -40);
+    const H1SampleFormula formula(
+      {Math::SpatialPoint{0, 0, 1}, Math::SpatialPoint{0, 0.5, 0.5},
+        Math::SpatialPoint{0, 0.25, 0.75}, Math::SpatialPoint{0.25, 0.25, 0.5},
+        Math::SpatialPoint{0, 0, 1 - gap}, Math::SpatialPoint{gap / 4, gap / 4, 1 - gap},
+        Math::SpatialPoint{gap / 4, 0.5 - gap, 0.5}});
+    const auto& table = element.getTabulation(formula);
+    for (size_t qp = 0; qp < formula.getSize(); ++qp)
+    {
+      SCOPED_TRACE(qp);
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        SCOPED_TRACE(a);
+        const auto& point = formula.getPoint(qp);
+        const auto& basis = element.getBasis(a);
+        const auto value = table.getBasis(qp, a);
+        EXPECT_TRUE(std::isfinite(std::abs(value)));
+        EXPECT_EQ(value, basis(point));
+        for (size_t i = 0; i < 3; ++i)
+        {
+          const auto derivative = table.template getDerivative<1>(qp, a, i);
+          EXPECT_TRUE(std::isfinite(std::abs(derivative)));
+          EXPECT_EQ(derivative, basis.template getDerivative<1>(i)(point));
+        }
+      }
+    }
+  }
+
+  TYPED_TEST(H1TabulationTest, MovedRuleSourceCannotReuseReferenceSamples)
+  {
+    using Element = TypeParam;
+    using G = Geometry::Polytope::Type;
+    for (const auto geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
+           G::Tetrahedron, G::Pyramid, G::Hexahedron, G::Wedge})
+    {
+      SCOPED_TRACE(int(geometry));
+      const Element element(geometry);
+      QF::GaussLegendre source(geometry, 2);
+      const auto saved = element.getTabulation(source);
+      const auto identity = source.getCacheIdentity();
+      QF::GaussLegendre destination(std::move(source));
+      EXPECT_NE(source.getCacheIdentity(), identity);
+      EXPECT_NE(destination.getCacheIdentity(), identity);
+      const auto& fromSource = element.getTabulation(source);
+      EXPECT_EQ(fromSource.nqp, source.getSize());
+      EXPECT_EQ(fromSource.ndof, element.getCount());
+      EXPECT_EQ(fromSource.dim, Geometry::Polytope::Traits(geometry).getDimension());
+      const auto& fromDestination = element.getTabulation(destination);
+      EXPECT_EQ(fromDestination.phi, saved.phi);
+      EXPECT_EQ(fromDestination.dphi, saved.dphi);
+    }
+  }
+
+  TYPED_TEST(H1TabulationTest, BulkGeometryEvictionAssignmentAndEmptySamples)
+  {
+    using Element = TypeParam;
+    using G = Geometry::Polytope::Type;
+    for (const auto geometry : {G::Pyramid, G::Tetrahedron})
+    {
+      SCOPED_TRACE(int(geometry));
+      const Element element(geometry);
+      H1SampleFormula formula({Math::SpatialPoint{0.125, 0.125, 0.25}});
+      const auto saved = element.getTabulation(formula);
+      const auto originalIdentity = formula.getCacheIdentity();
+      constexpr size_t CacheCapacity = 8; // The store's documented capacity.
+      constexpr size_t FormulaCount = CacheCapacity + 1;
+      std::vector<H1SampleFormula> replacements;
+      replacements.reserve(FormulaCount);
+      for (size_t i = 0; i < FormulaCount; ++i)
+      {
+        replacements.emplace_back(
+          std::vector<Math::SpatialPoint>{{Real(i + 1) / 64, 0.125, 0.25}});
+        element.getTabulation(replacements.back());
+      }
+      EXPECT_FALSE(element.findTabulation(originalIdentity));
+      const auto& rebuilt = element.getTabulation(formula);
+      EXPECT_EQ(rebuilt.phi, saved.phi);
+      EXPECT_EQ(rebuilt.dphi, saved.dphi);
+      formula = replacements.front();
+      EXPECT_NE(formula.getCacheIdentity(), originalIdentity);
+      EXPECT_FALSE(element.findTabulation(formula.getCacheIdentity()));
+      const auto& assigned = element.getTabulation(formula);
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        const auto& basis = element.getBasis(a);
+        EXPECT_EQ(assigned.getBasis(0, a), basis(formula.getPoint(0)));
+        for (size_t i = 0; i < 3; ++i)
+        {
+          EXPECT_EQ(assigned.template getDerivative<1>(0, a, i),
+            basis.template getDerivative<1>(i)(formula.getPoint(0)));
+        }
+      }
+      const H1SampleFormula empty({});
+      const auto& emptyTable = element.getTabulation(empty);
+      EXPECT_EQ(emptyTable.nqp, 0u);
+      EXPECT_EQ(emptyTable.ndof, element.getCount());
+      EXPECT_EQ(emptyTable.dim, 3u);
+      EXPECT_TRUE(emptyTable.phi.empty());
+      EXPECT_TRUE(emptyTable.dphi.empty());
     }
   }
 }

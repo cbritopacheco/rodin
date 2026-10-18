@@ -26,9 +26,9 @@ namespace Rodin::Tests::Benchmarks
   struct UniformGrid : public benchmark::Fixture
   {
     public:
-    void SetUp(const benchmark::State&) {}
+      void SetUp(const benchmark::State&) {}
 
-    void TearDown(const benchmark::State&) {}
+      void TearDown(const benchmark::State&) {}
   };
 
   /// @brief Measures construction of a 16x16 triangular uniform grid.

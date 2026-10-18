@@ -6,6 +6,7 @@ add_subdirectory(Location)
 add_subdirectory(IO)
 add_subdirectory(Assembly)
 add_subdirectory(Solver)
+add_subdirectory(Solid)
 
 if (RODIN_USE_MPI)
   add_subdirectory(MPI)

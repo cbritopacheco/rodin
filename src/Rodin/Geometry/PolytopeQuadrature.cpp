@@ -17,9 +17,10 @@ namespace Rodin::Geometry
   {
     std::vector<Math::SpatialMatrix<Real>> jacobians;
     polytope.getTransformation().jacobian(jacobians, qf);
-    assert(jacobians.size() == qf.getSize());
-    m_ps.reserve(qf.getSize());
-    for (size_t qp = 0; qp < qf.getSize(); ++qp)
+    const size_t count = jacobians.size();
+    assert(count == qf.getSize());
+    m_ps.reserve(count);
+    for (size_t qp = 0; qp < count; ++qp)
       m_ps.emplace_back(jacobians[qp], polytope, qf, qp);
   }
 }

@@ -120,6 +120,14 @@ namespace Rodin::Geometry
     public:
       /**
        * @brief Constructs the realized quadrature on a polytope.
+       *
+       * The formula remains immutable throughout construction. After bulk
+       * Jacobian evaluation, the returned array supplies point-storage size
+       * and logical sample order. Debug builds independently assert agreement
+       * with the formula size; release construction does not query size again.
+       * No additional retained cache or collective operation is introduced.
+       * Sample order, reference coordinates and owned Jacobians are unchanged.
+       *
        * @param[in] polytope Concrete mesh polytope
        * @param[in] qf Reference quadrature formula
        */
@@ -432,12 +440,12 @@ namespace Rodin::Geometry
           static constexpr size_t MutexCount = 64;
           /**
            * @brief Initializes the quadrature formula cache.
-           * @param identity Formula lifetime/assignment identity.
+         * @param identity Formula lifetime/assignment identity.
            * @param count Required number of cache slots.
            */
 
-          Formula(size_t identity, size_t count)
-            : identity(identity),
+        Formula(size_t identity, size_t count)
+          : identity(identity),
               slots(count),
               publishedSize(count)
           {}

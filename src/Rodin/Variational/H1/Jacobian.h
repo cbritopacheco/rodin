@@ -301,7 +301,6 @@ namespace Rodin::Variational
 
         const auto geom = polytope.getGeometry();
         const auto feS = H1Element<K, ScalarType>(geom);
-        const size_t nscalar = feS.getCount();
         const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
@@ -311,9 +310,8 @@ namespace Rodin::Variational
         out.resize(vdim, spaceDimension);
         out.setZero();
 
-        for (size_t alpha = 0; alpha < nscalar; ++alpha)
-        {
-          const auto gref = feS.getBasis(alpha).getGradient()(rc);
+        feS.evaluateGradients(
+          [&](size_t alpha, const auto& gref) {
           for (size_t j = 0; j < d; ++j)
             ref(j) = gref(j);
 
@@ -323,10 +321,11 @@ namespace Rodin::Variational
           {
             const size_t local = alpha * vdim + comp;
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            for (size_t j = 0; j < spaceDimension; ++j)
+              for (size_t j = 0; j < spaceDimension; ++j)
               out(comp, j) += uval * phys(j);
           }
-        }
+          },
+          rc);
       }
   };
 

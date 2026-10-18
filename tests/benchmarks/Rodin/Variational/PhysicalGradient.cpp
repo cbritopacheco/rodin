@@ -66,137 +66,220 @@ namespace Rodin::Tests::Benchmarks
   class PhysicalGradient
   {
     public:
-    /// @brief Dimensionless affine-reproduction roundoff budget.
-    static constexpr Real Tolerance = 1e-10;
+      /// @brief Dimensionless affine-reproduction roundoff budget.
+      static constexpr Real Tolerance = 1e-10;
 
-    /**
-     * @brief Sweeps prepared quadrature samples through the gradient expression.
-     * @param state Requested polynomial quadrature order and repetitions.
-     * @param geometry Unit-box cell family.
-     */
-    static void run(benchmark::State& state, Geometry::Polytope::Type geometry)
-    {
-      using namespace Variational;
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
-      const auto cell = *mesh.getCell();
-      const size_t d = cell.getDimension();
-      if constexpr (IdentityMap)
-        mesh.setPolytopeTransformation(
-          {d, cell.getIndex()}, new Geometry::IdentityTransformation(d));
-      const auto space = [&]() {
-        if constexpr (NativeP1 && Operation == PhysicalDerivative::Gradient)
-          return P1<Scalar>(mesh);
-        else if constexpr (NativeP1)
-          return P1<Math::SpatialVector<Scalar>>(mesh, d);
-        else if constexpr (Operation == PhysicalDerivative::Gradient)
-          return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
-        else
-          return H1<K, Math::SpatialVector<Scalar>>(
-            std::integral_constant<size_t, K>{}, mesh, d);
-      }();
-      TrialFunction u(space);
-      auto gradient = [&]() {
-        if constexpr (Operation == PhysicalDerivative::Gradient)
-          return Grad(u);
-        else if constexpr (Operation == PhysicalDerivative::Jacobian)
-          return Jacobian(u);
-        else
-          return Div(u);
-      }();
-      using Value = std::remove_cvref_t<decltype(gradient.getBasis(size_t(0)))>;
-      const auto& fe = space.getFiniteElement(d, cell.getIndex());
-      const auto& formula = QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
-      const Geometry::PolytopeQuadrature quadrature(cell, formula);
-      const Scalar multiplier = []() {
-        if constexpr (std::is_same_v<Scalar, Complex>)
-          return Scalar(1, 0.5);
-        else
-          return Scalar(1);
-      }();
-      Math::Vector<Scalar> coefficients(fe.getCount());
-      for (size_t a = 0; a < fe.getCount(); ++a)
+      /**
+       * @brief Sweeps prepared quadrature samples through the gradient expression.
+       * @param state Requested polynomial quadrature order and repetitions.
+       * @param geometry Unit-box cell family.
+       */
+      static void run(benchmark::State& state, Geometry::Polytope::Type geometry)
       {
-        coefficients(a) = fe.getLinearForm(a)([&](const auto& reference) {
-          const Geometry::Point point(cell, reference);
-          Scalar value = multiplier;
-          for (size_t j = 0; j < d; ++j)
-            value += multiplier * Real(j + 1) * point.getPhysicalCoordinates()(j);
-          if constexpr (Operation == PhysicalDerivative::Gradient)
-            return value;
+        using namespace Variational;
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
+        const auto cell = *mesh.getCell();
+        const size_t d = cell.getDimension();
+        if constexpr (IdentityMap)
+          mesh.setPolytopeTransformation(
+            {d, cell.getIndex()}, new Geometry::IdentityTransformation(d));
+        const auto space = [&]() {
+          if constexpr (NativeP1 && Operation == PhysicalDerivative::Gradient)
+            return P1<Scalar>(mesh);
+          else if constexpr (NativeP1)
+            return P1<Math::SpatialVector<Scalar>>(mesh, d);
+          else if constexpr (Operation == PhysicalDerivative::Gradient)
+            return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
           else
+            return H1<K, Math::SpatialVector<Scalar>>(
+              std::integral_constant<size_t, K>{}, mesh, d);
+        }();
+        TrialFunction u(space);
+        auto gradient = [&]() {
+          if constexpr (Operation == PhysicalDerivative::Gradient)
+            return Grad(u);
+          else if constexpr (Operation == PhysicalDerivative::Jacobian)
+            return Jacobian(u);
+          else
+            return Div(u);
+        }();
+        using Value = std::remove_cvref_t<decltype(gradient.getBasis(size_t(0)))>;
+        const auto& fe = space.getFiniteElement(d, cell.getIndex());
+        const auto& formula =
+          QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
+        const Geometry::PolytopeQuadrature quadrature(cell, formula);
+        const Scalar multiplier = []() {
+          if constexpr (std::is_same_v<Scalar, Complex>)
+            return Scalar(1, 0.5);
+          else
+            return Scalar(1);
+        }();
+        Math::Vector<Scalar> coefficients(fe.getCount());
+        for (size_t a = 0; a < fe.getCount(); ++a)
+        {
+          coefficients(a) = fe.getLinearForm(a)([&](const auto& reference) {
+            const Geometry::Point point(cell, reference);
+            Scalar value = multiplier;
+            for (size_t j = 0; j < d; ++j)
+              value += multiplier * Real(j + 1) * point.getPhysicalCoordinates()(j);
+            if constexpr (Operation == PhysicalDerivative::Gradient)
+              return value;
+            else
+            {
+              Math::SpatialVector<Scalar> vector(d);
+              for (size_t c = 0; c < d; ++c)
+                vector(c) = Scalar(c + 1) * value;
+              return vector;
+            }
+          });
+        }
+        std::vector<Value> initial;
+        const auto valid = [&](const auto& values) {
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
           {
-            Math::SpatialVector<Scalar> vector(d);
-            for (size_t c = 0; c < d; ++c)
-              vector(c) = Scalar(c + 1) * value;
-            return vector;
+            if constexpr (Operation == PhysicalDerivative::Divergence)
+            {
+              Scalar value = 0;
+              for (size_t a = 0; a < fe.getCount(); ++a)
+                value += coefficients(a) * values[qp * fe.getCount() + a];
+              Scalar expected = 0;
+              for (size_t j = 0; j < d; ++j)
+                expected += multiplier * Real((j + 1) * (j + 1));
+              if (!std::isfinite(std::abs(value)) ||
+                std::abs(value - expected) > Tolerance)
+                return false;
+            }
+            else
+            {
+              for (size_t c = 0; c < (Operation == PhysicalDerivative::Gradient ? 1 : d);
+                   ++c)
+              {
+                for (size_t j = 0; j < d; ++j)
+                {
+                  Scalar value = 0;
+                  for (size_t a = 0; a < fe.getCount(); ++a)
+                  {
+                    const auto& basis = values[qp * fe.getCount() + a];
+                    if constexpr (Operation == PhysicalDerivative::Gradient)
+                      value += coefficients(a) * basis(j);
+                    else
+                      value += coefficients(a) * basis(c, j);
+                  }
+                  if (!std::isfinite(std::abs(value)) ||
+                    std::abs(value - multiplier * Real((c + 1) * (j + 1))) > Tolerance)
+                    return false;
+                }
+              }
+            }
           }
-        });
-      }
-      std::vector<Value> initial;
-      const auto valid = [&](const auto& values) {
+          return true;
+        };
         for (size_t qp = 0; qp < formula.getSize(); ++qp)
         {
-          if constexpr (Operation == PhysicalDerivative::Divergence)
+          const IntegrationPoint ip(quadrature, qp);
+          gradient.setIntegrationPoint(ip);
+          for (size_t a = 0; a < fe.getCount(); ++a)
+            initial.push_back(gradient.getBasis(a));
+          if constexpr (NativeP1)
           {
-            Scalar value = 0;
+            auto direct = [&]() {
+              if constexpr (Operation == PhysicalDerivative::Gradient)
+                return Grad(u);
+              else if constexpr (Operation == PhysicalDerivative::Jacobian)
+                return Jacobian(u);
+              else
+                return Div(u);
+            }();
+            const IntegrationPoint pointwise(quadrature.getPoint(qp));
+            direct.setIntegrationPoint(pointwise);
             for (size_t a = 0; a < fe.getCount(); ++a)
-              value += coefficients(a) * values[qp * fe.getCount() + a];
-            Scalar expected = 0;
-            for (size_t j = 0; j < d; ++j)
-              expected += multiplier * Real((j + 1) * (j + 1));
-            if (!std::isfinite(std::abs(value)) || std::abs(value - expected) > Tolerance)
-              return false;
-          }
-          else
-          {
-            for (size_t c = 0; c < (Operation == PhysicalDerivative::Gradient ? 1 : d);
-                 ++c)
             {
-              for (size_t j = 0; j < d; ++j)
-              {
-                Scalar value = 0;
-                for (size_t a = 0; a < fe.getCount(); ++a)
+              const auto expected = direct.getBasis(a);
+              const auto& actual = initial[qp * fe.getCount() + a];
+              const bool equal = [&]() {
+                if constexpr (Operation == PhysicalDerivative::Divergence)
+                  return actual == expected;
+                else
                 {
-                  const auto& basis = values[qp * fe.getCount() + a];
-                  if constexpr (Operation == PhysicalDerivative::Gradient)
-                    value += coefficients(a) * basis(j);
-                  else
-                    value += coefficients(a) * basis(c, j);
+                  for (size_t c = 0;
+                       c < (Operation == PhysicalDerivative::Gradient ? 1 : d); ++c)
+                  {
+                    for (size_t j = 0; j < d; ++j)
+                    {
+                      if constexpr (Operation == PhysicalDerivative::Gradient)
+                      {
+                        if (actual(j) != expected(j))
+                          return false;
+                      }
+                      else if (actual(c, j) != expected(c, j))
+                        return false;
+                    }
+                  }
+                  return true;
                 }
-                if (!std::isfinite(std::abs(value)) ||
-                  std::abs(value - multiplier * Real((c + 1) * (j + 1))) > Tolerance)
-                  return false;
+              }();
+              if (!equal)
+              {
+                physicalGradientFailed = true;
+                state.SkipWithError(
+                  "Indexed basis differs from fresh direct-point derivative");
+                return;
               }
             }
           }
         }
-        return true;
-      };
-      for (size_t qp = 0; qp < formula.getSize(); ++qp)
-      {
-        const IntegrationPoint ip(quadrature, qp);
-        gradient.setIntegrationPoint(ip);
-        for (size_t a = 0; a < fe.getCount(); ++a)
-          initial.push_back(gradient.getBasis(a));
-        if constexpr (NativeP1)
+        auto wrong = initial;
+        size_t perturbed = 0;
+        while (perturbed < fe.getCount() && std::abs(coefficients(perturbed)) == 0)
+          ++perturbed;
+        if (perturbed == fe.getCount())
         {
-          auto direct = [&]() {
-            if constexpr (Operation == PhysicalDerivative::Gradient)
-              return Grad(u);
-            else if constexpr (Operation == PhysicalDerivative::Jacobian)
-              return Jacobian(u);
-            else
-              return Div(u);
-          }();
-          const IntegrationPoint pointwise(quadrature.getPoint(qp));
-          direct.setIntegrationPoint(pointwise);
+          physicalGradientFailed = true;
+          state.SkipWithError("Affine coefficient representation is zero");
+          return;
+        }
+        if constexpr (Operation == PhysicalDerivative::Gradient)
+          wrong[perturbed](0) += Scalar(1) / coefficients(perturbed);
+        else if constexpr (Operation == PhysicalDerivative::Jacobian)
+          wrong[perturbed](0, 0) += Scalar(1) / coefficients(perturbed);
+        else
+          wrong[perturbed] += Scalar(1) / coefficients(perturbed);
+        if (!valid(initial) || valid(wrong))
+        {
+          physicalGradientFailed = true;
+          state.SkipWithError("Affine gradient or perturbation-rejection guard failed");
+          return;
+        }
+        for (auto _ : state)
+        {
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            const IntegrationPoint ip(quadrature, qp);
+            gradient.setIntegrationPoint(ip);
+            for (size_t a = 0; a < fe.getCount(); ++a)
+            {
+              if constexpr (NativeP1)
+              {
+                auto value = gradient.getBasis(a);
+                benchmark::DoNotOptimize(value);
+              }
+              else
+                benchmark::DoNotOptimize(gradient.getBasis(a));
+            }
+          }
+          benchmark::ClobberMemory();
+        }
+        for (size_t qp = 0; qp < formula.getSize(); ++qp)
+        {
+          const IntegrationPoint ip(quadrature, qp);
+          gradient.setIntegrationPoint(ip);
           for (size_t a = 0; a < fe.getCount(); ++a)
           {
-            const auto expected = direct.getBasis(a);
-            const auto& actual = initial[qp * fe.getCount() + a];
-            const bool equal = [&]() {
+            const auto value = gradient.getBasis(a);
+            const auto& expected = initial[qp * fe.getCount() + a];
+            const bool unchanged = [&]() {
               if constexpr (Operation == PhysicalDerivative::Divergence)
-                return actual == expected;
+                return value == expected;
               else
               {
                 for (size_t c = 0;
@@ -206,152 +289,74 @@ namespace Rodin::Tests::Benchmarks
                   {
                     if constexpr (Operation == PhysicalDerivative::Gradient)
                     {
-                      if (actual(j) != expected(j))
+                      if (value(j) != expected(j))
                         return false;
                     }
-                    else if (actual(c, j) != expected(c, j))
+                    else if (value(c, j) != expected(c, j))
                       return false;
                   }
                 }
                 return true;
               }
             }();
-            if (!equal)
+            if (!unchanged)
             {
               physicalGradientFailed = true;
-              state.SkipWithError(
-                "Indexed basis differs from fresh direct-point derivative");
+              state.SkipWithError("Repeated derivative preparation changed a component");
               return;
             }
           }
         }
+        state.counters["dimension"] = d;
+        state.counters["geometry_order"] = cell.getTransformation().getOrder();
+        state.counters["identity_map"] = IdentityMap;
+        const bool affineReference = geometry == Geometry::Polytope::Type::Segment ||
+          geometry == Geometry::Polytope::Type::Triangle ||
+          geometry == Geometry::Polytope::Type::Tetrahedron;
+        state.counters["warm_affine_reuse"] =
+          NativeP1 && affineReference && cell.getTransformation().getOrder() == 1;
+        state.counters["cells"] = 1;
+        state.counters["degree"] = K;
+        state.counters["basis_functions"] = fe.getCount();
+        state.counters["quadrature_points"] = formula.getSize();
+        state.counters["field_components"] =
+          Operation == PhysicalDerivative::Gradient ? 1 : d;
+        state.counters["local_dofs"] = fe.getCount();
+        const size_t scalarBasis =
+          Operation == PhysicalDerivative::Gradient ? fe.getCount() : fe.getCount() / d;
+        state.counters["scalar_basis_functions"] = scalarBasis;
+        state.counters["gradient_transform_products"] =
+          formula.getSize() * scalarBasis * d * d;
       }
-      auto wrong = initial;
-      size_t perturbed = 0;
-      while (perturbed < fe.getCount() && std::abs(coefficients(perturbed)) == 0)
-        ++perturbed;
-      if (perturbed == fe.getCount())
-      {
-        physicalGradientFailed = true;
-        state.SkipWithError("Affine coefficient representation is zero");
-        return;
-      }
-      if constexpr (Operation == PhysicalDerivative::Gradient)
-        wrong[perturbed](0) += Scalar(1) / coefficients(perturbed);
-      else if constexpr (Operation == PhysicalDerivative::Jacobian)
-        wrong[perturbed](0, 0) += Scalar(1) / coefficients(perturbed);
-      else
-        wrong[perturbed] += Scalar(1) / coefficients(perturbed);
-      if (!valid(initial) || valid(wrong))
-      {
-        physicalGradientFailed = true;
-        state.SkipWithError("Affine gradient or perturbation-rejection guard failed");
-        return;
-      }
-      for (auto _ : state)
-      {
-        for (size_t qp = 0; qp < formula.getSize(); ++qp)
-        {
-          const IntegrationPoint ip(quadrature, qp);
-          gradient.setIntegrationPoint(ip);
-          for (size_t a = 0; a < fe.getCount(); ++a)
-          {
-            if constexpr (NativeP1)
-            {
-              auto value = gradient.getBasis(a);
-              benchmark::DoNotOptimize(value);
-            }
-            else
-              benchmark::DoNotOptimize(gradient.getBasis(a));
-          }
-        }
-        benchmark::ClobberMemory();
-      }
-      for (size_t qp = 0; qp < formula.getSize(); ++qp)
-      {
-        const IntegrationPoint ip(quadrature, qp);
-        gradient.setIntegrationPoint(ip);
-        for (size_t a = 0; a < fe.getCount(); ++a)
-        {
-          const auto value = gradient.getBasis(a);
-          const auto& expected = initial[qp * fe.getCount() + a];
-          const bool unchanged = [&]() {
-            if constexpr (Operation == PhysicalDerivative::Divergence)
-              return value == expected;
-            else
-            {
-              for (size_t c = 0; c < (Operation == PhysicalDerivative::Gradient ? 1 : d);
-                   ++c)
-              {
-                for (size_t j = 0; j < d; ++j)
-                {
-                  if constexpr (Operation == PhysicalDerivative::Gradient)
-                  {
-                    if (value(j) != expected(j))
-                      return false;
-                  }
-                  else if (value(c, j) != expected(c, j))
-                    return false;
-                }
-              }
-              return true;
-            }
-          }();
-          if (!unchanged)
-          {
-            physicalGradientFailed = true;
-            state.SkipWithError("Repeated derivative preparation changed a component");
-            return;
-          }
-        }
-      }
-      state.counters["dimension"] = d;
-      state.counters["geometry_order"] = cell.getTransformation().getOrder();
-      state.counters["identity_map"] = IdentityMap;
-      const bool affineReference = geometry == Geometry::Polytope::Type::Segment ||
-        geometry == Geometry::Polytope::Type::Triangle ||
-        geometry == Geometry::Polytope::Type::Tetrahedron;
-      state.counters["warm_affine_reuse"] =
-        NativeP1 && affineReference && cell.getTransformation().getOrder() == 1;
-      state.counters["cells"] = 1;
-      state.counters["degree"] = K;
-      state.counters["basis_functions"] = fe.getCount();
-      state.counters["quadrature_points"] = formula.getSize();
-      state.counters["field_components"] =
-        Operation == PhysicalDerivative::Gradient ? 1 : d;
-      state.counters["local_dofs"] = fe.getCount();
-      const size_t scalarBasis =
-        Operation == PhysicalDerivative::Gradient ? fe.getCount() : fe.getCount() / d;
-      state.counters["scalar_basis_functions"] = scalarBasis;
-      state.counters["gradient_transform_products"] =
-        formula.getSize() * scalarBasis * d * d;
-    }
 
-    /// @brief Registers seven volume families and three quadrature orders.
-    static void registerCases()
-    {
-      using G = Geometry::Polytope::Type;
-      for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral,
-             G::Tetrahedron, G::Pyramid, G::Hexahedron, G::Wedge})
+      /// @brief Registers seven volume families, including elasticity-matched orders.
+      static void registerCases()
       {
-        const std::string operation = Operation == PhysicalDerivative::Gradient
-          ? "PhysicalGradient"
-          : Operation == PhysicalDerivative::Jacobian ? "PhysicalJacobian"
-                                                      : "PhysicalDivergence";
-        const std::string family = NativeP1
-          ? (IdentityMap ? "/NativeP1Identity" : "/NativeP1")
-          : "/H1/P" + std::to_string(K);
-        const std::string name = operation + family +
-          (std::is_same_v<Scalar, Complex> ? "/Complex/" : "/Real/") +
-          std::string(Convergence::UniformGrid::getGeometryName(geometry));
-        benchmark::RegisterBenchmark(
-          name.c_str(), [geometry](auto& state) { run(state, geometry); })
-          ->Arg(2)
-          ->Arg(8)
-          ->Arg(16)
-          ->UseRealTime();
+        using G = Geometry::Polytope::Type;
+        for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral,
+               G::Tetrahedron, G::Pyramid, G::Hexahedron, G::Wedge})
+        {
+          const std::string operation = Operation == PhysicalDerivative::Gradient
+            ? "PhysicalGradient"
+            : Operation == PhysicalDerivative::Jacobian ? "PhysicalJacobian"
+                                                        : "PhysicalDivergence";
+          const std::string family = NativeP1
+            ? (IdentityMap ? "/NativeP1Identity" : "/NativeP1")
+            : "/H1/P" + std::to_string(K);
+          const std::string name = operation + family +
+            (std::is_same_v<Scalar, Complex> ? "/Complex/" : "/Real/") +
+            std::string(Convergence::UniformGrid::getGeometryName(geometry));
+          benchmark::RegisterBenchmark(
+            name.c_str(), [geometry](auto& state) { run(state, geometry); })
+            ->Arg(2)
+            ->Arg(4)
+            ->Arg(6)
+            ->Arg(8)
+            ->Arg(12)
+            ->Arg(16)
+            ->UseRealTime();
+        }
       }
-    }
   };
 }
 

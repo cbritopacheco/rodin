@@ -32,159 +32,161 @@ namespace Rodin::Tests::Benchmarks
   class CoupledReactionDiffusionWorkload
   {
     public:
-    /// @brief Matches the polynomial patch quadrature in coupled certification.
-    static constexpr size_t QuadratureOrder = 16;
+      /// @brief Matches the polynomial patch quadrature in coupled certification.
+      static constexpr size_t QuadratureOrder = 16;
 
-    /**
-     * @brief Returns the fixed component multiplier for the coefficient field.
-     * @param component Zero-based component index, smaller than two.
-     * @returns Real unit multiplier or a distinct complex component multiplier.
-     */
-    static Scalar getMultiplier(size_t component)
-    {
-      assert(component < 2);
-      if constexpr (std::is_same_v<Scalar, Complex>)
-        return component == 0 ? Scalar(1, 1) : Scalar(2, -1);
-      else
-        return 1;
-    }
-
-    /**
-     * @brief Returns the manufactured physical field for one component.
-     * @param data Certified real manufactured data.
-     * @param component Zero-based component index, smaller than two.
-     * @returns Function taking values in the requested coefficient field.
-     */
-    static auto getSolution(
-      const Convergence::ReactionDiffusionData& data, size_t component)
-    {
-      const auto exact = data.getSolution(component);
-      const Scalar multiplier = getMultiplier(component);
-      const auto evaluate = [exact, multiplier](const Geometry::Point& point) {
-        return multiplier * exact(point);
-      };
-      if constexpr (std::is_same_v<Scalar, Complex>)
-        return Variational::ComplexFunction(evaluate);
-      else
-        return Variational::RealFunction(evaluate);
-    }
-
-    /**
-     * @brief Returns the analytically scaled coupled source.
-     * @param data Certified real manufactured data.
-     * @param component Zero-based component index, smaller than two.
-     * @returns Source for the original nonzero coupling coefficient.
-     */
-    static auto getSource(
-      const Convergence::ReactionDiffusionData& data, size_t component)
-    {
-      const auto source = data.getSource(component);
-      const auto other = data.getSolution(1 - component);
-      const Scalar multiplier = getMultiplier(component),
-                   otherMultiplier = getMultiplier(1 - component);
-      const auto evaluate = [source, other, multiplier, otherMultiplier](
-                              const Geometry::Point& point) {
-        return multiplier * source(point) +
-          Convergence::ReactionDiffusionData::Coupling * (otherMultiplier - multiplier) *
-          other(point);
-      };
-      if constexpr (std::is_same_v<Scalar, Complex>)
-        return Variational::ComplexFunction(evaluate);
-      else
-        return Variational::RealFunction(evaluate);
-    }
-
-    /**
-     * @brief Defines the physical block problem or its omitted-coupling control.
-     *
-     * Original reference integrals replace only local operator kernels.
-     * Omitting coupling leaves analytic sources and prescribed traces unchanged.
-     * Both exact fields are interpolated through their own DOF functionals.
-     *
-     * @tparam Reference Whether original local operator kernels are requested.
-     * @tparam TestWeighted Whether the real second diffusion coefficient is
-     * placed on the test operand to exercise generic gradient expressions.
-     * @tparam U First trial function type.
-     * @tparam W Second trial function type.
-     * @tparam V First test function type.
-     * @tparam Z Second test function type.
-     * @tparam ProblemType Two-field problem representation.
-     * @param u First trial function.
-     * @param w Second trial function.
-     * @param v First test function.
-     * @param z Second test function.
-     * @param problem Destination formulation.
-     * @param data Manufactured real fields and physical sources.
-     * @param omitCoupling Whether both off-diagonal operator terms are zeroed.
-     */
-    template <bool Reference = false, bool TestWeighted = false, class U, class W,
-      class V, class Z, class ProblemType>
-    static void configure(U& u, W& w, V& v, Z& z, ProblemType& problem,
-      const Convergence::ReactionDiffusionData& data, bool omitCoupling = false)
-    {
-      using namespace Variational;
-      const auto exactU = getSolution(data, 0), exactW = getSolution(data, 1);
-      const Real coupling =
-        omitCoupling ? Real(0) : Convergence::ReactionDiffusionData::Coupling;
-      auto aUU = Integral(Grad(u), Grad(v));
-      auto aWW = [&]() {
-        if constexpr (TestWeighted)
-          return Integral(Grad(w), Real(2) * Grad(z));
+      /**
+       * @brief Returns the fixed component multiplier for the coefficient field.
+       * @param component Zero-based component index, smaller than two.
+       * @returns Real unit multiplier or a distinct complex component multiplier.
+       */
+      static Scalar getMultiplier(size_t component)
+      {
+        assert(component < 2);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return component == 0 ? Scalar(1, 1) : Scalar(2, -1);
         else
-          return Integral(Real(2) * Grad(w), Grad(z));
-      }();
-      auto rUU = Integral(u, v), rWW = Integral(w, z);
-      auto rUW = Integral(coupling * w, v), rWU = Integral(coupling * u, z);
-      auto bU = Integral(getSource(data, 0), v), bW = Integral(getSource(data, 1), z);
-      aUU.setOrder(QuadratureOrder);
-      aWW.setOrder(QuadratureOrder);
-      rUU.setOrder(QuadratureOrder);
-      rWW.setOrder(QuadratureOrder);
-      rUW.setOrder(QuadratureOrder);
-      rWU.setOrder(QuadratureOrder);
-      bU.setOrder(QuadratureOrder);
-      bW.setOrder(QuadratureOrder);
-      if constexpr (Reference)
-      {
-        problem = ReferenceIntegral(aUU) + ReferenceIntegral(rUU) +
-          ReferenceIntegral(rUW) - bU + ReferenceIntegral(aWW) + ReferenceIntegral(rWW) +
-          ReferenceIntegral(rWU) - bW + DirichletBC(u, exactU) + DirichletBC(w, exactW);
+          return 1;
       }
-      else
-      {
-        problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW + DirichletBC(u, exactU) +
-          DirichletBC(w, exactW);
-      }
-      u.getSolution() = exactU;
-      w.getSolution() = exactW;
-    }
 
-    /**
-     * @brief Registers both physical fields on seven geometries at three sizes.
-     * @tparam Callback Callable accepting state and reference geometry.
-     * @param scope Owning operation, such as Assembly or CG.
-     * @param callback Operation to measure.
-     */
-    template <class Callback>
-    static void registerCases(const char* scope, Callback callback)
-    {
-      using Geometry::Polytope;
-      for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
-             Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-             Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+      /**
+       * @brief Returns the manufactured physical field for one component.
+       * @param data Certified real manufactured data.
+       * @param component Zero-based component index, smaller than two.
+       * @returns Function taking values in the requested coefficient field.
+       */
+      static auto getSolution(
+        const Convergence::ReactionDiffusionData& data, size_t component)
       {
-        const std::string name = std::string("CoupledReactionDiffusion/") + scope +
-          "/H1/P" + std::to_string(K) + "/" +
-          (std::is_same_v<Scalar, Complex> ? "Complex/" : "Real/") +
-          std::string(Convergence::UniformGrid::getGeometryName(geometry));
-        benchmark::RegisterBenchmark(
-          name.c_str(), [callback, geometry](auto& state) { callback(state, geometry); })
-          ->Arg(3)
-          ->Arg(5)
-          ->Arg(9)
-          ->UseRealTime();
+        const auto exact = data.getSolution(component);
+        const Scalar multiplier = getMultiplier(component);
+        const auto evaluate = [exact, multiplier](const Geometry::Point& point) {
+          return multiplier * exact(point);
+        };
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Variational::ComplexFunction(evaluate);
+        else
+          return Variational::RealFunction(evaluate);
       }
-    }
+
+      /**
+       * @brief Returns the analytically scaled coupled source.
+       * @param data Certified real manufactured data.
+       * @param component Zero-based component index, smaller than two.
+       * @returns Source for the original nonzero coupling coefficient.
+       */
+      static auto getSource(
+        const Convergence::ReactionDiffusionData& data, size_t component)
+      {
+        const auto source = data.getSource(component);
+        const auto other = data.getSolution(1 - component);
+        const Scalar multiplier = getMultiplier(component),
+                     otherMultiplier = getMultiplier(1 - component);
+        const auto evaluate = [source, other, multiplier, otherMultiplier](
+                                const Geometry::Point& point) {
+          return multiplier * source(point) +
+            Convergence::ReactionDiffusionData::Coupling *
+            (otherMultiplier - multiplier) * other(point);
+        };
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Variational::ComplexFunction(evaluate);
+        else
+          return Variational::RealFunction(evaluate);
+      }
+
+      /**
+       * @brief Defines the physical block problem or its omitted-coupling control.
+       *
+       * Original reference integrals replace only local operator kernels.
+       * Omitting coupling leaves analytic sources and prescribed traces unchanged.
+       * Both exact fields are interpolated through their own DOF functionals.
+       *
+       * @tparam Reference Whether original local operator kernels are requested.
+       * @tparam TestWeighted Whether the real second diffusion coefficient is
+       * placed on the test operand to exercise generic gradient expressions.
+       * @tparam U First trial function type.
+       * @tparam W Second trial function type.
+       * @tparam V First test function type.
+       * @tparam Z Second test function type.
+       * @tparam ProblemType Two-field problem representation.
+       * @param u First trial function.
+       * @param w Second trial function.
+       * @param v First test function.
+       * @param z Second test function.
+       * @param problem Destination formulation.
+       * @param data Manufactured real fields and physical sources.
+       * @param omitCoupling Whether both off-diagonal operator terms are zeroed.
+       */
+      template <bool Reference = false, bool TestWeighted = false, class U, class W,
+        class V, class Z, class ProblemType>
+      static void configure(U& u, W& w, V& v, Z& z, ProblemType& problem,
+        const Convergence::ReactionDiffusionData& data, bool omitCoupling = false)
+      {
+        using namespace Variational;
+        const auto exactU = getSolution(data, 0), exactW = getSolution(data, 1);
+        const Real coupling =
+          omitCoupling ? Real(0) : Convergence::ReactionDiffusionData::Coupling;
+        auto aUU = Integral(Grad(u), Grad(v));
+        auto aWW = [&]() {
+          if constexpr (TestWeighted)
+            return Integral(Grad(w), Real(2) * Grad(z));
+          else
+            return Integral(Real(2) * Grad(w), Grad(z));
+        }();
+        auto rUU = Integral(u, v), rWW = Integral(w, z);
+        auto rUW = Integral(coupling * w, v), rWU = Integral(coupling * u, z);
+        auto bU = Integral(getSource(data, 0), v), bW = Integral(getSource(data, 1), z);
+        aUU.setOrder(QuadratureOrder);
+        aWW.setOrder(QuadratureOrder);
+        rUU.setOrder(QuadratureOrder);
+        rWW.setOrder(QuadratureOrder);
+        rUW.setOrder(QuadratureOrder);
+        rWU.setOrder(QuadratureOrder);
+        bU.setOrder(QuadratureOrder);
+        bW.setOrder(QuadratureOrder);
+        if constexpr (Reference)
+        {
+          problem = ReferenceIntegral(aUU) + ReferenceIntegral(rUU) +
+            ReferenceIntegral(rUW) - bU + ReferenceIntegral(aWW) +
+            ReferenceIntegral(rWW) + ReferenceIntegral(rWU) - bW +
+            DirichletBC(u, exactU) + DirichletBC(w, exactW);
+        }
+        else
+        {
+          problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW + DirichletBC(u, exactU) +
+            DirichletBC(w, exactW);
+        }
+        u.getSolution() = exactU;
+        w.getSolution() = exactW;
+      }
+
+      /**
+       * @brief Registers both physical fields on seven geometries at three sizes.
+       * @tparam Callback Callable accepting state and reference geometry.
+       * @param scope Owning operation, such as Assembly or CG.
+       * @param callback Operation to measure.
+       */
+      template <class Callback>
+      static void registerCases(const char* scope, Callback callback)
+      {
+        using Geometry::Polytope;
+        for (const auto geometry :
+          {Polytope::Type::Segment, Polytope::Type::Triangle,
+            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+            Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+        {
+          const std::string name = std::string("CoupledReactionDiffusion/") + scope +
+            "/H1/P" + std::to_string(K) + "/" +
+            (std::is_same_v<Scalar, Complex> ? "Complex/" : "Real/") +
+            std::string(Convergence::UniformGrid::getGeometryName(geometry));
+          benchmark::RegisterBenchmark(name.c_str(),
+            [callback, geometry](auto& state) { callback(state, geometry); })
+            ->Arg(3)
+            ->Arg(5)
+            ->Arg(9)
+            ->UseRealTime();
+        }
+      }
   };
 }
 #endif

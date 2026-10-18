@@ -57,209 +57,211 @@ namespace Rodin::Tests::Benchmarks
   class ProblemLifecycle
   {
     public:
-    /// @brief Existing manufactured coefficient-patch residual budget.
-    static constexpr Real PatchTolerance = 1e-10;
+      /// @brief Existing manufactured coefficient-patch residual budget.
+      static constexpr Real PatchTolerance = 1e-10;
 
-    /**
-     * @brief Measures one lifetime on fixed spaces and a qualified formulation.
-     * @param state Grid points per axis and repetition protocol.
-     * @param geometry Reference-cell family of the unit-box mesh.
-     */
-    static void run(benchmark::State& state, Geometry::Polytope::Type geometry)
-    {
-      using namespace Variational;
-      using Workload = CoupledReactionDiffusionWorkload<2, Scalar>;
-      using System = Math::LinearSystem<Matrix, Math::Vector<Scalar>>;
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-      H1<2, Scalar> space(std::integral_constant<size_t, 2>{}, mesh);
-      TrialFunction u(space), w(space);
-      TestFunction v(space), z(space);
-      using ProblemType =
-        Problem<System, decltype(u), decltype(w), decltype(v), decltype(z)>;
-      ProblemType source(u, w, v, z);
-      const Convergence::ReactionDiffusionData data(
-        mesh.getDimension(), Convergence::ReactionDiffusionData::Field::Quadratic);
-      Workload::configure(u, w, v, z, source, data);
-      source.assemble();
-      const auto& system = source.getLinearSystem();
-      const Math::Vector<Scalar> exact = system.getSolution();
-      const Real residual = (system.getOperator() * exact - system.getVector()).norm() /
-        std::max(Real(1), system.getVector().norm());
-      const auto bodyMatches = [&](const auto& candidate) {
-        return candidate.getBody().getLocalBFIs().size() ==
-          source.getBody().getLocalBFIs().size() &&
-          candidate.getBody().getLFIs().size() == source.getBody().getLFIs().size();
-      };
-      const auto makeCandidate = [&]() -> ProblemType {
-        if constexpr (Lifetime == ProblemLifetime::Empty ||
-          Lifetime == ProblemLifetime::Defined)
-        {
-          ProblemType candidate(u, w, v, z);
-          candidate = source.getBody();
-          candidate.assemble();
-          return candidate;
-        }
-        else if constexpr (Lifetime == ProblemLifetime::Copy)
-          return ProblemType(source);
-        else if constexpr (Lifetime == ProblemLifetime::Move)
-        {
-          auto staging(source);
-          return ProblemType(std::move(staging));
-        }
-        else
-        {
-          ProblemType candidate(u, w, v, z);
-          if constexpr (Lifetime == ProblemLifetime::CopyAssignment)
-            candidate = source;
-          else
+      /**
+       * @brief Measures one lifetime on fixed spaces and a qualified formulation.
+       * @param state Grid points per axis and repetition protocol.
+       * @param geometry Reference-cell family of the unit-box mesh.
+       */
+      static void run(benchmark::State& state, Geometry::Polytope::Type geometry)
+      {
+        using namespace Variational;
+        using Workload = CoupledReactionDiffusionWorkload<2, Scalar>;
+        using System = Math::LinearSystem<Matrix, Math::Vector<Scalar>>;
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+        H1<2, Scalar> space(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(space), w(space);
+        TestFunction v(space), z(space);
+        using ProblemType =
+          Problem<System, decltype(u), decltype(w), decltype(v), decltype(z)>;
+        ProblemType source(u, w, v, z);
+        const Convergence::ReactionDiffusionData data(
+          mesh.getDimension(), Convergence::ReactionDiffusionData::Field::Quadratic);
+        Workload::configure(u, w, v, z, source, data);
+        source.assemble();
+        const auto& system = source.getLinearSystem();
+        const Math::Vector<Scalar> exact = system.getSolution();
+        const Real residual = (system.getOperator() * exact - system.getVector()).norm() /
+          std::max(Real(1), system.getVector().norm());
+        const auto bodyMatches = [&](const auto& candidate) {
+          return candidate.getBody().getLocalBFIs().size() ==
+            source.getBody().getLocalBFIs().size() &&
+            candidate.getBody().getLFIs().size() == source.getBody().getLFIs().size();
+        };
+        const auto makeCandidate = [&]() -> ProblemType {
+          if constexpr (Lifetime == ProblemLifetime::Empty ||
+            Lifetime == ProblemLifetime::Defined)
+          {
+            ProblemType candidate(u, w, v, z);
+            candidate = source.getBody();
+            candidate.assemble();
+            return candidate;
+          }
+          else if constexpr (Lifetime == ProblemLifetime::Copy)
+            return ProblemType(source);
+          else if constexpr (Lifetime == ProblemLifetime::Move)
           {
             auto staging(source);
-            candidate = std::move(staging);
+            return ProblemType(std::move(staging));
           }
-          return candidate;
-        }
-      };
-      const auto qualify = [&]() {
-        auto candidate = makeCandidate();
-        if (!bodyMatches(candidate))
-          return false;
-        candidate.assemble();
-        const auto& result = candidate.getLinearSystem();
-        return (result.getOperator() - system.getOperator()).norm() == 0 &&
-          (result.getVector() - system.getVector()).norm() == 0 &&
-          candidate.getTrialOffsets() == source.getTrialOffsets() &&
-          candidate.getTestOffsets() == source.getTestOffsets();
-      };
-      ProblemType wrong(u, w, v, z);
-      if (!std::isfinite(residual) || residual >= PatchTolerance || bodyMatches(wrong) ||
-        !qualify())
-      {
-        problemLifecycleFailed = true;
-        state.SkipWithError("Initial lifecycle or manufactured fixture guard failed");
-        return;
-      }
-      Optional<ProblemType> staging;
-      Optional<ProblemType> destination;
-      if constexpr (Lifetime == ProblemLifetime::CopyAssignment ||
-        Lifetime == ProblemLifetime::MoveAssignment)
-        destination.emplace(u, w, v, z);
-      for (auto _ : state)
-      {
-        if constexpr (Lifetime == ProblemLifetime::Empty ||
-          Lifetime == ProblemLifetime::Defined)
-        {
-          ProblemType candidate(u, w, v, z);
-          if constexpr (Lifetime == ProblemLifetime::Defined)
-            candidate = source.getBody();
-          benchmark::DoNotOptimize(&candidate);
-          benchmark::ClobberMemory();
-        }
-        else if constexpr (Lifetime == ProblemLifetime::Copy)
-        {
-          auto candidate(source);
-          benchmark::DoNotOptimize(&candidate);
-          benchmark::ClobberMemory();
-        }
-        else if constexpr (Lifetime == ProblemLifetime::CopyAssignment)
-        {
-          *destination = source;
-          benchmark::DoNotOptimize(&*destination);
-          benchmark::ClobberMemory();
-        }
-        else
-        {
-          state.PauseTiming();
-          staging.emplace(source);
-          state.ResumeTiming();
+          else
           {
-            if constexpr (Lifetime == ProblemLifetime::Move)
-            {
-              auto candidate(std::move(*staging));
-              benchmark::DoNotOptimize(&candidate);
-              benchmark::ClobberMemory();
-            }
+            ProblemType candidate(u, w, v, z);
+            if constexpr (Lifetime == ProblemLifetime::CopyAssignment)
+              candidate = source;
             else
             {
-              *destination = std::move(*staging);
-              benchmark::DoNotOptimize(&*destination);
-              benchmark::ClobberMemory();
+              auto staging(source);
+              candidate = std::move(staging);
             }
+            return candidate;
           }
-          state.PauseTiming();
-          staging.reset();
-          state.ResumeTiming();
-        }
-      }
-      bool destinationMatches = true;
-      if constexpr (Lifetime == ProblemLifetime::CopyAssignment ||
-        Lifetime == ProblemLifetime::MoveAssignment)
-      {
-        destinationMatches = bodyMatches(*destination) &&
-          (destination->getLinearSystem().getOperator() - system.getOperator()).norm() ==
-            0 &&
-          (destination->getLinearSystem().getVector() - system.getVector()).norm() == 0;
-        if (destinationMatches)
+        };
+        const auto qualify = [&]() {
+          auto candidate = makeCandidate();
+          if (!bodyMatches(candidate))
+            return false;
+          candidate.assemble();
+          const auto& result = candidate.getLinearSystem();
+          return (result.getOperator() - system.getOperator()).norm() == 0 &&
+            (result.getVector() - system.getVector()).norm() == 0 &&
+            candidate.getTrialOffsets() == source.getTrialOffsets() &&
+            candidate.getTestOffsets() == source.getTestOffsets();
+        };
+        ProblemType wrong(u, w, v, z);
+        if (!std::isfinite(residual) || residual >= PatchTolerance ||
+          bodyMatches(wrong) || !qualify())
         {
-          destination->assemble();
-          destinationMatches =
+          problemLifecycleFailed = true;
+          state.SkipWithError("Initial lifecycle or manufactured fixture guard failed");
+          return;
+        }
+        Optional<ProblemType> staging;
+        Optional<ProblemType> destination;
+        if constexpr (Lifetime == ProblemLifetime::CopyAssignment ||
+          Lifetime == ProblemLifetime::MoveAssignment)
+          destination.emplace(u, w, v, z);
+        for (auto _ : state)
+        {
+          if constexpr (Lifetime == ProblemLifetime::Empty ||
+            Lifetime == ProblemLifetime::Defined)
+          {
+            ProblemType candidate(u, w, v, z);
+            if constexpr (Lifetime == ProblemLifetime::Defined)
+              candidate = source.getBody();
+            benchmark::DoNotOptimize(&candidate);
+            benchmark::ClobberMemory();
+          }
+          else if constexpr (Lifetime == ProblemLifetime::Copy)
+          {
+            auto candidate(source);
+            benchmark::DoNotOptimize(&candidate);
+            benchmark::ClobberMemory();
+          }
+          else if constexpr (Lifetime == ProblemLifetime::CopyAssignment)
+          {
+            *destination = source;
+            benchmark::DoNotOptimize(&*destination);
+            benchmark::ClobberMemory();
+          }
+          else
+          {
+            state.PauseTiming();
+            staging.emplace(source);
+            state.ResumeTiming();
+            {
+              if constexpr (Lifetime == ProblemLifetime::Move)
+              {
+                auto candidate(std::move(*staging));
+                benchmark::DoNotOptimize(&candidate);
+                benchmark::ClobberMemory();
+              }
+              else
+              {
+                *destination = std::move(*staging);
+                benchmark::DoNotOptimize(&*destination);
+                benchmark::ClobberMemory();
+              }
+            }
+            state.PauseTiming();
+            staging.reset();
+            state.ResumeTiming();
+          }
+        }
+        bool destinationMatches = true;
+        if constexpr (Lifetime == ProblemLifetime::CopyAssignment ||
+          Lifetime == ProblemLifetime::MoveAssignment)
+        {
+          destinationMatches = bodyMatches(*destination) &&
             (destination->getLinearSystem().getOperator() - system.getOperator())
                 .norm() == 0 &&
             (destination->getLinearSystem().getVector() - system.getVector()).norm() == 0;
+          if (destinationMatches)
+          {
+            destination->assemble();
+            destinationMatches =
+              (destination->getLinearSystem().getOperator() - system.getOperator())
+                  .norm() == 0 &&
+              (destination->getLinearSystem().getVector() - system.getVector()).norm() ==
+                0;
+          }
+        }
+        if (!destinationMatches || !qualify())
+        {
+          problemLifecycleFailed = true;
+          state.SkipWithError("Final lifecycle guard changed the operator or load");
+        }
+        state.counters["dimension"] = mesh.getDimension();
+        state.counters["degree"] = 2;
+        state.counters["cells"] = mesh.getPolytopeCount(mesh.getDimension());
+        state.counters["rows"] = system.getOperator().rows();
+        if constexpr (std::is_base_of_v<Eigen::SparseMatrixBase<Matrix>, Matrix>)
+          state.counters["stored_entries"] = system.getOperator().nonZeros();
+        else
+          state.counters["stored_entries"] = system.getOperator().size();
+        state.counters["problem_object_bytes"] = sizeof(ProblemType);
+        state.counters["scalar_bytes"] = sizeof(Scalar);
+        state.counters["relative_patch_residual"] = residual;
+      }
+
+      /// @brief Registers seven mesh families and three independent size levels.
+      static void registerCases()
+      {
+        const char* operation = [] {
+          if constexpr (Lifetime == ProblemLifetime::Empty)
+            return "Empty";
+          else if constexpr (Lifetime == ProblemLifetime::Defined)
+            return "Defined";
+          else if constexpr (Lifetime == ProblemLifetime::Copy)
+            return "Copy";
+          else if constexpr (Lifetime == ProblemLifetime::Move)
+            return "Move";
+          else if constexpr (Lifetime == ProblemLifetime::CopyAssignment)
+            return "CopyAssignment";
+          else
+            return "MoveAssignment";
+        }();
+        using Geometry::Polytope;
+        for (const auto geometry :
+          {Polytope::Type::Segment, Polytope::Type::Triangle,
+            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+            Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+        {
+          const std::string name = std::string("ProblemLifecycle/") + operation +
+            "/H1/P2/" + (std::is_same_v<Scalar, Complex> ? "Complex/" : "Real/") +
+            (std::is_base_of_v<Eigen::SparseMatrixBase<Matrix>, Matrix> ? "Sparse/"
+                                                                        : "Dense/") +
+            std::string(Convergence::UniformGrid::getGeometryName(geometry));
+          benchmark::RegisterBenchmark(
+            name.c_str(), [geometry](auto& state) { run(state, geometry); })
+            ->Arg(2)
+            ->Arg(3)
+            ->Arg(4)
+            ->UseRealTime();
         }
       }
-      if (!destinationMatches || !qualify())
-      {
-        problemLifecycleFailed = true;
-        state.SkipWithError("Final lifecycle guard changed the operator or load");
-      }
-      state.counters["dimension"] = mesh.getDimension();
-      state.counters["degree"] = 2;
-      state.counters["cells"] = mesh.getPolytopeCount(mesh.getDimension());
-      state.counters["rows"] = system.getOperator().rows();
-      if constexpr (std::is_base_of_v<Eigen::SparseMatrixBase<Matrix>, Matrix>)
-        state.counters["stored_entries"] = system.getOperator().nonZeros();
-      else
-        state.counters["stored_entries"] = system.getOperator().size();
-      state.counters["problem_object_bytes"] = sizeof(ProblemType);
-      state.counters["scalar_bytes"] = sizeof(Scalar);
-      state.counters["relative_patch_residual"] = residual;
-    }
-
-    /// @brief Registers seven mesh families and three independent size levels.
-    static void registerCases()
-    {
-      const char* operation = [] {
-        if constexpr (Lifetime == ProblemLifetime::Empty)
-          return "Empty";
-        else if constexpr (Lifetime == ProblemLifetime::Defined)
-          return "Defined";
-        else if constexpr (Lifetime == ProblemLifetime::Copy)
-          return "Copy";
-        else if constexpr (Lifetime == ProblemLifetime::Move)
-          return "Move";
-        else if constexpr (Lifetime == ProblemLifetime::CopyAssignment)
-          return "CopyAssignment";
-        else
-          return "MoveAssignment";
-      }();
-      using Geometry::Polytope;
-      for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
-             Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-             Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
-      {
-        const std::string name = std::string("ProblemLifecycle/") + operation +
-          "/H1/P2/" + (std::is_same_v<Scalar, Complex> ? "Complex/" : "Real/") +
-          (std::is_base_of_v<Eigen::SparseMatrixBase<Matrix>, Matrix> ? "Sparse/"
-                                                                      : "Dense/") +
-          std::string(Convergence::UniformGrid::getGeometryName(geometry));
-        benchmark::RegisterBenchmark(
-          name.c_str(), [geometry](auto& state) { run(state, geometry); })
-          ->Arg(2)
-          ->Arg(3)
-          ->Arg(4)
-          ->UseRealTime();
-      }
-    }
   };
 
   /**

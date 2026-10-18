@@ -49,297 +49,299 @@ namespace Rodin::Geometry
   template <class FE>
   class ParametricTransformation final : public PolytopeTransformation
   {
-    static_assert(std::is_same_v<typename FE::RangeType, Real>,
-      "Type of finite element must be scalar valued.");
+      static_assert(std::is_same_v<typename FE::RangeType, Real>,
+        "Type of finite element must be scalar valued.");
 
-    friend class boost::serialization::access;
+      friend class boost::serialization::access;
 
     public:
-    /// @brief Parent class type.
-    using Parent = PolytopeTransformation;
-    using Parent::transform;
-    using Parent::jacobian;
-    using Parent::inverse;
+      /// @brief Parent class type.
+      using Parent = PolytopeTransformation;
+      using Parent::transform;
+      using Parent::jacobian;
+      using Parent::inverse;
 
-    /**
-     * @brief Constructs the transformation from a control-point cloud and
-     * a finite element (the control-point count must match the element's
-     * node count).
-     * @param pm Point at which the operation is evaluated.
-     * @param fe Finite element used by the operation.
-     */
-    ParametricTransformation(Geometry::PointCloud&& pm, FE&& fe)
-      : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
-        m_pm(std::move(pm)),
-        m_fe(std::move(fe))
-    {
-      assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
-    }
-
-    /**
-     * @brief Constructs the transformation from a control-point cloud and
-     * a finite element.
-     * @param pm Point at which the operation is evaluated.
-     * @param fe Finite element used by the operation.
-     */
-    ParametricTransformation(const Geometry::PointCloud& pm, const FE& fe)
-      : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
-        m_pm(pm),
-        m_fe(fe)
-    {
-      assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
-    }
-
-    /**
-     * @brief Constructs the transformation from a control-point cloud and
-     * a finite element.
-     * @param pm Point at which the operation is evaluated.
-     * @param fe Finite element used by the operation.
-     */
-    ParametricTransformation(Geometry::PointCloud&& pm, const FE& fe)
-      : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
-        m_pm(std::move(pm)),
-        m_fe(fe)
-    {
-      assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
-    }
-
-    /**
-     * @brief Constructs the transformation from a control-point cloud and
-     * a finite element.
-     * @param pm Point at which the operation is evaluated.
-     * @param fe Finite element used by the operation.
-     */
-    ParametricTransformation(const PointCloud& pm, FE&& fe)
-      : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
-        m_pm(pm),
-        m_fe(std::move(fe))
-    {
-      assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
-    }
-
-    /**
-     * @brief Copy constructor.
-     * @param other Object to copy from.
-     */
-    ParametricTransformation(const ParametricTransformation& other)
-      : Parent(other),
-        m_pm(other.m_pm),
-        m_fe(other.m_fe)
-    {
-      assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
-    }
-
-    /**
-     * @brief Move constructor.
-     * @param other Object to move from.
-     */
-    ParametricTransformation(ParametricTransformation&& other)
-      : Parent(std::move(other)),
-        m_pm(std::move(other.m_pm)),
-        m_fe(std::move(other.m_fe))
-    {
-      assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
-    }
-
-    size_t getOrder() const override
-    {
-      return m_fe.getOrder();
-    }
-
-    /**
-     * @brief Returns the element's factor degree when available, otherwise
-     * the conservative total-degree bound of the transformation interface.
-     * @returns The element's factor degree when available, otherwise the conservative total-degree bound of the transformation interface.
-     */
-    size_t getFactorOrder() const override
-    {
-      if constexpr (requires { m_fe.getFactorOrder(); })
-        return m_fe.getFactorOrder();
-      else
-        return Parent::getFactorOrder();
-    }
-
-    void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
-    {
-      const size_t pdim = getPhysicalDimension();
-      assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
-      pc.resize(pdim);
-      pc.setZero();
-      const size_t count = m_fe.getCount();
-      for (size_t local = 0; local < count; local++)
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element (the control-point count must match the element's
+       * node count).
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
+      ParametricTransformation(Geometry::PointCloud&& pm, FE&& fe)
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
+          m_pm(std::move(pm)),
+          m_fe(std::move(fe))
       {
-        assert(pc.size() == m_pm[local].size());
-        pc += m_pm[local] * m_fe.getBasis(local)(rc);
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
-    }
 
-    void jacobian(
-      Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
-    {
-      const size_t rdim = getReferenceDimension();
-      assert(static_cast<size_t>(rc.size()) == rdim);
-      const size_t pdim = getPhysicalDimension();
-      pc.resize(pdim, rdim);
-      pc.setZero();
-      const size_t count = m_fe.getCount();
-      for (size_t local = 0; local < count; local++)
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element.
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
+      ParametricTransformation(const Geometry::PointCloud& pm, const FE& fe)
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
+          m_pm(pm),
+          m_fe(fe)
       {
-        const auto& basis = m_fe.getBasis(local);
-        for (size_t i = 0; i < rdim; i++)
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element.
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
+      ParametricTransformation(Geometry::PointCloud&& pm, const FE& fe)
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
+          m_pm(std::move(pm)),
+          m_fe(fe)
+      {
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element.
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
+      ParametricTransformation(const PointCloud& pm, FE&& fe)
+        : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
+          m_pm(pm),
+          m_fe(std::move(fe))
+      {
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      ParametricTransformation(const ParametricTransformation& other)
+        : Parent(other),
+          m_pm(other.m_pm),
+          m_fe(other.m_fe)
+      {
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      ParametricTransformation(ParametricTransformation&& other)
+        : Parent(std::move(other)),
+          m_pm(std::move(other.m_pm)),
+          m_fe(std::move(other.m_fe))
+      {
+        assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
+      }
+
+      size_t getOrder() const override
+      {
+        return m_fe.getOrder();
+      }
+
+      /**
+       * @brief Returns the element's factor degree when available, otherwise
+       * the conservative total-degree bound of the transformation interface.
+       * @returns The element's factor degree when available, otherwise the conservative total-degree bound of the transformation interface.
+       */
+      size_t getFactorOrder() const override
+      {
+        if constexpr (requires { m_fe.getFactorOrder(); })
+          return m_fe.getFactorOrder();
+        else
+          return Parent::getFactorOrder();
+      }
+
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
+      {
+        const size_t pdim = getPhysicalDimension();
+        assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
+        pc.resize(pdim);
+        pc.setZero();
+        const size_t count = m_fe.getCount();
+        for (size_t local = 0; local < count; local++)
         {
-          const auto derivative = basis.template getDerivative<1>(i);
-          // The reference derivative is shared by all physical components.
-          const Real value = derivative(rc);
-          // Expose the spatial storage bound to keep this a small loop.
-          for (size_t j = 0; j < pdim && j < Math::SpatialMatrix<Real>::MaxSize; j++)
-            pc(j, i) += m_pm(j, local) * value;
+          assert(pc.size() == m_pm[local].size());
+          pc += m_pm[local] * m_fe.getBasis(local)(rc);
         }
       }
-    }
 
-    /**
-     * @brief Computes quadrature Jacobians using the element's reference table.
-     *
-     * For control coordinates @f$P_{ja}@f$, each matrix entry is
-     * @f$J_{ji}(\hat x_q)=\sum_a P_{ja}\partial_i\phi_a(\hat x_q)@f$.
-     * Only reference derivatives are shared across cells; mapped matrices
-     * remain specific to the current transformation. Generic scalar elements
-     * without a table retain the default pointwise evaluation.
-     * Square three-dimensional maps instantiate the same contraction with
-     * compile-time spatial bounds. This removes repeated small-loop control
-     * without changing the local-basis accumulation order, reference samples,
-     * padding initialization or ownership. Other dimensions use runtime bounds;
-     * no affine-map assumption or derived-metric cache is introduced.
-     * The square-three-dimensional instance accumulates in a local fixed-capacity
-     * matrix and commits it once per sample. Runtime-bound instances write to
-     * retained output directly, avoiding an extra copy for smaller matrices.
-     *
-     * @param[out] jacobians Jacobian matrices in quadrature-point order.
-     * @param[in] qf Reference formula identifying the element tabulation.
-     */
-    void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-      const QF::QuadratureFormulaBase& qf) const override
-    {
-      if constexpr (requires { m_fe.getTabulation(qf); })
+      void jacobian(
+        Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
       {
-        const auto& table = m_fe.getTabulation(qf);
-        const size_t rdim = getReferenceDimension(), pdim = getPhysicalDimension();
-        assert(table.dim == rdim);
-        assert(table.ndof == m_fe.getCount());
-        jacobians.resize(table.nqp);
-        const auto contract = [&](auto referenceDimension, auto physicalDimension) {
-          constexpr bool localAccumulation = std::is_same_v<decltype(referenceDimension),
-            std::integral_constant<size_t, 3>>;
-          for (size_t qp = 0; qp < table.nqp; ++qp)
+        const size_t rdim = getReferenceDimension();
+        assert(static_cast<size_t>(rc.size()) == rdim);
+        const size_t pdim = getPhysicalDimension();
+        pc.resize(pdim, rdim);
+        pc.setZero();
+        const size_t count = m_fe.getCount();
+        for (size_t local = 0; local < count; local++)
+        {
+          const auto& basis = m_fe.getBasis(local);
+          for (size_t i = 0; i < rdim; i++)
           {
-            decltype(auto) matrix = [&]() -> decltype(auto) {
-              if constexpr (localAccumulation)
-                return Math::SpatialMatrix<Real>(physicalDimension, referenceDimension);
-              else
-              {
-                auto& output = jacobians[qp];
-                output.resize(physicalDimension, referenceDimension);
-                output.setZero();
-                return (output);
-              }
-            }();
-            for (size_t local = 0; local < table.ndof; ++local)
+            const auto derivative = basis.template getDerivative<1>(i);
+            // The reference derivative is shared by all physical components.
+            const Real value = derivative(rc);
+            // Expose the spatial storage bound to keep this a small loop.
+            for (size_t j = 0; j < pdim && j < Math::SpatialMatrix<Real>::MaxSize; j++)
+              pc(j, i) += m_pm(j, local) * value;
+          }
+        }
+      }
+
+      /**
+       * @brief Computes quadrature Jacobians using the element's reference table.
+       *
+       * For control coordinates @f$P_{ja}@f$, each matrix entry is
+       * @f$J_{ji}(\hat x_q)=\sum_a P_{ja}\partial_i\phi_a(\hat x_q)@f$.
+       * Only reference derivatives are shared across cells; mapped matrices
+       * remain specific to the current transformation. Generic scalar elements
+       * without a table retain the default pointwise evaluation.
+       * Square three-dimensional maps instantiate the same contraction with
+       * compile-time spatial bounds. This removes repeated small-loop control
+       * without changing the local-basis accumulation order, reference samples,
+       * padding initialization or ownership. Other dimensions use runtime bounds;
+       * no affine-map assumption or derived-metric cache is introduced.
+       * The square-three-dimensional instance accumulates in a local fixed-capacity
+       * matrix and commits it once per sample. Runtime-bound instances write to
+       * retained output directly, avoiding an extra copy for smaller matrices.
+       *
+       * @param[out] jacobians Jacobian matrices in quadrature-point order.
+       * @param[in] qf Reference formula identifying the element tabulation.
+       */
+      void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
+        const QF::QuadratureFormulaBase& qf) const override
+      {
+        if constexpr (requires { m_fe.getTabulation(qf); })
+        {
+          const auto& table = m_fe.getTabulation(qf);
+          const size_t rdim = getReferenceDimension(), pdim = getPhysicalDimension();
+          assert(table.dim == rdim);
+          assert(table.ndof == m_fe.getCount());
+          jacobians.resize(table.nqp);
+          const auto contract = [&](auto referenceDimension, auto physicalDimension) {
+            constexpr bool localAccumulation =
+              std::is_same_v<decltype(referenceDimension),
+                std::integral_constant<size_t, 3>>;
+            for (size_t qp = 0; qp < table.nqp; ++qp)
             {
-              const auto gradient = table.getGradient(qp, local);
-              for (size_t i = 0; i < referenceDimension; ++i)
-              {
-                const Real value = gradient[i];
-                for (size_t j = 0;
-                     j < physicalDimension && j < Math::SpatialMatrix<Real>::MaxSize; ++j)
+              decltype(auto) matrix = [&]() -> decltype(auto) {
+                if constexpr (localAccumulation)
+                  return Math::SpatialMatrix<Real>(physicalDimension, referenceDimension);
+                else
                 {
-                  matrix(j, i) += m_pm(j, local) * value;
+                  auto& output = jacobians[qp];
+                  output.resize(physicalDimension, referenceDimension);
+                  output.setZero();
+                  return (output);
+                }
+              }();
+              for (size_t local = 0; local < table.ndof; ++local)
+              {
+                const auto gradient = table.getGradient(qp, local);
+                for (size_t i = 0; i < referenceDimension; ++i)
+                {
+                  const Real value = gradient[i];
+                  for (size_t j = 0;
+                       j < physicalDimension && j < Math::SpatialMatrix<Real>::MaxSize;
+                       ++j)
+                  {
+                    matrix(j, i) += m_pm(j, local) * value;
+                  }
                 }
               }
+              if constexpr (localAccumulation)
+                jacobians[qp] = matrix;
             }
-            if constexpr (localAccumulation)
-              jacobians[qp] = matrix;
-          }
-        };
-        if (rdim == 3 && pdim == 3)
-          contract(
-            std::integral_constant<size_t, 3>{}, std::integral_constant<size_t, 3>{});
+          };
+          if (rdim == 3 && pdim == 3)
+            contract(
+              std::integral_constant<size_t, 3>{}, std::integral_constant<size_t, 3>{});
+          else
+            contract(rdim, pdim);
+        }
         else
-          contract(rdim, pdim);
+          Parent::jacobian(jacobians, qf);
       }
-      else
-        Parent::jacobian(jacobians, qf);
-    }
 
-    /**
-     * @brief Gets the control-point coordinate matrix.
-     * @returns The control-point coordinate matrix.
-     */
-    const PointCloud& getPointMatrix() const
-    {
-      return m_pm;
-    }
+      /**
+       * @brief Gets the control-point coordinate matrix.
+       * @returns The control-point coordinate matrix.
+       */
+      const PointCloud& getPointMatrix() const
+      {
+        return m_pm;
+      }
 
-    /**
-     * @brief Serializes the transformation (for boost::serialization).
-     * @param ar Serialization archive.
-     * @param version Boost.Serialization class version; unused by this implementation.
-     */
-    template <class Archive>
-    void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
-    {
-      ar& boost::serialization::base_object<PolytopeTransformation>(*this);
-      ar & m_pm;
-      ar & m_fe;
-    }
+      /**
+       * @brief Serializes the transformation (for boost::serialization).
+       * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
+      {
+        ar& boost::serialization::base_object<PolytopeTransformation>(*this);
+        ar & m_pm;
+        ar & m_fe;
+      }
 
-    ParametricTransformation* copy() const noexcept override
-    {
-      return new ParametricTransformation(*this);
-    }
+      ParametricTransformation* copy() const noexcept override
+      {
+        return new ParametricTransformation(*this);
+      }
 
     protected:
-    /**
-     * @brief Maps a logical reference sample without retaining reference storage.
-     *
-     * When its existing table is present, @f$x_K(\hat x_q)=
-     * \sum_a X_{K,a}\phi_a(\hat x_q)@f$ is accumulated in pointwise order.
-     * Table eviction, another thread, and generic elements use direct
-     * evaluation at the point's owned coordinates instead.
-     *
-     * @param[out] pc Physical coordinates.
-     * @param rc Owned reference sample coordinates.
-     * @param identity Formula lifetime/assignment identity.
-     * @param qp Logical sample index established by point construction.
-     */
-    void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc, size_t identity,
-      size_t qp) const override
-    {
-      if constexpr (requires { m_fe.findTabulation(identity); })
+      /**
+       * @brief Maps a logical reference sample without retaining reference storage.
+       *
+       * When its existing table is present, @f$x_K(\hat x_q)=
+       * \sum_a X_{K,a}\phi_a(\hat x_q)@f$ is accumulated in pointwise order.
+       * Table eviction, another thread, and generic elements use direct
+       * evaluation at the point's owned coordinates instead.
+       *
+       * @param[out] pc Physical coordinates.
+       * @param rc Owned reference sample coordinates.
+       * @param identity Formula lifetime/assignment identity.
+       * @param qp Logical sample index established by point construction.
+       */
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
+        size_t identity, size_t qp) const override
       {
-        if (const auto found = m_fe.findTabulation(identity))
+        if constexpr (requires { m_fe.findTabulation(identity); })
         {
-          const auto& table = found->get();
-          assert(table.ndof == m_fe.getCount());
-          assert(qp < table.nqp);
-          pc.resize(getPhysicalDimension());
-          pc.setZero();
-          for (size_t local = 0; local < table.ndof; ++local)
-            pc += m_pm[local] * table.getBasis(qp, local);
-          return;
+          if (const auto found = m_fe.findTabulation(identity))
+          {
+            const auto& table = found->get();
+            assert(table.ndof == m_fe.getCount());
+            assert(qp < table.nqp);
+            pc.resize(getPhysicalDimension());
+            pc.setZero();
+            for (size_t local = 0; local < table.ndof; ++local)
+              pc += m_pm[local] * table.getBasis(qp, local);
+            return;
+          }
         }
+        transform(pc, rc);
       }
-      transform(pc, rc);
-    }
 
     private:
-    // Boost constructs this empty state before loading all serialized fields.
-    ParametricTransformation()
-      : Parent(0, 0)
-    {}
+      // Boost constructs this empty state before loading all serialized fields.
+      ParametricTransformation()
+        : Parent(0, 0)
+      {}
 
-    PointCloud m_pm;
-    FE m_fe;
+      PointCloud m_pm;
+      FE m_fe;
   };
 }
 

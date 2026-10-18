@@ -58,176 +58,176 @@ namespace Rodin::Tests::Benchmarks
   class SparseAlgebra
   {
     public:
-    static constexpr Real AlgebraTolerance = 1e-11;
-    static constexpr Real PatchTolerance = 1e-10;
-    using Wide = std::conditional_t<std::is_same_v<Scalar, Complex>,
-      std::complex<long double>, long double>;
+      static constexpr Real AlgebraTolerance = 1e-11;
+      static constexpr Real PatchTolerance = 1e-10;
+      using Wide = std::conditional_t<std::is_same_v<Scalar, Complex>,
+        std::complex<long double>, long double>;
 
-    /**
-     * @brief Measures one operation on a retained assembled matrix and vectors.
-     *
-     * Compiler barriers retain input reads. Reported matrix storage counts
-     * describe compressed values/indices, not resident memory or traffic.
-     *
-     * @param state Grid points per axis and timed iteration range.
-     * @param geometry Reference-cell family.
-     * @param physics Manufactured scalar equation selector.
-     */
-    static void run(
-      benchmark::State& state, Geometry::Polytope::Type geometry, unsigned physics)
-    {
-      using namespace Variational;
-      using Workload = ConstrainedWorkload<K, Scalar>;
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-      const size_t dim = mesh.getDimension();
-      H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
-      TrialFunction u(space);
-      TestFunction v(space);
-      Problem problem(u, v), reference(u, v);
-      const Real operatorScale = 1, boundaryScale = 1;
-      Workload::configure(u, v, problem, dim, physics, operatorScale, boundaryScale);
-      Workload::template configure<true>(
-        u, v, reference, dim, physics, operatorScale, boundaryScale);
-      const Math::Vector<Scalar> exact = u.getSolution().getData();
-      problem.assemble();
-      reference.assemble();
-      const auto& system = problem.getLinearSystem();
-      const auto& matrix = system.getOperator();
-      const auto& rhs = system.getVector();
-      const auto& baseline = reference.getLinearSystem();
-      const auto fail = [&](const char* message) {
-        sparseAlgebraFailed = true;
-        state.SkipWithError(message);
-      };
-      const Real rhsScale = std::max(Real(1), rhs.norm());
-      if (!matrix.isCompressed() ||
-        (matrix - baseline.getOperator()).norm() >=
-          AlgebraTolerance * std::max(Real(1), baseline.getOperator().norm()) ||
-        (rhs - baseline.getVector()).norm() >= AlgebraTolerance * rhsScale ||
-        !((matrix * exact - rhs).norm() < PatchTolerance * rhsScale))
+      /**
+       * @brief Measures one operation on a retained assembled matrix and vectors.
+       *
+       * Compiler barriers retain input reads. Reported matrix storage counts
+       * describe compressed values/indices, not resident memory or traffic.
+       *
+       * @param state Grid points per axis and timed iteration range.
+       * @param geometry Reference-cell family.
+       * @param physics Manufactured scalar equation selector.
+       */
+      static void run(
+        benchmark::State& state, Geometry::Polytope::Type geometry, unsigned physics)
       {
-        fail("Assembled operator/load/manufactured patch check failed");
-        return;
-      }
+        using namespace Variational;
+        using Workload = ConstrainedWorkload<K, Scalar>;
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+        const size_t dim = mesh.getDimension();
+        H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
+        TrialFunction u(space);
+        TestFunction v(space);
+        Problem problem(u, v), reference(u, v);
+        const Real operatorScale = 1, boundaryScale = 1;
+        Workload::configure(u, v, problem, dim, physics, operatorScale, boundaryScale);
+        Workload::template configure<true>(
+          u, v, reference, dim, physics, operatorScale, boundaryScale);
+        const Math::Vector<Scalar> exact = u.getSolution().getData();
+        problem.assemble();
+        reference.assemble();
+        const auto& system = problem.getLinearSystem();
+        const auto& matrix = system.getOperator();
+        const auto& rhs = system.getVector();
+        const auto& baseline = reference.getLinearSystem();
+        const auto fail = [&](const char* message) {
+          sparseAlgebraFailed = true;
+          state.SkipWithError(message);
+        };
+        const Real rhsScale = std::max(Real(1), rhs.norm());
+        if (!matrix.isCompressed() ||
+          (matrix - baseline.getOperator()).norm() >=
+            AlgebraTolerance * std::max(Real(1), baseline.getOperator().norm()) ||
+          (rhs - baseline.getVector()).norm() >= AlgebraTolerance * rhsScale ||
+          !((matrix * exact - rhs).norm() < PatchTolerance * rhsScale))
+        {
+          fail("Assembled operator/load/manufactured patch check failed");
+          return;
+        }
 
-      Math::Vector<Scalar> x(matrix.cols()), z(matrix.cols()), y(matrix.rows());
-      for (Eigen::Index j = 0; j < x.size(); ++j)
-      {
-        const Real a = Real(1) + Real(j % 17) / 19;
-        const Real b = Real(1) / 3 + Real(j % 11) / 13;
-        if constexpr (std::is_same_v<Scalar, Complex>)
+        Math::Vector<Scalar> x(matrix.cols()), z(matrix.cols()), y(matrix.rows());
+        for (Eigen::Index j = 0; j < x.size(); ++j)
         {
-          x(j) = Scalar(a, b);
-          z(j) = Scalar(b, -a / 2);
-        }
-        else
-        {
-          x(j) = a;
-          z(j) = b;
-        }
-      }
-      Math::Vector<Wide> productReference(matrix.rows());
-      productReference.setZero();
-      for (Eigen::Index outer = 0; outer < matrix.outerSize(); ++outer)
-      {
-        for (typename Math::SparseMatrix<Scalar>::InnerIterator entry(matrix, outer);
-             entry; ++entry)
-        {
-          if constexpr (Operation == SparseOperation::TransposeProduct)
-            productReference(entry.col()) += Wide(entry.value()) * Wide(x(entry.row()));
+          const Real a = Real(1) + Real(j % 17) / 19;
+          const Real b = Real(1) / 3 + Real(j % 11) / 13;
+          if constexpr (std::is_same_v<Scalar, Complex>)
+          {
+            x(j) = Scalar(a, b);
+            z(j) = Scalar(b, -a / 2);
+          }
           else
-            productReference(entry.row()) += Wide(entry.value()) * Wide(x(entry.col()));
+          {
+            x(j) = a;
+            z(j) = b;
+          }
         }
+        Math::Vector<Wide> productReference(matrix.rows());
+        productReference.setZero();
+        for (Eigen::Index outer = 0; outer < matrix.outerSize(); ++outer)
+        {
+          for (typename Math::SparseMatrix<Scalar>::InnerIterator entry(matrix, outer);
+               entry; ++entry)
+          {
+            if constexpr (Operation == SparseOperation::TransposeProduct)
+              productReference(entry.col()) += Wide(entry.value()) * Wide(x(entry.row()));
+            else
+              productReference(entry.row()) += Wide(entry.value()) * Wide(x(entry.col()));
+          }
+        }
+        Wide dotReference = 0;
+        long double normReference = 0;
+        for (Eigen::Index j = 0; j < x.size(); ++j)
+        {
+          if constexpr (std::is_same_v<Scalar, Complex>)
+          {
+            dotReference += std::conj(Wide(x(j))) * Wide(z(j));
+            normReference += std::norm(Wide(x(j)));
+          }
+          else
+          {
+            dotReference += Wide(x(j)) * Wide(z(j));
+            normReference += Wide(x(j)) * Wide(x(j));
+          }
+        }
+        const Math::Vector<Scalar> expected = productReference.template cast<Scalar>();
+        const Scalar expectedDot = Scalar(dotReference);
+        const Real expectedNorm = Real(normReference);
+        const auto productValid = [&](const auto& value) {
+          return (value - expected).norm() <
+            AlgebraTolerance * std::max(Real(1), expected.norm());
+        };
+        const auto dotValid = [&](Scalar value) {
+          return std::abs(value - expectedDot) <
+            AlgebraTolerance * std::max(Real(1), std::abs(expectedDot));
+        };
+        const auto normValid = [&](Real value) {
+          return std::abs(value - expectedNorm) <
+            AlgebraTolerance * std::max(Real(1), expectedNorm);
+        };
+        const auto product = [&]() {
+          if constexpr (Operation == SparseOperation::TransposeProduct)
+            y.noalias() = matrix.transpose() * x;
+          else
+            y.noalias() = matrix * x;
+        };
+        product();
+        Scalar dot = x.dot(z);
+        Real norm = x.squaredNorm();
+        const Math::Vector<Scalar> wrong = expected.array() + Scalar(1);
+        if (!productValid(y) || !dotValid(dot) || !normValid(norm) ||
+          productValid(wrong) || dotValid(Scalar(0)) || normValid(Real(0)))
+        {
+          fail("Independent product/reduction or wrong-output guard failed");
+          return;
+        }
+        for (auto _ : state)
+        {
+          benchmark::DoNotOptimize(x.data());
+          if constexpr (Operation == SparseOperation::Product ||
+            Operation == SparseOperation::TransposeProduct)
+          {
+            product();
+            benchmark::DoNotOptimize(y.data());
+          }
+          else if constexpr (Operation == SparseOperation::Dot)
+          {
+            benchmark::DoNotOptimize(z.data());
+            dot = x.dot(z);
+            benchmark::DoNotOptimize(dot);
+          }
+          else
+          {
+            norm = x.squaredNorm();
+            benchmark::DoNotOptimize(norm);
+          }
+          benchmark::ClobberMemory();
+        }
+        if (!productValid(y) || !dotValid(dot) || !normValid(norm))
+          fail("Repeated operation failed the independent scalar reference");
+        state.counters["dimension"] = dim;
+        state.counters["degree"] = K;
+        state.counters["cells"] = mesh.getPolytopeCount(dim);
+        state.counters["rows"] = matrix.rows();
+        state.counters["nnz"] = matrix.nonZeros();
+        state.counters["scalar_bytes"] = sizeof(Scalar);
+        state.counters["reference_mantissa_bits"] =
+          std::numeric_limits<long double>::digits;
+        state.counters["compressed_storage_bytes"] =
+          matrix.nonZeros() * (sizeof(Scalar) + sizeof(Math::SparseIndex)) +
+          (matrix.outerSize() + 1) * sizeof(Math::SparseIndex);
+        state.counters["vector_entries"] = x.size();
+        state.counters["product_relative_error"] =
+          (y - expected).norm() / std::max(Real(1), expected.norm());
+        state.counters["dot_relative_error"] =
+          std::abs(dot - expectedDot) / std::max(Real(1), std::abs(expectedDot));
+        state.counters["norm_relative_error"] =
+          std::abs(norm - expectedNorm) / std::max(Real(1), expectedNorm);
       }
-      Wide dotReference = 0;
-      long double normReference = 0;
-      for (Eigen::Index j = 0; j < x.size(); ++j)
-      {
-        if constexpr (std::is_same_v<Scalar, Complex>)
-        {
-          dotReference += std::conj(Wide(x(j))) * Wide(z(j));
-          normReference += std::norm(Wide(x(j)));
-        }
-        else
-        {
-          dotReference += Wide(x(j)) * Wide(z(j));
-          normReference += Wide(x(j)) * Wide(x(j));
-        }
-      }
-      const Math::Vector<Scalar> expected = productReference.template cast<Scalar>();
-      const Scalar expectedDot = Scalar(dotReference);
-      const Real expectedNorm = Real(normReference);
-      const auto productValid = [&](const auto& value) {
-        return (value - expected).norm() <
-          AlgebraTolerance * std::max(Real(1), expected.norm());
-      };
-      const auto dotValid = [&](Scalar value) {
-        return std::abs(value - expectedDot) <
-          AlgebraTolerance * std::max(Real(1), std::abs(expectedDot));
-      };
-      const auto normValid = [&](Real value) {
-        return std::abs(value - expectedNorm) <
-          AlgebraTolerance * std::max(Real(1), expectedNorm);
-      };
-      const auto product = [&]() {
-        if constexpr (Operation == SparseOperation::TransposeProduct)
-          y.noalias() = matrix.transpose() * x;
-        else
-          y.noalias() = matrix * x;
-      };
-      product();
-      Scalar dot = x.dot(z);
-      Real norm = x.squaredNorm();
-      const Math::Vector<Scalar> wrong = expected.array() + Scalar(1);
-      if (!productValid(y) || !dotValid(dot) || !normValid(norm) || productValid(wrong) ||
-        dotValid(Scalar(0)) || normValid(Real(0)))
-      {
-        fail("Independent product/reduction or wrong-output guard failed");
-        return;
-      }
-      for (auto _ : state)
-      {
-        benchmark::DoNotOptimize(x.data());
-        if constexpr (Operation == SparseOperation::Product ||
-          Operation == SparseOperation::TransposeProduct)
-        {
-          product();
-          benchmark::DoNotOptimize(y.data());
-        }
-        else if constexpr (Operation == SparseOperation::Dot)
-        {
-          benchmark::DoNotOptimize(z.data());
-          dot = x.dot(z);
-          benchmark::DoNotOptimize(dot);
-        }
-        else
-        {
-          norm = x.squaredNorm();
-          benchmark::DoNotOptimize(norm);
-        }
-        benchmark::ClobberMemory();
-      }
-      if (!productValid(y) || !dotValid(dot) || !normValid(norm))
-        fail("Repeated operation failed the independent scalar reference");
-      state.counters["dimension"] = dim;
-      state.counters["degree"] = K;
-      state.counters["cells"] = mesh.getPolytopeCount(dim);
-      state.counters["rows"] = matrix.rows();
-      state.counters["nnz"] = matrix.nonZeros();
-      state.counters["scalar_bytes"] = sizeof(Scalar);
-      state.counters["reference_mantissa_bits"] =
-        std::numeric_limits<long double>::digits;
-      state.counters["compressed_storage_bytes"] =
-        matrix.nonZeros() * (sizeof(Scalar) + sizeof(Math::SparseIndex)) +
-        (matrix.outerSize() + 1) * sizeof(Math::SparseIndex);
-      state.counters["vector_entries"] = x.size();
-      state.counters["product_relative_error"] =
-        (y - expected).norm() / std::max(Real(1), expected.norm());
-      state.counters["dot_relative_error"] =
-        std::abs(dot - expectedDot) / std::max(Real(1), std::abs(expectedDot));
-      state.counters["norm_relative_error"] =
-        std::abs(norm - expectedNorm) / std::max(Real(1), expectedNorm);
-    }
   };
 
   /// @brief Registers the assembly workload axes under their Math operation.

@@ -804,7 +804,7 @@ namespace Rodin::Variational
         typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
           ::template Type<LinearSystemType, Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
-      private:
+    private:
       template <class T>
       struct IsTrialFunctionReferenceWrapper
       {
@@ -855,83 +855,83 @@ namespace Rodin::Variational
        * @param u3 Trial shape functions defining the unknowns.
        * @param us Trial shape functions defining the unknowns.
        */
-    ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
-      : m_assembled(false),
-        m_us(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-               .template filter<IsTrialFunctionReferenceWrapper>()),
-        m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-               .template filter<IsTestFunctionReferenceWrapper>()),
-        m_trialOffsets{},
-        m_testOffsets{}
-    {
-      size_t trialSize = 0, testSize = 0;
-      m_us.iapply([&](size_t i, const auto& u) {
-        m_trialOffsets[i] = trialSize;
-        trialSize += u.get().getFiniteElementSpace().getSize();
-        m_trialUUIDMap.right.insert({i, u.get().getUUID()});
-      });
-      m_vs.iapply([&](size_t i, const auto& v) {
-        m_testOffsets[i] = testSize;
-        testSize += v.get().getFiniteElementSpace().getSize();
-        m_testUUIDMap.right.insert({i, v.get().getUUID()});
-      });
-    }
+      ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
+        : m_assembled(false),
+          m_us(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+                 .template filter<IsTrialFunctionReferenceWrapper>()),
+          m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+                 .template filter<IsTestFunctionReferenceWrapper>()),
+          m_trialOffsets{},
+          m_testOffsets{}
+      {
+        size_t trialSize = 0, testSize = 0;
+        m_us.iapply([&](size_t i, const auto& u) {
+          m_trialOffsets[i] = trialSize;
+          trialSize += u.get().getFiniteElementSpace().getSize();
+          m_trialUUIDMap.right.insert({i, u.get().getUUID()});
+        });
+        m_vs.iapply([&](size_t i, const auto& v) {
+          m_testOffsets[i] = testSize;
+          testSize += v.get().getFiniteElementSpace().getSize();
+          m_testUUIDMap.right.insert({i, v.get().getUUID()});
+        });
+      }
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-    ProblemUsBase(const ProblemUsBase& other)
-      : Parent(other),
-        m_assembled(other.m_assembled),
-        m_us(other.m_us),
-        m_vs(other.m_vs),
-        m_pb(other.m_pb),
-        m_trialOffsets(other.m_trialOffsets),
-        m_testOffsets(other.m_testOffsets),
-        m_trialUUIDMap(other.m_trialUUIDMap),
-        m_testUUIDMap(other.m_testUUIDMap),
-        m_assembly(other.m_assembly)
-    {}
+      ProblemUsBase(const ProblemUsBase& other)
+        : Parent(other),
+          m_assembled(other.m_assembled),
+          m_us(other.m_us),
+          m_vs(other.m_vs),
+          m_pb(other.m_pb),
+          m_trialOffsets(other.m_trialOffsets),
+          m_testOffsets(other.m_testOffsets),
+          m_trialUUIDMap(other.m_trialUUIDMap),
+          m_testUUIDMap(other.m_testUUIDMap),
+          m_assembly(other.m_assembly)
+      {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-    ProblemUsBase(ProblemUsBase&& other) noexcept
-      : Parent(std::move(other)),
-        m_assembled(std::exchange(other.m_assembled, false)),
-        m_us(std::move(other.m_us)),
-        m_vs(std::move(other.m_vs)),
-        m_pb(std::move(other.m_pb)),
-        m_trialOffsets(std::move(other.m_trialOffsets)),
-        m_testOffsets(std::move(other.m_testOffsets)),
-        m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
-        m_testUUIDMap(std::move(other.m_testUUIDMap)),
-        m_assembly(std::move(other.m_assembly))
-    {}
+      ProblemUsBase(ProblemUsBase&& other) noexcept
+        : Parent(std::move(other)),
+          m_assembled(std::exchange(other.m_assembled, false)),
+          m_us(std::move(other.m_us)),
+          m_vs(std::move(other.m_vs)),
+          m_pb(std::move(other.m_pb)),
+          m_trialOffsets(std::move(other.m_trialOffsets)),
+          m_testOffsets(std::move(other.m_testOffsets)),
+          m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
+          m_testUUIDMap(std::move(other.m_testUUIDMap)),
+          m_assembly(std::move(other.m_assembly))
+      {}
 
       /**
        * @brief Copy assignment operator.
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
-    ProblemUsBase& operator=(const ProblemUsBase& other)
-    {
-      if (this != &other)
+      ProblemUsBase& operator=(const ProblemUsBase& other)
       {
-        m_assembled = other.m_assembled;
-        m_us = other.m_us;
-        m_vs = other.m_vs;
-        m_pb = other.m_pb;
-        m_trialOffsets = other.m_trialOffsets;
-        m_testOffsets = other.m_testOffsets;
-        m_trialUUIDMap = other.m_trialUUIDMap;
-        m_testUUIDMap = other.m_testUUIDMap;
-        m_assembly = other.m_assembly;
+        if (this != &other)
+        {
+          m_assembled = other.m_assembled;
+          m_us = other.m_us;
+          m_vs = other.m_vs;
+          m_pb = other.m_pb;
+          m_trialOffsets = other.m_trialOffsets;
+          m_testOffsets = other.m_testOffsets;
+          m_trialUUIDMap = other.m_trialUUIDMap;
+          m_testUUIDMap = other.m_testUUIDMap;
+          m_assembly = other.m_assembly;
+        }
+        return *this;
       }
-      return *this;
-    }
 
       /**
        * @brief Move assignment operator.

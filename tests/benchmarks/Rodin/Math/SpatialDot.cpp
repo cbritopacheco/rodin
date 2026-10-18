@@ -142,135 +142,136 @@ namespace Rodin::Tests::Benchmarks
   class SpatialDotBatch
   {
     public:
-    /**
-     * @brief Measures one complete pair batch per iteration.
-     * @param state Logical dimension, vector count and repetition protocol.
-     */
-    static void run(benchmark::State& state)
-    {
-      const size_t dimension = state.range(0);
-      const size_t count = state.range(1);
-      std::vector<Math::SpatialVector<LHS>> lhs(count);
-      std::vector<Math::SpatialVector<RHS>> rhs(count);
-      for (size_t b = 0; b < count; ++b)
+      /**
+       * @brief Measures one complete pair batch per iteration.
+       * @param state Logical dimension, vector count and repetition protocol.
+       */
+      static void run(benchmark::State& state)
       {
-        lhs[b].resize(dimension);
-        rhs[b].resize(dimension);
-        lhs[b].getData().setConstant(LHS(std::numeric_limits<Real>::quiet_NaN()));
-        rhs[b].getData().setConstant(RHS(std::numeric_limits<Real>::quiet_NaN()));
-        for (size_t j = 0; j < dimension; ++j)
-        {
-          if constexpr (std::is_same_v<LHS, Complex>)
-            lhs[b](j) = LHS(Real(b + j + 1) / 7, Real(b + 2 * j + 2) / 11);
-          else
-            lhs[b](j) = Real(b + j + 1) / 7;
-          if constexpr (std::is_same_v<RHS, Complex>)
-            rhs[b](j) = RHS(Real(2 * b + j + 2) / 13, -Real(b + j + 1) / 17);
-          else
-            rhs[b](j) = Real(2 * b + j + 2) / 13;
-        }
-      }
-      const auto& left = lhs;
-      const auto& right = rhs;
-      static_assert(
-        std::is_const_v<std::remove_reference_t<decltype(left[0].getData())>>);
-      static_assert(
-        std::is_const_v<std::remove_reference_t<decltype(right[0].getData())>>);
-      using Value = decltype(Math::dot(left[0], right[0]));
-      std::vector<Value> expected(count * count, Value(0));
-      std::vector<Value> actual(count * count, Value(0));
-      for (size_t b = 0; b < count; ++b)
-      {
-        const auto n = static_cast<Eigen::Index>(left[b].size());
-        for (size_t a = 0; a < (Lower ? b + 1 : count); ++a)
-        {
-          expected[b * count + a] =
-            Math::dot(left[b].getData().head(n), right[a].getData().head(n));
-        }
-      }
-      const auto compute = [&]() {
+        const size_t dimension = state.range(0);
+        const size_t count = state.range(1);
+        std::vector<Math::SpatialVector<LHS>> lhs(count);
+        std::vector<Math::SpatialVector<RHS>> rhs(count);
         for (size_t b = 0; b < count; ++b)
         {
-          const auto& row = [&]() -> decltype(auto) {
-            if constexpr (Snapshot)
-              return Math::SpatialVector<LHS>(left[b]);
-            else
-              return (left[b]);
-          }();
-          for (size_t a = 0; a < (Lower ? b + 1 : count); ++a)
+          lhs[b].resize(dimension);
+          rhs[b].resize(dimension);
+          lhs[b].getData().setConstant(LHS(std::numeric_limits<Real>::quiet_NaN()));
+          rhs[b].getData().setConstant(RHS(std::numeric_limits<Real>::quiet_NaN()));
+          for (size_t j = 0; j < dimension; ++j)
           {
-            if constexpr (Original)
-            {
-              const auto n = static_cast<Eigen::Index>(row.size());
-              actual[b * count + a] =
-                Math::dot(row.getData().head(n), right[a].getData().head(n));
-            }
+            if constexpr (std::is_same_v<LHS, Complex>)
+              lhs[b](j) = LHS(Real(b + j + 1) / 7, Real(b + 2 * j + 2) / 11);
             else
-              actual[b * count + a] = Math::dot(row, right[a]);
+              lhs[b](j) = Real(b + j + 1) / 7;
+            if constexpr (std::is_same_v<RHS, Complex>)
+              rhs[b](j) = RHS(Real(2 * b + j + 2) / 13, -Real(b + j + 1) / 17);
+            else
+              rhs[b](j) = Real(2 * b + j + 2) / 13;
           }
         }
-      };
-      const auto valid = [&]() { return actual == expected; };
-      compute();
-      if (!valid())
-      {
-        spatialDotFailed = true;
-        state.SkipWithError("Batched spatial dot differs from original entry reduction");
-        return;
-      }
-      actual[0] += Value(1);
-      if (valid())
-      {
-        spatialDotFailed = true;
-        state.SkipWithError("Batched spatial dot failed to reject a changed entry");
-        return;
-      }
-      actual[0] = expected[0];
-      for (auto _ : state)
-      {
-        benchmark::DoNotOptimize(lhs.data());
-        benchmark::DoNotOptimize(rhs.data());
-        compute();
-        benchmark::DoNotOptimize(actual.data());
-        benchmark::ClobberMemory();
-      }
-      if (!valid())
-      {
-        spatialDotFailed = true;
-        state.SkipWithError("Timed spatial dot batch changed a reference entry");
-      }
-      const size_t pairs = Lower ? count * (count + 1) / 2 : count * count;
-      state.counters["dimension"] = dimension;
-      state.counters["row_snapshot"] = Snapshot;
-      state.counters["vectors_per_operand"] = count;
-      state.counters["pairs"] = pairs;
-      state.counters["scalar_products"] = pairs * dimension;
-      state.counters["input_bytes"] = count * (sizeof(lhs[0]) + sizeof(rhs[0]));
-      state.counters["output_bytes"] = actual.size() * sizeof(Value);
-      state.counters["written_bytes"] = pairs * sizeof(Value);
-    }
-
-    /**
-     * @brief Registers empty and nonempty dimensions at three batch sizes.
-     * @param label Scalar-pair label used in benchmark names.
-     */
-    static void registerCases(const char* label)
-    {
-      const std::string name = std::string("SpatialDot/Batch/") +
-        (Snapshot      ? "RowSnapshot/"
-            : Original ? "Original/"
-                       : "Public/") +
-        (Lower ? "Lower/" : "Full/") + label;
-      for (const size_t dimension : {size_t(0), size_t(1), size_t(2), size_t(3)})
-      {
-        for (const size_t count : {size_t(4), size_t(16), size_t(64)})
+        const auto& left = lhs;
+        const auto& right = rhs;
+        static_assert(
+          std::is_const_v<std::remove_reference_t<decltype(left[0].getData())>>);
+        static_assert(
+          std::is_const_v<std::remove_reference_t<decltype(right[0].getData())>>);
+        using Value = decltype(Math::dot(left[0], right[0]));
+        std::vector<Value> expected(count * count, Value(0));
+        std::vector<Value> actual(count * count, Value(0));
+        for (size_t b = 0; b < count; ++b)
         {
-          benchmark::RegisterBenchmark(name.c_str(), [](auto& state) { run(state); })
-            ->Args({static_cast<int64_t>(dimension), static_cast<int64_t>(count)})
-            ->UseRealTime();
+          const auto n = static_cast<Eigen::Index>(left[b].size());
+          for (size_t a = 0; a < (Lower ? b + 1 : count); ++a)
+          {
+            expected[b * count + a] =
+              Math::dot(left[b].getData().head(n), right[a].getData().head(n));
+          }
+        }
+        const auto compute = [&]() {
+          for (size_t b = 0; b < count; ++b)
+          {
+            const auto& row = [&]() -> decltype(auto) {
+              if constexpr (Snapshot)
+                return Math::SpatialVector<LHS>(left[b]);
+              else
+                return (left[b]);
+            }();
+            for (size_t a = 0; a < (Lower ? b + 1 : count); ++a)
+            {
+              if constexpr (Original)
+              {
+                const auto n = static_cast<Eigen::Index>(row.size());
+                actual[b * count + a] =
+                  Math::dot(row.getData().head(n), right[a].getData().head(n));
+              }
+              else
+                actual[b * count + a] = Math::dot(row, right[a]);
+            }
+          }
+        };
+        const auto valid = [&]() { return actual == expected; };
+        compute();
+        if (!valid())
+        {
+          spatialDotFailed = true;
+          state.SkipWithError(
+            "Batched spatial dot differs from original entry reduction");
+          return;
+        }
+        actual[0] += Value(1);
+        if (valid())
+        {
+          spatialDotFailed = true;
+          state.SkipWithError("Batched spatial dot failed to reject a changed entry");
+          return;
+        }
+        actual[0] = expected[0];
+        for (auto _ : state)
+        {
+          benchmark::DoNotOptimize(lhs.data());
+          benchmark::DoNotOptimize(rhs.data());
+          compute();
+          benchmark::DoNotOptimize(actual.data());
+          benchmark::ClobberMemory();
+        }
+        if (!valid())
+        {
+          spatialDotFailed = true;
+          state.SkipWithError("Timed spatial dot batch changed a reference entry");
+        }
+        const size_t pairs = Lower ? count * (count + 1) / 2 : count * count;
+        state.counters["dimension"] = dimension;
+        state.counters["row_snapshot"] = Snapshot;
+        state.counters["vectors_per_operand"] = count;
+        state.counters["pairs"] = pairs;
+        state.counters["scalar_products"] = pairs * dimension;
+        state.counters["input_bytes"] = count * (sizeof(lhs[0]) + sizeof(rhs[0]));
+        state.counters["output_bytes"] = actual.size() * sizeof(Value);
+        state.counters["written_bytes"] = pairs * sizeof(Value);
+      }
+
+      /**
+       * @brief Registers empty and nonempty dimensions at three batch sizes.
+       * @param label Scalar-pair label used in benchmark names.
+       */
+      static void registerCases(const char* label)
+      {
+        const std::string name = std::string("SpatialDot/Batch/") +
+          (Snapshot      ? "RowSnapshot/"
+              : Original ? "Original/"
+                         : "Public/") +
+          (Lower ? "Lower/" : "Full/") + label;
+        for (const size_t dimension : {size_t(0), size_t(1), size_t(2), size_t(3)})
+        {
+          for (const size_t count : {size_t(4), size_t(16), size_t(64)})
+          {
+            benchmark::RegisterBenchmark(name.c_str(), [](auto& state) { run(state); })
+              ->Args({static_cast<int64_t>(dimension), static_cast<int64_t>(count)})
+              ->UseRealTime();
+          }
         }
       }
-    }
   };
 
   /**

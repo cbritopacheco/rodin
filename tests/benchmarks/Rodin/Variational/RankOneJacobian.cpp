@@ -24,37 +24,38 @@ namespace Rodin::Tests::Benchmarks
     class OtherIdentityMatrix final : public MatrixFunctionBase<Real, OtherIdentityMatrix>
     {
       public:
-      explicit OtherIdentityMatrix(size_t dimension)
-        : m_dimension(dimension)
-      {}
+        explicit OtherIdentityMatrix(size_t dimension)
+          : m_dimension(dimension)
+        {}
 
-      Math::SpatialMatrix<Real> getValue(const Geometry::Point&) const
-      {
-        return Math::SpatialMatrix<Real>::Identity(
-          static_cast<std::uint8_t>(m_dimension), static_cast<std::uint8_t>(m_dimension));
-      }
+        Math::SpatialMatrix<Real> getValue(const Geometry::Point&) const
+        {
+          return Math::SpatialMatrix<Real>::Identity(
+            static_cast<std::uint8_t>(m_dimension),
+            static_cast<std::uint8_t>(m_dimension));
+        }
 
-      size_t getRows() const
-      {
-        return m_dimension;
-      }
-      size_t getColumns() const
-      {
-        return m_dimension;
-      }
+        size_t getRows() const
+        {
+          return m_dimension;
+        }
+        size_t getColumns() const
+        {
+          return m_dimension;
+        }
 
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
-      {
-        return 0;
-      }
+        Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+        {
+          return 0;
+        }
 
-      OtherIdentityMatrix* copy() const noexcept override
-      {
-        return new OtherIdentityMatrix(*this);
-      }
+        OtherIdentityMatrix* copy() const noexcept override
+        {
+          return new OtherIdentityMatrix(*this);
+        }
 
       private:
-      size_t m_dimension;
+        size_t m_dimension;
     };
 
     LocalMesh unitSquare(size_t n)
@@ -89,7 +90,7 @@ namespace Rodin::Tests::Benchmarks
       const IdentityMatrix A(2);
       const OtherIdentityMatrix B(2);
       BilinearForm form(u, v);
-        // The distinct coefficient types deliberately select the generic rule.
+      // The distinct coefficient types deliberately select the generic rule.
       form = Integral(Dot(Dot(A, Jacobian(u)), Dot(B, Jacobian(v))));
 
       for (auto _ : state)

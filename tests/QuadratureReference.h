@@ -91,6 +91,15 @@ namespace Rodin::Tests
         return m_matrix;
       }
 
+      /**
+       * @brief Returns the owned expression for an unbound reference copy.
+       * @returns Expression independently evaluated by the reference algorithm.
+       */
+      const Integrand& getIntegrand() const
+      {
+        return m_integrand;
+      }
+
     private:
       Integrand m_integrand;
       Math::Matrix<Scalar> m_matrix;
@@ -110,16 +119,27 @@ namespace Rodin::Tests
       using Parent = Variational::LocalBilinearFormIntegratorBase<Scalar>;
 
       explicit ReferenceIntegral(const Integral& integral)
+        : ReferenceIntegral(integral, integral.getIntegrand())
+      {}
+
+      /**
+       * @brief Constructs an oracle without requiring a production expression accessor.
+       * @param integral Region, attributes and quadrature-order policy to retain.
+       * @param integrand Expression independently evaluated inside every entry loop.
+       * @pre The expression represents the same form and spaces as the integral.
+       */
+      ReferenceIntegral(const Integral& integral,
+        const typename QuadratureReference<Integral>::Integrand& integrand)
         : Parent(integral),
           m_integral(integral),
-          m_reference(integral),
+          m_reference(integrand),
           m_polytope(nullptr)
       {}
 
       ReferenceIntegral(const ReferenceIntegral& other)
         : Parent(other),
           m_integral(other.m_integral),
-          m_reference(m_integral),
+          m_reference(other.m_reference.getIntegrand()),
           m_polytope(nullptr)
       {}
 

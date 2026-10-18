@@ -30,6 +30,10 @@ add_executable(RodinNamedFormBenchmarks EXCLUDE_FROM_ALL NamedFormEvaluation.cpp
 target_link_libraries(RodinNamedFormBenchmarks PRIVATE
   Rodin::Variational Rodin::Solid benchmark::benchmark)
 
+add_executable(RodinNamedMassKernelBenchmarks EXCLUDE_FROM_ALL NamedMassKernel.cpp)
+target_link_libraries(RodinNamedMassKernelBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_executable(RodinQuadratureExpressionBenchmarks EXCLUDE_FROM_ALL QuadratureExpressions.cpp)
 target_link_libraries(RodinQuadratureExpressionBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
@@ -46,4 +50,18 @@ add_executable(RodinPhysicalGradientBenchmarks EXCLUDE_FROM_ALL PhysicalGradient
 target_link_libraries(RodinPhysicalGradientBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+add_executable(RodinFieldDerivativeBenchmarks EXCLUDE_FROM_ALL FieldDerivative.cpp)
+target_link_libraries(RodinFieldDerivativeBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
+add_executable(RodinFieldContractionBenchmarks EXCLUDE_FROM_ALL FieldContraction.cpp)
+target_link_libraries(RodinFieldContractionBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
+add_executable(RodinBasisScalingBenchmarks EXCLUDE_FROM_ALL
+  Mult.cpp MultH1.cpp MultHigherOrder.cpp MultFixedDegree.cpp)
+target_link_libraries(RodinBasisScalingBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_subdirectory(H1)
+add_subdirectory(P1)

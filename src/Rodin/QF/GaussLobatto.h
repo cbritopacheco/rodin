@@ -405,17 +405,19 @@ namespace Rodin::QF
       }
 
       /**
-       * @brief Builds quadrature for a point (0D).
+       * @brief Builds the unit-mass quadrature rule on a zero-dimensional point.
        *
-       * Creates a single quadrature point at the origin with weight 1.
+       * The unique reference coordinate in @f$\mathbb{R}^0@f$ is an empty
+       * tuple. A one-entry zero would instead describe a coordinate in
+       * @f$\mathbb{R}^1@f$. The sole weight is one.
        */
       void buildPoint()
       {
         m_points.clear();
         m_weights.resize(1);
-        Math::SpatialVector<Real> p; p.resize(1); p[0]=0.0;
+        Math::SpatialVector<Real> p;
         m_points.push_back(std::move(p));
-        m_weights[0]=1.0;
+        m_weights[0] = 1.0;
       }
 
       /**
@@ -657,7 +659,9 @@ namespace Rodin::QF
       }
 
       Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
-      size_t m_nx{2}, m_ny{2}, m_nz{2}; ///< Number of points per direction
+      size_t m_nx; ///< Number of points in the first reference direction.
+      size_t m_ny; ///< Number of points in the second reference direction.
+      size_t m_nz; ///< Number of points in the third reference direction.
       std::vector<Math::SpatialVector<Real>> m_points; ///< Quadrature point coordinates
       Math::Vector<Real> m_weights; ///< Quadrature weights
   };

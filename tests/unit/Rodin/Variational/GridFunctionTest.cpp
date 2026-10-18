@@ -46,24 +46,24 @@ namespace Rodin::Tests::Unit
       class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
-        template <class Function>
-        Pushforward(Function&& function, size_t& evaluations, bool geometric)
-          : m_function(std::forward<Function>(function)),
-            m_evaluations(evaluations),
-            m_geometric(geometric)
-        {}
+          template <class Function>
+          Pushforward(Function&& function, size_t& evaluations, bool geometric)
+            : m_function(std::forward<Function>(function)),
+              m_evaluations(evaluations),
+              m_geometric(geometric)
+          {}
 
-        Math::SpatialVector<Real> operator()(const Point& p) const
-        {
-          ++m_evaluations.get();
-          const auto value = m_function(p.getReferenceCoordinates());
-          Math::SpatialVector<Real> out(2);
-          out(0) = 2.0 * value(0) + value(1);
-          out(1) = -value(0) + 3.0 * value(1);
-          if (m_geometric)
-            out *= p.getDistortion();
-          return out;
-        }
+          Math::SpatialVector<Real> operator()(const Point& p) const
+          {
+            ++m_evaluations.get();
+            const auto value = m_function(p.getReferenceCoordinates());
+            Math::SpatialVector<Real> out(2);
+            out(0) = 2.0 * value(0) + value(1);
+            out(1) = -value(0) + 3.0 * value(1);
+            if (m_geometric)
+              out *= p.getDistortion();
+            return out;
+          }
 
         private:
           Callable m_function;

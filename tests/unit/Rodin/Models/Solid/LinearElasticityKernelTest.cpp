@@ -150,7 +150,9 @@ namespace Rodin::Tests::Unit
         typename Form::Kernel::MatrixType actual;
         selected.compute(actual, cell);
         if (space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder() == 0)
+        {
           EXPECT_TRUE((actual.array() == Scalar(0)).all());
+        }
         const size_t order =
           2 * space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder();
         const auto& formula =
@@ -318,9 +320,13 @@ namespace Rodin::Tests::Unit
           using ShearRange = typename std::decay_t<decltype(mu)>::ScalarType;
           if constexpr (std::is_same_v<FirstRange, Real> &&
             std::is_same_v<ShearRange, Real>)
+          {
             EXPECT_EQ((actual - actual.adjoint()).norm(), 0);
+          }
           else
+          {
             EXPECT_GT((actual - actual.adjoint()).norm(), 0);
+          }
         };
         verify(realLambda, realMu);
         verify(realLambda, complexMu);

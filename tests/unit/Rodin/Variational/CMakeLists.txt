@@ -1,5 +1,20 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalMassFormTest MassFormTest.cpp)
+target_link_libraries(RodinVariationalMassFormTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMassFormTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalConvectionQuadratureTest ConvectionQuadratureTest.cpp)
+target_link_libraries(RodinVariationalConvectionQuadratureTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalConvectionQuadratureTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalReferenceTabulationTest ReferenceTabulationTest.cpp)
+target_link_libraries(RodinVariationalReferenceTabulationTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalReferenceTabulationTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalComplexNamedFormTest ComplexNamedFormTest.cpp)
 target_link_libraries(RodinVariationalComplexNamedFormTest PRIVATE
   GTest::gtest GTest::gtest_main Rodin::Variational)
@@ -19,6 +34,21 @@ add_executable(RodinVariationalWeightedH1JacobianTest WeightedH1JacobianTest.cpp
 target_link_libraries(RodinVariationalWeightedH1JacobianTest PRIVATE
   GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalWeightedH1JacobianTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1JacobianBlocksTest H1JacobianBlocksTest.cpp)
+target_link_libraries(RodinVariationalH1JacobianBlocksTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1JacobianBlocksTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalH1CoefficientTabulationTest H1CoefficientTabulationTest.cpp)
+target_link_libraries(RodinVariationalH1CoefficientTabulationTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1CoefficientTabulationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalQuadratureLifecycleTest QuadratureLifecycleTest.cpp)
+target_link_libraries(RodinVariationalQuadratureLifecycleTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalQuadratureLifecycleTest PROPERTIES LABELS unit)
 
 add_executable(RodinVariationalEmbeddedJacobianTest EmbeddedJacobianTest.cpp)
 target_link_libraries(RodinVariationalEmbeddedJacobianTest PRIVATE
@@ -792,6 +822,11 @@ add_executable(RodinVariationalMatrixQuadratureTest MatrixQuadratureTest.cpp)
 target_link_libraries(RodinVariationalMatrixQuadratureTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalMatrixQuadratureTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalShapeFunctionTest ShapeFunctionTest.cpp)
+target_link_libraries(RodinVariationalShapeFunctionTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalShapeFunctionTest PROPERTIES LABELS unit)
 
 add_executable(RodinVariationalCoefficientEvaluationTest CoefficientEvaluationTest.cpp)
 target_link_libraries(RodinVariationalCoefficientEvaluationTest

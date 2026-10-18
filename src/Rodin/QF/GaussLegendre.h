@@ -252,7 +252,12 @@ namespace Rodin::QF
       /// @brief Builds the quadrature rule for the selected geometry.
       void build();
 
-      /// @brief Builds quadrature for a point (0D).
+      /**
+       * @brief Builds the unit-mass rule on a zero-dimensional point.
+       *
+       * The single reference sample is the empty tuple in
+       * @f$\mathbb{R}^0@f$, with weight one.
+       */
       void buildPoint();
 
       /**

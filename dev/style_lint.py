@@ -88,7 +88,7 @@ def expected_guard(relpath):
 
 
 CPP_COMMENTS = re.compile(
-    r'R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
+    r'(?:u8|u|U|L)?R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
     r'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\''
     r'|(?P<comment>//[^\n]*|/\*.*?\*/)', re.DOTALL)
 

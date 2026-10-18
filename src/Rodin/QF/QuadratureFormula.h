@@ -63,6 +63,23 @@ namespace Rodin::QF
       {}
 
       /**
+       * @brief Moves rule state with independent destination and source identities.
+       *
+       * A derived move may transfer the source's nodes. Both versions must be
+       * renewed so caches cannot reuse pre-move samples for the moved-from rule.
+       * One atomic reservation supplies two distinct identities, one per rule.
+       * This does not make the concrete rule's moved-from payload queryable.
+       *
+       * @param other Rule whose state is being transferred.
+       */
+      QuadratureFormulaBase(QuadratureFormulaBase&& other) noexcept
+        : Copyable(std::move(other)),
+          m_identity(s_nextCacheIdentity.fetch_add(2, std::memory_order_relaxed))
+      {
+        other.m_identity = m_identity + 1;
+      }
+
+      /**
        * @brief Assignment invalidates caches of the previous rule contents.
        * @param other Rule assigned to this formula.
        * @returns Reference to this formula.
@@ -75,12 +92,35 @@ namespace Rodin::QF
       }
 
       /**
+       * @brief Renews identities for both sides of a rule-state transfer.
+       *
+       * Self-move also renews the destination identity because derived members
+       * may change during self-move. Distinct sources receive a separate fresh
+       * identity. Concrete types retain their own moved-from payload contracts.
+       * A single atomic reservation covers the one or two changed versions.
+       *
+       * @param other Rule whose state is being transferred.
+       * @returns This formula with its previous version retired.
+       */
+      QuadratureFormulaBase& operator=(QuadratureFormulaBase&& other) noexcept
+      {
+        const size_t changedVersions = this == &other ? 1 : 2;
+        m_identity =
+          s_nextCacheIdentity.fetch_add(changedVersions, std::memory_order_relaxed);
+        if (this != &other)
+          other.m_identity = m_identity + 1;
+        return *this;
+      }
+
+      /**
        * @brief Identity for caches of this quadrature formula.
        *
        * Construction, copying, and assignment receive a fresh identity, even
-       * when object storage is reused. Reading the identity requires no atomic
-       * operation. Nodes must remain fixed between these operations.
-       * @returns Unique lifetime and assignment identity of the rule.
+       * when object storage is reused. Move operations renew the source version
+       * as well as the destination; a derived move must delegate to the base move
+       * operation when transferring nodes. Reading the identity requires no
+       * atomic operation. Nodes must remain fixed between these operations.
+       * @returns Unique lifetime and state-version identity of the rule.
        */
       size_t getCacheIdentity() const noexcept
       {

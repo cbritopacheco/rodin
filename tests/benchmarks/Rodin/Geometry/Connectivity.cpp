@@ -28,306 +28,306 @@ namespace Rodin::Tests::Benchmarks
   class ConnectivityBenchmark : public benchmark::Fixture
   {
     public:
-    struct MeshSpec
-    {
-      Polytope::Type type;
-      std::string name;
-      std::array<size_t, 3> resolution;
-      size_t topologicalDimension;
-    };
-
-    static MeshSpec kMeshes[];
-
-    static LocalMesh makeMesh(const MeshSpec& spec)
-    {
-      switch (spec.topologicalDimension)
+      struct MeshSpec
       {
-        case 1:
-          return LocalMesh::UniformGrid(spec.type, {spec.resolution[0]});
+        Polytope::Type type;
+        std::string name;
+        std::array<size_t, 3> resolution;
+        size_t topologicalDimension;
+      };
 
-        case 2:
-          return LocalMesh::UniformGrid(
-            spec.type, {spec.resolution[0], spec.resolution[1]});
+      static MeshSpec kMeshes[];
 
-        case 3:
-          return LocalMesh::UniformGrid(
-            spec.type, {spec.resolution[0], spec.resolution[1], spec.resolution[2]});
-
-        default:
-          assert(false);
-          return LocalMesh();
-      }
-    }
-
-    static void setCommonCounters(benchmark::State& st, const LocalMesh& mesh)
-    {
-      const auto& conn = mesh.getConnectivity();
-      const size_t D = mesh.getDimension();
-
-      st.counters["D"] = static_cast<double>(D);
-      st.counters["vertices"] = static_cast<double>(conn.getCount(0));
-      st.counters["cells"] = static_cast<double>(conn.getCount(D));
-
-      if (D >= 1)
-        st.counters["entities_1"] = static_cast<double>(conn.getCount(1));
-      if (D >= 2)
-        st.counters["entities_2"] = static_cast<double>(conn.getCount(2));
-      if (D >= 3)
-        st.counters["entities_3"] = static_cast<double>(conn.getCount(3));
-    }
-
-    static void computeAll(LocalMesh& mesh,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      const size_t D = mesh.getDimension();
-      auto& conn = mesh.getConnectivity();
-      for (size_t d = 0; d <= D; ++d)
+      static LocalMesh makeMesh(const MeshSpec& spec)
       {
-        for (size_t dp = 0; dp <= D; ++dp)
-          conn.compute(d, dp, mode);
-      }
-    }
-
-    static void clearAllDerived(LocalMesh& mesh)
-    {
-      const size_t D = mesh.getDimension();
-      auto& conn = mesh.getConnectivity();
-
-      for (size_t d = 0; d <= D; ++d)
-      {
-        for (size_t dp = 0; dp <= D; ++dp)
+        switch (spec.topologicalDimension)
         {
-          if ((d == D && dp == 0) || (d == D && dp == D))
-            continue;
-          conn.clear(d, dp);
+          case 1:
+            return LocalMesh::UniformGrid(spec.type, {spec.resolution[0]});
+
+          case 2:
+            return LocalMesh::UniformGrid(
+              spec.type, {spec.resolution[0], spec.resolution[1]});
+
+          case 3:
+            return LocalMesh::UniformGrid(
+              spec.type, {spec.resolution[0], spec.resolution[1], spec.resolution[2]});
+
+          default:
+            assert(false);
+            return LocalMesh();
         }
       }
-    }
 
-    static void prepareForTranspose(LocalMesh& mesh, size_t d, size_t dp)
-    {
-      assert(d < dp);
-      auto& conn = mesh.getConnectivity();
+      static void setCommonCounters(benchmark::State& st, const LocalMesh& mesh)
+      {
+        const auto& conn = mesh.getConnectivity();
+        const size_t D = mesh.getDimension();
+
+        st.counters["D"] = static_cast<double>(D);
+        st.counters["vertices"] = static_cast<double>(conn.getCount(0));
+        st.counters["cells"] = static_cast<double>(conn.getCount(D));
+
+        if (D >= 1)
+          st.counters["entities_1"] = static_cast<double>(conn.getCount(1));
+        if (D >= 2)
+          st.counters["entities_2"] = static_cast<double>(conn.getCount(2));
+        if (D >= 3)
+          st.counters["entities_3"] = static_cast<double>(conn.getCount(3));
+      }
+
+      static void computeAll(LocalMesh& mesh,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
+      {
+        const size_t D = mesh.getDimension();
+        auto& conn = mesh.getConnectivity();
+        for (size_t d = 0; d <= D; ++d)
+        {
+          for (size_t dp = 0; dp <= D; ++dp)
+            conn.compute(d, dp, mode);
+        }
+      }
+
+      static void clearAllDerived(LocalMesh& mesh)
+      {
+        const size_t D = mesh.getDimension();
+        auto& conn = mesh.getConnectivity();
+
+        for (size_t d = 0; d <= D; ++d)
+        {
+          for (size_t dp = 0; dp <= D; ++dp)
+          {
+            if ((d == D && dp == 0) || (d == D && dp == D))
+              continue;
+            conn.clear(d, dp);
+          }
+        }
+      }
+
+      static void prepareForTranspose(LocalMesh& mesh, size_t d, size_t dp)
+      {
+        assert(d < dp);
+        auto& conn = mesh.getConnectivity();
 
         // Need dp -> d first, then benchmark transpose(d, dp)
-      conn.compute(dp, d);
-      conn.clear(d, dp);
-    }
+        conn.compute(dp, d);
+        conn.clear(d, dp);
+      }
 
-    static void prepareForIntersection(LocalMesh& mesh, size_t d, size_t dp, size_t dpp)
-    {
-      auto& conn = mesh.getConnectivity();
+      static void prepareForIntersection(LocalMesh& mesh, size_t d, size_t dp, size_t dpp)
+      {
+        auto& conn = mesh.getConnectivity();
 
         // intersection(d, dp, dpp) requires d -> dpp and dpp -> dp
-      conn.compute(d, dpp);
-      conn.compute(dpp, dp);
-      conn.clear(d, dp);
-    }
+        conn.compute(d, dpp);
+        conn.compute(dpp, dp);
+        conn.clear(d, dp);
+      }
 
-    static void benchmarkColdCompute(benchmark::State& st, const MeshSpec& spec, size_t d,
-      size_t dp,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      for (auto _ : st)
+      static void benchmarkColdCompute(benchmark::State& st, const MeshSpec& spec,
+        size_t d, size_t dp,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
       {
-        st.PauseTiming();
-        auto mesh = makeMesh(spec);
-        st.ResumeTiming();
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          auto mesh = makeMesh(spec);
+          st.ResumeTiming();
 
+          mesh.getConnectivity().compute(d, dp, mode);
+        }
+
+        auto mesh = makeMesh(spec);
         mesh.getConnectivity().compute(d, dp, mode);
+        setCommonCounters(st, mesh);
+        st.counters["from"] = static_cast<double>(d);
+        st.counters["to"] = static_cast<double>(dp);
       }
 
-      auto mesh = makeMesh(spec);
-      mesh.getConnectivity().compute(d, dp, mode);
-      setCommonCounters(st, mesh);
-      st.counters["from"] = static_cast<double>(d);
-      st.counters["to"] = static_cast<double>(dp);
-    }
-
-    static void benchmarkWarmCompute(benchmark::State& st, const MeshSpec& spec, size_t d,
-      size_t dp,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      auto mesh = makeMesh(spec);
-      mesh.getConnectivity().compute(d, dp, mode);
-
-      for (auto _ : st)
+      static void benchmarkWarmCompute(benchmark::State& st, const MeshSpec& spec,
+        size_t d, size_t dp,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
       {
-        auto& result = mesh.getConnectivity().compute(d, dp, mode);
-        benchmark::DoNotOptimize(result);
-        benchmark::ClobberMemory();
-      }
-
-      setCommonCounters(st, mesh);
-      st.counters["from"] = static_cast<double>(d);
-      st.counters["to"] = static_cast<double>(dp);
-    }
-
-    static void benchmarkColdAllPairs(benchmark::State& st, const MeshSpec& spec,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      for (auto _ : st)
-      {
-        st.PauseTiming();
         auto mesh = makeMesh(spec);
-        st.ResumeTiming();
+        mesh.getConnectivity().compute(d, dp, mode);
 
-        computeAll(mesh, mode);
-        benchmark::DoNotOptimize(mesh.getConnectivity());
+        for (auto _ : st)
+        {
+          auto& result = mesh.getConnectivity().compute(d, dp, mode);
+          benchmark::DoNotOptimize(result);
+          benchmark::ClobberMemory();
+        }
+
+        setCommonCounters(st, mesh);
+        st.counters["from"] = static_cast<double>(d);
+        st.counters["to"] = static_cast<double>(dp);
       }
 
-      auto mesh = makeMesh(spec);
-      computeAll(mesh, mode);
-      setCommonCounters(st, mesh);
-    }
-
-    static void benchmarkWarmAllPairs(benchmark::State& st, const MeshSpec& spec,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      auto mesh = makeMesh(spec);
-      computeAll(mesh, mode);
-
-      for (auto _ : st)
+      static void benchmarkColdAllPairs(benchmark::State& st, const MeshSpec& spec,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
       {
-        computeAll(mesh, mode);
-        benchmark::DoNotOptimize(mesh.getConnectivity());
-        benchmark::ClobberMemory();
-      }
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          auto mesh = makeMesh(spec);
+          st.ResumeTiming();
 
-      setCommonCounters(st, mesh);
-    }
+          computeAll(mesh, mode);
+          benchmark::DoNotOptimize(mesh.getConnectivity());
+        }
 
-    static void benchmarkColdBuild(benchmark::State& st, const MeshSpec& spec, size_t d,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      for (auto _ : st)
-      {
-        st.PauseTiming();
         auto mesh = makeMesh(spec);
-        st.ResumeTiming();
-
-        mesh.getConnectivity().build(d, mode);
+        computeAll(mesh, mode);
+        setCommonCounters(st, mesh);
       }
 
-      auto mesh = makeMesh(spec);
-      mesh.getConnectivity().build(d, mode);
-      setCommonCounters(st, mesh);
-      st.counters["build_dim"] = static_cast<double>(d);
-    }
-
-    static void benchmarkWarmBuild(benchmark::State& st, const MeshSpec& spec, size_t d,
-      Connectivity<Context::Local>::Mode mode =
-        Connectivity<Context::Local>::Mode::Discover)
-    {
-      auto mesh = makeMesh(spec);
-      mesh.getConnectivity().build(d, mode);
-
-      for (auto _ : st)
+      static void benchmarkWarmAllPairs(benchmark::State& st, const MeshSpec& spec,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
       {
-        st.PauseTiming();
-        mesh.getConnectivity().clear(mesh.getDimension(), d);
-        st.ResumeTiming();
+        auto mesh = makeMesh(spec);
+        computeAll(mesh, mode);
 
-        mesh.getConnectivity().build(d, mode);
+        for (auto _ : st)
+        {
+          computeAll(mesh, mode);
+          benchmark::DoNotOptimize(mesh.getConnectivity());
+          benchmark::ClobberMemory();
+        }
+
+        setCommonCounters(st, mesh);
       }
 
-      setCommonCounters(st, mesh);
-      st.counters["build_dim"] = static_cast<double>(d);
-    }
-
-    static void benchmarkColdTranspose(
-      benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp)
-    {
-      assert(d < dp);
-
-      for (auto _ : st)
+      static void benchmarkColdBuild(benchmark::State& st, const MeshSpec& spec, size_t d,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
       {
-        st.PauseTiming();
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          auto mesh = makeMesh(spec);
+          st.ResumeTiming();
+
+          mesh.getConnectivity().build(d, mode);
+        }
+
+        auto mesh = makeMesh(spec);
+        mesh.getConnectivity().build(d, mode);
+        setCommonCounters(st, mesh);
+        st.counters["build_dim"] = static_cast<double>(d);
+      }
+
+      static void benchmarkWarmBuild(benchmark::State& st, const MeshSpec& spec, size_t d,
+        Connectivity<Context::Local>::Mode mode =
+          Connectivity<Context::Local>::Mode::Discover)
+      {
+        auto mesh = makeMesh(spec);
+        mesh.getConnectivity().build(d, mode);
+
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          mesh.getConnectivity().clear(mesh.getDimension(), d);
+          st.ResumeTiming();
+
+          mesh.getConnectivity().build(d, mode);
+        }
+
+        setCommonCounters(st, mesh);
+        st.counters["build_dim"] = static_cast<double>(d);
+      }
+
+      static void benchmarkColdTranspose(
+        benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp)
+      {
+        assert(d < dp);
+
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          auto mesh = makeMesh(spec);
+          prepareForTranspose(mesh, d, dp);
+          st.ResumeTiming();
+
+          mesh.getConnectivity().transpose(d, dp);
+        }
+
         auto mesh = makeMesh(spec);
         prepareForTranspose(mesh, d, dp);
-        st.ResumeTiming();
-
         mesh.getConnectivity().transpose(d, dp);
+        setCommonCounters(st, mesh);
+        st.counters["from"] = static_cast<double>(d);
+        st.counters["to"] = static_cast<double>(dp);
       }
 
-      auto mesh = makeMesh(spec);
-      prepareForTranspose(mesh, d, dp);
-      mesh.getConnectivity().transpose(d, dp);
-      setCommonCounters(st, mesh);
-      st.counters["from"] = static_cast<double>(d);
-      st.counters["to"] = static_cast<double>(dp);
-    }
-
-    static void benchmarkWarmTranspose(
-      benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp)
-    {
-      assert(d < dp);
-
-      auto mesh = makeMesh(spec);
-      prepareForTranspose(mesh, d, dp);
-
-      for (auto _ : st)
+      static void benchmarkWarmTranspose(
+        benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp)
       {
-        st.PauseTiming();
-        mesh.getConnectivity().clear(d, dp);
-        st.ResumeTiming();
+        assert(d < dp);
 
-        mesh.getConnectivity().transpose(d, dp);
+        auto mesh = makeMesh(spec);
+        prepareForTranspose(mesh, d, dp);
+
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          mesh.getConnectivity().clear(d, dp);
+          st.ResumeTiming();
+
+          mesh.getConnectivity().transpose(d, dp);
+        }
+
+        setCommonCounters(st, mesh);
+        st.counters["from"] = static_cast<double>(d);
+        st.counters["to"] = static_cast<double>(dp);
       }
 
-      setCommonCounters(st, mesh);
-      st.counters["from"] = static_cast<double>(d);
-      st.counters["to"] = static_cast<double>(dp);
-    }
-
-    static void benchmarkColdIntersection(
-      benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp, size_t dpp)
-    {
-      for (auto _ : st)
+      static void benchmarkColdIntersection(
+        benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp, size_t dpp)
       {
-        st.PauseTiming();
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          auto mesh = makeMesh(spec);
+          prepareForIntersection(mesh, d, dp, dpp);
+          st.ResumeTiming();
+
+          mesh.getConnectivity().intersection(d, dp, dpp);
+        }
+
         auto mesh = makeMesh(spec);
         prepareForIntersection(mesh, d, dp, dpp);
-        st.ResumeTiming();
-
         mesh.getConnectivity().intersection(d, dp, dpp);
+        setCommonCounters(st, mesh);
+        st.counters["from"] = static_cast<double>(d);
+        st.counters["to"] = static_cast<double>(dp);
+        st.counters["via"] = static_cast<double>(dpp);
       }
 
-      auto mesh = makeMesh(spec);
-      prepareForIntersection(mesh, d, dp, dpp);
-      mesh.getConnectivity().intersection(d, dp, dpp);
-      setCommonCounters(st, mesh);
-      st.counters["from"] = static_cast<double>(d);
-      st.counters["to"] = static_cast<double>(dp);
-      st.counters["via"] = static_cast<double>(dpp);
-    }
-
-    static void benchmarkWarmIntersection(
-      benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp, size_t dpp)
-    {
-      auto mesh = makeMesh(spec);
-      prepareForIntersection(mesh, d, dp, dpp);
-
-      for (auto _ : st)
+      static void benchmarkWarmIntersection(
+        benchmark::State& st, const MeshSpec& spec, size_t d, size_t dp, size_t dpp)
       {
-        st.PauseTiming();
-        mesh.getConnectivity().clear(d, dp);
-        st.ResumeTiming();
+        auto mesh = makeMesh(spec);
+        prepareForIntersection(mesh, d, dp, dpp);
 
-        mesh.getConnectivity().intersection(d, dp, dpp);
+        for (auto _ : st)
+        {
+          st.PauseTiming();
+          mesh.getConnectivity().clear(d, dp);
+          st.ResumeTiming();
+
+          mesh.getConnectivity().intersection(d, dp, dpp);
+        }
+
+        setCommonCounters(st, mesh);
+        st.counters["from"] = static_cast<double>(d);
+        st.counters["to"] = static_cast<double>(dp);
+        st.counters["via"] = static_cast<double>(dpp);
       }
-
-      setCommonCounters(st, mesh);
-      st.counters["from"] = static_cast<double>(d);
-      st.counters["to"] = static_cast<double>(dp);
-      st.counters["via"] = static_cast<double>(dpp);
-    }
   };
 
   ConnectivityBenchmark::MeshSpec ConnectivityBenchmark::kMeshes[] = {

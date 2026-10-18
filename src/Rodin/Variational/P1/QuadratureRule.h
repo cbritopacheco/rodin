@@ -556,8 +556,17 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$.
    *
-   * The specialization evaluates the integrand at the element centroid and
-   * supports distinct P1 trial and test spaces.
+   * The specialization evaluates the selected quadrature formula and supports
+   * distinct P1 trial and test spaces.
+   *
+   * ## Architecture
+   *
+   * Binding selects the formula, owns its mapped samples and sizes the local
+   * matrix before scalar reference preparation. Zero components give a
+   * @f$0\times0@f$ matrix without dividing by that count. Reference values
+   * depend on geometry and order, not component count. A replacement cache
+   * is marked ready only after all scalar values have been prepared; an empty
+   * binding cannot publish an unprepared entry for a later nonempty binding.
    */
   template <
     class LHSDerived, class RHSDerived,
@@ -708,24 +717,11 @@ namespace Rodin::Variational
 
         if (recompute)
         {
-          m_set      = true;
-          m_order    = order;
+          m_set = false;
+          m_order = order;
           m_geometry = geometry;
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
-
-          // Reference P1 basis values depend on the geometry and quadrature
-          // formula, but not on the physical mesh cell.
-          const P1Element<ScalarType> scalarfe(geometry);
-          const size_t nv = scalarfe.getCount();
-          m_basis.resize(
-            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-          {
-            const auto& rc = m_qf->getPoint(qp);
-            for (size_t a = 0; a < nv; ++a)
-              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
-          }
         }
 
         assert(m_qf);
@@ -752,14 +748,29 @@ namespace Rodin::Variational
             return size_t(1);
           }
         }();
-        assert(vdim > 0);
-        assert(ntr % vdim == 0);
-        assert(nte % vdim == 0);
-        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
-        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
-
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
+        if (vdim == 0)
+          return *this;
+
+        assert(ntr % vdim == 0);
+        assert(nte % vdim == 0);
+        if (recompute)
+        {
+          const P1Element<ScalarType> scalarfe(geometry);
+          const size_t nv = scalarfe.getCount();
+          m_basis.resize(
+            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
+            for (size_t a = 0; a < nv; ++a)
+              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
+          }
+          m_set = true;
+        }
+        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
+        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -915,6 +926,14 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and @f$
    * A @f$ is a coefficient function.
+   *
+   * ## Architecture
+   *
+   * Scalar reference values are owned by this rule and keyed by geometry and
+   * integration order. The ready flag is published after complete preparation.
+   * Empty component ranges retain mapped-sample ownership and a
+   * @f$0\times0@f$ matrix, without scalar preparation or coefficient evaluation.
+   * This contract does not require a component count to serve as a divisor.
    *
    * Judgement
    * ---------
@@ -1099,24 +1118,11 @@ namespace Rodin::Variational
 
         if (recompute)
         {
-          m_set      = true;
-          m_order    = order;
+          m_set = false;
+          m_order = order;
           m_geometry = geometry;
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
-
-          // Reference P1 basis values are shared by every physical cell with
-          // this geometry and quadrature formula.
-          const P1Element<ScalarType> scalarfe(geometry);
-          const size_t nv = scalarfe.getCount();
-          m_basis.resize(
-            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-          {
-            const auto& rc = m_qf->getPoint(qp);
-            for (size_t a = 0; a < nv; ++a)
-              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
-          }
         }
 
         assert(m_qf);
@@ -1141,14 +1147,29 @@ namespace Rodin::Variational
             return size_t(1);
           }
         }();
-        assert(vdim > 0);
-        assert(ntr % vdim == 0);
-        assert(nte % vdim == 0);
-        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
-        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
-
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
+        if (vdim == 0)
+          return *this;
+
+        assert(ntr % vdim == 0);
+        assert(nte % vdim == 0);
+        if (recompute)
+        {
+          const P1Element<ScalarType> scalarfe(geometry);
+          const size_t nv = scalarfe.getCount();
+          m_basis.resize(
+            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
+            for (size_t a = 0; a < nv; ++a)
+              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
+          }
+          m_set = true;
+        }
+        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
+        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -3207,7 +3228,7 @@ namespace Rodin::Variational
    *
    * Assembles
    * @f[
-   *   \int_K (A : \mathbf{J}\,u)\,(B : \mathbf{J}\,v)\ dx,
+   *   \int_K (A : \mathbf{J}\,u)\,\overline{(B : \mathbf{J}\,v)}\ dx,
    * @f]
    * the outer product of Frobenius contractions of matrix coefficients @f$A@f$
    * and @f$B@f$ against the Jacobians of the trial and test functions.
@@ -3470,7 +3491,7 @@ namespace Rodin::Variational
           {
             for (size_t te = 0; te < nte; ++te)
             {
-              const ScalarType at = wdet * m_trialAction[te];
+              const ScalarType at = wdet * Math::conj(m_trialAction[te]);
               for (size_t tr = 0; tr <= te; ++tr)
                 m_matrix(te, tr) += at * m_trialAction[tr];
             }
@@ -3479,7 +3500,7 @@ namespace Rodin::Variational
           {
             for (size_t te = 0; te < nte; ++te)
             {
-              const ScalarType at = wdet * m_testAction[te];
+              const ScalarType at = wdet * Math::conj(m_testAction[te]);
               for (size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(te, tr) += at * m_trialAction[tr];
             }
@@ -3489,7 +3510,7 @@ namespace Rodin::Variational
         if (trialfes == testfes && sharedCoefficient)
         {
           m_matrix.template triangularView<Eigen::Upper>() =
-            m_matrix.transpose().template triangularView<Eigen::Upper>();
+            m_matrix.adjoint().template triangularView<Eigen::Upper>();
         }
 
         return *this;
@@ -3971,8 +3992,19 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * Evaluates at the element centroid. Supports distinct P1 trial and test
-   * spaces. Implements the linearized convection term for Navier-Stokes.
+   * Evaluates at every sample of the selected quadrature formula. Supports
+   * distinct P1 trial and test spaces and implements the linearized convection
+   * term for Navier-Stokes.
+   *
+   * ## Architecture
+   *
+   * Reference derivatives of the trial scalar basis and values of the test
+   * scalar basis are prepared directly in their respective scalar fields.
+   * Their counts do not require division by a vector component count or access
+   * to a component-zero vector basis. The cache is marked ready only after the
+   * complete sample collection is filled. Empty ranges retain mapped quadrature
+   * and a @f$0\times0@f$ local matrix, but perform no scalar preparation or
+   * coefficient evaluation. Mapping and contraction are recomputed on each bind.
    */
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
@@ -4132,16 +4164,33 @@ namespace Rodin::Variational
 
         if (recompute)
         {
-          m_set      = true;
-          m_order    = order;
+          m_set = false;
+          m_order = order;
           m_geometry = geometry;
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+        }
 
-          // Cached per quadrature point, not at the first one: basis values
-          // vary within every element and reference gradients vary within
-          // every element that is not a simplex, so freezing either at one
-          // point is exact only for a single-point rule.
+        assert(m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
+
+        const size_t vdim = trialfes.getVectorDimension();
+        assert(vdim == rhs.getFiniteElementSpace().getVectorDimension());
+        const size_t ntr = lhs.getDOFs(polytope);
+        const size_t nte = rhs.getDOFs(polytope);
+        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+        m_matrix.setZero();
+        if (vdim == 0)
+          return *this;
+
+        if (recompute)
+        {
+          using TrialScalar = typename FormLanguage::Traits<TrialFESType>::ScalarType;
+          using TestScalar = typename FormLanguage::Traits<TestFESType>::ScalarType;
+          const P1Element<TrialScalar> trialScalar(trialfe.getGeometry());
+          const P1Element<TestScalar> testScalar(testfe.getGeometry());
+          const size_t scalarCount = trialScalar.getCount();
+          assert(scalarCount == testScalar.getCount());
           const size_t nqp = m_qf->getSize();
           m_refGrad.assign(nqp, {});
           m_basis.assign(nqp, {});
@@ -4149,56 +4198,21 @@ namespace Rodin::Variational
           {
             const auto& rc = m_qf->getPoint(qp);
 
-            if constexpr (std::is_same_v<LHSRange, ScalarType>)
+            m_refGrad[qp].resize(scalarCount);
+            m_basis[qp].resize(scalarCount);
+            for (size_t a = 0; a < scalarCount; ++a)
             {
-              const size_t n = trialfe.getCount();
-              m_refGrad[qp].resize(n);
-              for (size_t a = 0; a < n; ++a)
-              {
-                m_refGrad[qp][a].resize(d);
-                const auto& basisFn = trialfe.getBasis(a);
-                for (size_t j = 0; j < d; ++j)
-                  m_refGrad[qp][a](j) = basisFn.template getDerivative<1>(j)(rc);
-              }
-
-              m_basis[qp].resize(n);
-              for (size_t b = 0; b < n; ++b)
-                m_basis[qp][b] = testfe.getBasis(b)(rc);
-            }
-            else
-            {
-              const size_t vdim = trialfes.getVectorDimension();
-              const size_t nVertices = trialfe.getCount() / vdim;
-
-              m_refGrad[qp].resize(nVertices);
-              for (size_t v = 0; v < nVertices; ++v)
-              {
-                m_refGrad[qp][v].resize(d);
-                const auto& basisFn = trialfe.getBasis(v * vdim);
-                for (size_t j = 0; j < d; ++j)
-                  m_refGrad[qp][v](j) = basisFn.template getDerivative<1>(0, j)(rc);
-              }
-
-              m_basis[qp].resize(nVertices);
-              for (size_t v = 0; v < nVertices; ++v)
-              {
-                const auto bv = testfe.getBasis(v * vdim)(rc);
-                m_basis[qp][v] = bv(0);
-              }
+              m_refGrad[qp][a].resize(d);
+              const auto& basisFn = trialScalar.getBasis(a);
+              for (size_t j = 0; j < d; ++j)
+                m_refGrad[qp][a](j) = basisFn.template getDerivative<1>(j)(rc);
+              m_basis[qp][a] = testScalar.getBasis(a)(rc);
             }
           }
+          m_set = true;
         }
 
-        assert(m_qf);
-        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
-
         const size_t n = m_refGrad.empty() ? 0 : m_refGrad.front().size();
-        const size_t vdim = trialfes.getVectorDimension();
-
-        const size_t ntr = lhs.getDOFs(polytope);
-        const size_t nte = rhs.getDOFs(polytope);
-        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
-        m_matrix.setZero();
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -4217,7 +4231,9 @@ namespace Rodin::Variational
           for (size_t a = 0; a < n; ++a)
           {
             const auto physGrad = Jinv.transpose() * refGrad[a];
-            const ScalarType gradDotF = Math::dot(physGrad, fval);
+            // Scalar nodal bases and geometric pullbacks are real-valued.
+            // Conjugate the gradient slot, not the direction coefficient.
+            const ScalarType gradDotF = Math::dot(fval, physGrad);
 
             for (size_t b = 0; b < n; ++b)
             {

@@ -5,7 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Overlapping sequential assembly-stage measurements. */
+/**
+ * @file
+ * @brief Overlapping sequential assembly-stage measurements.
+ */
 #include <benchmark/benchmark.h>
 
 #include "Rodin/Assembly.h"
@@ -41,129 +44,129 @@ namespace Rodin::Tests::Benchmarks
   class PhysicsStages
   {
     public:
-    static void run(
-      benchmark::State& state, Polytope::Type geometry, Stage stage, bool conductivity)
-    {
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-      const size_t dim = mesh.getDimension();
-      using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
-      auto space = [&]() {
-        if constexpr (Elasticity)
-          return H1<Degree, Range, LocalMesh>(
-            std::integral_constant<size_t, Degree>{}, mesh, dim);
-        else
-          return H1<Degree, Range, LocalMesh>(
-            std::integral_constant<size_t, Degree>{}, mesh);
-      }();
-      TrialFunction u(space);
-      TestFunction v(space);
-      BilinearForm form(u, v);
-      const Real expected =
-        PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
-      form.assemble();
-      BilinearForm original(u, v);
-      PhysicsForm<Elasticity>::template configure<true>(
-        u, v, original, dim, conductivity);
-      original.assemble();
-      const auto baseline = original.getOperator();
-      const auto& coefficients = u.getSolution().getData();
-      using FES = std::decay_t<decltype(space)>;
-      using Triplets = std::vector<Math::SparseTriplet<Real>>;
-      using TripletForm =
-        BilinearForm<typename decltype(u)::SolutionType, FES, FES, Triplets>;
-      Assembly::Sequential<Triplets, TripletForm> assembler;
-      typename decltype(assembler)::InputType input(
-        space, space, form.getLocalIntegrators(), form.getGlobalIntegrators());
-      Triplets triplets;
-      assembler.execute(triplets, input);
-      Math::SparseMatrix<Real> matrix(space.getSize(), space.getSize());
-      matrix.setFromTriplets(triplets.begin(), triplets.end());
-
-      const size_t cells = mesh.getPolytopeCount(dim);
-      size_t entries = 0;
-      for (size_t cell = 0; cell < cells; ++cell)
+      static void run(
+        benchmark::State& state, Polytope::Type geometry, Stage stage, bool conductivity)
       {
-        const size_t count = space.getDOFs(dim, cell).size();
-        entries += count * count * form.getLocalIntegrators().size();
-      }
-      const auto evaluate = [&](bool bindOnly, bool energy) {
-        Real result = 0;
-        for (auto& integral : form.getLocalIntegrators())
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+        const size_t dim = mesh.getDimension();
+        using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
+        auto space = [&]() {
+          if constexpr (Elasticity)
+            return H1<Degree, Range, LocalMesh>(
+              std::integral_constant<size_t, Degree>{}, mesh, dim);
+          else
+            return H1<Degree, Range, LocalMesh>(
+              std::integral_constant<size_t, Degree>{}, mesh);
+        }();
+        TrialFunction u(space);
+        TestFunction v(space);
+        BilinearForm form(u, v);
+        const Real expected =
+          PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
+        form.assemble();
+        BilinearForm original(u, v);
+        PhysicsForm<Elasticity>::template configure<true>(
+          u, v, original, dim, conductivity);
+        original.assemble();
+        const auto baseline = original.getOperator();
+        const auto& coefficients = u.getSolution().getData();
+        using FES = std::decay_t<decltype(space)>;
+        using Triplets = std::vector<Math::SparseTriplet<Real>>;
+        using TripletForm =
+          BilinearForm<typename decltype(u)::SolutionType, FES, FES, Triplets>;
+        Assembly::Sequential<Triplets, TripletForm> assembler;
+        typename decltype(assembler)::InputType input(
+          space, space, form.getLocalIntegrators(), form.getGlobalIntegrators());
+        Triplets triplets;
+        assembler.execute(triplets, input);
+        Math::SparseMatrix<Real> matrix(space.getSize(), space.getSize());
+        matrix.setFromTriplets(triplets.begin(), triplets.end());
+
+        const size_t cells = mesh.getPolytopeCount(dim);
+        size_t entries = 0;
+        for (size_t cell = 0; cell < cells; ++cell)
         {
-          for (size_t cell = 0; cell < cells; ++cell)
+          const size_t count = space.getDOFs(dim, cell).size();
+          entries += count * count * form.getLocalIntegrators().size();
+        }
+        const auto evaluate = [&](bool bindOnly, bool energy) {
+          Real result = 0;
+          for (auto& integral : form.getLocalIntegrators())
           {
-            const auto polytope = *mesh.getPolytope(dim, cell);
-            integral.setPolytope(polytope);
-            if (bindOnly)
-              continue;
-            const auto& dofs = space.getDOFs(dim, cell);
-            for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+            for (size_t cell = 0; cell < cells; ++cell)
             {
-              for (size_t m = 0; m < static_cast<size_t>(dofs.size()); ++m)
+              const auto polytope = *mesh.getPolytope(dim, cell);
+              integral.setPolytope(polytope);
+              if (bindOnly)
+                continue;
+              const auto& dofs = space.getDOFs(dim, cell);
+              for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
               {
-                const Real value = integral.integrate(m, l);
-                result +=
-                  energy ? coefficients(dofs(l)) * value * coefficients(dofs(m)) : value;
+                for (size_t m = 0; m < static_cast<size_t>(dofs.size()); ++m)
+                {
+                  const Real value = integral.integrate(m, l);
+                  result += energy ? coefficients(dofs(l)) * value * coefficients(dofs(m))
+                                   : value;
+                }
               }
             }
           }
-        }
-        return result;
-      };
-      const auto valid = [&]() {
-        const Real localEnergy = evaluate(false, true);
-        const Real matrixEnergy = coefficients.dot(matrix * coefficients);
-        return std::isfinite(localEnergy) && std::isfinite(matrixEnergy) &&
-          std::abs(localEnergy / expected - 1) < 1e-9 &&
-          std::abs(matrixEnergy / expected - 1) < 1e-9 &&
-          (matrix - baseline).norm() < 1e-12 * std::max(Real(1), baseline.norm());
-      };
-      if (!valid())
-      {
-        stageCheckFailed = true;
-        state.SkipWithError("Stage failed local energy or canonical operator check");
-        return;
-      }
-      for (auto _ : state)
-      {
-        switch (stage)
+          return result;
+        };
+        const auto valid = [&]() {
+          const Real localEnergy = evaluate(false, true);
+          const Real matrixEnergy = coefficients.dot(matrix * coefficients);
+          return std::isfinite(localEnergy) && std::isfinite(matrixEnergy) &&
+            std::abs(localEnergy / expected - 1) < 1e-9 &&
+            std::abs(matrixEnergy / expected - 1) < 1e-9 &&
+            (matrix - baseline).norm() < 1e-12 * std::max(Real(1), baseline.norm());
+        };
+        if (!valid())
         {
-          case Stage::Binding:
-            benchmark::DoNotOptimize(evaluate(true, false));
-            break;
-          case Stage::Kernel:
-            benchmark::DoNotOptimize(evaluate(false, false));
-            break;
-          case Stage::Triplets:
-            assembler.execute(triplets, input);
-            benchmark::DoNotOptimize(triplets.data());
-            break;
-          case Stage::Finalize:
-            matrix.setFromTriplets(triplets.begin(), triplets.end());
-            benchmark::DoNotOptimize(matrix.nonZeros());
-            break;
+          stageCheckFailed = true;
+          state.SkipWithError("Stage failed local energy or canonical operator check");
+          return;
         }
-        benchmark::ClobberMemory();
-      }
+        for (auto _ : state)
+        {
+          switch (stage)
+          {
+            case Stage::Binding:
+              benchmark::DoNotOptimize(evaluate(true, false));
+              break;
+            case Stage::Kernel:
+              benchmark::DoNotOptimize(evaluate(false, false));
+              break;
+            case Stage::Triplets:
+              assembler.execute(triplets, input);
+              benchmark::DoNotOptimize(triplets.data());
+              break;
+            case Stage::Finalize:
+              matrix.setFromTriplets(triplets.begin(), triplets.end());
+              benchmark::DoNotOptimize(matrix.nonZeros());
+              break;
+          }
+          benchmark::ClobberMemory();
+        }
         // Finalization of the last triplet output is deliberately untimed.
-      if (stage == Stage::Triplets)
-        matrix.setFromTriplets(triplets.begin(), triplets.end());
-      if (!valid())
-      {
-        stageCheckFailed = true;
-        state.SkipWithError("Timed stage changed local energy or operator");
+        if (stage == Stage::Triplets)
+          matrix.setFromTriplets(triplets.begin(), triplets.end());
+        if (!valid())
+        {
+          stageCheckFailed = true;
+          state.SkipWithError("Timed stage changed local energy or operator");
+        }
+        state.counters["cells"] = cells;
+        state.counters["dofs"] = space.getSize();
+        state.counters["nnz"] = matrix.nonZeros();
+        state.counters["local_entries"] = entries;
+        state.counters["triplets"] = triplets.size();
+        state.counters["degree"] = Degree;
+        state.counters["components"] = Elasticity ? dim : 1;
+        state.counters["quadrature_order"] = 6;
+        state.counters["quadrature_points_per_cell"] =
+          QF::PolytopeQuadratureFormula::get(6, geometry).getSize();
       }
-      state.counters["cells"] = cells;
-      state.counters["dofs"] = space.getSize();
-      state.counters["nnz"] = matrix.nonZeros();
-      state.counters["local_entries"] = entries;
-      state.counters["triplets"] = triplets.size();
-      state.counters["degree"] = Degree;
-      state.counters["components"] = Elasticity ? dim : 1;
-      state.counters["quadrature_order"] = 6;
-      state.counters["quadrature_points_per_cell"] =
-        QF::PolytopeQuadratureFormula::get(6, geometry).getSize();
-    }
   };
 
   template <size_t Degree>

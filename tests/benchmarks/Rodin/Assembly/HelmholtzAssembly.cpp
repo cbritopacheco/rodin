@@ -41,120 +41,124 @@ namespace Rodin::Tests::Benchmarks
   class HelmholtzAssembly
   {
     public:
-    /// @brief Same original-kernel comparison budget as constrained assembly.
-    static constexpr Real AssemblyTolerance = 1e-11;
-    /// @brief Same manufactured patch budget as constrained assembly.
-    static constexpr Real PatchTolerance = 1e-10;
-    /// @brief Same wrong-field rejection floor as constrained assembly.
-    static constexpr Real SensitivityFloor = 1e-4;
+      /// @brief Same original-kernel comparison budget as constrained assembly.
+      static constexpr Real AssemblyTolerance = 1e-11;
+      /// @brief Same manufactured patch budget as constrained assembly.
+      static constexpr Real PatchTolerance = 1e-10;
+      /// @brief Same wrong-field rejection floor as constrained assembly.
+      static constexpr Real SensitivityFloor = 1e-4;
 
-    /**
-     * @brief Measures full problem assembly on a fixed mesh and space.
-     * @param state Grid points per axis and benchmark iterations.
-     * @param geometry Unit-box reference-cell family.
-     * @param shifted Whether the complex-shifted physical operator is selected.
-     */
-    static void run(
-      benchmark::State& state, Geometry::Polytope::Type geometry, bool shifted)
-    {
-      using namespace Variational;
-      using Workload = HelmholtzWorkload<K>;
-      using Convergence::HelmholtzData;
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-      const size_t dim = mesh.getDimension();
-      const HelmholtzData data(
-        dim, K == 1 ? HelmholtzData::Field::Affine : HelmholtzData::Field::Quadratic);
-      const Complex alpha = Workload::getMassCoefficient(shifted);
-      H1<K, Complex> space(std::integral_constant<size_t, K>{}, mesh);
-      TrialFunction u(space);
-      TestFunction v(space);
-      Problem problem(u, v), reference(u, v);
-      Workload::configure(u, v, problem, data, alpha);
-      Workload::template configure<true>(u, v, reference, data, alpha);
-      const Math::Vector<Complex> exact = u.getSolution().getData();
-      const Math::Vector<Complex> wrong = exact.array() + Complex(1, -1);
-      reference.assemble();
-      problem.assemble();
-      const auto& system = problem.getLinearSystem();
-      const auto& baseline = reference.getLinearSystem();
-      const Real rhsScale = std::max(Real(1), baseline.getVector().norm());
-      const Real matrixScale = std::max(Real(1), baseline.getOperator().norm());
-      const auto residual = [&]() {
-        return (system.getOperator() * exact - system.getVector()).norm() / rhsScale;
-      };
-      const auto matrixError = [&]() {
-        return (system.getOperator() - baseline.getOperator()).norm() / matrixScale;
-      };
-      const auto loadError = [&]() {
-        return (system.getVector() - baseline.getVector()).norm() / rhsScale;
-      };
-      const auto imaginaryDiagonal = [&]() {
-        Real sum = 0;
-        const size_t rows = static_cast<size_t>(system.getOperator().rows());
-        for (size_t j = 0; j < rows; ++j)
-          sum += system.getOperator().coeff(j, j).imag();
-        return sum;
-      };
-      const auto valid = [&]() {
-        const Real sensitivity =
-          (system.getOperator() * wrong - system.getVector()).norm() / rhsScale;
-        return std::isfinite(residual()) && residual() < PatchTolerance &&
-          std::isfinite(matrixError()) && matrixError() < AssemblyTolerance &&
-          std::isfinite(loadError()) && loadError() < AssemblyTolerance &&
-          sensitivity > SensitivityFloor &&
-          (shifted ? imaginaryDiagonal() > 0 : imaginaryDiagonal() == 0);
-      };
-      if (!valid())
+      /**
+       * @brief Measures full problem assembly on a fixed mesh and space.
+       * @param state Grid points per axis and benchmark iterations.
+       * @param geometry Unit-box reference-cell family.
+       * @param shifted Whether the complex-shifted physical operator is selected.
+       */
+      static void run(
+        benchmark::State& state, Geometry::Polytope::Type geometry, bool shifted)
       {
-        helmholtzAssemblyFailed = true;
-        state.SkipWithError(
-          "Initial Helmholtz matrix, load or manufactured patch failed");
-        return;
-      }
-      for (auto _ : state)
-      {
+        using namespace Variational;
+        using Workload = HelmholtzWorkload<K>;
+        using Convergence::HelmholtzData;
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+        const size_t dim = mesh.getDimension();
+        const HelmholtzData data(
+          dim, K == 1 ? HelmholtzData::Field::Affine : HelmholtzData::Field::Quadratic);
+        const Complex alpha = Workload::getMassCoefficient(shifted);
+        H1<K, Complex> space(std::integral_constant<size_t, K>{}, mesh);
+        TrialFunction u(space);
+        TestFunction v(space);
+        Problem problem(u, v), reference(u, v);
+        Workload::configure(u, v, problem, data, alpha);
+        Workload::template configure<true>(u, v, reference, data, alpha);
+        const Math::Vector<Complex> exact = u.getSolution().getData();
+        const Math::Vector<Complex> wrong = exact.array() + Complex(1, -1);
+        reference.assemble();
         problem.assemble();
-        benchmark::DoNotOptimize(system.getOperator().valuePtr());
-        benchmark::DoNotOptimize(system.getVector().data());
-        benchmark::ClobberMemory();
+        const auto& system = problem.getLinearSystem();
+        const auto& baseline = reference.getLinearSystem();
+        const Real rhsScale = std::max(Real(1), baseline.getVector().norm());
+        const Real matrixScale = std::max(Real(1), baseline.getOperator().norm());
+        const auto residual = [&]() {
+          return (system.getOperator() * exact - system.getVector()).norm() / rhsScale;
+        };
+        const auto matrixError = [&]() {
+          return (system.getOperator() - baseline.getOperator()).norm() / matrixScale;
+        };
+        const auto loadError = [&]() {
+          return (system.getVector() - baseline.getVector()).norm() / rhsScale;
+        };
+        const auto imaginaryDiagonal = [&]() {
+          Real sum = 0;
+          const size_t rows = static_cast<size_t>(system.getOperator().rows());
+          for (size_t j = 0; j < rows; ++j)
+            sum += system.getOperator().coeff(j, j).imag();
+          return sum;
+        };
+        const auto valid = [&]() {
+          const Real sensitivity =
+            (system.getOperator() * wrong - system.getVector()).norm() / rhsScale;
+          return std::isfinite(residual()) && residual() < PatchTolerance &&
+            std::isfinite(matrixError()) && matrixError() < AssemblyTolerance &&
+            std::isfinite(loadError()) && loadError() < AssemblyTolerance &&
+            sensitivity > SensitivityFloor &&
+            (shifted ? imaginaryDiagonal() > 0 : imaginaryDiagonal() == 0);
+        };
+        if (!valid())
+        {
+          helmholtzAssemblyFailed = true;
+          state.SkipWithError(
+            "Initial Helmholtz matrix, load or manufactured patch failed");
+          return;
+        }
+        for (auto _ : state)
+        {
+          problem.assemble();
+          benchmark::DoNotOptimize(system.getOperator().valuePtr());
+          benchmark::DoNotOptimize(system.getVector().data());
+          benchmark::ClobberMemory();
+        }
+        if (!valid())
+        {
+          helmholtzAssemblyFailed = true;
+          state.SkipWithError(
+            "Repeated Helmholtz assembly changed the qualified operator");
+        }
+        const size_t cells = mesh.getPolytopeCount(dim);
+        size_t localEntries = 0;
+        for (size_t cell = 0; cell < cells; ++cell)
+        {
+          const size_t count = space.getDOFs(dim, cell).size();
+          localEntries += count * count;
+        }
+        state.counters["dimension"] = dim;
+        state.counters["degree"] = K;
+        state.counters["cells"] = cells;
+        state.counters["rows"] = system.getOperator().rows();
+        state.counters["nnz"] = system.getOperator().nonZeros();
+        state.counters["local_basis_per_cell"] = space.getDOFs(dim, 0).size();
+        state.counters["scalar_bytes"] = sizeof(Complex);
+        state.counters["local_entries_per_operator_term"] = localEntries;
+        state.counters["quadrature_order"] = Workload::QuadratureOrder;
+        state.counters["quadrature_points_per_cell"] =
+          QF::PolytopeQuadratureFormula::get(Workload::QuadratureOrder, geometry)
+            .getSize();
+        state.counters["mass_real"] = alpha.real();
+        state.counters["mass_imaginary"] = alpha.imag();
+        state.counters["relative_residual"] = residual();
+        state.counters["relative_matrix_error"] = matrixError();
+        state.counters["relative_load_error"] = loadError();
+        state.counters["imaginary_diagonal_sum"] = imaginaryDiagonal();
       }
-      if (!valid())
-      {
-        helmholtzAssemblyFailed = true;
-        state.SkipWithError("Repeated Helmholtz assembly changed the qualified operator");
-      }
-      const size_t cells = mesh.getPolytopeCount(dim);
-      size_t localEntries = 0;
-      for (size_t cell = 0; cell < cells; ++cell)
-      {
-        const size_t count = space.getDOFs(dim, cell).size();
-        localEntries += count * count;
-      }
-      state.counters["dimension"] = dim;
-      state.counters["degree"] = K;
-      state.counters["cells"] = cells;
-      state.counters["rows"] = system.getOperator().rows();
-      state.counters["nnz"] = system.getOperator().nonZeros();
-      state.counters["local_basis_per_cell"] = space.getDOFs(dim, 0).size();
-      state.counters["scalar_bytes"] = sizeof(Complex);
-      state.counters["local_entries_per_operator_term"] = localEntries;
-      state.counters["quadrature_order"] = Workload::QuadratureOrder;
-      state.counters["quadrature_points_per_cell"] =
-        QF::PolytopeQuadratureFormula::get(Workload::QuadratureOrder, geometry).getSize();
-      state.counters["mass_real"] = alpha.real();
-      state.counters["mass_imaginary"] = alpha.imag();
-      state.counters["relative_residual"] = residual();
-      state.counters["relative_matrix_error"] = matrixError();
-      state.counters["relative_load_error"] = loadError();
-      state.counters["imaginary_diagonal_sum"] = imaginaryDiagonal();
-    }
 
-    /// @brief Registers the same physical operator matrix as the solver benchmark.
-    static void registerCases()
-    {
-      HelmholtzWorkload<K>::registerCases("Assembly",
-        [](auto& state, auto geometry, auto shifted) { run(state, geometry, shifted); });
-    }
+      /// @brief Registers the same physical operator matrix as the solver benchmark.
+      static void registerCases()
+      {
+        HelmholtzWorkload<K>::registerCases(
+          "Assembly", [](auto& state, auto geometry, auto shifted) {
+            run(state, geometry, shifted);
+          });
+      }
   };
 }
 

@@ -41,92 +41,92 @@ namespace Rodin::Tests::Benchmarks
   class SpatialMatrixVector
   {
     public:
-    /**
-     * @brief Measures one qualified product shape.
-     * @param state Runtime rows, contraction dimension and timing protocol.
-     */
-    static void run(benchmark::State& state)
-    {
-      using Out = typename FormLanguage::Mult<MatrixScalar, VectorScalar>::Type;
-      const size_t rows = state.range(0), columns = state.range(1);
-      Math::SpatialMatrix<MatrixScalar> matrix(rows, columns);
-      Math::SpatialVector<VectorScalar> vector(columns);
-      matrix.getData().setConstant(MatrixScalar(128));
-      vector.getData().setConstant(VectorScalar(256));
-      const auto coefficient = []<class Scalar>(size_t i, size_t j) {
-        const Real real = Real(2 * i + j + 1) / 8;
-        if constexpr (std::is_same_v<Scalar, Complex>)
-          return Scalar(real, -Real(i + 2 * j + 1) / 16);
-        else
-          return real;
-      };
-      for (size_t i = 0; i < rows; ++i)
+      /**
+       * @brief Measures one qualified product shape.
+       * @param state Runtime rows, contraction dimension and timing protocol.
+       */
+      static void run(benchmark::State& state)
       {
-        for (size_t j = 0; j < columns; ++j)
-          matrix(i, j) = coefficient.template operator()<MatrixScalar>(i, j);
-      }
-      for (size_t j = 0; j < columns; ++j)
-        vector(j) = coefficient.template operator()<VectorScalar>(j, 1);
-      Math::SpatialVector<Out> expected(rows);
-      for (size_t i = 0; i < rows; ++i)
-      {
-        for (size_t j = 0; j < columns; ++j)
-          expected(i) += Out(matrix(i, j)) * Out(vector(j));
-      }
-      const auto valid = [&](const auto& result) {
-        if (result.size() != rows)
-          return false;
-        for (size_t i = 0; i < 3; ++i)
+        using Out = typename FormLanguage::Mult<MatrixScalar, VectorScalar>::Type;
+        const size_t rows = state.range(0), columns = state.range(1);
+        Math::SpatialMatrix<MatrixScalar> matrix(rows, columns);
+        Math::SpatialVector<VectorScalar> vector(columns);
+        matrix.getData().setConstant(MatrixScalar(128));
+        vector.getData().setConstant(VectorScalar(256));
+        const auto coefficient = []<class Scalar>(size_t i, size_t j) {
+          const Real real = Real(2 * i + j + 1) / 8;
+          if constexpr (std::is_same_v<Scalar, Complex>)
+            return Scalar(real, -Real(i + 2 * j + 1) / 16);
+          else
+            return real;
+        };
+        for (size_t i = 0; i < rows; ++i)
         {
-          const Out value = result.getData()(i);
-          if (!std::isfinite(std::abs(value)) ||
-            value != (i < rows ? expected(i) : Out(0)))
-            return false;
+          for (size_t j = 0; j < columns; ++j)
+            matrix(i, j) = coefficient.template operator()<MatrixScalar>(i, j);
         }
-        return true;
-      };
-      auto result = matrix * vector;
-      auto wrong = result;
-      if (rows > 0)
-        wrong(0) += Out(1);
-      else
-        wrong.resize(1);
-      if (!valid(result) || valid(wrong))
-      {
-        spatialMatrixVectorFailed = true;
-        state.SkipWithError("Product, dimensions, padding or sensitivity guard failed");
-        return;
+        for (size_t j = 0; j < columns; ++j)
+          vector(j) = coefficient.template operator()<VectorScalar>(j, 1);
+        Math::SpatialVector<Out> expected(rows);
+        for (size_t i = 0; i < rows; ++i)
+        {
+          for (size_t j = 0; j < columns; ++j)
+            expected(i) += Out(matrix(i, j)) * Out(vector(j));
+        }
+        const auto valid = [&](const auto& result) {
+          if (result.size() != rows)
+            return false;
+          for (size_t i = 0; i < 3; ++i)
+          {
+            const Out value = result.getData()(i);
+            if (!std::isfinite(std::abs(value)) ||
+              value != (i < rows ? expected(i) : Out(0)))
+              return false;
+          }
+          return true;
+        };
+        auto result = matrix * vector;
+        auto wrong = result;
+        if (rows > 0)
+          wrong(0) += Out(1);
+        else
+          wrong.resize(1);
+        if (!valid(result) || valid(wrong))
+        {
+          spatialMatrixVectorFailed = true;
+          state.SkipWithError("Product, dimensions, padding or sensitivity guard failed");
+          return;
+        }
+        for (auto _ : state)
+        {
+          benchmark::DoNotOptimize(&matrix);
+          benchmark::DoNotOptimize(&vector);
+          auto product = matrix * vector;
+          benchmark::DoNotOptimize(&product);
+          benchmark::ClobberMemory();
+        }
+        result = matrix * vector;
+        if (!valid(result))
+        {
+          spatialMatrixVectorFailed = true;
+          state.SkipWithError("Repeated product changed a qualified component");
+        }
+        state.counters["rows"] = rows;
+        state.counters["columns"] = columns;
+        state.counters["scalar_products"] = rows * columns;
+        state.counters["result_bytes"] = sizeof(result);
       }
-      for (auto _ : state)
-      {
-        benchmark::DoNotOptimize(&matrix);
-        benchmark::DoNotOptimize(&vector);
-        auto product = matrix * vector;
-        benchmark::DoNotOptimize(&product);
-        benchmark::ClobberMemory();
-      }
-      result = matrix * vector;
-      if (!valid(result))
-      {
-        spatialMatrixVectorFailed = true;
-        state.SkipWithError("Repeated product changed a qualified component");
-      }
-      state.counters["rows"] = rows;
-      state.counters["columns"] = columns;
-      state.counters["scalar_products"] = rows * columns;
-      state.counters["result_bytes"] = sizeof(result);
-    }
 
-    /// @brief Registers all runtime shapes for the operand scalar pair.
-    static void registerCases()
-    {
-      const std::string name = std::string("SpatialMatrixVector/") +
-        (std::is_same_v<MatrixScalar, Complex> ? "Complex" : "Real") + "By" +
-        (std::is_same_v<VectorScalar, Complex> ? "Complex" : "Real");
-      benchmark::RegisterBenchmark(name.c_str(), &run)
-        ->ArgsProduct({{0, 1, 2, 3}, {0, 1, 2, 3}})
-        ->UseRealTime();
-    }
+      /// @brief Registers all runtime shapes for the operand scalar pair.
+      static void registerCases()
+      {
+        const std::string name = std::string("SpatialMatrixVector/") +
+          (std::is_same_v<MatrixScalar, Complex> ? "Complex" : "Real") + "By" +
+          (std::is_same_v<VectorScalar, Complex> ? "Complex" : "Real");
+        benchmark::RegisterBenchmark(name.c_str(), &run)
+          ->ArgsProduct({{0, 1, 2, 3}, {0, 1, 2, 3}})
+          ->UseRealTime();
+      }
   };
 }
 

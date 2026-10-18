@@ -5,7 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Warmed real P1/P2 physics operator assembly on all geometries. */
+/**
+ * @file
+ * @brief Warmed real P1/P2 physics operator assembly on all geometries.
+ */
 
 #include <benchmark/benchmark.h>
 
@@ -40,69 +43,69 @@ namespace Rodin::Tests::Benchmarks
   class PhysicsAssembly
   {
     public:
-    static void run(
-      benchmark::State& state, Polytope::Type geometry, bool conductivity = false)
-    {
-      const size_t n = state.range(0);
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(n);
-      const size_t dim = mesh.getDimension();
-      using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
-      auto space = [&]() {
-        if constexpr (Elasticity)
-          return H1<Degree, Range, LocalMesh>(
-            std::integral_constant<size_t, Degree>{}, mesh, dim);
-        else
-          return H1<Degree, Range, LocalMesh>(
-            std::integral_constant<size_t, Degree>{}, mesh);
-      }();
-      TrialFunction u(space);
-      TestFunction v(space);
-      BilinearForm form(u, v);
-      const Real expected =
-        PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
-
-      form.assemble();
-      BilinearForm original(u, v);
-      PhysicsForm<Elasticity>::template configure<true>(
-        u, v, original, dim, conductivity);
-      original.assemble();
-      const auto baseline = original.getOperator();
-      const auto& coefficients = u.getSolution().getData();
-      const auto valid = [&]() {
-        const auto& matrix = form.getOperator();
-        const Real energy = coefficients.dot(matrix * coefficients);
-        return std::isfinite(energy) && std::abs(energy / expected - 1) < 1e-9 &&
-          (matrix - baseline).norm() < 1e-12 * std::max(Real(1), baseline.norm());
-      };
-      form.assemble();
-      if (!valid())
+      static void run(
+        benchmark::State& state, Polytope::Type geometry, bool conductivity = false)
       {
-        assemblyCheckFailed = true;
-        state.SkipWithError("Assembly failed analytic-energy or replacement check");
-        return;
-      }
+        const size_t n = state.range(0);
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(n);
+        const size_t dim = mesh.getDimension();
+        using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
+        auto space = [&]() {
+          if constexpr (Elasticity)
+            return H1<Degree, Range, LocalMesh>(
+              std::integral_constant<size_t, Degree>{}, mesh, dim);
+          else
+            return H1<Degree, Range, LocalMesh>(
+              std::integral_constant<size_t, Degree>{}, mesh);
+        }();
+        TrialFunction u(space);
+        TestFunction v(space);
+        BilinearForm form(u, v);
+        const Real expected =
+          PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
 
-      for (auto _ : state)
-      {
         form.assemble();
-        benchmark::DoNotOptimize(form.getOperator().nonZeros());
-        benchmark::ClobberMemory();
+        BilinearForm original(u, v);
+        PhysicsForm<Elasticity>::template configure<true>(
+          u, v, original, dim, conductivity);
+        original.assemble();
+        const auto baseline = original.getOperator();
+        const auto& coefficients = u.getSolution().getData();
+        const auto valid = [&]() {
+          const auto& matrix = form.getOperator();
+          const Real energy = coefficients.dot(matrix * coefficients);
+          return std::isfinite(energy) && std::abs(energy / expected - 1) < 1e-9 &&
+            (matrix - baseline).norm() < 1e-12 * std::max(Real(1), baseline.norm());
+        };
+        form.assemble();
+        if (!valid())
+        {
+          assemblyCheckFailed = true;
+          state.SkipWithError("Assembly failed analytic-energy or replacement check");
+          return;
+        }
+
+        for (auto _ : state)
+        {
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+          benchmark::ClobberMemory();
+        }
+        if (!valid())
+        {
+          assemblyCheckFailed = true;
+          state.SkipWithError("Timed assembly changed operator or analytic energy");
+        }
+        const size_t cells = mesh.getPolytopeCount(dim);
+        state.counters["cells"] = cells;
+        state.counters["dofs"] = space.getSize();
+        state.counters["nnz"] = form.getOperator().nonZeros();
+        state.counters["degree"] = Degree;
+        state.counters["quadrature_order"] = 6;
+        state.counters["components"] = Elasticity ? dim : 1;
+        state.counters["cells_per_second"] =
+          benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate);
       }
-      if (!valid())
-      {
-        assemblyCheckFailed = true;
-        state.SkipWithError("Timed assembly changed operator or analytic energy");
-      }
-      const size_t cells = mesh.getPolytopeCount(dim);
-      state.counters["cells"] = cells;
-      state.counters["dofs"] = space.getSize();
-      state.counters["nnz"] = form.getOperator().nonZeros();
-      state.counters["degree"] = Degree;
-      state.counters["quadrature_order"] = 6;
-      state.counters["components"] = Elasticity ? dim : 1;
-      state.counters["cells_per_second"] =
-        benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate);
-    }
   };
 
   /// @brief Registers three mesh sizes for each physical context and geometry.

@@ -53,123 +53,124 @@ namespace Rodin::Tests::Benchmarks
        * @param geometry Reference-cell family.
        * @param curved Whether to install the exact quadratic map.
        */
-    static void run(benchmark::State& state, Polytope::Type geometry, bool curved)
-    {
-      auto mesh = UniformGrid(geometry).makeMesh(state.range(0));
-      if (curved)
+      static void run(benchmark::State& state, Polytope::Type geometry, bool curved)
       {
-        CurvedGeometry mapping(mesh);
-        mapping.template install<2>();
-      }
-      H1 velocity(std::integral_constant<size_t, K>{}, mesh, mesh.getDimension());
-      H1 pressure(std::integral_constant<size_t, K - 1>{}, mesh);
-      TrialFunction u(velocity);
-      TrialFunction p(pressure);
-      TestFunction v(velocity);
-      TestFunction q(pressure);
-      auto diffusion = Integral(Jacobian(u), Jacobian(v));
-      auto divergence = Integral(Div(u), q);
-      auto pressureMass = Integral(p, q);
-      const size_t order = state.range(1);
-      diffusion.setOrder(order);
-      divergence.setOrder(order);
-      pressureMass.setOrder(order);
-      BilinearForm a(u, v);
-      BilinearForm b(u, q);
-      BilinearForm mass(p, q);
-      a = diffusion;
-      b = divergence;
-      mass = pressureMass;
-      a.assemble();
-      b.assemble();
-      mass.assemble();
-      auto boundary = DirichletBC(u, Zero());
-      boundary.assemble();
-      GridFunction constant(pressure);
-      constant = RealFunction(Real(1));
-      const auto& constraints = std::get<IndexMap<Real>>(boundary.getDOFs());
-      MixedStability::Result baseline;
-      MixedStability::compute(baseline, a.getOperator(), b.getOperator(),
-        mass.getOperator(), constraints, constant.getData());
-      if (!::testing::Test::HasFailure())
-        MixedStability::expectConsistent(baseline);
-      if (::testing::Test::HasFailure())
-      {
-        pressureOracleFailed = true;
-        state.SkipWithError("Pressure-oracle warmup failed");
-        return;
-      }
-      for (auto _ : state)
-      {
-        MixedStability::Result measured;
-        MixedStability::compute(measured, a.getOperator(), b.getOperator(),
+        auto mesh = UniformGrid(geometry).makeMesh(state.range(0));
+        if (curved)
+        {
+          CurvedGeometry mapping(mesh);
+          mapping.template install<2>();
+        }
+        H1 velocity(std::integral_constant<size_t, K>{}, mesh, mesh.getDimension());
+        H1 pressure(std::integral_constant<size_t, K - 1>{}, mesh);
+        TrialFunction u(velocity);
+        TrialFunction p(pressure);
+        TestFunction v(velocity);
+        TestFunction q(pressure);
+        auto diffusion = Integral(Jacobian(u), Jacobian(v));
+        auto divergence = Integral(Div(u), q);
+        auto pressureMass = Integral(p, q);
+        const size_t order = state.range(1);
+        diffusion.setOrder(order);
+        divergence.setOrder(order);
+        pressureMass.setOrder(order);
+        BilinearForm a(u, v);
+        BilinearForm b(u, q);
+        BilinearForm mass(p, q);
+        a = diffusion;
+        b = divergence;
+        mass = pressureMass;
+        a.assemble();
+        b.assemble();
+        mass.assemble();
+        auto boundary = DirichletBC(u, Zero());
+        boundary.assemble();
+        GridFunction constant(pressure);
+        constant = RealFunction(Real(1));
+        const auto& constraints = std::get<IndexMap<Real>>(boundary.getDOFs());
+        MixedStability::Result baseline;
+        MixedStability::compute(baseline, a.getOperator(), b.getOperator(),
           mass.getOperator(), constraints, constant.getData());
-        benchmark::DoNotOptimize(measured.eigenvalues.data());
-        benchmark::ClobberMemory();
+        if (!::testing::Test::HasFailure())
+          MixedStability::expectConsistent(baseline);
         if (::testing::Test::HasFailure())
         {
           pressureOracleFailed = true;
-          state.SkipWithError("Timed pressure oracle failed");
-          break;
+          state.SkipWithError("Pressure-oracle warmup failed");
+          return;
         }
+        for (auto _ : state)
+        {
+          MixedStability::Result measured;
+          MixedStability::compute(measured, a.getOperator(), b.getOperator(),
+            mass.getOperator(), constraints, constant.getData());
+          benchmark::DoNotOptimize(measured.eigenvalues.data());
+          benchmark::ClobberMemory();
+          if (::testing::Test::HasFailure())
+          {
+            pressureOracleFailed = true;
+            state.SkipWithError("Timed pressure oracle failed");
+            break;
+          }
+        }
+        MixedStability::Result final;
+        MixedStability::compute(final, a.getOperator(), b.getOperator(),
+          mass.getOperator(), constraints, constant.getData());
+        if (!::testing::Test::HasFailure())
+          MixedStability::expectConsistent(final);
+        if (::testing::Test::HasFailure() ||
+          final.eigenvalues.size() != baseline.eigenvalues.size() ||
+          !(final.eigenvalues.array() == baseline.eigenvalues.array()).all())
+        {
+          pressureOracleFailed = true;
+          state.SkipWithError("Repeated pressure oracle changed its spectrum");
+        }
+        state.counters["dimension"] = mesh.getDimension();
+        state.counters["cells"] = mesh.getPolytopeCount(mesh.getDimension());
+        state.counters["velocity_dofs"] = velocity.getSize();
+        state.counters["pressure_dofs"] = pressure.getSize();
+        state.counters["free_velocity_dofs"] = baseline.freeVelocity;
+        state.counters["zero_mean_pressure_dofs"] = baseline.zeroMeanPressure;
+        state.counters["velocity_degree"] = K;
+        state.counters["pressure_degree"] = K - 1;
+        state.counters["geometry_degree"] = curved ? 2 : 1;
+        state.counters["quadrature_order"] = order;
+        state.counters["quadrature_points_per_cell"] =
+          QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
+        state.counters["velocity_nnz"] = a.getOperator().nonZeros();
+        state.counters["divergence_nnz"] = b.getOperator().nonZeros();
+        state.counters["pressure_mass_nnz"] = mass.getOperator().nonZeros();
       }
-      MixedStability::Result final;
-      MixedStability::compute(final, a.getOperator(), b.getOperator(), mass.getOperator(),
-        constraints, constant.getData());
-      if (!::testing::Test::HasFailure())
-        MixedStability::expectConsistent(final);
-      if (::testing::Test::HasFailure() ||
-        final.eigenvalues.size() != baseline.eigenvalues.size() ||
-        !(final.eigenvalues.array() == baseline.eigenvalues.array()).all())
-      {
-        pressureOracleFailed = true;
-        state.SkipWithError("Repeated pressure oracle changed its spectrum");
-      }
-      state.counters["dimension"] = mesh.getDimension();
-      state.counters["cells"] = mesh.getPolytopeCount(mesh.getDimension());
-      state.counters["velocity_dofs"] = velocity.getSize();
-      state.counters["pressure_dofs"] = pressure.getSize();
-      state.counters["free_velocity_dofs"] = baseline.freeVelocity;
-      state.counters["zero_mean_pressure_dofs"] = baseline.zeroMeanPressure;
-      state.counters["velocity_degree"] = K;
-      state.counters["pressure_degree"] = K - 1;
-      state.counters["geometry_degree"] = curved ? 2 : 1;
-      state.counters["quadrature_order"] = order;
-      state.counters["quadrature_points_per_cell"] =
-        QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
-      state.counters["velocity_nnz"] = a.getOperator().nonZeros();
-      state.counters["divergence_nnz"] = b.getOperator().nonZeros();
-      state.counters["pressure_mass_nnz"] = mass.getOperator().nonZeros();
-    }
 
       /// @brief Registers three hierarchy levels on six geometries and two maps.
-    static void registerCases()
-    {
-      for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
-             Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
-             Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+      static void registerCases()
       {
-        for (const bool curved : {false, true})
+        for (const auto geometry :
+          {Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+            Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+            Polytope::Type::Hexahedron, Polytope::Type::Wedge})
         {
-          const std::string name = std::string("Stokes/PressureOracle/") +
-            (curved ? "CurvedQ2/" : "Affine/") + "P" + std::to_string(K) + "P" +
-            std::to_string(K - 1) + "/" +
-            std::string(UniformGrid::getGeometryName(geometry));
-          auto* entry = benchmark::RegisterBenchmark(
-            name.c_str(), [geometry, curved](benchmark::State& state) {
-              run(state, geometry, curved);
-            });
-          const std::array<int, 3> levels =
-            K == 2 ? std::array<int, 3>{2, 3, 5} : std::array<int, 3>{3, 4, 5};
-          for (const int n : levels)
+          for (const bool curved : {false, true})
           {
-            for (const int order : {16, 20})
-              entry->Args({n, order});
+            const std::string name = std::string("Stokes/PressureOracle/") +
+              (curved ? "CurvedQ2/" : "Affine/") + "P" + std::to_string(K) + "P" +
+              std::to_string(K - 1) + "/" +
+              std::string(UniformGrid::getGeometryName(geometry));
+            auto* entry = benchmark::RegisterBenchmark(
+              name.c_str(), [geometry, curved](benchmark::State& state) {
+                run(state, geometry, curved);
+              });
+            const std::array<int, 3> levels =
+              K == 2 ? std::array<int, 3>{2, 3, 5} : std::array<int, 3>{3, 4, 5};
+            for (const int n : levels)
+            {
+              for (const int order : {16, 20})
+                entry->Args({n, order});
+            }
+            entry->UseRealTime();
           }
-          entry->UseRealTime();
         }
       }
-    }
   };
 }
 

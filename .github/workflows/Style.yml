@@ -49,7 +49,7 @@ jobs:
       - name: Check formatting of changed lines
         run: >-
           python3 dev/check_format.py --base "$BASE_REF" --head HEAD
-          --binary clang-format --git-clang-format git-clang-format-18
+          --binary clang-format
 
   StyleLint:
     runs-on: ubuntu-24.04

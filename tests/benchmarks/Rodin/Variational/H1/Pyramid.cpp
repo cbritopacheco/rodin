@@ -64,148 +64,80 @@ namespace Rodin::Tests::Benchmarks
   class Pyramid
   {
     public:
-    /// @brief Roundoff allowance for independent polynomial evaluation.
-    static constexpr Real OracleTolerance = 1e-12;
+      /// @brief Roundoff allowance for independent polynomial evaluation.
+      static constexpr Real OracleTolerance = 1e-12;
 
-    /**
-     * @brief Measures one source operation and checks every written output.
-     * @param state Quadrature order where applicable and timing iterations.
-     * @param operation Selected metadata, factor or modal scope.
-     */
-    static void run(benchmark::State& state, PyramidOperation operation)
-    {
-      using namespace Variational;
-      const bool metadata =
-        operation == PyramidOperation::Index || operation == PyramidOperation::Binomial;
-      const bool factor = operation == PyramidOperation::Bernstein ||
-        operation == PyramidOperation::BernsteinDerivative;
-      const bool derivative = operation == PyramidOperation::BernsteinDerivative ||
-        operation == PyramidOperation::ModalDerivative;
-      const QF::QuadratureFormulaBase* formula = nullptr;
-      if (!metadata)
-        formula = &QF::PolytopeQuadratureFormula::get(
-          state.range(0), Geometry::Polytope::Type::Pyramid);
-      const size_t nqp = formula ? formula->getSize() : 0;
-      std::vector<std::array<size_t, 3>> modes;
-      std::vector<size_t> modeIndices;
-      std::vector<std::array<size_t, 2>> factorArguments;
-      for (size_t k = 0; k <= K; ++k)
+      /**
+       * @brief Measures one source operation and checks every written output.
+       * @param state Quadrature order where applicable and timing iterations.
+       * @param operation Selected metadata, factor or modal scope.
+       */
+      static void run(benchmark::State& state, PyramidOperation operation)
       {
-        for (size_t j = 0; j <= K - k; ++j)
+        using namespace Variational;
+        const bool metadata =
+          operation == PyramidOperation::Index || operation == PyramidOperation::Binomial;
+        const bool factor = operation == PyramidOperation::Bernstein ||
+          operation == PyramidOperation::BernsteinDerivative;
+        const bool derivative = operation == PyramidOperation::BernsteinDerivative ||
+          operation == PyramidOperation::ModalDerivative;
+        const QF::QuadratureFormulaBase* formula = nullptr;
+        if (!metadata)
+          formula = &QF::PolytopeQuadratureFormula::get(
+            state.range(0), Geometry::Polytope::Type::Pyramid);
+        const size_t nqp = formula ? formula->getSize() : 0;
+        std::vector<std::array<size_t, 3>> modes;
+        std::vector<size_t> modeIndices;
+        std::vector<std::array<size_t, 2>> factorArguments;
+        for (size_t k = 0; k <= K; ++k)
         {
-          for (size_t i = 0; i <= K - k; ++i)
-            modes.push_back({i, j, k});
+          for (size_t j = 0; j <= K - k; ++j)
+          {
+            for (size_t i = 0; i <= K - k; ++i)
+              modes.push_back({i, j, k});
+          }
         }
-      }
-      for (size_t mode = 0; mode < modes.size(); ++mode)
-        modeIndices.push_back(mode);
-      for (size_t n = 0; n <= K; ++n)
-      {
-        for (size_t i = 0; i <= n; ++i)
-          factorArguments.push_back({n, i});
-      }
-      std::array<std::array<Real, K + 1>, K + 1> pascal{};
-      for (size_t n = 0; n <= K; ++n)
-      {
-        pascal[n][0] = pascal[n][n] = 1;
-        for (size_t i = 1; i < n; ++i)
-          pascal[n][i] = pascal[n - 1][i - 1] + pascal[n - 1][i];
-      }
-      const auto polynomial = [&](size_t n, size_t i, Real x) {
-        return pascal[n][i] * std::pow(x, i) * std::pow(1 - x, n - i);
-      };
-      const auto polynomialDerivative = [&](size_t n, size_t i, Real x) {
-        Real value = 0;
-        if (i > 0)
-          value += pascal[n][i] * Real(i) * std::pow(x, i - 1) * std::pow(1 - x, n - i);
-        if (i < n)
-          value -=
-            pascal[n][i] * Real(n - i) * std::pow(x, i) * std::pow(1 - x, n - i - 1);
-        return value;
-      };
-      std::vector<Real> expected;
-      if (operation == PyramidOperation::Index)
-      {
-        for (const auto& ijk : modes)
-        {
-          for (size_t j = 0; j < 3; ++j)
-            expected.push_back(ijk[j]);
-        }
-      }
-      else if (operation == PyramidOperation::Binomial)
-      {
+        for (size_t mode = 0; mode < modes.size(); ++mode)
+          modeIndices.push_back(mode);
         for (size_t n = 0; n <= K; ++n)
         {
           for (size_t i = 0; i <= n; ++i)
-            expected.push_back(pascal[n][i]);
+            factorArguments.push_back({n, i});
         }
-      }
-      else
-      {
-        for (size_t qp = 0; qp < nqp; ++qp)
+        std::array<std::array<Real, K + 1>, K + 1> pascal{};
+        for (size_t n = 0; n <= K; ++n)
         {
-          const auto& r = formula->getPoint(qp);
-          if (factor)
-          {
-            for (size_t n = 0; n <= K; ++n)
-            {
-              for (size_t i = 0; i <= n; ++i)
-              {
-                for (size_t j = 0; j < 3; ++j)
-                {
-                  expected.push_back(derivative ? polynomialDerivative(n, i, r(j))
-                                                : polynomial(n, i, r(j)));
-                }
-              }
-            }
-          }
-          else
-          {
-            const Real q = 1 - r.z(), a = r.x() / q, b = r.y() / q;
-            for (const auto& ijk : modes)
-            {
-              const auto [i, j, k] = ijk;
-              const size_t n = K - k;
-              const Real ba = polynomial(n, i, a), bb = polynomial(n, j, b);
-              const Real bz = polynomial(K, k, r.z());
-              if (!derivative)
-                expected.push_back(ba * bb * bz);
-              else
-              {
-                const Real da = polynomialDerivative(n, i, a);
-                const Real db = polynomialDerivative(n, j, b);
-                const Real dz = polynomialDerivative(K, k, r.z());
-                expected.push_back(da * bb * bz / q);
-                expected.push_back(ba * db * bz / q);
-                expected.push_back((da * a * bb + ba * db * b) * bz / q + ba * bb * dz);
-              }
-            }
-          }
+          pascal[n][0] = pascal[n][n] = 1;
+          for (size_t i = 1; i < n; ++i)
+            pascal[n][i] = pascal[n - 1][i - 1] + pascal[n - 1][i];
         }
-      }
-      std::vector<Real> output(expected.size());
-      const auto evaluate = [&]() {
-        benchmark::DoNotOptimize(modeIndices.data());
-        benchmark::DoNotOptimize(factorArguments.data());
-        benchmark::ClobberMemory();
-        size_t pos = 0;
+        const auto polynomial = [&](size_t n, size_t i, Real x) {
+          return pascal[n][i] * std::pow(x, i) * std::pow(1 - x, n - i);
+        };
+        const auto polynomialDerivative = [&](size_t n, size_t i, Real x) {
+          Real value = 0;
+          if (i > 0)
+            value += pascal[n][i] * Real(i) * std::pow(x, i - 1) * std::pow(1 - x, n - i);
+          if (i < n)
+            value -=
+              pascal[n][i] * Real(n - i) * std::pow(x, i) * std::pow(1 - x, n - i - 1);
+          return value;
+        };
+        std::vector<Real> expected;
         if (operation == PyramidOperation::Index)
         {
-          for (const size_t mode : modeIndices)
+          for (const auto& ijk : modes)
           {
-            size_t i, j, k;
-            PyramidIndex<K>::decode(mode, i, j, k);
-            output[pos++] = i;
-            output[pos++] = j;
-            output[pos++] = k;
+            for (size_t j = 0; j < 3; ++j)
+              expected.push_back(ijk[j]);
           }
         }
         else if (operation == PyramidOperation::Binomial)
         {
-          for (const auto& argument : factorArguments)
+          for (size_t n = 0; n <= K; ++n)
           {
-            const auto [n, i] = argument;
-            output[pos++] = BernsteinPyramid<K>::getBinomial(n, i);
+            for (size_t i = 0; i <= n; ++i)
+              expected.push_back(pascal[n][i]);
           }
         }
         else
@@ -215,95 +147,163 @@ namespace Rodin::Tests::Benchmarks
             const auto& r = formula->getPoint(qp);
             if (factor)
             {
-              for (const auto& argument : factorArguments)
+              for (size_t n = 0; n <= K; ++n)
               {
-                const auto [n, i] = argument;
-                for (size_t j = 0; j < 3; ++j)
+                for (size_t i = 0; i <= n; ++i)
                 {
-                  output[pos++] = derivative
-                    ? BernsteinPyramid<K>::getDerivative(n, i, r(j))
-                    : BernsteinPyramid<K>::getBasis(n, i, r(j));
+                  for (size_t j = 0; j < 3; ++j)
+                  {
+                    expected.push_back(derivative ? polynomialDerivative(n, i, r(j))
+                                                  : polynomial(n, i, r(j)));
+                  }
                 }
               }
             }
             else
             {
-              for (const size_t mode : modeIndices)
+              const Real q = 1 - r.z(), a = r.x() / q, b = r.y() / q;
+              for (const auto& ijk : modes)
               {
+                const auto [i, j, k] = ijk;
+                const size_t n = K - k;
+                const Real ba = polynomial(n, i, a), bb = polynomial(n, j, b);
+                const Real bz = polynomial(K, k, r.z());
                 if (!derivative)
-                  output[pos++] = PyramidModal<K>::getBasis(mode, r);
+                  expected.push_back(ba * bb * bz);
                 else
                 {
-                  for (size_t j = 0; j < 3; ++j)
-                    output[pos++] = PyramidModal<K>::getDerivative(mode, j, r);
+                  const Real da = polynomialDerivative(n, i, a);
+                  const Real db = polynomialDerivative(n, j, b);
+                  const Real dz = polynomialDerivative(K, k, r.z());
+                  expected.push_back(da * bb * bz / q);
+                  expected.push_back(ba * db * bz / q);
+                  expected.push_back((da * a * bb + ba * db * b) * bz / q + ba * bb * dz);
                 }
               }
             }
           }
         }
-      };
-      const auto valid = [&]() {
-        for (size_t i = 0; i < expected.size(); ++i)
-        {
-          if (!std::isfinite(output[i]) || (metadata && output[i] != expected[i]) ||
-            std::abs(output[i] - expected[i]) >
-              OracleTolerance * std::max(Real(1), std::abs(expected[i])))
-            return false;
-        }
-        return true;
-      };
-      const auto fail = [&](const char* message) {
-        pyramidFailed = true;
-        state.SkipWithError(message);
-      };
-      evaluate();
-      if (!valid())
-      {
-        fail("Pyramid kernel disagrees with independent polynomial oracle");
-        return;
-      }
-      output.front() += 1;
-      if (valid())
-      {
-        fail("Pyramid oracle accepted a perturbed output");
-        return;
-      }
-      evaluate();
-      for (auto _ : state)
-      {
+        std::vector<Real> output(expected.size());
+        const auto evaluate = [&]() {
+          benchmark::DoNotOptimize(modeIndices.data());
+          benchmark::DoNotOptimize(factorArguments.data());
+          benchmark::ClobberMemory();
+          size_t pos = 0;
+          if (operation == PyramidOperation::Index)
+          {
+            for (const size_t mode : modeIndices)
+            {
+              size_t i, j, k;
+              PyramidIndex<K>::decode(mode, i, j, k);
+              output[pos++] = i;
+              output[pos++] = j;
+              output[pos++] = k;
+            }
+          }
+          else if (operation == PyramidOperation::Binomial)
+          {
+            for (const auto& argument : factorArguments)
+            {
+              const auto [n, i] = argument;
+              output[pos++] = BernsteinPyramid<K>::getBinomial(n, i);
+            }
+          }
+          else
+          {
+            for (size_t qp = 0; qp < nqp; ++qp)
+            {
+              const auto& r = formula->getPoint(qp);
+              if (factor)
+              {
+                for (const auto& argument : factorArguments)
+                {
+                  const auto [n, i] = argument;
+                  for (size_t j = 0; j < 3; ++j)
+                  {
+                    output[pos++] = derivative
+                      ? BernsteinPyramid<K>::getDerivative(n, i, r(j))
+                      : BernsteinPyramid<K>::getBasis(n, i, r(j));
+                  }
+                }
+              }
+              else
+              {
+                for (const size_t mode : modeIndices)
+                {
+                  if (!derivative)
+                    output[pos++] = PyramidModal<K>::getBasis(mode, r);
+                  else
+                  {
+                    for (size_t j = 0; j < 3; ++j)
+                      output[pos++] = PyramidModal<K>::getDerivative(mode, j, r);
+                  }
+                }
+              }
+            }
+          }
+        };
+        const auto valid = [&]() {
+          for (size_t i = 0; i < expected.size(); ++i)
+          {
+            if (!std::isfinite(output[i]) || (metadata && output[i] != expected[i]) ||
+              std::abs(output[i] - expected[i]) >
+                OracleTolerance * std::max(Real(1), std::abs(expected[i])))
+              return false;
+          }
+          return true;
+        };
+        const auto fail = [&](const char* message) {
+          pyramidFailed = true;
+          state.SkipWithError(message);
+        };
         evaluate();
-        benchmark::DoNotOptimize(output.data());
-        benchmark::ClobberMemory();
+        if (!valid())
+        {
+          fail("Pyramid kernel disagrees with independent polynomial oracle");
+          return;
+        }
+        output.front() += 1;
+        if (valid())
+        {
+          fail("Pyramid oracle accepted a perturbed output");
+          return;
+        }
+        evaluate();
+        for (auto _ : state)
+        {
+          evaluate();
+          benchmark::DoNotOptimize(output.data());
+          benchmark::ClobberMemory();
+        }
+        if (!valid())
+          fail("Timed pyramid kernel changed numerical values");
+        state.counters["degree"] = K;
+        state.counters["modes"] = modes.size();
+        state.counters["quadrature_points"] = nqp;
+        state.counters["output_entries"] = output.size();
       }
-      if (!valid())
-        fail("Timed pyramid kernel changed numerical values");
-      state.counters["degree"] = K;
-      state.counters["modes"] = modes.size();
-      state.counters["quadrature_points"] = nqp;
-      state.counters["output_entries"] = output.size();
-    }
 
-    /// @brief Registers metadata and three quadrature workloads separately.
-    static void registerCases()
-    {
-      for (const auto& [operation, label] :
-        {std::pair{PyramidOperation::Index, "IndexDecode"},
-          {PyramidOperation::Binomial, "Binomial"},
-          {PyramidOperation::Bernstein, "BernsteinValues"},
-          {PyramidOperation::BernsteinDerivative, "BernsteinDerivatives"},
-          {PyramidOperation::Modal, "ModalValues"},
-          {PyramidOperation::ModalDerivative, "ModalDerivatives"}})
+      /// @brief Registers metadata and three quadrature workloads separately.
+      static void registerCases()
       {
-        const std::string name =
-          "H1/Pyramid/" + std::string(label) + "/P" + std::to_string(K);
-        auto* registration = benchmark::RegisterBenchmark(
-          name.c_str(), [operation](auto& state) { run(state, operation); });
-        if (operation != PyramidOperation::Index &&
-          operation != PyramidOperation::Binomial)
-          registration->Arg(2)->Arg(4)->Arg(8);
-        registration->UseRealTime();
+        for (const auto& [operation, label] :
+          {std::pair{PyramidOperation::Index, "IndexDecode"},
+            {PyramidOperation::Binomial, "Binomial"},
+            {PyramidOperation::Bernstein, "BernsteinValues"},
+            {PyramidOperation::BernsteinDerivative, "BernsteinDerivatives"},
+            {PyramidOperation::Modal, "ModalValues"},
+            {PyramidOperation::ModalDerivative, "ModalDerivatives"}})
+        {
+          const std::string name =
+            "H1/Pyramid/" + std::string(label) + "/P" + std::to_string(K);
+          auto* registration = benchmark::RegisterBenchmark(
+            name.c_str(), [operation](auto& state) { run(state, operation); });
+          if (operation != PyramidOperation::Index &&
+            operation != PyramidOperation::Binomial)
+            registration->Arg(2)->Arg(4)->Arg(8);
+          registration->UseRealTime();
+        }
       }
-    }
   };
 }
 

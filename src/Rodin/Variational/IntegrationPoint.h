@@ -46,12 +46,12 @@ namespace Rodin::Variational
        * @brief Constructs an integration point from a geometric point.
        * @param p Point at which the operation is evaluated.
        */
-    IntegrationPoint(const Geometry::Point& p)
-      : m_p(p),
-        m_qf(nullptr),
-        m_qp(0),
-        m_referenceIdentity(std::nullopt)
-    {}
+      IntegrationPoint(const Geometry::Point& p)
+        : m_p(p),
+          m_qf(nullptr),
+          m_qp(0),
+          m_referenceIdentity(std::nullopt)
+      {}
 
       /**
        * @brief Records sampling provenance without certifying reference coordinates.
@@ -61,13 +61,13 @@ namespace Rodin::Variational
        *                pointwise evaluation
        * @param[in] qp Quadrature sample index in @p qf
        */
-    IntegrationPoint(
-      const Geometry::Point& p, const QF::QuadratureFormulaBase* qf, size_t qp)
-      : m_p(p),
-        m_qf(qf),
-        m_qp(qp),
-        m_referenceIdentity(std::nullopt)
-    {}
+      IntegrationPoint(
+        const Geometry::Point& p, const QF::QuadratureFormulaBase* qf, size_t qp)
+        : m_p(p),
+          m_qf(qf),
+          m_qp(qp),
+          m_referenceIdentity(std::nullopt)
+      {}
 
       /**
        * @brief Borrows an owned mapped sample with logical reference association.
@@ -81,27 +81,27 @@ namespace Rodin::Variational
        * @param quadrature Owner of the mapped point and its reference association.
        * @param qp Logical sample index in the mapped quadrature.
        */
-    IntegrationPoint(const Geometry::PolytopeQuadrature& quadrature, size_t qp)
-      : m_p(quadrature.getPoint(qp)),
-        m_qf(&quadrature.getQuadratureFormula()),
-        m_qp(qp),
-        m_referenceIdentity(quadrature.getQuadratureFormulaIdentity())
-    {}
+      IntegrationPoint(const Geometry::PolytopeQuadrature& quadrature, size_t qp)
+        : m_p(quadrature.getPoint(qp)),
+          m_qf(&quadrature.getQuadratureFormula()),
+          m_qp(qp),
+          m_referenceIdentity(quadrature.getQuadratureFormulaIdentity())
+      {}
 
       /// @returns Underlying geometric point context.
-    const Geometry::Point& getPoint() const
-    {
-      return m_p;
-    }
+      const Geometry::Point& getPoint() const
+      {
+        return m_p;
+      }
 
       /**
        * @returns Non-owning pointer to the quadrature formula, or @c nullptr
        * when this integration point is not in a quadrature context.
        */
-    const QF::QuadratureFormulaBase* getQuadratureFormula() const
-    {
-      return m_qf;
-    }
+      const QF::QuadratureFormulaBase* getQuadratureFormula() const
+      {
+        return m_qf;
+      }
 
       /**
        * @brief Returns the logically certified reference formula, when available.
@@ -111,27 +111,27 @@ namespace Rodin::Variational
        *
        * @returns Formula authorizing reference tabulation, or @c nullptr.
        */
-    const QF::QuadratureFormulaBase* getReferenceQuadratureFormula() const noexcept
-    {
-      return m_referenceIdentity && *m_referenceIdentity == m_qf->getCacheIdentity()
-        ? m_qf
-        : nullptr;
-    }
+      const QF::QuadratureFormulaBase* getReferenceQuadratureFormula() const noexcept
+      {
+        return m_referenceIdentity && *m_referenceIdentity == m_qf->getCacheIdentity()
+          ? m_qf
+          : nullptr;
+      }
 
       /**
        * @returns Quadrature index associated with this point.
        * @note Meaningful only when getQuadratureFormula() is not @c nullptr.
        */
-    size_t getIndex() const
-    {
-      return m_qp;
-    }
+      size_t getIndex() const
+      {
+        return m_qp;
+      }
 
     private:
-    std::reference_wrapper<const Geometry::Point> m_p;
-    const QF::QuadratureFormulaBase* m_qf;
-    size_t m_qp;
-    Optional<size_t> m_referenceIdentity;
+      std::reference_wrapper<const Geometry::Point> m_p;
+      const QF::QuadratureFormulaBase* m_qf;
+      size_t m_qp;
+      Optional<size_t> m_referenceIdentity;
   };
 }
 

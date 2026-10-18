@@ -13,6 +13,7 @@
  * executable does not measure backend scheduling or communication.
  */
 #include <benchmark/benchmark.h>
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <type_traits>
@@ -27,14 +28,19 @@ namespace Rodin::Tests::Benchmarks
 {
   bool referenceElementFailed = false;
 
+  /// @brief Documented store capacity, checked by the resident-table guards.
+  constexpr int ReferenceCacheCapacity = 8;
+
   enum class ReferenceOperation
   {
     Values,
     Derivatives,
+    BulkDerivatives,
     PrefetchedValues,
     PrefetchedDerivatives,
     WarmTable,
-    CapacityWarmMiss
+    CapacityWarmMiss,
+    WarmTablePosition
   };
 
   /**
@@ -43,10 +49,18 @@ namespace Rodin::Tests::Benchmarks
    * Direct and prefetched sweeps write the same quadrature-major output. The
    * former obtains each descriptor in the sample loop; the latter obtains
    * descriptors before timing. Neither path changes the library implementation.
+   * BulkDerivatives uses the element's ordered gradient consumer, including its
+   * coordinate validation and owned point-local modal work. Its output has the
+   * same quadrature-major layout, without physical mapping or field contraction.
    * WarmTable includes lookup only, not a sweep over table entries. Misses rotate
    * nine independently identified formulas through the eight-entry reference
    * cache. Initial allocation and basis initialization are outside timing;
    * CapacityWarmMiss therefore measures rebuilding, not first-use allocation.
+   * WarmTable records its one-based search position outside timing: resident
+   * table addresses order the cache's array slots, not formula identities.
+   * WarmTablePosition selects each of the eight resident search positions
+   * explicitly before timing. Formula contents are identical across versions;
+   * lookup continues to use logical identity and geometry, never an address key.
    *
    * ## Numerical qualification
    *
@@ -60,7 +74,7 @@ namespace Rodin::Tests::Benchmarks
    *
    * @tparam Element Scalar reference-element family.
    * @tparam Constant Whether only constants are represented.
-   * @param state Quadrature order and timing iterations.
+   * @param state Quadrature order, optional cache position and timing iterations.
    * @param geometry Reference-cell family.
    * @param operation Measured kernel or cache protocol.
    */
@@ -70,7 +84,7 @@ namespace Rodin::Tests::Benchmarks
   {
     using Scalar = typename Element::ScalarType;
     using Store = Variational::ReferenceTabulation<Element, Scalar>;
-    constexpr size_t FormulaCount = 9;
+    constexpr size_t FormulaCount = ReferenceCacheCapacity + 1;
     constexpr Real ReconstructionTolerance = 1e-8;
     Element element(geometry);
     const size_t ndof = element.getCount();
@@ -90,15 +104,33 @@ namespace Rodin::Tests::Benchmarks
     for (size_t a = 0; a < ndof; ++a)
       bases.emplace_back(element.getBasis(a));
     const bool derivatives = operation == ReferenceOperation::Derivatives ||
+      operation == ReferenceOperation::BulkDerivatives ||
       operation == ReferenceOperation::PrefetchedDerivatives;
     const bool prefetched = operation == ReferenceOperation::PrefetchedValues ||
       operation == ReferenceOperation::PrefetchedDerivatives;
+    const bool warmLookup = operation == ReferenceOperation::WarmTable ||
+      operation == ReferenceOperation::WarmTablePosition;
     const auto expected = Store::get(element, formula);
     std::vector<Scalar> output(derivatives ? nqp * ndof * dim : nqp * ndof);
     const auto sweep = [&]() {
       for (size_t qp = 0; qp < nqp; ++qp)
       {
         const auto& point = formula.getPoint(qp);
+        if constexpr (requires {
+                        element.evaluateGradients([](size_t, const auto&) {}, point);
+                      })
+        {
+          if (operation == ReferenceOperation::BulkDerivatives)
+          {
+            element.evaluateGradients(
+              [&](size_t a, const auto& gradient) {
+                for (size_t i = 0; i < dim; ++i)
+                  output[(qp * ndof + a) * dim + i] = gradient(i);
+              },
+              point);
+            continue;
+          }
+        }
         for (size_t a = 0; a < ndof; ++a)
         {
           const auto evaluate = [&](const auto& basis) {
@@ -188,8 +220,57 @@ namespace Rodin::Tests::Benchmarks
     }
     for (const auto& qf : formulas)
       Store::get(element, qf);
-    if (operation == ReferenceOperation::WarmTable)
-      Store::get(element, formula);
+    const QF::QuadratureFormulaBase* lookupFormula = &formula;
+    if (operation == ReferenceOperation::WarmTablePosition)
+    {
+      using Resident =
+        std::pair<const typename Store::Table*, const QF::QuadratureFormulaBase*>;
+      std::vector<Resident> residents;
+      residents.reserve(FormulaCount - 1);
+      for (const auto& qf : formulas)
+      {
+        if (const auto table = Store::find(element, qf.getCacheIdentity()))
+          residents.emplace_back(&table->get(), &qf);
+      }
+      const size_t requested = state.range(1);
+      if (residents.size() != FormulaCount - 1 || requested == 0 ||
+        requested > residents.size())
+      {
+        fail("Pinned lookup requires eight resident tables and a valid position");
+        return;
+      }
+      std::sort(residents.begin(), residents.end(), [](const auto& lhs, const auto& rhs) {
+        return std::less<const typename Store::Table*>{}(lhs.first, rhs.first);
+      });
+      lookupFormula = residents[requested - 1].second;
+    }
+    if (warmLookup)
+    {
+      const auto* selected = &Store::get(element, *lookupFormula);
+      size_t resident = 0, position = 1;
+      for (const auto& qf : formulas)
+      {
+        if (const auto table = Store::find(element, qf.getCacheIdentity()))
+        {
+          ++resident;
+          position += std::less<const typename Store::Table*>{}(&table->get(), selected);
+        }
+      }
+      if (resident != FormulaCount - 1)
+      {
+        fail("Warm lookup instrumentation did not observe all eight resident tables");
+        return;
+      }
+      // Entries are stored in one array and searched in increasing slot order.
+      // Address order diagnoses that search position; it is never a cache key.
+      state.counters["warm_lookup_position"] = position;
+      if (operation == ReferenceOperation::WarmTablePosition &&
+        position != static_cast<size_t>(state.range(1)))
+      {
+        fail("Pinned lookup did not select the requested search position");
+        return;
+      }
+    }
     if (operation == ReferenceOperation::CapacityWarmMiss)
     {
       for (const auto& qf : formulas)
@@ -210,9 +291,9 @@ namespace Rodin::Tests::Benchmarks
     size_t next = 0;
     for (auto _ : state)
     {
-      if (operation == ReferenceOperation::WarmTable)
+      if (warmLookup)
       {
-        const auto& table = Store::get(element, formula);
+        const auto& table = Store::get(element, *lookupFormula);
         benchmark::DoNotOptimize(table.phi.data());
       }
       else if (operation == ReferenceOperation::CapacityWarmMiss)
@@ -230,7 +311,7 @@ namespace Rodin::Tests::Benchmarks
     }
     if (output != reference)
       fail("Timed sweep changed reference entries");
-    const auto& table = Store::get(element, formula);
+    const auto& table = Store::get(element, *lookupFormula);
     if (table.phi != expected.phi || table.dphi != expected.dphi)
       fail("Timed tabulation changed reference entries");
     state.counters["dimension"] = dim;
@@ -238,7 +319,7 @@ namespace Rodin::Tests::Benchmarks
     state.counters["quadrature_points"] = nqp;
     state.counters["table_bytes"] = sizeof(Scalar) * nqp * ndof * (1 + dim);
     state.counters["output_entries"] = output.size();
-    state.counters["written_entries"] = operation == ReferenceOperation::WarmTable
+    state.counters["written_entries"] = warmLookup
       ? 0
       : (operation == ReferenceOperation::CapacityWarmMiss ? nqp * ndof * (1 + dim)
                                                            : output.size());
@@ -246,7 +327,7 @@ namespace Rodin::Tests::Benchmarks
       operation == ReferenceOperation::CapacityWarmMiss ? FormulaCount : 1;
   }
 
-  /// @brief Registers three reference workloads without constructing a mesh.
+  /// @brief Registers reference operations and explicit cache search positions.
   template <class Element, bool Constant = false>
   void registerReferenceElement(const char* family, const char* scalar)
   {
@@ -259,25 +340,42 @@ namespace Rodin::Tests::Benchmarks
       for (const auto& [operation, operationLabel] :
         {std::pair{ReferenceOperation::Values, "Values"},
           {ReferenceOperation::Derivatives, "Derivatives"},
+          {ReferenceOperation::BulkDerivatives, "BulkDerivatives"},
           {ReferenceOperation::PrefetchedValues, "PrefetchedValues"},
           {ReferenceOperation::PrefetchedDerivatives, "PrefetchedDerivatives"},
           {ReferenceOperation::WarmTable, "WarmTable"},
+          {ReferenceOperation::WarmTablePosition, "WarmTablePosition"},
           {ReferenceOperation::CapacityWarmMiss, "CapacityWarmMiss"}})
       {
         if (geometry == G::Point &&
           (operation == ReferenceOperation::Derivatives ||
+            operation == ReferenceOperation::BulkDerivatives ||
             operation == ReferenceOperation::PrefetchedDerivatives))
           continue;
+        if constexpr (!requires(const Element& element, const Math::SpatialPoint& point) {
+                        element.evaluateGradients([](size_t, const auto&) {}, point);
+                      })
+        {
+          if (operation == ReferenceOperation::BulkDerivatives)
+            continue;
+        }
         const std::string name = std::string("ReferenceElement/") + family + "/" +
           scalar + "/" + operationLabel + "/" + label;
-        benchmark::RegisterBenchmark(name.c_str(),
-          [geometry, operation](auto& state) {
+        auto* registration =
+          benchmark::RegisterBenchmark(name.c_str(), [geometry, operation](auto& state) {
             referenceElement<Element, Constant>(state, geometry, operation);
-          })
-          ->Arg(2)
-          ->Arg(4)
-          ->Arg(8)
-          ->UseRealTime();
+          });
+        for (const int order : {2, 4, 6, 8, 12})
+        {
+          if (operation == ReferenceOperation::WarmTablePosition)
+          {
+            for (int position = 1; position <= ReferenceCacheCapacity; ++position)
+              registration->Args({order, position});
+          }
+          else
+            registration->Arg(order);
+        }
+        registration->UseRealTime();
       }
     }
   }

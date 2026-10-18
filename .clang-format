@@ -1,6 +1,6 @@
-# Rodin house style. Derived empirically from the existing codebase — when in
-# doubt, match the surrounding code, not this file. Enforcement in CI is on
-# changed lines only (git clang-format); see CONTRIBUTING.md.
+# Rodin house style for new and changed code. Untouched legacy layout does not
+# override this configuration. Enforcement in CI is on changed lines only
+# (dev/check_format.py); see CONTRIBUTING.md.
 #
 # Requires clang-format >= 16 (AlignTrailingComments: Leave); CI uses 18.
 #
@@ -20,10 +20,10 @@ TabWidth: 2
 UseTab: Never
 ContinuationIndentWidth: 2
 NamespaceIndentation: All
-# Access labels and members share one two-space level inside the record.
-# IndentAccessModifiers: true adds a second level, even in plain structs.
-IndentAccessModifiers: false
-AccessModifierOffset: 0
+# Access labels are inset by two spaces; their members by four spaces.
+# clang-format also adds four spaces in plain structs. dev/format_cpp.py removes
+# that extra level in structs without explicit access sections.
+IndentAccessModifiers: true
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 

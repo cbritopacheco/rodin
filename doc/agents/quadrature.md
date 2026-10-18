@@ -125,8 +125,18 @@ The mesh-owned index keys each formula by its process-local lifetime/assignment
 identity, which uniquely identifies a version without an additional address
 comparison. Reassigning a formula or reconstructing it in reused storage selects
 a new mapped-sample entry. Earlier entries remain alive until mesh flush; an
-old reference is not silently replaced when a new version is requested. Formula
-mutation must not overlap cache access. Canonical immutable formulas retain
+old reference is not silently replaced when a new version is requested. Moving
+nodes also changes the source version: `QuadratureFormulaBase` renews both
+source and destination identities on move construction and move assignment.
+One atomic reservation obtains the two distinct versions; reading an identity
+remains non-atomic. Identity values are opaque process-local versions, not
+distributed entity indices or an ordering contract.
+Self-move renews the identity because concrete members may change. Derived
+moves that transfer nodes must delegate to the base move operation; a copy
+fallback that leaves source nodes unchanged does not invalidate that source.
+The renewed identity does not make a concrete moved-from payload queryable:
+for example, an owned dispatcher may no longer contain a delegated formula.
+Formula mutation must not overlap cache access. Canonical immutable formulas retain
 their ordinary hot lookup. Storage grows with requested formula versions and
 polytope slots until the explicit flush, rather than evicting borrowed objects.
 
@@ -153,7 +163,21 @@ store used by scalar P1 and H1 elements. Each element type retains its own basis
 formulas and ordering, including the rational pyramid basis. The stored arrays
 contain only reference values and first derivatives; physical Jacobians are
 recomputed from each cell's control coordinates. The eight-entry eviction policy
-and logical formula identities apply equally to both element families.
+and logical formula identities apply equally to both element families. Warm
+hits compare the logical identity and geometry without querying size or nodes;
+immutability between identity changes makes those queries redundant. Cold
+misses obtain the size before changing store contents. The unit regressions
+count formula queries and verify that moving a rule cannot recover its old
+source samples, including real and complex H1 degrees one through six.
+
+Lookup and construction share one already obtained thread-local cache reference.
+The private identity search serves both public access operations; table filling
+and publication remain separate stages of this same owner. Replacement retires
+the selected entry's previous identity before changing its storage and publishes
+the new identity only after filling completes. Once replacement begins, the
+round-robin successor is selected before filling and is not rewound on failure.
+An interrupted fill therefore exposes neither key, while other entries remain
+unchanged. The regression checks these logical keys and exact surviving arrays.
 
 Physical-coordinate evaluation reuses the basis values from the same reference
 table without making coordinates eager. A mapped point owns its reference

@@ -91,8 +91,10 @@ update it only to shrink the backlog.
 
 ### Changed-Line Formatting
 
-`check_format.py` runs `git-clang-format` against the merge base and only
-checks lines touched by the current change.
+`check_format.py` compares complete-file canonical formatting against lines
+touched by the current change. It only reads Git state. `format_cpp.py` uses
+clang-format followed by the plain-struct indentation rule: access labels are
+inset two spaces, explicit-section members four, and plain-struct members two.
 
 ```sh
 python3 dev/check_format.py
@@ -103,8 +105,19 @@ python3 dev/check_format.py --binary clang-format
 To fix reported hunks locally:
 
 ```sh
-git clang-format <base>
+python3 dev/check_format.py --base origin/develop --fix [paths...]
 ```
+
+This applies only complete canonical edits intersecting changed lines; unrelated
+legacy layout is left untouched. `--fix` cannot be combined with `--head`, and
+never writes Git's index. For new files or an intentional complete-file pass,
+use `python3 dev/format_cpp.py -i <file>` instead.
+Indentation-insensitive anchors prevent distant matches in repetitive code.
+Before writing a changed-region result, its code/literal token sequence and
+preprocessor directives are checked against the original; an unsafe partial
+edit is rejected rather than applied.
+Changed ranges are recomputed until no further edits are needed, including when
+Git realigns neighbouring repeated braces after an indentation change.
 
 ## Dependency Graphs
 

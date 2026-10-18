@@ -6,6 +6,10 @@ add_executable(RodinSpatialMatrixVectorBenchmarks EXCLUDE_FROM_ALL SpatialMatrix
 target_link_libraries(RodinSpatialMatrixVectorBenchmarks PRIVATE
   Rodin::Math benchmark::benchmark)
 
+add_executable(RodinSpatialMatrixProductBenchmarks EXCLUDE_FROM_ALL SpatialMatrixProduct.cpp)
+target_link_libraries(RodinSpatialMatrixProductBenchmarks PRIVATE
+  Rodin::Math benchmark::benchmark)
+
 add_executable(RodinMathBenchmarks EXCLUDE_FROM_ALL SpatialAlgebra.cpp)
 target_link_libraries(RodinMathBenchmarks PRIVATE
   Rodin::Math benchmark::benchmark benchmark::benchmark_main)
@@ -13,6 +17,10 @@ target_link_libraries(RodinMathBenchmarks PRIVATE
 add_executable(RodinSpatialDotBenchmarks EXCLUDE_FROM_ALL SpatialDot.cpp)
 target_link_libraries(RodinSpatialDotBenchmarks PRIVATE
   Rodin::Rodin benchmark::benchmark)
+
+add_executable(RodinScalarDotBenchmarks EXCLUDE_FROM_ALL ScalarDot.cpp)
+target_link_libraries(RodinScalarDotBenchmarks PRIVATE
+  Rodin::Math benchmark::benchmark)
 
 add_executable(RodinSpatialVectorStorageBenchmarks EXCLUDE_FROM_ALL SpatialVectorStorage.cpp)
 target_link_libraries(RodinSpatialVectorStorageBenchmarks PRIVATE

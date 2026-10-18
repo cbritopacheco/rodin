@@ -76,22 +76,22 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Mesh type.
-    using MeshType = Mesh;
+      using MeshType = Mesh;
 
       /// @brief Finite element space type.
-    using FESType = P0<Range, MeshType>;
+      using FESType = P0<Range, MeshType>;
 
       /// @brief Scalar coefficient type.
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Gradient value with one entry per ambient coordinate.
-    using RangeType = Math::SpatialVector<ScalarType>;
+      using RangeType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
-    using OperandType = GridFunction<FESType, Data>;
+      using OperandType = GridFunction<FESType, Data>;
 
       /// @brief Parent class type.
-    using Parent = GradBase<OperandType, Grad<OperandType>>;
+      using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
        * @brief Constructs the gradient of a P0 function @f$ u @f$.
@@ -99,35 +99,35 @@ namespace Rodin::Variational
        *
        * @note The gradient of a P0 function is zero on each element.
        */
-    Grad(const OperandType& u)
-      : Parent(u)
-    {}
+      Grad(const OperandType& u)
+        : Parent(u)
+      {}
 
       /**
        * @brief Copy constructor.
        * @param[in] other Grad object to copy
        */
-    Grad(const Grad& other)
-      : Parent(other)
-    {}
+      Grad(const Grad& other)
+        : Parent(other)
+      {}
 
       /**
        * @brief Move constructor.
        * @param[in] other Grad object to move from
        */
-    Grad(Grad&& other)
-      : Parent(std::move(other))
-    {}
+      Grad(Grad&& other)
+        : Parent(std::move(other))
+      {}
 
       /**
        * @brief Interpolates the broken gradient at an integration point.
        * @param out Storage for the computed result.
        * @param ip Evaluation point carrying optional sampling metadata.
        */
-    void interpolate(RangeType& out, const IntegrationPoint& ip) const
-    {
-      interpolate(out, ip.getPoint());
-    }
+      void interpolate(RangeType& out, const IntegrationPoint& ip) const
+      {
+        interpolate(out, ip.getPoint());
+      }
 
       /**
        * @brief Interpolates at a geometric point.

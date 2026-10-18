@@ -119,12 +119,12 @@ namespace Rodin::Tests::Unit
   class ComplexNamedFormTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
-    LocalMesh makeMesh() const
-    {
-      if (GetParam() == Polytope::Type::Point)
-        return LocalMesh::Builder().initialize(3).nodes(1).vertex({1, 2, 3}).finalize();
-      return Convergence::UniformGrid(GetParam()).makeMesh(2);
-    }
+      LocalMesh makeMesh() const
+      {
+        if (GetParam() == Polytope::Type::Point)
+          return LocalMesh::Builder().initialize(3).nodes(1).vertex({1, 2, 3}).finalize();
+        return Convergence::UniformGrid(GetParam()).makeMesh(2);
+      }
   };
 
   TEST_P(ComplexNamedFormTest, ScalarComplexFunctions)
