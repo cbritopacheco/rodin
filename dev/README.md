@@ -667,6 +667,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   missing counters must not be treated as a supported but merely untested
   evaluation. Shape-function nonlocal potentials are a separate specialization
   with existing numerical coverage.
+- The P1 and H1 quadrature classes for `Mult<FunctionBase, Dot<Trial, Test>>`
+  are dormant under the current public expression route. Multiplication on
+  either side of a bilinear `Dot` normalizes to `Dot(coefficient * trial, test)`,
+  which selects a different specialization. Their absent counters are source
+  audit findings, not evidence that the existing outer-weighted public form
+  lacks tests; the dispatch and numerical specialization suites cover that form.
 - Attribute-restricted mesh measures: analytic half-unit-box area, volume and
   exterior measures for all six 2D/3D cell geometries, including combined,
   empty and missing attribute sets. Local and MPI suites pass; the distributed
