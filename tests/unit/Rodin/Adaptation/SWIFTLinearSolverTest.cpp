@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include <memory>
+#include <cmath>
 #include <string>
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/Adaptation/SWIFT/LinearSolver.h"
@@ -208,4 +209,38 @@ namespace Rodin::Tests::Unit
     solver.setParameters(parameters).setCentering(centering).solve();
     expectCenteredSolution(solver);
   }
+
+  /// @brief Singular direct factorization preserves data and the same adapter can solve again.
+  TEST_F(SWIFTLinearSolverTest, SingularDirectFactorizationReportsFailureAndRecovers)
+  {
+    auto& system = problem.getLinearSystem();
+    const auto positive = system.getOperator();
+    const auto load = system.getVector();
+    Math::Matrix<Real> singular(2, 2);
+    singular << 1, 2, 2, 4;
+    system.getOperator() = singular.sparseView();
+    system.getOperator().makeCompressed();
+    system.getSolution().setConstant(17);
+    const auto guess = system.getSolution();
+    parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+    parameters.trace = true;
+    SWIFT::LinearSolver<System> solver(problem);
+    solver.setParameters(parameters);
+    testing::internal::CaptureStdout();
+    solver.solve();
+    const auto diagnostic = testing::internal::GetCapturedStdout();
+    EXPECT_FALSE(solver.success());
+    EXPECT_EQ(solver.getIterations(), 0u);
+    EXPECT_TRUE(std::isinf(solver.getError()));
+    EXPECT_GT(solver.getError(), 0);
+    EXPECT_NE(diagnostic.find("metric LU: ok=0"), std::string::npos);
+    EXPECT_EQ((system.getSolution() - guess).norm(), 0);
+    EXPECT_EQ((system.getVector() - load).norm(), 0);
+    EXPECT_EQ((system.getOperator() - singular.sparseView()).norm(), 0);
+    system.getOperator() = positive;
+    solver.setCentering(centering).solve();
+    expectCenteredSolution(solver);
+    EXPECT_EQ(solver.getIterations(), 0u);
+  }
+
 }
