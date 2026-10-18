@@ -867,3 +867,8 @@ add_executable(RodinVariationalProductEvaluationTest ProductEvaluationTest.cpp)
 target_link_libraries(RodinVariationalProductEvaluationTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinVariationalProductEvaluationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalMissingInterfaceTraceTest MissingInterfaceTraceTest.cpp)
+target_link_libraries(RodinVariationalMissingInterfaceTraceTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalMissingInterfaceTraceTest PROPERTIES LABELS unit)
