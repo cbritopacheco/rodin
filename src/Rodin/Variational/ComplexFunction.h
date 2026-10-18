@@ -385,16 +385,14 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class ComplexFunction<FunctionBase<NestedDerived>> final
-    : public ComplexFunctionBase<ComplexFunction<NestedDerived>>
+    : public ComplexFunctionBase<ComplexFunction<FunctionBase<NestedDerived>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Complex;
 
       /// @brief Parent class type.
-      using Parent = ComplexFunctionBase<ComplexFunction<NestedDerived>>;
-
-      using Parent::traceOf;
+      using Parent = ComplexFunctionBase<ComplexFunction<FunctionBase<NestedDerived>>>;
 
       using Parent::operator();
 
@@ -517,8 +515,6 @@ namespace Rodin::Variational
           ComplexFunction<
             FunctionBase<RealNestedDerived>,
             FunctionBase<ImagNestedDerived>>>;
-
-      using Parent::traceOf;
 
       using Parent::operator();
 

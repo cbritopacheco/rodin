@@ -315,3 +315,107 @@ TEST(Rodin_Variational_ComplexFunction, PolymorphicCallablePairOutlivesSource)
   EXPECT_FALSE(copied->getOrder(cell));
   EXPECT_TRUE(copied->getTraceDomain().contains(Attribute(31)));
 }
+
+/// @brief Explicit nested wrappers own copies and preserve scalar and quadrature dispatch.
+TEST(Rodin_Variational_ComplexFunction, NestedWrapperOwnsAndDispatchesThroughItsBase)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto cell = *mesh.getCell();
+  QF::Centroid rule(Polytope::Type::Triangle);
+  const Point point(cell, rule.getPoint(0));
+  const IntegrationPoint ip(point, &rule, 0);
+  const auto check = [&]<class Derived>(const FunctionBase<Derived>& nested,
+                       Complex expectedPoint, Complex expectedQuadrature,
+                       Optional<size_t> expectedOrder) {
+    using Wrapper = ComplexFunction<FunctionBase<Derived>>;
+    static_assert(std::is_base_of_v<ComplexFunctionBase<Wrapper>, Wrapper>);
+    std::unique_ptr<ComplexFunctionBase<Wrapper>> owned;
+    {
+      Wrapper original(nested);
+      Wrapper copied(original);
+      Wrapper moved(std::move(copied));
+      owned.reset(moved.copy());
+    }
+    EXPECT_EQ(owned->getValue(point), expectedPoint);
+    EXPECT_EQ(owned->getValue(ip), expectedQuadrature);
+    EXPECT_EQ((*owned)(point), expectedPoint);
+    EXPECT_EQ(owned->getOrder(cell), expectedOrder);
+  };
+  check(RealFunction(Real(2.5)), Complex(2.5, 0), Complex(2.5, 0), 0);
+  check(ComplexFunction(Complex(-2, 3)), Complex(-2, 3), Complex(-2, 3), 0);
+  check(ComplexFunction(IntegrationPointComplexCallable{}), Complex(1, 2),
+    Complex(10, 20), {});
+  EXPECT_EQ(ComplexFunction(Integer(-3)).getValue(), -3);
+  EXPECT_EQ(ComplexFunction(Real(2.5)).getValue(), 2.5);
+  EXPECT_EQ(ComplexFunction(Complex(-2, 3)).getValue(), Complex(-2, 3));
+}
+
+/// @brief Nested wrapper copies keep independent one-sided derivatives across a continuous kink.
+TEST(Rodin_Variational_ComplexFunction, NestedWrapperCopiesOwnInterfaceTraceSelection)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.getConnectivity().compute(0, 1);
+  mesh.setAttribute({1, 0}, Attribute(7));
+  mesh.setAttribute({1, 1}, Attribute(11));
+  P1<Complex> space(mesh);
+  GridFunction field(space);
+  field = [](const Point& point) {
+    return point.x() <= 1 ? Complex(2, 3) * point.x()
+                          : Complex(2, 3) + Complex(-4, 5) * (point.x() - 1);
+  };
+  const Point point(*mesh.getVertex(1), Math::SpatialPoint{});
+  const IntegrationPoint ip(point);
+  const auto check = [&]<class Derived>(const FunctionBase<Derived>& operand) {
+    using Wrapper = ComplexFunction<FunctionBase<Derived>>;
+    Wrapper original(operand);
+    EXPECT_EQ(&original.traceOf(Attribute(7)), &original);
+    EXPECT_EQ(original.getValue(point), Complex(2, 3));
+    std::unique_ptr<Wrapper> copied(original.copy());
+    original.traceOf(FlatSet<Attribute>{Attribute(11)});
+    EXPECT_EQ(original.getValue(ip), Complex(-4, 5));
+    EXPECT_EQ(copied->getValue(ip), Complex(2, 3));
+    copied->traceOf(Attribute(11));
+    EXPECT_EQ(copied->getValue(point), Complex(-4, 5));
+  };
+  check(Derivative(size_t(0), field));
+  EXPECT_TRUE(field.getTraceDomain().empty());
+}
+
+/// @brief Explicit function pairs forward traces, preserve polynomial order, and own copies.
+TEST(Rodin_Variational_ComplexFunction, FunctionPairOwnsTraceSelectionAndReportsOrder)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.getConnectivity().compute(0, 1);
+  mesh.setAttribute({1, 0}, Attribute(7));
+  mesh.setAttribute({1, 1}, Attribute(11));
+  P1<Real> space(mesh);
+  GridFunction field(space);
+  field = [](const Point& point) {
+    return point.x() <= 1 ? 2 * point.x() : 2 - 4 * (point.x() - 1);
+  };
+  const auto pair = []<class Re, class Im>(
+                      const FunctionBase<Re>& re, const FunctionBase<Im>& im) {
+    return ComplexFunction<FunctionBase<Re>, FunctionBase<Im>>(re, im);
+  };
+  const Point interface(*mesh.getVertex(1), Math::SpatialPoint{});
+  const IntegrationPoint ip(interface);
+  const auto constant = RealFunction(Real(3));
+  auto original = pair(Derivative(size_t(0), field), constant);
+  EXPECT_EQ(&original.traceOf(Attribute(7)), &original);
+  EXPECT_EQ(original.getValue(interface), Complex(2, 3));
+  using Pair = decltype(original);
+  std::unique_ptr<ComplexFunctionBase<Pair>> owned;
+  {
+    Pair copied(original);
+    Pair moved(std::move(copied));
+    owned.reset(moved.copy());
+  }
+  original.traceOf(FlatSet<Attribute>{Attribute(11)});
+  EXPECT_EQ(original.getValue(ip), Complex(-4, 3));
+  EXPECT_EQ(owned->getValue(ip), Complex(2, 3));
+  EXPECT_EQ(owned->getOrder(*mesh.getCell()), Optional<size_t>(0));
+  EXPECT_EQ(pair(field, constant).getOrder(*mesh.getCell()), Optional<size_t>(1));
+  const auto unknown = RealFunction([](const Point& p) { return p.x(); });
+  EXPECT_FALSE(pair(unknown, constant).getOrder(*mesh.getCell()));
+  EXPECT_FALSE(pair(constant, unknown).getOrder(*mesh.getCell()));
+}
