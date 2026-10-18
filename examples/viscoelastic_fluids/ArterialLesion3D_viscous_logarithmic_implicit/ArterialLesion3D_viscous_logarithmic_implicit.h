@@ -12,8 +12,9 @@
  *
  * Formulation. T = 2 eta_s eps(u) + sigma, sigma = (eta_p/lambda0)(exp(psi)
  * - I), the psi equation solved by Newton together with (u, p), P1 spaces,
- * BDF1 or BDF2 (-al_time_order), and the split-OSS stabilisation (S1 dynamic
- * convection,
+ * BDF1 or BDF2 (-al_time_order; variable-step, with step rejection and
+ * control, Config::adaptiveTimeStep), and the split-OSS stabilisation (S1
+ * dynamic convection,
  * pressure and div sigma; S2 grad-div; S3 u-psi compatibility and psi
  * advection). The only changes from the planar driver are those of the
  * dimension:
@@ -365,8 +366,70 @@ namespace Rodin::Examples::ViscoelasticFluids
           Real perturbationCycles = 1.0;
 
           /// @brief Divergence guard: max|u| above this multiple of Ubar
-          ///        stops the run.
+          ///        rejects the step (stops the run without adaptiveTimeStep).
           Real maxVelocityFactor = 20.0;
+
+          /// @brief Step control. A step is rejected, and retried from the same
+          ///        x^n with dt * dtShrink, when Newton does not converge in
+          ///        conformationIterations, when its undamped increment grows,
+          ///        when the linear solver fails or when the divergence guard
+          ///        trips. Nothing of x^n, x^{n-1} changes before a step is
+          ///        accepted, so a retry starts from the same state. After
+          ///        dtGrowAfter consecutive steps of at most newtonEasy
+          ///        iterations dt grows by dtGrow, never above the nominal
+          ///        T/stepsPerCycle; a step of newtonHard or more iterations
+          ///        shrinks the next one. Steps are clipped to end on the cycle
+          ///        boundaries; BDF2 is then variable-step. Iterations count
+          ///        undamped ones only. Without it, a step
+          ///        whose Newton does not converge is accepted with a warning and
+          ///        any other failure stops the run (the former behaviour).
+          bool adaptiveTimeStep = true;
+          /// @brief Retries of one step; the smallest dt is dt0 dtShrink^maxStepRetries.
+          int maxStepRetries = 6;
+          Real dtShrink = 0.5;
+          /// @brief Growth factor; BDF2 with variable steps is zero-stable for
+          ///        dt_{n+1}/dt_n < 1 + sqrt(2), so it stays well below that.
+          Real dtGrow = 1.5;
+          int dtGrowAfter = 10;
+          int newtonEasy = 2;
+          int newtonHard = 5;
+
+          /// @brief Newton acceptance by the quadratic prediction: after an
+          ///        undamped increment d_k, the next one is ~ C d_k^2, with C
+          ///        estimated from the steps that took two undamped iterations or
+          ///        more. The iterate is accepted when C d_k^2 is below
+          ///        newtonPredictSafety * conformationTolerance, which saves the
+          ///        confirming iteration (one assembly and one solve). Every
+          ///        newtonCalibrateEvery steps the prediction is not used, so
+          ///        that C keeps being measured.
+          bool newtonPredict = true;
+          Real newtonPredictSafety = 0.1;
+          int newtonCalibrateEvery = 20;
+
+          /// @brief Lagged preconditioner of the flow solve: the preconditioner
+          ///        (ILU blocks or LU factors) of an earlier matrix is reused for
+          ///        up to pcReuseSolves solves, across Newton iterations and
+          ///        steps. A solve with it that needs more than pcReuseGrowth
+          ///        times the iterations of the first Newton solve after the
+          ///        last build is kept, and the preconditioner is rebuilt for the
+          ///        next solve; one that fails is repeated, from the same guess,
+          ///        with a fresh preconditioner. A change of dt rebuilds it too.
+          ///        1 rebuilds it at every solve. Only meaningful with a Krylov
+          ///        method (-ksp_type gmres); with preonly it is ignored.
+          int pcReuseSolves = 1;
+          Real pcReuseGrowth = 2.0;
+
+          /// @brief Weak inflow condition of the psi equation on the outlet:
+          ///        where u*.n < 0 the term |u*.n|_- (psi - psi^n) : chi makes
+          ///        the entering fluid carry the conformation found there at
+          ///        step n. The psi equation is hyperbolic, and without it a
+          ///        backflow on the outlet enters with no data.
+          bool outletConformationInflow = true;
+          /// @brief Skew-symmetric psi advection, + (1/2)(div u*) psi : chi: the
+          ///        discrete div u is not zero for P1/P1, and this restores the
+          ///        L2 stability of the advection of psi (Temam's term of the
+          ///        momentum equation, applied to psi). Weakly consistent.
+          bool psiSkewAdvection = false;
       };
 
       /// @brief Wall-clock cost of each phase of one step.
@@ -379,6 +442,11 @@ namespace Rodin::Examples::ViscoelasticFluids
           Real fluxes = 0.0;
           Real output = 0.0;
           Real total = 0.0;
+          /// @brief Rejected attempts of the step, preconditioner builds and
+          ///        Krylov iterations over all its attempts.
+          int retries = 0;
+          int pcBuilds = 0;
+          int kspIterations = 0;
       };
 
       ArterialLesion3DViscousLogImplicit(const Rodin::Context::MPI& context, const Config& cfg);
@@ -428,13 +496,26 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief z <- a x + b y, with the ghost values refreshed.
       static void combine(Real a, const ::Vec& x, Real b, const ::Vec& y, ::Vec& z);
 
-      /// @brief The time step of the BDF mass terms: dt (BDF1) or 2 dt/3 (BDF2).
+      /// @brief The time step of the BDF mass terms: dt (BDF1) or, for BDF2
+      ///        with w = dt_{n+1}/dt_n, dt (1 + w)/(1 + 2 w) (2 dt/3 at w = 1).
       Real massStep() const;
 
-      /// @brief After a step (m_uIt, the psi iterates and the pressure solution
-      ///        hold x^{n+1}): shifts x^n, x^{n-1}, rebuilds the BDF history and
-      ///        u* of the next step.
+      /// @brief w = dt_{n+1}/dt_n of the BDF2 step about to be taken; 1 on the
+      ///        first step (x^{-1} = x^0) and for BDF1.
+      Real bdfRatio() const;
+
+      /// @brief Before each attempt of a step, from x^n, x^{n-1} and w: the BDF
+      ///        history x_hist, with d/dt x ~ (x - x_hist)/massStep(),
+      ///          x_hist = ((1 + w)^2 x^n - w^2 x^{n-1})/(1 + 2 w)  (BDF2),
+      ///        and the extrapolation u* = (1 + w) u^n - w u^{n-1}.
+      void prepareStep();
+
+      /// @brief After a step is accepted (m_uIt, the psi iterates and the
+      ///        pressure solution hold x^{n+1}): shifts x^n, x^{n-1}.
       void advanceHistory();
+
+      /// @brief After a rejected attempt: the solution fields back to x^n.
+      void rejectStep();
 
       /// @brief The orthogonal projections Pi[grad p], Pi[div sigma] and, if
       ///        strain, Pi[div u], Pi[eps(u)] and Pi[(u^n . grad) psi], at step n
@@ -505,7 +586,16 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief Mean inlet velocity Ubar (m/s) and period T (s).
       Real m_meanVelocity = 0.0;
       Real m_period = 0.0;
+      /// @brief dt of the step being taken, its nominal value T/stepsPerCycle,
+      ///        the dt of the last accepted step and the number of accepted steps.
       Real m_dt = 0.0;
+      Real m_dtNominal = 0.0;
+      Real m_dtPrev = 0.0;
+      int m_history = 0;
+      /// @brief (dt, massStep) the flow forms were built with: setupFlow bakes
+      ///        both into the forms, so a change of either rebuilds them.
+      Real m_formDt = -1.0;
+      Real m_formMassStep = -1.0;
 
       MeshType m_mesh;
       Rodin::IO::XDMF m_xdmf;
@@ -632,6 +722,25 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief Newton iterations of the last step and their last increment.
       int m_conformationIts = 0;
       Real m_psiIncrement = 0.0;
+      /// @brief Undamped Newton iterations of the last step: the measure of
+      ///        its difficulty for the step control (the damped ones of the
+      ///        start from rest are not).
+      int m_newtonUndamped = 0;
+      /// @brief Why the last attempt was rejected (empty if accepted).
+      std::string m_failure;
+      /// @brief Newton accepted by the quadratic prediction (not by d_k < tol).
+      bool m_newtonPredicted = false;
+      /// @brief Recent estimates of C in d_{k+1} ~ C d_k^2 (ring buffer).
+      std::vector<Real> m_contraction;
+      size_t m_contractionNext = 0;
+      /// @brief Lagged preconditioner: built at least once, solves since its
+      ///        last build, and a forced rebuild (dt changed).
+      bool m_pcBuilt = false;
+      int m_pcSolves = 0;
+      /// @brief Krylov iterations of the first Newton solve after the last
+      ///        build, the reference of pcReuseGrowth (< 0 until measured).
+      int m_pcReferenceIts = -1;
+      bool m_pcStale = true;
       bool m_flowFieldSplitsSet = false;
       bool m_initialized = false;
 

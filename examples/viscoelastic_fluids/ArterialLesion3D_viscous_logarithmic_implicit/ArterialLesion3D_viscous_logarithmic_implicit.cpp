@@ -28,6 +28,12 @@
  *   vms, inlet_conformation, trace_newton          booleans
  *   inlet_perturbation, perturbation_cycles        m = 1 seed (see the header)
  *   newton_d2 (bool), psi_order (int)              Newton D2exp term; psi quadrature degree
+ *   adaptive_dt (bool), max_step_retries, dt_shrink, dt_grow, dt_grow_after,
+ *   newton_easy, newton_hard                       step control (header, Config)
+ *   newton_predict (bool), newton_predict_safety, newton_calibrate_every
+ *                                                  Newton acceptance by C d_k^2
+ *   pc_reuse_solves, pc_reuse_growth               lagged preconditioner (Krylov only)
+ *   outlet_conformation_inflow (bool), psi_skew (bool)  psi outlet inflow; skew advection
  *
  * The CSV ends with maxTAWSSLesion, maxOSILesion (tag 5 only) and uyMean,
  * uzMean, the volume means of u_y and u_z over Ubar: both vanish for an
@@ -40,6 +46,7 @@
 #include <filesystem>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -1094,6 +1101,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     if (!(m_cfg.stepsPerCycle > 0))
       throw std::runtime_error("stepsPerCycle must be positive.");
     m_dt = m_period / static_cast<Real>(m_cfg.stepsPerCycle);
+    m_dtNominal = m_dt;
     if (m_cfg.timeOrder != 1 && m_cfg.timeOrder != 2)
       throw std::runtime_error("timeOrder must be 1 (BDF1) or 2 (BDF2).");
 
@@ -1480,40 +1488,88 @@ namespace Rodin::Examples::ViscoelasticFluids
     (void)ierr;
   }
 
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::bdfRatio() const
+  {
+    // The first step takes x^{-1} = x^0, for which w does not enter the
+    // history; w = 1 keeps its mass step at 2 dt/3.
+    if (m_cfg.timeOrder != 2 || m_history < 1 || !(m_dtPrev > 0.0))
+      return 1.0;
+    return m_dt / m_dtPrev;
+  }
+
   ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::massStep() const
   {
-    return m_cfg.timeOrder == 2 ? 2.0 * m_dt / 3.0 : m_dt;
+    if (m_cfg.timeOrder != 2)
+      return m_dt;
+    // (1 + 2 w)/(1 + w) x^{n+1} - (1 + w) x^n + w^2/(1 + w) x^{n-1}, over dt,
+    // is (x^{n+1} - x_hist)/dtM with dtM = dt (1 + w)/(1 + 2 w). At w = 1 the
+    // expression is evaluated as 2 dt/3, as before the variable step.
+    const Real w = bdfRatio();
+    return (1.0 + w) * m_dt / (1.0 + 2.0 * w);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::prepareStep()
+  {
+    if (m_cfg.timeOrder == 2)
+    {
+      // x_hist = ((1 + w)^2 x^n - w^2 x^{n-1})/(1 + 2 w), u* = (1 + w) u^n -
+      // w u^{n-1}; at w = 1, (4 x^n - x^{n-1})/3 and 2 u^n - u^{n-1}.
+      const Real w = bdfRatio();
+      const Real a = (1.0 + w) * (1.0 + w) / (1.0 + 2.0 * w);
+      const Real b = -w * w / (1.0 + 2.0 * w);
+      combine(a, m_uOld.getData(), b, m_uNm1.getData(), m_uHist.getData());
+      combine(1.0 + w, m_uOld.getData(), -w, m_uNm1.getData(), m_uAdv.getData());
+      combine(a, m_psiOldD.getData(), b, m_psiNm1D.getData(), m_psiHistD.getData());
+      combine(a, m_psiOldO.getData(), b, m_psiNm1O.getData(), m_psiHistO.getData());
+    }
+    else
+    {
+      m_uHist.setData(m_uOld.getData());
+      m_uAdv.setData(m_uOld.getData());
+      m_psiHistD.setData(m_psiOldD.getData());
+      m_psiHistO.setData(m_psiOldO.getData());
+    }
   }
 
   void ArterialLesion3DViscousLogImplicit::advanceHistory()
   {
     if (m_cfg.timeOrder == 2)
     {
-      // x^{n-1} <- x^n, x^n <- x^{n+1}; history (4 x^n - x^{n-1})/3 and
-      // u* = 2 u^n - u^{n-1}.
+      // x^{n-1} <- x^n, x^n <- x^{n+1}; the history of the next step is
+      // prepareStep's, once its dt is known.
       m_uNm1.setData(m_uOld.getData());
       m_uOld.setData(m_uIt.getData());
-      combine(4.0 / 3.0, m_uOld.getData(), -1.0 / 3.0, m_uNm1.getData(), m_uHist.getData());
-      combine(2.0, m_uOld.getData(), -1.0, m_uNm1.getData(), m_uAdv.getData());
       m_pNm1.setData(m_pN.getData());
       m_pN.setData(m_p.getSolution().getData());
       m_psiNm1D.setData(m_psiOldD.getData());
       m_psiNm1O.setData(m_psiOldO.getData());
       m_psiOldD.setData(m_psiItD.getData());
       m_psiOldO.setData(m_psiItO.getData());
-      combine(4.0 / 3.0, m_psiOldD.getData(), -1.0 / 3.0, m_psiNm1D.getData(), m_psiHistD.getData());
-      combine(4.0 / 3.0, m_psiOldO.getData(), -1.0 / 3.0, m_psiNm1O.getData(), m_psiHistO.getData());
     }
     else
     {
       m_uOld.setData(m_uIt.getData());
-      m_uHist.setData(m_uIt.getData());
-      m_uAdv.setData(m_uIt.getData());
+      m_pN.setData(m_p.getSolution().getData());
       m_psiOldD.setData(m_psiItD.getData());
       m_psiOldO.setData(m_psiItO.getData());
-      m_psiHistD.setData(m_psiItD.getData());
-      m_psiHistO.setData(m_psiItO.getData());
     }
+  }
+
+  void ArterialLesion3DViscousLogImplicit::rejectStep()
+  {
+    // x^n, x^{n-1} and the history are untouched by a failed attempt; the
+    // trial solutions (read as p^n by the BDF1 projections, and as the Krylov
+    // initial guess) and the iterates go back to x^n.
+    m_u.getSolution().setData(m_uOld.getData());
+    m_p.getSolution().setData(m_pN.getData());
+    m_psiD.getSolution().setData(m_psiOldD.getData());
+    m_psiO.getSolution().setData(m_psiOldO.getData());
+    m_uIt.setData(m_uOld.getData());
+    m_psiItD.setData(m_psiOldD.getData());
+    m_psiItO.setData(m_psiOldO.getData());
+    ++m_psiRevision;
+    // The matrix of the retry differs (dt): rebuild the preconditioner.
+    m_pcStale = true;
   }
 
   ArterialLesion3DViscousLogImplicit& ArterialLesion3DViscousLogImplicit::initialize()
@@ -1635,6 +1691,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const Real dt = m_dt;
     // BDF mass terms (x - x_hist)/dtM: dtM = dt (BDF1) or 2 dt/3 (BDF2).
     const Real dtM = massStep();
+    m_formDt = dt;
+    m_formMassStep = dtM;
     const auto& ob = m_cfg.oldroydB;
     // eta_s(gd(u^n or u*)); constant (order 0) for "sptt", so that assembly is
     // the parent one.
@@ -1793,11 +1851,38 @@ namespace Rodin::Examples::ViscoelasticFluids
       else
         m_flow = form;
     };
+    // Optional psi terms. Each changes the type of the form, so they are
+    // appended through generic lambdas, in the order outlet, skew, finish.
+    //  - Outlet (Config::outletConformationInflow): where u*.n < 0 the
+    //    upwind term |u*.n|_- (psi - psi^n) : chi imposes weakly that the
+    //    entering fluid carries the conformation of step n there; it vanishes
+    //    identically while the outlet is an outflow.
+    //  - Skew (Config::psiSkewAdvection): + (1/2)(div u*) psi : chi.
+    const auto inflowOut = Max(-Dot(m_uAdv, normal), 0.0);
+    const auto outlet = m_cfg.labels.outlet;
+    const auto withSkew = [&](const auto& form) {
+      if (m_cfg.psiSkewAdvection)
+        finish(form
+          + 0.5 * wD * Integral(Dot(Div(m_uAdv) * m_psiD, m_chiD))
+          + 0.5 * wO * Integral(Dot(Div(m_uAdv) * m_psiO, m_chiO)));
+      else
+        finish(form);
+    };
+    const auto withOutlet = [&](const auto& form) {
+      if (m_cfg.outletConformationInflow)
+        withSkew(form
+          + wD * BoundaryIntegral(inflowOut * Dot(m_psiD, m_chiD)).over(outlet)
+          - wD * BoundaryIntegral(inflowOut * Dot(m_psiOldD, m_chiD)).over(outlet)
+          + wO * BoundaryIntegral(inflowOut * Dot(m_psiO, m_chiO)).over(outlet)
+          - wO * BoundaryIntegral(inflowOut * Dot(m_psiOldO, m_chiO)).over(outlet));
+      else
+        withSkew(form);
+    };
     if (m_cfg.newtonD2)
     {
       // S1, the D2exp part of the Newton linearisation of div exp(psi).
       const Real k1 = chiScale * m_cfg.stressDivScale * s;
-      finish(body
+      withOutlet(body
         + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<D>(m_chiD)))
         + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<D>(m_chiD)))
         + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<O>(m_chiO)))
@@ -1806,7 +1891,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         - k1 * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<O>(m_chiO))));
     }
     else
-      finish(body);
+      withOutlet(body);
   }
 
   void ArterialLesion3DViscousLogImplicit::setupWallShear()
@@ -1930,10 +2015,13 @@ namespace Rodin::Examples::ViscoelasticFluids
       }
     };
 
+    m_failure.clear();
+    m_newtonPredicted = false;
+
     const auto vmsStart = CoronaryClock::now();
     phase("VMS: updating the stabilisation (alphas and projections)");
     updateStabilization();
-    m_timing.vms = secondsSince(vmsStart);
+    m_timing.vms += secondsSince(vmsStart);
 
     if (trace)
     {
@@ -1955,23 +2043,68 @@ namespace Rodin::Examples::ViscoelasticFluids
     ::Vec uIncrement = PETSC_NULLPTR;
     ierr = VecDuplicate(m_uIt.getData(), &uIncrement);
     assert(ierr == PETSC_SUCCESS);
-    m_timing.assembly = 0.0;
-    m_timing.solve = 0.0;
+    // The Krylov initial guess of a solve with a reused preconditioner, kept
+    // in case that solve has to be repeated with a fresh one.
+    ::Vec guess = PETSC_NULLPTR;
     m_conformationIts = 0;
-    // Newton starts from x^n (BDF1) or from 2 x^n - x^{n-1} (BDF2). The
-    // extrapolation of psi is skipped on the second step: the start from rest
-    // with a non-zero inlet conformation makes psi^1 - psi^0 a jump, and 2 psi^1
-    // a poor guess (Newton diverged for the "gsptt" fluid).
+    m_newtonUndamped = 0;
+
+    // Newton starts from x^n (BDF1) or from the extrapolation (1 + w) x^n - w
+    // x^{n-1} (BDF2). The extrapolation of psi is skipped on the second step:
+    // the start from rest with a non-zero inlet conformation makes psi^1 -
+    // psi^0 a jump, and 2 psi^1 a poor guess (Newton diverged for the "gsptt"
+    // fluid). The iterates are set explicitly, since a rejected attempt may
+    // have left them anywhere.
+    const Real w = bdfRatio();
     m_uIt.setData(m_uAdv.getData());
     if (m_cfg.timeOrder == 2)
-      combine(2.0, m_pN.getData(), -1.0, m_pNm1.getData(), m_pIt.getData());
-    if (m_cfg.timeOrder == 2 && m_step >= 2)
+      combine(1.0 + w, m_pN.getData(), -w, m_pNm1.getData(), m_pIt.getData());
+    if (m_cfg.timeOrder == 2 && m_history >= 2)
     {
-      combine(2.0, m_psiOldD.getData(), -1.0, m_psiNm1D.getData(), m_psiItD.getData());
-      combine(2.0, m_psiOldO.getData(), -1.0, m_psiNm1O.getData(), m_psiItO.getData());
-      ++m_psiRevision;
+      combine(1.0 + w, m_psiOldD.getData(), -w, m_psiNm1D.getData(), m_psiItD.getData());
+      combine(1.0 + w, m_psiOldO.getData(), -w, m_psiNm1O.getData(), m_psiItO.getData());
     }
-    for (int k = 0; k < std::max(1, m_cfg.conformationIterations); ++k)
+    else
+    {
+      m_psiItD.setData(m_psiOldD.getData());
+      m_psiItO.setData(m_psiOldO.getData());
+    }
+    ++m_psiRevision;
+
+    // The quadratic prediction d_{k+1} ~ C d_k^2 uses the largest recent
+    // estimate of C; it is not used on calibration steps, so that C keeps
+    // being measured.
+    Real contraction = -1.0;
+    for (const Real c : m_contraction)
+      contraction = std::max(contraction, c);
+    const bool calibrate =
+      m_cfg.newtonCalibrateEvery > 0 && m_history % m_cfg.newtonCalibrateEvery == 0;
+    const bool predict = m_cfg.newtonPredict && !calibrate && contraction > 0.0;
+    const auto recordContraction = [this, &contraction](Real previous, Real increment) {
+      // A zero increment is a Krylov solve that stopped on its initial
+      // residual: below the resolution of the linear solver, it says nothing
+      // about C.
+      if (!(previous > 0.0) || !(increment > 0.0))
+        return;
+      // The first step (start from rest, inlet jump) is not representative.
+      if (m_history == 0)
+        return;
+      constexpr size_t ContractionSamples = 16;  ///< recent estimates of C kept
+      const Real c = increment / (previous * previous);
+      if (m_contraction.size() < ContractionSamples)
+        m_contraction.push_back(c);
+      else
+        m_contraction[m_contractionNext] = c;
+      m_contractionNext = (m_contractionNext + 1) % ContractionSamples;
+      // A measurement of this step counts at once: away from the quadratic
+      // regime (a large dt, a hard step) it is the one that matters.
+      contraction = std::max(contraction, c);
+    };
+
+    bool converged = false;
+    Real previous = -1.0;  // the last undamped increment, < 0 if none
+    const int maxIterations = std::max(1, m_cfg.conformationIterations);
+    for (int k = 0; k < maxIterations; ++k)
     {
       if (m_cfg.timeOrder == 2 && k == 0)
       {
@@ -1980,6 +2113,16 @@ namespace Rodin::Examples::ViscoelasticFluids
         projectConsistent(true, static_cast<unsigned>(m_cfg.bdf2Extrapolate));
         m_timing.vms += secondsSince(projStart);
       }
+
+      // The Krylov initial guess is gathered from the trial solutions by
+      // assemble(): the iterate (u^k, p^k, psi^k), not x^n. The pressure of
+      // the BDF1 projections is read above, before this.
+      m_u.getSolution().setData(m_uIt.getData());
+      m_psiD.getSolution().setData(m_psiItD.getData());
+      m_psiO.getSolution().setData(m_psiItO.getData());
+      if (k == 0 && m_cfg.timeOrder == 2)
+        m_p.getSolution().setData(m_pIt.getData());
+
       const auto assemblyStart = CoronaryClock::now();
       m_flow.assemble();
       m_timing.assembly += secondsSince(assemblyStart);
@@ -1992,14 +2135,78 @@ namespace Rodin::Examples::ViscoelasticFluids
         m_flowFieldSplitsSet = true;
       }
 
+      // Lagged preconditioner (Config::pcReuseSolves): reused while the Krylov
+      // solver needs at most pcReuseGrowth times the iterations it needed
+      // with a fresh one; a solve that fails with it is repeated, from the
+      // same guess, with a fresh one.
       const auto solveStart = CoronaryClock::now();
+      ::KSP ksp = m_flowKSP.getHandle();
+      ::Vec x = m_flow.getLinearSystem().getSolution();
+      // A lagged preconditioner needs a Krylov method: with preonly it would be
+      // the solution operator of an earlier matrix.
+      ::KSPType kspType = nullptr;
+      ierr = KSPGetType(ksp, &kspType);
+      assert(ierr == PETSC_SUCCESS);
+      const bool krylov = kspType && std::strcmp(kspType, KSPPREONLY) != 0;
+      bool reuse = krylov && m_cfg.pcReuseSolves > 1 && m_pcBuilt && !m_pcStale &&
+        m_pcSolves < m_cfg.pcReuseSolves;
+      if (reuse)
+      {
+        if (!guess)
+        {
+          ierr = VecDuplicate(x, &guess);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        ierr = VecCopy(x, guess);
+        assert(ierr == PETSC_SUCCESS);
+      }
+      ierr = KSPSetReusePreconditioner(ksp, reuse ? PETSC_TRUE : PETSC_FALSE);
+      assert(ierr == PETSC_SUCCESS);
       m_flow.solve(m_flowKSP);
+      PetscInt its = 0;
+      ierr = KSPGetConvergedReason(ksp, &reason);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = KSPGetIterationNumber(ksp, &its);
+      assert(ierr == PETSC_SUCCESS);
+      if (reuse && reason <= 0)
+      {
+        m_timing.kspIterations += static_cast<int>(its);
+        ierr = VecCopy(guess, x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = KSPSetReusePreconditioner(ksp, PETSC_FALSE);
+        assert(ierr == PETSC_SUCCESS);
+        m_flow.solve(m_flowKSP);
+        ierr = KSPGetConvergedReason(ksp, &reason);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = KSPGetIterationNumber(ksp, &its);
+        assert(ierr == PETSC_SUCCESS);
+        reuse = false;
+      }
+      if (!reuse)
+      {
+        m_pcBuilt = true;
+        m_pcStale = false;
+        m_pcSolves = 0;
+        // The reference count: a first Newton solve, which starts from the
+        // predictor; later ones start next to the solution and need few.
+        m_pcReferenceIts = k == 0 ? static_cast<int>(its) : -1;
+        ++m_timing.pcBuilds;
+      }
+      else if (m_pcReferenceIts < 0 && k == 0)
+        m_pcReferenceIts = static_cast<int>(its);
+      else if (m_pcReferenceIts >= 0 &&
+               static_cast<Real>(its) > m_cfg.pcReuseGrowth * static_cast<Real>(m_pcReferenceIts))
+        m_pcStale = true;  // this solve is kept; the next one rebuilds
+      ++m_pcSolves;
+      m_timing.kspIterations += static_cast<int>(its);
       m_timing.solve += secondsSince(solveStart);
 
-      ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
-      assert(ierr == PETSC_SUCCESS);
       if (reason <= 0)
+      {
+        m_failure = "linear solver failed (KSPConvergedReason " +
+          std::to_string(static_cast<int>(reason)) + ", " + std::to_string(its) + " iterations)";
         break;
+      }
 
       // max |psi^{k+1} - psi^k| over both blocks, relative to max(1, |psi^k|).
       ierr = VecWAXPY(incrementD, -1.0, m_psiItD.getData(), m_psiD.getSolution().getData());
@@ -2030,12 +2237,48 @@ namespace Rodin::Examples::ViscoelasticFluids
       ++m_psiRevision;
       ++m_conformationIts;
 
+      const bool undamped = omega == 1.0;
+      if (undamped)
+        ++m_newtonUndamped;
+      if (undamped && m_psiIncrement >= m_cfg.conformationTolerance)
+        recordContraction(previous, m_psiIncrement);
+      const bool predicted = undamped && predict && contraction > 0.0 &&
+        m_psiIncrement >= m_cfg.conformationTolerance &&
+        contraction * m_psiIncrement * m_psiIncrement <
+          m_cfg.newtonPredictSafety * m_cfg.conformationTolerance;
       if (trace)
         KSPInfo() << "Newton " << m_conformationIts << ": max|dpsi| = " << stepSize
-                  << (omega < 1.0 ? " (damped)" : "") << Alert::Raise;
-      if (!std::isfinite(m_psiIncrement) ||
-          (omega == 1.0 && m_psiIncrement < m_cfg.conformationTolerance))
+                  << " (relative " << m_psiIncrement << ")" << (omega < 1.0 ? " (damped)" : "")
+                  << "  ksp its " << its << (reuse ? " (lagged PC)" : "")
+                  << (predicted ? "  accepted: C d^2 = " + std::to_string(contraction *
+                        m_psiIncrement * m_psiIncrement) : std::string())
+                  << Alert::Raise;
+      if (!std::isfinite(m_psiIncrement))
+      {
+        m_failure = "non-finite Newton increment";
         break;
+      }
+      if (undamped && m_psiIncrement < m_cfg.conformationTolerance)
+      {
+        recordContraction(previous, m_psiIncrement);
+        converged = true;
+        break;
+      }
+      // A growing undamped increment: Newton is outside its basin, and the
+      // remaining iterations only cost time (rejected with step control).
+      if (m_cfg.adaptiveTimeStep && undamped && previous > 0.0 && m_psiIncrement > previous)
+      {
+        m_failure = "Newton increment grew (" + std::to_string(previous) + " -> " +
+          std::to_string(m_psiIncrement) + ")";
+        break;
+      }
+      if (predicted)
+      {
+        m_newtonPredicted = true;
+        converged = true;
+        break;
+      }
+      previous = undamped ? m_psiIncrement : -1.0;
     }
     ierr = VecDestroy(&incrementD);
     assert(ierr == PETSC_SUCCESS);
@@ -2043,12 +2286,36 @@ namespace Rodin::Examples::ViscoelasticFluids
     assert(ierr == PETSC_SUCCESS);
     ierr = VecDestroy(&uIncrement);
     assert(ierr == PETSC_SUCCESS);
+    if (guess)
+    {
+      ierr = VecDestroy(&guess);
+      assert(ierr == PETSC_SUCCESS);
+    }
     (void)ierr;
 
-    if (isRoot() && m_conformationIts >= m_cfg.conformationIterations &&
-        m_psiIncrement >= 100.0 * m_cfg.conformationTolerance)
-      Alert::Warning() << "[log] Newton stopped after " << m_conformationIts
-                       << " iterations with max|dpsi| = " << m_psiIncrement << Alert::Raise;
+    if (!converged && m_failure.empty())
+    {
+      if (m_cfg.adaptiveTimeStep)
+        m_failure = "Newton did not converge in " + std::to_string(m_conformationIts) +
+          " iterations (|dpsi| = " + std::to_string(m_psiIncrement) + ")";
+      else if (isRoot() && m_psiIncrement >= 100.0 * m_cfg.conformationTolerance)
+        // Without step control the step is accepted, as before.
+        Alert::Warning() << "[log] Newton stopped after " << m_conformationIts
+                         << " iterations with max|dpsi| = " << m_psiIncrement << Alert::Raise;
+    }
+    if (!m_failure.empty())
+      return false;
+
+    // The divergence guard, on u^{n+1} before anything is advanced.
+    m_speed = std::max(std::abs(m_uIt.max()), std::abs(m_uIt.min()));
+    const Real guard =
+      m_cfg.maxVelocityFactor * m_meanVelocity * std::max<Real>(1.0, m_inflow.getPeak());
+    if (!std::isfinite(m_speed) || m_speed > guard)
+    {
+      m_failure = "divergence guard: max|u| = " + std::to_string(m_speed) + " m/s = " +
+        std::to_string(m_speed / m_meanVelocity) + " Ubar";
+      return false;
+    }
 
     advanceHistory();
     m_u.getSolution().setData(m_uIt.getData());
@@ -2059,14 +2326,9 @@ namespace Rodin::Examples::ViscoelasticFluids
     if (m_cfg.useVMS)
       m_subOld.setData(m_sub.get().getData());
 
-    m_speed = std::max(std::abs(m_uOld.max()), std::abs(m_uOld.min()));
     m_stress = std::max({ std::abs(m_sigmaD.max()), std::abs(m_sigmaD.min()),
       std::abs(m_sigmaO.max()), std::abs(m_sigmaO.min()) });
-
-    const Real guard =
-      m_cfg.maxVelocityFactor * m_meanVelocity * std::max<Real>(1.0, m_inflow.getPeak());
-    return reason > 0 && std::isfinite(m_psiIncrement) && std::isfinite(m_speed) &&
-      m_speed <= guard;
+    return true;
   }
 
   void ArterialLesion3DViscousLogImplicit::computeWallShear()
@@ -2211,7 +2473,7 @@ namespace Rodin::Examples::ViscoelasticFluids
   void ArterialLesion3DViscousLogImplicit::writeCSVHeader()
   {
     m_csv << "t,cycle,qTarget,qIn,qOut,pInletMean,pOutletMean,dp,maxU,maxSigma,"
-          << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion,uyMean,uzMean\n";
+          << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion,uyMean,uzMean,dt,retries\n";
   }
 
   void ArterialLesion3DViscousLogImplicit::writeCSVRow(int cycle)
@@ -2231,7 +2493,8 @@ namespace Rodin::Examples::ViscoelasticFluids
           << m_inletPressure << ',' << m_outletMeanPressure << ','
           << (m_inletPressure - m_outletMeanPressure) << ',' << m_speed << ',' << m_stress
           << ',' << m_conformationIts << ',' << m_psiIncrement << ',' << tawss << ',' << osi
-          << ',' << tawssLesion << ',' << osiLesion << ',' << m_uyMean << ',' << m_uzMean << '\n';
+          << ',' << tawssLesion << ',' << osiLesion << ',' << m_uyMean << ',' << m_uzMean
+          << ',' << m_dt << ',' << m_timing.retries << '\n';
     m_csv.flush();
   }
 
@@ -2241,35 +2504,98 @@ namespace Rodin::Examples::ViscoelasticFluids
       initialize();
 
     const int stepsPerCycle = m_cfg.stepsPerCycle;
-    const int totalSteps = m_cfg.cycles * stepsPerCycle;
+    const int nominalSteps = m_cfg.cycles * stepsPerCycle;
+    // A step whose end lies within TimeRoundoff dt0 of a cycle boundary or an
+    // output time reaches it: far below any step the control takes (dt0
+    // dtShrink^maxStepRetries), far above the roundoff of t summed over a run.
+    constexpr Real TimeRoundoff = 1.0e-6;
+    const Real dtMin = m_dtNominal * std::pow(m_cfg.dtShrink, m_cfg.maxStepRetries);
+    // XDMF output, as before at the nominal step: after the first step and
+    // every outputEvery nominal steps from there; cycle boundaries always.
+    const Real outputInterval =
+      m_cfg.outputEvery > 0 ? static_cast<Real>(m_cfg.outputEvery) * m_dtNominal : 0.0;
+    Real nextOutput = m_dtNominal;
+    const Real endTime = static_cast<Real>(m_cfg.cycles) * m_period;
 
     if (isRoot())
+    {
       Alert::Info() << "[run] " << m_cfg.cycles << " cycles of " << stepsPerCycle
-                    << " steps (" << totalSteps << " total), inflow ramped over "
+                    << " steps (" << nominalSteps << " total), inflow ramped over "
                     << m_cfg.rampCycles << " cycle(s); XDMF every " << m_cfg.outputEvery
                     << " steps and at every cycle boundary" << Alert::Raise;
+      if (m_cfg.adaptiveTimeStep)
+        Alert::Info() << "[run] step control: retry with dt x " << m_cfg.dtShrink << " (at most "
+                      << m_cfg.maxStepRetries << " times, dt >= " << dtMin << " s), growth x "
+                      << m_cfg.dtGrow << " after " << m_cfg.dtGrowAfter << " steps of <= "
+                      << m_cfg.newtonEasy << " Newton iterations, up to dt0 = " << m_dtNominal
+                      << " s; Newton prediction " << (m_cfg.newtonPredict ? "on" : "off")
+                      << "; lagged preconditioner over " << m_cfg.pcReuseSolves << " solves"
+                      << Alert::Raise;
+    }
 
     Real cycleElapsed = 0.0;
     const auto runStart = CoronaryClock::now();
+    Real dtTarget = m_dtNominal;
+    int easySteps = 0;
+    int cycle = 0;
+    int step = 0;
 
-    for (int step = 0; step < totalSteps; ++step)
+    while (cycle < m_cfg.cycles)
     {
       m_step = step;
       m_timing = Timing{};
       const auto stepStart = CoronaryClock::now();
+      const Real tStart = m_t;
+      const Real cycleEnd = static_cast<Real>(cycle + 1) * m_period;
 
-      m_t += m_dt;
-      const int cycle = step / stepsPerCycle;
-      const bool endOfCycle = (step % stepsPerCycle == stepsPerCycle - 1);
-      m_inflowNow = inflowFactor(m_t);
-
-      if (!solveFlow())
+      // The target step, clipped to end on the cycle boundary. Within two
+      // targets of it the remainder is split in two equal steps, so that no
+      // sliver of a step is left; a remainder that is a whole number of
+      // targets up to roundoff keeps the target.
+      Real dt = dtTarget;
       {
-        Alert::Exception() << "[flow] diverged at step " << (step + 1)
-                           << ": max|u| = " << m_speed << " m/s = "
-                           << (m_speed / m_meanVelocity) << " Ubar" << Alert::Raise;
-        return 1;
+        const Real remaining = cycleEnd - tStart;
+        const Real ratio = remaining / dtTarget;
+        if (ratio <= 1.0 + TimeRoundoff)
+          dt = ratio >= 1.0 - TimeRoundoff ? dtTarget : remaining;
+        else if (ratio < 2.0 - TimeRoundoff)
+          dt = 0.5 * remaining;
       }
+
+      for (int retries = 0;; ++retries)
+      {
+        m_dt = dt;
+        // setupFlow bakes dt and the BDF mass step into the forms.
+        if (m_dt != m_formDt || massStep() != m_formMassStep)
+        {
+          setupFlow();
+          m_pcStale = true;
+        }
+        m_t = tStart + m_dt;
+        m_inflowNow = inflowFactor(m_t);
+        prepareStep();
+        if (solveFlow())
+          break;
+
+        rejectStep();
+        const Real next = m_cfg.dtShrink * m_dt;
+        if (!m_cfg.adaptiveTimeStep || retries >= m_cfg.maxStepRetries ||
+            next < (1.0 - TimeRoundoff) * dtMin)
+        {
+          Alert::Exception() << "[flow] diverged at step " << (step + 1) << ", t = " << m_t
+                             << " s, dt = " << m_dt << " s: " << m_failure << Alert::Raise;
+          return 1;
+        }
+        if (isRoot())
+          Alert::Warning() << "[step] " << (step + 1) << " rejected at t = " << m_t
+                           << " s, dt = " << m_dt << " s: " << m_failure
+                           << "; retrying with dt = " << next << " s" << Alert::Raise;
+        ++m_timing.retries;
+        dt = next;
+      }
+      m_dtPrev = m_dt;
+      ++m_history;
+      ++step;
 
       computeWallShear();
       cycleElapsed += m_dt;
@@ -2278,6 +2604,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       computeFluxes();
       m_timing.fluxes = secondsSince(fluxStart);
 
+      const bool endOfCycle = cycleEnd - m_t <= TimeRoundoff * m_dtNominal;
       if (endOfCycle)
       {
         closeCycle(cycleElapsed);
@@ -2296,8 +2623,13 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       writeCSVRow(cycle);
 
-      const bool output =
-        endOfCycle || (m_cfg.outputEvery > 0 && step % m_cfg.outputEvery == 0);
+      bool output = endOfCycle;
+      if (outputInterval > 0.0 && m_t >= nextOutput - TimeRoundoff * m_dtNominal)
+      {
+        output = true;
+        while (nextOutput <= m_t + TimeRoundoff * m_dtNominal)
+          nextOutput += outputInterval;
+      }
       if (output)
       {
         const auto outputStart = CoronaryClock::now();
@@ -2307,25 +2639,58 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       m_timing.total = secondsSince(stepStart);
 
-      if (isRoot() && (m_step < 3 || step % 20 == 0 || endOfCycle))
+      if (isRoot() && (m_step < 3 || m_step % 20 == 0 || endOfCycle || m_timing.retries > 0))
       {
         const Real elapsed = secondsSince(runStart);
-        const Real perStep = elapsed / static_cast<Real>(step + 1);
+        const Real remainingTime = std::max<Real>(endTime - m_t, 0.0);
 
-        Alert::Info() << "---- Step " << (step + 1) << "/" << totalSteps << "  cycle "
+        Alert::Info() << "---- Step " << step << "/" << nominalSteps << "  cycle "
                       << (cycle + 1) << "/" << m_cfg.cycles << "  t = " << m_t << " s"
-                      << Alert::Raise;
+                      << "  dt = " << m_dt << " s" << Alert::Raise;
         Alert::Info() << "[3D] q=" << m_inflowNow << "  qIn=" << m_qIn << "  qOut=" << m_qOut
                       << " m^3/s  max|u|=" << m_speed << " m/s  max|sigma|=" << m_stress
                       << " Pa  dp=" << (m_inletPressure - m_outletMeanPressure)
-                      << " Pa  newton=" << m_conformationIts << " (|dpsi|=" << m_psiIncrement
+                      << " Pa  newton=" << m_conformationIts << (m_newtonPredicted ? "p" : "")
+                      << " (|dpsi|=" << m_psiIncrement
                       << ")  <uy,uz>/Ubar=(" << m_uyMean << ", " << m_uzMean << ")" << Alert::Raise;
         Alert::Info() << "[timing] vms=" << m_timing.vms << "  asm=" << m_timing.assembly
-                      << "  ksp=" << m_timing.solve << "  wss=" << m_timing.shear
+                      << "  ksp=" << m_timing.solve << " (" << m_timing.kspIterations << " its, "
+                      << m_timing.pcBuilds << " PC builds)  wss=" << m_timing.shear
                       << "  flux=" << m_timing.fluxes << "  out=" << m_timing.output
+                      << "  retries=" << m_timing.retries
                       << "  total=" << m_timing.total << " s  |  ETA "
-                      << (perStep * (totalSteps - step - 1) / 60.0) << " min" << Alert::Raise;
+                      << (elapsed / std::max<Real>(m_t, 1e-30) * remainingTime / 60.0) << " min"
+                      << Alert::Raise;
         std::cout.flush();
+      }
+
+      if (endOfCycle)
+        ++cycle;
+
+      // Step size of the next step (Config::adaptiveTimeStep).
+      if (m_cfg.adaptiveTimeStep)
+      {
+        if (m_timing.retries > 0)
+        {
+          // Go on at the step that worked.
+          dtTarget = m_dt;
+          easySteps = 0;
+        }
+        else if (m_newtonUndamped >= m_cfg.newtonHard)
+        {
+          dtTarget = std::max(m_cfg.dtShrink * dtTarget, dtMin);
+          easySteps = 0;
+        }
+        else if (m_newtonUndamped <= m_cfg.newtonEasy && dtTarget < m_dtNominal)
+        {
+          if (++easySteps >= m_cfg.dtGrowAfter)
+          {
+            dtTarget = std::min(m_cfg.dtGrow * dtTarget, m_dtNominal);
+            easySteps = 0;
+          }
+        }
+        else
+          easySteps = 0;
       }
     }
 
@@ -2450,6 +2815,20 @@ int main(int argc, char** argv)
       getInt("-al_psi_order", cfg.psiQuadratureOrder);
       getReal("-al_inlet_perturbation", cfg.inletPerturbation);
       getReal("-al_perturbation_cycles", cfg.perturbationCycles);
+      getBool("-al_adaptive_dt", cfg.adaptiveTimeStep);
+      getInt("-al_max_step_retries", cfg.maxStepRetries);
+      getReal("-al_dt_shrink", cfg.dtShrink);
+      getReal("-al_dt_grow", cfg.dtGrow);
+      getInt("-al_dt_grow_after", cfg.dtGrowAfter);
+      getInt("-al_newton_easy", cfg.newtonEasy);
+      getInt("-al_newton_hard", cfg.newtonHard);
+      getBool("-al_newton_predict", cfg.newtonPredict);
+      getReal("-al_newton_predict_safety", cfg.newtonPredictSafety);
+      getInt("-al_newton_calibrate_every", cfg.newtonCalibrateEvery);
+      getInt("-al_pc_reuse_solves", cfg.pcReuseSolves);
+      getReal("-al_pc_reuse_growth", cfg.pcReuseGrowth);
+      getBool("-al_outlet_conformation_inflow", cfg.outletConformationInflow);
+      getBool("-al_psi_skew", cfg.psiSkewAdvection);
 
       // The XDMF and CSV writers do not create directories.
       if (world.rank() == 0)

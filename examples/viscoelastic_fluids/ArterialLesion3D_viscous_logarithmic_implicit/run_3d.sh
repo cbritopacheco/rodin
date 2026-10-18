@@ -46,10 +46,26 @@
 #                     (2: 4 points per tetrahedron; 4: 11 points, slower)
 #     NEWTON_TOL=5e-4 Newton stops when max|dpsi|/max(1,|psi|) < NEWTON_TOL;
 #                     Newton is quadratic, so the error left is ~NEWTON_TOL^2
+#     ADAPTIVE_DT=1   step control: a failed step (Newton not converged or
+#                     diverging, linear solver failure, velocity guard) is
+#                     retried with dt/2 (up to 6 times); dt grows back x1.5
+#                     after 10 easy steps, never above T/STEPS (-al_adaptive_dt)
+#     NEWTON_PREDICT=1 accept the Newton iterate when the quadratic prediction
+#                     C d_k^2 of the next increment is below NEWTON_TOL/10,
+#                     saving the confirming iteration (-al_newton_predict)
+#     PC_REUSE=20     lagged preconditioner: reuse the ASM/ILU (or LU) factors
+#                     for up to PC_REUSE solves; rebuilt when a solve needs
+#                     more than PC_REUSE_GROWTH=2 times the iterations of the
+#                     first one after the build, when one fails (repeated
+#                     fresh), or when dt changes; 1 rebuilds at every solve
+#     OUTLET_PSI=1    weak inflow condition for psi where the outlet has
+#                     backflow (-al_outlet_conformation_inflow)
+#     PSI_SKEW=0      skew-symmetric psi advection, + (1/2)(div u) psi (-al_psi_skew)
 #     PETSC_EXTRA=""  extra PETSc options, e.g. MUMPS block low-rank:
 #                     "-mat_mumps_icntl_35 1 -mat_mumps_cntl_7 1e-10"
 #     SOLVER=gmres    linear solver of each Newton iteration:
 #                       gmres  GMRES + additive Schwarz (overlap 1) + ILU(1)
+#                       lulag  GMRES + MUMPS LU, lagged over PC_REUSE solves
 #                       mumps  direct LU (MUMPS), the driver's default
 #     RETRY=1         a failed case is re-run: with gmres, first with mumps
 #                     (<case>_lu); then with mumps and 2x STEPS (<case>_dt2)
@@ -105,6 +121,13 @@ PETSC_EXTRA="${PETSC_EXTRA:-}"
 RETRY="${RETRY:-1}"
 SOLVER="${SOLVER:-gmres}"
 GMRES_OPTS="-ksp_type gmres -ksp_gmres_restart 200 -ksp_max_it 2000 -ksp_rtol 1e-8 -pc_type asm -pc_asm_overlap 1 -sub_pc_type ilu -sub_pc_factor_levels 1"
+LULAG_OPTS="-ksp_type gmres -ksp_gmres_restart 100 -ksp_max_it 300 -ksp_rtol 1e-8 -pc_type lu -pc_factor_mat_solver_type mumps"
+ADAPTIVE_DT="${ADAPTIVE_DT:-1}"
+NEWTON_PREDICT="${NEWTON_PREDICT:-1}"
+PC_REUSE="${PC_REUSE:-20}"
+PC_REUSE_GROWTH="${PC_REUSE_GROWTH:-2}"
+OUTLET_PSI="${OUTLET_PSI:-1}"
+PSI_SKEW="${PSI_SKEW:-0}"
 OUT="${OUT3D:-${OUT:-$HOME/Results/axi_jfm}/3D}/Re${RE}_Wo${WO}"   # never inside the axisymmetric folders
 [[ -n "$WAVEFORM" ]] && OUT="${OUT}_$(basename "${WAVEFORM%.*}")"
 MESH="$MESHDIR/${GEO}_pipe_${MESH_LEVEL}.mesh"
@@ -144,10 +167,15 @@ run_case() {   # fluid steps dir solver
     -al_re "$RE" -al_wo "$WO" -al_amplitude "$AMP" "${fargs[@]}" -al_time_order "$TIME_ORDER"
     -al_cycles "$cycles" -al_steps_per_cycle "$steps" -al_output_every "$OUTPUT_EVERY"
     -al_conformation_its "$NEWTON_ITS" -al_conformation_tol "$NEWTON_TOL" -al_psi_order "$PSI_ORDER"
-    -al_inlet_perturbation "$PERTURB" -al_perturbation_cycles 1)
+    -al_inlet_perturbation "$PERTURB" -al_perturbation_cycles 1
+    -al_adaptive_dt "$ADAPTIVE_DT" -al_newton_predict "$NEWTON_PREDICT"
+    -al_pc_reuse_solves "$PC_REUSE" -al_pc_reuse_growth "$PC_REUSE_GROWTH"
+    -al_outlet_conformation_inflow "$OUTLET_PSI" -al_psi_skew "$PSI_SKEW")
   [[ -n "$WAVEFORM" ]] && cmd+=(-al_waveform "$WAVEFORM" -al_harmonics "$HARMONICS")
   # shellcheck disable=SC2206
   [[ "$solver" == gmres ]] && cmd+=($GMRES_OPTS)
+  # shellcheck disable=SC2206
+  [[ "$solver" == lulag ]] && cmd+=($LULAG_OPTS)
   # shellcheck disable=SC2206
   [[ -n "$PETSC_EXTRA" ]] && cmd+=($PETSC_EXTRA)
   printf '%q ' "${cmd[@]}" > "$dir/params.txt"; echo >> "$dir/params.txt"
