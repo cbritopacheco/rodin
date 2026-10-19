@@ -134,11 +134,11 @@ namespace Rodin::Tests::Unit
         samples.push_back(interior.getPoint(qp));
       const H1SampleFormula formula(std::move(samples));
       const auto& table = element.getTabulation(formula);
-      ASSERT_EQ(table.nqp, formula.getSize());
-      ASSERT_EQ(table.ndof, count);
-      ASSERT_EQ(table.dim, dim);
-      ASSERT_EQ(table.phi.size(), formula.getSize() * count);
-      ASSERT_EQ(table.dphi.size(), formula.getSize() * count * dim);
+      ASSERT_EQ(table.getSize(), formula.getSize());
+      ASSERT_EQ(table.getCount(), count);
+      ASSERT_EQ(table.getDimension(), dim);
+      ASSERT_EQ(table.getValues().size(), formula.getSize() * count);
+      ASSERT_EQ(table.getDerivatives().size(), formula.getSize() * count * dim);
       EXPECT_EQ(&table, &element.getTabulation(formula));
       for (size_t qp = 0; qp < formula.getSize(); ++qp)
       {
@@ -272,12 +272,13 @@ namespace Rodin::Tests::Unit
       EXPECT_NE(source.getCacheIdentity(), identity);
       EXPECT_NE(destination.getCacheIdentity(), identity);
       const auto& fromSource = element.getTabulation(source);
-      EXPECT_EQ(fromSource.nqp, source.getSize());
-      EXPECT_EQ(fromSource.ndof, element.getCount());
-      EXPECT_EQ(fromSource.dim, Geometry::Polytope::Traits(geometry).getDimension());
+      EXPECT_EQ(fromSource.getSize(), source.getSize());
+      EXPECT_EQ(fromSource.getCount(), element.getCount());
+      EXPECT_EQ(
+        fromSource.getDimension(), Geometry::Polytope::Traits(geometry).getDimension());
       const auto& fromDestination = element.getTabulation(destination);
-      EXPECT_EQ(fromDestination.phi, saved.phi);
-      EXPECT_EQ(fromDestination.dphi, saved.dphi);
+      EXPECT_EQ(fromDestination.getValues(), saved.getValues());
+      EXPECT_EQ(fromDestination.getDerivatives(), saved.getDerivatives());
     }
   }
 
@@ -304,8 +305,8 @@ namespace Rodin::Tests::Unit
       }
       EXPECT_FALSE(element.findTabulation(originalIdentity));
       const auto& rebuilt = element.getTabulation(formula);
-      EXPECT_EQ(rebuilt.phi, saved.phi);
-      EXPECT_EQ(rebuilt.dphi, saved.dphi);
+      EXPECT_EQ(rebuilt.getValues(), saved.getValues());
+      EXPECT_EQ(rebuilt.getDerivatives(), saved.getDerivatives());
       formula = replacements.front();
       EXPECT_NE(formula.getCacheIdentity(), originalIdentity);
       EXPECT_FALSE(element.findTabulation(formula.getCacheIdentity()));
@@ -322,11 +323,11 @@ namespace Rodin::Tests::Unit
       }
       const H1SampleFormula empty({});
       const auto& emptyTable = element.getTabulation(empty);
-      EXPECT_EQ(emptyTable.nqp, 0u);
-      EXPECT_EQ(emptyTable.ndof, element.getCount());
-      EXPECT_EQ(emptyTable.dim, 3u);
-      EXPECT_TRUE(emptyTable.phi.empty());
-      EXPECT_TRUE(emptyTable.dphi.empty());
+      EXPECT_EQ(emptyTable.getSize(), 0u);
+      EXPECT_EQ(emptyTable.getCount(), element.getCount());
+      EXPECT_EQ(emptyTable.getDimension(), 3u);
+      EXPECT_TRUE(emptyTable.getValues().empty());
+      EXPECT_TRUE(emptyTable.getDerivatives().empty());
     }
   }
 }

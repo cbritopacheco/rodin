@@ -196,9 +196,9 @@ namespace Rodin::Tests::Unit
         }
         typename H1Element<K, Scalar>::Tabulation table;
         element.tabulate(table, formula);
-        ASSERT_EQ(table.nqp, formula.getSize());
-        ASSERT_EQ(table.ndof, count);
-        ASSERT_EQ(table.dim, dimension);
+        ASSERT_EQ(table.getSize(), formula.getSize());
+        ASSERT_EQ(table.getCount(), count);
+        ASSERT_EQ(table.getDimension(), dimension);
         for (size_t q = 0; q < formula.getSize(); ++q)
         {
           element.tabulate(

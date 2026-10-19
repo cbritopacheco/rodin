@@ -14,6 +14,7 @@
 #ifndef RODIN_MATH_ROOTFINDING_NEWTONRAPHSON_H
 #define RODIN_MATH_ROOTFINDING_NEWTONRAPHSON_H
 
+#include "Rodin/Types.h"
 #include <cassert>
 #include <cmath>
 #include <limits>
@@ -108,7 +109,7 @@ namespace Rodin::Math::RootFinding
        * for the derivative component and the method will use secant approximation.
        */
       template <class F>
-      std::optional<Scalar> solve(const F& f, Scalar t0, Scalar lo, Scalar hi) const
+      Optional<Scalar> solve(const F& f, Scalar t0, Scalar lo, Scalar hi) const
       {
         // basic interval sanity
         assert(std::isfinite(lo) && std::isfinite(hi));

@@ -72,8 +72,7 @@ namespace Rodin::Geometry
    */
   class PolytopeTransformation : public Copyable
   {
-    friend class boost::serialization::access;
-    friend class PointBase;
+      friend class boost::serialization::access;
 
     public:
       /**
@@ -249,12 +248,11 @@ namespace Rodin::Geometry
        */
       virtual PolytopeTransformation* copy() const noexcept override = 0;
 
-    protected:
       /**
        * @brief Maps an owned reference sample using available reference data.
        *
-       * Called only by a point whose constructor established the provenance
-       * of @p rc. Cache misses retain direct pointwise evaluation. The logical
+       * The caller must establish that @p rc is the sample at @p qp in the
+       * formula identified by @p identity. Cache misses retain direct pointwise evaluation. The logical
        * identity is a value, not a borrowed formula or table pointer.
        *
        * @param[out] pc Physical coordinates.

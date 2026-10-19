@@ -677,34 +677,31 @@ namespace Rodin::Variational
   void H1Element<K, Scalar>::tabulate(
     Tabulation& table, const QF::QuadratureFormulaBase& formula) const
   {
-    table.nqp = formula.getSize();
-    table.ndof = this->getCount();
-    table.dim = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
-    table.phi.resize(table.nqp * table.ndof);
-    table.dphi.resize(table.nqp * table.ndof * table.dim);
-    if (table.nqp == 0)
+    table.resize(formula.getSize(), this->getCount(),
+      Geometry::Polytope::Traits(this->getGeometry()).getDimension());
+    if (table.getSize() == 0)
       return;
     if (this->getGeometry() != Geometry::Polytope::Type::Tetrahedron &&
       this->getGeometry() != Geometry::Polytope::Type::Pyramid)
     {
       std::vector<std::reference_wrapper<const BasisFunction>> bases;
-      bases.reserve(table.ndof);
-      for (size_t local = 0; local < table.ndof; ++local)
+      bases.reserve(table.getCount());
+      for (size_t local = 0; local < table.getCount(); ++local)
         bases.emplace_back(this->getBasis(local));
-      for (size_t qp = 0; qp < table.nqp; ++qp)
+      for (size_t qp = 0; qp < table.getSize(); ++qp)
       {
         const auto& point = formula.getPoint(qp);
-        if (static_cast<size_t>(point.size()) < table.dim)
+        if (static_cast<size_t>(point.size()) < table.getDimension())
           Alert::MemberFunctionException(*this, __func__)
-            << "Reference tabulation requires " << table.dim
+            << "Reference tabulation requires " << table.getDimension()
             << " coordinate components, got " << point.size() << "." << Alert::Raise;
-        for (size_t local = 0; local < table.ndof; ++local)
+        for (size_t local = 0; local < table.getCount(); ++local)
         {
           const auto& basis = bases[local].get();
-          table.phi[qp * table.ndof + local] = basis(point);
-          for (size_t direction = 0; direction < table.dim; ++direction)
+          table.getValues(qp).data[local] = basis(point);
+          for (size_t direction = 0; direction < table.getDimension(); ++direction)
           {
-            table.dphi[(qp * table.ndof + local) * table.dim + direction] =
+            table.getGradients(qp).data[local * table.getDimension() + direction] =
               basis.template getDerivative<1>(direction)(point);
           }
         }
@@ -713,10 +710,10 @@ namespace Rodin::Variational
     }
     const auto tabulate =
       [&]<class Modal, class Vandermonde, class Accumulator, size_t Count>() {
-        assert(table.ndof == Count && table.dim == 3);
+        assert(table.getCount() == Count && table.getDimension() == 3);
         const auto& inverse = Vandermonde::getInverse();
         typename Modal::Tabulation modal;
-        for (size_t qp = 0; qp < table.nqp; ++qp)
+        for (size_t qp = 0; qp < table.getSize(); ++qp)
         {
           Modal::tabulate(modal, formula.getPoint(qp));
           for (size_t local = 0; local < Count; ++local)
@@ -724,13 +721,14 @@ namespace Rodin::Variational
             Accumulator value = 0;
             for (size_t mode = 0; mode < Count; ++mode)
               value += inverse(mode, local) * modal[mode][0];
-            table.phi[qp * Count + local] = Scalar(value);
+            table.getValues(qp).data[local] = Scalar(value);
             for (size_t direction = 0; direction < 3; ++direction)
             {
               Real derivative = 0;
               for (size_t mode = 0; mode < Count; ++mode)
                 derivative += inverse(mode, local) * modal[mode][direction + 1];
-              table.dphi[(qp * Count + local) * 3 + direction] = Scalar(derivative);
+              table.getGradients(qp).data[local * table.getDimension() + direction] =
+                Scalar(derivative);
             }
           }
         }

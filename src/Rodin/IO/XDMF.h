@@ -407,17 +407,14 @@ namespace Rodin::IO
            */
           Grid& clear();
 
-        private:
-          /// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
-          friend class XDMF;
           /**
-           * @endcond
-           * @param owner Owning XDMF document.
-           * @param index Degree-of-freedom index.
+           * @brief Borrows a registered grid in an XDMF document.
+           * @param owner Owning XDMF document, which must outlive this handle.
+           * @param index Registered grid index.
            */
+          Grid(XDMF& owner, size_t index);
 
-          Grid(XDMF& owner, size_t index) noexcept;
-
+        private:
           XDMF* m_owner = nullptr;
           size_t m_index = 0;
       };
@@ -665,7 +662,7 @@ namespace Rodin::IO
       size_t getRootRank() const noexcept;
 
       /// @brief Flushes the XDMF XML document without closing the writer.
-      void flush() const;
+      void flush();
 
     private:
       /// @brief Internal record for one registered attribute.

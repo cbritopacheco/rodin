@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_H1_H1_HPP
 #define RODIN_VARIATIONAL_H1_H1_HPP
 
+#include "Rodin/Types.h"
 #include <cstddef>
 
 #include "Rodin/Alert/Raise.h"
@@ -2249,7 +2250,7 @@ namespace Rodin::Variational
         {
           const auto wanted = canonicalFaceVerts(lf);
 
-          std::optional<Index> fOpt;
+          Optional<Index> fOpt;
           std::array<int,4> canonToQuad{};
 
           // 1) Find the quad entity and permutation canonToQuad

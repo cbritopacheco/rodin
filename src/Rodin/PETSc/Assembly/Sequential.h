@@ -12,6 +12,7 @@
  * @brief Sequential assembly specializations targeting PETSc objects.
  */
 
+#include "Rodin/Types.h"
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscsystypes.h>
@@ -1076,7 +1077,7 @@ namespace Rodin::Assembly
 
         using MeshType0 =
           std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
-        std::optional<std::reference_wrapper<const MeshType0>> meshRef;
+        Optional<std::reference_wrapper<const MeshType0>> meshRef;
         us.apply([&](const auto& uref)
         {
           using MeshT = std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;

@@ -299,10 +299,12 @@ namespace
       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
-  /// @brief Returns the PETSc object id of a vector.
-  ///
-  /// Unlike the raw handle, an id is never reused by a later object, which
-  /// makes it a reliable witness of whether a vector was reallocated.
+  /**
+   * @brief Returns the PETSc object id of a vector.
+   *
+   * Unlike the raw handle, an id is never reused by a later object, which
+   * makes it a reliable witness of whether a vector was reallocated.
+   */
   PetscObjectId objectId(const ::Vec& vec)
   {
     PetscObjectId id = 0;
@@ -338,12 +340,14 @@ namespace
     return sharder.gather(0);
   }
 
-  /// @brief Writes @p value into every DOF of the local shard, owned and ghost
-  ///        alike, through `operator[]`.
-  ///
-  /// Writing only the owned range is not equivalent: `flush()` scatters ghost
-  /// entries back to their owners with `INSERT_VALUES`, so untouched ghost
-  /// slots would overwrite the values their owners just wrote.
+  /**
+   * @brief Writes @p value into every DOF of the local shard, owned and ghost
+   *        alike, through `operator[]`.
+   *
+   * Writing only the owned range is not equivalent: `flush()` scatters ghost
+   * entries back to their owners with `INSERT_VALUES`, so untouched ghost
+   * slots would overwrite the values their owners just wrote.
+   */
   template <class FES, class GF, class Value>
   void writeShardDOFs(
     const Mesh<Context::MPI>& mesh, const FES& fes, GF& gf, const Value& value)
@@ -436,9 +440,11 @@ namespace
     world.barrier();
   }
 
-  /// @brief Verifies that axpy accumulates a scaled grid function on the owned
-  ///        DOFs and refreshes the ghost layer, by checking exact expected
-  ///        values and MPI behavior.
+  /**
+   * @brief Verifies that axpy accumulates a scaled grid function on the owned
+   *        DOFs and refreshes the ghost layer, by checking exact expected
+   *        values and MPI behavior.
+   */
   TEST(PETSc_MPI_GridFunction, AxpyAccumulatesScaledGridFunctionAndRefreshesGhosts)
   {
     auto& world = *g_world;
@@ -477,9 +483,11 @@ namespace
     world.barrier();
   }
 
-  /// @brief Verifies that axpy flushes DOFs written through operator[] and
-  ///        propagates them to the ghost layer, by checking exact expected
-  ///        values and MPI behavior.
+  /**
+   * @brief Verifies that axpy flushes DOFs written through operator[] and
+   *        propagates them to the ghost layer, by checking exact expected
+   *        values and MPI behavior.
+   */
   TEST(PETSc_MPI_GridFunction, AxpyFlushesPendingWritesBeforeGhostUpdate)
   {
     auto& world = *g_world;
@@ -517,8 +525,10 @@ namespace
     world.barrier();
   }
 
-  /// @brief Verifies that sync releases pending read/write access and refreshes
-  ///        ghosts before direct PETSc use and point evaluation.
+  /**
+   * @brief Verifies that sync releases pending read/write access and refreshes
+   *        ghosts before direct PETSc use and point evaluation.
+   */
   TEST(PETSc_MPI_GridFunction, SyncReleasesAccessAndRefreshesGhosts)
   {
     auto& world = *g_world;
@@ -529,6 +539,9 @@ namespace
 
     writeShardDOFs(mesh, fes, gf, [](Index) { return static_cast<PetscScalar>(5.0); });
     ASSERT_TRUE(gf.getArrayWrite().acquired);
+    const auto& reader = gf;
+    EXPECT_THROW(reader.sync(), Alert::Exception);
+    EXPECT_TRUE(gf.getArrayWrite().acquired);
     gf.sync();
     EXPECT_FALSE(gf.getArrayWrite().acquired);
 
@@ -559,8 +572,10 @@ namespace
     world.barrier();
   }
 
-  /// @brief Verifies that reductions synchronize pending shard writes without
-  ///        requiring callers to flush first.
+  /**
+   * @brief Verifies that reductions synchronize pending shard writes without
+   *        requiring callers to flush first.
+   */
   TEST(PETSc_MPI_GridFunction, ReductionsSynchronizePendingWrites)
   {
     auto& world = *g_world;
@@ -606,8 +621,10 @@ namespace
     world.barrier();
   }
 
-  /// @brief Verifies that norm is a global reduction over the owned DOFs by
-  ///        comparing against an independent MPI reduction.
+  /**
+   * @brief Verifies that norm is a global reduction over the owned DOFs by
+   *        comparing against an independent MPI reduction.
+   */
   TEST(PETSc_MPI_GridFunction, NormReducesOverAllRanks)
   {
     auto& world = *g_world;
@@ -653,9 +670,11 @@ namespace
     world.barrier();
   }
 
-  /// @brief Verifies that copy assignment reuses the destination PETSc vector
-  ///        and leaves owned and ghost DOFs consistent, by checking exact
-  ///        expected values and MPI behavior.
+  /**
+   * @brief Verifies that copy assignment reuses the destination PETSc vector
+   *        and leaves owned and ghost DOFs consistent, by checking exact
+   *        expected values and MPI behavior.
+   */
   TEST(PETSc_MPI_GridFunction, CopyAssignmentReusesVectorHandleAndSyncsGhosts)
   {
     auto& world = *g_world;

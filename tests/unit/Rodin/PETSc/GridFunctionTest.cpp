@@ -78,10 +78,12 @@ TEST(PETSc_GridFunction, RegionalProjectionPreservesUnselectedVertices)
 
 namespace
 {
-  /// @brief Returns the PETSc object id of a vector.
-  ///
-  /// Unlike the raw handle, an id is never reused by a later object, which
-  /// makes it a reliable witness of whether a vector was reallocated.
+  /**
+   * @brief Returns the PETSc object id of a vector.
+   *
+   * Unlike the raw handle, an id is never reused by a later object, which
+   * makes it a reliable witness of whether a vector was reallocated.
+   */
   PetscObjectId objectId(const ::Vec& vec)
   {
     PetscObjectId id = 0;
@@ -243,8 +245,10 @@ namespace
     EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(value)), 4.25);
   }
 
-  /// @brief Verifies that sync releases pending write access before raw PETSc
-  ///        calls and releases pending read access afterwards.
+  /**
+   * @brief Verifies that sync releases pending write access before raw PETSc
+   *        calls and releases pending read access afterwards.
+   */
   TEST(PETSc_GridFunction, SequentialSyncReleasesReadAndWriteAccess)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -275,8 +279,10 @@ namespace
     EXPECT_DOUBLE_EQ(gf.norm(), 6.0);
   }
 
-  /// @brief Verifies that reductions synchronize DOFs written through
-  ///        operator[] without requiring an explicit flush.
+  /**
+   * @brief Verifies that reductions synchronize DOFs written through
+   *        operator[] without requiring an explicit flush.
+   */
   TEST(PETSc_GridFunction, SequentialReductionsSynchronizePendingWrites)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -297,8 +303,10 @@ namespace
     EXPECT_EQ(idx, 2);
   }
 
-  /// @brief Verifies that axpy accumulates a scaled grid function without
-  ///        disturbing the operand, by checking exact expected values.
+  /**
+   * @brief Verifies that axpy accumulates a scaled grid function without
+   *        disturbing the operand, by checking exact expected values.
+   */
   TEST(PETSc_GridFunction, SequentialAxpyAccumulatesScaledGridFunction)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -330,8 +338,10 @@ namespace
     cx.flush();
   }
 
-  /// @brief Verifies that axpy flushes DOFs written through operator[] on the
-  ///        accumulator before calling PETSc, by checking exact expected values.
+  /**
+   * @brief Verifies that axpy flushes DOFs written through operator[] on the
+   *        accumulator before calling PETSc, by checking exact expected values.
+   */
   TEST(PETSc_GridFunction, SequentialAxpyFlushesPendingWrites)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -356,8 +366,10 @@ namespace
     cy.flush();
   }
 
-  /// @brief Verifies that operator+= and operator-= remain the unit-coefficient
-  ///        cases of axpy, by checking exact expected values.
+  /**
+   * @brief Verifies that operator+= and operator-= remain the unit-coefficient
+   *        cases of axpy, by checking exact expected values.
+   */
   TEST(PETSc_GridFunction, SequentialPlusEqualsAndMinusEqualsAgreeWithAxpy)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
@@ -393,8 +405,10 @@ namespace
     cAxpy.flush();
   }
 
-  /// @brief Verifies the 2-, 1- and infinity-norms against analytic scalar
-  ///        magnitudes, including nonzero imaginary coefficients in complex builds.
+  /**
+   * @brief Verifies the 2-, 1- and infinity-norms against analytic scalar
+   *        magnitudes, including nonzero imaginary coefficients in complex builds.
+   */
   TEST(PETSc_GridFunction, SequentialNormMatchesHandComputedValues)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -433,8 +447,10 @@ namespace
     EXPECT_DOUBLE_EQ(gf.norm(), 0.0);
   }
 
-  /// @brief Verifies that copy assignment reuses the destination PETSc vector
-  ///        instead of reallocating it, keeping the Vec handle stable.
+  /**
+   * @brief Verifies that copy assignment reuses the destination PETSc vector
+   *        instead of reallocating it, keeping the Vec handle stable.
+   */
   TEST(PETSc_GridFunction, SequentialCopyAssignmentReusesVectorHandle)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -461,8 +477,10 @@ namespace
     cDestination.flush();
   }
 
-  /// @brief Verifies that copy assignment is a deep copy: the operands do not
-  ///        alias after the assignment.
+  /**
+   * @brief Verifies that copy assignment is a deep copy: the operands do not
+   *        alias after the assignment.
+   */
   TEST(PETSc_GridFunction, SequentialCopyAssignmentIsDeep)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -483,8 +501,10 @@ namespace
     cDestination.flush();
   }
 
-  /// @brief Verifies that copy assignment flushes DOFs written through
-  ///        operator[] on the source before copying.
+  /**
+   * @brief Verifies that copy assignment flushes DOFs written through
+   *        operator[] on the source before copying.
+   */
   TEST(PETSc_GridFunction, SequentialCopyAssignmentFlushesPendingWrites)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -509,8 +529,10 @@ namespace
     cDestination.flush();
   }
 
-  /// @brief Verifies that copy assignment into a moved-from grid function
-  ///        allocates a vector rather than copying into a null handle.
+  /**
+   * @brief Verifies that copy assignment into a moved-from grid function
+   *        allocates a vector rather than copying into a null handle.
+   */
   TEST(PETSc_GridFunction, SequentialCopyAssignmentIntoMovedFromAllocates)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -562,4 +584,30 @@ int main(int argc, char** argv)
   const int result = RUN_ALL_TESTS();
   PetscFinalize();
   return result;
+}
+
+TEST(PETSc_GridFunction, ConstSynchronizationRequiresCompletedWrites)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<PetscScalar> fes(mesh);
+  Rodin::PETSc::Variational::GridFunction field(fes);
+  field[0] = PetscScalar(3);
+  const auto& reader = field;
+  EXPECT_THROW(reader.sync(), Alert::Exception);
+  EXPECT_TRUE(field.getArrayWrite().acquired);
+  EXPECT_THROW(reader[0], Alert::Exception);
+  EXPECT_THROW((decltype(field)(reader)), Alert::Exception);
+  field.sync();
+  EXPECT_NO_THROW(reader.sync());
+  EXPECT_DOUBLE_EQ(reader.norm(), 3);
+  EXPECT_EQ(reader[0], PetscScalar(3));
+  EXPECT_TRUE(reader.getArrayRead().acquired);
+  const decltype(field) copy(reader);
+  EXPECT_TRUE(reader.getArrayRead().acquired);
+  EXPECT_DOUBLE_EQ(copy.norm(), 3);
+  field[0] = PetscScalar(4);
+  EXPECT_FALSE(reader.getArrayRead().acquired);
+  EXPECT_THROW(reader[0], Alert::Exception);
+  field.sync();
+  EXPECT_DOUBLE_EQ(reader.norm(), 4);
 }

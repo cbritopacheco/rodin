@@ -28,6 +28,7 @@
  * @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::PETSc::Solver::SNES</a>
  */
 
+#include "Rodin/Types.h"
 #include <petscksp.h>
 #include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/LinearSolver.h"
@@ -194,7 +195,7 @@ namespace Rodin::Solver
                    m_abstol, ///< Absolute convergence tolerance.
                    m_dtol; ///< Divergence tolerance.
       PetscInt     m_maxIt; ///< Maximum iteration count.
-      std::optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
+      Optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
       Optional<std::string> m_prefix; ///< Optional prefix for PETSc options.
   };
 } // namespace Rodin::Solver

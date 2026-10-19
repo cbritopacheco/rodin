@@ -34,6 +34,7 @@
 #ifndef RODIN_VARIATIONAL_FLOW_H
 #define RODIN_VARIATIONAL_FLOW_H
 
+#include "Rodin/Types.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -530,7 +531,7 @@ namespace Rodin::Variational
         sXFace.resize(sPc.size());
 
         // Avoid immediate backtracking if there are alternatives.
-        std::optional<size_t> lastFace;
+        Optional<size_t> lastFace;
 
         auto phiFace = [&](const auto& hs, size_t j, const Math::SpatialPoint& r) -> Real
         {
@@ -662,7 +663,7 @@ namespace Rodin::Variational
           const Real dtMin =
             minStepFactor * sqrtEps * (Real(1) + rnorm) / std::max<Real>(Real(1), vrefMag);
 
-          std::optional<Trace> exitTrace;
+          Optional<Trace> exitTrace;
 
           auto doZeroHops = [&]() -> bool
           {

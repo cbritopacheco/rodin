@@ -293,3 +293,21 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(ipValue(1), 26.0, 1e-10);
   }
 }
+
+TEST(VectorFunction, IntegerLiteralDimensionSelectsVectorCallable)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto cell = *mesh.getCell();
+  const Point point(cell, Polytope::Traits(cell.getGeometry()).getCentroid());
+  const VectorFunction vector(2, [](const Point&) {
+    Math::SpatialVector<Real> value(2);
+    value[0] = 3;
+    value[1] = 4;
+    return value;
+  });
+  EXPECT_EQ(vector(point)[0], 3);
+  EXPECT_EQ(vector(point)[1], 4);
+  const VectorFunction components(2, [](const Point&) -> Real { return 5; });
+  EXPECT_EQ(components(point)[0], 2);
+  EXPECT_EQ(components(point)[1], 5);
+}

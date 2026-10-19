@@ -408,8 +408,8 @@ namespace Rodin::Solver
         instance.jcn = m_columnIndices.data();
         if (m_symmetry == Symmetry::Unsymmetric)
         {
-          // The values of an unsymmetric matrix are read in place.
-          instance.a = const_cast<ScalarType*>(matrix.valuePtr());
+          // The non-const system lends its writable values to the external API.
+          instance.a = matrix.valuePtr();
         }
         else
         {

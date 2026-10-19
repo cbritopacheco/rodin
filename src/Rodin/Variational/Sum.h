@@ -12,6 +12,7 @@
 #ifndef RODIN_VARIATIONAL_SUM_H
 #define RODIN_VARIATIONAL_SUM_H
 
+#include "Rodin/Types.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/Traits.h"
 
@@ -222,8 +223,7 @@ namespace Rodin::Variational
        * @param poly Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -507,8 +507,7 @@ namespace Rodin::Variational
        * @param poly Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);

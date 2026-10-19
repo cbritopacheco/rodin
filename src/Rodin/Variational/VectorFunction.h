@@ -15,6 +15,7 @@
 #ifndef RODIN_VARIATIONAL_VECTORFUNCTION_H
 #define RODIN_VARIATIONAL_VECTORFUNCTION_H
 
+#include "Rodin/Types.h"
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -502,7 +503,7 @@ namespace Rodin::Variational
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        std::optional<size_t> res = std::nullopt;
+        Optional<size_t> res = std::nullopt;
         std::apply(
           [&](const auto&... s)
           {
@@ -532,6 +533,11 @@ namespace Rodin::Variational
    * @param values Parameter pack of values
    */
   template <class V, class... Values>
+    requires((std::is_convertible_v<V, Real> ||
+               std::is_invocable_r_v<Real, V, const Geometry::Point&>) &&
+              ((std::is_convertible_v<Values, Real> ||
+                 std::is_invocable_r_v<Real, Values, const Geometry::Point&>) &&
+                ...))
   VectorFunction(const V& v, const Values&... values) -> VectorFunction<V, Values...>;
 
   /**

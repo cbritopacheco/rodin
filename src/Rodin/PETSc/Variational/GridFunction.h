@@ -115,6 +115,8 @@
 #include <utility>
 
 #include "Rodin/Types.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Context/Local.h"
 #include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -403,7 +405,8 @@ namespace Rodin::Variational
        * `VecCopy` so that this instance owns an independent copy of the
        * DOF data.  Ghost mappings and ownership ranges are also copied.
        * Any acquired array state in @p other is **not** propagated; the
-       * new object starts with no arrays acquired.
+       * new object starts with no arrays acquired. The source must have completed
+       * writes through its mutable owner; a prepared read borrow is retained.
        *
        * @param[in] other Grid function to copy from.
        */
@@ -415,6 +418,9 @@ namespace Rodin::Variational
           m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
           m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
       {
+        if (other.m_write.acquired)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Complete source coefficient writes before copying." << Alert::Raise;
         PetscErrorCode ierr = VecDuplicate(other.m_data, &m_data);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecCopy(other.m_data, m_data);
@@ -467,8 +473,8 @@ namespace Rodin::Variational
        * is created with `VecDuplicate` only when this instance holds none,
        * which is the case for a moved-from object.
        *
-       * Any array acquired through `operator[]` on either operand is
-       * flushed first, so the copy sees the current values.
+       * The destination completes its own pending writes. The source must
+       * have completed writes through its mutable owner before this const borrow.
        *
        * @pre Both grid functions must reference the same finite element space.
        *
@@ -484,7 +490,7 @@ namespace Rodin::Variational
 
         static_cast<const GridFunction&>(*this).flush();
         this->flush();
-        other.flush();
+        other.sync();
 
         m_begin = other.m_begin;
         m_end = other.m_end;
@@ -573,6 +579,18 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Completes pending writes and computes the coefficient min.
+       * In MPI mode this operation is collective.
+       * @param idx Global index of the selected coefficient.
+       * @returns The requested coefficient min.
+       */
+      ScalarType min(Index& idx)
+      {
+        sync();
+        return static_cast<const GridFunction&>(*this).min(idx);
+      }
+
+      /**
        * @brief Finds the minimum DOF value in the grid function.
        *
        * Synchronizes any pending array access, then delegates to `VecMin`.
@@ -598,6 +616,18 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Completes pending writes and computes the coefficient max.
+       * In MPI mode this operation is collective.
+       * @param idx Global index of the selected coefficient.
+       * @returns The requested coefficient max.
+       */
+      ScalarType max(Index& idx)
+      {
+        sync();
+        return static_cast<const GridFunction&>(*this).max(idx);
+      }
+
+      /**
        * @brief Finds the maximum DOF value in the grid function.
        *
        * Synchronizes any pending array access, then delegates to `VecMax`.
@@ -620,6 +650,18 @@ namespace Rodin::Variational
         (void) ierr;
         idx = static_cast<Index>(pidx);
         return static_cast<ScalarType>(res);
+      }
+
+      /**
+       * @brief Completes pending writes and computes the coefficient norm.
+       * In MPI mode this operation is collective.
+       * @param type PETSc norm type.
+       * @returns The requested coefficient norm.
+       */
+      Real norm(NormType type = NORM_2)
+      {
+        sync();
+        return static_cast<const GridFunction&>(*this).norm(type);
       }
 
       /**
@@ -839,6 +881,7 @@ namespace Rodin::Variational
        * (@f$ \mathbf{u} \leftarrow \mathbf{u} + \Delta t\, \mathbf{v} @f$).
        *
        * @pre `&this->getFiniteElementSpace() == &other.getFiniteElementSpace()`
+       * @pre Pending source writes have been completed through the mutable owner.
        *
        * @param[in] a     Scalar coefficient @f$ a @f$.
        * @param[in] other Grid function @f$ v @f$ to accumulate.
@@ -849,7 +892,7 @@ namespace Rodin::Variational
         assert(&this->getFiniteElementSpace() == &other.getFiniteElementSpace());
         static_cast<const GridFunction&>(*this).flush();
         this->flush();
-        other.flush();
+        other.sync();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecAXPY(data, a, other.getData());
@@ -1175,6 +1218,8 @@ namespace Rodin::Variational
        */
       GridFunction& acquire()
       {
+        if (!m_write.acquired)
+          static_cast<const GridFunction&>(*this).flush();
         PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -1214,11 +1259,15 @@ namespace Rodin::Variational
        * instead, permitting concurrent read access from multiple threads
        * or call sites.  In MPI mode this only locks the ghosted local form;
        * ghost synchronization is done by collective data-update paths.
+       * Pending writes must have been completed through the mutable owner.
        *
        * @returns Const reference to `*this`.
        */
       const GridFunction& acquire() const
       {
+        if (m_write.acquired)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Complete pending coefficient writes before const access." << Alert::Raise;
         if (m_readAcquired.load(std::memory_order_acquire))
           return *this;
 
@@ -1406,17 +1455,19 @@ namespace Rodin::Variational
       /**
        * @brief Const overload of @ref sync().
        *
-       * Synchronization changes PETSc access state, not the mathematical grid
-       * function.  The write state is mutable so const reductions can ensure
-       * they see DOFs written through a non-const alias before the object was
-       * observed as const.
+       * Releases read access only. Pending coefficient writes must first be
+       * completed by calling the non-const overload on the writer. This read
+       * operation never commits coefficients or performs a ghost scatter.
        *
        * @returns Const reference to `*this`.
        */
       const GridFunction& sync() const
       {
+        if (m_write.acquired)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Pending writes require sync() on the mutable grid function."
+            << Alert::Raise;
         this->flush();
-        const_cast<GridFunction&>(*this).flush();
         return *this;
       }
 
@@ -1576,7 +1627,7 @@ namespace Rodin::Variational
       GhostBimap m_ghosts;      ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
 
       mutable ArrayRead m_read;   ///< Read-access state (mutable to allow const `acquire`/`flush`).
-      mutable ArrayWrite m_write; ///< Write-access state (mutable to allow const `acquire`/`flush`).
+      ArrayWrite m_write; ///< Write-access state owned by the mutable writer.
       mutable std::atomic_bool m_readAcquired{false};
       mutable std::mutex m_readMutex;
   };

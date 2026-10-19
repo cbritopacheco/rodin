@@ -199,7 +199,8 @@ namespace Rodin::Tests::Benchmarks
         }
       }
     }
-    const auto& reference = derivatives ? expected.dphi : expected.phi;
+    const auto& reference =
+      derivatives ? expected.getDerivatives() : expected.getValues();
     sweep();
     if (output != reference)
     {
@@ -279,7 +280,8 @@ namespace Rodin::Tests::Benchmarks
           return;
         }
         const auto& table = Store::get(element, qf);
-        if (table.phi != expected.phi || table.dphi != expected.dphi)
+        if (table.getValues() != expected.getValues() ||
+          table.getDerivatives() != expected.getDerivatives())
         {
           fail("Cache-miss warmup changed reference entries");
           return;
@@ -292,12 +294,12 @@ namespace Rodin::Tests::Benchmarks
       if (warmLookup)
       {
         const auto& table = Store::get(element, *lookupFormula);
-        benchmark::DoNotOptimize(table.phi.data());
+        benchmark::DoNotOptimize(table.getValues().data());
       }
       else if (operation == ReferenceOperation::CapacityWarmMiss)
       {
         const auto& table = Store::get(element, formulas[next]);
-        benchmark::DoNotOptimize(table.phi.data());
+        benchmark::DoNotOptimize(table.getValues().data());
         next = (next + 1) % FormulaCount;
       }
       else
@@ -310,7 +312,8 @@ namespace Rodin::Tests::Benchmarks
     if (output != reference)
       fail("Timed sweep changed reference entries");
     const auto& table = Store::get(element, *lookupFormula);
-    if (table.phi != expected.phi || table.dphi != expected.dphi)
+    if (table.getValues() != expected.getValues() ||
+      table.getDerivatives() != expected.getDerivatives())
       fail("Timed tabulation changed reference entries");
     state.counters["dimension"] = dim;
     state.counters["basis_functions"] = ndof;

@@ -185,11 +185,8 @@ namespace Rodin::Variational
           element.tabulate(table, formula);
         else
         {
-          table.nqp = formula.getSize();
-          table.ndof = element.getCount();
-          table.dim = Geometry::Polytope::Traits(geometry).getDimension();
-          table.phi.resize(table.nqp * table.ndof);
-          table.dphi.resize(table.nqp * table.ndof * table.dim);
+          table.resize(formula.getSize(), element.getCount(),
+            Geometry::Polytope::Traits(geometry).getDimension());
           fill(element, table, formula);
         }
         entry.geometry = geometry;
@@ -217,13 +214,13 @@ namespace Rodin::Variational
         using StoredBasis = std::conditional_t<std::is_lvalue_reference_v<BasisResult>,
           std::reference_wrapper<const Basis>, Basis>;
         std::vector<StoredBasis> bases;
-        bases.reserve(table.ndof);
-        for (size_t a = 0; a < table.ndof; ++a)
+        bases.reserve(table.getCount());
+        for (size_t a = 0; a < table.getCount(); ++a)
           bases.emplace_back(element.getBasis(a));
-        for (size_t qp = 0; qp < table.nqp; ++qp)
+        for (size_t qp = 0; qp < table.getSize(); ++qp)
         {
           const auto& reference = formula.getPoint(qp);
-          for (size_t a = 0; a < table.ndof; ++a)
+          for (size_t a = 0; a < table.getCount(); ++a)
           {
             const Basis& basis = [&]() -> const Basis& {
               if constexpr (std::is_lvalue_reference_v<BasisResult>)
@@ -231,10 +228,10 @@ namespace Rodin::Variational
               else
                 return bases[a];
             }();
-            table.phi[qp * table.ndof + a] = basis(reference);
-            for (size_t i = 0; i < table.dim; ++i)
+            table.getValues(qp).data[a] = basis(reference);
+            for (size_t i = 0; i < table.getDimension(); ++i)
             {
-              table.dphi[(qp * table.ndof + a) * table.dim + i] =
+              table.getGradients(qp).data[a * table.getDimension() + i] =
                 basis.template getDerivative<1>(i)(reference);
             }
           }

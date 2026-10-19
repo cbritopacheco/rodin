@@ -473,3 +473,9 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(grid.getName(), "");
   }
 }
+
+TEST(XDMFGridHandle, UnregisteredIndexRaises)
+{
+  IO::XDMF writer("unregistered-grid");
+  EXPECT_THROW((IO::XDMF::Grid(writer, 0)), Alert::Exception);
+}

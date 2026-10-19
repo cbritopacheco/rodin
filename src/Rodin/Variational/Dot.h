@@ -300,8 +300,7 @@ namespace Rodin::Variational
        * @param poly Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -553,8 +552,7 @@ namespace Rodin::Variational
        * @param poly Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -1086,7 +1084,7 @@ namespace Rodin::Variational
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr std::optional<size_t> getOrder(
+      constexpr Optional<size_t> getOrder(
         [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;

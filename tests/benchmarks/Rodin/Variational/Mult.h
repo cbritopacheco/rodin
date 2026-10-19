@@ -262,8 +262,8 @@ namespace Rodin::Tests::Benchmarks
         {
           const H1Element<K, Scalar> element(geometry);
           const auto& table = element.getTabulation(formula);
-          if (table.nqp != samples || table.ndof != count / components ||
-            table.dim != Polytope::Traits(geometry).getDimension())
+          if (table.getSize() != samples || table.getCount() != count / components ||
+            table.getDimension() != Polytope::Traits(geometry).getDimension())
           {
             fail("Prepared reference dimensions differ from the selected space");
             return;

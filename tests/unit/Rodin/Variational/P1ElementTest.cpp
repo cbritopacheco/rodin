@@ -207,9 +207,9 @@ namespace Rodin::Tests::Unit
           const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
           const auto& table = element.getTabulation(formula);
           ASSERT_EQ(&element.getTabulation(formula), &table);
-          ASSERT_EQ(table.nqp, formula.getSize());
-          ASSERT_EQ(table.ndof, element.getCount());
-          ASSERT_EQ(table.dim, Polytope::Traits(geometry).getDimension());
+          ASSERT_EQ(table.getSize(), formula.getSize());
+          ASSERT_EQ(table.getCount(), element.getCount());
+          ASSERT_EQ(table.getDimension(), Polytope::Traits(geometry).getDimension());
           for (size_t qp = 0; qp < formula.getSize(); ++qp)
           {
             for (size_t a = 0; a < element.getCount(); ++a)
@@ -217,8 +217,8 @@ namespace Rodin::Tests::Unit
               const auto basis = element.getBasis(a);
               EXPECT_EQ(table.getBasis(qp, a), basis(formula.getPoint(qp)));
               const auto gradient = table.getGradient(qp, a);
-              ASSERT_EQ(gradient.size(), table.dim);
-              for (size_t i = 0; i < table.dim; ++i)
+              ASSERT_EQ(gradient.size(), table.getDimension());
+              for (size_t i = 0; i < table.getDimension(); ++i)
               {
                 const auto expected =
                   basis.template getDerivative<1>(i)(formula.getPoint(qp));

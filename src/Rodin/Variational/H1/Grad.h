@@ -203,23 +203,19 @@ namespace Rodin::Variational
           if (geometry == Geometry::Polytope::Type::Tetrahedron ||
             geometry == Geometry::Polytope::Type::Pyramid)
           {
-            const auto tabulate =
-              [&]<Geometry::Polytope::Type ReferenceGeometry, size_t Count>() {
-                const H1Element<K, ScalarType> reference(ReferenceGeometry);
-                const auto evaluation =
-                  reference.template tabulate<ReferenceGeometry>(rc);
-                for (size_t local = 0; local < Count; ++local)
-                {
-                  out +=
-                    evaluation.getGradient(local) * gf[fes.getGlobalIndex(entity, local)];
-                }
-              };
+            const auto tabulate = [&]<Geometry::Polytope::Type ReferenceGeometry>() {
+              const H1Element<K, ScalarType> reference(ReferenceGeometry);
+              const auto evaluation = reference.template tabulate<ReferenceGeometry>(rc);
+              for (size_t local = 0; local < evaluation.getCount(); ++local)
+              {
+                out +=
+                  evaluation.getGradient(local) * gf[fes.getGlobalIndex(entity, local)];
+              }
+            };
             if (geometry == Geometry::Polytope::Type::Tetrahedron)
-              tabulate.template operator()<Geometry::Polytope::Type::Tetrahedron,
-                FeketeTetrahedron<K>::Count>();
+              tabulate.template operator()<Geometry::Polytope::Type::Tetrahedron>();
             else
-              tabulate.template
-              operator()<Geometry::Polytope::Type::Pyramid, PyramidIndex<K>::Count>();
+              tabulate.template operator()<Geometry::Polytope::Type::Pyramid>();
           }
           else
           {

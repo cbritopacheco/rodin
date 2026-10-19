@@ -228,19 +228,15 @@ namespace Rodin::Tests::Unit
       void tabulate(Store::Table& table, const QF::QuadratureFormulaBase& formula) const
       {
         ++m_fills;
-        table.nqp = formula.getSize();
-        table.ndof = getCount();
-        table.dim = 1;
-        table.phi.resize(table.nqp * table.ndof);
-        table.dphi.resize(table.nqp * table.ndof);
-        for (size_t q = 0; q < table.nqp; ++q)
+        table.resize(formula.getSize(), getCount(), 1);
+        for (size_t q = 0; q < table.getSize(); ++q)
         {
           const auto& point = formula.getPoint(q);
-          for (size_t a = 0; a < table.ndof; ++a)
+          for (size_t a = 0; a < table.getCount(); ++a)
           {
             const auto basis = getBasis(a);
-            table.phi[q * table.ndof + a] = basis(point);
-            table.dphi[q * table.ndof + a] = basis.template getDerivative<1>(0)(point);
+            table.getValues(q).data[a] = basis(point);
+            table.getGradients(q).data[a] = basis.template getDerivative<1>(0)(point);
           }
         }
         if (m_fail)
@@ -345,15 +341,15 @@ namespace Rodin::Tests::Unit
     {
       const auto surviving = Store::find(element, formulas[i].getCacheIdentity());
       ASSERT_TRUE(surviving);
-      EXPECT_EQ(surviving->get().phi, snapshots[i].phi);
-      EXPECT_EQ(surviving->get().dphi, snapshots[i].dphi);
+      EXPECT_EQ(surviving->get().getValues(), snapshots[i].getValues());
+      EXPECT_EQ(surviving->get().getDerivatives(), snapshots[i].getDerivatives());
     }
     element.setFail(false);
     const auto& retried = Store::get(element, replacement);
     const auto published = Store::find(element, replacement.getCacheIdentity());
     ASSERT_TRUE(published);
     EXPECT_EQ(&published->get(), &retried);
-    EXPECT_EQ(retried.nqp, replacement.getSize());
+    EXPECT_EQ(retried.getSize(), replacement.getSize());
     EXPECT_EQ(element.getFills(), CacheCapacity + 2);
     EXPECT_FALSE(Store::find(element, formulas[1].getCacheIdentity()));
     for (size_t i = 2; i < CacheCapacity; ++i)
@@ -371,7 +367,7 @@ namespace Rodin::Tests::Unit
     const auto sizeQueries = formula.getSizeQueries();
     const auto pointQueries = formula.getPointQueries();
     EXPECT_GT(sizeQueries, 0u);
-    EXPECT_EQ(pointQueries, table.nqp);
+    EXPECT_EQ(pointQueries, table.getSize());
     EXPECT_EQ(&table, &Store::get(element, formula));
     EXPECT_EQ(formula.getSizeQueries(), sizeQueries);
     EXPECT_EQ(formula.getPointQueries(), pointQueries);
@@ -385,9 +381,9 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(Store::find(element, formula.getCacheIdentity()));
     const auto& replaced = Store::get(element, formula);
     EXPECT_EQ(element.getFills(), 2u);
-    EXPECT_EQ(replaced.nqp, replacementSize);
+    EXPECT_EQ(replaced.getSize(), replacementSize);
     EXPECT_GT(formula.getSizeQueries(), replacement.getSizeQueries());
-    EXPECT_EQ(formula.getPointQueries(), replaced.nqp);
+    EXPECT_EQ(formula.getPointQueries(), replaced.getSize());
     const auto replacedSizeQueries = formula.getSizeQueries();
     const auto replacedPointQueries = formula.getPointQueries();
     EXPECT_EQ(&replaced, &Store::get(element, formula));
@@ -406,11 +402,69 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(source.getCacheIdentity(), identity);
     EXPECT_NE(destination.getCacheIdentity(), identity);
     const auto& sourceTable = Store::get(element, source);
-    EXPECT_EQ(sourceTable.nqp, source.getSize());
+    EXPECT_EQ(sourceTable.getSize(), source.getSize());
     EXPECT_EQ(element.getFills(), 2u);
     const auto& destinationTable = Store::get(element, destination);
-    EXPECT_EQ(destinationTable.phi, saved.phi);
-    EXPECT_EQ(destinationTable.dphi, saved.dphi);
+    EXPECT_EQ(destinationTable.getValues(), saved.getValues());
+    EXPECT_EQ(destinationTable.getDerivatives(), saved.getDerivatives());
     EXPECT_EQ(element.getFills(), 3u);
   }
+}
+
+using namespace Rodin;
+using namespace Rodin::Variational;
+
+namespace
+{
+  template <class Table>
+  concept HasSecondReferenceDerivative =
+    requires(const Table& table) { table.template getDerivative<2>(0, 0, 0); };
+  static_assert(!HasSecondReferenceDerivative<ReferenceTabulation<Real>>);
+}
+
+TEST(ReferenceTabulation, ControlledStorageExtentsAndOverflow)
+{
+  ReferenceTabulation<Real> table;
+  table.resize(2, 3, 2);
+  ASSERT_EQ(table.getValues().size(), 6u);
+  ASSERT_EQ(table.getDerivatives().size(), 12u);
+  table.getValues(1).data[2] = 7;
+  table.getGradients(1).data[5] = 9;
+  EXPECT_EQ(table.getBasis(1, 2), 7);
+  EXPECT_EQ(table.getDerivative<1>(1, 2, 1), 9);
+  const auto saved = table;
+  EXPECT_THROW(table.resize(std::numeric_limits<size_t>::max(), 2, 1), Alert::Exception);
+  EXPECT_EQ(table.getValues(), saved.getValues());
+  EXPECT_EQ(table.getDerivatives(), saved.getDerivatives());
+  EXPECT_EQ(table.getSize(), 2u);
+  table.resize(1, 4, 0);
+  EXPECT_EQ(table.getValues().size(), 4u);
+  EXPECT_TRUE(table.getDerivatives().empty());
+  EXPECT_TRUE(table.getGradients(0).data.empty());
+}
+
+TEST(ReferenceTabulation, MovingPreservesBothStorageContracts)
+{
+  ReferenceTabulation<Real> source;
+  source.resize(2, 3, 2);
+  source.getValues(1).data[2] = 7;
+  const auto saved = source;
+  auto moved = std::move(source);
+  EXPECT_EQ(moved.getValues(), saved.getValues());
+  EXPECT_EQ(source.getSize(), 0u);
+  EXPECT_EQ(source.getCount(), 0u);
+  EXPECT_EQ(source.getDimension(), 0u);
+  EXPECT_TRUE(source.getValues().empty());
+  EXPECT_TRUE(source.getDerivatives().empty());
+  source = std::move(moved);
+  EXPECT_EQ(source.getValues(), saved.getValues());
+  EXPECT_EQ(moved.getSize(), 0u);
+  EXPECT_TRUE(moved.getValues().empty());
+  moved = source;
+  source.resize(0, 4, 3);
+  EXPECT_EQ(moved.getValues(), saved.getValues());
+  EXPECT_EQ(moved.getDerivatives(), saved.getDerivatives());
+  auto& alias = moved;
+  moved = std::move(alias);
+  EXPECT_EQ(moved.getValues(), saved.getValues());
 }

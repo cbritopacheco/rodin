@@ -225,14 +225,14 @@ namespace Rodin::Geometry
         {
           const auto& table = m_fe.getTabulation(qf);
           const size_t rdim = getReferenceDimension(), pdim = getPhysicalDimension();
-          assert(table.dim == rdim);
-          assert(table.ndof == m_fe.getCount());
-          jacobians.resize(table.nqp);
+          assert(table.getDimension() == rdim);
+          assert(table.getCount() == m_fe.getCount());
+          jacobians.resize(table.getSize());
           const auto contract = [&](auto referenceDimension, auto physicalDimension) {
             constexpr bool localAccumulation =
               std::is_same_v<decltype(referenceDimension),
                 std::integral_constant<size_t, 3>>;
-            for (size_t qp = 0; qp < table.nqp; ++qp)
+            for (size_t qp = 0; qp < table.getSize(); ++qp)
             {
               decltype(auto) matrix = [&]() -> decltype(auto) {
                 if constexpr (localAccumulation)
@@ -245,7 +245,7 @@ namespace Rodin::Geometry
                   return (output);
                 }
               }();
-              for (size_t local = 0; local < table.ndof; ++local)
+              for (size_t local = 0; local < table.getCount(); ++local)
               {
                 const auto gradient = table.getGradient(qp, local);
                 for (size_t i = 0; i < referenceDimension; ++i)
@@ -322,11 +322,11 @@ namespace Rodin::Geometry
           if (const auto found = m_fe.findTabulation(identity))
           {
             const auto& table = found->get();
-            assert(table.ndof == m_fe.getCount());
-            assert(qp < table.nqp);
+            assert(table.getCount() == m_fe.getCount());
+            assert(qp < table.getSize());
             pc.resize(getPhysicalDimension());
             pc.setZero();
-            for (size_t local = 0; local < table.ndof; ++local)
+            for (size_t local = 0; local < table.getCount(); ++local)
               pc += m_pm[local] * table.getBasis(qp, local);
             return;
           }

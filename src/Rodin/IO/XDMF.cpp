@@ -183,10 +183,14 @@ namespace Rodin::IO
 
   // ---- XDMF::Grid ----------------------------------------------------------
 
-  XDMF::Grid::Grid(XDMF& owner, size_t index) noexcept
+  XDMF::Grid::Grid(XDMF& owner, size_t index)
     : m_owner(&owner),
       m_index(index)
-  {}
+  {
+    if (index >= owner.m_grids.size())
+      Alert::MemberFunctionException(*this, __func__)
+        << "XDMF grid index " << index << " is not registered." << Alert::Raise;
+  }
 
   std::string_view XDMF::Grid::getName() const noexcept
   {
@@ -548,7 +552,7 @@ namespace Rodin::IO
     os << indent(bi) << "</Grid>\n";
   }
 
-  void XDMF::flush() const
+  void XDMF::flush()
   {
     if (m_distributed)
     {
