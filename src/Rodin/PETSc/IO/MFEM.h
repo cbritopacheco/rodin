@@ -45,14 +45,19 @@ namespace Rodin::IO
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief PETSc coefficient storage type.
       using DataType = ::Vec;
+
       /// @brief Printed grid function type.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+
       /// @brief Format-specific printer interface.
       using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+
       /// @brief Scalar field of the finite element space.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       /// @brief Context of the source finite element mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<typename FESType::MeshType>::ContextType;

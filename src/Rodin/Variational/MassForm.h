@@ -213,6 +213,7 @@ namespace Rodin::Variational
               m_testCount = testFE.getCount();
               m_reference.resize(qf.getSize());
               using TrialValue = typename FormLanguage::Traits<TrialFES>::RangeType;
+
               /// @brief Inline storage for scalar Point and linear-Segment controls.
               constexpr size_t TrialInlineCapacity = 2;
               boost::container::small_vector<TrialValue, TrialInlineCapacity> trialValues(

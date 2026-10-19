@@ -30,6 +30,7 @@ namespace Rodin::Geometry::Euclidean
         TopLeft,
         TopRight
       };
+
       /// @brief Constructs a box. @param lower Componentwise lower corner. @param upper Componentwise upper corner.
       Box(const Point<Dimension, T>& lower, const Point<Dimension, T>& upper)
         : m_lower(lower),
@@ -42,21 +43,25 @@ namespace Rodin::Geometry::Euclidean
               << "Box requires ordered bounds in coordinate " << i << Alert::Raise;
         }
       }
+
       /// @brief Gets the ambient dimension. @returns Coordinate count.
       static constexpr size_t getDimension()
       {
         return Dimension;
       }
+
       /// @brief Gets the lower corner. @returns Componentwise minima.
       const Point<Dimension, T>& lower() const
       {
         return m_lower;
       }
+
       /// @brief Gets the upper corner. @returns Componentwise maxima.
       const Point<Dimension, T>& upper() const
       {
         return m_upper;
       }
+
       /// @brief Tests closed containment. @param point Point. @returns Whether all coordinates are in bounds.
       bool contains(const Point<Dimension, T>& point) const
       {
@@ -67,6 +72,7 @@ namespace Rodin::Geometry::Euclidean
         }
         return true;
       }
+
       /// @brief Selects a corner. @param upperCoordinates True selects the upper bound in that coordinate. @returns Corner point.
       Point<Dimension, T> getCorner(
         const std::array<bool, Dimension>& upperCoordinates) const
@@ -79,6 +85,7 @@ namespace Rodin::Geometry::Euclidean
         }
         return point;
       }
+
       /// @brief Selects a planar corner. @tparam C Corner identifier. @returns Corner point.
       template <Corner C>
       Point<Dimension, T> getCorner() const
@@ -88,6 +95,7 @@ namespace Rodin::Geometry::Euclidean
         return getCorner(
           {C == BottomRight || C == TopRight, C == TopLeft || C == TopRight});
       }
+
       /// @brief Computes a side length. @param coordinate Coordinate index. @returns Extent in that direction.
       T extent(size_t coordinate) const
       {
@@ -96,6 +104,7 @@ namespace Rodin::Geometry::Euclidean
             << "Box coordinate is outside its dimension" << Alert::Raise;
         return m_upper[coordinate] - m_lower[coordinate];
       }
+
       /// @brief Computes measure. @returns Product of all side lengths.
       T measure() const
       {
@@ -115,6 +124,7 @@ namespace Rodin::Geometry::Euclidean
           return result;
         }
       }
+
       /// @brief Projects onto the closed box. @param point Point. @returns Closest point in the box.
       Point<Dimension, T> project(const Point<Dimension, T>& point) const
       {
@@ -123,11 +133,13 @@ namespace Rodin::Geometry::Euclidean
           result[i] = std::clamp(point[i], m_lower[i], m_upper[i]);
         return result;
       }
+
       /// @brief Computes distance to the box. @param point Point. @returns Euclidean distance, zero inside.
       T distance(const Point<Dimension, T>& point) const
       {
         return (point - project(point)).norm();
       }
+
       /// @brief Computes box intersection. @param other Box. @returns Closed intersection, including degenerate touching boxes.
       Optional<Box> intersect(const Box& other) const
       {
@@ -141,18 +153,21 @@ namespace Rodin::Geometry::Euclidean
         }
         return Box(lower, upper);
       }
+
       /// @brief Gets planar width. @returns First side length.
       T width() const
         requires(Dimension == 2)
       {
         return extent(0);
       }
+
       /// @brief Gets planar height. @returns Second side length.
       T height() const
         requires(Dimension == 2)
       {
         return extent(1);
       }
+
       /// @brief Gets planar area. @returns Product of both side lengths.
       T area() const
         requires(Dimension == 2)

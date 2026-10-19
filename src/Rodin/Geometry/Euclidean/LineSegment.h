@@ -140,6 +140,7 @@ namespace Rodin::Geometry::Euclidean
           return operator()(std::clamp(t, T(0), T(1)));
         }
       }
+
       /// @brief Computes point distance. @param point Point. @returns Euclidean distance.
       T distance(const Point<Dimension, T>& point) const
       {

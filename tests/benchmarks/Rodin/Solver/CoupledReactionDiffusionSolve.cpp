@@ -53,14 +53,19 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Matches the native coupled convergence solver tolerance.
       static constexpr Real SolverTolerance = 1e-13;
+
       /// @brief Existing generous native scalar/mixed iterative safety cap.
       static constexpr size_t MaximumIterations = 20000;
+
       /// @brief Allows conditioning amplification of the requested residual budget.
       static constexpr Real CoefficientTolerance = 1e-9;
+
       /// @brief Existing full-operator and load reference-comparison budget.
       static constexpr Real AssemblyTolerance = 1e-11;
+
       /// @brief Existing independent true-residual budget for native solves.
       static constexpr Real ResidualTolerance = 1e-11;
+
       /// @brief Wrong-field and omitted-term rejection floor, outside timing.
       static constexpr Real SensitivityFloor = 1e-4;
 

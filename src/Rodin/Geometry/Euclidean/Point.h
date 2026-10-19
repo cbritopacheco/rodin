@@ -64,6 +64,7 @@ namespace Rodin::Geometry::Euclidean
         for (size_t i = 0; i < Dimension; ++i)
           m_coordinates[i] = values[i];
       }
+
       /// @brief Constructs a point from Dimension coordinates. @param coordinates Initial coordinates.
       constexpr Point(std::initializer_list<T> coordinates)
         : Point()
@@ -73,6 +74,7 @@ namespace Rodin::Geometry::Euclidean
         for (const T& coordinate : coordinates)
           m_coordinates[i++] = coordinate;
       }
+
       /// @brief Copies a column-vector expression into fixed storage. @param coordinates Dimension coordinate values.
       template <class Derived>
         requires((Derived::RowsAtCompileTime == Eigen::Dynamic ||
@@ -84,6 +86,7 @@ namespace Rodin::Geometry::Euclidean
       {
         *this = coordinates;
       }
+
       /// @brief Assigns a column-vector expression. @param coordinates New coordinates. @returns This point.
       template <class Derived>
         requires((Derived::RowsAtCompileTime == Eigen::Dynamic ||
@@ -119,18 +122,21 @@ namespace Rodin::Geometry::Euclidean
       {
         return m_coordinates.x();
       }
+
       /// @brief Gets the first coordinate. @returns The first coordinate.
       const T& x() const
         requires(Dimension >= 1)
       {
         return m_coordinates.x();
       }
+
       /// @brief Gets the mutable second coordinate. @returns The second coordinate.
       T& y()
         requires(Dimension >= 2)
       {
         return m_coordinates.y();
       }
+
       /// @brief Gets the second coordinate. @returns The second coordinate.
       const T& y() const
         requires(Dimension >= 2)
@@ -144,6 +150,7 @@ namespace Rodin::Geometry::Euclidean
       {
         return m_coordinates.z();
       }
+
       /// @brief Gets the third coordinate. @returns The third coordinate.
       const T& z() const
         requires(Dimension >= 3)
@@ -157,6 +164,7 @@ namespace Rodin::Geometry::Euclidean
         assert(i < Dimension);
         return m_coordinates[i];
       }
+
       /// @brief Gets a coordinate. @param i Coordinate index. @returns The coordinate.
       const T& operator[](size_t i) const
       {
@@ -205,12 +213,14 @@ namespace Rodin::Geometry::Euclidean
         const Point displacement(offset);
         return Point(point.m_coordinates + displacement.m_coordinates);
       }
+
       /// @brief Translates a point. @param offset Column-vector displacement. @param point Initial point. @returns Translated point.
       template <class Derived>
       friend Point operator+(const Eigen::MatrixBase<Derived>& offset, const Point& point)
       {
         return point + offset;
       }
+
       /// @brief Subtracts a displacement. @param point Initial point. @param offset Column-vector displacement. @returns Translated point.
       template <class Derived>
       friend Point operator-(const Point& point, const Eigen::MatrixBase<Derived>& offset)
@@ -240,9 +250,11 @@ namespace Rodin::Geometry::Euclidean
       /// @brief Connects two distinct points. @param other End point. @returns Segment, absent for equal points.
       inline constexpr Optional<LineSegment<Dimension, T>> connect(
         const Point& other) const;
+
       /// @brief Connects to the closest line point. @param other Line. @returns Perpendicular segment, absent for a point on the line.
       inline constexpr Optional<LineSegment<Dimension, T>> connect(
         const Line<Dimension, T>& other) const;
+
       /// @brief Connects to the nearest sphere point. @param other Sphere. @returns Segment, absent at the center or on the surface where no unique nonzero connection exists.
       inline constexpr Optional<LineSegment<Dimension, T>> connect(
         const Sphere<Dimension, T>& other) const;

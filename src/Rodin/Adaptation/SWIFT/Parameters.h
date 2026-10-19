@@ -35,6 +35,7 @@ namespace Rodin::Adaptation::SWIFT
           Real distortion = 10; ///< @f$Q_{\max}@f$, relative-distortion budget.
           Real jacobian =
             Real(1e-2); ///< @f$j_{\mathrm{safe}}@f$, relative Jacobian floor.
+
       /// @brief Independent constraint strengths relative to predicted decrease.
       struct Hinge
       {

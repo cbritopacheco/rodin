@@ -1,4 +1,4 @@
-"""Regression checks for the repository's two-space record indentation."""
+"""Regression checks for record indentation and documentation spacing."""
 
 import os
 from pathlib import Path
@@ -9,11 +9,68 @@ import tempfile
 import unittest
 from unittest import mock
 
-from format_cpp import format_source
+from format_cpp import documentation_spacing, format_source
 import check_format
 
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+class DocumentationSpacingTests(unittest.TestCase):
+    def test_canonical_formatter_inserts_spacing(self):
+        text = "/// @brief First.\nusing First = int;\n/// @brief Second.\nusing Second = int;\n"
+        binary = os.environ.get("CLANG_FORMAT_BINARY", "clang-format")
+        self.assertEqual(format_source(binary, str(ROOT / "src/FormatFixture.cpp"), text),
+                         text.replace("int;\n///", "int;\n\n///"))
+
+    def test_definition_followed_by_block_documentation(self):
+        text = "void f()\n{\n}\n/**\n * @brief Next.\n */\nvoid g();\n"
+        expected = text.replace("}\n/**", "}\n\n/**")
+        self.assertEqual(documentation_spacing(text), expected)
+
+    def test_documented_aliases_and_members_are_separated(self):
+        text = ("/// @brief First.\nusing First = int;\n"
+                "/// @brief Second.\nusing Second = int;\n"
+                "/// @brief Value.\nint value;\n")
+        expected = text.replace("int;\n///", "int;\n\n///")
+        self.assertEqual(documentation_spacing(text), expected)
+
+    def test_record_definition_and_function_declaration(self):
+        for declaration in ("struct A {};", "void f();", "void f() {}"):
+            with self.subTest(declaration=declaration):
+                text = declaration + "\n  /// @brief Next.\n  int x;\n"
+                self.assertEqual(documentation_spacing(text),
+                                 declaration + "\n\n  /// @brief Next.\n  int x;\n")
+
+    def test_existing_spacing_and_first_member_are_preserved(self):
+        text = ("/// @brief Class.\nclass A\n{\n  public:\n"
+                "    /// @brief First.\n    void f();\n\n"
+                "    /// @brief Second.\n    void g();\n};\n")
+        self.assertEqual(documentation_spacing(text), text)
+
+    def test_documentation_contents_and_literals_are_preserved(self):
+        text = ('auto s = R"doc(\n}\n/** Example */\n)doc";\n\n'
+                '/**\n * Example:\n * }\n * /// Nested example.\n */\n'
+                'void f();\n\n/// First line.\n/// Second line.\nvoid g();\n')
+        self.assertEqual(documentation_spacing(text), text)
+
+    def test_trailing_comments_and_preprocessor_directives_are_preserved(self):
+        text = ('int x; ///< Trailing.\nint y; /** inline */\n'
+                '#define VALUE 1\n/// @brief Next.\nint z;\n')
+        self.assertEqual(documentation_spacing(text), text)
+
+    def test_documentation_after_trailing_comment_is_separated(self):
+        text = "int x; ///< First.\n/// @brief Second.\nint y;\n"
+        self.assertEqual(documentation_spacing(text),
+                         text.replace("First.\n///", "First.\n\n///"))
+
+    def test_spacing_is_idempotent_and_checked_in_changed_regions(self):
+        text = "void f();\n/// @brief Next.\nvoid g();\n"
+        expected = "void f();\n\n/// @brief Next.\nvoid g();\n"
+        formatted = documentation_spacing(text)
+        self.assertEqual(documentation_spacing(formatted), expected)
+        self.assertEqual(check_format.format_changed_source(text, formatted, {2}), expected)
+        self.assertEqual(check_format.format_changed_source(text, formatted, {3}), text)
 
 
 class FormatConfigTests(unittest.TestCase):

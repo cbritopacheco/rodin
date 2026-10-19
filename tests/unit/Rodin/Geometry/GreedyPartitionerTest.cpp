@@ -80,6 +80,7 @@ namespace Rodin::Tests::Unit
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
     checkGreedyPartition(mesh, 5, 1);
   }
+
   /// @brief Partitioning faces uses their incidence graph rather than cell indices.
   TEST(GreedyPartitioner, LowerDimensionalEntities)
   {

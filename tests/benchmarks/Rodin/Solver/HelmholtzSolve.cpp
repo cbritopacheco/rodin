@@ -56,18 +56,25 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Matches the native scalar convergence solver tolerance.
       static constexpr Real SolverTolerance = 1e-13;
+
       /// @brief Algebraic validation budget allowing conditioning amplification.
       static constexpr Real ResidualTolerance = 1e-11;
+
       /// @brief Manufactured coefficient budget, distinct from a continuous norm.
       static constexpr Real CoefficientTolerance = 1e-9;
+
       /// @brief Original-kernel assembly comparison budget.
       static constexpr Real AssemblyTolerance = 1e-11;
+
       /// @brief Existing benchmark wrong-field sensitivity floor.
       static constexpr Real SensitivityFloor = 1e-4;
+
       /// @brief Same generous iteration cap as native scalar convergence solves.
       static constexpr size_t MaximumIterations = 20000;
+
       /// @brief Fixed restart policy; not tuned separately to each geometry.
       static constexpr size_t Restart = 50;
+
       /// @brief Integrates polynomial patches and rational pyramid basis products.
       static constexpr size_t QuadratureOrder = HelmholtzWorkload<K>::QuadratureOrder;
 

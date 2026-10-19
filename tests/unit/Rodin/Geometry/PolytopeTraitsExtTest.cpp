@@ -315,6 +315,7 @@ namespace Rodin::Tests::Unit
     for (int i = 0; i < result.size(); ++i)
       EXPECT_LE(result(i), hs.vector(i) + 1e-14);
   }
+
   /// @brief Unit outward half-spaces agree with ordered facets, not merely centroid inclusion.
   TEST(Geometry_PolytopeTraitsExt, HalfSpacesMatchOrderedBoundaryFacets)
   {

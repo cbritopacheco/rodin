@@ -138,6 +138,7 @@ namespace Rodin::Tests::Manufactured
   {
     checkManufacturedNonlocalBlock<Complex, Math::Matrix<Complex>>();
   }
+
   /// @brief Dense real preassembled blocks and loads retain exact boundary elimination.
   TEST(Rodin_Manufactured_NonlocalBlock, DenseRealPreassembledBoundary)
   {

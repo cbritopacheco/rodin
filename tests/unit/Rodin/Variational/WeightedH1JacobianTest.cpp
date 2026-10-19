@@ -100,6 +100,7 @@ namespace Rodin::Tests::Unit
           checkCoefficient(MatrixFunction(matrix));
         }
       }
+
       /**
        * @brief Checks scalar-weighted component factorization exactly.
        *

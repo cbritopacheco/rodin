@@ -309,14 +309,19 @@ namespace Rodin::Variational
         {
           /// @brief Mesh the cached tabulation belongs to.
           const Geometry::MeshBase* mesh;
+
           /// @brief Topological dimension of the cached polytope.
           size_t dimension;
+
           /// @brief Index of the cached polytope.
           Index index;
+
           /// @brief Geometry of the cached polytope.
           Geometry::Polytope::Type geometry;
+
           /// @brief Order of the geometric transformation.
           size_t transformationOrder;
+
           /// @brief Vector dimension of the finite element space.
           size_t vectorDimension;
 
@@ -376,10 +381,13 @@ namespace Rodin::Variational
         {
             /// @brief Quadrature formula the cached tabulation belongs to.
           const QF::QuadratureFormulaBase* formula;
+
             /// @brief Logical lifetime and assignment identity of the formula.
           size_t formulaIdentity;
+
             /// @brief Index of the quadrature point.
           size_t index;
+
             /// @brief Whether the key holds a cached entry.
             bool valid;
 

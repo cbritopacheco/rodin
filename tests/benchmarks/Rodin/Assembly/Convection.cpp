@@ -69,12 +69,16 @@ namespace Rodin::Tests::Benchmarks
 
       /// @brief Component count held fixed across dimensions and geometries.
       static constexpr size_t Components = 3;
+
       /// @brief Same base integration order as the directional component controls.
       static constexpr size_t QuadratureOrder = 4;
+
       /// @brief Relative budget for differently associated expression-entry assembly.
       static constexpr Real ReferenceBudget = 1e-11;
+
       /// @brief Relative budget for the independently derived affine patch identity.
       static constexpr Real PatchBudget = 1e-10;
+
       /// @brief Rejection floor for the doubled affine field, relative to load scale.
       static constexpr Real SensitivityFloor = 1e-4;
 

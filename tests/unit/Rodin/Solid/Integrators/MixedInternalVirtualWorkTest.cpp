@@ -86,6 +86,7 @@ namespace
         EXPECT_NEAR(pu(i, j), up(j, i), 1e-12);
       }
     }
+
     /** Independent density @f$ W=J^{-2/d}\operatorname{tr}(F^TF)-d+p(J-1) @f$. */
     const auto energy = [&] {
       const auto& formula = QF::PolytopeQuadratureFormula::get(6, cell.getGeometry());

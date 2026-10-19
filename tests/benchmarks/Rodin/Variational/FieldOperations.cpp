@@ -66,18 +66,25 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Dimensionless point-value budget for the representable field.
       static constexpr Real FieldTolerance = 1e-10;
+
       /// @brief Relative mass-energy budget for quadrature and roundoff.
       static constexpr Real EnergyTolerance = 1e-10;
+
       /// @brief Algebraic residual budget, looser than the CG stopping tolerance.
       static constexpr Real ResidualTolerance = 1e-11;
+
       /// @brief Relative coefficient budget allowing mass-matrix conditioning.
       static constexpr Real CoefficientTolerance = 1e-9;
+
       /// @brief CG stopping tolerance, matching native convergence solves.
       static constexpr Real SolverTolerance = 1e-13;
+
       /// @brief Iteration cap matching native convergence solves.
       static constexpr size_t MaximumIterations = 20000;
+
       /// @brief Wrong-field residual floor ensuring a non-vacuous oracle.
       static constexpr Real SensitivityFloor = 1e-4;
+
       /// @brief Fixed quadrature order defining the measured mass operator.
       static constexpr size_t QuadratureOrder = 8;
 

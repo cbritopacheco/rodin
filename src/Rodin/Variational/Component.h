@@ -971,6 +971,7 @@ namespace Rodin::Variational
       {
         return m_operand->getIntegrationPoint();
       }
+
       /**
        * @brief Starts a fresh cell binding and releases the previous point binding.
        * @param polytope Entity whose basis will be evaluated.

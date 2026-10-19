@@ -786,6 +786,7 @@ namespace Rodin::Variational
   {
     return UnaryMinus(op);
   }
+
   /**
    * @ingroup UnaryMinusSpecializations
    * @brief Negation of a bilinear form integrator.

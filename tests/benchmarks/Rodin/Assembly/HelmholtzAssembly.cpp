@@ -43,8 +43,10 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Same original-kernel comparison budget as constrained assembly.
       static constexpr Real AssemblyTolerance = 1e-11;
+
       /// @brief Same manufactured patch budget as constrained assembly.
       static constexpr Real PatchTolerance = 1e-10;
+
       /// @brief Same wrong-field rejection floor as constrained assembly.
       static constexpr Real SensitivityFloor = 1e-4;
 

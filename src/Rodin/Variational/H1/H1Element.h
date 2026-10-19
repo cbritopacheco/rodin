@@ -67,6 +67,7 @@ namespace Rodin::FormLanguage
   {
     /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
     /// @brief Range (evaluation value) type.
     using RangeType = Range;
   };
@@ -797,6 +798,7 @@ namespace Rodin::Variational
 
       /// @brief Caller-owned scalar reference values at one point.
       using Values = typename Tabulation::Values;
+
       /// @brief Caller-owned scalar reference gradients at one point.
       using Gradients = typename Tabulation::Gradients;
 

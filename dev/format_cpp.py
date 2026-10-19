@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical C++ formatting: clang-format plus plain-struct indentation.
+"""Canonical C++ formatting: clang-format plus house indentation and spacing.
 
 clang-format 18's IndentAccessModifiers indents access labels by two spaces
 and members by four, but also indents plain struct members by four. The house
@@ -7,6 +7,9 @@ style requires two spaces in structs without explicit access sections. This
 pass removes that single extra level, including in nested declarations; it
 never changes tokens or string-literal contents. Use this entry point rather
 than raw clang-format when formatting Rodin C++ files.
+
+Standalone documentation following a declaration or definition is separated
+by a blank line, including individually documented aliases and data members.
 """
 
 import argparse
@@ -138,12 +141,39 @@ def plain_struct_indentation(text):
     return "".join(result)
 
 
+def documentation_spacing(text):
+    """Separate declarations/definitions from following standalone Doxygen docs.
+
+    Tokenize comments and literals so examples, trailing docs and consecutive
+    lines of one documentation block retain their contents. Opening scopes and
+    access labels do not end declarations and need no additional blank line.
+    """
+    insertions = []
+    previous = None
+    for match in CPP_TOKENS.finditer(text):
+        comment = match.group("comment")
+        start = text.rfind("\n", 0, match.start()) + 1
+        if comment is not None and text[start:match.start()].strip():
+            continue  # Trailing comments remain attached to their declaration.
+        if (comment is not None and comment.startswith(("/**", "///"))
+                and not comment.startswith(("/**<", "/***", "///<", "////"))):
+            if (not text[start:match.start()].strip() and previous is not None
+                    and previous.group("token") in (";", "}")
+                    and text.count("\n", previous.end(), start) == 1):
+                insertions.append(start)
+        # Comments break adjacency, preserving documentation continuations.
+        previous = match
+    for start in reversed(insertions):
+        text = text[:start] + "\n" + text[start:]
+    return text
+
+
 def format_source(binary, path, content):
     """Format complete source with scope context and the repository style."""
     result = subprocess.run(
         [binary, "--style=file", f"--assume-filename={path}"],
         input=content, capture_output=True, text=True, check=True)
-    return plain_struct_indentation(result.stdout)
+    return documentation_spacing(plain_struct_indentation(result.stdout))
 
 
 def main():

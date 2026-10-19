@@ -57,6 +57,7 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Roundoff budget for the independently associated entry loop.
       static constexpr Real ReferenceTolerance = 1e-12;
+
       /// @brief Degree increment distinguishing the two refresh formulas.
       static constexpr size_t OrderIncrement = 4;
 

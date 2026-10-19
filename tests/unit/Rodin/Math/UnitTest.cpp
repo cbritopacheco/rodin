@@ -265,6 +265,7 @@ TEST_F(UnitTest, EdgeCases)
 template <class T>
 class ConcreteUnitTest : public ::testing::Test
 {};
+
 /// @brief Instantiates the complete arithmetic surface for non-Real scalar storage.
 template <class T>
 class ScalarUnit : public Unit<ScalarUnit<T>, T>

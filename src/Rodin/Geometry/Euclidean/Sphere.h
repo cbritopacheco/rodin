@@ -26,6 +26,7 @@ namespace Rodin::Geometry::Euclidean
     public:
       /// @brief Fixed-size coordinate vector in the ambient dimension.
       using Vector = typename Point<Dimension, T>::Vector;
+
       /// @brief Constructs a sphere. @param center Center. @param radius Positive radius.
       Sphere(const Point<Dimension, T>& center = Point<Dimension, T>(), T radius = T(1))
         : m_center(center),
@@ -37,26 +38,31 @@ namespace Rodin::Geometry::Euclidean
         else
           setRadius(radius);
       }
+
       /// @brief Gets the ambient dimension. @returns Coordinate count.
       static constexpr size_t getDimension()
       {
         return Dimension;
       }
+
       /// @brief Evaluates the implicit sphere equation. @param point Point. @returns Squared distance minus squared radius.
       T operator()(const Point<Dimension, T>& point) const
       {
         return (point - m_center).squaredNorm() - m_radius * m_radius;
       }
+
       /// @brief Gets the radius. @returns Positive radius.
       T radius() const
       {
         return m_radius;
       }
+
       /// @brief Gets the center. @returns Center point.
       const Point<Dimension, T>& center() const
       {
         return m_center;
       }
+
       /// @brief Changes the radius. @param radius Positive radius. @returns This sphere.
       Sphere& setRadius(T radius)
       {
@@ -66,12 +72,14 @@ namespace Rodin::Geometry::Euclidean
         m_radius = radius;
         return *this;
       }
+
       /// @brief Changes the center. @param center New center. @returns This sphere.
       Sphere& setCenter(const Point<Dimension, T>& center)
       {
         m_center = center;
         return *this;
       }
+
       /// @brief Computes a radial surface point. @param direction Nonzero spatial direction. @returns Surface point.
       template <class Derived>
       Point<Dimension, T> pointAt(const Eigen::MatrixBase<Derived>& direction) const
@@ -92,17 +100,20 @@ namespace Rodin::Geometry::Euclidean
         else
           return m_center + m_radius * (radial / radial.stableNorm());
       }
+
       /// @brief Computes distance to the surface. @param point Point. @returns Unsigned surface distance.
       T distance(const Point<Dimension, T>& point) const
       {
         return std::abs((point - m_center).norm() - m_radius);
       }
+
       /// @brief Computes the tangent hyperplane. @param direction Nonzero radial direction. @returns Tangent at the radial surface point.
       template <class Derived>
       Hyperplane<Dimension, T> tangent(const Eigen::MatrixBase<Derived>& direction) const
       {
         return Hyperplane<Dimension, T>(pointAt(direction), direction);
       }
+
       /// @brief Evaluates the planar angular parameterization. @param angle Angle. @returns Circle point.
       Point<Dimension, T> operator()(const Math::Rad& angle) const
         requires(Dimension == 2)
@@ -112,6 +123,7 @@ namespace Rodin::Geometry::Euclidean
             m_radius * std::cos(static_cast<T>(static_cast<Real>(angle))),
             m_radius * std::sin(static_cast<T>(static_cast<Real>(angle))));
       }
+
       /// @brief Computes a planar tangent line. @param angle Angle. @returns Tangent line.
       Line<Dimension, T> tangent(const Math::Rad& angle) const
         requires(Dimension == 2)

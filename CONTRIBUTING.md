@@ -8,7 +8,7 @@ existing code, and the tooling is configured to match it.
 
 | Layer | What | Enforced by |
 |-------|------|-------------|
-| 1. Formatting | Indentation, braces, wrapping | [`.clang-format`](.clang-format) + [`dev/format_cpp.py`](dev/format_cpp.py) — CI checks **changed lines only** |
+| 1. Formatting | Indentation, braces, wrapping, documentation spacing | [`.clang-format`](.clang-format) + [`dev/format_cpp.py`](dev/format_cpp.py) — CI checks **changed lines only** |
 | 2. Naming | Identifier conventions | [`.clang-tidy`](.clang-tidy) + [`dev/check_clang_tidy.py`](dev/check_clang_tidy.py) — ratchet against a findings baseline |
 | 3. House rules | Include guards, license blocks, header docs, loop braces, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
 | 4. Documentation | No new Doxygen warnings | [`dev/check_doxygen_warnings.py`](dev/check_doxygen_warnings.py) |
@@ -47,6 +47,9 @@ line, offending source, and suggested fix.
   specializations, and its deduction guides live together in that header.
 - **Documentation**: Use `/** ... */` for multiline Doxygen documentation
   and `///` for single-line documentation. Use `///<` for trailing member documentation.
+  Leave a blank line between a declaration or definition and the next standalone
+  documentation block, including documented aliases and data members. Keep each
+  documentation block attached to its own declaration.
   Integrate API contracts and explanatory prose into the relevant Doxygen block;
   remove redundant ordinary comments beside it.
   Document every parameter and non-void return, including unused inputs,

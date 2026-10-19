@@ -82,8 +82,10 @@ namespace Rodin::Scotch
     private:
       /// @brief Requested count of the most recent successful partition operation.
       size_t m_numPartitions;
+
       /// @brief Mesh whose incidence graph is partitioned.
       std::reference_wrapper<const MeshType> m_mesh;
+
       /// @brief Most recent successful assignment, indexed by mesh entity.
       std::vector<SCOTCH_Num> m_partition;
 

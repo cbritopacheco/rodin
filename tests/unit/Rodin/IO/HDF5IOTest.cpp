@@ -1687,6 +1687,7 @@ namespace Rodin::Tests::Unit
     EXPECT_THROW(mesh.load(filename, FileFormat::HDF5), Alert::Exception);
     EXPECT_THROW(field.load(filename, FileFormat::HDF5), Alert::Exception);
   }
+
   /// @brief Moved HDF5 handles transfer ownership and close the replaced identifier.
   TEST_F(HDF5InvalidPayload, HandleOwnershipTransfer)
   {

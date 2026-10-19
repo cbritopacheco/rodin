@@ -583,6 +583,7 @@ namespace Rodin::Tests::Unit
         size_t* basisReads;
         size_t* tableReads;
         size_t* countReads;
+
         /**
          * @brief Observes an H1 geometry element's evaluation entry points.
          * @param geometry Reference geometry type.
@@ -597,6 +598,7 @@ namespace Rodin::Tests::Unit
             tableReads(&table),
             countReads(&count)
         {}
+
         /**
          * @brief Gets the underlying reference geometry.
          * @returns The element geometry type.
@@ -605,6 +607,7 @@ namespace Rodin::Tests::Unit
         {
           return element.getGeometry();
         }
+
         /**
          * @brief Gets the underlying basis count.
          * @returns Number of scalar basis functions.
@@ -614,6 +617,7 @@ namespace Rodin::Tests::Unit
           ++*countReads;
           return element.getCount();
         }
+
         /**
          * @brief Gets the geometry element order.
          * @returns The element order.
@@ -622,6 +626,7 @@ namespace Rodin::Tests::Unit
         {
           return element.getOrder();
         }
+
         /**
          * @brief Counts direct scalar basis access.
          * @param i Local scalar basis index.
@@ -632,6 +637,7 @@ namespace Rodin::Tests::Unit
           ++*basisReads;
           return element.getBasis(i);
         }
+
         /**
          * @brief Counts access to the existing shared reference table.
          * @param formula Formula defining the reference sample set.

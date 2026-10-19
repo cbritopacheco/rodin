@@ -68,10 +68,13 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Dimensionless absolute/relative budget for low-degree moments.
       static constexpr Real MomentTolerance = 1e-12;
+
       /// @brief Current source hot-cache capacity, not a public QF API contract.
       static constexpr size_t HotWorkingSet = 8;
+
       /// @brief One more distinct key forces cyclic round-robin eviction.
       static constexpr size_t PoolWorkingSet = HotWorkingSet + 1;
+
       /// @brief Disjoint point-rule keys used only to evict prior hot entries.
       static constexpr size_t EvictionOrder = 1024;
 

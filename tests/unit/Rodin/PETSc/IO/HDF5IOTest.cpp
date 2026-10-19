@@ -307,8 +307,10 @@ namespace
     private:
       /// @brief Unique checkpoint path owned by this test.
       boost::filesystem::path m_path;
+
       /// @brief HDF5 error callback restored after the test.
       H5E_auto2_t m_errorHandler = nullptr;
+
       /// @brief Original callback context.
       void* m_errorData = nullptr;
   };

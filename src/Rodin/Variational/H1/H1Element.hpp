@@ -53,6 +53,7 @@ namespace Rodin::Variational
     {
       /// @brief Index of the cached polytope.
       size_t i;
+
       /// @brief Second tensor-product index.
       size_t j;
     };
@@ -298,6 +299,7 @@ namespace Rodin::Variational
         }
         return 0;
       }
+
       /**
        * @brief Fixed modal rows containing a value followed by three derivatives.
        *

@@ -51,6 +51,7 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Budget for differently associated generic entry-loop quadrature.
       static constexpr Real ReferenceBudget = 1e-12;
+
       /// @brief Integration-order increment for a reference-data refresh.
       static constexpr size_t OrderIncrement = 4;
 

@@ -28,21 +28,25 @@ namespace Rodin::Tests::Unit
           m_scale(1),
           m_jacobians(0)
       {}
+
       /// @param scale New geometric dilation, published through fresh bindings.
       void setScale(Real scale)
       {
         m_scale = scale;
       }
+
       /// @returns Number of Jacobian evaluations performed by this map.
       size_t getJacobianCount() const
       {
         return m_jacobians;
       }
+
       /// @returns The affine order.
       size_t getOrder() const override
       {
         return 1;
       }
+
       /**
        * @brief Applies the geometric dilation.
        * @param pc Physical coordinates.
@@ -52,6 +56,7 @@ namespace Rodin::Tests::Unit
       {
         pc = m_scale * rc;
       }
+
       /**
        * @brief Evaluates the constant Jacobian.
        * @param matrix Physical Jacobian.
@@ -65,6 +70,7 @@ namespace Rodin::Tests::Unit
           getPhysicalDimension(), getReferenceDimension());
         matrix *= m_scale;
       }
+
       /// @returns An independently owned copy of the map.
       BindingMap* copy() const noexcept override
       {
@@ -225,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(rule.integrate(0, 0), fresh.integrate(0, 0));
     EXPECT_EQ(rule.integrate(0, 0), before);
   }
+
   /// @brief Unary, binary, matrix and component nodes forward fresh cell bindings.
   TYPED_TEST(BindingTest, NestedExpressionsPropagateBindings)
   {

@@ -103,6 +103,7 @@ namespace Rodin::Tests::Unit
     auto copied = first;
     checkScotchPartition(copied, 2, 2);
   }
+
   /// @brief Requests outside Scotch's integer range or the mesh dimensions fail safely.
   TEST(ScotchPartitioner, InvalidArguments)
   {

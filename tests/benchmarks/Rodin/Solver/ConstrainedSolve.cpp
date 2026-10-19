@@ -59,14 +59,19 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Matches the tolerance in the native Poisson convergence solve.
       static constexpr Real SolverTolerance = 1e-13;
+
       /// @brief Matches the iteration cap in the native Poisson convergence solve.
       static constexpr size_t MaximumIterations = 20000;
+
       /// @brief Allows roundoff amplification beyond the requested CG tolerance.
       static constexpr Real ResidualTolerance = 1e-11;
+
       /// @brief Allows conditioning to amplify algebraic residual into coefficient error.
       static constexpr Real CoefficientTolerance = 1e-9;
+
       /// @brief Matches the constrained-assembly original-kernel comparison budget.
       static constexpr Real AssemblyTolerance = 1e-11;
+
       /// @brief Matches the existing wrong-field sensitivity floor.
       static constexpr Real SensitivityFloor = 1e-4;
 

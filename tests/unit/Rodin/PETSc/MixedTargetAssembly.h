@@ -25,6 +25,7 @@ namespace Rodin::Tests::Unit
 {
   using namespace Geometry;
   using namespace Variational;
+
   /// @brief Mixed local, nonlocal and preassembled terms obey separate target updates.
   template <template <class, class> class Assembler, bool Affine = false, class Space,
     class Scalar = PetscScalar>

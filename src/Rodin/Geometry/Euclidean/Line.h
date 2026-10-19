@@ -36,6 +36,7 @@ namespace Rodin::Geometry::Euclidean
     public:
       /// @brief Fixed-size coordinate vector in the ambient dimension.
       using Vector = typename Point<Dimension, T>::Vector;
+
       /// @brief Empty, single-point or two-point intersection with a sphere.
       using Intersections = std::variant<std::nullopt_t, Point<Dimension, T>,
         std::pair<Point<Dimension, T>, Point<Dimension, T>>>;
@@ -106,11 +107,13 @@ namespace Rodin::Geometry::Euclidean
       {
         return Dimension;
       }
+
       /// @brief Gets the origin. @returns An anchor point.
       const Point<Dimension, T>& origin() const
       {
         return m_origin;
       }
+
       /// @brief Gets a unit direction. @returns Normalized direction.
       Vector direction() const
       {
@@ -125,11 +128,13 @@ namespace Rodin::Geometry::Euclidean
         else
           return m_direction / m_direction.stableNorm();
       }
+
       /// @brief Evaluates the affine parameterization. @param t Parameter. @returns Point on the line.
       Point<Dimension, T> pointAt(T t) const
       {
         return m_origin + t * m_direction;
       }
+
       /// @brief Projects a point orthogonally. @param p Point. @returns Closest point on the line.
       Point<Dimension, T> project(const Point<Dimension, T>& p) const
       {
@@ -141,6 +146,7 @@ namespace Rodin::Geometry::Euclidean
           return m_origin + unit.dot(p - m_origin) * unit;
         }
       }
+
       /// @brief Computes point distance. @param p Point. @returns Euclidean distance.
       T distance(const Point<Dimension, T>& p) const
       {
@@ -153,6 +159,7 @@ namespace Rodin::Geometry::Euclidean
         const auto point = getUniqueClosestPoint(other);
         return point ? *point : m_origin;
       }
+
       /// @brief Computes line distance, including skew lines. @param other Line. @returns Minimum distance.
       T distance(const Line& other) const
       {
@@ -196,8 +203,10 @@ namespace Rodin::Geometry::Euclidean
           return {};
         return point;
       }
+
       /// @brief Intersects a sphere. @param sphere Sphere. @returns Zero, one, or two points.
       Intersections intersect(const Sphere<Dimension, T>& sphere) const;
+
       /// @brief Connects to a disjoint sphere. @param sphere Sphere. @returns Unique shortest segment when separated.
       Optional<LineSegment<Dimension, T>> connect(
         const Sphere<Dimension, T>& sphere) const;
@@ -208,24 +217,28 @@ namespace Rodin::Geometry::Euclidean
       {
         return m_coefficients[0];
       }
+
       /// @brief Gets the second planar normal coefficient. @returns Coefficient b.
       T b() const
         requires(Dimension == 2)
       {
         return m_coefficients[1];
       }
+
       /// @brief Gets the planar constant. @returns Coefficient c.
       T c() const
         requires(Dimension == 2)
       {
         return m_coefficients[2];
       }
+
       /// @brief Evaluates the planar implicit equation. @param p Point. @returns Signed equation value.
       T operator()(const Point<Dimension, T>& p) const
         requires(Dimension == 2)
       {
         return a() * p[0] + b() * p[1] - c();
       }
+
       /// @brief Evaluates planar ordinate. @param x Abscissa. @returns Ordinate, absent for vertical lines.
       Optional<T> operator()(T x) const
         requires(Dimension == 2)
@@ -234,6 +247,7 @@ namespace Rodin::Geometry::Euclidean
           return {};
         return (c() - a() * x) / b();
       }
+
       /// @brief Gets planar slope. @returns Slope, absent for vertical lines.
       Optional<T> slope() const
         requires(Dimension == 2)
@@ -242,6 +256,7 @@ namespace Rodin::Geometry::Euclidean
           return {};
         return -a() / b();
       }
+
       /// @brief Gets planar abscissa intercept. @returns Intercept when unique.
       Optional<T> xIntercept() const
         requires(Dimension == 2)
@@ -250,6 +265,7 @@ namespace Rodin::Geometry::Euclidean
           return {};
         return c() / a();
       }
+
       /// @brief Gets planar ordinate intercept. @returns Intercept when unique.
       Optional<T> yIntercept() const
         requires(Dimension == 2)
@@ -258,12 +274,14 @@ namespace Rodin::Geometry::Euclidean
           return {};
         return c() / b();
       }
+
       /// @brief Tests planar verticality. @returns Whether the second coefficient vanishes.
       bool isVertical() const
         requires(Dimension == 2)
       {
         return b() == T(0);
       }
+
       /// @brief Tests planar horizontality. @returns Whether the first coefficient vanishes.
       bool isHorizontal() const
         requires(Dimension == 2)

@@ -55,8 +55,10 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Existing full-operator and load reference-comparison budget.
       static constexpr Real AssemblyTolerance = 1e-11;
+
       /// @brief Existing manufactured coefficient-patch residual budget.
       static constexpr Real PatchTolerance = 1e-10;
+
       /// @brief Wrong-field and omitted-term rejection floor, outside timing.
       static constexpr Real SensitivityFloor = 1e-4;
 

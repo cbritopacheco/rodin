@@ -46,6 +46,7 @@ namespace Rodin::Tests::Unit
     public:
       /// @brief Original scalar space type.
       using Base = H1<K, Scalar>;
+
       /// @brief Logical entity identified by dimension and local index.
       using Entity = std::pair<size_t, Index>;
 

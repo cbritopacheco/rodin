@@ -32,8 +32,10 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Integrates polynomial patches and rational pyramid basis products.
       static constexpr size_t QuadratureOrder = 12;
+
       /// @brief Above the first unit-box Dirichlet eigenvalue in dimensions 1--3.
       static constexpr Real ShiftedWaveNumberSquared = 64;
+
       /// @brief Positive imaginary physical mass shift, not a solver parameter.
       static constexpr Real Absorption = 1;
 

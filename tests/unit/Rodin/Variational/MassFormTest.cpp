@@ -27,6 +27,7 @@ namespace Rodin::Tests::Unit
     public:
       /// @brief Production scalar space.
       using Parent = Variational::H1<K, Scalar>;
+
       /// @brief Production scalar finite element.
       using BaseElement = Variational::H1Element<K, Scalar>;
 
@@ -82,6 +83,7 @@ namespace Rodin::Tests::Unit
           {
             return m_element.get().getCount();
           }
+
           /// @brief Returns the unchanged total polynomial order.
           size_t getOrder() const
           {
@@ -168,6 +170,7 @@ namespace Rodin::Variational
     public:
       /// @brief Production H1 shape-function interface.
       using Parent = ShapeFunction<Derived, H1<K, Scalar>, Space>;
+
       /// @brief Counted space retained by the named leaf interface.
       using FESType = Tests::Unit::CountingMassSpace<K, Scalar>;
 

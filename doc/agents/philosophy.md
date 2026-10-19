@@ -221,6 +221,9 @@ rather than extended:
   deleted or omitted.
 - Use `/** ... */` for multiline Doxygen documentation and `///` for
   single-line documentation. Use `///<` for trailing member documentation.
+  Leave a blank line between each declaration or definition and the next
+  standalone documentation block, including individually documented aliases
+  and data members. Keep each block attached to its own declaration.
   Integrate API contracts and explanatory prose into the relevant Doxygen block;
   remove redundant ordinary comments beside it.
   Document every parameter, including intentionally unused inputs and deduction

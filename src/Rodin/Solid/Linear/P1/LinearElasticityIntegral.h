@@ -86,6 +86,7 @@ namespace Rodin::Variational
 
       /// @brief Shear modulus function type.
       using MuType = FunctionBase<MuDerived>;
+
       /// @brief First Lamé parameter function type.
       using LambdaType = FunctionBase<LambdaDerived>;
 

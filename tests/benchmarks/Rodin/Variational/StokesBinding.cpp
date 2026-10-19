@@ -42,6 +42,7 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Shared polynomial quadrature order of the complete Stokes consumer.
       static constexpr size_t QuadratureOrder = 16;
+
       /// @brief Relative Frobenius budget used by the original-loop assembly oracle.
       static constexpr Real ReferenceTolerance = 1e-11;
 

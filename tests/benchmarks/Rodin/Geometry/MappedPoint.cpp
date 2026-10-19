@@ -90,8 +90,10 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Positive curvature chosen to keep every sampled map regular.
       static constexpr Real Curvature = Real(1) / 8;
+
       /// @brief Roundoff allowance for independently represented dimensionless maps.
       static constexpr Real OracleTolerance = 1e-9;
+
       /// @brief One more live rule than the reference store's eight-entry capacity.
       static constexpr size_t ReferenceVersions = 9;
 

@@ -22,18 +22,22 @@ namespace Rodin::Tests::Unit
         : PolytopeTransformation(1, 1),
           m_scale(1)
       {}
+
       /// @brief Preserves constant-evaluated destruction.
       constexpr ~StateTransformation() override = default;
+
       /**
        * @brief Copies geometry into a fresh state.
        * @param other Source map.
        */
       constexpr StateTransformation(const StateTransformation& other) = default;
+
       /**
        * @brief Moves geometry into a fresh state.
        * @param other Source map.
        */
       constexpr StateTransformation(StateTransformation&& other) noexcept = default;
+
       /**
        * @brief Replaces the geometry state by move assignment.
        * @param other Source map.
@@ -49,6 +53,7 @@ namespace Rodin::Tests::Unit
       {
         m_scale = scale;
       }
+
       /**
        * @brief Returns the affine map order.
        * @returns One.
@@ -57,6 +62,7 @@ namespace Rodin::Tests::Unit
       {
         return 1;
       }
+
       /**
        * @brief Applies the scalar dilation.
        * @param pc Output physical coordinates.
@@ -66,6 +72,7 @@ namespace Rodin::Tests::Unit
       {
         pc = rc * m_scale;
       }
+
       /**
        * @brief Evaluates the constant map derivative.
        * @param jacobian Output derivative matrix.
@@ -77,6 +84,7 @@ namespace Rodin::Tests::Unit
         jacobian.resize(1, 1);
         jacobian(0, 0) = m_scale;
       }
+
       /**
        * @brief Copies the map polymorphically.
        * @returns A new map owned by the caller.

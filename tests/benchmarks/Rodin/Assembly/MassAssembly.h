@@ -46,6 +46,7 @@ namespace Rodin::Tests::Benchmarks
     public:
       /// @brief Relative budget for the independently integrated constant-field energy.
       static constexpr Real EnergyBudget = 1e-10;
+
       /// @brief Relative budget for differently associated original-entry assembly.
       static constexpr Real OperatorBudget = 1e-11;
 

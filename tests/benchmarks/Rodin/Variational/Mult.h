@@ -422,8 +422,10 @@ namespace Rodin::Tests::Benchmarks
 
   /// @brief Registers H1 degrees one through three in one compilation unit.
   void registerBasisScalingH1();
+
   /// @brief Registers H1 degrees four through six in one compilation unit.
   void registerBasisScalingHigherOrder();
+
   /// @brief Registers P1, P0 and P0g in one compilation unit.
   void registerBasisScalingFixedDegree();
 }

@@ -73,6 +73,7 @@ namespace Rodin::Variational
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>, FESType,
           TestSpace>;
+
       /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       /// @brief Scalar value type.
@@ -926,13 +927,16 @@ namespace Rodin::Variational
   {
     /// @brief Original coefficient operand type.
     using CoefficientType = FunctionBase<CoefficientDerived>;
+
     /// @brief Direct H1 trial operand type.
     using MultiplicandType =
       ShapeFunctionBase<ShapeFunction<Derived, H1<K, Range, Mesh>, TrialSpace>,
         H1<K, Range, Mesh>, TrialSpace>;
+
     /// @brief Whether the original left-coefficient rule accepts this range.
     static constexpr bool Value = !FormLanguage::IsTensorRange<
       typename FormLanguage::Traits<CoefficientType>::RangeType>::Value;
+
     /// @brief Whether the coefficient precedes the trial operand.
     static constexpr bool CoefficientOnLeft = true;
   };
@@ -958,10 +962,12 @@ namespace Rodin::Variational
   {
     /// @brief Original coefficient operand type.
     using CoefficientType = FunctionBase<CoefficientDerived>;
+
     /// @brief Direct H1 trial operand type.
     using MultiplicandType =
       ShapeFunctionBase<ShapeFunction<Derived, H1<K, Range, Mesh>, TrialSpace>,
         H1<K, Range, Mesh>, TrialSpace>;
+
     /// @brief Whether the scalar coefficient acts on an aggregate carrier.
     static constexpr bool Value = (FormLanguage::IsVectorRange<Range>::Value ||
                                     FormLanguage::IsMatrixRange<Range>::Value) &&
@@ -969,6 +975,7 @@ namespace Rodin::Variational
          Real> ||
         std::is_same_v<typename FormLanguage::Traits<CoefficientType>::RangeType,
           Complex>);
+
     /// @brief Whether the coefficient precedes the trial operand.
     static constexpr bool CoefficientOnLeft = false;
   };
@@ -1070,6 +1077,7 @@ namespace Rodin::Variational
 
       /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = typename Operands::CoefficientType;
+
       /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
@@ -3791,6 +3799,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
@@ -3806,8 +3815,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -4131,10 +4142,13 @@ namespace Rodin::Variational
     public:
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
+
       /// @brief Scalar coefficient expression type.
       using CoefficientType = FunctionBase<CoeffDerived>;
+
       /// @brief Scalar type of the coefficient expression.
       using ScalarType = typename FormLanguage::Traits<CoefficientType>::ScalarType;
 
@@ -4154,6 +4168,7 @@ namespace Rodin::Variational
 
       /// @brief Rank-one Jacobian integrand type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Base local bilinear-form integrator type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -4448,6 +4463,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
@@ -4469,8 +4485,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 

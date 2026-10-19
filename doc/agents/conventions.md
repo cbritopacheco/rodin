@@ -43,6 +43,13 @@ Comment reflow remains disabled to preserve mathematical documentation;
 existing block-comment indentation may be retained by clang-format. Align
 each documentation block with its declaration when editing it.
 
+Always leave a blank line between the end of a declaration or definition and
+the next standalone Doxygen documentation block, including `///` comments.
+This also separates individually documented aliases and data members. Keep
+the documentation attached to its own declaration, and do not insert blank
+lines within one documentation block. The canonical formatter enforces this
+spacing through the existing changed-line CI check.
+
 ## Const correctness
 
 **`const_cast` is forbidden.** Operations that update assembly or evaluation
