@@ -256,7 +256,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(IntegrationPoint(transferred, 0).getReferenceQuadratureFormula(), nullptr);
     const PolytopeQuadrature rebuilt(cell, formula);
     EXPECT_EQ(IntegrationPoint(rebuilt, 0).getReferenceQuadratureFormula(), &formula);
-    EXPECT_THROW(IntegrationPoint(rebuilt, rebuilt.getSize()), std::out_of_range);
+    EXPECT_THROW(IntegrationPoint(rebuilt, rebuilt.getSize()), Alert::Exception);
   }
 
   /**

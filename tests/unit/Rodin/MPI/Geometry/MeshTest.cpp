@@ -347,9 +347,7 @@ TEST(MPI_Geometry_Mesh, ReconciliationWithEmptyRootAcrossGeometries)
   }
 }
 
-/**
- * @brief Non-strict finite caps preserve fully propagated IDs and ownership metadata.
- */
+/// @brief Non-strict finite caps preserve fully propagated IDs and ownership metadata.
 TEST(MPI_Geometry_Mesh, NonStrictRoundCapsPreserveConvergedEntities)
 {
   boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
@@ -525,9 +523,11 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
               EXPECT_EQ(&mesh.setVertexCoordinates(vertex, Real(2) * coordinates), &mesh);
             else
               for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+              {
                 EXPECT_EQ(&mesh.setVertexCoordinates(
                             vertex, Real(2) * coordinates[coordinate], coordinate),
                   &mesh);
+              }
           }
         }
         for (size_t coordinate = 0; coordinate < dimension; ++coordinate)

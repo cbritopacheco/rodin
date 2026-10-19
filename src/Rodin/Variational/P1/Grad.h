@@ -132,7 +132,6 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
