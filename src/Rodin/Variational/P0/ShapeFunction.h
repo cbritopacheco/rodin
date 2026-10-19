@@ -79,11 +79,8 @@ namespace Rodin::Variational
                 return geom == o.geom && vdim == o.vdim;
               }
 
-          /**
-           * @brief Resets the key, invalidating the cached entry.
-           * @param other Object to copy from.
-           */
-              void operator=(std::initializer_list<int> other) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
               {
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;

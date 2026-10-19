@@ -308,17 +308,17 @@ namespace Rodin::Variational
         struct CellKey
         {
           /// @brief Mesh the cached tabulation belongs to.
-          const void* mesh;
+          const Geometry::MeshBase* mesh;
           /// @brief Topological dimension of the cached polytope.
-          size_t d;
+          size_t dimension;
           /// @brief Index of the cached polytope.
-          Index i;
+          Index index;
           /// @brief Geometry of the cached polytope.
-          Geometry::Polytope::Type geom;
+          Geometry::Polytope::Type geometry;
           /// @brief Order of the geometric transformation.
-          int transOrder;
+          size_t transformationOrder;
           /// @brief Vector dimension of the finite element space.
-          size_t vdim;
+          size_t vectorDimension;
 
           /// @brief Whether the key holds a cached entry.
           bool valid;
@@ -326,11 +326,11 @@ namespace Rodin::Variational
           /// @brief Constructs an invalid cell key.
           CellKey()
             : mesh(nullptr),
-              d(0),
-              i(0),
-              geom(Geometry::Polytope::Type::Point),
-              transOrder(1),
-              vdim(0),
+              dimension(0),
+              index(0),
+              geometry(Geometry::Polytope::Type::Point),
+              transformationOrder(1),
+              vectorDimension(0),
               valid(false)
           {}
 
@@ -352,43 +352,42 @@ namespace Rodin::Variational
           {
             if (!valid || !o.valid)
               return false;
-            return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
-              transOrder == o.transOrder && vdim == o.vdim;
+            return mesh == o.mesh && dimension == o.dimension && index == o.index &&
+              geometry == o.geometry &&
+              transformationOrder == o.transformationOrder &&
+              vectorDimension == o.vectorDimension;
           }
 
-          /**
-           * @brief Resets the key, invalidating the cached entry.
-           * @param other Object to copy from.
-           */
-          void operator=([[maybe_unused]] std::initializer_list<int> other) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
           {
             valid = false;
             mesh = nullptr;
-            d = 0;
-            i = 0;
-            geom = Geometry::Polytope::Type::Point;
-            transOrder = 1;
-            vdim = 0;
+            dimension = 0;
+            index = 0;
+            geometry = Geometry::Polytope::Type::Point;
+            transformationOrder = 1;
+            vectorDimension = 0;
           }
         };
 
         /// @brief Key identifying the quadrature point a tabulation was computed for.
-        struct QpKey
+        struct QuadraturePointKey
         {
             /// @brief Quadrature formula the cached tabulation belongs to.
-            const QF::QuadratureFormulaBase* qf;
+          const QF::QuadratureFormulaBase* formula;
             /// @brief Logical lifetime and assignment identity of the formula.
-            size_t identity;
+          size_t formulaIdentity;
             /// @brief Index of the quadrature point.
-            size_t qp;
+          size_t index;
             /// @brief Whether the key holds a cached entry.
             bool valid;
 
             /// @brief Constructs an invalid quadrature cache key.
-            QpKey()
-              : qf(nullptr),
-                identity(0),
-                qp(0),
+          QuadraturePointKey()
+            : formula(nullptr),
+              formulaIdentity(0),
+              index(0),
                 valid(false)
             {}
 
@@ -406,23 +405,21 @@ namespace Rodin::Variational
              * @returns Whether the operands compare equal.
              * @param o Key to compare with this key.
              */
-            bool operator==(const QpKey& o) const noexcept
+          bool operator==(const QuadraturePointKey& o) const noexcept
             {
               if (!valid || !o.valid)
                 return false;
-              return qf == o.qf && identity == o.identity && qp == o.qp;
+            return formula == o.formula && formulaIdentity == o.formulaIdentity &&
+              index == o.index;
             }
 
-            /**
-             * @brief Resets the key, invalidating the cached entry.
-             * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
-             */
-            void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
             {
               valid = false;
-              qf = nullptr;
-              identity = 0;
-              qp = 0;
+            formula = nullptr;
+            formulaIdentity = 0;
+            index = 0;
             }
         };
 
@@ -433,7 +430,7 @@ namespace Rodin::Variational
         /// @brief Key of the cached cell tabulation.
         CellKey cellKey;
         /// @brief Key of the cached quadrature-point tabulation.
-        QpKey qpKey;
+        QuadraturePointKey quadraturePointKey;
       };
 
       /**
@@ -529,15 +526,15 @@ namespace Rodin::Variational
       Div& setPolytope(const Geometry::Polytope& polytope)
       {
         m_ip = nullptr;
-        m_binding = {};
-        m_cache.cellKey = {};
-        m_cache.qpKey = {};
-        m_binding.mesh = static_cast<const void*>(&polytope.getMesh());
-        m_binding.d = polytope.getDimension();
-        m_binding.i = polytope.getIndex();
-        m_binding.geom = polytope.getGeometry();
-        m_binding.transOrder = polytope.getTransformation().getOrder();
-        m_binding.vdim = this->getFiniteElementSpace().getVectorDimension();
+        m_binding.reset();
+        m_cache.cellKey.reset();
+        m_cache.quadraturePointKey.reset();
+        m_binding.mesh = &polytope.getMesh();
+        m_binding.dimension = polytope.getDimension();
+        m_binding.index = polytope.getIndex();
+        m_binding.geometry = polytope.getGeometry();
+        m_binding.transformationOrder = polytope.getTransformation().getOrder();
+        m_binding.vectorDimension = this->getFiniteElementSpace().getVectorDimension();
         m_binding.valid = true;
         return *this;
       }
@@ -566,7 +563,7 @@ namespace Rodin::Variational
         const auto geom = poly.getGeometry();
 
         const auto& transformation = poly.getTransformation();
-        const int transOrder = transformation.getOrder();
+        const size_t transformationOrder = transformation.getOrder();
         const auto* qf = ip.getReferenceQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
@@ -574,47 +571,48 @@ namespace Rodin::Variational
         assert(vdim == d);
 
         // cell key
-        typename Cache::CellKey ckey;
-        ckey.mesh = static_cast<const void*>(&mesh);
-        ckey.d = d;
-        ckey.i = i;
-        ckey.geom = geom;
-        ckey.transOrder = transOrder;
-        ckey.vdim = vdim;
-        ckey.valid = true;
+        typename Cache::CellKey cellKey;
+        cellKey.mesh = &mesh;
+        cellKey.dimension = d;
+        cellKey.index = i;
+        cellKey.geometry = geom;
+        cellKey.transformationOrder = transformationOrder;
+        cellKey.vectorDimension = vdim;
+        cellKey.valid = true;
 
-        const bool cellChanged = !(m_binding == ckey) || !(m_cache.cellKey == ckey);
+        const bool cellChanged = !(m_binding == cellKey) || !(m_cache.cellKey == cellKey);
         if (cellChanged)
         {
-          m_cache.cellKey = ckey;
-          m_cache.qpKey = {};
+          m_cache.cellKey = cellKey;
+          m_cache.quadraturePointKey.reset();
 
           const size_t nv = Geometry::Polytope::Traits(geom).getVertexCount();
           m_cache.div.resize(vdim * nv);
         }
 
-        const bool needsQp = (transOrder > 1) || isTensorGeom(geom) ||
+        const bool needsQp = (transformationOrder > 1) || isTensorGeom(geom) ||
           geom == Geometry::Polytope::Type::Pyramid;
 
-        typename Cache::QpKey qkey;
+        typename Cache::QuadraturePointKey quadraturePointKey;
         if (needsQp)
         {
-          qkey.qf = qf;
-          qkey.identity = qf ? qf->getCacheIdentity() : 0;
-          qkey.qp = qf ? ip.getIndex() : 0;
-          qkey.valid = true;
+          quadraturePointKey.formula = qf;
+          quadraturePointKey.formulaIdentity = qf ? qf->getCacheIdentity() : 0;
+          quadraturePointKey.index = qf ? ip.getIndex() : 0;
+          quadraturePointKey.valid = true;
         }
         else
         {
-          qkey.qf = nullptr;
-          qkey.qp = 0;
-          qkey.valid = true;
+          quadraturePointKey.formula = nullptr;
+          quadraturePointKey.index = 0;
+          quadraturePointKey.valid = true;
         }
 
-        const bool qpChanged = (needsQp && !qf) || !(m_cache.qpKey == qkey);
-        if (cellChanged || qpChanged)
+        const bool quadraturePointChanged =
+          (needsQp && !qf) || !(m_cache.quadraturePointKey == quadraturePointKey);
+        if (cellChanged || quadraturePointChanged)
         {
-          m_cache.qpKey = qkey;
+          m_cache.quadraturePointKey = quadraturePointKey;
 
           const P1Element<ScalarType> feScalar(geom);
           const size_t nv = feScalar.getCount();

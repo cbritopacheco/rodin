@@ -82,11 +82,8 @@ namespace Rodin::Variational
                 return geom == o.geom && vdim == o.vdim;
               }
 
-          /**
-           * @brief Resets the key, invalidating the cached entry.
-           * @param other Object to copy from.
-           */
-              void operator=(std::initializer_list<int> other) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
               {
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;
@@ -135,11 +132,8 @@ namespace Rodin::Variational
               return qf == o.qf && identity == o.identity && qp == o.qp;
             }
 
-          /**
-           * @brief Resets the key, invalidating the cached entry.
-           * @param other Object to copy from.
-           */
-            void operator=(std::initializer_list<int> other) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
             {
               valid = false;
               qf = nullptr;
@@ -274,7 +268,7 @@ namespace Rodin::Variational
         if (structureChanged)
         {
           m_cache.skey = skey;
-          m_cache.vkey = {}; // invalidate value cache
+          m_cache.vkey.reset(); // invalidate value cache
 
           const size_t nv = Geometry::Polytope::Traits(geom).getVertexCount();
           m_cache.phi_vertex.resize(nv);

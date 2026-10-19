@@ -452,7 +452,7 @@ namespace Rodin::Variational
         private:
           std::reference_wrapper<const FunctionBase> m_function;
           bool m_bound;
-          std::optional<Value> m_value;
+          Optional<Value> m_value;
       };
 
       /**

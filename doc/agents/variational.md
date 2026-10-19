@@ -127,7 +127,9 @@ a convenience wrapper or changing the existing P1/H1 tabulation path.
 
 Cell binding is an explicit evaluation boundary. Generic local quadrature
 rules propagate `setPolytope()` through their expression trees before replacing
-owned quadrature. Composite nodes forward the operation and coefficient caches
+owned quadrature. Every shape leaf implements the binding operation explicitly;
+the CRTP base forwards directly, including through custom expression wrappers.
+Composite nodes forward the operation and coefficient caches
 invalidate their point snapshots while retaining owned allocation for reuse. Native P1 Grad/Div/Jacobian reset prepared physical
 results on every cell bind, retain allocated buffers, and reuse affine simplex
 results across samples only while the cell binding matches. Direct point binds
@@ -142,6 +144,9 @@ the current point binding. Shared fields acquire no mutable cell binding.
 DeformationMap owns one explicitly prepared moved point: point binding locates
 once, parameterless access reuses it, cell binding clears it, and direct point
 queries always locate afresh. No transformation token, UUID or revision is used.
+Binding setters, invalidation, and direct evaluation mutate this owned working
+object and are non-const. Const coefficient evaluation owns a mutable evaluator;
+the prepared moved-point accessor remains const.
 
 `FiniteElement.h` defines the element side: `getBasis(local)`,
 `getNode(local)` (reference nodes), counts per `Polytope::Type`.

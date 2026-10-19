@@ -474,7 +474,10 @@ namespace Rodin::Variational
         Modal::tabulate(typename Modal::Gradients{m_modal}, point);
       }
 
-      /// @brief Returns the number of scalar nodal basis functions.
+      /**
+       * @brief Returns the number of scalar nodal basis functions.
+       * @returns Number of scalar nodal basis functions in this evaluation.
+       */
       static constexpr size_t getCount()
       {
         return std::tuple_size_v<typename Modal::Tabulation>;
@@ -513,6 +516,13 @@ namespace Rodin::Variational
       const Math::Matrix<Real>& m_inverse;
   };
 
+  /**
+   * @brief Prepares shared modal derivatives for nodal gradient evaluation.
+   * @tparam ReferenceGeometry Tetrahedron or pyramid reference geometry.
+   * @param point Reference coordinates; optional trailing padding is ignored.
+   * @returns Owned modal derivatives with shared inverse Vandermonde access.
+   * @throws Alert::Exception If the geometry or coordinates are incompatible.
+   */
   template <size_t K, class Scalar>
   template <Geometry::Polytope::Type ReferenceGeometry>
   auto H1Element<K, Scalar>::tabulate(

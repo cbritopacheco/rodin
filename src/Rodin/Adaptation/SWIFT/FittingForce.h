@@ -111,7 +111,7 @@ namespace Rodin::Adaptation::SWIFT
     private:
       std::unique_ptr<PhiType> m_phi;
       std::unique_ptr<GradType> m_grad;
-      DeformationMap<Displacement, LocatorType> m_deformation;
+      mutable DeformationMap<Displacement, LocatorType> m_deformation;
       Loss m_loss;
       Real m_normalization;
       std::size_t m_dimension;

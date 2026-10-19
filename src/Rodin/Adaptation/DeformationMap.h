@@ -7,7 +7,6 @@
 #ifndef RODIN_ADAPTATION_DEFORMATIONMAP_H
 #define RODIN_ADAPTATION_DEFORMATIONMAP_H
 
-#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Mesh.h"
@@ -30,6 +29,7 @@ namespace Rodin::Adaptation
    * Evaluation objects are local to a pass and must not be shared concurrently.
    *
    * @tparam Displacement Displacement grid function type.
+   * @tparam LocatorType Point locator used in the displaced configuration.
    */
   template <class Displacement, class LocatorType>
   class DeformationMap
@@ -59,8 +59,7 @@ namespace Rodin::Adaptation
        * @param polytope Source entity for the next evaluation pass.
        * @returns This unbound point evaluator.
        */
-      const DeformationMap& setPolytope(
-        [[maybe_unused]] const Geometry::Polytope& polytope) const
+      DeformationMap& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
       {
         invalidate();
         return *this;
@@ -71,8 +70,7 @@ namespace Rodin::Adaptation
        * @param ip Source integration point; no reference to it is retained.
        * @returns This evaluator with an owned moved-point result.
        */
-      const DeformationMap& setIntegrationPoint(
-        const Variational::IntegrationPoint& ip) const
+      DeformationMap& setIntegrationPoint(const Variational::IntegrationPoint& ip)
       {
         getMovedPoint(ip);
         return *this;
@@ -124,18 +122,17 @@ namespace Rodin::Adaptation
        * @param ip Source integration point.
        * @returns Located moved point, replaced by the next evaluation.
        */
-      const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
+      const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip)
       {
         invalidate();
         const auto& point = ip.getPoint();
-        m_moved.emplace(makeMovedPoint(point,
-          point.getPhysicalCoordinates() + getDisplacementValue(point, ip),
-          m_locator.get()));
+        m_moved.emplace(makeMovedPoint(
+          point, point.getPhysicalCoordinates() + getDisplacementValue(point, ip)));
         return *m_moved;
       }
 
       /// @brief Drops the cached point, forcing the next request to relocate.
-      void invalidate() const
+      void invalidate()
       {
         m_moved.reset();
       }
@@ -145,30 +142,30 @@ namespace Rodin::Adaptation
        * @brief Resolves a point at moved physical coordinates.
        * @param source Source point retaining the reference cell and coordinates.
        * @param physical Moved physical coordinates.
-       * @param locator Locator used to resolve the moved point.
        * @returns Located moved point, or an inverse-mapped point in the source volume cell or an adjacent volume cell when location fails.
        */
-      static Geometry::Point makeMovedPoint(const Geometry::Point& source,
-        const Math::SpatialVector<Real>& physical, const LocatorType& locator)
+      Geometry::Point makeMovedPoint(
+        const Geometry::Point& source, const Math::SpatialVector<Real>& physical) const
       {
         const auto& sourcePolytope = source.getPolytope();
         const auto& mesh = sourcePolytope.getMesh();
         const std::size_t dimension = mesh.getDimension();
-        if (auto located = locator.locate(dimension, physical))
+        if (auto located = m_locator.get().locate(dimension, physical))
           return std::move(*located);
 
-        Index cell = Index(-1);
+        Index cell;
         if (sourcePolytope.getDimension() == dimension)
           cell = sourcePolytope.getIndex();
         else
         {
-          assert(sourcePolytope.getDimension() + 1 == dimension);
+          if (sourcePolytope.getDimension() + 1 != dimension)
+            Alert::MemberFunctionException(*this, __func__)
+              << "Deformation fallback requires a source cell or facet." << Alert::Raise;
           const auto& adjacent = mesh.getConnectivity()
                                    .getIncidence(dimension - 1, dimension)
                                    .at(sourcePolytope.getIndex());
           if (adjacent.empty())
-            Alert::NamespacedException(
-              "Rodin::Adaptation::DeformationMap::makeMovedPoint")
+            Alert::MemberFunctionException(*this, __func__)
               << "Deformation map source face has no adjacent cell." << Alert::Raise;
           cell = *adjacent.begin();
         }
@@ -180,7 +177,7 @@ namespace Rodin::Adaptation
 
       std::reference_wrapper<const Displacement> m_u;
       std::reference_wrapper<const LocatorType> m_locator;
-      mutable Optional<Geometry::Point> m_moved;
+      Optional<Geometry::Point> m_moved;
   };
 }
 

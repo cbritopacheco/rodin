@@ -29,7 +29,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param loss Loss applied to the observation residual.
        */
       ResidualState(const PhiType& phi, const GradType& grad,
-        const DeformationType& deformation, const Variational::IntegrationPoint& ip,
+        DeformationType& deformation, const Variational::IntegrationPoint& ip,
         const Loss& loss)
       {
         deformation.setIntegrationPoint(ip);

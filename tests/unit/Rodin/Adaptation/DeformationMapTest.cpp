@@ -153,6 +153,37 @@ namespace Rodin::Tests::Unit
     checkPointEvaluation<3, 3>();
   }
 
+  /// @brief Failed location diagnoses unsupported source dimensions and clears binding state.
+  TEST(Rodin_Adaptation_DeformationMap, FallbackRequiresCellOrFacet)
+  {
+    struct MissingLocator
+    {
+      Optional<Point> locate([[maybe_unused]] size_t dimension,
+        [[maybe_unused]] const Math::SpatialPoint& physical) const
+      {
+        return {};
+      }
+    };
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto cell = *mesh.getCell();
+    const auto vertex = *mesh.getPolytope(0, 0);
+    VectorFunction zero(
+      size_t(2), [](const Point&) { return Math::SpatialVector<Real>{0, 0}; });
+    MissingLocator locator;
+    DeformationMap deformation(zero, locator);
+    const Point source(cell, Math::SpatialPoint{Real(0.25), Real(0.25)});
+    const IntegrationPoint cellPoint(source);
+    deformation.setPolytope(cell).setIntegrationPoint(cellPoint);
+    EXPECT_EQ((deformation.getMovedPoint().getPhysicalCoordinates() -
+                source.getPhysicalCoordinates())
+                .norm(),
+      0);
+    const Point vertexSource(vertex, Math::SpatialPoint(0));
+    const IntegrationPoint vertexPoint(vertexSource);
+    EXPECT_THROW(deformation.setIntegrationPoint(vertexPoint), Alert::Exception);
+    EXPECT_THROW(deformation.getMovedPoint(), Alert::Exception);
+  }
+
   /**
    * @brief Located-point reuse follows reference association and local state.
    *

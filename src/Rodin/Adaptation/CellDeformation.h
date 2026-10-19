@@ -257,7 +257,8 @@ namespace Rodin::Adaptation
       /// @brief Below this @f$|j|@f$ the cofactor via the inverse is unreliable.
       static constexpr Real singularTolerance = Real(1e-14);
 
-      void invalidate() const
+      /// @brief Clears derived quantities after changing the deformation gradient.
+      void invalidate()
       {
         m_j.reset();
         m_FinvT.reset();

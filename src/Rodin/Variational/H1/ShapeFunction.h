@@ -95,11 +95,8 @@ namespace Rodin::Variational
                   qp == o.qp;
               }
 
-          /**
-           * @brief Resets the key, invalidating the cached entry.
-           * @param other Object to copy from.
-           */
-              void operator=(std::initializer_list<int> other) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
               {
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;
@@ -356,11 +353,8 @@ namespace Rodin::Variational
                   qp == o.qp && vdim == o.vdim;
               }
 
-              /**
-               * @brief Resets the key, invalidating the cached entry.
-               * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
-               */
-              void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
               {
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;
