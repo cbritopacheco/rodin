@@ -36,7 +36,7 @@ namespace Rodin::Solid
    * NeoHookean::Cache cache;
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
-   * law.setCache(cache, state);
+   * law.getCache(cache, state);
    *
    * FirstPiolaKirchhoffStress<NeoHookean> pk1(law);
     * Math::SpatialMatrix<Real> P;
@@ -76,7 +76,7 @@ namespace Rodin::Solid
       /**
        * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
        * @param[out] P Output stress tensor
-       * @param[in] cache Constitutive invariant cache populated by setCache().
+       * @param[in] cache Constitutive invariant cache populated by getCache().
        * @param[in] cp Constitutive point
        */
       void getFirstPiolaKirchhoffStress(

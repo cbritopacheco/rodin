@@ -78,7 +78,7 @@ namespace
     state.setDisplacementGradient(H);
     ConstitutivePoint cp(state);
     typename Law::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
     return law.getStrainEnergyDensity(cache, cp);
   }
 
@@ -90,7 +90,7 @@ namespace
     state.setDisplacementGradient(H);
     ConstitutivePoint cp(state);
     typename Law::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
     Math::SpatialMatrix<Real> P(d, d);
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
     return P;
@@ -104,7 +104,7 @@ namespace
     state.setDisplacementGradient(H);
     ConstitutivePoint cp(state);
     typename Law::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
     Math::SpatialMatrix<Real> dP(d, d);
     law.getMaterialTangent(dP, cache, cp, dF);
     return dP;

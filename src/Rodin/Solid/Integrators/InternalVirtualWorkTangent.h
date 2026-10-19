@@ -249,7 +249,7 @@ namespace Rodin::Solid
             m_input(cp);
 
           typename LawType::Cache cache;
-          m_law.setCache(cache, cp);
+          m_law.getCache(cache, cp);
 
           for (size_t tr = 0; tr < trialDofs; ++tr)
           {
@@ -566,7 +566,7 @@ namespace Rodin::Solid
             m_input(cp);
 
           typename LawType::Cache cache;
-          m_law.setCache(cache, cp);
+          m_law.getCache(cache, cp);
 
           const ScalarType p = m_pressure.get().getValue(ip);
           const ScalarType J = state.getJacobian();

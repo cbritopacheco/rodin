@@ -180,7 +180,7 @@ namespace Rodin::Solid
    * ConstitutivePoint cp(pt, state);
    * cp.set<Tags::FiberDirection>(fiberDir);
    *
-   * law.setCache(cache, cp);
+   * law.getCache(cache, cp);
    * law.getFirstPiolaKirchhoffStress(P, cache, cp);
    * @endcode
    *

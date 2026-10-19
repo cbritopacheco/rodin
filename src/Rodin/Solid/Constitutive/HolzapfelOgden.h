@@ -124,14 +124,14 @@ namespace Rodin::Solid
        * @param cache Storage for the constitutive invariant cache.
        * @param cp Constitutive evaluation point.
        */
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      void getCache(Cache& cache, const ConstitutivePoint& cp) const
       {
-        setCache(cache, cp.getKinematicState(), FiberKinematics::direction(cp));
+        getCache(cache, cp.getKinematicState(), FiberKinematics::direction(cp));
       }
 
       /**
        * @brief Returns the stored strain-energy density.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @returns The stored strain-energy density.
        * @param cp Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.
        */
@@ -147,7 +147,7 @@ namespace Rodin::Solid
       /**
        * @brief Computes the first Piola-Kirchhoff stress.
        * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        */
       void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
@@ -159,7 +159,7 @@ namespace Rodin::Solid
       /**
        * @brief Computes the material tangent action by directional differencing.
        * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        * @param dF Increment of the deformation gradient.
        */
@@ -175,7 +175,7 @@ namespace Rodin::Solid
         KinematicState plus(state.getDimension());
         plus.setDisplacementGradient(H + tangentDifferenceStep * dF);
         Cache plusCache = cache;
-        setCache(plusCache, plus, cache.direction);
+        getCache(plusCache, plus, cache.direction);
         Math::SpatialMatrix<Real> Pplus;
         computeFirstPiolaKirchhoffStress(Pplus, plusCache, plus);
 
@@ -202,7 +202,7 @@ namespace Rodin::Solid
        * @param direction Material direction to include in the stress contribution.
        */
 
-      void setCache(Cache& cache, const KinematicState& state,
+      void getCache(Cache& cache, const KinematicState& state,
         const Math::SpatialVector<Real>& direction) const
       {
         const auto& C = state.getRightCauchyGreenTensor();

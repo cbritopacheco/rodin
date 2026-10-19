@@ -230,7 +230,7 @@ namespace Rodin::Solid
               m_input(cp);
 
             typename LawType::Cache cache;
-            m_law.setCache(cache, cp);
+            m_law.getCache(cache, cp);
 
             m_output(cp, cache);
           }

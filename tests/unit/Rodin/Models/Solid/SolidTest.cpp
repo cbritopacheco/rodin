@@ -213,7 +213,7 @@ namespace Rodin::Tests::Unit
     H.setZero();
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     // At zero deformation, P should be zero
     Math::SpatialMatrix<Real> P;
@@ -240,7 +240,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.1; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.1;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -265,7 +265,7 @@ namespace Rodin::Tests::Unit
 
     Solid::NeoHookean::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     // Test tangent via finite differences
     Math::SpatialMatrix<Real> dF(2, 2);
@@ -281,7 +281,7 @@ namespace Rodin::Tests::Unit
     state_plus.setDisplacementGradient(H_plus);
     Solid::NeoHookean::Cache cache_plus;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    law.getCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
     law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
@@ -313,7 +313,7 @@ namespace Rodin::Tests::Unit
     H.setZero();
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     // At zero deformation, P should be zero (E = 0, S = 0)
     Math::SpatialMatrix<Real> P;
@@ -340,7 +340,7 @@ namespace Rodin::Tests::Unit
 
     Solid::SaintVenantKirchhoff::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
@@ -355,7 +355,7 @@ namespace Rodin::Tests::Unit
     state_plus.setDisplacementGradient(H_plus);
     Solid::SaintVenantKirchhoff::Cache cache_plus;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    law.getCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
     law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
@@ -386,7 +386,7 @@ namespace Rodin::Tests::Unit
 
     Solid::SaintVenantKirchhoff::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -420,7 +420,7 @@ namespace Rodin::Tests::Unit
     H.setZero();
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     // At zero deformation, P should be zero
     Math::SpatialMatrix<Real> P;
@@ -445,7 +445,7 @@ namespace Rodin::Tests::Unit
 
     Solid::MooneyRivlin::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
@@ -460,7 +460,7 @@ namespace Rodin::Tests::Unit
     state_plus.setDisplacementGradient(H_plus);
     Solid::MooneyRivlin::Cache cache_plus;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    law.getCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
     law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
@@ -498,7 +498,7 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::FiberDirection>(fiber);
 
     Solid::HolzapfelOgden::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -536,7 +536,7 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::FiberDirection>(fiber);
 
     Solid::HolzapfelOgden::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0, 0) = 0.2;
@@ -558,7 +558,7 @@ namespace Rodin::Tests::Unit
     Solid::ConstitutivePoint cpPlus(statePlus);
     cpPlus.set<Solid::Tags::FiberDirection>(fiber);
     Solid::HolzapfelOgden::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    law.getCache(cachePlus, cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -596,7 +596,7 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::ActiveExtension>(0.0);
 
     typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -637,7 +637,7 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::ActiveExtension>(-0.06);
 
     typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0, 0) = 0.21;
@@ -655,7 +655,7 @@ namespace Rodin::Tests::Unit
     cpPlus.set<Solid::Tags::FiberDirection>(fiber);
     cpPlus.set<Solid::Tags::ActiveExtension>(-0.06);
     typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    law.getCache(cachePlus, cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -702,7 +702,7 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::ActiveExtension>(-0.04);
 
     typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0, 0) = 0.18;
@@ -725,7 +725,7 @@ namespace Rodin::Tests::Unit
     cpPlus.set<Solid::Tags::FiberDirection>(fiber);
     cpPlus.set<Solid::Tags::ActiveExtension>(-0.04);
     typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    law.getCache(cachePlus, cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -779,7 +779,7 @@ namespace Rodin::Tests::Unit
 
     Solid::ConstitutivePoint cp = buildPoint(state);
     typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
     EXPECT_TRUE(cache.dynamic);
     EXPECT_LT(cache.localIterations, 30u);
 
@@ -797,7 +797,7 @@ namespace Rodin::Tests::Unit
     statePlus.setDisplacementGradient(H + eps * dF);
     Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
     typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    law.getCache(cachePlus, cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -854,7 +854,7 @@ namespace Rodin::Tests::Unit
 
     Solid::ConstitutivePoint cp = buildPoint(state);
     typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
     EXPECT_TRUE(cache.dynamic);
 
     Math::SpatialMatrix<Real> dF(3, 3);
@@ -876,7 +876,7 @@ namespace Rodin::Tests::Unit
     statePlus.setDisplacementGradient(H + eps * dF);
     Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
     typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    law.getCache(cachePlus, cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -925,7 +925,7 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::ElectricalActivation>(0.9);
 
     typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     EXPECT_TRUE(cache.dynamic);
     EXPECT_NEAR(cache.active.residual, 0.0, 1e-11);
@@ -1055,7 +1055,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Solid::CauchyStress<Solid::NeoHookean> cauchy(law);
     Math::SpatialMatrix<Real> sigma;
@@ -1507,7 +1507,7 @@ namespace Rodin::Tests::Unit
 
     Solid::NeoHookean::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
@@ -1524,7 +1524,7 @@ namespace Rodin::Tests::Unit
     state_plus.setDisplacementGradient(H_plus);
     Solid::NeoHookean::Cache cache_plus;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    law.getCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
     law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
@@ -1555,7 +1555,7 @@ namespace Rodin::Tests::Unit
 
     Solid::SaintVenantKirchhoff::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
@@ -1571,7 +1571,7 @@ namespace Rodin::Tests::Unit
     state_plus.setDisplacementGradient(H_plus);
     Solid::SaintVenantKirchhoff::Cache cache_plus;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    law.getCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
     law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
@@ -1602,7 +1602,7 @@ namespace Rodin::Tests::Unit
 
     Solid::MooneyRivlin::Cache cache;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
@@ -1618,7 +1618,7 @@ namespace Rodin::Tests::Unit
     state_plus.setDisplacementGradient(H_plus);
     Solid::MooneyRivlin::Cache cache_plus;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    law.getCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
     law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
@@ -1650,7 +1650,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.2; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     // Energy should be positive for non-zero deformation
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
@@ -1668,7 +1668,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
@@ -1685,7 +1685,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
@@ -1718,7 +1718,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Solid::CauchyStress<Solid::SaintVenantKirchhoff> cauchy(law);
     Math::SpatialMatrix<Real> sigma;
@@ -1740,7 +1740,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     Solid::CauchyStress<Solid::MooneyRivlin> cauchy(law);
     Math::SpatialMatrix<Real> sigma;
@@ -1761,7 +1761,7 @@ namespace Rodin::Tests::Unit
     H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    law.getCache(cache, cp);
 
     // Direct from law
     Math::SpatialMatrix<Real> P_direct;
@@ -2038,14 +2038,14 @@ namespace Rodin::Tests::Unit
     setDynamicTags(cpA);
     cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
     decltype(law)::Cache cacheA;
-    law.setCache(cacheA, cpA);
+    law.getCache(cacheA, cpA);
 
     // The same evaluation strain, reached directly with no tag.
     auto stateB = makeUniaxialStateWithFiberStrain(eMid);
     Solid::ConstitutivePoint cpB(stateB);
     setDynamicTags(cpB);
     decltype(law)::Cache cacheB;
-    law.setCache(cacheB, cpB);
+    law.getCache(cacheB, cpB);
 
     ASSERT_TRUE(cacheA.dynamic);
     ASSERT_TRUE(cacheB.dynamic);
@@ -2074,13 +2074,13 @@ namespace Rodin::Tests::Unit
     setDynamicTags(cpA);
     cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
     decltype(law)::Cache cacheA;
-    law.setCache(cacheA, cpA);
+    law.getCache(cacheA, cpA);
 
     auto stateB = makeUniaxialStateWithFiberStrain(eMid);
     Solid::ConstitutivePoint cpB(stateB);
     setDynamicTags(cpB);
     decltype(law)::Cache cacheB;
-    law.setCache(cacheB, cpB);
+    law.getCache(cacheB, cpB);
 
     EXPECT_GT(std::abs(cacheB.active.tangent), 1e-8);
     EXPECT_NEAR(cacheA.active.tangent, 0.5 * cacheB.active.tangent, 1e-9);
@@ -2101,7 +2101,7 @@ namespace Rodin::Tests::Unit
     Solid::ConstitutivePoint cpA(stateA);
     setDynamicTags(cpA);
     decltype(law)::Cache cacheA;
-    law.setCache(cacheA, cpA);
+    law.getCache(cacheA, cpA);
 
     // Tag equal to the current strain: the midpoint *is* the current strain,
     // so the local solve must agree, while the tangent picks up the 1/2.
@@ -2110,7 +2110,7 @@ namespace Rodin::Tests::Unit
     setDynamicTags(cpB);
     cpB.set<Solid::Tags::PreviousFiberStrain>(eCurr);
     decltype(law)::Cache cacheB;
-    law.setCache(cacheB, cpB);
+    law.getCache(cacheB, cpB);
 
     EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
     // Guard: without this the tangent comparison would pass trivially if the

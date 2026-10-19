@@ -99,7 +99,7 @@ namespace Rodin::Solid
        * @param cache Storage for the constitutive invariant cache.
        * @param cp Constitutive evaluation point.
        */
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      void getCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
         const auto& C = state.getRightCauchyGreenTensor();
@@ -110,7 +110,7 @@ namespace Rodin::Solid
 
       /**
        * @brief Returns the stored strain-energy density.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        * @returns The stored strain-energy density.
        */
@@ -125,7 +125,7 @@ namespace Rodin::Solid
       /**
        * @brief Computes the first Piola-Kirchhoff stress.
        * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        */
       void getFirstPiolaKirchhoffStress(
@@ -144,7 +144,7 @@ namespace Rodin::Solid
       /**
        * @brief Computes the material tangent action.
        * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        * @param dF Increment of the deformation gradient.
        */

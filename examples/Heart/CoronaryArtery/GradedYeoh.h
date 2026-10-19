@@ -70,9 +70,9 @@ namespace Rodin::Examples::Heart
       GradedYeoh(GradedYeoh&&) = default;
 
       /// @brief Populates the constitutive cache (delegates to the base law).
-      void setCache(Cache& cache, const Solid::ConstitutivePoint& cp) const
+      void getCache(Cache& cache, const Solid::ConstitutivePoint& cp) const
       {
-        m_base.setCache(cache, cp);
+        m_base.getCache(cache, cp);
       }
 
       /// @brief Graded strain-energy density m(x) W(F).

@@ -38,7 +38,7 @@ namespace Rodin::Solid
    * NeoHookean::Cache cache;
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
-   * law.setCache(cache, state);
+   * law.getCache(cache, state);
    *
    * CauchyStress<NeoHookean> cauchy(law);
     * Math::SpatialMatrix<Real> sigma;

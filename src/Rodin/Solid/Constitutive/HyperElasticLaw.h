@@ -11,7 +11,7 @@
  * Provides the CRTP base class for all hyperelastic constitutive laws.
  * Each derived law must provide:
  * - A `Cache` struct for precomputed data
- * - `setCache(Cache&, const ConstitutivePoint&)` to populate the cache
+ * - `getCache(Cache&, const ConstitutivePoint&)` to populate the cache
  * - `getFirstPiolaKirchhoffStress(SpatialMatrix&, const Cache&, const ConstitutivePoint&)`
  *   to compute @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
  * - `getMaterialTangent(SpatialMatrix&, const Cache&, const ConstitutivePoint&, const SpatialMatrix&)`
@@ -53,9 +53,9 @@ namespace Rodin::Solid
        * @param[in] cp Constitutive point (kinematic state, coordinates, region, etc.)
        */
       template <class Cache>
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      void getCache(Cache& cache, const ConstitutivePoint& cp) const
       {
-        static_cast<const Derived&>(*this).setCache(cache, cp);
+        static_cast<const Derived&>(*this).getCache(cache, cp);
       }
 
       /**
@@ -66,7 +66,7 @@ namespace Rodin::Solid
        * @f]
        *
        * @param[out] P Output stress tensor
-       * @param[in] cache Constitutive invariant cache populated by setCache().
+       * @param[in] cache Constitutive invariant cache populated by getCache().
        * @param[in] cp Constitutive point
        */
       template <class Cache>
@@ -89,7 +89,7 @@ namespace Rodin::Solid
        * @f]
        *
        * @param[out] dP Output tangent stress increment
-       * @param[in] cache Constitutive invariant cache populated by setCache().
+       * @param[in] cache Constitutive invariant cache populated by getCache().
        * @param[in] cp Constitutive point
        * @param[in] dF Perturbation of the deformation gradient
        */
@@ -110,7 +110,7 @@ namespace Rodin::Solid
        *   W(\mathbf{F})
        * @f]
        *
-       * @param[in] cache Constitutive invariant cache populated by setCache().
+       * @param[in] cache Constitutive invariant cache populated by getCache().
        * @param[in] cp Constitutive point
        * @returns Strain energy density value
        */

@@ -115,9 +115,9 @@ TYPED_TEST(Solid_LocalOutput, PreservesCacheAndPointReferencesAfterCallbackCopy)
     ConstitutivePoint point(state);
     typename TypeParam::Cache cache;
     if constexpr (std::is_same_v<TypeParam, NeoHookean>)
-      NeoHookean(Real(2), Real(3)).setCache(cache, point);
+      NeoHookean(Real(2), Real(3)).getCache(cache, point);
     else
-      Yeoh(Real(1), Real(0.2), Real(0.1), Real(10)).setCache(cache, point);
+      Yeoh(Real(1), Real(0.2), Real(0.1), Real(10)).getCache(cache, point);
 
     auto samples = std::make_shared<List<Sample>>();
     OutputFunction<typename TypeParam::Cache> callback;

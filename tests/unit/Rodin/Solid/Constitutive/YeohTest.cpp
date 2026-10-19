@@ -26,7 +26,7 @@ namespace
     state.setDisplacementGradient(h);
     ConstitutivePoint point(state);
     Yeoh::Cache cache;
-    law.setCache(cache, point);
+    law.getCache(cache, point);
     Response result;
     result.energy = law.getStrainEnergyDensity(cache, point);
     law.getFirstPiolaKirchhoffStress(result.stress, cache, point);

@@ -222,7 +222,7 @@ namespace Rodin::Solid
             m_input(cp);
 
           typename LawType::Cache cache;
-          m_law.setCache(cache, cp);
+          m_law.getCache(cache, cp);
 
           Math::SpatialMatrix<ScalarType> P;
           m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -506,7 +506,7 @@ namespace Rodin::Solid
             m_input(cp);
 
           typename LawType::Cache cache;
-          m_law.setCache(cache, cp);
+          m_law.getCache(cache, cp);
 
           Math::SpatialMatrix<ScalarType> P;
           m_law.getFirstPiolaKirchhoffStress(P, cache, cp);

@@ -118,9 +118,9 @@ namespace Rodin::Solid
        * @param cache Storage for the constitutive invariant cache.
        * @param cp Constitutive evaluation point.
        */
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      void getCache(Cache& cache, const ConstitutivePoint& cp) const
       {
-        m_passiveLaw.setCache(cache.passive, cp);
+        m_passiveLaw.getCache(cache.passive, cp);
 
         cache.fiber = FiberKinematics(cp);
         cache.strain = cache.fiber.strain();
@@ -194,7 +194,7 @@ namespace Rodin::Solid
 
       /**
        * @brief Returns the sum of passive and active strain-energy densities.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        * @returns The sum of passive and active strain-energy densities.
        */
@@ -211,7 +211,7 @@ namespace Rodin::Solid
       /**
        * @brief Adds the active contribution to the first Piola-Kirchhoff stress.
        * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        */
       void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
@@ -226,7 +226,7 @@ namespace Rodin::Solid
       /**
        * @brief Adds the active contribution to the material tangent action.
        * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        * @param dF Increment of the deformation gradient.
        */
