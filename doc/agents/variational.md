@@ -153,15 +153,23 @@ the completed table; faster rebuilding is not a universal assembly speedup.
 Public scalar H1 `tabulate` shares modal derivatives within a pointwise
 basis sweep on tetrahedra and pyramids. Modal basis classes own modal evaluation;
 H1 owns the inverse Vandermonde contraction. Other geometries retain public
-basis directional derivatives. Ordinary pointwise fields retain direct public
-basis evaluation; tetrahedral and pyramidal consumers use invocation-owned
-buffers sized to their scalar basis count. Scalar field gradients retain real
-reference-gradient scratch and promote each coordinate to the field scalar before
-the existing coefficient product. Modal output types
-borrow fixed-size four-entry rows, retaining the original compile-time layout
-without copying or changing the flat stored tables. Coordinate and nodal output
-extents are checked before writing, and independent calls retain no table borrow
-or mutable shared scratch.
+basis directional derivatives. For immediate field consumption,
+`element.tabulate<Geometry>(point)` returns an owned `Evaluation<Geometry>`.
+It prepares modal derivatives and obtains the cached inverse once, then
+`getGradient(local)` performs one nodal contraction. Scalar field gradients
+consume that result immediately, preserving the fused coefficient accumulation
+without an intermediate array of all nodal gradients. Vector Jacobians retain
+the existing caller-owned dense gradient output, whose measured performance
+is preferable for the small tetrahedral cases. Every
+reference derivative accumulates in real arithmetic before scalar promotion. Each
+inverse weight is loaded once per mode and reused for the three coordinates;
+each coordinate retains the original mode summation order.
+Evaluation copies own their modal rows; input coordinates and other evaluations
+can change without invalidating them. The borrowed inverse has static lifetime.
+The caller-owned dense value/gradient and whole-formula overloads remain available.
+Their output extents and coordinates are checked before writing. Modal rows retain
+the fixed four-entry layout, with an unused initialized value column for gradient
+queries, so no dynamic allocation is introduced by a point evaluation.
 The field-gradient consumer owns the cell's logical `(dimension, index)` pair
 for that invocation and reads current coefficients through the space's public
 `getGlobalIndex` operation. It does not replace that operation with a borrowed

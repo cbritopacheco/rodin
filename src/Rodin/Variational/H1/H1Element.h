@@ -778,6 +778,23 @@ namespace Rodin::Variational
         ar& boost::serialization::base_object<Parent>(*this);
       }
 
+      /**
+       * @brief Owned modal derivatives for nodal gradient evaluation at one point.
+       * @tparam ReferenceGeometry Tetrahedron or pyramid reference geometry.
+       */
+      template <G ReferenceGeometry>
+      class Evaluation;
+
+      /**
+       * @brief Prepares shared modal work for immediate per-basis gradient consumption.
+       * @tparam ReferenceGeometry Tetrahedron or pyramid reference geometry.
+       * @param point Reference coordinates; optional trailing padding is ignored.
+       * @returns An owned evaluation with a lifetime independent of the input point.
+       * @throws Alert::Exception If the geometry or coordinates are incompatible.
+       */
+      template <G ReferenceGeometry>
+      Evaluation<ReferenceGeometry> tabulate(const Math::SpatialPoint& point) const;
+
       /// @brief Caller-owned scalar reference values at one point.
       using Values = typename Tabulation::Values;
       /// @brief Caller-owned scalar reference gradients at one point.

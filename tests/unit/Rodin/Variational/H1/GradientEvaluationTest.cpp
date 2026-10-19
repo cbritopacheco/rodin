@@ -93,6 +93,54 @@ namespace Rodin::Tests::Unit
         using Gradients = typename H1Element<K, Scalar>::Gradients;
         const size_t count = element.getCount();
         const size_t dimension = traits.getDimension();
+        const auto checkEvaluation = [&]<Geometry::Polytope::Type ReferenceGeometry>() {
+          using Evaluation =
+            typename H1Element<K, Scalar>::template Evaluation<ReferenceGeometry>;
+          const Math::SpatialPoint invalid{0.25, 0.25};
+          EXPECT_THROW(
+            element.template tabulate<ReferenceGeometry>(invalid), Alert::Exception);
+          EXPECT_THROW((Evaluation(invalid)), Alert::Exception);
+          const H1Element<K, Scalar> incompatible(
+            ReferenceGeometry == Geometry::Polytope::Type::Tetrahedron
+              ? Geometry::Polytope::Type::Pyramid
+              : Geometry::Polytope::Type::Tetrahedron);
+          EXPECT_THROW(incompatible.template tabulate<ReferenceGeometry>(points.front()),
+            Alert::Exception);
+          for (const auto& point : points)
+          {
+            auto coordinates = point;
+            const auto evaluation =
+              element.template tabulate<ReferenceGeometry>(coordinates);
+            const auto copy = evaluation;
+            coordinates(0) += Real(0.03125);
+            const auto other = element.template tabulate<ReferenceGeometry>(coordinates);
+            ASSERT_EQ(evaluation.getCount(), count);
+            ASSERT_EQ(other.getCount(), count);
+            EXPECT_THROW(evaluation.getGradient(count), Alert::Exception);
+            for (size_t local = 0; local < count; ++local)
+            {
+              const auto expected = element.getBasis(local).getGradient()(point);
+              const auto actual = evaluation.getGradient(local);
+              const auto copied = copy.getGradient(local);
+              for (size_t direction = 0; direction < 3; ++direction)
+              {
+                EXPECT_EQ(actual(direction), expected(direction));
+                EXPECT_EQ(copied(direction), expected(direction));
+              }
+            }
+          }
+          const auto independent = element.template tabulate<ReferenceGeometry>(
+            Math::SpatialPoint{0.125, 0.125, 0.25});
+          const auto expected =
+            element.getBasis(0).getGradient()(Math::SpatialPoint{0.125, 0.125, 0.25});
+          const auto actual = independent.getGradient(0);
+          for (size_t direction = 0; direction < 3; ++direction)
+            EXPECT_EQ(actual(direction), expected(direction));
+        };
+        if (geometry == Geometry::Polytope::Type::Tetrahedron)
+          checkEvaluation.template operator()<Geometry::Polytope::Type::Tetrahedron>();
+        else if (geometry == Geometry::Polytope::Type::Pyramid)
+          checkEvaluation.template operator()<Geometry::Polytope::Type::Pyramid>();
         std::vector<Scalar> values(count, Scalar(77));
         std::vector<Scalar> gradients(count * dimension, Scalar(77));
         if (dimension > 0)

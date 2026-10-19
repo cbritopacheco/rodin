@@ -444,6 +444,89 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class Scalar>
+  template <Geometry::Polytope::Type ReferenceGeometry>
+  class H1Element<K, Scalar>::Evaluation
+  {
+      static_assert(
+        ReferenceGeometry == G::Tetrahedron || ReferenceGeometry == G::Pyramid);
+      using Modal = std::conditional_t<ReferenceGeometry == G::Tetrahedron,
+        DubinerTetrahedron<K>, PyramidModal<K>>;
+      using Vandermonde = std::conditional_t<ReferenceGeometry == G::Tetrahedron,
+        VandermondeTetrahedron<K>, VandermondePyramid<K>>;
+
+    public:
+      /**
+       * @brief Evaluates shared modal derivatives and obtains the cached inverse once.
+       * @param point Reference coordinates with at least three components.
+       * @throws Alert::Exception If coordinates are missing.
+       */
+      explicit Evaluation(const Math::SpatialPoint& point)
+        : m_inverse(Vandermonde::getInverse())
+      {
+        if (point.size() < 3)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Reference gradient evaluation requires three coordinate components."
+            << Alert::Raise;
+        // The value column is unused here, but initialized so copies own fully
+        // initialized rows without zeroing derivatives that tabulation overwrites.
+        for (auto& row : m_modal)
+          row[0] = 0;
+        Modal::tabulate(typename Modal::Gradients{m_modal}, point);
+      }
+
+      /// @brief Returns the number of scalar nodal basis functions.
+      static constexpr size_t getCount()
+      {
+        return std::tuple_size_v<typename Modal::Tabulation>;
+      }
+
+      /**
+       * @brief Converts one modal gradient into the requested nodal gradient.
+       *
+       * Modes retain their original summation order and real accumulator before
+       * promotion. No array of all nodal gradients is formed.
+       * @param local Local nodal basis index.
+       * @returns The three reference derivatives of the selected basis function.
+       * @throws Alert::Exception If the basis index is outside the evaluation.
+       */
+      Math::SpatialVector<Scalar> getGradient(size_t local) const
+      {
+        if (local >= getCount())
+          Alert::MemberFunctionException(*this, __func__)
+            << "Basis index " << local << " is outside the reference evaluation."
+            << Alert::Raise;
+        Real dx = 0;
+        Real dy = 0;
+        Real dz = 0;
+        for (size_t mode = 0; mode < getCount(); ++mode)
+        {
+          const Real weight = m_inverse(mode, local);
+          dx += weight * m_modal[mode][1];
+          dy += weight * m_modal[mode][2];
+          dz += weight * m_modal[mode][3];
+        }
+        return Math::SpatialVector<Scalar>{Scalar(dx), Scalar(dy), Scalar(dz)};
+      }
+
+    private:
+      typename Modal::Tabulation m_modal;
+      const Math::Matrix<Real>& m_inverse;
+  };
+
+  template <size_t K, class Scalar>
+  template <Geometry::Polytope::Type ReferenceGeometry>
+  auto H1Element<K, Scalar>::tabulate(
+    const Math::SpatialPoint& point) const -> Evaluation<ReferenceGeometry>
+  {
+    if (this->getGeometry() != ReferenceGeometry || point.size() < 3)
+      Alert::MemberFunctionException(*this, __func__)
+        << "Reference gradient evaluation requires a matching geometry and three "
+           "coordinates."
+        << Alert::Raise;
+    return Evaluation<ReferenceGeometry>(point);
+  }
+
+  template <size_t K, class Scalar>
   Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
   H1Element<K, Scalar>::findTabulation(size_t identity) const
   {

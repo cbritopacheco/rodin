@@ -205,16 +205,13 @@ namespace Rodin::Variational
           {
             const auto tabulate =
               [&]<Geometry::Polytope::Type ReferenceGeometry, size_t Count>() {
-                const H1Element<K, Real> reference(ReferenceGeometry);
-                std::array<Real, 3 * Count> storage;
-                reference.tabulate(
-                  typename H1Element<K, Real>::Gradients{storage, 3}, rc);
+                const H1Element<K, ScalarType> reference(ReferenceGeometry);
+                const auto evaluation =
+                  reference.template tabulate<ReferenceGeometry>(rc);
                 for (size_t local = 0; local < Count; ++local)
                 {
-                  Math::SpatialVector<ScalarType> gradient(3);
-                  for (size_t direction = 0; direction < 3; ++direction)
-                    gradient(direction) = ScalarType(storage[3 * local + direction]);
-                  out += gradient * gf[fes.getGlobalIndex(entity, local)];
+                  out +=
+                    evaluation.getGradient(local) * gf[fes.getGlobalIndex(entity, local)];
                 }
               };
             if (geometry == Geometry::Polytope::Type::Tetrahedron)
