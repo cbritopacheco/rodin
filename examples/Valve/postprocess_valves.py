@@ -17,7 +17,8 @@ used instead. The transient is cut at t_avg of the run (case.env, i.e.
 T_AVG_CONV D/U), or at --skip D/U.
 
 Usage:
-  python3 postprocess_valves.py runs/ [-o valves_report.pdf] [--times 4]
+  python3 postprocess_valves.py runs/ [-o valves_report.pdf] [--times 4 | --at 0.5,1.0,1.5]
+          [--all-times]
           [--skip 8] [--no-mean] [--field mag|uz] [--png]
 Needs numpy, matplotlib, h5py (pip install h5py).
 """
@@ -240,6 +241,10 @@ def main():
     ap.add_argument("--times", type=int, default=4, help="saved times shown per case (after the transient)")
     ap.add_argument("--skip", type=float, default=None,
                     help="transient cut in D/U (default: t_avg of the run, case.env)")
+    ap.add_argument("--at", default="",
+                    help="explicit times in s, comma separated (nearest saved step); overrides --times")
+    ap.add_argument("--all-times", action="store_true",
+                    help="--times spread over the whole run, transient included")
     ap.add_argument("--no-mean", action="store_true", help="skip the time-averaged velocity")
     ap.add_argument("--field", default="mag", choices=["mag", "uz"], help="|u| or axial u_z")
     ap.add_argument("--png", action="store_true", help="also write one PNG per page")
@@ -389,8 +394,13 @@ def main():
         cache = {}
         mesh = load_mesh(base, steps[0][1], cache)
         after = [s for s in steps if s[0] > t0] or steps[-1:]
-        idx = np.unique(np.linspace(0, len(after) - 1, min(a.times, len(after))).round().astype(int))
-        shown = [after[i] for i in idx]
+        if a.at:
+            ts = np.array([s[0] for s in steps])
+            shown = [steps[int(np.argmin(np.abs(ts - float(x))))] for x in a.at.split(",") if x.strip()]
+        else:
+            pool = steps if a.all_times else after
+            idx = np.unique(np.linspace(0, len(pool) - 1, min(a.times, len(pool))).round().astype(int))
+            shown = [pool[i] for i in idx]
         label = "|u| [m/s]" if a.field == "mag" else "u_z [m/s]"
         cmap = "jet" if a.field == "mag" else "RdBu_r"
         frames = []
