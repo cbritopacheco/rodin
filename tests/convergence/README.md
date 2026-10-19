@@ -1133,7 +1133,13 @@ J_{K,ji}(\widehat x_q)=\sum_a X_{K,ja}\,\partial_i\phi_a(\widehat x_q).
 $$
 
 Only the reference values and derivatives can be shared across cells.
-`ReferenceTabulation<Element, Scalar>` supplies the same bounded, thread-local,
+`ReferenceTabulation<Scalar>` owns numerical values and first reference
+derivatives independently of caching. H1 elements provide public `tabulate`
+overloads for caller-owned value and gradient outputs; modal basis types own
+modal evaluation and the H1 element owns the nodal conversion. No friendship
+is required between the element and its cache.
+
+`ReferenceTabulationCache<Element, Scalar>` supplies the same bounded, thread-local,
 logical-identity store to P1 and H1 geometry; each retains its own basis and
 ordering. Physical Jacobians remain cell-specific, and physical coordinates
 remain lazy. No coordinate tolerance, mapped-data cache or collective is added.

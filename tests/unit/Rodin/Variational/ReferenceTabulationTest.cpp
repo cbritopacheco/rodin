@@ -14,7 +14,7 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
-#include "Rodin/Variational/ReferenceTabulation.h"
+#include "Rodin/Variational/ReferenceTabulationCache.h"
 
 namespace Rodin::Tests::Unit
 {
@@ -119,14 +119,15 @@ namespace Rodin::Tests::Unit
   /**
    * @brief Exposes exact fill counts for a linear segment's bulk operation.
    *
-   * The basis is @f$(1-x,x)@f$. The internal bulk operation reuses the store's
-   * generic pointwise fill so dispatch and cache publication can be checked
-   * independently of a particular optimized element algorithm.
+   * The basis is @f$(1-x,x)@f$. The public bulk operation fills caller-owned numerical storage directly,
+   * so dispatch and cache publication can be checked independently of a
+   * particular optimized element algorithm.
    */
   class CountingTabulationElement
   {
     public:
-      using Store = Variational::ReferenceTabulation<CountingTabulationElement, Real>;
+      using Store =
+        Variational::ReferenceTabulationCache<CountingTabulationElement, Real>;
 
       /// @brief One linear segment basis function.
       struct Basis
@@ -219,23 +220,35 @@ namespace Rodin::Tests::Unit
         m_fail = fail;
       }
 
-    private:
-      friend Store;
-
       /**
        * @brief Fills the table and optionally interrupts its publication.
-       * @param table Already-sized storage owned by the cache.
+       * @param table Numerical storage sized and filled by the element.
        * @param formula Reference sample collection.
        */
       void tabulate(Store::Table& table, const QF::QuadratureFormulaBase& formula) const
       {
         ++m_fills;
-        Store::fill(*this, table, formula);
+        table.nqp = formula.getSize();
+        table.ndof = getCount();
+        table.dim = 1;
+        table.phi.resize(table.nqp * table.ndof);
+        table.dphi.resize(table.nqp * table.ndof);
+        for (size_t q = 0; q < table.nqp; ++q)
+        {
+          const auto& point = formula.getPoint(q);
+          for (size_t a = 0; a < table.ndof; ++a)
+          {
+            const auto basis = getBasis(a);
+            table.phi[q * table.ndof + a] = basis(point);
+            table.dphi[q * table.ndof + a] = basis.template getDerivative<1>(0)(point);
+          }
+        }
         if (m_fail)
           Alert::MemberFunctionException(*this, __func__)
             << "Deliberately interrupted reference-table publication" << Alert::Raise;
       }
 
+    private:
       mutable size_t m_fills;
       bool m_fail;
   };

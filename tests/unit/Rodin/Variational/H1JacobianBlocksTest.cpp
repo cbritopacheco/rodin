@@ -77,8 +77,10 @@ namespace Rodin::Tests::Unit
           ASSERT_EQ(v.getDOFs(cell), 0);
           const H1Element<TrialDegree, Scalar> trialElement(geometry);
           const H1Element<TestDegree, Scalar> testElement(geometry);
-          using TrialTables = ReferenceTabulation<H1Element<TrialDegree, Scalar>, Scalar>;
-          using TestTables = ReferenceTabulation<H1Element<TestDegree, Scalar>, Scalar>;
+          using TrialTables =
+            ReferenceTabulationCache<H1Element<TrialDegree, Scalar>, Scalar>;
+          using TestTables =
+            ReferenceTabulationCache<H1Element<TestDegree, Scalar>, Scalar>;
           const auto& bound = QF::PolytopeQuadratureFormula::get(0, geometry);
           std::vector<std::unique_ptr<const QF::QuadratureFormulaBase>> eviction;
           for (size_t i = 0; i < EvictionRules; ++i)

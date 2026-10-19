@@ -23,7 +23,6 @@
  * @see <a href="_h1_element_8h.html">VectorH1Element</a>
  */
 
-#include "Rodin/Alert/MemberFunctionException.h"
 #include <cstddef>
 #include <functional>
 #include <array>
@@ -149,10 +148,7 @@ namespace Rodin::Variational
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
       /// @brief Basis values and derivatives tabulated on the reference element.
-      using Tabulation =
-        typename ReferenceTabulation<H1Element<K, Scalar>, Scalar>::Table;
-
-      friend class boost::serialization::access;
+      using Tabulation = ReferenceTabulation<Scalar>;
 
       /// Parent class
       using Parent = FiniteElementBase<H1Element<K, Scalar>>;
@@ -782,102 +778,69 @@ namespace Rodin::Variational
         ar& boost::serialization::base_object<Parent>(*this);
       }
 
+      /// @brief Caller-owned scalar reference values at one point.
+      using Values = typename Tabulation::Values;
+      /// @brief Caller-owned scalar reference gradients at one point.
+      using Gradients = typename Tabulation::Gradients;
+
       /**
-       * @brief Evaluates every reference basis gradient at one point.
-       *
-       * The consumer receives @f$(a,\widehat\nabla\phi_a(\widehat x))@f$ once
-       * per basis, in ascending local-index order. Its gradient argument is
-       * valid only during that invocation. Pyramid and tetrahedral modal
-       * derivatives are evaluated once per point and shared by the nodal sums.
-       * Each sum retains the public derivative's mode order and real accumulator
-       * before scalar promotion. Other geometries use public basis directional
-       * derivatives, sharing the reference dimension across the basis sweep.
-       *
-       * Scratch belongs to this invocation: consumers may reenter the operation
-       * at another point without invalidating the outer evaluation. No cache,
-       * coordinate identity, retained borrow or communication is introduced.
-       * Consumer exceptions propagate without changing the element.
-       *
-       * @tparam Consumer Callable accepting a local index and a reference gradient.
-       * @param consumer Operation applied to each evaluated gradient.
-       * @param rc Coordinates with at least this element's reference dimension.
-       * @throws Alert::Exception If a required coordinate component is absent.
+       * @brief Tabulates nodal values at one reference point.
+       * @param values Output with one entry per basis function.
+       * @param point Reference coordinates; padding beyond the dimension is ignored.
+       * @throws Alert::Exception If coordinates or output dimensions are invalid.
        */
-      template <class Consumer>
-      void evaluateGradients(Consumer&& consumer, const Math::SpatialPoint& rc) const;
-
-    private:
-      friend class ReferenceTabulation<H1Element<K, Scalar>, Scalar>;
+      void tabulate(Values values, const Math::SpatialPoint& point) const;
 
       /**
-       * @brief Reports missing reference coordinates before differentiation.
-       *
-       * Diagnostic construction occurs only on the failing branch, outside
-       * the valid numerical sweep. The public operation remains the reported
-       * error context.
-       *
-       * @param required Required reference dimension.
-       * @param supplied Number of supplied reference coordinates.
-       * @throws Alert::Exception Always reports the invalid coordinate extent.
+       * @brief Tabulates nodal reference gradients at one point.
+       * @param gradients Basis-major output with the reference dimension.
+       * @param point Reference coordinates; padding beyond the dimension is ignored.
+       * @throws Alert::Exception If coordinates or output dimensions are invalid.
        */
-      void raiseInvalidGradientCoordinates(size_t required, size_t supplied) const;
+      void tabulate(Gradients gradients, const Math::SpatialPoint& point) const;
 
       /**
-       * @brief Contracts point-local modal gradients into nodal gradients.
+       * @brief Tabulates values and gradients with shared point-local modal work.
        *
-       * This stage owns the pyramid or tetrahedral scratch and emits the nodal
-       * gradients in local-index order. Other geometries do not enter it.
-       *
-       * @tparam Consumer Callable accepting a local index and a reference gradient.
-       * @param consumer Operation applied to each evaluated gradient.
-       * @param rc Validated reference coordinates of the sample.
+       * The modal basis owns differentiation; this element owns its inverse
+       * Vandermonde contraction. Scratch belongs to this invocation, with no
+       * retained borrow or cache state. For modal values @f$\psi_m@f$,
+       * @f[
+       *   \phi_a = \sum_m (V^{-1})_{ma} \psi_m, \qquad
+       *   \partial_i\phi_a = \sum_m (V^{-1})_{ma} \partial_i\psi_m.
+       * @f]
+       * Mode order, real derivative accumulation,
+       * scalar promotion and historical singular-vertex conventions are retained.
+       * @pre Outputs are disjoint and do not overlap the input coordinates.
+       * @param values Output with one entry per basis function.
+       * @param gradients Basis-major reference gradients.
+       * @param point Reference coordinates.
+       * @throws Alert::Exception If coordinates or output dimensions are invalid.
        */
-      template <class Consumer>
-      void evaluateModalGradients(
-        Consumer&& consumer, const Math::SpatialPoint& rc) const;
+      void tabulate(
+        Values values, Gradients gradients, const Math::SpatialPoint& point) const;
 
       /**
-       * @brief Fills point-local modal quantities for a pyramid or tetrahedron.
+       * @brief Sizes and fills caller-owned values and gradients at reference samples.
        *
-       * Each row stores an optional value followed by three real derivatives.
-       * The four-entry layout preserves the established table contraction.
-       * Gradient-only consumers leave the value slot unused. Storage belongs to
-       * the caller; no reference to it is retained.
-       *
-       * @tparam Values Whether modal values are also required.
-       * @tparam Modal Owned, fixed-size four-entry modal rows.
-       * @param modal Storage matching this geometry's modal count.
-       * @param rc Reference coordinates of the sample.
-       */
-      template <bool Values, class Modal>
-      void tabulateModes(Modal& modal, const Math::SpatialPoint& rc) const;
-
-      /**
-       * @brief Fills this element's reference values and first derivatives.
-       *
-       * Pyramid and tetrahedral modal quantities are evaluated once per sample
-       * and reused in every nodal contraction. Other geometries retain direct
-       * basis evaluation.
-       * This operation neither owns nor publishes cache entries.
-       *
-       * ## Arithmetic contract
-       *
-       * The contractions are @f$\phi_a=\sum_b(V^{-1})_{ba}\psi_b@f$ and
-       * @f$\partial_i\phi_a=\sum_b(V^{-1})_{ba}\partial_i\psi_b@f$.
-       * Every sum retains ascending mode order and the public basis's accumulator
-       * type: pyramid values use scalar accumulators; tetrahedral values and
-       * all derivatives use real accumulators before scalar promotion. Complex
-       * derivatives preserve the public evaluator's delegation to the real basis.
-       * Modal evaluation, including the historical apex convention,
-       * is unchanged. Scratch contains four real quantities per mode for one
-       * sample only, not another persistent or cross-point cache.
-       * Empty sample collections require no basis evaluation or Vandermonde
-       * initialization.
-       *
-       * @param table Table whose dimensions and storage have been established.
-       * @param formula Reference samples for the table rows.
+       * This operation does not inspect formula identity or access a cache.
+       * Existing output capacity is reused. Modal formulas obtain the inverse
+       * and prepare their shared workspace once, outside the sample loop.
+       * Empty formulas do not evaluate a basis or initialize an inverse.
+       * @param table Numerical output in sample-major order.
+       * @param formula Reference sample collection.
        */
       void tabulate(Tabulation& table, const QF::QuadratureFormulaBase& formula) const;
+
+    private:
+      /**
+       * @brief Implements the requested nodal quantities using invocation-owned scratch.
+       * @tparam Output Requested nodal quantities, individually or paired.
+       * @param output Requested caller-owned quantities.
+       * @param point Reference coordinates.
+       */
+      template <class Output>
+      void tabulate(Output output, const Math::SpatialPoint& point) const;
   };
 
   /**
@@ -935,8 +898,6 @@ namespace Rodin::Variational
 
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
-
-      friend class boost::serialization::access;
 
       /// Parent class
       using Parent = FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>;

@@ -158,7 +158,7 @@ to individual geometric points and requires no coordinate comparisons or MPI
 communication. Explicit point/formula/index bindings retain origin metadata
 without certifying a reference chart.
 
-`ReferenceTabulation<Element, Scalar>` owns the common bounded thread-local
+`ReferenceTabulationCache<Element, Scalar>` owns the common bounded thread-local
 store used by scalar P1 and H1 elements. Each element type retains its own basis
 formulas and ordering, including the rational pyramid basis. The stored arrays
 contain only reference values and first derivatives; physical Jacobians are
@@ -166,7 +166,7 @@ recomputed from each cell's control coordinates. The eight-entry eviction policy
 and logical formula identities apply equally to both element families. Warm
 hits compare the logical identity and geometry without querying size or nodes;
 immutability between identity changes makes those queries redundant. Cold
-misses obtain the size before changing store contents. The unit regressions
+misses size and fill numerical storage before publishing an entry. The unit regressions
 count formula queries and verify that moving a rule cannot recover its old
 source samples, including real and complex H1 degrees one through six.
 

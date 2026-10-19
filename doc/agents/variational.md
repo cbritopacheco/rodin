@@ -128,13 +128,15 @@ a convenience wrapper or changing the existing P1/H1 tabulation path.
 `FiniteElement.h` defines the element side: `getBasis(local)`,
 `getNode(local)` (reference nodes), counts per `Polytope::Type`.
 
-Scalar reference values and first derivatives are retained by
-`ReferenceTabulation<Element, Scalar>` in its bounded thread-local store.
-The store owns dimensions, allocation, logical formula/geometry keys, eviction
-and publication. An element may supply a private bulk fill, granting access to
-its corresponding store specialization. The generic direct-basis fill remains
-available to the element for other geometries. A failed fill leaves the selected
-entry unpublished; neither an element nor a consumer owns a second cache.
+`ReferenceTabulation<Scalar>` owns numerical dimensions and arrays without
+cache state. `ReferenceTabulationCache<Element, Scalar>` owns the bounded
+thread-local store, logical formula/geometry keys, eviction and publication.
+H1 supplies public `tabulate` overloads for caller-owned values, gradients, or
+both, plus a whole-formula overload that sizes and fills a numerical table.
+The cache delegates to that public operation without friendship. Elements
+without bulk tabulation retain the generic direct-basis fill. Failed fills
+leave the selected entry unpublished; neither elements nor consumers own a
+second cache.
 
 Scalar H1 uses this operation to share pyramid and tetrahedral modal values
 and derivatives within each reference sample. Every nodal contraction keeps
@@ -148,11 +150,18 @@ Public pointwise basis calls, mapped quantities, quadrature orders, interpolatio
 and projection contracts are unchanged. Warm indexed consumers already reuse
 the completed table; faster rebuilding is not a universal assembly speedup.
 
-Public scalar H1 `evaluateGradients` also shares modal derivatives within one
-pointwise basis sweep on tetrahedra and pyramids. Other geometries retain public
-basis directional derivatives. The ordered consumer receives an ephemeral
-gradient; point-local scratch supports nested evaluation without retained
-table borrows or a second cache. Coordinate extent is checked before callbacks.
+Public scalar H1 `tabulate` shares modal derivatives within a pointwise
+basis sweep on tetrahedra and pyramids. Modal basis classes own modal evaluation;
+H1 owns the inverse Vandermonde contraction. Other geometries retain public
+basis directional derivatives. Ordinary pointwise fields retain direct public
+basis evaluation; tetrahedral and pyramidal consumers use invocation-owned
+buffers sized to their scalar basis count. Scalar field gradients retain real
+reference-gradient scratch and promote each coordinate to the field scalar before
+the existing coefficient product. Modal output types
+borrow fixed-size four-entry rows, retaining the original compile-time layout
+without copying or changing the flat stored tables. Coordinate and nodal output
+extents are checked before writing, and independent calls retain no table borrow
+or mutable shared scratch.
 The field-gradient consumer owns the cell's logical `(dimension, index)` pair
 for that invocation and reads current coefficients through the space's public
 `getGlobalIndex` operation. It does not replace that operation with a borrowed

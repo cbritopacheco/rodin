@@ -28,6 +28,7 @@
 #include "Rodin/Math/Common.h"
 
 #include "Rodin/QF/QuadratureFormula.h"
+#include "Rodin/Variational/ReferenceTabulationCache.h"
 
 #include "H1Element.h"
 
@@ -297,6 +298,98 @@ namespace Rodin::Variational
         }
         return 0;
       }
+      /**
+       * @brief Fixed modal rows containing a value followed by three derivatives.
+       *
+       * Row @f$m@f$ contains @f$(\psi_m,\partial_0\psi_m,
+       * \partial_1\psi_m,\partial_2\psi_m)@f$. Its compile-time layout
+       * retains the original point-local modal workspace.
+       */
+      using Tabulation = std::array<std::array<Real, 4>, PyramidIndex<K>::Count>;
+
+      /// @brief Selects the value column of caller-owned modal rows.
+      struct Values
+      {
+        Tabulation&
+          data; ///< Caller-owned modal rows; derivative columns are untouched.
+      };
+
+      /// @brief Selects the three derivative columns of caller-owned modal rows.
+      struct Gradients
+      {
+        Tabulation& data; ///< Caller-owned modal rows; the value column is untouched.
+      };
+
+      /**
+       * @brief Tabulates all four modal columns with shared point-local work.
+       * @param output Caller-owned fixed-layout modal rows.
+       * @param rc Three reference coordinates, with optional trailing padding.
+       * @throws Alert::Exception If coordinates are invalid.
+       */
+      static void tabulate(Tabulation& output, const Math::SpatialPoint& rc)
+      {
+        tabulate<Tabulation&>(output, rc);
+      }
+
+      /**
+       * @brief Tabulates modal values at one point.
+       * @param values Mode-indexed output.
+       * @param rc Reference coordinates.
+       * @throws Alert::Exception If coordinates are invalid.
+       */
+      static void tabulate(Values values, const Math::SpatialPoint& rc)
+      {
+        tabulate<Values>(values, rc);
+      }
+
+      /**
+       * @brief Tabulates modal reference gradients at one point.
+       * @param gradients Mode-major output.
+       * @param rc Reference coordinates.
+       * @throws Alert::Exception If coordinates are invalid.
+       */
+      static void tabulate(Gradients gradients, const Math::SpatialPoint& rc)
+      {
+        tabulate<Gradients>(gradients, rc);
+      }
+
+    private:
+      /**
+       * @brief Computes the requested modal quantities with compile-time selection.
+       * @tparam Output Selected modal columns or the complete tabulation reference.
+       * @param output Caller-owned modal quantities.
+       * @param rc Three reference coordinates.
+       * @throws Alert::Exception If reference coordinates are missing.
+       */
+      template <class Output>
+      static void tabulate(Output output, const Math::SpatialPoint& rc)
+      {
+        constexpr bool HasValues = !std::is_same_v<Output, Gradients>;
+        constexpr bool HasGradients = !std::is_same_v<Output, Values>;
+        auto& modal = [&]() -> Tabulation& {
+          if constexpr (std::is_same_v<Output, Tabulation&>)
+            return output;
+          else
+            return output.data;
+        }();
+        if (rc.size() < 3)
+        {
+          Alert::NamespacedException("Rodin::Variational::PyramidModal::tabulate")
+            << "Modal tabulation requires three reference coordinates." << Alert::Raise;
+          return;
+        }
+        constexpr size_t Count = PyramidIndex<K>::Count;
+        for (size_t mode = 0; mode < Count; ++mode)
+        {
+          if constexpr (HasValues)
+            modal[mode][0] = getBasis(mode, rc);
+          if constexpr (HasGradients)
+          {
+            for (size_t direction = 0; direction < 3; ++direction)
+              modal[mode][direction + 1] = getDerivative(mode, direction, rc);
+          }
+        }
+      }
   };
 
   /// @brief Vandermonde matrix of the modal basis on the reference pyramid.
@@ -354,188 +447,205 @@ namespace Rodin::Variational
   Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
   H1Element<K, Scalar>::findTabulation(size_t identity) const
   {
-    return ReferenceTabulation<H1Element<K, Scalar>, Scalar>::find(*this, identity);
+    return ReferenceTabulationCache<H1Element<K, Scalar>, Scalar>::find(*this, identity);
   }
 
   template <size_t K, class Scalar>
   const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
     const QF::QuadratureFormulaBase& qf) const
   {
-    return ReferenceTabulation<H1Element<K, Scalar>, Scalar>::get(*this, qf);
+    return ReferenceTabulationCache<H1Element<K, Scalar>, Scalar>::get(*this, qf);
   }
 
   template <size_t K, class Scalar>
-  template <bool Values, class Modal>
-  void H1Element<K, Scalar>::tabulateModes(
-    Modal& modal, const Math::SpatialPoint& rc) const
+  void H1Element<K, Scalar>::tabulate(
+    Values values, const Math::SpatialPoint& point) const
   {
-    if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
-    {
-      assert(modal.size() == (K + 1) * (K + 2) * (K + 3) / 6);
-      Real a, b, c;
-      DubinerTetrahedron<K>::getCollapsed(a, b, c, rc.x(), rc.y(), rc.z());
-      const Real s1 = 1.0 - rc.y() - rc.z();
-      const Real s2 = 1.0 - rc.z();
-      size_t mode = 0;
-      Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
-        constexpr size_t P = pIdx.value;
-        Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
-          constexpr size_t Q = qIdx.value;
-          Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
-            constexpr size_t R = rIdx.value;
-            if constexpr (Values)
-              DubinerTetrahedron<K>::template getBasis<P, Q, R>(modal[mode][0], a, b, c);
-            DubinerTetrahedron<K>::template getReferenceGradientFromCollapsed<P, Q, R>(
-              modal[mode][1], modal[mode][2], modal[mode][3], a, b, c, s1, s2);
-            ++mode;
-          });
-        });
-      });
-      assert(mode == modal.size());
-      return;
-    }
-    assert(this->getGeometry() == Geometry::Polytope::Type::Pyramid);
-    assert(modal.size() == PyramidIndex<K>::Count);
-    for (size_t mode = 0; mode < modal.size(); ++mode)
-    {
-      if constexpr (Values)
-        modal[mode][0] = PyramidModal<K>::getBasis(mode, rc);
-      for (size_t direction = 0; direction < 3; ++direction)
-        modal[mode][direction + 1] = PyramidModal<K>::getDerivative(mode, direction, rc);
-    }
+    tabulate<Values>(values, point);
   }
 
   template <size_t K, class Scalar>
-  void H1Element<K, Scalar>::raiseInvalidGradientCoordinates(
-    size_t required, size_t supplied) const
+  void H1Element<K, Scalar>::tabulate(
+    Gradients gradients, const Math::SpatialPoint& point) const
   {
-    Alert::MemberFunctionException(*this, "evaluateGradients")
-      << "Reference gradient evaluation requires " << required
-      << " coordinate components, got " << supplied << "." << Alert::Raise;
+    tabulate<Gradients>(gradients, point);
   }
 
   template <size_t K, class Scalar>
-  template <class Consumer>
-  void H1Element<K, Scalar>::evaluateGradients(
-    Consumer&& consumer, const Math::SpatialPoint& rc) const
+  void H1Element<K, Scalar>::tabulate(
+    Values values, Gradients gradients, const Math::SpatialPoint& point) const
   {
+    tabulate<std::pair<Values, Gradients>>({values, gradients}, point);
+  }
+
+  template <size_t K, class Scalar>
+  template <class Output>
+  void H1Element<K, Scalar>::tabulate(
+    Output output, const Math::SpatialPoint& point) const
+  {
+    constexpr bool HasValues = !std::is_same_v<Output, Gradients>;
+    constexpr bool HasGradients = !std::is_same_v<Output, Values>;
+    const auto values = [&]() -> Values {
+      if constexpr (std::is_same_v<Output, Values>)
+        return output;
+      else if constexpr (HasValues)
+        return output.first;
+      else
+        return {{}};
+    }();
+    const auto gradients = [&]() -> Gradients {
+      if constexpr (std::is_same_v<Output, Gradients>)
+        return output;
+      else if constexpr (HasGradients)
+        return output.second;
+      else
+        return {{}, 0};
+    }();
     const size_t dimension =
       Geometry::Polytope::Traits(this->getGeometry()).getDimension();
-    if (static_cast<size_t>(rc.size()) < dimension)
-      raiseInvalidGradientCoordinates(dimension, static_cast<size_t>(rc.size()));
-    if (this->getGeometry() == Geometry::Polytope::Type::Pyramid ||
-      this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
-    {
-      evaluateModalGradients(consumer, rc);
-      return;
-    }
-    for (size_t local = 0; local < this->getCount(); ++local)
-    {
-      const auto basis = this->getBasis(local);
-      Math::SpatialVector<Scalar> gradient(static_cast<std::uint8_t>(dimension));
-      for (size_t direction = 0; direction < dimension; ++direction)
-        gradient(direction) = basis.template getDerivative<1>(direction)(rc);
-      consumer(local, gradient);
-    }
-  }
+    const size_t count = this->getCount();
+    if (static_cast<size_t>(point.size()) < dimension)
+      Alert::MemberFunctionException(*this, __func__)
+        << "Reference tabulation requires " << dimension << " coordinate components, got "
+        << point.size() << "." << Alert::Raise;
+    if ((HasValues && values.data.size() != count) ||
+      (HasGradients &&
+        (gradients.dimension != dimension || gradients.data.size() != count * dimension)))
+      Alert::MemberFunctionException(*this, __func__)
+        << "Reference tabulation output does not match the basis count and dimension."
+        << Alert::Raise;
 
-  template <size_t K, class Scalar>
-  template <class Consumer>
-  void H1Element<K, Scalar>::evaluateModalGradients(
-    Consumer&& consumer, const Math::SpatialPoint& rc) const
-  {
-    const auto emit = [&](const auto& modal, const auto& inverse) {
-      for (size_t local = 0; local < modal.size(); ++local)
+    const auto contract = [&]<class Modal, class Vandermonde, size_t Count>() {
+      typename Modal::Tabulation modal;
+      if constexpr (HasValues && HasGradients)
+        Modal::tabulate(modal, point);
+      else if constexpr (HasValues)
+        Modal::tabulate(typename Modal::Values{modal}, point);
+      else
+        Modal::tabulate(typename Modal::Gradients{modal}, point);
+      const auto& inverse = Vandermonde::getInverse();
+      for (size_t local = 0; local < Count; ++local)
       {
-        Math::SpatialVector<Scalar> gradient(3);
-        for (size_t direction = 0; direction < 3; ++direction)
+        if constexpr (HasValues)
         {
-          Real derivative = 0;
-          for (size_t mode = 0; mode < modal.size(); ++mode)
-            derivative += inverse(mode, local) * modal[mode][direction + 1];
-          gradient(direction) = Scalar(derivative);
+          using Accumulator =
+            std::conditional_t<std::is_same_v<Modal, PyramidModal<K>>, Scalar, Real>;
+          Accumulator value = 0;
+          for (size_t mode = 0; mode < Count; ++mode)
+            value += inverse(mode, local) * modal[mode][0];
+          values.data[local] = Scalar(value);
         }
-        consumer(local, gradient);
+        if constexpr (HasGradients)
+        {
+          Math::SpatialVector<Scalar> gradient(3);
+          for (size_t direction = 0; direction < 3; ++direction)
+          {
+            Real derivative = 0;
+            for (size_t mode = 0; mode < Count; ++mode)
+              derivative += inverse(mode, local) * modal[mode][direction + 1];
+            gradient(direction) = Scalar(derivative);
+          }
+          for (size_t direction = 0; direction < 3; ++direction)
+            gradients.data[3 * local + direction] = gradient(direction);
+        }
       }
     };
-    if (this->getGeometry() == Geometry::Polytope::Type::Pyramid)
+    if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
     {
-      constexpr size_t Count = PyramidIndex<K>::Count;
-      const auto& inverse = VandermondePyramid<K>::getInverse();
-      std::array<std::array<Real, 4>, Count> modal;
-      tabulateModes<false>(modal, rc);
-      emit(modal, inverse);
+      contract.template operator()<DubinerTetrahedron<K>, VandermondeTetrahedron<K>,
+        (K + 1) * (K + 2) * (K + 3) / 6>();
       return;
     }
-    assert(this->getGeometry() == Geometry::Polytope::Type::Tetrahedron);
-    constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
-    const auto& inverse = VandermondeTetrahedron<K>::getInverse();
-    std::array<std::array<Real, 4>, Count> modal;
-    tabulateModes<false>(modal, rc);
-    emit(modal, inverse);
+    if (this->getGeometry() == Geometry::Polytope::Type::Pyramid)
+    {
+      contract.template
+      operator()<PyramidModal<K>, VandermondePyramid<K>, PyramidIndex<K>::Count>();
+      return;
+    }
+    for (size_t local = 0; local < count; ++local)
+    {
+      const auto basis = this->getBasis(local);
+      if constexpr (HasValues)
+        values.data[local] = basis(point);
+      if constexpr (HasGradients)
+      {
+        Math::SpatialVector<Scalar> gradient(dimension);
+        for (size_t direction = 0; direction < dimension; ++direction)
+          gradient(direction) = basis.template getDerivative<1>(direction)(point);
+        for (size_t direction = 0; direction < dimension; ++direction)
+          gradients.data[local * dimension + direction] = gradient(direction);
+      }
+    }
   }
 
   template <size_t K, class Scalar>
   void H1Element<K, Scalar>::tabulate(
     Tabulation& table, const QF::QuadratureFormulaBase& formula) const
   {
+    table.nqp = formula.getSize();
+    table.ndof = this->getCount();
+    table.dim = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+    table.phi.resize(table.nqp * table.ndof);
+    table.dphi.resize(table.nqp * table.ndof * table.dim);
     if (table.nqp == 0)
       return;
-    if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
+    if (this->getGeometry() != Geometry::Polytope::Type::Tetrahedron &&
+      this->getGeometry() != Geometry::Polytope::Type::Pyramid)
     {
-      constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
-      assert(table.ndof == Count && table.dim == 3);
-      const auto& inverse = VandermondeTetrahedron<K>::getInverse();
-      std::array<std::array<Real, 4>, Count> modal;
+      std::vector<std::reference_wrapper<const BasisFunction>> bases;
+      bases.reserve(table.ndof);
+      for (size_t local = 0; local < table.ndof; ++local)
+        bases.emplace_back(this->getBasis(local));
       for (size_t qp = 0; qp < table.nqp; ++qp)
       {
         const auto& point = formula.getPoint(qp);
-        tabulateModes<true>(modal, point);
-        for (size_t local = 0; local < Count; ++local)
+        if (static_cast<size_t>(point.size()) < table.dim)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Reference tabulation requires " << table.dim
+            << " coordinate components, got " << point.size() << "." << Alert::Raise;
+        for (size_t local = 0; local < table.ndof; ++local)
         {
-          Real value = 0;
-          for (size_t mode = 0; mode < Count; ++mode)
-            value += inverse(mode, local) * modal[mode][0];
-          table.phi[qp * Count + local] = Scalar(value);
-          for (size_t i = 0; i < 3; ++i)
+          const auto& basis = bases[local].get();
+          table.phi[qp * table.ndof + local] = basis(point);
+          for (size_t direction = 0; direction < table.dim; ++direction)
           {
-            Real derivative = 0;
-            for (size_t mode = 0; mode < Count; ++mode)
-              derivative += inverse(mode, local) * modal[mode][i + 1];
-            table.dphi[(qp * Count + local) * 3 + i] = Scalar(derivative);
+            table.dphi[(qp * table.ndof + local) * table.dim + direction] =
+              basis.template getDerivative<1>(direction)(point);
           }
         }
       }
       return;
     }
-    if (this->getGeometry() != Geometry::Polytope::Type::Pyramid)
-    {
-      ReferenceTabulation<H1Element<K, Scalar>, Scalar>::fill(*this, table, formula);
-      return;
-    }
-    constexpr size_t Count = PyramidIndex<K>::Count;
-    assert(table.ndof == Count && table.dim == 3);
-    const auto& inverse = VandermondePyramid<K>::getInverse();
-    std::array<std::array<Real, 4>, Count> modal;
-    for (size_t qp = 0; qp < table.nqp; ++qp)
-    {
-      const auto& point = formula.getPoint(qp);
-      tabulateModes<true>(modal, point);
-      for (size_t a = 0; a < Count; ++a)
-      {
-        Scalar value = Scalar(0);
-        for (size_t b = 0; b < Count; ++b)
-          value += inverse(b, a) * modal[b][0];
-        table.phi[qp * Count + a] = value;
-        for (size_t i = 0; i < 3; ++i)
+    const auto tabulate =
+      [&]<class Modal, class Vandermonde, class Accumulator, size_t Count>() {
+        assert(table.ndof == Count && table.dim == 3);
+        const auto& inverse = Vandermonde::getInverse();
+        typename Modal::Tabulation modal;
+        for (size_t qp = 0; qp < table.nqp; ++qp)
         {
-          Real derivative = 0;
-          for (size_t b = 0; b < Count; ++b)
-            derivative += inverse(b, a) * modal[b][i + 1];
-          table.dphi[(qp * Count + a) * 3 + i] = Scalar(derivative);
+          Modal::tabulate(modal, formula.getPoint(qp));
+          for (size_t local = 0; local < Count; ++local)
+          {
+            Accumulator value = 0;
+            for (size_t mode = 0; mode < Count; ++mode)
+              value += inverse(mode, local) * modal[mode][0];
+            table.phi[qp * Count + local] = Scalar(value);
+            for (size_t direction = 0; direction < 3; ++direction)
+            {
+              Real derivative = 0;
+              for (size_t mode = 0; mode < Count; ++mode)
+                derivative += inverse(mode, local) * modal[mode][direction + 1];
+              table.dphi[(qp * Count + local) * 3 + direction] = Scalar(derivative);
+            }
+          }
         }
-      }
-    }
+      };
+    if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
+      tabulate.template operator()<DubinerTetrahedron<K>, VandermondeTetrahedron<K>, Real,
+        FeketeTetrahedron<K>::Count>();
+    else
+      tabulate.template operator()<PyramidModal<K>, VandermondePyramid<K>, Scalar,
+        PyramidIndex<K>::Count>();
   }
 
   template <size_t K, class Scalar>

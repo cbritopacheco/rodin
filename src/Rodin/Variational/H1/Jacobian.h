@@ -35,6 +35,7 @@
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H
 
+#include <array>
 #include <vector>
 
 #include "Rodin/Variational/ForwardDecls.h"
@@ -310,22 +311,50 @@ namespace Rodin::Variational
         out.resize(vdim, spaceDimension);
         out.setZero();
 
-        feS.evaluateGradients(
-          [&](size_t alpha, const auto& gref) {
+        if (static_cast<size_t>(rc.size()) < d)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Reference gradient evaluation requires " << d
+            << " coordinate components, got " << rc.size() << "." << Alert::Raise;
+        const auto accumulate = [&](size_t alpha, const auto& gradient) {
           for (size_t j = 0; j < d; ++j)
-            ref(j) = gref(j);
-
+            ref(j) = gradient(j);
           phys = JinvT * ref;
-
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-              for (size_t j = 0; j < spaceDimension; ++j)
+            for (size_t j = 0; j < spaceDimension; ++j)
               out(comp, j) += uval * phys(j);
           }
-          },
-          rc);
+        };
+        if (geom == Geometry::Polytope::Type::Tetrahedron ||
+          geom == Geometry::Polytope::Type::Pyramid)
+        {
+          const auto tabulate = [&]<size_t Count>() {
+            std::array<ScalarType, 3 * Count> storage;
+            feS.tabulate(typename H1Element<K, ScalarType>::Gradients{storage, 3}, rc);
+            for (size_t alpha = 0; alpha < Count; ++alpha)
+            {
+              for (size_t j = 0; j < 3; ++j)
+                ref(j) = storage[3 * alpha + j];
+              accumulate(alpha, ref);
+            }
+          };
+          if (geom == Geometry::Polytope::Type::Tetrahedron)
+            tabulate.template operator()<FeketeTetrahedron<K>::Count>();
+          else
+            tabulate.template operator()<PyramidIndex<K>::Count>();
+        }
+        else
+        {
+          for (size_t alpha = 0; alpha < feS.getCount(); ++alpha)
+          {
+            const auto basis = feS.getBasis(alpha);
+            for (size_t j = 0; j < d; ++j)
+              ref(j) = basis.template getDerivative<1>(j)(rc);
+            accumulate(alpha, ref);
+          }
+        }
       }
   };
 

@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <array>
 #include <sstream>
 #include <string>
 #include <type_traits>
@@ -25,8 +26,8 @@ namespace Rodin::Tests::Unit
    * derivative. Samples include interiors and reference vertices, preserving
    * historical singular-vertex conventions rather than asserting new traces.
    * Real/complex degrees one through six exercise distinct scalar
-   * promotion and modal sizes. Nested evaluation and a throwing consumer must
-   * leave subsequent entries and later invocations unchanged. No numerical
+   * promotion and modal sizes. Independent caller-owned outputs and rejected invalid extents must
+   * leave prior results and later invocations unchanged. No numerical
    * tolerance or coordinate-based identity is used.
    */
   class H1GradientEvaluationTest : public ::testing::TestWithParam<GradientGeometry>
@@ -47,84 +48,127 @@ namespace Rodin::Tests::Unit
         for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
           points.push_back(traits.getVertex(vertex));
         ASSERT_FALSE(points.empty());
-        if (traits.getDimension() > 0)
+        const auto checkModalOutputs = [&]<class Modal, size_t Count>() {
+          using ModalValues = typename Modal::Values;
+          using ModalGradients = typename Modal::Gradients;
+          typename Modal::Tabulation modalValues, modalGradients, both;
+          for (auto& row : modalValues)
+            row.fill(77);
+          modalGradients = modalValues;
+          both = modalValues;
+          const Math::SpatialPoint invalid{0.25, 0.25};
+          EXPECT_THROW(
+            Modal::tabulate(ModalValues{modalValues}, invalid), Alert::Exception);
+          EXPECT_THROW(
+            Modal::tabulate(ModalGradients{modalGradients}, invalid), Alert::Exception);
+          EXPECT_THROW(Modal::tabulate(both, invalid), Alert::Exception);
+          EXPECT_EQ(modalValues, both);
+          EXPECT_EQ(modalGradients, both);
+          const Math::SpatialPoint point{0.125, 0.125, 0.25};
+          Modal::tabulate(ModalValues{modalValues}, point);
+          Modal::tabulate(ModalGradients{modalGradients}, point);
+          Modal::tabulate(both, point);
+          for (size_t mode = 0; mode < Count; ++mode)
+          {
+            EXPECT_EQ(modalValues[mode][0], both[mode][0]);
+            EXPECT_EQ(modalGradients[mode][0], 77);
+            for (size_t direction = 1; direction < 4; ++direction)
+            {
+              EXPECT_EQ(modalGradients[mode][direction], both[mode][direction]);
+              EXPECT_EQ(modalValues[mode][direction], 77);
+            }
+          }
+          Modal::tabulate(ModalGradients{modalValues}, point);
+          Modal::tabulate(ModalValues{modalGradients}, point);
+          EXPECT_EQ(modalValues, both);
+          EXPECT_EQ(modalGradients, both);
+        };
+        if (geometry == Geometry::Polytope::Type::Tetrahedron)
+          checkModalOutputs
+            .template operator()<DubinerTetrahedron<K>, FeketeTetrahedron<K>::Count>();
+        else if (geometry == Geometry::Polytope::Type::Pyramid)
+          checkModalOutputs
+            .template operator()<PyramidModal<K>, PyramidIndex<K>::Count>();
+        using Values = typename H1Element<K, Scalar>::Values;
+        using Gradients = typename H1Element<K, Scalar>::Gradients;
+        const size_t count = element.getCount();
+        const size_t dimension = traits.getDimension();
+        std::vector<Scalar> values(count, Scalar(77));
+        std::vector<Scalar> gradients(count * dimension, Scalar(77));
+        if (dimension > 0)
         {
-          Math::SpatialPoint invalid(traits.getDimension() - 1);
+          Math::SpatialPoint invalid(dimension - 1);
           invalid.setZero();
-          bool invoked = false;
           try
           {
-            element.evaluateGradients(
-              [&](size_t, const auto&) { invoked = true; }, invalid);
+            element.tabulate(Gradients{gradients, dimension}, invalid);
             FAIL() << "Missing reference coordinates were accepted.";
           }
           catch (const Alert::Exception& error)
           {
+            EXPECT_NE(std::string(error.what()).find("tabulate"), std::string::npos);
             EXPECT_NE(
-              std::string(error.what()).find("evaluateGradients"), std::string::npos);
-            EXPECT_NE(std::string(error.what())
-                        .find("coordinate components, got " +
-                          std::to_string(static_cast<size_t>(invalid.size())) + "."),
-              std::string::npos);
+              std::string(error.what()).find("In member function"), std::string::npos);
           }
-          EXPECT_FALSE(invoked);
+          EXPECT_TRUE(std::all_of(gradients.begin(), gradients.end(),
+            [](Scalar x) { return x == Scalar(77); }));
         }
+        EXPECT_THROW(
+          element.tabulate(Values{std::span(values).first(count - 1)}, points.front()),
+          Alert::Exception);
+        EXPECT_THROW(
+          element.tabulate(Gradients{gradients, dimension + 1}, points.front()),
+          Alert::Exception);
         Math::SpatialPoint padded(points.front());
         padded.resize(3);
-        for (size_t direction = traits.getDimension(); direction < 3; ++direction)
+        for (size_t direction = dimension; direction < 3; ++direction)
           padded(direction) = Real(7 + direction);
         points.push_back(padded);
         for (const auto& point : points)
         {
-          size_t next = 0;
-          element.evaluateGradients(
-            [&](size_t local, const auto& gradient) {
-              EXPECT_EQ(local, next++);
-              const auto expected = element.getBasis(local).getGradient()(point);
-              if (local == 0)
-              {
-                size_t nestedCount = 0;
-                element.evaluateGradients(
-                  [&](size_t nested, const auto& value) {
-                    EXPECT_EQ(nested, nestedCount++);
-                    const auto reference =
-                      element.getBasis(nested).getGradient()(points.back());
-                    ASSERT_EQ(value.size(), reference.size());
-                    for (size_t j = 0; j < traits.getDimension(); ++j)
-                      EXPECT_EQ(value(j), reference(j));
-                  },
-                  points.back());
-                EXPECT_EQ(nestedCount, element.getCount());
-              }
-              ASSERT_EQ(gradient.size(), expected.size());
-              for (size_t j = 0; j < traits.getDimension(); ++j)
-                EXPECT_EQ(gradient(j), expected(j));
-            },
-            point);
-          EXPECT_EQ(next, element.getCount());
+          element.tabulate(Values{values}, Gradients{gradients, dimension}, point);
+          const auto originalValues = values;
+          const auto originalGradients = gradients;
+          std::vector<Scalar> other(count * dimension);
+          element.tabulate(Gradients{other, dimension}, points.back());
+          EXPECT_EQ(values, originalValues);
+          EXPECT_EQ(gradients, originalGradients);
+          for (size_t local = 0; local < count; ++local)
+          {
+            const auto& basis = element.getBasis(local);
+            EXPECT_EQ(values[local], basis(point));
+            const auto expected = basis.getGradient()(point);
+            for (size_t direction = 0; direction < dimension; ++direction)
+              EXPECT_EQ(gradients[local * dimension + direction], expected(direction));
+          }
+          element.tabulate(Values{values}, point);
+          EXPECT_EQ(values, originalValues);
+          element.tabulate(Gradients{gradients, dimension}, point);
+          EXPECT_EQ(gradients, originalGradients);
         }
-        std::ostringstream diagnostic;
-        EXPECT_THROW(element.evaluateGradients(
-                       [&](size_t, const auto&) {
-                         Alert::Exception(diagnostic)
-                           << "Intentional consumer failure" << Alert::Raise;
-                       },
-                       points.front()),
-          Alert::Exception);
-        size_t repeated = 0;
-        element.evaluateGradients(
-          [&](size_t local, const auto& gradient) {
-            EXPECT_EQ(local, repeated++);
-            const auto expected = element.getBasis(local).getGradient()(points.front());
-            for (size_t j = 0; j < traits.getDimension(); ++j)
-              EXPECT_EQ(gradient(j), expected(j));
-          },
-          points.front());
-        EXPECT_EQ(repeated, element.getCount());
+        typename H1Element<K, Scalar>::Tabulation table;
+        element.tabulate(table, formula);
+        ASSERT_EQ(table.nqp, formula.getSize());
+        ASSERT_EQ(table.ndof, count);
+        ASSERT_EQ(table.dim, dimension);
+        for (size_t q = 0; q < formula.getSize(); ++q)
+        {
+          element.tabulate(
+            Values{values}, Gradients{gradients, dimension}, formula.getPoint(q));
+          for (size_t local = 0; local < count; ++local)
+          {
+            EXPECT_EQ(table.getBasis(q, local), values[local]);
+            for (size_t direction = 0; direction < dimension; ++direction)
+            {
+              EXPECT_EQ(table.template getDerivative<1>(q, local, direction),
+                gradients[local * dimension + direction]);
+            }
+          }
+        }
       }
   };
 
-  TEST_P(H1GradientEvaluationTest, MatchesPublicBasisAfterReentryAndFailure)
+  TEST_P(H1GradientEvaluationTest, TypedOutputsMatchPublicBasisAndRemainIndependent)
   {
     const auto geometry = GetParam().first;
     check<1, Real>(geometry);

@@ -18,6 +18,7 @@
  * where @f$ \phi_i @f$ are the H1<K> basis functions.
  */
 
+#include <array>
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
@@ -191,14 +192,49 @@ namespace Rodin::Variational
           const auto& gf  = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe  = fes.getFiniteElement(d, i);
-          const auto& rc  = p.getReferenceCoordinates();
+          const auto& rc = p.getReferenceCoordinates();
 
-          fe.evaluateGradients(
-            [&out, &gf, &fes, entity = std::pair{d, i}](
-              size_t local, const auto& gradient) {
+          if (static_cast<size_t>(rc.size()) < d)
+            Alert::MemberFunctionException(*this, __func__)
+              << "Reference gradient evaluation requires " << d
+              << " coordinate components, got " << rc.size() << "." << Alert::Raise;
+          const auto entity = std::pair{d, i};
+          const auto geometry = fe.getGeometry();
+          if (geometry == Geometry::Polytope::Type::Tetrahedron ||
+            geometry == Geometry::Polytope::Type::Pyramid)
+          {
+            const auto tabulate =
+              [&]<Geometry::Polytope::Type ReferenceGeometry, size_t Count>() {
+                const H1Element<K, Real> reference(ReferenceGeometry);
+                std::array<Real, 3 * Count> storage;
+                reference.tabulate(
+                  typename H1Element<K, Real>::Gradients{storage, 3}, rc);
+                for (size_t local = 0; local < Count; ++local)
+                {
+                  Math::SpatialVector<ScalarType> gradient(3);
+                  for (size_t direction = 0; direction < 3; ++direction)
+                    gradient(direction) = ScalarType(storage[3 * local + direction]);
+                  out += gradient * gf[fes.getGlobalIndex(entity, local)];
+                }
+              };
+            if (geometry == Geometry::Polytope::Type::Tetrahedron)
+              tabulate.template operator()<Geometry::Polytope::Type::Tetrahedron,
+                FeketeTetrahedron<K>::Count>();
+            else
+              tabulate.template
+              operator()<Geometry::Polytope::Type::Pyramid, PyramidIndex<K>::Count>();
+          }
+          else
+          {
+            for (size_t local = 0; local < fe.getCount(); ++local)
+            {
+              const auto basis = fe.getBasis(local);
+              Math::SpatialVector<ScalarType> gradient(d);
+              for (size_t direction = 0; direction < d; ++direction)
+                gradient(direction) = basis.template getDerivative<1>(direction)(rc);
               out += gradient * gf[fes.getGlobalIndex(entity, local)];
-            },
-            rc);
+            }
+          }
 
           out = p.getJacobianInverse().transpose() * out;
         }

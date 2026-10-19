@@ -8,6 +8,7 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinVariational_HEADERS
   FiniteElement.h
   ReferenceTabulation.h
+  ReferenceTabulationCache.h
   BilinearForm.h
   MassForm.h
   DiffusionForm.h

@@ -49,7 +49,7 @@ namespace Rodin::Tests::Benchmarks
    * Direct and prefetched sweeps write the same quadrature-major output. The
    * former obtains each descriptor in the sample loop; the latter obtains
    * descriptors before timing. Neither path changes the library implementation.
-   * BulkDerivatives uses the element's ordered gradient consumer, including its
+   * BulkDerivatives uses the element's typed gradient output, including its
    * coordinate validation and owned point-local modal work. Its output has the
    * same quadrature-major layout, without physical mapping or field contraction.
    * WarmTable includes lookup only, not a sweep over table entries. Misses rotate
@@ -83,7 +83,7 @@ namespace Rodin::Tests::Benchmarks
     ReferenceOperation operation)
   {
     using Scalar = typename Element::ScalarType;
-    using Store = Variational::ReferenceTabulation<Element, Scalar>;
+    using Store = Variational::ReferenceTabulationCache<Element, Scalar>;
     constexpr size_t FormulaCount = ReferenceCacheCapacity + 1;
     constexpr Real ReconstructionTolerance = 1e-8;
     Element element(geometry);
@@ -117,16 +117,14 @@ namespace Rodin::Tests::Benchmarks
       {
         const auto& point = formula.getPoint(qp);
         if constexpr (requires {
-                        element.evaluateGradients([](size_t, const auto&) {}, point);
+                        element.tabulate(typename Element::Gradients{{}, 0}, point);
                       })
         {
           if (operation == ReferenceOperation::BulkDerivatives)
           {
-            element.evaluateGradients(
-              [&](size_t a, const auto& gradient) {
-                for (size_t i = 0; i < dim; ++i)
-                  output[(qp * ndof + a) * dim + i] = gradient(i);
-              },
+            element.tabulate(
+              typename Element::Gradients{
+                std::span(output).subspan(qp * ndof * dim, ndof * dim), dim},
               point);
             continue;
           }
@@ -353,7 +351,7 @@ namespace Rodin::Tests::Benchmarks
             operation == ReferenceOperation::PrefetchedDerivatives))
           continue;
         if constexpr (!requires(const Element& element, const Math::SpatialPoint& point) {
-                        element.evaluateGradients([](size_t, const auto&) {}, point);
+                        element.tabulate(typename Element::Gradients{{}, 0}, point);
                       })
         {
           if (operation == ReferenceOperation::BulkDerivatives)

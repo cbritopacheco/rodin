@@ -30,6 +30,14 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Owned scalar basis values and reference derivatives.
+  template <class Scalar>
+  class ReferenceTabulation;
+
+  /// @brief Bounded reference-table reuse for an element and scalar type.
+  template <class Element, class Scalar>
+  class ReferenceTabulationCache;
+
   /// @brief Finite-element interpolation selected by the space's context.
   template <class FES>
   class Interpolation;
