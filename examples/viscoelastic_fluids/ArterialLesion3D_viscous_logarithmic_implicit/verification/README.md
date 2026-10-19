@@ -136,6 +136,48 @@ lagged Π[∇p] dominates. The error against the exact solution at T/Δt = 64 is
 1.5 % in u and 5 % in σ, and it is spatial for both schemes. The finer meshes,
 on pc9, show how the order recovers.
 
+## Formulation (`-al_formulation psi_rb|exp|psi`)
+
+In all three formulations, momentum and continuity carry the split OSS with dynamic subscales, as in Moreno, Codina and Baiges (CMAME 367, 2020):
+
+- **Subscales.** The convective, pressure-gradient and div σ subscales carry the memory ρ/Δt. The pressure subscale is algebraic (grad-div on the orthogonal part of div u).
+- **α1.** It uses η0 = η_s + η_p/f, where h is the cell length along u. The constants are c1..c4 = 4, 2, 4, 0.25 (`-al_c1..4`).
+- **Storage.** The subscales are kept at the quadrature points and updated when a step is accepted. `-al_dynamic_subscales 0` gives the quasi-static variant.
+
+The formulations differ in the constitutive equation:
+
+- **`psi_rb` (default).** The ψ equation (Fattal and Kupferman), with BDF on ψ:
+  R_ψ = ∂_t ψ + (u·∇)ψ + N(ψ, ∇u), N = −Dexp⁻¹[∇u E + E ∇uᵀ − c ε(u)] + (f/λ)(I − e^{−ψ}).
+  - **Stabilisation.** It is the OSS of the full residual. A log-conformation subscale ψ̃ = τ′(ψ̃ⁿ/Δt − (R_ψ − Π[R_ψⁿ])), with τ = (λ/2η_p)α3, enters in two places:
+    - the ψ equation, as ⟨ψ̃, −(uⁿ·∇)χ⟩;
+    - the momentum, as ⟨σ̃, ε(v)⟩ with σ̃ = (η_p/λ0) Dexp[ψ̃]. This term gives the u–ψ compatibility.
+  - **Approximation.** The reaction part of the adjoint is left out.
+  - **Newton.** It is exact and quadratic.
+- **`exp`.** Moreno, Codina, Baiges and Castillo (CMAME 354, 2019). The σ equation is written for E = exp(ψ) and tested with χ:
+  R = f(E − I)/(2λ0) − ε(u) + (λ/2λ0)[∂_t E + (u·∇)E − (∇u E + E ∇uᵀ) + 2ε(u)].
+  Its stabilisation is ⟨σ̃, A*(χ) + ε(v)⟩, with σ̃ = α3′(λ/(2η_pΔt) σ̃ⁿ − (R − Π[Rⁿ])).
+- **`psi`.** The former scheme: the ψ equation with split OSS of (u·∇)ψ and ε(u). This adds α3⟨ε(u) − Π[ε(u)], ε(v)⟩ with α3 ≈ η_p/2, which for blood is several times η_s. It acts whether or not the equation is resolved.
+
+Why `psi_rb`:
+
+- **Consistent and low-dissipation.** Its stabilisation acts only on the part of R that the mesh does not resolve. Start-up in the S75 pipe (Re 600, fluid R) shows the difference. At t = 1 ms the diffusion length √(νt) is 0.1 R, so the core should be a plug flow:
+  - `exp` and `psi_rb`: Δp = 2.9 Pa, max|u|/Ū = 4.7. These are the inertial values: the plug through the 75 % stenosis, with ρ L dŪ/dt of a few Pa.
+  - `psi`: Δp = 0.29 Pa, max|u|/Ū = 2.2. This is far from that. Its stabilisation differs in two ways that both act on this transient: the quasi-static α1 with lagged Π[∇p], and S3.
+- **Well scaled at high Wi.**
+  - In the E form, the equation for an eigenvalue l of ψ is scaled by e^l. At blood Weissenberg numbers (λγ̇ ~ 10³), the small eigenvalues are therefore not determined.
+  - In the S75 xcoarse test, `exp` had ψ_min = −7.5 at t = 0.042 s and −20 at t = 0.052 s. Newton then stalled at every Δt.
+  - With the same data, `psi_rb` ran to t = 0.115 s with no rejected step and 2 Newton iterations per step, which is past the t = 0.108 s where the earlier 3D run had failed. Its ψ_min stayed between −4.5 and −6.6. At that point ψ_max was 9.9 and max|σ| was 205 Pa, the latter levelling off. The test was stopped there.
+
+Steady sPTT pipe, rf 0.5 (h/D = 0.2):
+
+| formulation | e_u | e_σ | e_G | e_τw | Newton iterations / steps |
+|---|---|---|---|---|---|
+| psi_rb | 6.18e-2 | 1.40e-1 | 1.14e-1 | −4.4 % | 146 / 52 |
+| exp | 6.16e-2 | 1.62e-1 | 1.14e-1 | −4.3 % | 101 / 40 |
+| psi | 6.38e-2 | 1.39e-1 | 1.15e-1 | −4.4 % | 92 / 40 |
+
+Assembly per Newton iteration costs about 1.5 to 1.7 times that of `psi`, for both `psi_rb` and `exp`.
+
 ## Pulsatile Oldroyd-B test
 
 ```

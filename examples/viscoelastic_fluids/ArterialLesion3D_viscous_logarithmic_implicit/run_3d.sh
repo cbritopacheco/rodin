@@ -46,6 +46,14 @@
 #                     (2: 4 points per tetrahedron; 4: 11 points, slower)
 #     NEWTON_TOL=5e-4 Newton stops when max|dpsi|/max(1,|psi|) < NEWTON_TOL;
 #                     Newton is quadratic, so the error left is ~NEWTON_TOL^2
+#     FORMULATION=psi_rb constitutive discretisation (-al_formulation); all
+#                     three have split OSS on momentum/continuity:
+#                       psi_rb psi equation, OSS of its full residual (default)
+#                       exp    Moreno et al. (2019, 2020): sigma equation in
+#                              E = exp(psi), OSS of its full residual; loses
+#                              the small eigenvalues of psi at blood Wi
+#                       psi    the former psi equation with term-by-term OSS
+#     DYNAMIC=1       dynamic subscales (psi_rb, exp; 0: quasi-static)
 #     ADAPTIVE_DT=1   step control: a failed step (Newton not converged or
 #                     diverging, linear solver failure, velocity guard) is
 #                     retried with dt/2 (up to 6 times); dt grows back x1.5
@@ -122,6 +130,8 @@ RETRY="${RETRY:-1}"
 SOLVER="${SOLVER:-gmres}"
 GMRES_OPTS="-ksp_type gmres -ksp_gmres_restart 200 -ksp_max_it 2000 -ksp_rtol 1e-8 -pc_type asm -pc_asm_overlap 1 -sub_pc_type ilu -sub_pc_factor_levels 1"
 LULAG_OPTS="-ksp_type gmres -ksp_gmres_restart 100 -ksp_max_it 300 -ksp_rtol 1e-8 -pc_type lu -pc_factor_mat_solver_type mumps"
+FORMULATION="${FORMULATION:-psi_rb}"
+DYNAMIC="${DYNAMIC:-1}"
 ADAPTIVE_DT="${ADAPTIVE_DT:-1}"
 NEWTON_PREDICT="${NEWTON_PREDICT:-1}"
 PC_REUSE="${PC_REUSE:-20}"
@@ -168,6 +178,7 @@ run_case() {   # fluid steps dir solver
     -al_cycles "$cycles" -al_steps_per_cycle "$steps" -al_output_every "$OUTPUT_EVERY"
     -al_conformation_its "$NEWTON_ITS" -al_conformation_tol "$NEWTON_TOL" -al_psi_order "$PSI_ORDER"
     -al_inlet_perturbation "$PERTURB" -al_perturbation_cycles 1
+    -al_formulation "$FORMULATION" -al_dynamic_subscales "$DYNAMIC"
     -al_adaptive_dt "$ADAPTIVE_DT" -al_newton_predict "$NEWTON_PREDICT"
     -al_pc_reuse_solves "$PC_REUSE" -al_pc_reuse_growth "$PC_REUSE_GROWTH"
     -al_outlet_conformation_inflow "$OUTLET_PSI" -al_psi_skew "$PSI_SKEW")

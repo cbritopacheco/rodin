@@ -11,13 +11,51 @@
  *        ArterialLesion2D_viscous_logarithmic_implicit, term by term.
  *
  * Formulation. T = 2 eta_s eps(u) + sigma, sigma = (eta_p/lambda0)(exp(psi)
- * - I), the psi equation solved by Newton together with (u, p), P1 spaces,
- * BDF1 or BDF2 (-al_time_order; variable-step, with step rejection and
- * control, Config::adaptiveTimeStep), and the split-OSS stabilisation (S1
- * dynamic convection,
- * pressure and div sigma; S2 grad-div; S3 u-psi compatibility and psi
- * advection). The only changes from the planar driver are those of the
- * dimension:
+ * - I), (u, p, psi) solved by Newton, P1 spaces, BDF1 or BDF2
+ * (-al_time_order; variable-step, with step rejection and control,
+ * Config::adaptiveTimeStep). Momentum and continuity carry the term-by-term
+ * (split) OSS with dynamic subscales: u1 for convection, u2 for the pressure
+ * gradient, u3 for div sigma, and the algebraic pressure subscale (grad-div).
+ * Three discretisations of the constitutive equation (Config::formulation):
+ *
+ *  - "psi_rb" (default): the psi equation (Fattal and Kupferman 2004)
+ *      R_psi = d_t psi + (u.grad) psi + N(psi, L) = 0,
+ *      N = -Dexp^{-1}[L E + E L^T - c eps(u)] + (f/lambda)(I - exp(-psi)),
+ *    BDF on psi, with the OSS of its full residual: a log-conformation
+ *    subscale psi~, (d_t + 1/tau) psi~ = -P^perp[R_psi], tau = (lambda/(2
+ *    eta_p)) alpha3, entering as <psi~, -(u^n.grad) chi> and, through sigma~ =
+ *    (eta_p/lambda0) Dexp[psi~], as <sigma~, eps(v)> in the momentum (the u-psi
+ *    compatibility). Both are consistent and vanish where R_psi is resolved;
+ *    the reaction part of the adjoint is left out. The psi equation keeps
+ *    every eigenvalue of psi at the scale O(1): in the exp form below the
+ *    equation for an eigenvalue l of psi is scaled by e^l, so at the
+ *    Weissenberg numbers of blood (lambda gd ~ 10^3) the small eigenvalues
+ *    are not determined (psi_min ran to -20 and Newton stalled in the S75
+ *    test at t = 0.05 s; psi_rb kept psi_min > -6.6 and ran on to
+ *    t = 0.115 s without a rejected step).
+ *  - "exp" (Moreno, Codina, Baiges, Castillo, CMAME 354, 2019;
+ *    Moreno, Codina, Baiges, CMAME 367, 2020). With E = exp(psi), f the PTT
+ *    factor and L = grad u (L_ij = d u_i/d x_j),
+ *
+ *      R = f (E - I)/(2 lambda0) - eps(u)
+ *          + (lambda/(2 lambda0)) [d_t E + (u.grad) E - (L E + E L^T) + 2 eps(u)] = 0,
+ *
+ *    the sigma equation over 2 eta_p, tested with chi; BDF on E. The
+ *    constitutive equation
+ *    carries the OSS of its full residual, sum_K <s~, A(chi) + eps(v)>,
+ *      A(chi) = f chi/(2 eta_p) - (lambda/(2 eta_p))((u.grad) chi + chi L + L^T chi),
+ *      (lambda/(2 eta_p)) d_t s~ + s~/alpha3 = -P^perp[R],
+ *    because its terms are large where they balance (stress layers) while R
+ *    is small: projecting each term separately fails there (Moreno et al.
+ *    2020, Table 1) and adds dissipation where the equation is satisfied.
+ *    The subscales live at the quadrature points; P^perp[R] = R - Pi[R^n].
+ *  - "psi": the former scheme, the psi equation with the split OSS of the
+ *    former driver (S1 dynamic convection, pressure and div sigma; S2
+ *    grad-div; S3 u-psi compatibility Pi[eps(u)] and psi advection). S3 acts
+ *    on eps(u) - Pi[eps(u)] with a weight ~eta_p/2 whether or not the
+ *    equation is resolved: an artificial viscosity of several eta_s for blood.
+ *
+ * The only changes from the planar driver are those of the dimension:
  *
  *  - psi is a symmetric 3x3 tensor, six unknowns per node. Rodin's vector H1
  *    space holds at most three components (Math::SpatialVector), so psi is
@@ -244,6 +282,41 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       struct Config
       {
+          /// @brief Discretisation of the constitutive equation and of its
+          ///        stabilisation (file header). In all three, momentum and
+          ///        continuity carry the split OSS with dynamic subscales.
+          ///  - "psi_rb": the psi equation with the OSS of its full residual,
+          ///    a log-conformation subscale psi~ seen by the psi equation
+          ///    (streamline) and by the momentum (sigma~ = s Dexp[psi~]).
+          ///  - "exp": Moreno, Codina, Baiges, Castillo (CMAME 2019) and Moreno,
+          ///    Codina, Baiges (CMAME 2020). The constitutive equation is the
+          ///    sigma equation over 2 eta_p written in E = exp(psi) and tested
+          ///    with a stress-like chi; momentum and continuity carry the
+          ///    term-by-term (split) OSS, with dynamic subscales u1
+          ///    (convection), u2 (pressure gradient), u3 (div sigma) and the
+          ///    algebraic pressure subscale; the constitutive equation carries
+          ///    the OSS of its full residual, tested with the adjoint operator
+          ///    A(chi, v), with a dynamic stress subscale. Newton is exact in
+          ///    (u, p, psi): Dexp and D2exp by Daleckii-Krein.
+          ///  - "psi": the former scheme, the psi equation d_t psi + u.grad psi
+          ///    - Dexp^{-1}[L T + T L^T] + (f/lambda)(I - exp(-psi)) = 0 with the
+          ///    term-by-term OSS of eps(u) and (u.grad) psi.
+          std::string formulation = "psi_rb";
+          /// @brief Stabilisation constants of "psi_rb" and "exp" (tau_psi =
+          ///        (lambda/(2 eta_p)) alpha3), linear
+          ///        elements (Moreno et al. 2019): alpha1 = [c1 eta_0/h1^2 + c2
+          ///        rho |u|/h2]^-1, alpha2 = h1^2/(c1 alpha1), alpha3 = [c3 f/(2
+          ///        eta_p) + c4 (lambda |u|/(2 eta_p h2) + lambda |grad u|/eta_p)]^-1,
+          ///        h1 = |K|^(1/3), h2 the length of K along u.
+          Real c1 = 4.0;
+          Real c2 = 2.0;
+          Real c3 = 4.0;
+          Real c4 = 0.25;
+          /// @brief Dynamic subscales (time-dependent, BDF1 in their own
+          ///        equations): alpha1 -> (rho/dt + 1/alpha1)^-1, alpha3 ->
+          ///        (lambda/(2 eta_p dt) + 1/alpha3)^-1, plus their memory terms.
+          ///        Off: quasi-static subscales ("psi_rb" and "exp").
+          bool dynamicSubscales = true;
           /// @brief "sptt", "gsptt" or "cy" (file header).
           std::string fluid = "sptt";
           CarreauYasuda carreauYasuda;
@@ -254,6 +327,12 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        the developed mean profile instead of psi = 0 (requires
           ///        lambda0 = lambda).
           bool inletDevelopedConformation = false;
+          /// @brief Scale that inlet log-conformation by the inflow ramp,
+          ///        psi_in(t) = ramp(t) psi_dev, as the inlet velocity. The flow
+          ///        starts from rest (psi = 0): without it psi jumps by psi_dev
+          ///        across the first cell layer at t = 0, and in the "exp"
+          ///        formulation the first Newton solve diverges at every dt.
+          bool inletConformationRamp = true;
 
           /// @brief Tetrahedral MEDIT "Dimension 3" mesh in units of D.
           std::string meshPath =
@@ -478,6 +557,24 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       void setupSpaces();
       void setupFlow();
+      /// @brief The "exp" formulation (Config::formulation): its forms.
+      void setupFlowExp();
+      /// @brief "exp": the alphas at step n (dynamic or quasi-static).
+      void updateStabilizationExp();
+      /// @brief "exp", after a step is accepted and before the history moves:
+      ///        the subscales of step n+1 at the quadrature points, then
+      ///        Pi[R^{n+1}], the projection of the constitutive residual read by
+      ///        the next step.
+      void updateSubscalesExp();
+      /// @brief The "psi_rb" formulation (Config::formulation): its forms.
+      void setupFlowPsiRB();
+      /// @brief "psi_rb", as updateSubscalesExp: the subscales of step n+1 and
+      ///        Pi[R_psi^{n+1}].
+      void updateSubscalesPsiRB();
+      /// @brief The length of the cell of p along the direction of u (h1 if
+      ///        |u| vanishes).
+      static Real streamlineLength(const Rodin::Geometry::Point& p,
+        const Rodin::Math::SpatialVector<Real>& u);
       void setupWallShear();
 
       /// @brief L2 projection of a vector expression, reusing one mass matrix.
@@ -669,6 +766,13 @@ namespace Rodin::Examples::ViscoelasticFluids
       Heart::OrthogonalProjection<VectorFESType> m_piEpsO;     ///< Pi[eps(u^n)], O block
       Heart::OrthogonalProjection<VectorFESType> m_piAdvPsiD;  ///< Pi[(u^n.grad) psi^n], D
       Heart::OrthogonalProjection<VectorFESType> m_piAdvPsiO;  ///< Pi[(u^n.grad) psi^n], O
+      /// @brief "exp": Pi[R^n] of the constitutive residual (D and O blocks),
+      ///        the static and dynamic alpha3 and the PTT factor f(psi^n), by cell.
+      Heart::OrthogonalProjection<VectorFESType> m_piRD;
+      Heart::OrthogonalProjection<VectorFESType> m_piRO;
+      CellGridFunctionType m_alpha3Dyn;
+      CellGridFunctionType m_pttN;
+
 
       // ---- Wall shear indices ----------------------------------------------
       /// @brief The three rows of 2 eps(u), recovered onto the nodes.
@@ -689,6 +793,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       ScalarTestFunctionType m_qFlux;
       ScalarGridFunctionType m_one;
       FluxFormType m_flux;
+      /// @brief "exp": the sweep that writes the subscales at the quadrature points.
+      FluxFormType m_subscaleSweep;
 
       // ---- Problems and solvers --------------------------------------------
       FlowProblemType m_flow;

@@ -34,6 +34,8 @@
  *                                                  Newton acceptance by C d_k^2
  *   pc_reuse_solves, pc_reuse_growth               lagged preconditioner (Krylov only)
  *   outlet_conformation_inflow (bool), psi_skew (bool)  psi outlet inflow; skew advection
+ *   formulation (psi_rb|exp|psi), c1, c2, c3, c4, dynamic_subscales (bool)
+ *                                                  constitutive form and stabilisation (header)
  *
  * The CSV ends with maxTAWSSLesion, maxOSILesion (tag 5 only) and uyMean,
  * uzMean, the volume means of u_y and u_z over Ubar: both vanish for an
@@ -282,6 +284,12 @@ namespace Rodin::Examples::ViscoelasticFluids
         Real lambda0 = 0.0;
         Real epsilon = 0.0;   ///< sPTT
         Real c = 0.0;         ///< 2 (1 - lambda0/lambda), on eps(u)
+        /// @brief Exp form (Config::formulation "exp"): the BDF history of the
+        ///        conformation, E_hist = bdfA exp(psi^n) + bdfB exp(psi^{n-1}),
+        ///        and the mass step, d/dt E ~ (E - E_hist)/dtM.
+        Real bdfA = 1.0;
+        Real bdfB = 0.0;
+        Real dtM = 1.0;
     };
 
     /// @brief What the forms read at one quadrature point, from (psi^k, L^k =
@@ -308,6 +316,24 @@ namespace Rodin::Examples::ViscoelasticFluids
         ///        in psi beyond the one carried by d_j psi; Vk = sum_m V_m psi^k_m.
         std::array<Eigen::Vector3d, 6> V;
         Eigen::Vector3d Vk;
+        /// @brief Exp form (LogExpForm), at (psi^k, u^k), with L = grad u^k,
+        ///        E = exp(psi^k), k_a = lambda/(2 lambda0) and the conformation
+        ///        residual
+        ///          R = f (E - I)/(2 lambda0) - eps(u)
+        ///              + k_a [(E - E_hist)/dtM + (u.grad) E - (L E + E L^T) + 2 eps(u)],
+        ///        the sigma equation over 2 eta_p (Moreno et al. 2019, eq. 2.10):
+        ///        G_j = d_j E = Dexp[d_j psi]; W_m = sum_j u_j D2exp[d_j psi, E_m];
+        ///        M_m = dR/dpsi_m but for the k_a (u.grad) Dexp[.] part,
+        ///          M_m = (f D_m + (df/dpsi_m)(E - I))/(2 lambda0)
+        ///                + k_a (D_m/dtM + W_m - (L D_m + D_m L^T));
+        ///        K = R - sum_m psi_m M_m - k_a sum_j u_j G_j - R_u[u], the part
+        ///        of R that is not linear in (psi, u) at (psi^k, u^k), R_u the
+        ///        exact (linear) velocity dependence; R itself.
+        std::array<Eigen::Matrix3d, 3> G;
+        std::array<Eigen::Matrix3d, 6> W;
+        std::array<Eigen::Matrix3d, 6> M;
+        Eigen::Matrix3d K;
+        Eigen::Matrix3d R;
     };
 
     Eigen::Matrix3d nonlinearMap(
@@ -331,7 +357,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     {
       LogDexp = 1,
       LogNewton = 2,
-      LogD2 = 4       ///< V_m, Vk (second derivative of exp along d_j psi^k)
+      LogD2 = 4,      ///< V_m, Vk (second derivative of exp along d_j psi^k)
+      LogExpForm = 8  ///< G, W, M, K, R of the exp form
     };
 
     /// @brief exp(psi) and Dexp[E_j], from the eigen-decomposition of psi.
@@ -432,6 +459,38 @@ namespace Rodin::Examples::ViscoelasticFluids
         F m_f;
     };
 
+    /// @brief A constant 3x3 tensor in fixed-size storage (Math::Matrix is
+    ///        dynamic: products with it allocate at every evaluation).
+    class ConstantTensor final
+      : public MatrixFunctionBase<Real, ConstantTensor>
+    {
+      public:
+        using Parent = MatrixFunctionBase<Real, ConstantTensor>;
+
+        explicit ConstantTensor(const Eigen::Matrix3d& m) : m_m(m) {}
+        ConstantTensor(const ConstantTensor& other) : Parent(other), m_m(other.m_m) {}
+        ConstantTensor(ConstantTensor&& other) : Parent(std::move(other)), m_m(other.m_m) {}
+
+        Math::SpatialMatrix<Real> getValue(const Point&) const { return Math::SpatialMatrix<Real>(m_m); }
+        size_t getRows() const { return 3; }
+        size_t getColumns() const { return 3; }
+        Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept { return 0; }
+        ConstantTensor* copy() const noexcept override { return new ConstantTensor(*this); }
+
+      private:
+        Eigen::Matrix3d m_m;
+    };
+
+    /// @brief tensor<B>, with fixed-size basis tensors (exp formulation).
+    template <Block B, class S>
+    auto tensorFixed(const S& s)
+    {
+      const auto& E = voigtBasisEigen();
+      return ConstantTensor(E[voigtIndex(B, 0)]) * Component(s, 0) +
+        ConstantTensor(E[voigtIndex(B, 1)]) * Component(s, 1) +
+        ConstantTensor(E[voigtIndex(B, 2)]) * Component(s, 2);
+    }
+
     /// @brief The fields a LogPoint is computed from: (psi_D, psi_O, u) and
     ///        the revision that keys the cache.
     template <class GF>
@@ -442,6 +501,11 @@ namespace Rodin::Examples::ViscoelasticFluids
         const GF* u;
         LogModel model;
         const std::uint64_t* revision;
+        /// @brief psi^n and psi^{n-1}, for E_hist (LogExpForm only).
+        const GF* psiND = nullptr;
+        const GF* psiNO = nullptr;
+        const GF* psiNm1D = nullptr;
+        const GF* psiNm1O = nullptr;
     };
 
     /// @brief logPoint(psi(x), grad u(x)) at every quadrature point of the
@@ -530,7 +594,9 @@ namespace Rodin::Examples::ViscoelasticFluids
             logPointNewton(e.value, eig, psi, L, s.model);
             e.have |= LogNewton;
           }
-          if (need & LogD2 & ~e.have)
+          const bool wantD2 = need & LogD2 & ~e.have;
+          const bool wantExp = need & LogExpForm & ~e.have;
+          if (wantD2 || wantExp)
           {
             // d_j psi^k = sum_c GD(c, j) E_c + GO(c, j) E_{3+c}.
             const auto GD = Jacobian(*s.psiD).getValue(p);
@@ -543,19 +609,83 @@ namespace Rodin::Examples::ViscoelasticFluids
               for (int k = 0; k < 3; ++k)
                 g[j] += GD(k, j) * B[k] + GO(k, j) * B[3 + k];
             }
+            // The exp form also needs u^k, L^k and (u^k . grad) psi^k.
+            Eigen::Vector3d u = Eigen::Vector3d::Zero();
+            Eigen::Matrix3d L = Eigen::Matrix3d::Zero();
+            Eigen::Matrix3d gu = Eigen::Matrix3d::Zero();
+            if (wantExp)
+            {
+              const auto uv = s.u->getValue(p);
+              const auto J = Jacobian(*s.u).getValue(p);
+              for (int a = 0; a < 3; ++a)
+              {
+                u(a) = uv(a);
+                for (int b = 0; b < 3; ++b)
+                  L(a, b) = J(a, b);
+              }
+              for (int j = 0; j < 3; ++j)
+                gu += u(j) * g[j];
+            }
+            // Central differences of Dexp in the six Voigt directions (twelve
+            // eigenproblems), shared by V_m (div exp, S1) and W_m (exp form).
             const Real h = 1.0e-6 * std::max<Real>(1.0, psi.cwiseAbs().maxCoeff());
             const Real pk[6] = { psi(0, 0), psi(1, 1), psi(2, 2), psi(0, 1), psi(0, 2), psi(1, 2) };
-            e.value.Vk.setZero();
+            if (wantD2)
+              e.value.Vk.setZero();
             for (size_t m = 0; m < 6; ++m)
             {
               const LogEig ep = logEig(psi + h * B[m]);
               const LogEig em = logEig(psi - h * B[m]);
-              e.value.V[m].setZero();
-              for (int j = 0; j < 3; ++j)
-                e.value.V[m] += ((ep.dexp(g[j]) - em.dexp(g[j])) / (2.0 * h)).col(j);
-              e.value.Vk += pk[m] * e.value.V[m];
+              if (wantD2)
+              {
+                e.value.V[m].setZero();
+                for (int j = 0; j < 3; ++j)
+                  e.value.V[m] += ((ep.dexp(g[j]) - em.dexp(g[j])) / (2.0 * h)).col(j);
+                e.value.Vk += pk[m] * e.value.V[m];
+              }
+              if (wantExp)
+                e.value.W[m] = (ep.dexp(gu) - em.dexp(gu)) / (2.0 * h);
             }
-            e.have |= LogD2;
+            if (wantD2)
+              e.have |= LogD2;
+            if (wantExp)
+            {
+              const LogModel& md = s.model;
+              const Eigen::Matrix3d Id = Eigen::Matrix3d::Identity();
+              const Eigen::Matrix3d& E = e.value.exp;
+              const Real ka = md.lambda / (2.0 * md.lambda0);
+              const Real ptt = md.epsilon * (md.lambda / md.lambda0);
+              const Real fk = 1.0 + ptt * (E.trace() - 3.0);
+              // E_hist from psi^n and psi^{n-1} at this point.
+              const auto expAt = [&p](const GF* d, const GF* o) -> Eigen::Matrix3d {
+                return logEig(unpack(d->getValue(p), o->getValue(p))).exp();
+              };
+              Eigen::Matrix3d Eh = md.bdfA * expAt(s.psiND, s.psiNO);
+              if (md.bdfB != 0.0)
+                Eh += md.bdfB * expAt(s.psiNm1D, s.psiNm1O);
+              for (int j = 0; j < 3; ++j)
+                e.value.G[j] = eig.dexp(g[j]);
+              Eigen::Matrix3d adv = Eigen::Matrix3d::Zero();   // (u . grad) E
+              for (int j = 0; j < 3; ++j)
+                adv += u(j) * e.value.G[j];
+              const Eigen::Matrix3d symL = 0.5 * (L + L.transpose());
+              Eigen::Matrix3d sumPsiM = Eigen::Matrix3d::Zero();
+              for (size_t m = 0; m < 6; ++m)
+              {
+                const Eigen::Matrix3d& Dm = e.value.D[m];
+                // df/dpsi_m = ptt tr(Dexp[E_m]) (= ptt tr(E E_m)).
+                e.value.M[m] = (fk * Dm + ptt * Dm.trace() * (E - Id)) / (2.0 * md.lambda0) +
+                  ka * (Dm / md.dtM + e.value.W[m] - (L * Dm + Dm * L.transpose()));
+                sumPsiM += pk[m] * e.value.M[m];
+              }
+              const Eigen::Matrix3d relax = fk * (E - Id) / (2.0 * md.lambda0);
+              const Eigen::Matrix3d rate = ka * (E - Eh) / md.dtM;
+              e.value.R = relax - symL + rate + ka * (adv - (L * E + E * L.transpose()) + 2.0 * symL);
+              // R = sum_m psi_m M_m + k_a (u . grad) Dexp[psi] + R_u[u] + K, with
+              // R_u[u] = (k_a 2 - 1) eps(u) + k_a (sum_j u_j G_j - (L E + E L^T)).
+              e.value.K = relax + rate - sumPsiM - ka * adv;
+              e.have |= LogExpForm;
+            }
           }
           return e;
         }
@@ -757,6 +887,126 @@ namespace Rodin::Examples::ViscoelasticFluids
     auto divExpKnownD2(const LogFields<GF>& s)
     {
       return fromPointVector(s, LogD2, [](const LogPoint& q) -> Eigen::Vector3d { return q.Vk; });
+    }
+
+    // ---- Exp form (Config::formulation "exp") ----------------------------------
+    //
+    // The constitutive equation is the sigma equation over 2 eta_p written in
+    // E = exp(psi) (Moreno, Codina, Baiges, Castillo 2019, eq. 2.10), tested
+    // with a stress-like chi, and linearised by Newton about (psi^k, u^k):
+    //   R(psi, u) ~ sum_m M_m psi_m + k_a Dexp[(u^k . grad) psi] + R_u[u] + K.
+
+    /// @brief Trial part of R in the block B of psi.
+    template <Block B, class GF, class S, class U>
+    auto expFormTrialPsi(const LogFields<GF>& s, Real ka, const S& psi, const U& uk)
+    {
+      const auto Mc = [&](size_t c) {
+        const size_t m = voigtIndex(B, c);
+        return fromPoint(s, LogExpForm, [m](const LogPoint& q) { return q.M[m]; });
+      };
+      const auto Dc = [&](size_t c) {
+        const size_t m = voigtIndex(B, c);
+        return fromPoint(s, LogDexp, [m](const LogPoint& q) { return q.D[m]; });
+      };
+      const auto adv = Mult(Jacobian(psi), uk);
+      return Mc(0) * Component(psi, 0) + Mc(1) * Component(psi, 1) + Mc(2) * Component(psi, 2)
+        + ka * Dc(0) * Component(adv, 0) + ka * Dc(1) * Component(adv, 1)
+        + ka * Dc(2) * Component(adv, 2);
+    }
+
+    /// @brief Trial part of R in u: R_u[u] = (2 k_a - 1) eps(u) + k_a (sum_j
+    ///        u_j d_j E - (grad u E + E grad u^T)), E and d_j E at psi^k.
+    template <class GF, class U>
+    auto expFormTrialU(const LogFields<GF>& s, Real ka, const U& u)
+    {
+      const auto Gj = [&](size_t j) {
+        return fromPoint(s, LogExpForm, [j](const LogPoint& q) { return q.G[j]; });
+      };
+      const auto E = fromPoint(s, LogDexp, [](const LogPoint& q) { return q.exp; });
+      return (ka - 0.5) * (Jacobian(u) + Transpose(Jacobian(u)))
+        + ka * Gj(0) * Component(u, 0) + ka * Gj(1) * Component(u, 1) + ka * Gj(2) * Component(u, 2)
+        + (-ka) * Mult(Jacobian(u), E) + (-ka) * Mult(E, Transpose(Jacobian(u)));
+    }
+
+    /// @brief The adjoint test operator of the constitutive subscale, block C
+    ///        of chi (Moreno, Codina, Baiges 2020, eq. 27):
+    ///          A(chi) = f chi/(2 eta_p) - (lambda/(2 eta_p)) ((u^n . grad) chi
+    ///                   + chi L^n + (L^n)^T chi),  L^n = grad u^n;
+    ///        the eps(v) part is paired separately.
+    template <Block C, class T, class F, class U, class L>
+    auto adjointTest(const T& chi, const F& fN, Real kA, Real kB, const U& un, const L& ln)
+    {
+      const auto X = tensorFixed<C>(chi);
+      return kA * fN * X + (-kB) * tensorFixed<C>(Mult(Jacobian(chi), un))
+        + (-kB) * Mult(X, ln) + (-kB) * Mult(Transpose(ln), X);
+    }
+
+    /// @brief Dynamic subgrid scales at the quadrature points, step n: the
+    ///        velocity parts u1 (convection), u2 (pressure gradient), u3 (div
+    ///        sigma) of the term-by-term momentum subscale, and the stress
+    ///        subscale sig. Written for step n+1 once the step is accepted, then
+    ///        committed; keyed like LogStore, so every integral that reads it
+    ///        uses the psi quadrature rule. Missing points read zero (start).
+    class SubscaleStore
+    {
+      public:
+        struct Entry
+        {
+            Eigen::Vector3d u1 = Eigen::Vector3d::Zero();
+            Eigen::Vector3d u2 = Eigen::Vector3d::Zero();
+            Eigen::Vector3d u3 = Eigen::Vector3d::Zero();
+            Eigen::Matrix3d sig = Eigen::Matrix3d::Zero();
+        };
+
+        const Entry& at(const Point& p) const
+        {
+          static const Entry zero{};
+          std::lock_guard<std::mutex> lock(m_mutex);
+          const auto it = m_current.find(PointKey::of(p));
+          return it == m_current.end() ? zero : it->second;
+        }
+
+        void stage(const Point& p, const Entry& e)
+        {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          m_next[PointKey::of(p)] = e;
+        }
+
+        /// @brief The staged values become step n.
+        void commit()
+        {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          m_current.swap(m_next);
+          m_next.clear();
+        }
+
+        void discard()
+        {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          m_next.clear();
+        }
+
+      private:
+        mutable std::mutex m_mutex;
+        std::unordered_map<PointKey, Entry, PointKeyHash> m_current;
+        std::unordered_map<PointKey, Entry, PointKeyHash> m_next;
+    };
+
+    /// @brief One simulation per process: the store of its subscales.
+    SubscaleStore& subscales()
+    {
+      static SubscaleStore store;
+      return store;
+    }
+
+    /// @brief A velocity subscale of step n, as a vector function.
+    template <class Pick>
+    auto subscaleVector(Pick pick)
+    {
+      return VectorFunction(size_t(3), [pick](const Point& p) -> Math::SpatialVector<Real> {
+        const Eigen::Vector3d v = pick(subscales().at(p));
+        return Math::SpatialVector<Real>{{ v(0), v(1), v(2) }};
+      });
     }
 
     /// @brief The projections invert mass matrices: CG + Jacobi, never the
@@ -1020,6 +1270,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_piEpsO(m_tauh, "al_proj_"),
       m_piAdvPsiD(m_tauh, "al_proj_"),
       m_piAdvPsiO(m_tauh, "al_proj_"),
+      m_piRD(m_tauh, "al_proj_"),
+      m_piRO(m_tauh, "al_proj_"),
+      m_alpha3Dyn(m_ch),
+      m_pttN(m_ch),
       m_wss(m_vh),
       m_symRec0(m_vh),
       m_symRec1(m_vh),
@@ -1034,6 +1288,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_qFlux(m_sh),
       m_one(m_sh),
       m_flux(m_qFlux),
+      m_subscaleSweep(m_qFlux),
       m_flow(m_u, m_p, m_psiD, m_psiO, m_v, m_q, m_chiD, m_chiO),
       m_flowKSP(m_flow),
       m_vectorProjection(m_wTrial, m_wTest),
@@ -1070,6 +1325,10 @@ namespace Rodin::Examples::ViscoelasticFluids
     const Real D = m_cfg.diameter;
     const Real rho = m_cfg.rho;
 
+    if (m_cfg.formulation != "exp" && m_cfg.formulation != "psi" && m_cfg.formulation != "psi_rb")
+      throw std::runtime_error("formulation must be psi_rb, exp or psi.");
+    if (m_cfg.formulation != "psi" && m_cfg.psiSkewAdvection)
+      throw std::runtime_error("psi_skew is a term of the psi formulation only.");
     if (m_cfg.fluid != "sptt" && m_cfg.fluid != "cy" && m_cfg.fluid != "gsptt")
       throw std::runtime_error("fluid must be sptt, cy or gsptt.");
     if (m_cfg.fluid == "cy")
@@ -1399,6 +1658,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       out = Math::SpatialVector<Real>{{ lg(0, 1) * ny, lg(0, 1) * nz, lg(1, 1) * ny * nz }};
     else
       out = Math::SpatialVector<Real>{{ lg(0, 0), lg(1, 1) * ny * ny, lg(1, 1) * nz * nz }};
+    if (m_cfg.inletConformationRamp)
+      out *= ramp(m_t);
     return out;
   }
 
@@ -1604,6 +1865,10 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_pIt = Real(0);
     m_subOld = zero;
     m_sub.get() = zero;
+    m_piRD.get() = zero;
+    m_piRO.get() = zero;
+    m_pttN = Real(1);
+    m_alpha3Dyn = Real(0);
     m_psiOldD = zero;
     m_psiOldO = zero;
     m_psiNm1D = zero;
@@ -1683,8 +1948,689 @@ namespace Rodin::Examples::ViscoelasticFluids
     return std::max<Real>(m_flux(m_one), 1e-18);
   }
 
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::streamlineLength(
+    const Point& p, const Math::SpatialVector<Real>& u)
+  {
+    const Real speed = std::sqrt(Math::dot(u, u));
+    if (!(speed > 0.0))
+      return cellSize(p);
+    // The extent of the cell along u/|u|.
+    Real lo = std::numeric_limits<Real>::max();
+    Real hi = std::numeric_limits<Real>::lowest();
+    for (auto it = p.getPolytope().getVertex(); it; ++it)
+    {
+      const auto x = it->getCoordinates();
+      Real d = 0.0;
+      for (Index c = 0; c < static_cast<Index>(u.size()); ++c)
+        d += x(c) * u(c);
+      d /= speed;
+      lo = std::min(lo, d);
+      hi = std::max(hi, d);
+    }
+    return hi > lo ? hi - lo : cellSize(p);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::setupFlowExp()
+  {
+    const size_t dim = m_mesh.getSpaceDimension();
+    const auto normal = BoundaryNormal(m_mesh);
+    const Real rho = m_cfg.rho;
+    const Real dt = m_dt;
+    // BDF mass terms (x - x_hist)/dtM, for u in the momentum and for E in the
+    // constitutive equation.
+    const Real dtM = massStep();
+    m_formDt = dt;
+    m_formMassStep = dtM;
+    const auto& ob = m_cfg.oldroydB;
+    const auto etaS = PointwiseScalar([this](const Point& p) -> Real {
+      return solventViscosityAt(p); }, m_cfg.fluid == "sptt" ? size_t(0) : size_t(2));
+    const Real l0 = lambda0();
+    const Real s = ob.etaP / l0;                     // sigma = s (E - I)
+    const Real ka = ob.lambda / (2.0 * l0);          // lambda/(2 lambda0)
+    const Real kA = 1.0 / (2.0 * ob.etaP);           // adjoint: reaction
+    const Real kB = ob.lambda / (2.0 * ob.etaP);     // adjoint: transport
+    // Memory of the dynamic subscales (zero for quasi-static ones):
+    // rho/dt in the velocity subscales, lambda/(2 eta_p dt) in the stress one.
+    const Real memU = m_cfg.dynamicSubscales ? rho / dt : 0.0;
+    const Real memS = m_cfg.dynamicSubscales ? kB / dt : 0.0;
+    const Real vms = m_cfg.useVMS ? m_cfg.vmsScale : 0.0;
+    // E_hist = a E^n + b E^{n-1}, as x_hist in prepareStep.
+    Real bdfA = 1.0, bdfB = 0.0;
+    if (m_cfg.timeOrder == 2)
+    {
+      const Real w = bdfRatio();
+      bdfA = (1.0 + w) * (1.0 + w) / (1.0 + 2.0 * w);
+      bdfB = -w * w / (1.0 + 2.0 * w);
+    }
+    const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda),
+      bdfA, bdfB, dtM };
+    constexpr Block D = Block::D;
+    constexpr Block O = Block::O;
+
+    const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+    const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+    const auto convU = Mult(Jacobian(m_u), m_uAdv);
+    const auto temam = Dot(Div(m_uAdv) * m_u, m_v);
+    const auto outletBackflow =
+      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uAdv, normal), 0.0);
+    RealFunction pOutFn = [this](const Point&) { return m_cfg.outletPressure; };
+    VectorFunction inletVelocity(dim, [this](const Point& p) -> Math::SpatialVector<Real> {
+      const auto& x = p.getPhysicalCoordinates();
+      const Real r = std::sqrt(x(1) * x(1) + x(2) * x(2));
+      const Real R = 0.5 * m_cfg.diameter;
+      const Real seed = (m_cfg.inletPerturbation != 0.0 &&
+          m_t < m_cfg.perturbationCycles * m_period) ? 1.0 + m_cfg.inletPerturbation * x(1) / R : 1.0;
+      return Math::SpatialVector<Real>{{
+        m_meanVelocity * ramp(m_t) * m_inflow.velocity(r, m_t) * seed, 0.0, 0.0 }};
+    });
+
+    // The stabilisation advects with u^n, the velocity of its parameters.
+    const auto streamV = Mult(Jacobian(m_v), m_uOld);
+    const auto uu = PointwiseTensor([this](const Point& p) -> Eigen::Matrix3d {
+      const auto u = m_uOld.getValue(p);
+      const Eigen::Vector3d w(u(0), u(1), u(2));
+      return w * w.transpose();
+    });
+    const auto Ln = Jacobian(m_uOld);
+    const auto I = MatrixFunction<Math::Matrix<Real>>(Math::Matrix<Real>::Identity(3, 3));
+
+    // Pointwise data at the Newton point (psi^k, u^k); E_hist from psi^n, psi^{n-1}.
+    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
+      &m_psiOldD, &m_psiOldO, &m_psiNm1D, &m_psiNm1O };
+
+    // Momentum: exp(psi) ~ exp(psi^k) + Dexp[psi - psi^k].
+    const auto Tn = fromPoint(at, LogDexp, [](const LogPoint& q) { return q.exp; });
+    const auto C = Tn - dexp<D>(at, m_psiItD) - dexp<O>(at, m_psiItO);
+
+    // One quadrature rule for every integral that reads pointwise data (the
+    // log data and the subscales): see setupFlow.
+    const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+    const auto withOrder = [psiOrder](auto integral) {
+      integral.setOrder(psiOrder);
+      return integral;
+    };
+
+    // ---- Constitutive equation, exp form: R(psi, u) : chi = 0 --------------
+    const auto RpsiD = expFormTrialPsi<D>(at, ka, m_psiD, m_uIt);
+    const auto RpsiO = expFormTrialPsi<O>(at, ka, m_psiO, m_uIt);
+    const auto Ru = expFormTrialU(at, ka, m_u);
+    const auto Kexp = fromPoint(at, LogExpForm, [](const LogPoint& q) { return q.K; });
+    const auto chiD = tensorFixed<D>(m_chiD);
+    const auto chiO = tensorFixed<O>(m_chiO);
+
+    // ---- Residual-based OSS of the constitutive equation --------------------
+    // <s~, A(chi) + eps(v)>, s~ = alpha3' (memS s~^n - P[R]), P[R] = R - Pi[R^n].
+    const auto AD = adjointTest<D>(m_chiD, m_pttN, kA, kB, m_uOld, Ln);
+    const auto AO = adjointTest<O>(m_chiO, m_pttN, kA, kB, m_uOld, Ln);
+    const auto stressKnown = PointwiseTensor([this, at, memS](const Point& p) -> Eigen::Matrix3d {
+      const Eigen::Matrix3d K = logPointAt(at, p, LogExpForm).K;
+      const Eigen::Matrix3d piR = unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p));
+      const Real a3 = m_alpha3Dyn.getValue(p);
+      return -a3 * (K - piR) + a3 * memS * subscales().at(p).sig;
+    });
+    const Real ma3 = -1.0;
+    // Galerkin and OSS test functions of the constitutive equation, merged so
+    // that each (trial, test) pair is assembled once: chi_B - alpha3' A(chi_B).
+    const auto testD = chiD + ma3 * m_alpha3Dyn * AD;
+    const auto testO = chiO + ma3 * m_alpha3Dyn * AO;
+
+    // ---- Subscales of step n --------------------------------------------------
+    const auto u1n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u1; });
+    const auto u2n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u2; });
+    const auto u3n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u3; });
+    const Real sd = m_cfg.stressDivScale;
+    const Real ps = m_cfg.pressureScale;
+
+    const auto body =
+      // ---- Momentum, sigma = s (exp(psi) - I) --------------------------------
+        (rho / dtM) * Integral(m_u, m_v) - (rho / dtM) * Integral(m_uHist, m_v)
+      + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam)
+      // (merged with the eps(v) part of the constitutive OSS, see below)
+      + withOrder(Integral(2.0 * etaS * symU + ma3 * m_alpha3Dyn * Ru, symV))
+      + withOrder(Integral(s * dexp<D>(at, m_psiD) + ma3 * m_alpha3Dyn * RpsiD, symV))
+      + withOrder(Integral(s * dexp<O>(at, m_psiO) + ma3 * m_alpha3Dyn * RpsiO, symV))
+      + s * withOrder(Integral(C, symV)) - s * Integral(I, symV)
+      - Integral(m_p, Div(m_v))
+
+      // ---- Continuity -----------------------------------------------------
+      + Integral(Div(m_u), m_q) + m_cfg.pressurePenalty * Integral(m_p, m_q)
+
+      // ---- Constitutive, exp form, Newton, with its OSS -----------------------
+      // <R, chi> + <s~, A(chi) + eps(v)>, s~ = alpha3' (memS s~^n - R + Pi[R^n]);
+      // the eps(v) part of the bilinear terms is in the momentum integrals.
+      + withOrder(Integral(RpsiD, testD)) + withOrder(Integral(RpsiO, testD))
+      + withOrder(Integral(RpsiD, testO)) + withOrder(Integral(RpsiO, testO))
+      + withOrder(Integral(Ru, testD)) + withOrder(Integral(Ru, testO))
+      + withOrder(Integral(Kexp, chiD)) + withOrder(Integral(Kexp, chiO))
+      + withOrder(Integral(stressKnown, AD))
+      + withOrder(Integral(stressKnown, AO))
+      + withOrder(Integral(stressKnown, symV))
+
+      // ---- Momentum, split OSS, dynamic subscales ------------------------------
+      // u1: <u1, -rho (grad v) u^n>, u1 = alpha1' (rho u1^n/dt - rho P[(grad u) u^n])
+      + vms * rho * rho * Integral(m_tauK * Mult(Jacobian(m_u), uu), Jacobian(m_v))
+      - vms * rho * rho * withOrder(Integral(m_tauK * (m_piConv.get() + (memU / rho) * u1n), streamV))
+      // u2: <u2, -grad q>, u2 = alpha1' (rho u2^n/dt - P[grad p])
+      + ps * Integral(m_tauK * Grad(m_p), Grad(m_q))
+      - ps * withOrder(Integral(m_tauK * (m_piGradP.get() + memU * u2n), Grad(m_q)))
+      // u3: <u3, div chi>, u3 = alpha1' (rho u3^n/dt + P[s div E])
+      - sd * withOrder(Integral(m_tauK * (m_piDivSigma.get() - memU * u3n), divergence<D>(m_chiD)))
+      - sd * withOrder(Integral(m_tauK * (m_piDivSigma.get() - memU * u3n), divergence<O>(m_chiO)))
+
+      // ---- Continuity, OSS of div u (algebraic subscale) ----------------------
+      + Integral(m_alpha2 * Div(m_u), Div(m_v))
+      - Integral(m_alpha2 * m_piDiv.get(), Div(m_v))
+
+
+      // ---- Outlet: traction p_out n and directional do-nothing ---------------
+      + BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.labels.outlet)
+      + BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.labels.outlet)
+
+      // ---- Inlet: developed pulsatile profile; walls: no slip -----------------
+      + DirichletBC(m_u, inletVelocity).on(m_cfg.labels.inlet)
+      + DirichletBC(m_u, Zero(dim)).on(m_wallSet);
+
+    VectorFunction inletPsiD(size_t(3), [this](const Point& p) -> Math::SpatialVector<Real> {
+      return inletLogConformation(p, false); });
+    VectorFunction inletPsiO(size_t(3), [this](const Point& p) -> Math::SpatialVector<Real> {
+      return inletLogConformation(p, true); });
+    const auto finish = [&](const auto& form) {
+      if (m_cfg.inletConformation)
+        m_flow = form
+          + DirichletBC(m_psiD, inletPsiD).on(m_cfg.labels.inlet)
+          + DirichletBC(m_psiO, inletPsiO).on(m_cfg.labels.inlet);
+      else
+        m_flow = form;
+    };
+    // Outlet (Config::outletConformationInflow): where u*.n < 0, the upwind
+    // term k_a |u*.n|_- (E - E^n) : chi, E linearised as above.
+    const auto inflowOut = Max(-Dot(m_uAdv, normal), 0.0);
+    const auto outlet = m_cfg.labels.outlet;
+    const auto outletKnown = PointwiseTensor([this, at](const Point& p) -> Eigen::Matrix3d {
+      const LogPoint& q = logPointAt(at, p, LogDexp);
+      const auto d = m_psiItD.getValue(p);
+      const auto o = m_psiItO.getValue(p);
+      const Real pk[6] = { d(0), d(1), d(2), o(0), o(1), o(2) };
+      Eigen::Matrix3d out = q.exp - logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp();
+      for (size_t m = 0; m < 6; ++m)
+        out -= pk[m] * q.D[m];
+      return out;
+    });
+    const auto withOutlet = [&](const auto& form) {
+      if (m_cfg.outletConformationInflow)
+        finish(form
+          + ka * BoundaryIntegral(inflowOut * Dot(dexp<D>(at, m_psiD), chiD)).over(outlet)
+          + ka * BoundaryIntegral(inflowOut * Dot(dexp<O>(at, m_psiO), chiD)).over(outlet)
+          + ka * BoundaryIntegral(inflowOut * Dot(dexp<D>(at, m_psiD), chiO)).over(outlet)
+          + ka * BoundaryIntegral(inflowOut * Dot(dexp<O>(at, m_psiO), chiO)).over(outlet)
+          + ka * BoundaryIntegral(inflowOut * Dot(chiD, outletKnown)).over(outlet)
+          + ka * BoundaryIntegral(inflowOut * Dot(chiO, outletKnown)).over(outlet));
+      else
+        finish(form);
+    };
+    // u3 trial: s div(Dexp[psi]) (+ the D2exp part of the Newton linearisation
+    // of div exp(psi)), each (trial, test) pair assembled once.
+    const Real k1 = sd * s;
+    if (m_cfg.newtonD2)
+    {
+      const auto dD = divExpTrial<D>(at, m_psiD) + divExpTrialD2<D>(at, m_psiD);
+      const auto dO = divExpTrial<O>(at, m_psiO) + divExpTrialD2<O>(at, m_psiO);
+      withOutlet(body
+        + k1 * withOrder(Integral(m_tauK * dD, divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * dO, divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * dD, divergence<O>(m_chiO)))
+        + k1 * withOrder(Integral(m_tauK * dO, divergence<O>(m_chiO)))
+        - k1 * withOrder(Integral(m_tauK * divExpKnownD2(at), divergence<D>(m_chiD)))
+        - k1 * withOrder(Integral(m_tauK * divExpKnownD2(at), divergence<O>(m_chiO))));
+    }
+    else
+      withOutlet(body
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<D>(at, m_psiD), divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<O>(at, m_psiO), divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<D>(at, m_psiD), divergence<O>(m_chiO)))
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<O>(at, m_psiO), divergence<O>(m_chiO))));
+  }
+
+  void ArterialLesion3DViscousLogImplicit::setupFlowPsiRB()
+  {
+    const size_t dim = m_mesh.getSpaceDimension();
+    const auto normal = BoundaryNormal(m_mesh);
+    const Real rho = m_cfg.rho;
+    const Real dt = m_dt;
+    const Real dtM = massStep();
+    m_formDt = dt;
+    m_formMassStep = dtM;
+    const auto& ob = m_cfg.oldroydB;
+    const auto etaS = PointwiseScalar([this](const Point& p) -> Real {
+      return solventViscosityAt(p); }, m_cfg.fluid == "sptt" ? size_t(0) : size_t(2));
+    const Real l0 = lambda0();
+    const Real s = ob.etaP / l0;                     // sigma = s (exp(psi) - I)
+    const Real kB = ob.lambda / (2.0 * ob.etaP);     // tau_psi = kB alpha3
+    // Memory of the dynamic subscales (zero for quasi-static ones): rho/dt in
+    // the velocity subscales, 1/dt in the log-conformation one.
+    const Real memU = m_cfg.dynamicSubscales ? rho / dt : 0.0;
+    const Real memP = m_cfg.dynamicSubscales ? 1.0 / dt : 0.0;
+    const Real vms = m_cfg.useVMS ? m_cfg.vmsScale : 0.0;
+    const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda) };
+    constexpr Block D = Block::D;
+    constexpr Block O = Block::O;
+    const Real wD = voigtWeight(D), wO = voigtWeight(O);
+
+    const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+    const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+    const auto convU = Mult(Jacobian(m_u), m_uAdv);
+    const auto temam = Dot(Div(m_uAdv) * m_u, m_v);
+    const auto outletBackflow =
+      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uAdv, normal), 0.0);
+    RealFunction pOutFn = [this](const Point&) { return m_cfg.outletPressure; };
+    VectorFunction inletVelocity(dim, [this](const Point& p) -> Math::SpatialVector<Real> {
+      const auto& x = p.getPhysicalCoordinates();
+      const Real r = std::sqrt(x(1) * x(1) + x(2) * x(2));
+      const Real R = 0.5 * m_cfg.diameter;
+      const Real seed = (m_cfg.inletPerturbation != 0.0 &&
+          m_t < m_cfg.perturbationCycles * m_period) ? 1.0 + m_cfg.inletPerturbation * x(1) / R : 1.0;
+      return Math::SpatialVector<Real>{{
+        m_meanVelocity * ramp(m_t) * m_inflow.velocity(r, m_t) * seed, 0.0, 0.0 }};
+    });
+
+    // The stabilisation advects with u^n, the velocity of its parameters.
+    const auto streamV = Mult(Jacobian(m_v), m_uOld);
+    const auto uu = PointwiseTensor([this](const Point& p) -> Eigen::Matrix3d {
+      const auto u = m_uOld.getValue(p);
+      const Eigen::Vector3d w(u(0), u(1), u(2));
+      return w * w.transpose();
+    });
+    const auto I = MatrixFunction<Math::Matrix<Real>>(Math::Matrix<Real>::Identity(3, 3));
+
+    // Pointwise data at the Newton point (psi^k, u^k).
+    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision };
+
+    // Momentum: exp(psi) ~ exp(psi^k) + Dexp[psi - psi^k].
+    const auto Tn = fromPoint(at, LogDexp, [](const LogPoint& q) { return q.exp; });
+    const auto C = Tn - dexp<D>(at, m_psiItD) - dexp<O>(at, m_psiItO);
+
+    const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+    const auto withOrder = [psiOrder](auto integral) {
+      integral.setOrder(psiOrder);
+      return integral;
+    };
+
+    // ---- psi equation, Newton about (psi^k, u^k), as in setupFlow -----------
+    // R_psi = (psi - psi_hist)/dtM + (u . grad) psi + N(psi, grad u), its block
+    // C paired against chi_C: rCB the trial part in psi_B, rCu in u, kC known.
+    const auto rDD = pairedJacobianN<D, D>(at, wD / dtM, m_psiD) + wD * Mult(Jacobian(m_psiD), m_uIt);
+    const auto rOO = pairedJacobianN<O, O>(at, wO / dtM, m_psiO) + wO * Mult(Jacobian(m_psiO), m_uIt);
+    const auto rDO = pairedJacobianN<D, O>(at, 0.0, m_psiO);
+    const auto rOD = pairedJacobianN<O, D>(at, 0.0, m_psiD);
+    const auto rDu = wD * Mult(Jacobian(m_psiItD), m_u) + pairedVelocityMap<D>(at, m_u);
+    const auto rOu = wO * Mult(Jacobian(m_psiItO), m_u) + pairedVelocityMap<O>(at, m_u);
+    const auto kD = pairedResidual<D>(at) - (wD / dtM) * m_psiHistD - wD * Mult(Jacobian(m_psiItD), m_uIt);
+    const auto kO = pairedResidual<O>(at) - (wO / dtM) * m_psiHistO - wO * Mult(Jacobian(m_psiItO), m_uIt);
+
+    // ---- Residual-based OSS of the psi equation ------------------------------
+    // psi~ = tau' (memP psi~^n - R_psi + Pi[R_psi^n]), tau = kB alpha3, enters
+    //   <psi~, -(u^n . grad) chi>   (the psi equation; the adjoint's reaction
+    //                                part is left out)
+    //   <s Dexp[psi~], eps(v)>      (sigma~ = s Dexp[psi~] in the momentum),
+    // the second giving the u-psi compatibility. Both carry the full residual,
+    // so they vanish where it is resolved. The streamline part is a
+    // Petrov-Galerkin test chi_C + tau' (u^n . grad) chi_C on the Galerkin terms.
+    const auto tauP = kB * m_alpha3Dyn;
+    const auto testD = m_chiD + tauP * Mult(Jacobian(m_chiD), m_uOld);
+    const auto testO = m_chiO + tauP * Mult(Jacobian(m_chiO), m_uOld);
+    // The known part of -psi~ paired against block C: w_C (Pi[R^n] + memP psi~^n)_C.
+    const auto knownSub = [this, memP](bool off) {
+      return VectorFunction(size_t(3), [this, memP, off](const Point& p) -> Math::SpatialVector<Real> {
+        const Eigen::Matrix3d m = unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p)) +
+          memP * subscales().at(p).sig;
+        return off ? Math::SpatialVector<Real>{{ 2.0 * m(0, 1), 2.0 * m(0, 2), 2.0 * m(1, 2) }}
+                   : packD(m);
+      });
+    };
+    // s tau' Dexp[memP psi~^n + Pi[R^n] - R_known] against eps(v).
+    const auto stressKnown = PointwiseTensor([this, at, kB, s, memP, dtM](const Point& p) -> Eigen::Matrix3d {
+      const LogPoint& q = logPointAt(at, p, LogNewton);
+      // R_known = R_rest - psi_hist/dtM - (u^k . grad) psi^k, as a tensor.
+      Eigen::Matrix3d rk;
+      rk << q.r[0](0), 0.5 * q.r[1](0), 0.5 * q.r[1](1),
+            0.5 * q.r[1](0), q.r[0](1), 0.5 * q.r[1](2),
+            0.5 * q.r[1](1), 0.5 * q.r[1](2), q.r[0](2);
+      rk -= unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p)) / dtM;
+      const auto GD = Jacobian(m_psiItD).getValue(p);
+      const auto GO = Jacobian(m_psiItO).getValue(p);
+      const auto uk = m_uIt.getValue(p);
+      Eigen::Vector3d advD = Eigen::Vector3d::Zero(), advO = Eigen::Vector3d::Zero();
+      for (int c = 0; c < 3; ++c)
+        for (int j = 0; j < 3; ++j)
+        {
+          advD(c) += GD(c, j) * uk(j);
+          advO(c) += GO(c, j) * uk(j);
+        }
+      rk -= unpack(advD, advO);
+      const Eigen::Matrix3d X = memP * subscales().at(p).sig +
+        unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p)) - rk;
+      // Dexp[X] = sum_m X_m D_m, X = sum_m X_m E_m.
+      const Real xm[6] = { X(0, 0), X(1, 1), X(2, 2), X(0, 1), X(0, 2), X(1, 2) };
+      Eigen::Matrix3d out = Eigen::Matrix3d::Zero();
+      for (size_t m = 0; m < 6; ++m)
+        out += xm[m] * q.D[m];
+      return s * kB * m_alpha3Dyn.getValue(p) * out;
+    });
+    const Real mst = -s;   // -s tau' Dexp[R_trial] against eps(v)
+
+    // ---- Subscales of step n --------------------------------------------------
+    const auto u1n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u1; });
+    const auto u2n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u2; });
+    const auto u3n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u3; });
+    const Real sd = m_cfg.stressDivScale;
+    const Real ps = m_cfg.pressureScale;
+
+    const auto body =
+      // ---- Momentum, sigma = s (exp(psi) - I), with sigma~ = s Dexp[psi~] ------
+        (rho / dtM) * Integral(m_u, m_v) - (rho / dtM) * Integral(m_uHist, m_v)
+      + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam)
+      + withOrder(Integral(2.0 * etaS * symU
+          + mst * tauP * (dexp<D>(at, (1.0 / wD) * rDu) + dexp<O>(at, (1.0 / wO) * rOu)), symV))
+      + withOrder(Integral(s * dexp<D>(at, m_psiD)
+          + mst * tauP * (dexp<D>(at, (1.0 / wD) * rDD) + dexp<O>(at, (1.0 / wO) * rOD)), symV))
+      + withOrder(Integral(s * dexp<O>(at, m_psiO)
+          + mst * tauP * (dexp<O>(at, (1.0 / wO) * rOO) + dexp<D>(at, (1.0 / wD) * rDO)), symV))
+      + withOrder(Integral(stressKnown, symV))
+      + s * withOrder(Integral(C, symV)) - s * Integral(I, symV)
+      - Integral(m_p, Div(m_v))
+
+      // ---- Continuity -----------------------------------------------------
+      + Integral(Div(m_u), m_q) + m_cfg.pressurePenalty * Integral(m_p, m_q)
+
+      // ---- psi equation, Galerkin and the streamline part of its OSS ---------
+      + withOrder(Integral(rDD, testD)) + withOrder(Integral(rDO, testD)) + withOrder(Integral(rDu, testD))
+      + withOrder(Integral(rOO, testO)) + withOrder(Integral(rOD, testO)) + withOrder(Integral(rOu, testO))
+      + withOrder(Integral(kD, testD)) + withOrder(Integral(kO, testO))
+      - withOrder(Integral(tauP * knownSub(false), Mult(Jacobian(m_chiD), m_uOld)))
+      - withOrder(Integral(tauP * knownSub(true), Mult(Jacobian(m_chiO), m_uOld)))
+
+      // ---- Momentum, split OSS, dynamic subscales (as setupFlowExp) ------------
+      + vms * rho * rho * Integral(m_tauK * Mult(Jacobian(m_u), uu), Jacobian(m_v))
+      - vms * rho * rho * withOrder(Integral(m_tauK * (m_piConv.get() + (memU / rho) * u1n), streamV))
+      + ps * Integral(m_tauK * Grad(m_p), Grad(m_q))
+      - ps * withOrder(Integral(m_tauK * (m_piGradP.get() + memU * u2n), Grad(m_q)))
+      - sd * withOrder(Integral(m_tauK * (m_piDivSigma.get() - memU * u3n), divergence<D>(m_chiD)))
+      - sd * withOrder(Integral(m_tauK * (m_piDivSigma.get() - memU * u3n), divergence<O>(m_chiO)))
+
+      // ---- Continuity, OSS of div u (algebraic subscale) ----------------------
+      + Integral(m_alpha2 * Div(m_u), Div(m_v))
+      - Integral(m_alpha2 * m_piDiv.get(), Div(m_v))
+
+      // ---- Outlet: traction p_out n and directional do-nothing ---------------
+      + BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.labels.outlet)
+      + BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.labels.outlet)
+
+      // ---- Inlet: developed pulsatile profile; walls: no slip -----------------
+      + DirichletBC(m_u, inletVelocity).on(m_cfg.labels.inlet)
+      + DirichletBC(m_u, Zero(dim)).on(m_wallSet);
+
+    VectorFunction inletPsiD(size_t(3), [this](const Point& p) -> Math::SpatialVector<Real> {
+      return inletLogConformation(p, false); });
+    VectorFunction inletPsiO(size_t(3), [this](const Point& p) -> Math::SpatialVector<Real> {
+      return inletLogConformation(p, true); });
+    const auto finish = [&](const auto& form) {
+      if (m_cfg.inletConformation)
+        m_flow = form
+          + DirichletBC(m_psiD, inletPsiD).on(m_cfg.labels.inlet)
+          + DirichletBC(m_psiO, inletPsiO).on(m_cfg.labels.inlet);
+      else
+        m_flow = form;
+    };
+    // Outlet (Config::outletConformationInflow): the upwind term of setupFlow.
+    const auto inflowOut = Max(-Dot(m_uAdv, normal), 0.0);
+    const auto outlet = m_cfg.labels.outlet;
+    const auto withOutlet = [&](const auto& form) {
+      if (m_cfg.outletConformationInflow)
+        finish(form
+          + wD * BoundaryIntegral(inflowOut * Dot(m_psiD, m_chiD)).over(outlet)
+          - wD * BoundaryIntegral(inflowOut * Dot(m_psiOldD, m_chiD)).over(outlet)
+          + wO * BoundaryIntegral(inflowOut * Dot(m_psiO, m_chiO)).over(outlet)
+          - wO * BoundaryIntegral(inflowOut * Dot(m_psiOldO, m_chiO)).over(outlet));
+      else
+        finish(form);
+    };
+    // u3 trial: s div(Dexp[psi]) (+ the D2exp part of its Newton linearisation).
+    const Real k1 = sd * s;
+    if (m_cfg.newtonD2)
+    {
+      const auto dD = divExpTrial<D>(at, m_psiD) + divExpTrialD2<D>(at, m_psiD);
+      const auto dO = divExpTrial<O>(at, m_psiO) + divExpTrialD2<O>(at, m_psiO);
+      withOutlet(body
+        + k1 * withOrder(Integral(m_tauK * dD, divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * dO, divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * dD, divergence<O>(m_chiO)))
+        + k1 * withOrder(Integral(m_tauK * dO, divergence<O>(m_chiO)))
+        - k1 * withOrder(Integral(m_tauK * divExpKnownD2(at), divergence<D>(m_chiD)))
+        - k1 * withOrder(Integral(m_tauK * divExpKnownD2(at), divergence<O>(m_chiO))));
+    }
+    else
+      withOutlet(body
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<D>(at, m_psiD), divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<O>(at, m_psiO), divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<D>(at, m_psiD), divergence<O>(m_chiO)))
+        + k1 * withOrder(Integral(m_tauK * divExpTrial<O>(at, m_psiO), divergence<O>(m_chiO))));
+  }
+
+  void ArterialLesion3DViscousLogImplicit::updateStabilizationExp()
+  {
+    const Real rho = m_cfg.rho;
+    const Real dt = m_dt;
+    const auto& ob = m_cfg.oldroydB;
+    const bool dynamic = m_cfg.dynamicSubscales;
+    const Real gradDiv = m_cfg.useVMS ? m_cfg.gradDivScale : 0.0;
+
+    // f(psi^n) by cell: the reaction of alpha3 and of the adjoint, and the
+    // polymer viscosity eta_p/f of eta_0.
+    m_pttN.project(RealFunction([this](const Point& p) {
+      return pttFactor(logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp().trace());
+    }));
+    // alpha1 = [c1 eta_0/h1^2 + c2 rho |u|/h2]^-1, eta_0 = eta_s + eta_p/f.
+    m_alpha1.project(RealFunction([this, rho](const Point& p) {
+      const auto u = m_uOld.getValue(p);
+      const Real h1 = cellSize(p);
+      const Real h2 = streamlineLength(p, u);
+      const Real eta0 = solventViscosityAt(p) + m_cfg.oldroydB.etaP / m_pttN.getValue(p);
+      return 1.0 / (m_cfg.c1 * eta0 / (h1 * h1) + m_cfg.c2 * rho * std::sqrt(Math::dot(u, u)) / h2);
+    }));
+    // alpha1' = (rho/dt + 1/alpha1)^-1 (dynamic) or alpha1.
+    m_tauK.project(RealFunction([this, rho, dt, dynamic](const Point& p) {
+      const Real a1 = m_alpha1.getValue(p);
+      return dynamic ? 1.0 / (rho / dt + 1.0 / a1) : a1;
+    }));
+    // alpha2 = h1^2/(c1 alpha1).
+    m_alpha2.project(RealFunction([this, gradDiv](const Point& p) {
+      const Real h1 = cellSize(p);
+      return gradDiv * h1 * h1 / (m_cfg.c1 * m_alpha1.getValue(p));
+    }));
+    // alpha3 = [c3 f/(2 eta_p) + c4 (lambda |u|/(2 eta_p h2) + lambda |grad u|/eta_p)]^-1
+    // and alpha3' = (lambda/(2 eta_p dt) + 1/alpha3)^-1 (dynamic) or alpha3.
+    m_alpha3.project(RealFunction([this, ob](const Point& p) {
+      const auto u = m_uOld.getValue(p);
+      const Real h2 = streamlineLength(p, u);
+      const Real speed = std::sqrt(Math::dot(u, u));
+      const Real gradNorm = Jacobian(m_uOld).getValue(p).norm();
+      const Real f = m_pttN.getValue(p);
+      return m_cfg.stressScale / (m_cfg.c3 * f / (2.0 * ob.etaP) +
+        m_cfg.c4 * (ob.lambda * speed / (2.0 * ob.etaP * h2) + ob.lambda * gradNorm / ob.etaP));
+    }));
+    m_alpha3Dyn.project(RealFunction([this, ob, dt, dynamic](const Point& p) {
+      const Real a3 = m_alpha3.getValue(p);
+      return dynamic ? 1.0 / (ob.lambda / (2.0 * ob.etaP * dt) + 1.0 / a3) : a3;
+    }));
+
+    // Pi[(grad u^n) u^n]; Pi[div u^n], Pi[grad p^n], Pi[s div E^n] in
+    // projectConsistent. Pi[R^n] is from the end of the last step.
+    m_piConv.project(Mult(Jacobian(m_uOld), m_uOld));
+    projectConsistent(false, 0u);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::updateSubscalesExp()
+  {
+    const Real rho = m_cfg.rho;
+    const Real dt = m_dt;
+    const auto& ob = m_cfg.oldroydB;
+    const Real l0 = lambda0();
+    const Real s = ob.etaP / l0;
+    const Real kB = ob.lambda / (2.0 * ob.etaP);
+    const Real memU = rho / dt;
+    const Real memS = kB / dt;
+    Real bdfA = 1.0, bdfB = 0.0;
+    if (m_cfg.timeOrder == 2)
+    {
+      const Real w = bdfRatio();
+      bdfA = (1.0 + w) * (1.0 + w) / (1.0 + 2.0 * w);
+      bdfB = -w * w / (1.0 + 2.0 * w);
+    }
+    // The data of the accepted step: (psi^{n+1}, u^{n+1}) in the iterates, its
+    // BDF history and mass step, so R is the residual the step solved.
+    const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda),
+      bdfA, bdfB, massStep() };
+    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
+      &m_psiOldD, &m_psiOldO, &m_psiNm1D, &m_psiNm1O };
+    const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+
+    if (m_cfg.dynamicSubscales)
+    {
+      // s~^{n+1} = alpha' (mem s~^n + rhs) at every quadrature point of the
+      // psi rule, with the same data as the assembled terms: u^n advects, the
+      // projections are those of the step.
+      const auto& pSol = m_p.getSolution();
+      auto sweep = Integral(PointwiseScalar([this, at, s, rho, memU, memS, &pSol](const Point& p) -> Real {
+        const LogPoint& q = logPointAt(at, p, LogExpForm);
+        const SubscaleStore::Entry& old = subscales().at(p);
+        const Real a1 = m_tauK.getValue(p);
+        const Real a3 = m_alpha3Dyn.getValue(p);
+        const auto toEigen = [](const auto& v) { return Eigen::Vector3d(v(0), v(1), v(2)); };
+        const auto J = Jacobian(m_uIt).getValue(p);
+        const Eigen::Vector3d un = toEigen(m_uOld.getValue(p));
+        Eigen::Vector3d conv;
+        for (int a = 0; a < 3; ++a)
+          conv(a) = J(a, 0) * un(0) + J(a, 1) * un(1) + J(a, 2) * un(2);
+        Eigen::Vector3d divE;
+        for (int i = 0; i < 3; ++i)
+          divE(i) = q.G[0](i, 0) + q.G[1](i, 1) + q.G[2](i, 2);
+        SubscaleStore::Entry e;
+        e.u1 = a1 * (memU * old.u1 - rho * (conv - toEigen(m_piConv.get().getValue(p))));
+        e.u2 = a1 * (memU * old.u2 - (toEigen(Grad(pSol).getValue(p)) - toEigen(m_piGradP.get().getValue(p))));
+        e.u3 = a1 * (memU * old.u3 + (s * divE - toEigen(m_piDivSigma.get().getValue(p))));
+        const Eigen::Matrix3d piR = unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p));
+        e.sig = a3 * (memS * old.sig - (q.R - piR));
+        subscales().stage(p, e);
+        return 0.0;
+      }, 2), m_qFlux);
+      sweep.setOrder(psiOrder);
+      m_subscaleSweep = sweep;
+      m_subscaleSweep.assemble();
+      subscales().commit();
+    }
+
+    // Pi[R^{n+1}], read as Pi[R^n] by the next step.
+    const auto R = fromPoint(at, LogExpForm, [](const LogPoint& q) { return q.R; });
+    m_piRD.project(voigtD(R));
+    m_piRO.project(voigtO(R));
+  }
+
+  void ArterialLesion3DViscousLogImplicit::updateSubscalesPsiRB()
+  {
+    const Real rho = m_cfg.rho;
+    const Real dt = m_dt;
+    const Real dtM = massStep();
+    const auto& ob = m_cfg.oldroydB;
+    const Real l0 = lambda0();
+    const Real s = ob.etaP / l0;
+    const Real kB = ob.lambda / (2.0 * ob.etaP);
+    const Real memU = rho / dt;
+    const Real memP = 1.0 / dt;
+    const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda) };
+    const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+
+    // The data of the accepted step, (psi^{n+1}, u^{n+1}) in the iterates:
+    // R_psi = (psi - psi_hist)/dtM + (u . grad) psi + N(psi, grad u), and
+    // div exp(psi) = sum_j Dexp[d_j psi] e_j.
+    struct StepPoint
+    {
+        Eigen::Matrix3d R;
+        Eigen::Vector3d divE;
+    };
+    const auto stepPoint = [this, model, dtM](const Point& p) -> StepPoint {
+      const Eigen::Matrix3d psi = unpack(m_psiItD.getValue(p), m_psiItO.getValue(p));
+      const auto J = Jacobian(m_uIt).getValue(p);
+      const auto uv = m_uIt.getValue(p);
+      Eigen::Matrix3d L;
+      for (int a = 0; a < 3; ++a)
+        for (int b = 0; b < 3; ++b)
+          L(a, b) = J(a, b);
+      const auto GD = Jacobian(m_psiItD).getValue(p);
+      const auto GO = Jacobian(m_psiItO).getValue(p);
+      const auto& B = voigtBasisEigen();
+      const LogEig eig = logEig(psi);
+      StepPoint out;
+      out.R = (psi - unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p))) / dtM +
+        nonlinearMap(psi, L, model);
+      out.divE.setZero();
+      for (int j = 0; j < 3; ++j)
+      {
+        Eigen::Matrix3d g = Eigen::Matrix3d::Zero();
+        for (int k = 0; k < 3; ++k)
+          g += GD(k, j) * B[k] + GO(k, j) * B[3 + k];
+        out.R += uv(j) * g;
+        out.divE += eig.dexp(g).col(j);
+      }
+      return out;
+    };
+
+    if (m_cfg.dynamicSubscales)
+    {
+      const auto& pSol = m_p.getSolution();
+      auto sweep = Integral(PointwiseScalar([this, stepPoint, s, kB, rho, memU, memP, &pSol](const Point& p) -> Real {
+        const StepPoint q = stepPoint(p);
+        const SubscaleStore::Entry& old = subscales().at(p);
+        const Real a1 = m_tauK.getValue(p);
+        const Real tp = kB * m_alpha3Dyn.getValue(p);
+        const auto toEigen = [](const auto& v) { return Eigen::Vector3d(v(0), v(1), v(2)); };
+        const auto J = Jacobian(m_uIt).getValue(p);
+        const Eigen::Vector3d un = toEigen(m_uOld.getValue(p));
+        Eigen::Vector3d conv;
+        for (int a = 0; a < 3; ++a)
+          conv(a) = J(a, 0) * un(0) + J(a, 1) * un(1) + J(a, 2) * un(2);
+        SubscaleStore::Entry e;
+        e.u1 = a1 * (memU * old.u1 - rho * (conv - toEigen(m_piConv.get().getValue(p))));
+        e.u2 = a1 * (memU * old.u2 - (toEigen(Grad(pSol).getValue(p)) - toEigen(m_piGradP.get().getValue(p))));
+        e.u3 = a1 * (memU * old.u3 + (s * q.divE - toEigen(m_piDivSigma.get().getValue(p))));
+        const Eigen::Matrix3d piR = unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p));
+        e.sig = tp * (memP * old.sig - (q.R - piR));   // psi~ (dimensionless)
+        subscales().stage(p, e);
+        return 0.0;
+      }, 2), m_qFlux);
+      sweep.setOrder(psiOrder);
+      m_subscaleSweep = sweep;
+      m_subscaleSweep.assemble();
+      subscales().commit();
+    }
+
+    // Pi[R_psi^{n+1}], read as Pi[R_psi^n] by the next step.
+    const auto R = PointwiseTensor([stepPoint](const Point& p) -> Eigen::Matrix3d { return stepPoint(p).R; });
+    m_piRD.project(voigtD(R));
+    m_piRO.project(voigtO(R));
+  }
+
   void ArterialLesion3DViscousLogImplicit::setupFlow()
   {
+    if (m_cfg.formulation == "exp")
+    {
+      setupFlowExp();
+      return;
+    }
+    if (m_cfg.formulation == "psi_rb")
+    {
+      setupFlowPsiRB();
+      return;
+    }
     const size_t dim = m_mesh.getSpaceDimension();
     const auto normal = BoundaryNormal(m_mesh);
     const Real rho = m_cfg.rho;
@@ -1930,6 +2876,11 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   void ArterialLesion3DViscousLogImplicit::updateStabilization()
   {
+    if (m_cfg.formulation != "psi")
+    {
+      updateStabilizationExp();
+      return;
+    }
     const size_t dim = m_mesh.getSpaceDimension();
     const Real rho = m_cfg.rho;
     const Real dt = m_dt;
@@ -1996,6 +2947,9 @@ namespace Rodin::Examples::ViscoelasticFluids
     // Nothing else reads psi^n pointwise this step: free its points.
     if (!sigmaIt)
       releaseLogPoints(&m_psiOldD);
+    // The residual-based formulations have no term-by-term constitutive projections.
+    if (m_cfg.formulation != "psi")
+      return;
     const auto epsN = 0.5 * (Jacobian(uE) + Transpose(Jacobian(uE)));
     m_piEpsD.project(voigtD(epsN));
     m_piEpsO.project(voigtO(epsN));
@@ -2106,7 +3060,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const int maxIterations = std::max(1, m_cfg.conformationIterations);
     for (int k = 0; k < maxIterations; ++k)
     {
-      if (m_cfg.timeOrder == 2 && k == 0)
+      if (m_cfg.timeOrder == 2 && k == 0 && m_cfg.formulation == "psi")
       {
         // The projections of the step, from the extrapolation (u*, p*, psi*).
         const auto projStart = CoronaryClock::now();
@@ -2317,6 +3271,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       return false;
     }
 
+    if (m_cfg.formulation == "exp")
+      updateSubscalesExp();
+    else if (m_cfg.formulation == "psi_rb")
+      updateSubscalesPsiRB();
     advanceHistory();
     m_u.getSolution().setData(m_uIt.getData());
     m_psiD.getSolution().setData(m_psiItD.getData());
@@ -2767,6 +3725,12 @@ int main(int argc, char** argv)
       getString("-al_csv", cfg.csvPath);
       getString("-al_waveform", cfg.flowWaveformPath);
       getString("-al_fluid", cfg.fluid);
+      getString("-al_formulation", cfg.formulation);
+      getReal("-al_c1", cfg.c1);
+      getReal("-al_c2", cfg.c2);
+      getReal("-al_c3", cfg.c3);
+      getReal("-al_c4", cfg.c4);
+      getBool("-al_dynamic_subscales", cfg.dynamicSubscales);
 
       getReal("-al_diameter", cfg.diameter);
       getReal("-al_rho", cfg.rho);
@@ -2795,6 +3759,7 @@ int main(int argc, char** argv)
       getReal("-al_cy_n", cfg.carreauYasuda.n);
       getReal("-al_cy_a", cfg.carreauYasuda.a);
       getBool("-al_inlet_developed_conformation", cfg.inletDevelopedConformation);
+      getBool("-al_inlet_conformation_ramp", cfg.inletConformationRamp);
       getInt("-al_bdf2_extrapolate", cfg.bdf2Extrapolate);
       getInt("-al_output_every", cfg.outputEvery);
 
