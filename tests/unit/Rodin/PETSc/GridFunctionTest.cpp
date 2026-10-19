@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <memory>
 
 #include <petsc.h>
 
@@ -610,4 +611,65 @@ TEST(PETSc_GridFunction, ConstSynchronizationRequiresCompletedWrites)
   EXPECT_THROW(reader[0], Alert::Exception);
   field.sync();
   EXPECT_DOUBLE_EQ(reader.norm(), 4);
+}
+
+namespace
+{
+  /// @brief Moving transfers live PETSc borrows without changing the vector handle.
+  void checkLocalMoveBorrows(bool assign)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<PetscScalar> space(mesh);
+    using Field = PETSc::Variational::GridFunction<decltype(space)>;
+    for (const bool write : {false, true})
+    {
+      std::unique_ptr<Field> moved;
+      {
+        Field source(space);
+        source = PetscScalar(3);
+        if (write)
+          source[0] = PetscScalar(7);
+        else
+          std::as_const(source).acquire();
+        const auto handle = source.getData();
+        const PetscScalar* raw =
+          write ? source.getArrayWrite().raw : source.getArrayRead().raw;
+        if (assign)
+        {
+          moved = std::make_unique<Field>(space);
+          *moved = PetscScalar(2);
+          std::as_const(*moved).acquire();
+          *moved = std::move(source);
+        }
+        else
+          moved = std::make_unique<Field>(std::move(source));
+        EXPECT_EQ(moved->getData(), handle);
+        EXPECT_EQ(source.getData(), PETSC_NULLPTR);
+        EXPECT_FALSE(source.getArrayRead().acquired);
+        EXPECT_FALSE(source.getArrayWrite().acquired);
+        EXPECT_EQ(moved->getArrayRead().acquired, !write);
+        EXPECT_EQ(moved->getArrayWrite().acquired, write);
+        EXPECT_EQ(write ? moved->getArrayWrite().raw : moved->getArrayRead().raw, raw);
+        auto& alias = *moved;
+        *moved = std::move(alias);
+        EXPECT_EQ(moved->getData(), handle);
+      }
+      // The moved-from source is destroyed while the new owner retains its borrow.
+      moved->sync();
+      EXPECT_EQ(std::as_const(*moved)[0], PetscScalar(write ? 7 : 3));
+      std::as_const(*moved).flush();
+    }
+  }
+}
+
+/// @brief Move construction retains active reads/writes across source destruction.
+TEST(PETSc_GridFunction, MoveConstructionPreservesBorrows)
+{
+  checkLocalMoveBorrows(false);
+}
+
+/// @brief Move assignment releases destination reads and transfers source borrows.
+TEST(PETSc_GridFunction, MoveAssignmentPreservesBorrows)
+{
+  checkLocalMoveBorrows(true);
 }

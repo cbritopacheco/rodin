@@ -440,7 +440,9 @@ namespace Rodin::Variational
        *
        * Transfers ownership of the PETSc vector handle from @p other using
        * `std::exchange`, leaving @p other in a valid but empty state (null
-       * vector, no array access).  No PETSc API calls are made.
+       * vector, no array access). Outstanding array borrows transfer with the
+       * vector. Moving requires exclusive access to both objects; it neither
+       * restores arrays nor performs a ghost update. No PETSc API calls are made.
        *
        * @param[in] other Grid function to move from.
        */
@@ -450,11 +452,17 @@ namespace Rodin::Variational
           m_begin(std::exchange(other.m_begin, 0)),
           m_end(std::exchange(other.m_end, 0)),
           m_ghosts(std::move(other.m_ghosts)),
-          m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
-          m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
+          m_read(),
+          m_write()
       {
-        other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        if (other.m_read.acquired)
+        {
+          m_read = std::exchange(other.m_read, ArrayRead{});
+          m_readAcquired.store(true, std::memory_order_relaxed);
+          other.m_readAcquired.store(false, std::memory_order_relaxed);
+        }
+        if (other.m_write.acquired)
+          m_write = std::exchange(other.m_write, ArrayWrite{});
       }
 
       /**
@@ -521,7 +529,9 @@ namespace Rodin::Variational
        * @brief Move assignment operator.
        *
        * Releases any existing PETSc handles via `release()`, then transfers
-       * ownership from @p other.
+       * ownership and outstanding array borrows from @p other. Moving requires
+       * exclusive access to both objects. Pending source writes remain pending
+       * until the new owner explicitly synchronizes them.
        *
        * @pre Both grid functions must reference the same finite element space.
        *
@@ -542,11 +552,14 @@ namespace Rodin::Variational
         m_end = std::exchange(other.m_end, 0);
         m_ghosts = std::move(other.m_ghosts);
 
-        m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-
-        other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        if (other.m_read.acquired)
+        {
+          m_read = std::exchange(other.m_read, ArrayRead{});
+          m_readAcquired.store(true, std::memory_order_relaxed);
+          other.m_readAcquired.store(false, std::memory_order_relaxed);
+        }
+        if (other.m_write.acquired)
+          m_write = std::exchange(other.m_write, ArrayWrite{});
 
         return *this;
       }

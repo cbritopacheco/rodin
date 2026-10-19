@@ -16,6 +16,7 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#include <memory>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
@@ -735,4 +736,86 @@ int main(int argc, char** argv)
   const int result = RUN_ALL_TESTS();
   PetscFinalize();
   return result;
+}
+
+namespace
+{
+  /// @brief Moves preserve pending ghost writes and live reads without collective work.
+  void checkDistributedMoveBorrows(bool assign)
+  {
+    Context::MPI context(*g_env, *g_world);
+    auto mesh = distributeFromRoot(context);
+    P1<PetscScalar, decltype(mesh)> space(mesh);
+    using Field = PETSc::Variational::GridFunction<decltype(space)>;
+    Index begin, end;
+    space.getOwnershipRange(begin, end);
+    for (const bool write : {false, true})
+    {
+      Field control(space);
+      control = PetscScalar(3);
+      const auto value = [&](Index dof) {
+        return begin <= dof && dof < end ? PetscScalar(0) : PetscScalar(7);
+      };
+      if (write)
+      {
+        writeShardDOFs(mesh, space, control, value);
+        control.sync();
+      }
+      std::unique_ptr<Field> moved;
+      {
+        Field source(space);
+        source = PetscScalar(3);
+        if (write)
+          writeShardDOFs(mesh, space, source, value);
+        else
+          std::as_const(source).acquire();
+        const auto handle = source.getData();
+        const auto ghost =
+          write ? source.getArrayWrite().ghost : source.getArrayRead().ghost;
+        const PetscScalar* raw =
+          write ? source.getArrayWrite().raw : source.getArrayRead().raw;
+        if (assign)
+        {
+          moved = std::make_unique<Field>(space);
+          *moved = PetscScalar(2);
+          std::as_const(*moved).acquire();
+          *moved = std::move(source);
+        }
+        else
+          moved = std::make_unique<Field>(std::move(source));
+        EXPECT_EQ(moved->getData(), handle);
+        EXPECT_EQ(source.getData(), PETSC_NULLPTR);
+        EXPECT_FALSE(source.getArrayRead().acquired);
+        EXPECT_FALSE(source.getArrayWrite().acquired);
+        EXPECT_EQ(moved->getArrayRead().acquired, !write);
+        EXPECT_EQ(moved->getArrayWrite().acquired, write);
+        EXPECT_EQ(write ? moved->getArrayWrite().raw : moved->getArrayRead().raw, raw);
+        EXPECT_EQ(
+          write ? moved->getArrayWrite().ghost : moved->getArrayRead().ghost, ghost);
+      }
+      moved->sync();
+      EXPECT_NEAR(moved->norm(), control.norm(), 1e-12);
+      const auto& actual = *moved;
+      const auto& expected = control;
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        for (const Index dof : space.getDOFs(cell->getDimension(), cell->getIndex()))
+          EXPECT_EQ(actual[dof], expected[dof]);
+      }
+      actual.flush();
+      expected.flush();
+    }
+  }
+}
+
+/// @brief Move construction preserves read ownership and reverse/forward ghost updates.
+TEST(PETSc_MPI_GridFunction, MoveConstructionPreservesBorrows)
+{
+  checkDistributedMoveBorrows(false);
+}
+
+/// @brief Move assignment transfers outstanding ghost-array borrows to the new owner.
+TEST(PETSc_MPI_GridFunction, MoveAssignmentPreservesBorrows)
+{
+  checkDistributedMoveBorrows(true);
 }
