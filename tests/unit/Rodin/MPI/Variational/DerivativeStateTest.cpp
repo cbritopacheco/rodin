@@ -48,15 +48,15 @@ namespace
       using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
       const PolytopeQuadrature before(cell, formula);
       const IntegrationPoint first(before, 0);
+      cached.setPolytope(cell);
       cached.setIntegrationPoint(first);
       std::vector<Value> original;
       for (size_t a = 0; a < cached.getDOFs(cell); ++a)
         original.push_back(cached.getBasis(a));
-      const auto identity = cell.getTransformation().getCacheIdentity();
       mesh.scale(2);
       const PolytopeQuadrature after(cell, formula);
-      EXPECT_NE(cell.getTransformation().getCacheIdentity(), identity);
       const IntegrationPoint second(after, 0);
+      cached.setPolytope(cell);
       cached.setIntegrationPoint(second);
       auto fresh = makeFresh(u);
       fresh.setIntegrationPoint(second);

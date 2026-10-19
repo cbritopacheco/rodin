@@ -16,6 +16,8 @@
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
+#include <type_traits>
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/Point.h"
@@ -296,6 +298,24 @@ namespace Rodin::Variational
       const IntegrationPoint& getIntegrationPoint() const
       {
         return static_cast<const Derived&>(*this).getIntegrationPoint();
+      }
+
+      /**
+       * @brief Starts a cell evaluation binding on the derived shape expression.
+       *
+       * Stateful expressions override this operation and propagate it to their
+       * operands. Physical data may be reused only within this binding; the
+       * geometry must remain unchanged until the next binding.
+       * @param polytope Cell or facet whose basis will be evaluated.
+       * @returns The derived shape expression.
+       */
+      Derived& setPolytope(const Geometry::Polytope& polytope)
+      {
+        if constexpr (std::is_same_v<decltype(&Derived::setPolytope),
+                        decltype(&ShapeFunctionBase::setPolytope)>)
+          return static_cast<Derived&>(*this);
+        else
+          return static_cast<Derived&>(*this).setPolytope(polytope);
       }
 
       /**

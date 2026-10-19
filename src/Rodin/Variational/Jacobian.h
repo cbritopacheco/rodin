@@ -495,6 +495,17 @@ namespace Rodin::Variational
         return m_gradient.getIntegrationPoint();
       }
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Jacobian& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_gradient.setPolytope(polytope);
+        return *this;
+      }
+
+      /**
        * @brief Binds the integration point and prepares local basis values.
        * @param point Point at which the operation is evaluated.
        * @returns Reference to this object after the operation.

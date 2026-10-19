@@ -328,6 +328,18 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Average& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        m_operand->setPolytope(polytope);
+        return *this;
+      }
+
+      /**
        * @brief Sets the integration point for evaluation.
        * @param[in] ip Integration point on an interface face
        * @returns Reference to this average operator

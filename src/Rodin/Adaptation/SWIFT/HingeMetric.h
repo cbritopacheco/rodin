@@ -90,7 +90,9 @@ namespace Rodin::Adaptation::SWIFT
         m_qTest.resize(nTest);
 
         auto trialJacobian = Variational::Jacobian(m_du.get());
+        trialJacobian.setPolytope(polytope);
         auto testJacobian = Variational::Jacobian(m_z.get());
+        testJacobian.setPolytope(polytope);
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto innerJacobian = Variational::Jacobian(m_inner.get());
         auto predictorJacobian = Variational::Jacobian(m_predictor.get());

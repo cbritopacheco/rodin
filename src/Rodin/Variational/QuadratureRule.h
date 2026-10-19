@@ -594,6 +594,7 @@ namespace Rodin::Variational
 
         assert(m_integrand);
         auto& integrand = *m_integrand;
+        integrand.setPolytope(polytope);
 
         const auto& trial = integrand.getLHS();
         const auto& test  = integrand.getRHS();
@@ -847,6 +848,7 @@ namespace Rodin::Variational
 
         assert(m_integrand);
         auto& integrand = *m_integrand;
+        integrand.setPolytope(polytope);
 
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);

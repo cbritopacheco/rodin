@@ -873,7 +873,7 @@ namespace Rodin::Variational
         const Index  i = polytope.getIndex();
 
         const auto& dofs = getCachedDOFs(d, i);
-        const auto& basisValues = getCachedBasisValues(d, i, ip);
+        const auto& basisValues = getBasisValues(d, i, ip);
         for (Index local = 0; local < basisValues.size(); ++local)
         {
           const auto k = [&] {
@@ -1307,12 +1307,7 @@ namespace Rodin::Variational
             mesh(nullptr),
             element(nullptr),
             d(0),
-            i(0),
-            hasBasisValues(false),
-            qf(nullptr),
-            qp(0),
-            qfIdentity(0),
-            transformationIdentity(std::nullopt)
+            i(0)
         {}
 
         const GridFunctionBase* owner;
@@ -1325,11 +1320,6 @@ namespace Rodin::Variational
         Index i;
         std::vector<Index> dofs;
 
-        bool hasBasisValues;
-        const QF::QuadratureFormulaBase* qf;
-        size_t qp;
-        size_t qfIdentity;
-        Optional<size_t> transformationIdentity;
         std::vector<RangeType> basisValues;
       };
       /**
@@ -1371,57 +1361,30 @@ namespace Rodin::Variational
           cache.dofs.resize(count);
           for (size_t local = 0; local < count; ++local)
             cache.dofs[local] = dofs[local];
-          cache.hasBasisValues = false;
         }
         return cache.dofs;
       }
       /**
-       * @brief Gets basis values cached for a quadrature point.
+       * @brief Prepares fresh physical basis values in reusable per-thread storage.
        * @param d Topological dimension of the evaluation entity.
        * @param i Index of the evaluation entity.
        * @param ip Quadrature point identifying the cached basis values.
-       * @returns Reference to the cached local basis values at the integration point.
+       * @returns Scratch values overwritten by the next evaluation on this thread.
        */
 
-      const std::vector<RangeType>& getCachedBasisValues(
+      const std::vector<RangeType>& getBasisValues(
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
-        const auto* qf = ip.getReferenceQuadratureFormula();
-        assert(qf);
-        const size_t qfIdentity = qf->getCacheIdentity();
-        const auto transformationIdentity =
-          ip.getPoint().getPolytope().getTransformation().getCacheIdentity();
-        if (!cache.hasBasisValues || cache.owner != this ||
-          cache.ownerIdentity != m_identity || cache.fes != fes ||
-          cache.element != element || cache.d != d || cache.i != i || cache.qf != qf ||
-          cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
-          !transformationIdentity ||
-          cache.transformationIdentity != transformationIdentity)
+        const size_t count = element->getCount();
+        const auto& point = ip.getPoint();
+        cache.basisValues.resize(count);
+        for (Index local = 0; local < count; ++local)
         {
-          const auto& fe = *element;
-          const size_t count = fe.getCount();
-          const auto& p = ip.getPoint();
-
-          cache.owner = this;
-          cache.ownerIdentity = m_identity;
-          cache.fes = fes;
-          cache.element = element;
-          cache.d = d;
-          cache.i = i;
-          cache.qf = qf;
-          cache.qfIdentity = qfIdentity;
-          cache.qp = ip.getIndex();
-          cache.transformationIdentity = transformationIdentity;
-          cache.basisValues.resize(count);
-          for (Index local = 0; local < count; ++local)
-          {
-            const auto mapping = fes->getPushforward({d, i}, fe.getBasis(local));
-            cache.basisValues[local] = mapping(p);
-          }
-          cache.hasBasisValues = true;
+          const auto mapping = fes->getPushforward({d, i}, element->getBasis(local));
+          cache.basisValues[local] = mapping(point);
         }
         return cache.basisValues;
       }

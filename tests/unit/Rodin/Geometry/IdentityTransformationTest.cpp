@@ -5,8 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
-#include <array>
-#include <thread>
 
 #include <Rodin/Geometry.h>
 
@@ -15,7 +13,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
-  /// @brief Mutable test map obeying the transformation-state invalidation contract.
+  /// @brief Mutable affine map used to check geometric value semantics.
   class StateTransformation final : public PolytopeTransformation
   {
     public:
@@ -50,7 +48,6 @@ namespace Rodin::Tests::Unit
       void setScale(Real scale)
       {
         m_scale = scale;
-        invalidateCacheIdentity();
       }
       /**
        * @brief Returns the affine map order.
@@ -93,145 +90,52 @@ namespace Rodin::Tests::Unit
       Real m_scale;
   };
 
-  /**
-   * @brief Checks the constant-evaluated construction contract.
-   * @returns Whether dimensions are retained without inventing a runtime token.
-   */
-  constexpr bool constantMapHasNoRuntimeIdentity()
-  {
-    StateTransformation map;
-    return map.getReferenceDimension() == 1 && !map.getCacheIdentity();
-  }
-  static_assert(constantMapHasNoRuntimeIdentity());
-  /**
-   * @brief Checks constant-evaluated move construction without a runtime token.
-   * @returns Whether both map states remain non-reusable in constant evaluation.
-   */
-  constexpr bool constantMapMoveHasNoRuntimeIdentity()
+  /// @brief Transformations retain dimensions in constant-evaluated construction.
+  constexpr bool constantMapDimensions()
   {
     StateTransformation source;
     StateTransformation moved(std::move(source));
-    return !source.getCacheIdentity() && !moved.getCacheIdentity() &&
-      moved.getReferenceDimension() == 1;
+    return moved.getReferenceDimension() == 1 && moved.getPhysicalDimension() == 1;
   }
-  static_assert(constantMapMoveHasNoRuntimeIdentity());
+  static_assert(constantMapDimensions());
   static_assert(std::is_nothrow_move_constructible_v<StateTransformation>);
   static_assert(std::is_nothrow_move_assignable_v<StateTransformation>);
 
-  /// @brief Construction, value transfer and mutation never reuse stale map tokens.
-  TEST(Geometry_IdentityTransformation, StateIdentityLifecycle)
+  /// @brief Copying and moving preserve independently owned geometry parameters.
+  TEST(Geometry_IdentityTransformation, StateGeometryLifecycle)
   {
     StateTransformation source;
-    ASSERT_TRUE(source.getCacheIdentity());
-    const auto initial = source.getCacheIdentity();
+    source.setScale(2);
     StateTransformation copied(source);
-    EXPECT_NE(copied.getCacheIdentity(), initial);
+    source.setScale(4);
     StateTransformation moved(std::move(copied));
-    ASSERT_TRUE(moved.getCacheIdentity());
-    EXPECT_FALSE(copied.getCacheIdentity());
-    EXPECT_NE(moved.getCacheIdentity(), initial);
-    const auto previous = moved.getCacheIdentity();
-    moved.setScale(2);
-    EXPECT_NE(moved.getCacheIdentity(), previous);
-    Math::SpatialMatrix<Real> jacobian;
-    moved.jacobian(jacobian, Math::SpatialPoint{0});
-    EXPECT_EQ(jacobian(0, 0), 2);
-    const auto beforeAssignment = moved.getCacheIdentity();
+    Math::SpatialPoint result;
+    moved.transform(result, Math::SpatialPoint{Real(0.5)});
+    EXPECT_EQ(result(0), 1);
     moved = std::move(source);
-    EXPECT_NE(moved.getCacheIdentity(), beforeAssignment);
-    EXPECT_FALSE(source.getCacheIdentity());
-    EXPECT_NE(moved.getCacheIdentity(), initial);
+    moved.transform(result, Math::SpatialPoint{Real(0.5)});
+    EXPECT_EQ(result(0), 2);
   }
 
-  /// @brief Archive loading refreshes local state without serializing its token.
-  TEST(Geometry_IdentityTransformation, LoadingRefreshesStateIdentity)
+  /// @brief Archive loading visits both geometric dimensions without runtime state tokens.
+  TEST(Geometry_IdentityTransformation, LoadingDimensions)
   {
     struct LoadingArchive
     {
-      using is_loading = std::true_type;
-      LoadingArchive()
-        : m_visits(0)
-      {}
-      LoadingArchive& operator&([[maybe_unused]] size_t& dimension)
-      {
-        ++m_visits;
-        return *this;
-      }
-      size_t m_visits;
-    };
-    static_assert(LoadingArchive::is_loading::value);
-    StateTransformation map;
-    const auto before = map.getCacheIdentity();
-    LoadingArchive archive;
-    map.serialize(archive, 0);
-    EXPECT_EQ(archive.m_visits, 2);
-    EXPECT_NE(map.getCacheIdentity(), before);
-    EXPECT_EQ(map.getReferenceDimension(), 1);
-    EXPECT_EQ(map.getPhysicalDimension(), 1);
-  }
-
-  /// @brief Runtime state tokens remain distinct across construction threads.
-  TEST(Geometry_IdentityTransformation, StateIdentityConcurrentConstruction)
-  {
-    constexpr size_t Threads = 4;
-    constexpr size_t MapsPerThread = 64;
-    std::array<std::array<size_t, MapsPerThread>, Threads> values{};
-    std::array<std::thread, Threads> threads;
-    for (size_t r = 0; r < Threads; ++r)
-    {
-      threads[r] = std::thread([&, r]() {
-        for (size_t i = 0; i < MapsPerThread; ++i)
-        {
-          StateTransformation map;
-          ASSERT_TRUE(map.getCacheIdentity());
-          values[r][i] = *map.getCacheIdentity();
-        }
-      });
-    }
-    for (auto& thread : threads)
-      thread.join();
-    FlatSet<size_t> unique;
-    for (const auto& row : values)
-    {
-      for (const auto identity : row)
-        EXPECT_TRUE(unique.insert(identity).second);
-    }
-    EXPECT_EQ(unique.size(), Threads * MapsPerThread);
-  }
-
-  /// @brief Reconstructing a map in the same storage receives a different token.
-  TEST(Geometry_IdentityTransformation, StateIdentityReusedStorage)
-  {
-    Optional<IdentityTransformation> map;
-    map.emplace(2);
-    const auto* address = &*map;
-    const auto before = map->getCacheIdentity();
-    map.emplace(2);
-    EXPECT_EQ(&*map, address);
-    ASSERT_TRUE(map->getCacheIdentity());
-    EXPECT_NE(map->getCacheIdentity(), before);
-  }
-
-  /// @brief A failed archive load cannot leave the previous cache token reusable.
-  TEST(Geometry_IdentityTransformation, FailedLoadingRefreshesStateIdentity)
-  {
-    struct FailingArchive
-    {
-      using is_loading = std::true_type;
-      FailingArchive& operator&(size_t& dimension)
+      size_t visits = 0;
+      LoadingArchive& operator&(size_t& dimension)
       {
         dimension = 2;
-        Alert::Exception() << "Deliberately rejected test archive" << Alert::Raise;
+        ++visits;
         return *this;
       }
     };
-    static_assert(FailingArchive::is_loading::value);
     StateTransformation map;
-    const auto before = map.getCacheIdentity();
-    FailingArchive archive;
-    EXPECT_THROW(map.serialize(archive, 0), Alert::Exception);
-    EXPECT_NE(map.getCacheIdentity(), before);
+    LoadingArchive archive;
+    map.serialize(archive, 0);
+    EXPECT_EQ(archive.visits, 2);
     EXPECT_EQ(map.getReferenceDimension(), 2);
+    EXPECT_EQ(map.getPhysicalDimension(), 2);
   }
 
   // ---- IdentityTransformation basic properties ----

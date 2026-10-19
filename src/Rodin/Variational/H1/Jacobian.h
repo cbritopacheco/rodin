@@ -503,6 +503,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Jacobian& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
        * @brief Sets the integration point the expression is evaluated at.
        *
        * Every explicit bind prepares physical derivatives from the supplied

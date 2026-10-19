@@ -62,9 +62,9 @@ namespace Rodin::Geometry
    *
    * # Thread Safety
    *
-   * Transformation objects are immutable after construction and are thread-safe
-   * for concurrent read access. The transform(), jacobian(), and inverse()
-   * methods can be called concurrently from multiple threads.
+   * Concurrent read access is supported. Mutating a derived map requires
+   * exclusive access and fresh point/quadrature and cell bindings before
+   * evaluation resumes. Geometry must remain fixed during each binding.
    *
    * @see <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html">IdentityTransformation</a>
    * @see <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html">ParametricTransformation</a>
@@ -83,8 +83,7 @@ namespace Rodin::Geometry
        */
     constexpr PolytopeTransformation(size_t rdim, size_t pdim)
       : m_rdim(rdim),
-          m_pdim(pdim),
-          m_cacheIdentity(createCacheIdentity())
+          m_pdim(pdim)
     {}
 
       /**
@@ -94,8 +93,7 @@ namespace Rodin::Geometry
       constexpr PolytopeTransformation(const PolytopeTransformation& other) noexcept
         : Copyable(other),
           m_rdim(other.m_rdim),
-          m_pdim(other.m_pdim),
-          m_cacheIdentity(createCacheIdentity())
+          m_pdim(other.m_pdim)
       {}
 
       /**
@@ -105,12 +103,8 @@ namespace Rodin::Geometry
       constexpr PolytopeTransformation(PolytopeTransformation&& other) noexcept
         : Copyable(std::move(other)),
           m_rdim(other.m_rdim),
-          m_pdim(other.m_pdim),
-          m_cacheIdentity(createCacheIdentity())
-      {
-        if (!std::is_constant_evaluated())
-          other.m_cacheIdentity.reset();
-      }
+          m_pdim(other.m_pdim)
+      {}
 
       /**
        * @brief Move assignment operator.
@@ -123,31 +117,8 @@ namespace Rodin::Geometry
         {
           m_rdim = other.m_rdim;
           m_pdim = other.m_pdim;
-          other.m_cacheIdentity.reset();
         }
-        invalidateCacheIdentity();
         return *this;
-      }
-
-      /**
-       * @brief Logical identity of this transformation state for local caches.
-       *
-       * Runtime construction, copying, moving, assignment and loading receive
-       * fresh process-local identities. Reads do not allocate, synchronize or
-       * communicate. The identity is not a distributed entity identifier and
-       * must not be serialized. Derived setters changing map parameters must
-       * call invalidateCacheIdentity(). Concurrent mutation is not supported.
-       * The token invalidates evaluation-node reuse, not existing point buffers
-       * or the mesh's quadrature cache. Attached geometry must be published through
-       * @ref MeshBase::setPolytopeTransformation and points rebound normally.
-       * Constant-evaluated and moved-from maps have no reusable identity;
-       * consumers must evaluate rather than reuse a physical result in that case.
-       *
-       * @returns Optional identity of the current map state.
-       */
-      constexpr const Optional<size_t>& getCacheIdentity() const noexcept
-      {
-        return m_cacheIdentity;
       }
 
       /// @brief Virtual destructor.
@@ -266,8 +237,6 @@ namespace Rodin::Geometry
       template <class Archive>
       void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
-        if constexpr (Archive::is_loading::value)
-          invalidateCacheIdentity();
         ar & m_rdim;
         ar & m_pdim;
       }
@@ -281,17 +250,6 @@ namespace Rodin::Geometry
       virtual PolytopeTransformation* copy() const noexcept override = 0;
 
     protected:
-      /**
-       * @brief Invalidates physical results after derived map parameters change.
-       *
-       * A fresh logical state is established without inspecting coordinates.
-       * Derived mutators must invoke this operation when changing geometry.
-       */
-      void invalidateCacheIdentity() noexcept
-      {
-        m_cacheIdentity = createCacheIdentity();
-      }
-
       /**
        * @brief Maps an owned reference sample using available reference data.
        *
@@ -308,26 +266,8 @@ namespace Rodin::Geometry
         size_t identity, size_t qp) const;
 
     private:
-      /**
-       * @brief Allocates a fresh process-local runtime state identity.
-       * @returns Identity distinct from previous transformation states.
-       */
-      static size_t nextCacheIdentity() noexcept;
-
-      /**
-       * @brief Preserves constant evaluation without inventing an identity.
-       * @returns No identity in constant evaluation, otherwise a fresh identity.
-       */
-      static constexpr Optional<size_t> createCacheIdentity() noexcept
-      {
-        if (std::is_constant_evaluated())
-          return std::nullopt;
-        return nextCacheIdentity();
-      }
-
       size_t m_rdim; ///< Reference dimension @f$ k @f$
       size_t m_pdim; ///< Physical dimension @f$ s @f$
-      Optional<size_t> m_cacheIdentity; ///< Logical runtime map state, when reusable.
   };
 }
 

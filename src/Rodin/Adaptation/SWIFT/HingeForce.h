@@ -77,6 +77,7 @@ namespace Rodin::Adaptation::SWIFT
         m_vector.resize(static_cast<Eigen::Index>(fe.getCount()));
         m_vector.setZero();
         auto testJacobian = Variational::Jacobian(m_z);
+        testJacobian.setPolytope(polytope);
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto innerJacobian = Variational::Jacobian(m_inner.get());
         auto predictorJacobian = Variational::Jacobian(m_predictor.get());

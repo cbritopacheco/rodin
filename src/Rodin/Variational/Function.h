@@ -349,7 +349,8 @@ namespace Rodin::Variational
            * @note The function is not owned and must outlive this cache.
            */
           explicit Cache(const FunctionBase& f)
-            : m_function(f)
+            : m_function(f),
+              m_bound(false)
           {}
 
           /**
@@ -380,7 +381,7 @@ namespace Rodin::Variational
           Cache& operator=(const Cache& other)
           {
             m_function = other.m_function;
-            m_value.reset();
+            m_bound = false;
             return *this;
           }
 
@@ -390,6 +391,17 @@ namespace Rodin::Variational
            * @returns This cache.
            */
           Cache& operator=(Cache&& other) = default;
+
+          /**
+           * @brief Invalidates the preceding cell snapshot while retaining owned storage.
+           * @param polytope Entity for the next evaluation pass.
+           * @returns This empty evaluation cache.
+           */
+          Cache& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+          {
+            m_bound = false;
+            return *this;
+          }
 
           /**
            * @brief Evaluates the bound function at an integration point.
@@ -404,6 +416,7 @@ namespace Rodin::Variational
            */
           Cache& setIntegrationPoint(const IntegrationPoint& ip)
           {
+            m_bound = false;
             if constexpr (Enabled)
             {
               if (!ip.getQuadratureFormula())
@@ -415,6 +428,7 @@ namespace Rodin::Variational
                 *m_value = m_function.get().getValue(ip);
               else
                 m_value.emplace(m_function.get().getValue(ip));
+              m_bound = true;
             }
             return *this;
           }
@@ -429,7 +443,7 @@ namespace Rodin::Variational
           {
             if constexpr (Enabled)
             {
-              if (m_value)
+              if (m_bound)
                 return &*m_value;
             }
             return nullptr;
@@ -437,6 +451,7 @@ namespace Rodin::Variational
 
         private:
           std::reference_wrapper<const FunctionBase> m_function;
+          bool m_bound;
           std::optional<Value> m_value;
       };
 

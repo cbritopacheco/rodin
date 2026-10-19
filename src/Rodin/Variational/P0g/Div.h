@@ -237,6 +237,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Div& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
        * @brief Sets the integration point the expression is evaluated at.
        *
        * The zero derivative is independent of operand values. Binding updates

@@ -103,13 +103,24 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      TrialFunctionReference& setPolytope(const Geometry::Polytope& polytope)
+      {
+        Parent::setPolytope(polytope);
+        return *this;
+      }
+
+      /**
        * @brief Sets the evaluation point for the shape function.
        * @param[in] p Point at which to evaluate
        * @returns Reference to this object
        */
       TrialFunctionReference& setIntegrationPoint(const IntegrationPoint& p)
       {
-        m_ref.get().setIntegrationPoint(p);
+        Parent::setIntegrationPoint(p);
         return *this;
       }
 
@@ -119,7 +130,7 @@ namespace Rodin::Variational
        */
       const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_ref.get().getIntegrationPoint();
+        return Parent::getIntegrationPoint();
       }
 
       /**
@@ -180,7 +191,7 @@ namespace Rodin::Variational
       constexpr
       decltype(auto) getBasis(size_t local) const
       {
-        return m_ref.get().getBasis(local);
+        return Parent::getBasis(local);
       }
 
       /**

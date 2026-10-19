@@ -102,10 +102,17 @@ namespace Rodin::Tests::Unit
       deformation.invalidate();
       const IntegrationPoint indexedFirst(firstQuadrature, 0);
       const IntegrationPoint indexedSecond(secondQuadrature, 0);
-      check(indexedFirst, Expansion);
+      deformation.setPolytope(*face).setIntegrationPoint(indexedFirst);
       const std::size_t beforeRepeat = locator.calls;
-      check(indexedFirst, Expansion);
+      const auto expectedFirst =
+        Math::SpatialPoint((Real(1) + Expansion) * first.getPhysicalCoordinates());
+      EXPECT_LT(
+        (deformation.getMovedPoint().getPhysicalCoordinates() - expectedFirst).norm(),
+        Tolerance);
+      deformation.getMovedPoint();
       EXPECT_EQ(locator.calls, beforeRepeat);
+      const auto copy = deformation;
+      EXPECT_THROW(copy.getMovedPoint(), Alert::Exception);
       check(indexedSecond, Expansion);
       EXPECT_EQ(locator.calls, beforeRepeat + 1);
 
@@ -161,11 +168,15 @@ namespace Rodin::Tests::Unit
     {
       explicit CellLocator(const LocalMesh& mesh)
         : mesh(mesh),
-          calls(0)
+          calls(0),
+          fail(false)
       {}
       Optional<Point> locate(size_t dimension, const Math::SpatialPoint& physical) const
       {
         ++calls;
+        if (fail)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Locator failure." << Alert::Raise;
         const auto cell = mesh.getPolytope(dimension, 0);
         Math::SpatialPoint reference;
         cell->getTransformation().inverse(reference, physical);
@@ -173,6 +184,7 @@ namespace Rodin::Tests::Unit
       }
       const LocalMesh& mesh;
       mutable size_t calls;
+      bool fail;
     };
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
@@ -192,8 +204,10 @@ namespace Rodin::Tests::Unit
       QF::GaussLegendre formula(geometry, 2);
       const PolytopeQuadrature first(cell, formula);
       const IntegrationPoint original(first, 0);
-      deformation.getMovedPoint(original);
-      deformation.getMovedPoint(original);
+      EXPECT_THROW(deformation.getMovedPoint(), Alert::Exception);
+      deformation.setPolytope(cell).setIntegrationPoint(original);
+      deformation.getMovedPoint();
+      deformation.getMovedPoint();
       EXPECT_EQ(locator.calls, 1);
       formula = QF::GaussLegendre(geometry, 4);
       const PolytopeQuadrature second(cell, formula);
@@ -219,6 +233,12 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(actual(j), unproven.getPoint().getPhysicalCoordinates()(j));
       }
       EXPECT_EQ(locator.calls, 6);
+      locator.fail = true;
+      EXPECT_THROW(deformation.setIntegrationPoint(rescaled), Alert::Exception);
+      EXPECT_THROW(deformation.getMovedPoint(), Alert::Exception);
+      locator.fail = false;
+      EXPECT_NO_THROW(deformation.setIntegrationPoint(rescaled));
+      EXPECT_NO_THROW(deformation.getMovedPoint());
     }
   }
 }

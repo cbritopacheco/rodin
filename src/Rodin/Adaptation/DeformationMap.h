@@ -8,6 +8,7 @@
 #define RODIN_ADAPTATION_DEFORMATIONMAP_H
 
 #include "Rodin/Alert/NamespacedException.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Types.h"
@@ -16,21 +17,17 @@
 namespace Rodin::Adaptation
 {
   /**
-   * @brief The deformation @f$\Phi(x)=x+u(x)@f$ induced by a displacement,
-   * evaluated with memoisation.
+   * @brief The deformation @f$\Phi(x)=x+u(x)@f$ induced by a displacement.
    *
-   * Locating @f$\Phi(x)@f$ in the mesh requires inverting a polytope
-   * transformation and, on a face, searching the adjacent cells. That cost is
-   * invariant with respect to the basis index, but the form language evaluates
-   * coefficients through @c getBasis(local) and so may request the same moved
-   * point once per basis function. This class makes the request idempotent: the
-   * last computed point is cached and returned directly when the integration
-   * point has not changed.
+   * ## Architecture
    *
-   * A single-entry cache suffices because repeated requests are always
-   * consecutive — they come from the innermost basis loop of a single
-   * quadrature point — so the memory cost is @f$O(1)@f$ regardless of mesh size
-   * and the hit rate is the full redundancy.
+   * A point binding locates the moved point once and owns that result for all
+   * subsequent basis requests in the binding. Cell binding or invalidation
+   * releases it. Direct point evaluation always locates afresh. Neither the
+   * integration point nor a transformation-state token is retained. Geometry,
+   * displacement and locator data must remain unchanged during a binding.
+   * Copies retain the displacement and locator references but start unbound.
+   * Evaluation objects are local to a pass and must not be shared concurrently.
    *
    * @tparam Displacement Displacement grid function type.
    */
@@ -47,6 +44,52 @@ namespace Rodin::Adaptation
         : m_u(u),
           m_locator(locator)
       {}
+
+      /**
+       * @brief Copies dependencies into an unbound evaluation object.
+       * @param other Evaluation whose displacement and locator are retained.
+       */
+      DeformationMap(const DeformationMap& other)
+        : m_u(other.m_u),
+          m_locator(other.m_locator)
+      {}
+
+      /**
+       * @brief Starts a fresh cell binding, releasing the previous moved point.
+       * @param polytope Source entity for the next evaluation pass.
+       * @returns This unbound point evaluator.
+       */
+      const DeformationMap& setPolytope(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const
+      {
+        invalidate();
+        return *this;
+      }
+
+      /**
+       * @brief Locates and owns the moved point for a fresh point binding.
+       * @param ip Source integration point; no reference to it is retained.
+       * @returns This evaluator with an owned moved-point result.
+       */
+      const DeformationMap& setIntegrationPoint(
+        const Variational::IntegrationPoint& ip) const
+      {
+        getMovedPoint(ip);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the moved point prepared by the current point binding.
+       * @returns The owned point, valid until rebinding or invalidation.
+       * @throws Alert::Exception If no point is bound.
+       */
+      const Geometry::Point& getMovedPoint() const
+      {
+        if (!m_moved)
+          Alert::MemberFunctionException(*this, __func__)
+            << "No moved point is bound." << Alert::Raise;
+        return *m_moved;
+      }
 
       /**
        * @brief The underlying displacement field.
@@ -77,33 +120,17 @@ namespace Rodin::Adaptation
       }
 
       /**
-       * @brief The moved point @f$\Phi(x)=x+u(x)@f$, located in the mesh.
-       *
-       * Consecutive calls may reuse a located point only for a certified
-       * reference sample with unchanged mesh, entity, formula version and
-       * geometry state. Sampling provenance alone does not authorize reuse.
-       * Displacement or locator updates still require @ref invalidate.
-       *
-       * @param ip Integration point on the reference configuration; its
-       * reference association and local geometry identify the source sample.
-       * @returns Located point in the deformed configuration.
+       * @brief Evaluates and owns a fresh moved point outside a binding.
+       * @param ip Source integration point.
+       * @returns Located moved point, replaced by the next evaluation.
        */
       const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
       {
-        const auto& pt = ip.getPoint();
-        const auto& polytope = pt.getPolytope();
-        const auto* formula = ip.getReferenceQuadratureFormula();
-        const auto identity = polytope.getTransformation().getCacheIdentity();
-        const Key key{&polytope.getMesh(), polytope.getDimension(), polytope.getIndex(),
-          formula, formula ? formula->getCacheIdentity() : 0, ip.getIndex(), identity};
-        if (!formula || !identity || !m_moved || !m_key || !(*m_key == key))
-        {
-            // Geometry::Point is constructible but not assignable, so the slot
-            // is re-emplaced rather than overwritten.
-          m_moved.emplace(makeMovedPoint(pt,
-            pt.getPhysicalCoordinates() + getDisplacementValue(pt, ip), m_locator.get()));
-          m_key = key;
-        }
+        invalidate();
+        const auto& point = ip.getPoint();
+        m_moved.emplace(makeMovedPoint(point,
+          point.getPhysicalCoordinates() + getDisplacementValue(point, ip),
+          m_locator.get()));
         return *m_moved;
       }
 
@@ -111,7 +138,6 @@ namespace Rodin::Adaptation
       void invalidate() const
       {
         m_moved.reset();
-        m_key.reset();
       }
 
     private:
@@ -152,33 +178,8 @@ namespace Rodin::Adaptation
         return Geometry::Point(*mesh.getPolytope(dimension, cell), reference, physical);
       }
 
-      struct Key
-      {
-        const Geometry::MeshBase* mesh;
-        std::size_t dimension;
-        Index index;
-        const QF::QuadratureFormulaBase* quadrature;
-        size_t quadratureIdentity;
-        std::size_t qp;
-        Optional<size_t> transformationIdentity;
-        /**
-           * @brief Compares the operands for equality.
-           * @param other Object compared with this object.
-           * @returns True when the operands compare equal.
-           */
-
-        bool operator==(const Key& other) const
-        {
-          return mesh == other.mesh && dimension == other.dimension &&
-            index == other.index && quadrature == other.quadrature &&
-            quadratureIdentity == other.quadratureIdentity && qp == other.qp &&
-            transformationIdentity == other.transformationIdentity;
-        }
-      };
-
       std::reference_wrapper<const Displacement> m_u;
       std::reference_wrapper<const LocatorType> m_locator;
-      mutable Optional<Key> m_key;
       mutable Optional<Geometry::Point> m_moved;
   };
 }

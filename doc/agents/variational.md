@@ -125,6 +125,24 @@ gradients through `getGradient()` when available, otherwise through the
 basis directional derivatives. This accepts constant bases without requiring
 a convenience wrapper or changing the existing P1/H1 tabulation path.
 
+Cell binding is an explicit evaluation boundary. Generic local quadrature
+rules propagate `setPolytope()` through their expression trees before replacing
+owned quadrature. Composite nodes forward the operation and coefficient caches
+invalidate their point snapshots while retaining owned allocation for reuse. Native P1 Grad/Div/Jacobian reset prepared physical
+results on every cell bind, retain allocated buffers, and reuse affine simplex
+results across samples only while the cell binding matches. Direct point binds
+without a matching cell binding always refresh. Copies start unbound. Reference
+basis tables may survive bindings because they depend on the reference formula,
+not physical geometry. Custom cell integrators establish the same lifecycle.
+
+GridFunction retains DOF/scratch allocation reuse but recomputes pushed-forward
+basis values on each direct integration-point evaluation. Caller-owned
+FunctionBase::Cache retains the resulting field value across basis indices for
+the current point binding. Shared fields acquire no mutable cell binding.
+DeformationMap owns one explicitly prepared moved point: point binding locates
+once, parameterless access reuses it, cell binding clears it, and direct point
+queries always locate afresh. No transformation token, UUID or revision is used.
+
 `FiniteElement.h` defines the element side: `getBasis(local)`,
 `getNode(local)` (reference nodes), counts per `Polytope::Type`.
 

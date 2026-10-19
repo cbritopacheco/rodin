@@ -250,8 +250,6 @@ namespace Rodin::Variational
           Geometry::Polytope::Type geom;
           /// @brief Order of the geometric transformation.
           int transOrder;
-          /// @brief Logical state of the geometric map.
-          Optional<size_t> transformationIdentity;
 
           /// @brief Whether the key holds a cached entry.
           bool valid;
@@ -263,7 +261,6 @@ namespace Rodin::Variational
               i(0),
               geom(Geometry::Polytope::Type::Point),
               transOrder(1),
-              transformationIdentity(std::nullopt),
               valid(false)
           {}
 
@@ -283,19 +280,17 @@ namespace Rodin::Variational
            */
           bool operator==(const CellKey& o) const noexcept
           {
-            if (!valid || !o.valid || !transformationIdentity ||
-              !o.transformationIdentity)
+            if (!valid || !o.valid)
               return false;
             return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
-              transOrder == o.transOrder &&
-              transformationIdentity == o.transformationIdentity;
+              transOrder == o.transOrder;
           }
 
           /**
            * @brief Resets the key, invalidating the cached entry.
            * @param other Object to copy from.
            */
-          void operator=(std::initializer_list<int> other) noexcept
+          void operator=([[maybe_unused]] std::initializer_list<int> other) noexcept
           {
             valid = false;
             mesh = nullptr;
@@ -303,7 +298,6 @@ namespace Rodin::Variational
             i = 0;
             geom = Geometry::Polytope::Type::Point;
             transOrder = 1;
-            transformationIdentity.reset();
           }
         };
 
@@ -388,8 +382,7 @@ namespace Rodin::Variational
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
-          m_ip(nullptr),
-          m_cache(other.m_cache)
+          m_ip(nullptr)
       {}
 
       /**
@@ -399,8 +392,7 @@ namespace Rodin::Variational
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_ip(std::exchange(other.m_ip, nullptr)),
-          m_cache(std::move(other.m_cache))
+          m_ip(nullptr)
       {}
 
       /**
@@ -443,6 +435,31 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding for physical basis derivatives.
+       *
+       * Affine simplex derivatives are prepared at the first point and reused
+       * throughout this binding. Curved or varying reference derivatives are
+       * prepared at each new quadrature sample. Rebinding the same entity
+       * discards the preceding physical results while retaining storage.
+       * @param polytope Entity whose geometry remains fixed during this binding.
+       * @returns This expression with no point bound.
+       */
+      Grad& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        m_binding = {};
+        m_cache.cellKey = {};
+        m_cache.qpKey = {};
+        m_binding.mesh = static_cast<const void*>(&polytope.getMesh());
+        m_binding.d = polytope.getDimension();
+        m_binding.i = polytope.getIndex();
+        m_binding.geom = polytope.getGeometry();
+        m_binding.transOrder = polytope.getTransformation().getOrder();
+        m_binding.valid = true;
+        return *this;
+      }
+
+      /**
        * @brief Sets the integration point the expression is evaluated at.
        *
        * Both the inverse map and the reference basis derivative determine
@@ -476,10 +493,9 @@ namespace Rodin::Variational
         ckey.i = i;
         ckey.geom = geom;
         ckey.transOrder = transOrder;
-        ckey.transformationIdentity = transformation.getCacheIdentity();
         ckey.valid = true;
 
-        const bool cellChanged = !(m_cache.cellKey == ckey);
+        const bool cellChanged = !(m_binding == ckey) || !(m_cache.cellKey == ckey);
         if (cellChanged)
         {
           m_cache.cellKey = ckey;
@@ -519,7 +535,7 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
+        const bool qpChanged = (needsQp && !qf) || !(m_cache.qpKey == qkey);
         if (cellChanged || qpChanged)
         {
           m_cache.qpKey = qkey;
@@ -583,6 +599,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
       const IntegrationPoint* m_ip;
       Cache m_cache;
+      typename Cache::CellKey m_binding;
   };
 }
 
@@ -860,6 +877,17 @@ namespace Rodin::Variational
         assert(m_point);
         return *m_point;
       }
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Grad& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_point = nullptr;
+        return *this;
+      }
+
       /**
        * @brief Binds the integration point and prepares local basis values.
        * @param point Point at which the operation is evaluated.

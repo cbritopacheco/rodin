@@ -198,6 +198,7 @@ namespace Rodin::Solid
 
         auto stateGradient = Variational::Jacobian(m_displacement.get());
         auto testGradient = Variational::Jacobian(m_test.get());
+        testGradient.setPolytope(polytope);
 
         for (size_t q = 0; q < nqp; ++q)
         {
@@ -481,6 +482,7 @@ namespace Rodin::Solid
 
         auto stateGradient = Variational::Jacobian(m_displacement.get());
         auto testGradient = Variational::Jacobian(m_test.get());
+        testGradient.setPolytope(polytope);
 
         for (size_t q = 0; q < nqp; ++q)
         {

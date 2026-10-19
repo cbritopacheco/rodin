@@ -103,6 +103,7 @@ namespace Rodin::Tests::Benchmarks
           else
             return Div(u);
         }();
+        gradient.setPolytope(cell);
         using Value = std::remove_cvref_t<decltype(gradient.getBasis(size_t(0)))>;
         const auto& fe = space.getFiniteElement(d, cell.getIndex());
         const auto& formula =

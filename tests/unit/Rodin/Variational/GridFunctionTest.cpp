@@ -1118,7 +1118,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Canonical basis reuse respects logical geometry changes in a pushforward.
+  /// @brief Direct evaluations refresh pushforwards while caller bindings retain owned values.
   TEST(Rodin_Variational_GridFunction, CertifiedSamplesTrackGeometryDependentPushforward)
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -1133,15 +1133,27 @@ namespace Rodin::Tests::Unit
     ASSERT_GT(original.norm(), 0);
     const size_t calls = fes.getPushforwardEvaluationCount();
     field.getValue(first);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + fes.getSize());
     mesh.scale(2);
     const PolytopeQuadrature after(cell, formula);
     const IntegrationPoint second(after, 0);
     const auto actual = field.getValue(second);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 2 * fes.getSize());
     for (size_t i = 0; i < actual.size(); ++i)
       EXPECT_EQ(actual(i), 4 * original(i));
     field.getValue(second);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 3 * fes.getSize());
+    typename decltype(field)::Cache binding(field);
+    const auto beforeBinding = fes.getPushforwardEvaluationCount();
+    binding.setPolytope(cell);
+    EXPECT_EQ(binding.get(), nullptr);
+    binding.setIntegrationPoint(second);
+    const auto* value = binding.get();
+    ASSERT_NE(value, nullptr);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + fes.getSize());
+    EXPECT_EQ(binding.get(), value);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + fes.getSize());
+    binding.setIntegrationPoint(second);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + 2 * fes.getSize());
   }
 }

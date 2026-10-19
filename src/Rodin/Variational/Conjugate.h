@@ -245,6 +245,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Conjugate& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_operand->setPolytope(polytope);
+        return *this;
+      }
+
+      /**
        * @brief Sets the evaluation point.
        * @param[in] p Point for evaluation
        * @returns Reference to this

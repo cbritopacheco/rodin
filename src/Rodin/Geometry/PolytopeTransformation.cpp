@@ -5,7 +5,6 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Eigen/Dense>
-#include <atomic>
 
 #include "Rodin/Variational/FiniteElement.h"
 #include "Rodin/QF/QuadratureFormula.h"
@@ -17,12 +16,6 @@
 
 namespace Rodin::Geometry
 {
-  size_t PolytopeTransformation::nextCacheIdentity() noexcept
-  {
-    static std::atomic<size_t> next(0);
-    return next.fetch_add(1, std::memory_order_relaxed);
-  }
-
   void PolytopeTransformation::transform(Math::SpatialPoint& pc,
     const Math::SpatialPoint& rc, [[maybe_unused]] size_t identity,
     [[maybe_unused]] size_t qp) const

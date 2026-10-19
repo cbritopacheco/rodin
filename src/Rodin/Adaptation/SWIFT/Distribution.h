@@ -75,7 +75,9 @@ namespace Rodin::Adaptation::SWIFT
         m_testStrains.resize(nTest);
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto trialJacobian = Variational::Jacobian(m_trial.get());
+        trialJacobian.setPolytope(cell);
         auto testJacobian = Variational::Jacobian(m_test.get());
+        testJacobian.setPolytope(cell);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);

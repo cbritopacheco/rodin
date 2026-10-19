@@ -32,7 +32,8 @@ namespace Rodin::Adaptation::SWIFT
         const DeformationType& deformation, const Variational::IntegrationPoint& ip,
         const Loss& loss)
       {
-        const auto& moved = deformation.getMovedPoint(ip);
+        deformation.setIntegrationPoint(ip);
+        const auto& moved = deformation.getMovedPoint();
         m_residual = phi.getValue(moved);
         m_gradient = grad.getValue(moved);
         m_weight = loss.getWeight(m_residual);

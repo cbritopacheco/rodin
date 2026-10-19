@@ -228,6 +228,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      ShapeFunction& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
        * Fallback path (non-quadrature evaluations).
        * Keeps your previous behavior (pushforward of each basis at p).
        * @param ip Integration point at which the expression is evaluated.
@@ -455,6 +466,17 @@ namespace Rodin::Variational
       {
         assert(m_ip);
         return *m_ip;
+      }
+
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Shape& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
       }
 
       /**

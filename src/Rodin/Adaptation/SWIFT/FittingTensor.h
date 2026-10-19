@@ -79,7 +79,8 @@ namespace Rodin::Adaptation::SWIFT
         RangeType m = RangeType::Identity(d, d);
         m.setZero();
 
-        const auto g = m_grad->getValue(m_deformation.getMovedPoint(ip));
+        m_deformation.setIntegrationPoint(ip);
+        const auto g = m_grad->getValue(m_deformation.getMovedPoint());
         const Real scale = params.model.fit * m_normalization;
         for (std::uint8_t r = 0; r < d; ++r)
         {

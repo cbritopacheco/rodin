@@ -447,6 +447,18 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Sum& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_lhs->setPolytope(polytope);
+        m_rhs->setPolytope(polytope);
+        return *this;
+      }
+
+      /**
        * @brief Sets the integration point the expression is evaluated at.
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
