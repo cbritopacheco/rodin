@@ -232,7 +232,11 @@ namespace Rodin::Examples::Valve
 
         // Output and stopping.
         Real tAverage = -1.0;      ///< s, start of the time average (< 0: tEnd/2)
-        Real steadyTolerance = 1.0e-5;  ///< relative change of (F, Q) per step
+        /// Early stop when the relative change of (F, Q) per step stays below
+        /// this for steadyWindow steps. Off by default (0): the test is per
+        /// step, so with small steps a slow drift passes it (FPC8 100 %:
+        /// stopped at 2.7 D/U while F_y,dyn still went from 9 to 6 N).
+        Real steadyTolerance = 0.0;
         int steadyWindow = 10;     ///< consecutive steps below steadyTolerance
         int outputEvery = 10;
       };

@@ -288,7 +288,8 @@ def main():
             t0 = env.get("tavg", 0.5 * h["t"][-1])
         k = h["t"] > t0 if op else np.arange(len(h["t"])) == len(h["t"]) - 1
         if not k.any():
-            print("[%s] the run has not passed the transient (t_end = %.4g s < %.4g s): last half used"
+            print("[%s] WARNING: the run ended (t_end = %.4g s) before the end of the transient "
+                  "(%.4g s), e.g. stopped by the steady-state test: last half used, rerun it longer"
                   % (tag, h["t"][-1], t0))
             t0 = 0.5 * h["t"][-1]
             k = h["t"] > t0
