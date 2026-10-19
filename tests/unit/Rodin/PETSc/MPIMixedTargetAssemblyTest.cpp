@@ -12,6 +12,7 @@
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Variational/P1.h>
+#include <Rodin/MPI/Variational/P0.h>
 #include "MixedTargetAssembly.h"
 
 using namespace Rodin;
@@ -146,4 +147,124 @@ int main(int argc, char** argv)
   MPI_Allreduce(&local, &result, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
   PetscFinalize();
   return result;
+}
+
+namespace
+{
+  /// @brief Checks each heterogeneous block against exact segment mass integrals.
+  template <bool FirstConstant, bool SecondConstant>
+  void checkHeterogeneousMassBlocks()
+  {
+    Context::MPI context(*environment, *world);
+    Sharder<Context::MPI> sharder(context);
+    if (world->rank() == 0)
+    {
+      auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {5});
+      local.scale(Real(.25));
+      local.getConnectivity().compute(0, 1);
+      local.getConnectivity().compute(1, 1);
+      BalancedCompactPartitioner partitioner(local);
+      partitioner.partition(static_cast<size_t>(world->size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    auto mesh = sharder.gather(0);
+    using MeshType = decltype(mesh);
+    using First = std::conditional_t<FirstConstant, P0<PetscScalar, MeshType>,
+      P1<PetscScalar, MeshType>>;
+    using Second = std::conditional_t<SecondConstant, P0<PetscScalar, MeshType>,
+      P1<PetscScalar, MeshType>>;
+    First first(mesh);
+    Second second(mesh);
+    PETSc::Variational::TrialFunction u(first), p(second);
+    PETSc::Variational::TestFunction v(first), q(second);
+    Problem problem(u, v, p, q);
+    problem = Integral(2 * u, v) + Integral(3 * p, v) + Integral(5 * u, q) +
+      Integral(7 * p, q) - Integral(11 * v) - Integral(13 * q);
+    const size_t firstSize = first.getSize(), secondSize = second.getSize(),
+                 totalSize = firstSize + secondSize;
+    Math::Matrix<PetscScalar> expected(totalSize, totalSize);
+    expected.setZero();
+    Math::Vector<PetscScalar> rhs(totalSize);
+    rhs.setZero();
+    auto block = [&](const auto& rows, const auto& columns, size_t rowOffset,
+                   size_t columnOffset, Real coefficient, Real length) {
+      for (Index i = 0; i < Index(rows.size()); ++i)
+      {
+        for (Index j = 0; j < Index(columns.size()); ++j)
+        {
+          Real weight = (rows.size() == 2 && columns.size() == 2)
+            ? (i == j ? length / 3 : length / 6)
+            : length / Real(rows.size() * columns.size());
+          expected(rowOffset + rows[i], columnOffset + columns[j]) +=
+            coefficient * weight;
+        }
+      }
+    };
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      if (!mesh.getShard().isOwned(1, cell->getIndex()))
+        continue;
+      auto firstDOFs = first.getDOFs(1, cell->getIndex());
+      auto secondDOFs = second.getDOFs(1, cell->getIndex());
+      const Real length = cell->getMeasure();
+      block(firstDOFs, firstDOFs, 0, 0, 2, length);
+      block(firstDOFs, secondDOFs, 0, firstSize, 3, length);
+      block(secondDOFs, firstDOFs, firstSize, 0, 5, length);
+      block(secondDOFs, secondDOFs, firstSize, firstSize, 7, length);
+      for (auto i : firstDOFs)
+        rhs[i] += 11 * length / Real(firstDOFs.size());
+      for (auto i : secondDOFs)
+        rhs[firstSize + i] += 13 * length / Real(secondDOFs.size());
+    }
+    MPI_Allreduce(MPI_IN_PLACE, expected.data(), int(totalSize * totalSize), MPIU_SCALAR,
+      MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(
+      MPI_IN_PLACE, rhs.data(), int(totalSize), MPIU_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+    problem.assemble();
+    auto& system = problem.getLinearSystem();
+    const auto matrix = system.getOperator();
+    const auto vector = system.getVector();
+    Math::Matrix<PetscScalar> actual(totalSize, totalSize);
+    actual.setZero();
+    Math::Vector<PetscScalar> load(totalSize);
+    load.setZero();
+    PetscInt begin, end;
+    ASSERT_EQ(MatGetOwnershipRange(matrix, &begin, &end), PETSC_SUCCESS);
+    for (PetscInt i = begin; i < end; ++i)
+    {
+      for (PetscInt j = 0; j < PetscInt(totalSize); ++j)
+      {
+        PetscScalar value;
+        ASSERT_EQ(MatGetValues(matrix, 1, &i, 1, &j, &value), PETSC_SUCCESS);
+        actual(i, j) = value;
+      }
+    }
+    ASSERT_EQ(VecGetOwnershipRange(vector, &begin, &end), PETSC_SUCCESS);
+    for (PetscInt i = begin; i < end; ++i)
+    {
+      PetscScalar value;
+      ASSERT_EQ(VecGetValues(vector, 1, &i, &value), PETSC_SUCCESS);
+      load[i] = value;
+    }
+    MPI_Allreduce(MPI_IN_PLACE, actual.data(), int(totalSize * totalSize), MPIU_SCALAR,
+      MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(
+      MPI_IN_PLACE, load.data(), int(totalSize), MPIU_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+    const Real matrixError = (actual - expected).norm(), rhsError = (load - rhs).norm();
+    EXPECT_LT(matrixError, 1e-12);
+    EXPECT_LT(rhsError, 1e-12);
+  }
+}
+
+/// @brief P1/P0 block assembly uses each space's own distributed DOF map.
+TEST(PETSc_MPIMixedTargetAssembly, P1P0MassBlocks)
+{
+  checkHeterogeneousMassBlocks<false, true>();
+}
+
+/// @brief Reversing heterogeneous block order retains exact matrices and loads.
+TEST(PETSc_MPIMixedTargetAssembly, P0P1MassBlocks)
+{
+  checkHeterogeneousMassBlocks<true, false>();
 }

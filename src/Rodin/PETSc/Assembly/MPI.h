@@ -1223,27 +1223,27 @@ namespace Rodin::Assembly
         const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
         {
           const size_t k = findTrialBlock(uuid);
-          const void* addr = nullptr;
+          const Variational::FiniteElementSpaceBase* addr = nullptr;
           us.iapply([&](size_t i, const auto& uref)
           {
             if (i == k)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace());
+              addr = &uref.get().getFiniteElementSpace();
           });
           assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace())>*>(addr);
+          return *addr;
         };
 
         const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
         {
           const size_t k = findTestBlock(uuid);
-          const void* addr = nullptr;
+          const Variational::FiniteElementSpaceBase* addr = nullptr;
           vs.iapply([&](size_t i, const auto& vref)
           {
             if (i == k)
-              addr = static_cast<const void*>(&vref.get().getFiniteElementSpace());
+              addr = &vref.get().getFiniteElementSpace();
           });
           assert(addr);
-          return *static_cast<const std::decay_t<decltype(vs.template get<0>().get().getFiniteElementSpace())>*>(addr);
+          return *addr;
         };
 
         // Compute localRows/localCols as sum of owned sizes of each block on this rank

@@ -306,6 +306,11 @@ if(RODIN_USE_MPI)
   add_executable(RodinPETScMPIMixedTargetAssemblyTest MPIMixedTargetAssemblyTest.cpp)
   target_link_libraries(RodinPETScMPIMixedTargetAssemblyTest PRIVATE
     GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI Rodin::PETSc)
+  if(RODIN_USE_UBSAN)
+    # Invalid concrete-space calls must fail the heterogeneous-space regressions.
+    target_compile_options(RodinPETScMPIMixedTargetAssemblyTest PRIVATE
+      -fno-sanitize-recover=vptr)
+  endif()
   foreach(np 1 2 3 4 8)
     add_test(NAME RodinPETScMPIMixedTargetAssemblyTest_np${np}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
