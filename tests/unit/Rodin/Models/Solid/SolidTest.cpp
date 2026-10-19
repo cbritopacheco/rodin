@@ -7,11 +7,14 @@
 #include <gtest/gtest.h>
 #include <cmath>
 #include <complex>
+#include <array>
 #include <type_traits>
 
 #include <Rodin/Solid.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Solver/NewtonSolver.h>
+#include <Rodin/Solver/SparseLU.h>
 
 namespace Rodin::Tests::Unit
 {
@@ -739,12 +742,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies that, after the per-quadrature-point local Newton on c.
+  /// @brief Verifies the displacement tangent at fixed active fields.
   TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference2D)
   {
-    // Verifies that, after the per-quadrature-point local Newton on c
-    // converges, the Schur-condensed material tangent matches a finite
-    // difference of P with respect to F at fixed previous state.
+    // The displacement block holds all three independent active fields fixed.
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
     activeInput.stiffness = 200.0;
@@ -774,6 +775,9 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
       cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
       cp.set<Solid::Tags::ElectricalActivation>(0.7);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
       return cp;
     };
 
@@ -781,7 +785,9 @@ namespace Rodin::Tests::Unit
     typename decltype(law)::Cache cache;
     law.getCache(cache, cp);
     EXPECT_TRUE(cache.dynamic);
-    EXPECT_LT(cache.localIterations, 30u);
+    EXPECT_DOUBLE_EQ(cache.activeExtension, -0.025);
+    EXPECT_DOUBLE_EQ(cache.newState.gamma, 1.8);
+    EXPECT_DOUBLE_EQ(cache.newState.beta, 0.95);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0, 0) = 0.21;
@@ -849,6 +855,9 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::PreviousActiveGamma>(1.5);
       cp.set<Solid::Tags::PreviousActiveBeta>(0.8);
       cp.set<Solid::Tags::ElectricalActivation>(1.2);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
       return cp;
     };
 
@@ -890,11 +899,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief After the local Newton converges, the dynamic residual should be at.
-  TEST(Rodin_Solid_ActiveContraction, DynamicLocalSolveResidualIsZero)
+  /// @brief Independent active fields remain unchanged away from equilibrium.
+  TEST(Rodin_Solid_ActiveContraction, DynamicFieldsAreNotEliminated)
   {
-    // After the local Newton converges, the dynamic residual should be at
-    // machine precision regardless of where the global state sits.
+    // Evaluation must preserve the independent fields, even away from equilibrium.
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
     activeInput.stiffness = 200.0;
@@ -923,12 +931,17 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
     cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
     cp.set<Solid::Tags::ElectricalActivation>(0.9);
+    cp.set<Solid::Tags::ActiveExtension>(-0.025);
+    cp.set<Solid::Tags::ActiveGamma>(1.8);
+    cp.set<Solid::Tags::ActiveBeta>(0.95);
 
     typename decltype(law)::Cache cache;
     law.getCache(cache, cp);
 
     EXPECT_TRUE(cache.dynamic);
-    EXPECT_NEAR(cache.active.residual, 0.0, 1e-11);
+    EXPECT_GT(std::abs(cache.active.residual), 1e-3);
+    EXPECT_EQ(cache.active.residual, cache.residual.value[0]);
+    EXPECT_DOUBLE_EQ(cache.activeExtension, -0.025);
   }
 
   /// @brief Verifies static stress derivative finite difference for solid active fiber law by checking tolerance-based numerical results.
@@ -1885,8 +1898,10 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cp.get<Solid::Tags::PreviousActiveBeta>(), 2.5, 1e-14);
   }
 
-  /// @brief Verifies an unset tag reports absent, and a set tag does not make
-  ///        an unrelated tag appear present.
+  /**
+   * @brief Verifies an unset tag reports absent, and a set tag does not make
+   *        an unrelated tag appear present.
+   */
   TEST(Rodin_Solid_ConstitutivePoint, UnsetTagIsAbsent)
   {
     auto state = makeIdentityState();
@@ -1899,8 +1914,10 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cp.has<Solid::Tags::FiberDirection>());
   }
 
-  /// @brief Verifies the tag set is open: tags declared outside the library,
-  ///        including one whose value type no library tag uses, round-trip.
+  /**
+   * @brief Verifies the tag set is open: tags declared outside the library,
+   *        including one whose value type no library tag uses, round-trip.
+   */
   TEST(Rodin_Solid_ConstitutivePoint, UserDefinedTagRoundTrips)
   {
     auto state = makeIdentityState();
@@ -1919,9 +1936,11 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cp.get<UserMatrixTag>()(0, 1), 0.0, 1e-14);
   }
 
-  /// @brief Boundary: ReservedTags is a capacity hint, not a limit. Setting
-  ///        more tags than are reserved must still round-trip; the storage
-  ///        reallocates.
+  /**
+   * @brief Boundary: ReservedTags is a capacity hint, not a limit. Setting
+   *        more tags than are reserved must still round-trip; the storage
+   *        reallocates.
+   */
   TEST(Rodin_Solid_ConstitutivePoint, ExceedingReservedTagsStillRoundTrips)
   {
     auto state = makeIdentityState();
@@ -1968,18 +1987,18 @@ namespace Rodin::Tests::Unit
   //
   // The series law is evaluated at e_1D^{n+1/2} when Tags::PreviousFiberStrain
   // is supplied (Chapelle, Le Tallec, Moireau, Sorine 2012, eq. 26). These
-  // pin that directly rather than through finite differences: the local solve
-  // depends on the evaluation strain alone, so supplying a previous strain
-  // must give the same active extension as evaluating at the midpoint with no
-  // tag at all.
+  // pin the evaluation strain and its chain-rule factor directly.
+  // Equal evaluation strains give equal stresses at fixed active fields.
   // ========================================================================
 
   namespace
   {
-    /// @brief Builds a kinematic state with a prescribed fiber strain along x.
-    ///
-    /// For F = diag(1+a,1,1) and fiber (1,0,0): I4 = (1+a)^2, so the
-    /// Green-Lagrange fiber strain is ((1+a)^2 - 1)/2. Invert for a.
+    /**
+     * @brief Builds a kinematic state with a prescribed fiber strain along x.
+     *
+     * For F = diag(1+a,1,1) and fiber (1,0,0): I4 = (1+a)^2, so the
+     * Green-Lagrange fiber strain is ((1+a)^2 - 1)/2. Invert for a.
+     */
     Solid::KinematicState makeUniaxialStateWithFiberStrain(Real strain)
     {
       const Real a = std::sqrt(1.0 + 2.0 * strain) - 1.0;
@@ -2002,7 +2021,6 @@ namespace Rodin::Tests::Unit
       p.crossBridgeStiffness = 60.0;
       p.contractility = 40.0;
       Solid::ActiveContraction law(passive, Solid::ActiveFiberLaw(p));
-      law.setLocalTolerance(1e-14).setLocalMaxIterations(80);
       return law;
     }
 
@@ -2018,12 +2036,17 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
       cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
       cp.set<Solid::Tags::ElectricalActivation>(1.1);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
     }
   }
 
-  /// @brief Verifies the series law is evaluated at the midpoint fiber strain:
-  ///        supplying a previous strain must reproduce the active extension
-  ///        obtained by evaluating at the midpoint directly.
+  /**
+   * @brief Verifies the series law is evaluated at the midpoint fiber strain:
+   *        supplying a previous strain must reproduce the active extension
+   *        obtained by evaluating at the midpoint directly.
+   */
   TEST(Rodin_Solid_ActiveContraction, MidpointStrainIsUsedForTheSeriesLaw)
   {
     auto law = makeActiveContractionLaw();
@@ -2054,14 +2077,17 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cacheA.strain, eCurr, 1e-12);
     EXPECT_NEAR(cacheB.strain, eMid, 1e-12);
 
-    // ... but the local solve sees the same evaluation strain, so the
-    // converged active extension must agree.
-    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+    // The independent fields are unchanged and the evaluated stresses agree.
+    EXPECT_DOUBLE_EQ(cacheA.activeExtension, cacheB.activeExtension);
+    EXPECT_NEAR(cacheA.active.stress, cacheB.active.stress, 1e-12);
+    EXPECT_NEAR(cacheA.residual.value[0], cacheB.residual.value[0], 1e-12);
   }
 
-  /// @brief Verifies the condensed tangent carries the 1/2 chain-rule factor
-  ///        when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.
-  TEST(Rodin_Solid_ActiveContraction, MidpointStrainHalvesTheCondensedTangent)
+  /**
+   * @brief Verifies the partial tangent carries the 1/2 chain-rule factor
+   *        when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.
+   */
+  TEST(Rodin_Solid_ActiveContraction, MidpointStrainHalvesThePartialTangent)
   {
     auto law = makeActiveContractionLaw();
 
@@ -2086,10 +2112,12 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cacheA.active.tangent, 0.5 * cacheB.active.tangent, 1e-9);
   }
 
-  /// @brief Regression: omitting Tags::PreviousFiberStrain must reproduce the
-  ///        pre-midpoint behaviour exactly -- the series law falls back to the
-  ///        current strain and the tangent carries no 1/2 factor. Existing
-  ///        callers that never set the tag must be unaffected.
+  /**
+   * @brief Regression: omitting Tags::PreviousFiberStrain must reproduce the
+   *        pre-midpoint behaviour exactly -- the series law falls back to the
+   *        current strain and the tangent carries no 1/2 factor. Existing
+   *        callers that never set the tag must be unaffected.
+   */
   TEST(Rodin_Solid_ActiveContraction, OmittingPreviousFiberStrainFallsBackToCurrentStrain)
   {
     auto law = makeActiveContractionLaw();
@@ -2104,7 +2132,7 @@ namespace Rodin::Tests::Unit
     law.getCache(cacheA, cpA);
 
     // Tag equal to the current strain: the midpoint *is* the current strain,
-    // so the local solve must agree, while the tangent picks up the 1/2.
+    // so the stress agrees while the partial tangent picks up the 1/2.
     auto stateB = makeUniaxialStateWithFiberStrain(eCurr);
     Solid::ConstitutivePoint cpB(stateB);
     setDynamicTags(cpB);
@@ -2248,4 +2276,194 @@ namespace Rodin::Tests::Unit
       });
     }
   }
+  TEST(Rodin_Solid_ActiveFiberLaw, CoupledResidualAllDerivativeBlocks)
+  {
+    Solid::ActiveFiberLaw::Parameters parameters;
+    parameters.stiffness = 80;
+    parameters.damping = 0.4;
+    parameters.destructionRate = 0.5;
+    parameters.crossBridgeStiffness = 60;
+    parameters.contractility = 40;
+    const Solid::ActiveFiberLaw law(parameters);
+    const Solid::ActiveFiberLaw::State oldState{1.7, 0.9};
+    constexpr Real Step = 1e-7;
+    for (Real extension : {Real(-0.015), Real(-0.055)})
+    {
+      const Solid::ActiveFiberLaw::State state{1.8, 0.95};
+      Solid::ActiveFiberLaw::Residual reference;
+      law.getResidual(
+        reference, 0.01, oldState, state, 0.06, -0.035, extension, 1.1, 0.5);
+      for (size_t column = 0; column < 4; ++column)
+      {
+        auto plusState = state;
+        auto minusState = state;
+        if (column == 1)
+        {
+          plusState.gamma += Step;
+          minusState.gamma -= Step;
+        }
+        if (column == 2)
+        {
+          plusState.beta += Step;
+          minusState.beta -= Step;
+        }
+        Solid::ActiveFiberLaw::Residual plus, minus;
+        law.getResidual(plus, 0.01, oldState, plusState,
+          0.06 + (column == 3 ? 0.5 * Step : 0), -0.035,
+          extension + (column == 0 ? Step : 0), 1.1, 0.5);
+        law.getResidual(minus, 0.01, oldState, minusState,
+          0.06 - (column == 3 ? 0.5 * Step : 0), -0.035,
+          extension - (column == 0 ? Step : 0), 1.1, 0.5);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          const Real analytic = column == 3 ? reference.strainDerivative[row]
+                                            : reference.derivative(row, column);
+          EXPECT_NEAR((plus.value[row] - minus.value[row]) / (2 * Step), analytic,
+            1e-7 * (1 + std::abs(analytic)))
+            << row << "," << column;
+        }
+      }
+    }
+  }
+
+  TEST(Rodin_Solid_ActiveFiberLaw, CoupledResidualPreservesRegularizedUpdate)
+  {
+    const Solid::ActiveFiberLaw law;
+    const Solid::ActiveFiberLaw::State previous{0, 0};
+    const auto state = law.update(0.01, previous, 0, 0, -1);
+    Solid::ActiveFiberLaw::Residual residual;
+    law.getResidual(residual, 0.01, previous, state, 0, 0, 0, -1);
+    EXPECT_NEAR(residual.value[1], 0, 1e-30);
+    EXPECT_EQ(residual.value[2], 0);
+    EXPECT_EQ(residual.derivative(1, 0), 0);
+    EXPECT_EQ(state.gamma, law.getMinimumGamma());
+    EXPECT_THROW(
+      law.getResidual(residual, 0, previous, state, 0, 0, 0, -1), Alert::Exception);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, GlobalDiscontinuousStateNewton)
+  {
+    using namespace Variational;
+    using namespace Geometry;
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+    P0 space(mesh);
+    GridFunction extension(space), gamma(space), beta(space);
+    extension = Real(-0.025);
+    gamma = Real(1.8);
+    beta = Real(0.95);
+    const Solid::ActiveFiberLaw::State previous{1.7, 0.9};
+    Solid::ActiveFiberLaw::Parameters parameters;
+    parameters.stiffness = 80;
+    parameters.damping = 0.4;
+    parameters.destructionRate = 0.5;
+    parameters.crossBridgeStiffness = 60;
+    parameters.contractility = 40;
+    const Solid::ActiveFiberLaw law(parameters);
+    const auto evaluate = [&](const Point& point) {
+      Solid::ActiveFiberLaw::Residual output;
+      const Solid::ActiveFiberLaw::State state{gamma(point), beta(point)};
+      law.getResidual(output, 0.01, previous, state, 0.06 + 0.02 * point(0), -0.035,
+        extension(point), 1.1);
+      return output;
+    };
+    const auto residual = [&](size_t row) {
+      return RealFunction(
+        [&, row](const Point& point) { return evaluate(point).value[row]; });
+    };
+    const auto derivative = [&](size_t row, size_t column) {
+      return RealFunction([&, row, column](const Point& point) {
+        return evaluate(point).derivative(row, column);
+      });
+    };
+    TrialFunction dc(space), dg(space), db(space);
+    TestFunction qc(space), qg(space), qb(space);
+    const std::array increments{std::ref(dc), std::ref(dg), std::ref(db)};
+    const std::array tests{std::ref(qc), std::ref(qg), std::ref(qb)};
+    constexpr size_t QuadratureOrder = 4; // Integrates the quadratic balance exactly.
+    Problem problem(dc, dg, db, qc, qg, qb);
+    auto firstLoad = Integral(residual(0), qc);
+    firstLoad.setOrder(QuadratureOrder);
+    auto firstBlock = Integral(derivative(0, 0) * dc, qc);
+    firstBlock.setOrder(QuadratureOrder);
+    problem = firstBlock + firstLoad;
+    for (size_t row = 0; row < 3; ++row)
+    {
+      if (row != 0)
+      {
+        auto load = Integral(residual(row), tests[row].get());
+        load.setOrder(QuadratureOrder);
+        problem += load;
+      }
+      for (size_t column = 0; column < 3; ++column)
+      {
+        if (row == 0 && column == 0)
+          continue;
+        auto block =
+          Integral(derivative(row, column) * increments[column].get(), tests[row].get());
+        block.setOrder(QuadratureOrder);
+        problem += block;
+      }
+    }
+    const Index count = extension.getData().size();
+    Math::Vector<Real> iterate(3 * count);
+    iterate << extension.getData(), gamma.getData(), beta.getData();
+    Solver::SparseLU linearSolver(problem);
+    Solver::NewtonSolver solver(linearSolver);
+    solver.setAbsoluteTolerance(1e-11).setRelativeTolerance(1e-11).setMaxIterations(30);
+    solver.setStepPolicy([&](auto& x, const auto& system, const auto&) {
+      const Real norm = system.getSolution().norm();
+      x += system.getSolution();
+      extension.getData() = x.head(count);
+      gamma.getData() = x.segment(count, count);
+      beta.getData() = x.tail(count);
+      return typename decltype(solver)::StepResult{.accepted = true, .stepNorm = norm};
+    });
+    solver.solve(iterate);
+    ASSERT_TRUE(solver.getReport().converged)
+      << "iterations=" << solver.getReport().iterations
+      << " residual=" << solver.getReport().finalResidual;
+    problem.assemble();
+    EXPECT_LT(problem.getLinearSystem().getVector().norm(), 1e-10);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      const auto expected = law.update(0.01, previous, -0.035, extension(point), 1.1);
+      EXPECT_NEAR(gamma(point), expected.gamma, 1e-10);
+      EXPECT_NEAR(beta(point), expected.beta, 1e-10);
+    }
+    const RealFunction balance([&](const Point& point) {
+      const Real c = extension(point);
+      const Real midpoint = 0.5 * (c - 0.035);
+      const Real d = 1 + 2 * midpoint;
+      const Real strain = 0.06 + 0.02 * point(0);
+      return d * d * d * (gamma(point) * beta(point) + 0.4 * (c + 0.035) / 0.01) -
+        80 * (strain - midpoint) * (1 + 2 * strain);
+    });
+    const auto& formula = QF::PolytopeQuadratureFormula::get(4, Polytope::Type::Segment);
+    Real integratedBalance = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const auto& quadrature = cell->getQuadrature(formula);
+      for (size_t sample = 0; sample < formula.getSize(); ++sample)
+      {
+        const auto& point = quadrature.getPoint(sample);
+        integratedBalance +=
+          formula.getWeight(sample) * point.getDistortion() * balance(point);
+      }
+    }
+    EXPECT_NEAR(integratedBalance, 0, 1e-10);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, DynamicInputRequiresIndependentFields)
+  {
+    auto law = makeActiveContractionLaw();
+    const auto state = makeUniaxialStateWithFiberStrain(0.06);
+    Solid::ConstitutivePoint point(state);
+    point.set<Solid::Tags::TimeStep>(0.01);
+    decltype(law)::Cache cache;
+    EXPECT_THROW(law.getCache(cache, point), Alert::Exception);
+    setDynamicTags(point);
+    EXPECT_NO_THROW(law.getCache(cache, point));
+  }
+
 }

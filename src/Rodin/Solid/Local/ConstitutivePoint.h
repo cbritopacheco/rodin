@@ -94,6 +94,20 @@ namespace Rodin::Solid
         using Type = Real;
     };
 
+    /// @brief Current independent gamma field.
+    struct ActiveGamma
+    {
+      /// @brief Stored value type.
+      using Type = Real;
+    };
+
+    /// @brief Current independent beta field.
+    struct ActiveBeta
+    {
+      /// @brief Stored value type.
+      using Type = Real;
+    };
+
     /// @brief Tag for the previous active fiber extension @f$e_c^n@f$.
     struct PreviousActiveExtension
     {

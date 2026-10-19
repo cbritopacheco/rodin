@@ -151,9 +151,11 @@ the prepared moved-point accessor remains const.
 `FiniteElement.h` defines the element side: `getBasis(local)`,
 `getNode(local)` (reference nodes), counts per `Polytope::Type`.
 
-`ReferenceTabulation<Scalar>` owns numerical dimensions and arrays without
-cache state. `ReferenceTabulationCache<Element, Scalar>` owns the bounded
-thread-local store, logical formula/geometry keys, eviction and publication.
+`ReferenceTabulation<Scalar>` owns private dimensions and arrays without
+cache state. `resize()` establishes all extents together; writable sample views
+fill values and first derivatives without exposing resizable storage. Derivative
+orders above one are excluded by the type contract.
+`ReferenceTabulationCache<Element, Scalar>` owns the bounded thread-local store, logical formula/geometry keys, eviction and publication.
 H1 supplies public `tabulate` overloads for caller-owned values, gradients, or
 both, plus a whole-formula overload that sizes and fills a numerical table.
 The cache delegates to that public operation without friendship. Elements

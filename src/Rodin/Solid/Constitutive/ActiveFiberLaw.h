@@ -15,6 +15,10 @@
 #include <cmath>
 
 #include "Rodin/Types.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
+#include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/Vector.h"
 
 namespace Rodin::Solid
 {
@@ -22,8 +26,7 @@ namespace Rodin::Solid
    * @brief Local active fiber contraction law.
    *
    * Evaluates a one-dimensional fiber stress, the local contraction residual,
-   * and the condensed tangent obtained after eliminating the local extension
-   * variable @f$e_c@f$.
+   * and partial tangent blocks for the independent fields @f$(e_c,\gamma,\beta)@f$.
    */
   class ActiveFiberLaw
   {
@@ -84,15 +87,126 @@ namespace Rodin::Solid
           Real dStressDe = 0.0;
           /// @brief Partial derivative of stress with respect to active extension.
           Real dStressDc = 0.0;
-          /// @brief Scaled local residual used as the Newton update.
+
+        /// @brief Uneliminated extension residual.
           Real residual = 0.0;
           /// @brief Mixed derivative of the local residual with respect to strain.
           Real kce = 0.0;
           /// @brief Derivative of the local residual with respect to active extension.
           Real kcc = 1.0;
-          /// @brief Condensed tangent after eliminating the active extension.
+
+        /// @brief Strain tangent at fixed independent active fields.
           Real tangent = 0.0;
       };
+
+      /**
+       * @brief Residual and tangent for the three independent active fields.
+       *
+       * Rows and columns are ordered as extension, gamma and beta. The strain
+       * derivative supplies the coupling to the displacement field. No internal
+       * variable is solved for or eliminated by this numerical evaluation.
+       */
+      struct Residual
+      {
+        Math::FixedSizeVector<Real, 3> value; ///< Active field residuals.
+        Math::FixedSizeMatrix<Real, 3, 3>
+          derivative; ///< Derivatives with respect to active fields.
+        Math::FixedSizeVector<Real, 3>
+          strainDerivative; ///< Derivatives with respect to current fiber strain.
+
+        /// @brief Constructs zero residual and tangent storage.
+        Residual()
+          : value(),
+            derivative(),
+            strainDerivative()
+        {
+          value.setZero();
+          derivative.setZero();
+          strainDerivative.setZero();
+        }
+      };
+
+      /**
+       * @brief Evaluates the coupled active-field equations and all first derivatives.
+       *
+       * @f$R_c=d^3(\gamma\beta+\eta(c-c_n)/\Delta t)
+       * -k(e-(c+c_n)/2)(1+2e)@f$, where @f$d=1+c+c_n@f$.
+       * Gamma and beta satisfy the uneliminated discrete Hill-Maxwell equations.
+       * @param output Residual and tangent output.
+       * @param dt Positive time-step size.
+       * @param oldState Previous gamma and beta fields.
+       * @param state Current independent gamma and beta fields.
+       * @param e Evaluation fiber strain.
+       * @param previousExtension Previous extension field.
+       * @param extension Current independent extension field.
+       * @param activation Electrical activation.
+       * @param strainFactor Derivative of evaluation strain with respect to current strain.
+       */
+      void getResidual(Residual& output, Real dt, const State& oldState,
+        const State& state, Real e, Real previousExtension, Real extension,
+        Real activation, Real strainFactor = 1) const
+      {
+        if (!std::isfinite(dt) || dt <= 0 || !std::isfinite(state.gamma) ||
+          state.gamma <= 0 || !std::isfinite(state.beta) ||
+          !std::isfinite(oldState.gamma) || !std::isfinite(oldState.beta) ||
+          !std::isfinite(e) || !std::isfinite(previousExtension) ||
+          !std::isfinite(extension) || !std::isfinite(activation) ||
+          !std::isfinite(strainFactor) || 1 + extension + previousExtension <= 0)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Active fields require finite data, positive gamma and time step, "
+            << "and positive midpoint stretch." << Alert::Raise;
+        const Real delta = extension - previousExtension;
+        const Real sign = delta > 0 ? Real(1) : (delta < 0 ? Real(-1) : Real(0));
+        const Real alpha = m_parameters.destructionRate;
+        const Real source =
+          dt * starling(previousExtension) * std::max(activation, Real(0));
+        const Real stiffness = source * m_parameters.crossBridgeStiffness;
+        const Real contractility = source * m_parameters.contractility;
+        const Real gamma = state.gamma;
+        const Real beta = state.beta;
+        const Real gammaSquared = gamma * gamma;
+        const Real gammaDenominator =
+          1 + dt * std::abs(activation) + alpha * std::abs(delta);
+        const Real betaDenominator = 1 + Real(0.5) * stiffness / gammaSquared +
+          Real(0.5) * dt * std::abs(activation) + Real(0.5) * alpha * std::abs(delta);
+        const Real midpoint = Real(0.5) * (extension + previousExtension);
+        const Real d = 1 + 2 * midpoint;
+        const Real branchStress = gamma * beta + m_parameters.damping * delta / dt;
+        output.value[0] = d * d * d * branchStress -
+          m_parameters.stiffness * (e - midpoint) * (1 + 2 * e);
+        const Real gammaNumerator = oldState.gamma * oldState.gamma + stiffness;
+        const bool gammaFloor = gammaNumerator / gammaDenominator <= MinimumGammaSquared;
+        output.value[1] =
+          gammaSquared - std::max(MinimumGammaSquared, gammaNumerator / gammaDenominator);
+        output.value[2] =
+          betaDenominator * beta - oldState.beta - gamma * delta - contractility / gamma;
+        output.derivative.setZero();
+        output.derivative(0, 0) = 3 * d * d * branchStress +
+          d * d * d * m_parameters.damping / dt +
+          Real(0.5) * m_parameters.stiffness * (1 + 2 * e);
+        output.derivative(0, 1) = d * d * d * beta;
+        output.derivative(0, 2) = d * d * d * gamma;
+        output.derivative(1, 0) = gammaFloor
+          ? Real(0)
+          : gammaNumerator * alpha * sign / (gammaDenominator * gammaDenominator);
+        output.derivative(1, 1) = 2 * gamma;
+        output.derivative(2, 0) = Real(0.5) * alpha * sign * beta - gamma;
+        output.derivative(2, 1) = -stiffness * beta / (gammaSquared * gamma) - delta +
+          contractility / gammaSquared;
+        output.derivative(2, 2) = betaDenominator;
+        output.strainDerivative.setZero();
+        output.strainDerivative[0] =
+          -strainFactor * m_parameters.stiffness * (1 + 4 * e - 2 * midpoint);
+      }
+
+      /**
+       * @brief Gets the positive gamma floor used by the discrete state equation.
+       * @returns Minimum gamma compatible with the regularized update.
+       */
+      static Real getMinimumGamma() noexcept
+      {
+        return std::sqrt(MinimumGammaSquared);
+      }
 
       /// @brief Constructs the active law with default parameters.
       ActiveFiberLaw()
@@ -227,109 +341,28 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Evaluates the dynamic active response and condensed tangent.
-       *
-       * @param dt Time step @f$\Delta t@f$.
-       * @param oldState Previous internal state @f$(\gamma^n, \beta^n)@f$.
-       * @param newState Updated internal state @f$(\gamma^{n+1}, \beta^{n+1})@f$.
-       * @param e Fiber strain at which the series law is evaluated. For the
-       *   compatible discretization this is the midpoint strain
-       *   @f$e_{1D}^{n+\frac{1}{2}}@f$.
-       * @param previousActiveExtension Previous active extension @f$e_c^n@f$.
-       * @param activeExtension Current active extension @f$e_c^{n+1}@f$.
-       * @param activation Electrical activation @f$u_1@f$.
-       * @param strainFactor Derivative @f$\partial e/\partial e_{1D}^{n+1}@f$
-       *   of the evaluation strain with respect to the current fiber strain.
-       *   It is @f$\frac{1}{2}@f$ for the midpoint strain and @f$1@f$ when
-       *   @p e is the current strain. Only the condensed tangent depends on
-       *   it, since the global tangent differentiates with respect to
-       *   @f$e_{1D}^{n+1}@f$.
-       * @returns Dynamic active stress and condensed tangent response.
+       * @brief Gets fiber stress and partial tangents from prepared active equations.
+       * @param residual Active residual and tangent evaluated at the same inputs.
+       * @param e Evaluation fiber strain.
+       * @param previousActiveExtension Previous independent extension.
+       * @param activeExtension Current independent extension.
+       * @param strainFactor Derivative of evaluation strain with respect to current strain.
+       * @returns Fiber response with no internal-variable elimination.
        */
-      Response evaluateDynamic(Real dt, const State& oldState, const State& newState,
-        Real e, Real previousActiveExtension, Real activeExtension, Real activation,
-        Real strainFactor = 1.0) const
+      Response getResponse(const Residual& residual, Real e, Real previousActiveExtension,
+        Real activeExtension, Real strainFactor = 1) const
       {
-        const Real midpointExtension = 0.5 * (activeExtension + previousActiveExtension);
-        const Real onePlus2MidpointExtension = 1.0 + 2.0 * midpointExtension;
-        const Real activeBranchStress = newState.activeStress() +
-          m_parameters.damping * (activeExtension - previousActiveExtension) / dt;
-
+        const Real midpointExtension =
+          Real(0.5) * (activeExtension + previousActiveExtension);
         Response response;
         response.stress = stress(e, midpointExtension);
         response.dStressDe = dStressDe(midpointExtension);
         response.dStressDc = dStressDc(e, midpointExtension);
-        response.kce =
-          -m_parameters.stiffness * (1.0 + 4.0 * e - 2.0 * midpointExtension);
-        response.kcc = 3.0 * onePlus2MidpointExtension * onePlus2MidpointExtension *
-            activeBranchStress +
-          onePlus2MidpointExtension * onePlus2MidpointExtension *
-            onePlus2MidpointExtension *
-            (dActiveStressDc(
-               dt, oldState, activation, previousActiveExtension, activeExtension) +
-              m_parameters.damping / dt) +
-          0.5 * m_parameters.stiffness * (1.0 + 2.0 * e);
-        response.residual =
-          (activeBranchStress * onePlus2MidpointExtension * onePlus2MidpointExtension *
-              onePlus2MidpointExtension -
-            m_parameters.stiffness * (e - midpointExtension) * (1.0 + 2.0 * e)) /
-          response.kcc;
-        // Chain rule to the current fiber strain: sigma and the local residual
-        // are functions of the evaluation strain e, whose derivative with
-        // respect to e_1D^{n+1} is strainFactor.
-        response.tangent = strainFactor *
-          (response.dStressDe - 0.5 * response.dStressDc * response.kce / response.kcc);
+        response.residual = residual.value[0];
+        response.kce = residual.strainDerivative[0];
+        response.kcc = residual.derivative(0, 0);
+        response.tangent = strainFactor * response.dStressDe;
         return response;
-      }
-
-      /**
-       * @brief Evaluates the derivative of active stress with respect to extension.
-       * @param dt Time-step size.
-       * @param oldState State at the previous time step.
-       * @param activation Activation at the current time step.
-       * @param previousActiveExtension Active extension at the previous time step.
-       * @param activeExtension Active extension field.
-       * @returns Derivative of active stress with respect to the active extension.
-       */
-      Real dActiveStressDc(Real dt, const State& oldState, Real activation,
-        Real previousActiveExtension, Real activeExtension) const
-      {
-        const Real alpha = m_parameters.destructionRate;
-        const Real k0 = m_parameters.crossBridgeStiffness;
-        const Real sigma0 = m_parameters.contractility;
-
-        const Real delta = activeExtension - previousActiveExtension;
-        const Real absDelta = std::abs(delta);
-        const Real sign = delta > 0.0 ? 1.0 : (delta < 0.0 ? -1.0 : 0.0);
-        const Real activationPlus = std::max<Real>(activation, 0.0);
-        const Real n0 = starling(previousActiveExtension);
-
-        const Real Dg = 1.0 + dt * std::abs(activation) + alpha * absDelta;
-
-        const Real Ng = oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus;
-
-        const Real gammaSquare = std::max<Real>(MinimumGammaSquared, Ng / Dg);
-        const Real gamma = std::sqrt(gammaSquare);
-
-        const Real dGammaSquare = -Ng * alpha * sign / (Dg * Dg);
-        const Real dGamma = 0.5 * dGammaSquare / gamma;
-
-        const Real Nb =
-          oldState.beta + gamma * delta + dt * n0 * sigma0 * activationPlus / gamma;
-
-        const Real Db = 1.0 + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare +
-          0.5 * dt * std::abs(activation) + 0.5 * alpha * absDelta;
-
-        const Real dNb = dGamma * delta + gamma -
-          dt * n0 * sigma0 * activationPlus * dGamma / (gamma * gamma);
-
-        const Real dDb = -0.5 * dt * n0 * k0 * activationPlus * dGammaSquare /
-            (gammaSquare * gammaSquare) +
-          0.5 * alpha * sign;
-
-        const Real dBeta = (dNb * Db - Nb * dDb) / (Db * Db);
-
-        return dGamma * (Nb / Db) + gamma * dBeta;
       }
 
       /**
