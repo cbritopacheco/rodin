@@ -771,8 +771,10 @@ namespace Rodin::Variational
           if (auto included = mesh.inclusion(point))
             return getDerivativePoint(*included);
           if (mesh.isSubMesh())
+          {
             if (auto restricted = mesh.asSubMesh().restriction(point))
               return getDerivativePoint(*restricted);
+          }
           Alert::MemberFunctionException(*this, __func__)
             << "Derivative point is outside the finite element mesh." << Alert::Raise;
         }

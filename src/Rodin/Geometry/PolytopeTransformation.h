@@ -80,10 +80,10 @@ namespace Rodin::Geometry
        * @param[in] rdim Reference dimension @f$ k @f$
        * @param[in] pdim Physical dimension @f$ s @f$
        */
-    constexpr PolytopeTransformation(size_t rdim, size_t pdim)
-      : m_rdim(rdim),
+      constexpr PolytopeTransformation(size_t rdim, size_t pdim)
+        : m_rdim(rdim),
           m_pdim(pdim)
-    {}
+      {}
 
       /**
        * @brief Copy constructor.
@@ -121,16 +121,16 @@ namespace Rodin::Geometry
       }
 
       /// @brief Virtual destructor.
-    virtual ~PolytopeTransformation() = default;
+      virtual ~PolytopeTransformation() = default;
 
       /**
        * @brief Gets the reference dimension @f$ k @f$.
        * @returns Reference dimension (topological dimension of reference element)
        */
-    constexpr size_t getReferenceDimension() const
-    {
-      return m_rdim;
-    }
+      constexpr size_t getReferenceDimension() const
+      {
+        return m_rdim;
+      }
 
       /**
        * @brief Gets the physical dimension @f$ s @f$.
