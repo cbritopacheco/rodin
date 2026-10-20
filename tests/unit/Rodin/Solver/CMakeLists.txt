@@ -13,6 +13,9 @@ foreach(algorithm CG BiCGSTAB GMRES DGMRES LDLT HouseholderQR PartialPivLU
   if(algorithm MATCHES "^(CG|BiCGSTAB|GMRES|DGMRES|SimplicialLDLT|SimplicialLLT|SparseQR)$")
     target_compile_definitions(${target} PRIVATE RODIN_TEST_SPARSE)
   endif()
+  if(algorithm MATCHES "^(GMRES|DGMRES)$")
+    target_compile_definitions(${target} PRIVATE RODIN_TEST_KRYLOV_CONFIGURATION)
+  endif()
   gtest_discover_tests(${target} TEST_PREFIX "${algorithm}."
     DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 endforeach()

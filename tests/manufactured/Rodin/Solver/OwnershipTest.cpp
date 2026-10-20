@@ -46,20 +46,20 @@ namespace
     Problem problem(u, v);
     using System = std::remove_reference_t<decltype(problem.getLinearSystem())>;
     using Algorithm = Rodin::Solver::RODIN_TEST_SOLVER<System>;
-    std::unique_ptr<Algorithm> survivor;
-    {
-      Algorithm original(problem);
-      Algorithm copied(original);
-      Algorithm moved(std::move(copied));
-      survivor.reset(moved.copy());
-    }
     constexpr Real SolverTolerance = 1e-12;
     constexpr size_t IterationLimit = 500;
     constexpr size_t RestartDimension = 32;
     constexpr Real FieldTolerance = 1e-9;
-    survivor->setTolerance(SolverTolerance)
-      .setMaxIterations(IterationLimit)
-      .setRestart(RestartDimension);
+    std::unique_ptr<Algorithm> survivor;
+    {
+      Algorithm original(problem);
+      original.setTolerance(SolverTolerance)
+        .setMaxIterations(IterationLimit)
+        .setRestart(RestartDimension);
+      Algorithm copied(original);
+      Algorithm moved(std::move(copied));
+      survivor.reset(moved.copy());
+    }
     for (const Real phase : {Real(1), Real(2)})
     {
       SCOPED_TRACE(phase);

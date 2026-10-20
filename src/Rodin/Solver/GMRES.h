@@ -120,24 +120,42 @@ namespace Rodin::Solver
        * @param pb Variational problem to operate on.
        */
       GMRES(ProblemBaseType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_maxIterations(),
+          m_restart()
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the problem and configured settings into a fresh backend.
        * @param other Object to copy from.
        */
       GMRES(const GMRES& other)
-        : Parent(other)
-      {}
+        : Parent(other),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /**
-       * @brief Move constructor.
+       * @brief Transfers the problem and configured settings into a fresh backend.
        * @param other Object to move from.
        */
       GMRES(GMRES&& other)
-        : Parent(std::move(other))
-      {}
+        : Parent(std::move(other)),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /// @brief Destructor.
       ~GMRES() = default;
@@ -160,6 +178,7 @@ namespace Rodin::Solver
        */
       GMRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -173,6 +192,7 @@ namespace Rodin::Solver
        */
       GMRES& setRestart(size_t restart)
       {
+        m_restart = restart;
         m_solver.set_restart(restart);
         return *this;
       }
@@ -231,6 +251,9 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t>
+        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
+      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
       Eigen::GMRES<OperatorType> m_solver;
   };
 
@@ -265,24 +288,42 @@ namespace Rodin::Solver
        * @param pb Variational problem to operate on.
        */
       GMRES(ProblemType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_maxIterations(),
+          m_restart()
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the problem and configured settings into a fresh backend.
        * @param other Object to copy from.
        */
       GMRES(const GMRES& other)
-        : Parent(other)
-      {}
+        : Parent(other),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /**
-       * @brief Move constructor.
+       * @brief Transfers the problem and configured settings into a fresh backend.
        * @param other Object to move from.
        */
       GMRES(GMRES&& other)
-        : Parent(std::move(other))
-      {}
+        : Parent(std::move(other)),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /// @brief Destructor.
       ~GMRES() = default;
@@ -305,6 +346,7 @@ namespace Rodin::Solver
        */
       GMRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -316,6 +358,7 @@ namespace Rodin::Solver
        */
       GMRES& setRestart(size_t restart)
       {
+        m_restart = restart;
         m_solver.set_restart(restart);
         return *this;
       }
@@ -374,6 +417,9 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t>
+        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
+      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
       Eigen::GMRES<OperatorType> m_solver;
   };
 }
