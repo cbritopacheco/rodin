@@ -151,7 +151,10 @@ The formulations differ in the constitutive equation:
   - **Stabilisation.** It is the OSS of the full residual. A log-conformation subscale ψ̃ = τ′(ψ̃ⁿ/Δt − (R_ψ − Π[R_ψⁿ])), with τ = (λ/2η_p)α3, enters in two places:
     - the ψ equation, as ⟨ψ̃, −(uⁿ·∇)χ⟩;
     - the momentum, as ⟨σ̃, ε(v)⟩ with σ̃ = (η_p/λ0) Dexp[ψ̃]. This term gives the u–ψ compatibility.
-  - **Approximation.** The reaction part of the adjoint is left out.
+  - **Adjoint reaction.** `-al_adjoint_reaction 1` adds the reaction part of the adjoint, JN*[χ] with JN = ∂N/∂ψ taken at step n. It is off by default:
+    - JN carries the deformation terms of N, which are of size |∇u| and of either sign, and τ|JN| = O(1) in the stenosis throat;
+    - with it, Newton failed at t = 0.046 s in the S75 test and Δt had to be cut by 8; without it, no step was rejected to t = 0.115 s;
+    - in the sPTT pipe both give the same errors (table).
   - **Newton.** It is exact and quadratic.
 - **`exp`.** Moreno, Codina, Baiges and Castillo (CMAME 354, 2019). The σ equation is written for E = exp(ψ) and tested with χ:
   R = f(E − I)/(2λ0) − ε(u) + (λ/2λ0)[∂_t E + (u·∇)E − (∇u E + E ∇uᵀ) + 2ε(u)].
@@ -173,6 +176,7 @@ Steady sPTT pipe, rf 0.5 (h/D = 0.2):
 | formulation | e_u | e_σ | e_G | e_τw | Newton iterations / steps |
 |---|---|---|---|---|---|
 | psi_rb | 6.18e-2 | 1.40e-1 | 1.14e-1 | −4.4 % | 146 / 52 |
+| psi_rb, `-al_adjoint_reaction 1` | 6.20e-2 | 1.39e-1 | 1.15e-1 | −4.1 % | 147 / 52 |
 | exp | 6.16e-2 | 1.62e-1 | 1.14e-1 | −4.3 % | 101 / 40 |
 | psi | 6.38e-2 | 1.39e-1 | 1.15e-1 | −4.4 % | 92 / 40 |
 

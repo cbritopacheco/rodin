@@ -23,11 +23,11 @@
  *      N = -Dexp^{-1}[L E + E L^T - c eps(u)] + (f/lambda)(I - exp(-psi)),
  *    BDF on psi, with the OSS of its full residual: a log-conformation
  *    subscale psi~, (d_t + 1/tau) psi~ = -P^perp[R_psi], tau = (lambda/(2
- *    eta_p)) alpha3, entering as <psi~, -(u^n.grad) chi> and, through sigma~ =
+ *    eta_p)) alpha3, entering as <psi~, -(u^n.grad) chi> (optionally + JN^*[chi],
+ *    JN = dN/dpsi; Config::adjointReaction) and, through sigma~ =
  *    (eta_p/lambda0) Dexp[psi~], as <sigma~, eps(v)> in the momentum (the u-psi
- *    compatibility). Both are consistent and vanish where R_psi is resolved;
- *    the reaction part of the adjoint is left out. The psi equation keeps
- *    every eigenvalue of psi at the scale O(1): in the exp form below the
+ *    compatibility). Both are consistent and vanish where R_psi is resolved.
+ *    The psi equation keeps every eigenvalue of psi at the scale O(1): in the exp form below the
  *    equation for an eigenvalue l of psi is scaled by e^l, so at the
  *    Weissenberg numbers of blood (lambda gd ~ 10^3) the small eigenvalues
  *    are not determined (psi_min ran to -20 and Newton stalled in the S75
@@ -317,6 +317,17 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        (lambda/(2 eta_p dt) + 1/alpha3)^-1, plus their memory terms.
           ///        Off: quasi-static subscales ("psi_rb" and "exp").
           bool dynamicSubscales = true;
+          /// @brief "psi_rb": test the log-conformation subscale with the full
+          ///        adjoint of the linearised psi operator, -(u^n.grad) chi +
+          ///        JN^*[chi] (the reaction part JN^* = (dN/dpsi)^* at step n,
+          ///        as in the stress adjoint of Moreno et al.); off (default):
+          ///        the convective part only. JN carries the deformation terms
+          ///        of N, of size |grad u| and of either sign, and tau |JN| =
+          ///        O(1) in the stenosis throat: with it, Newton failed at t =
+          ///        0.046 s in the S75 test (dt cut by 8), without it no step
+          ///        was rejected to t = 0.115 s. In the sPTT pipe both give the
+          ///        same errors.
+          bool adjointReaction = false;
           /// @brief "sptt", "gsptt" or "cy" (file header).
           std::string fluid = "sptt";
           CarreauYasuda carreauYasuda;
@@ -742,6 +753,9 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief Bumped whenever (u^k, psi^k) or (u^n, psi^n) change; keys the
       ///        cache of the pointwise log-conformation data.
       std::uint64_t m_psiRevision = 0;
+      /// @brief Bumped when the step data (psi^n, u^n) change: the revision of
+      ///        the pointwise data read at step n ("psi_rb" adjoint).
+      std::uint64_t m_stepRevision = 0;
       /// @brief sigma = (eta_p/lambda0)(exp(psi) - I) at the nodes, by block.
       VectorGridFunctionType m_sigmaD;
       VectorGridFunctionType m_sigmaO;

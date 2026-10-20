@@ -1794,6 +1794,7 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   void ArterialLesion3DViscousLogImplicit::advanceHistory()
   {
+    ++m_stepRevision;   // the step data (psi^n, u^n) change
     if (m_cfg.timeOrder == 2)
     {
       // x^{n-1} <- x^n, x^n <- x^{n+1}; the history of the next step is
@@ -2269,15 +2270,44 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     // ---- Residual-based OSS of the psi equation ------------------------------
     // psi~ = tau' (memP psi~^n - R_psi + Pi[R_psi^n]), tau = kB alpha3, enters
-    //   <psi~, -(u^n . grad) chi>   (the psi equation; the adjoint's reaction
-    //                                part is left out)
-    //   <s Dexp[psi~], eps(v)>      (sigma~ = s Dexp[psi~] in the momentum),
+    //   <psi~, -(u^n . grad) chi + JN^*[chi]>  (the psi equation: the adjoint
+    //                                           of its linearised operator)
+    //   <s Dexp[psi~], eps(v)>                 (sigma~ = s Dexp[psi~] in the
+    //                                           momentum),
     // the second giving the u-psi compatibility. Both carry the full residual,
-    // so they vanish where it is resolved. The streamline part is a
-    // Petrov-Galerkin test chi_C + tau' (u^n . grad) chi_C on the Galerkin terms.
+    // so they vanish where it is resolved. The block-diagonal parts are a
+    // Petrov-Galerkin test chi_C + tau' (u^n . grad) chi_C - tau' A[C][C]^T
+    // chi_C / w_C on the Galerkin terms; the D-O coupling of JN^* is tested
+    // separately (crossD, crossO). Config::adjointReaction (off by default)
+    // switches JN^* on.
     const auto tauP = kB * m_alpha3Dyn;
-    const auto testD = m_chiD + tauP * Mult(Jacobian(m_chiD), m_uOld);
-    const auto testO = m_chiO + tauP * Mult(Jacobian(m_chiO), m_uOld);
+    const auto tauR = ((m_cfg.adjointReaction ? 1.0 : 0.0) * kB) * m_alpha3Dyn;
+    // A[C][B]^T / w_B: JN^* restricted to the blocks (C, B), for the residual
+    // of block B (paired with weight w_B) tested with chi_C. Like the rest of
+    // the adjoint (u^n, alpha^n), JN is taken at step n, (psi^n, grad u^n):
+    // the term stays linear in the unknowns and Newton exact.
+    const LogFields<VectorGridFunctionType> atN{ &m_psiOldD, &m_psiOldO, &m_uOld, model, &m_stepRevision };
+    const auto adjointJN = [&atN](size_t c, size_t b, Real w) {
+      return fromPoint(atN, LogNewton, [c, b, w](const LogPoint& q) -> Eigen::Matrix3d {
+        return q.A[c][b].transpose() / w; });
+    };
+    const auto testD = m_chiD + tauP * Mult(Jacobian(m_chiD), m_uOld)
+      + (-1.0) * tauR * Mult(adjointJN(0, 0, wD), m_chiD);
+    const auto testO = m_chiO + tauP * Mult(Jacobian(m_chiO), m_uOld)
+      + (-1.0) * tauR * Mult(adjointJN(1, 1, wO), m_chiO);
+    const auto crossD = (-1.0) * tauR * Mult(adjointJN(0, 1, wO), m_chiD);   // residual O, chi_D
+    const auto crossO = (-1.0) * tauR * Mult(adjointJN(1, 0, wD), m_chiO);   // residual D, chi_O
+    // tau' pair<C>(JN[memP psi~^n + Pi[R^n]]) = tau' sum_B A[C][B] y_B.
+    const auto knownJN = [this, atN, memP](size_t c) {
+      return VectorFunction(size_t(3), [this, atN, memP, c](const Point& p) -> Math::SpatialVector<Real> {
+        const LogPoint& q = logPointAt(atN, p, LogNewton);
+        const Eigen::Matrix3d y = unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p)) +
+          memP * subscales().at(p).sig;
+        const Eigen::Vector3d yD(y(0, 0), y(1, 1), y(2, 2)), yO(y(0, 1), y(0, 2), y(1, 2));
+        const Eigen::Vector3d v = q.A[c][0] * yD + q.A[c][1] * yO;
+        return Math::SpatialVector<Real>{{ v(0), v(1), v(2) }};
+      });
+    };
     // The known part of -psi~ paired against block C: w_C (Pi[R^n] + memP psi~^n)_C.
     const auto knownSub = [this, memP](bool off) {
       return VectorFunction(size_t(3), [this, memP, off](const Point& p) -> Math::SpatialVector<Real> {
@@ -2348,6 +2378,12 @@ namespace Rodin::Examples::ViscoelasticFluids
       + withOrder(Integral(kD, testD)) + withOrder(Integral(kO, testO))
       - withOrder(Integral(tauP * knownSub(false), Mult(Jacobian(m_chiD), m_uOld)))
       - withOrder(Integral(tauP * knownSub(true), Mult(Jacobian(m_chiO), m_uOld)))
+      // the D-O coupling of the adjoint reaction, and its known part
+      + withOrder(Integral(rOO, crossD)) + withOrder(Integral(rOD, crossD)) + withOrder(Integral(rOu, crossD))
+      + withOrder(Integral(rDD, crossO)) + withOrder(Integral(rDO, crossO)) + withOrder(Integral(rDu, crossO))
+      + withOrder(Integral(kO, crossD)) + withOrder(Integral(kD, crossO))
+      + withOrder(Integral(tauR * knownJN(0), m_chiD))
+      + withOrder(Integral(tauR * knownJN(1), m_chiO))
 
       // ---- Momentum, split OSS, dynamic subscales (as setupFlowExp) ------------
       + vms * rho * rho * Integral(m_tauK * Mult(Jacobian(m_u), uu), Jacobian(m_v))
@@ -2941,8 +2977,10 @@ namespace Rodin::Examples::ViscoelasticFluids
     const Real l0 = lambda0();
     const Real s = ob.etaP / l0;
     const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda) };
-    // At the iterate the pointwise data are those of the assembly (same key).
-    const LogFields<VectorGridFunctionType> atX{ &psiSD, &psiSO, &uS, model, &m_psiRevision };
+    // At the iterate the pointwise data are those of the assembly (same key);
+    // step data (psi^n, u^n) are keyed by the step revision, as in setupFlowPsiRB.
+    const LogFields<VectorGridFunctionType> atX{ &psiSD, &psiSO, &uS, model,
+      sigmaIt ? &m_psiRevision : &m_stepRevision };
     m_piDivSigma.project(s * (divExp<Block::D>(atX, psiSD) + divExp<Block::O>(atX, psiSO)));
     // Nothing else reads psi^n pointwise this step: free its points.
     if (!sigmaIt)
@@ -3731,6 +3769,7 @@ int main(int argc, char** argv)
       getReal("-al_c3", cfg.c3);
       getReal("-al_c4", cfg.c4);
       getBool("-al_dynamic_subscales", cfg.dynamicSubscales);
+      getBool("-al_adjoint_reaction", cfg.adjointReaction);
 
       getReal("-al_diameter", cfg.diameter);
       getReal("-al_rho", cfg.rho);
