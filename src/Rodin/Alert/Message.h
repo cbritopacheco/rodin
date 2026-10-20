@@ -50,16 +50,17 @@ namespace Rodin::Alert
        * @param value Pointer used only for compile-time stream-insertion detection.
        * @returns Compile-time marker indicating whether stream insertion is supported.
        */
-        template <class U,
-          class = decltype(std::declval<std::ostream&>() << std::declval<const U&>())>
-        static std::true_type test(U* value);
+      template <class U,
+        class = decltype(std::declval<std::ostream&>() << std::declval<const U&>())>
+      static std::true_type test(U* value);
+
       /**
        * @brief Selects the compile-time stream-insertion detection result.
        * @returns Compile-time marker indicating whether stream insertion is supported.
        */
 
-        template <typename>
-        static std::false_type test(...);
+      template <typename>
+      static std::false_type test(...);
 
       public:
         /// @brief True if T can be streamed to an ostream, false otherwise.
@@ -207,8 +208,8 @@ namespace Rodin::Alert
        * can be output to an ostream.
        */
       template <class T>
-      std::enable_if_t<Internal::CanBeOutput<T>::Value, Message&>
-      operator<<(const T& v) noexcept
+      std::enable_if_t<Internal::CanBeOutput<T>::Value, Message&> operator<<(
+        const T& v) noexcept
       {
         if (m_newline)
         {

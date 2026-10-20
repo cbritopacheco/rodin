@@ -35,7 +35,7 @@ namespace Rodin::Tests::Unit
   {
     RealFunction f(3.14);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -48,7 +48,7 @@ namespace Rodin::Tests::Unit
   {
     RealFunction f(42);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -62,7 +62,7 @@ namespace Rodin::Tests::Unit
     RealFunction f(2.718);
     RealFunction f_copy(f);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -74,16 +74,12 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_RealFunction, MoveConstructor_Real)
   {
     RealFunction f(1.414);
-    Real original_value =
-      f.getValue(
-          Point(
-            *LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 }).getPolytope(2, 0),
-            Math::Vector<Real>{{0.0, 0.0}}
-      )
-    );
+    Real original_value = f.getValue(
+      Point(*LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2}).getPolytope(2, 0),
+        Math::Vector<Real>{{0.0, 0.0}}));
     RealFunction f_moved(std::move(f));
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -97,7 +93,7 @@ namespace Rodin::Tests::Unit
     RealFunction f(123.456);
     auto copied = f.copy();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -113,7 +109,7 @@ namespace Rodin::Tests::Unit
     RealFunction f(789);
     auto copied = f.copy();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -128,7 +124,7 @@ namespace Rodin::Tests::Unit
   {
     RealFunction f(0.0);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{1.0, 1.0}};
@@ -141,7 +137,7 @@ namespace Rodin::Tests::Unit
   {
     RealFunction f(-99.99);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.2, 0.8}};
@@ -153,7 +149,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_RealFunction, ConstantFunction_TracedToBoundary)
   {
     const Attribute interior_attr = 1;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, D);
     for (auto it = mesh.getCell(); !it.end(); ++it)
@@ -171,7 +167,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies callable uses integration point fast path for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, Callable_UsesIntegrationPointFastPath)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
@@ -187,7 +183,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies expression propagates integration point fast path for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, Expression_PropagatesIntegrationPointFastPath)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);

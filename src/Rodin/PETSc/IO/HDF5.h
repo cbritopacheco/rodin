@@ -60,11 +60,13 @@ namespace Rodin::IO
     {
       const auto space = H5Screate(H5S_SCALAR);
       assert(space >= 0);
-      const auto ds = H5Dcreate2(file, path, H5T_NATIVE_ULLONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      const auto ds = H5Dcreate2(
+        file, path, H5T_NATIVE_ULLONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
       assert(ds >= 0);
-      const auto writeStatus = H5Dwrite(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+      const auto writeStatus =
+        H5Dwrite(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
       assert(writeStatus >= 0);
-      (void) writeStatus;
+      (void)writeStatus;
       H5Dclose(ds);
       H5Sclose(space);
     }
@@ -84,16 +86,17 @@ namespace Rodin::IO
       hsize_t dims[1] = {0};
       const auto ndims = H5Sget_simple_extent_ndims(space);
       assert(ndims == 1);
-      (void) ndims;
+      (void)ndims;
       const auto dimStatus = H5Sget_simple_extent_dims(space, dims, nullptr);
       assert(dimStatus >= 0);
-      (void) dimStatus;
+      (void)dimStatus;
       std::vector<double> v(static_cast<size_t>(dims[0]));
       if (!v.empty())
       {
-        const auto readStatus = H5Dread(ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+        const auto readStatus =
+          H5Dread(ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
         assert(readStatus >= 0);
-        (void) readStatus;
+        (void)readStatus;
       }
       H5Sclose(space);
       H5Dclose(ds);
@@ -111,9 +114,10 @@ namespace Rodin::IO
       const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
       assert(ds >= 0);
       unsigned long long value = 0;
-      const auto readStatus = H5Dread(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+      const auto readStatus =
+        H5Dread(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
       assert(readStatus >= 0);
-      (void) readStatus;
+      (void)readStatus;
       H5Dclose(ds);
       return value;
     }
@@ -146,8 +150,10 @@ namespace Rodin::IO
     public:
       /// @brief PETSc vector data type (@c Vec).
       using DataType = ::Vec;
+
       /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+
       /// @brief Parent loader base class.
       using Parent = GridFunctionLoaderBase<FES, DataType>;
 
@@ -170,8 +176,7 @@ namespace Rodin::IO
           << "HDF5 GridFunction loading is file-path based."
           << "Please use the "
           << Alert::Identifier::Function("load(const boost::filesystem::path&)")
-          << " overload."
-          << Alert::Raise;
+          << " overload." << Alert::Raise;
       }
 
       /**
@@ -249,7 +254,8 @@ namespace Rodin::IO
 #endif
         }
 
-        ierr = VecSetValues(vec, localN, indices.data(), localValues.data(), INSERT_VALUES);
+        ierr =
+          VecSetValues(vec, localN, indices.data(), localValues.data(), INSERT_VALUES);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecAssemblyBegin(vec);
@@ -279,8 +285,10 @@ namespace Rodin::IO
     public:
       /// @brief PETSc vector data type (@c Vec).
       using DataType = ::Vec;
+
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+
       /// @brief Parent printer base class.
       using Parent = GridFunctionPrinterBase<FileFormat::HDF5, FES, DataType>;
 
@@ -303,8 +311,7 @@ namespace Rodin::IO
           << "HDF5 GridFunction printing is file-path based."
           << "Please use the "
           << Alert::Identifier::Function("print(const boost::filesystem::path&)")
-          << " overload."
-          << Alert::Raise;
+          << " overload." << Alert::Raise;
       }
 
       /**
@@ -341,40 +348,43 @@ namespace Rodin::IO
         ierr = VecRestoreArrayRead(vec, &raw);
         assert(ierr == PETSC_SUCCESS);
 
-        const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        const auto file =
+          H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (file < 0)
         {
           Alert::MemberFunctionException(*this, __func__)
             << "Failed to create HDF5 file: " << filename << Alert::Raise;
         }
 
-        const auto gfGroup = H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto gfGroup =
+          H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(gfGroup >= 0);
         H5Gclose(gfGroup);
 
-        const auto metaGroup = H5Gcreate2(file, "/GridFunction/Meta", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto metaGroup =
+          H5Gcreate2(file, "/GridFunction/Meta", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(metaGroup >= 0);
         H5Gclose(metaGroup);
 
-        const auto valuesGroup = H5Gcreate2(file, "/GridFunction/Values", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto valuesGroup =
+          H5Gcreate2(file, "/GridFunction/Values", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(valuesGroup >= 0);
         H5Gclose(valuesGroup);
 
-        const hsize_t dims[1] = { static_cast<hsize_t>(values.size()) };
+        const hsize_t dims[1] = {static_cast<hsize_t>(values.size())};
         const auto dataSpace = H5Screate_simple(1, dims, nullptr);
         assert(dataSpace >= 0);
 
-        const auto dataSet = H5Dcreate2(
-            file, "/GridFunction/Values/Data", H5T_NATIVE_DOUBLE, dataSpace,
-            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        const auto dataSet = H5Dcreate2(file, "/GridFunction/Values/Data",
+          H5T_NATIVE_DOUBLE, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         assert(dataSet >= 0);
 
         if (!values.empty())
         {
-          const auto writeStatus = H5Dwrite(dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
-                          H5P_DEFAULT, values.data());
+          const auto writeStatus = H5Dwrite(
+            dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, values.data());
           assert(writeStatus >= 0);
-          (void) writeStatus;
+          (void)writeStatus;
         }
         H5Dclose(dataSet);
 #if defined(PETSC_USE_COMPLEX)
@@ -392,10 +402,10 @@ namespace Rodin::IO
 #endif
         H5Sclose(dataSpace);
 
-        Internal::writeScalarULL(file, "/GridFunction/Meta/Size",
-            static_cast<unsigned long long>(localN));
+        Internal::writeScalarULL(
+          file, "/GridFunction/Meta/Size", static_cast<unsigned long long>(localN));
         Internal::writeScalarULL(file, "/GridFunction/Meta/Dimension",
-            static_cast<unsigned long long>(gf.getDimension()));
+          static_cast<unsigned long long>(gf.getDimension()));
 
         if constexpr (FormLanguage::IsMatrixRange<
                         typename FormLanguage::Traits<FES>::RangeType>::Value)
@@ -405,7 +415,6 @@ namespace Rodin::IO
         }
         H5Fclose(file);
       }
-
   };
 }
 

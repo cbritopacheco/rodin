@@ -26,6 +26,7 @@ namespace Rodin::IO::MFEM
     }
     return line;
   }
+
   /// @endcond
 }
 
@@ -58,9 +59,9 @@ namespace Rodin::IO
     auto dimension = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
     if (!dimension || *dimension > Math::SpatialPoint::MaxSize)
     {
-      Alert::MemberFunctionException(*this, __func__) << "Failed to determine mesh dimension on line "
-                         << m_currentLineNumber << "."
-                         << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to determine mesh dimension on line " << m_currentLineNumber << "."
+        << Alert::Raise;
     }
     m_dimension = *dimension;
   }
@@ -83,17 +84,15 @@ namespace Rodin::IO
       if (!kw)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Expected keyword on line "
-          << m_currentLineNumber
-          << "." << line << Alert::Raise;
+          << "Expected keyword on line " << m_currentLineNumber << "." << line
+          << Alert::Raise;
       }
       auto keyword = MFEM::toKeyword(kw->c_str());
       if (!keyword)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Unrecognized keyword " << std::quoted(*kw)
-          << " on line " << m_currentLineNumber << "."
-          << Alert::Raise;
+          << "Unrecognized keyword " << std::quoted(*kw) << " on line "
+          << m_currentLineNumber << "." << Alert::Raise;
       }
 
       switch (*keyword)
@@ -105,9 +104,8 @@ namespace Rodin::IO
           if (!count)
           {
             Alert::MemberFunctionException(*this, __func__)
-              << "Failed to determine " << std::quoted(*kw)
-              << " count on line " << m_currentLineNumber << "."
-              << Alert::Raise;
+              << "Failed to determine " << std::quoted(*kw) << " count on line "
+              << m_currentLineNumber << "." << Alert::Raise;
           }
           if (m_dimension > 0)
             attrs.resize(m_dimension - 1, *count);
@@ -118,8 +116,7 @@ namespace Rodin::IO
             if (!g)
             {
               Alert::MemberFunctionException(*this, __func__)
-                << "Failed to parse geometry on line "
-                << m_currentLineNumber << "."
+                << "Failed to parse geometry on line " << m_currentLineNumber << "."
                 << Alert::Raise;
             }
             if (m_dimension > 0)
@@ -127,12 +124,12 @@ namespace Rodin::IO
               if (g->geometry == Geometry::Polytope::Type::Point)
               {
                 assert(g->vertices.size() == 1);
-                attrs.set({ 0, g->vertices[0] }, g->attribute);
+                attrs.set({0, g->vertices[0]}, g->attribute);
               }
               else
               {
                 connectivity.polytope(g->geometry, std::move(g->vertices));
-                attrs.set({ m_dimension - 1, i }, g->attribute);
+                attrs.set({m_dimension - 1, i}, g->attribute);
               }
             }
           }
@@ -145,9 +142,8 @@ namespace Rodin::IO
           if (!count)
           {
             Alert::MemberFunctionException(*this, __func__)
-              << "Failed to determine " << std::quoted(*kw)
-              << " count on line " << m_currentLineNumber << "."
-              << Alert::Raise;
+              << "Failed to determine " << std::quoted(*kw) << " count on line "
+              << m_currentLineNumber << "." << Alert::Raise;
           }
           attrs.resize(m_dimension, *count);
           for (size_t i = 0; i < *count; i++)
@@ -157,13 +153,12 @@ namespace Rodin::IO
             if (!g)
             {
               Alert::MemberFunctionException(*this, __func__)
-                << "Failed to parse geometry on line "
-                << m_currentLineNumber << "."
+                << "Failed to parse geometry on line " << m_currentLineNumber << "."
                 << Alert::Raise;
             }
             if (g->geometry != Geometry::Polytope::Type::Point)
               connectivity.polytope(g->geometry, std::move(g->vertices));
-            attrs.set({ m_dimension, i }, g->attribute);
+            attrs.set({m_dimension, i}, g->attribute);
           }
           continue;
         }
@@ -174,9 +169,8 @@ namespace Rodin::IO
           if (!count)
           {
             Alert::MemberFunctionException(*this, __func__)
-              << "Failed to determine " << std::quoted(*kw)
-              << " count on line " << m_currentLineNumber << "."
-              << Alert::Raise;
+              << "Failed to determine " << std::quoted(*kw) << " count on line "
+              << m_currentLineNumber << "." << Alert::Raise;
           }
           attrs.resize(0, *count);
           connectivity.nodes(*count);
@@ -208,9 +202,8 @@ namespace Rodin::IO
         default:
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Unexpected keyword " << std::quoted(*kw)
-            << " on line " << m_currentLineNumber << "."
-            << Alert::Raise;
+            << "Unexpected keyword " << std::quoted(*kw) << " on line "
+            << m_currentLineNumber << "." << Alert::Raise;
         }
       }
     }
@@ -218,7 +211,7 @@ namespace Rodin::IO
     m_build.setAttributeIndex(std::move(attrs));
   }
 
-  void MeshLoader<IO::FileFormat::MFEM, Context::Local>::load(std::istream &is)
+  void MeshLoader<IO::FileFormat::MFEM, Context::Local>::load(std::istream& is)
   {
     m_currentLineNumber = 0;
     readHeader(is);
@@ -227,25 +220,25 @@ namespace Rodin::IO
     this->getObject() = m_build.finalize();
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Local>::print(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Local>::print(std::ostream& os)
   {
     printHeader(os);
     printDimension(os);
     printMesh(os);
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Local>::printHeader(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Local>::printHeader(std::ostream& os)
   {
     os << "MFEM mesh v1.0\n\n";
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Local>::printDimension(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Local>::printDimension(std::ostream& os)
   {
     const auto& mesh = getObject();
     os << "dimension\n" << mesh.getDimension() << "\n\n";
   }
 
-  void MeshPrinter<FileFormat::MFEM, Context::Local>::printMesh(std::ostream &os)
+  void MeshPrinter<FileFormat::MFEM, Context::Local>::printMesh(std::ostream& os)
   {
     const auto& mesh = getObject();
     os << MFEM::Keyword::Elements << '\n' << mesh.getCellCount() << '\n';
@@ -255,11 +248,11 @@ namespace Rodin::IO
       if (!g)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "MFEM format does not support geometry: "
-          << it->getGeometry() << "."
+          << "MFEM format does not support geometry: " << it->getGeometry() << "."
           << Alert::Raise;
       }
-      os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' ' << *g << ' ';
+      os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' '
+         << *g << ' ';
 
       const auto& vertices = it->getVertices();
       switch (it->getGeometry())
@@ -281,12 +274,14 @@ namespace Rodin::IO
         }
         case Geometry::Polytope::Type::Quadrilateral:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+             << vertices(3);
           break;
         }
         case Geometry::Polytope::Type::Tetrahedron:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+             << vertices(3);
           break;
         }
         case Geometry::Polytope::Type::Pyramid:
@@ -297,13 +292,15 @@ namespace Rodin::IO
         }
         case Geometry::Polytope::Type::Wedge:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+             << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
           break;
         }
         case Geometry::Polytope::Type::Hexahedron:
         {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' '
-             << vertices(4) << ' ' << vertices(5) << ' ' << vertices(6) << ' ' << vertices(7);
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+             << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5) << ' '
+             << vertices(6) << ' ' << vertices(7);
           break;
         }
       }
@@ -321,11 +318,11 @@ namespace Rodin::IO
         if (!g)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "MFEM format does not support geometry: "
-            << it->getGeometry() << "."
+            << "MFEM format does not support geometry: " << it->getGeometry() << "."
             << Alert::Raise;
         }
-        os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' ' << *g << ' ';
+        os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' '
+           << *g << ' ';
 
         const auto& vertices = it->getVertices();
         switch (it->getGeometry())
@@ -347,7 +344,8 @@ namespace Rodin::IO
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+               << vertices(3);
             break;
           }
           case Geometry::Polytope::Type::Pyramid:
@@ -358,18 +356,21 @@ namespace Rodin::IO
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+               << vertices(3);
             break;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+               << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
             break;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' '
-               << vertices(4) << ' ' << vertices(5) << ' ' << vertices(6) << ' ' << vertices(7);
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+               << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5) << ' '
+               << vertices(6) << ' ' << vertices(7);
             break;
           }
         }
@@ -394,5 +395,6 @@ namespace Rodin::IO
       os << '\n';
     }
   }
+
   /// @endcond
 }

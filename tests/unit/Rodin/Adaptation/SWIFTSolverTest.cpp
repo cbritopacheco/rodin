@@ -244,9 +244,9 @@ namespace Rodin::Tests::Unit
 
     struct SolveState
     {
-        Math::Vector<Real> displacement;
-        SWIFT::Report report;
-        Real physicalNorm = 0;
+      Math::Vector<Real> displacement;
+      SWIFT::Report report;
+      Real physicalNorm = 0;
     };
 
     template <std::size_t Order = 1, class Setup = std::nullptr_t>
@@ -887,6 +887,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(std::isfinite(state.report.residualSup));
     EXPECT_GT(state.report.geometricSup, Real(0.01));
   }
+
   /// @brief Compatible singular CG preserves the initial unresolved component.
   TEST(Rodin_Adaptation_SWIFTSolver, LinearSolveDoesNotGaugeNullModes)
   {

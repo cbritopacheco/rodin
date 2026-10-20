@@ -36,10 +36,11 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
 #endif
   struct Errors
   {
-      Real l2;
-      Real moment;
-      Real globalMean;
+    Real l2;
+    Real moment;
+    Real globalMean;
   };
+
   /** @brief Curved scalar/vector projection with independently integrated moments.
    * @par Architecture
    * A fresh mapped mesh owns P2 geometry. Each solve assembles a mass problem.

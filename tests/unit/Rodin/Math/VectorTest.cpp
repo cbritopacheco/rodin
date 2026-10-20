@@ -49,17 +49,17 @@ TEST_F(VectorTest, Construction)
   // Test default construction
   Vector<Real> v1;
   EXPECT_EQ(v1.size(), 0);
-  
+
   // Test sized construction
   Vector<Real> v2(5);
   EXPECT_EQ(v2.size(), 5);
-  
+
   // Test zero initialization
   Vector<Real> v3 = Vector<Real>::Zero(3);
   EXPECT_EQ(v3.size(), 3);
   for (int i = 0; i < v3.size(); ++i)
     EXPECT_DOUBLE_EQ(v3[i], 0.0);
-  
+
   // Test ones initialization
   Vector<Real> v4 = Vector<Real>::Ones(4);
   EXPECT_EQ(v4.size(), 4);
@@ -72,22 +72,22 @@ TEST_F(VectorTest, Construction)
 TEST_F(VectorTest, AccessAndAssignment)
 {
   Vector<Real> v(3);
-  
+
   // Test element assignment using operator[]
   v[0] = 1.0;
   v[1] = 2.0;
   v[2] = 3.0;
-  
+
   // Test element access using operator[]
   EXPECT_DOUBLE_EQ(v[0], 1.0);
   EXPECT_DOUBLE_EQ(v[1], 2.0);
   EXPECT_DOUBLE_EQ(v[2], 3.0);
-  
+
   // Test element access using operator()
   EXPECT_DOUBLE_EQ(v(0), 1.0);
   EXPECT_DOUBLE_EQ(v(1), 2.0);
   EXPECT_DOUBLE_EQ(v(2), 3.0);
-  
+
   // Test assignment operator
   v(1) = 5.0;
   EXPECT_DOUBLE_EQ(v(1), 5.0);
@@ -99,28 +99,28 @@ TEST_F(VectorTest, ArithmeticOperations)
 {
   Vector<Real> v1(3);
   v1 << 1, 2, 3;
-  
+
   Vector<Real> v2(3);
   v2 << 4, 5, 6;
-  
+
   // Test vector addition
   Vector<Real> sum = v1 + v2;
   EXPECT_DOUBLE_EQ(sum[0], 5.0);
   EXPECT_DOUBLE_EQ(sum[1], 7.0);
   EXPECT_DOUBLE_EQ(sum[2], 9.0);
-  
+
   // Test vector subtraction
   Vector<Real> diff = v2 - v1;
   EXPECT_DOUBLE_EQ(diff[0], 3.0);
   EXPECT_DOUBLE_EQ(diff[1], 3.0);
   EXPECT_DOUBLE_EQ(diff[2], 3.0);
-  
+
   // Test scalar multiplication
   Vector<Real> scaled = 2.0 * v1;
   EXPECT_DOUBLE_EQ(scaled[0], 2.0);
   EXPECT_DOUBLE_EQ(scaled[1], 4.0);
   EXPECT_DOUBLE_EQ(scaled[2], 6.0);
-  
+
   // Test scalar division
   Vector<Real> divided = v2 / 2.0;
   EXPECT_DOUBLE_EQ(divided[0], 2.0);
@@ -134,22 +134,22 @@ TEST_F(VectorTest, DotProductAndNorms)
 {
   Vector<Real> v1(3);
   v1 << 1, 2, 3;
-  
+
   Vector<Real> v2(3);
   v2 << 4, 5, 6;
-  
+
   // Test dot product
   Real dotProduct = v1.dot(v2);
-  EXPECT_DOUBLE_EQ(dotProduct, 32.0);  // 1*4 + 2*5 + 3*6 = 32
-  
+  EXPECT_DOUBLE_EQ(dotProduct, 32.0); // 1*4 + 2*5 + 3*6 = 32
+
   // Test L2 norm (Euclidean norm)
   Real norm = v1.norm();
-  EXPECT_DOUBLE_EQ(norm, std::sqrt(14.0));  // sqrt(1^2 + 2^2 + 3^2) = sqrt(14)
-  
+  EXPECT_DOUBLE_EQ(norm, std::sqrt(14.0)); // sqrt(1^2 + 2^2 + 3^2) = sqrt(14)
+
   // Test squared norm
   Real squaredNorm = v1.squaredNorm();
-  EXPECT_DOUBLE_EQ(squaredNorm, 14.0);  // 1^2 + 2^2 + 3^2 = 14
-  
+  EXPECT_DOUBLE_EQ(squaredNorm, 14.0); // 1^2 + 2^2 + 3^2 = 14
+
   // Test normalized vector
   Vector<Real> normalized = v1.normalized();
   Real normalizedNorm = normalized.norm();
@@ -166,7 +166,7 @@ TEST_F(VectorTest, FixedSizeVectors)
   EXPECT_EQ(v2.size(), 2);
   EXPECT_DOUBLE_EQ(v2[0], 1.0);
   EXPECT_DOUBLE_EQ(v2[1], 2.0);
-  
+
   // Test Vector3
   Vector3<Real> v3;
   v3 << 1.0, 2.0, 3.0;
@@ -174,13 +174,13 @@ TEST_F(VectorTest, FixedSizeVectors)
   EXPECT_DOUBLE_EQ(v3[0], 1.0);
   EXPECT_DOUBLE_EQ(v3[1], 2.0);
   EXPECT_DOUBLE_EQ(v3[2], 3.0);
-  
+
   // Test Vector4
   Vector4<Real> v4;
   v4 << 1.0, 2.0, 3.0, 4.0;
   EXPECT_EQ(v4.size(), 4);
   EXPECT_DOUBLE_EQ(v4[3], 4.0);
-  
+
   // Test compile-time size
   static_assert(Vector2<Real>::SizeAtCompileTime == 2);
   static_assert(Vector3<Real>::SizeAtCompileTime == 3);
@@ -220,7 +220,7 @@ TEST_F(VectorTest, SpatialVector)
 TEST_F(VectorTest, ComplexVector)
 {
   ComplexVector cv(3);
-  cv[0] = Complex(1.0, 2.0);  // 1 + 2i
+  cv[0] = Complex(1.0, 2.0); // 1 + 2i
   cv[1] = Complex(3.0, -1.0); // 3 - i
   cv[2] = Complex(-2.0, 1.0); // -2 + i
 
@@ -232,7 +232,7 @@ TEST_F(VectorTest, ComplexVector)
   EXPECT_DOUBLE_EQ(conjugated[1].imag(), 1.0);
   EXPECT_DOUBLE_EQ(conjugated[2].real(), -2.0);
   EXPECT_DOUBLE_EQ(conjugated[2].imag(), -1.0);
-  
+
   // Test complex norm
   Real complexNorm = cv.norm();
   EXPECT_GT(complexNorm, 0.0);
@@ -244,11 +244,11 @@ TEST_F(VectorTest, Resizing)
 {
   Vector<Real> v(3);
   v << 1, 2, 3;
-  
+
   // Test resize
   v.resize(5);
   EXPECT_EQ(v.size(), 5);
-  
+
   // Test conservativeResize
   Vector<Real> v2(3);
   v2 << 1, 2, 3;
@@ -264,17 +264,17 @@ TEST_F(VectorTest, Resizing)
 TEST_F(VectorTest, CrossProduct)
 {
   Vector3<Real> v1;
-  v1 << 1, 0, 0;  // x-axis unit vector
-  
+  v1 << 1, 0, 0; // x-axis unit vector
+
   Vector3<Real> v2;
-  v2 << 0, 1, 0;  // y-axis unit vector
-  
+  v2 << 0, 1, 0; // y-axis unit vector
+
   // Cross product should give z-axis unit vector
   Vector3<Real> cross = v1.cross(v2);
   EXPECT_DOUBLE_EQ(cross[0], 0.0);
   EXPECT_DOUBLE_EQ(cross[1], 0.0);
   EXPECT_DOUBLE_EQ(cross[2], 1.0);
-  
+
   // Test anti-commutativity: v1 x v2 = -(v2 x v1)
   Vector3<Real> cross_rev = v2.cross(v1);
   EXPECT_DOUBLE_EQ(cross_rev[0], 0.0);
@@ -288,21 +288,21 @@ TEST_F(VectorTest, MaxMinOperations)
 {
   Vector<Real> v(4);
   v << 3.0, -1.0, 5.0, 2.0;
-  
+
   // Test max coefficient
   Real maxVal = v.maxCoeff();
   EXPECT_DOUBLE_EQ(maxVal, 5.0);
-  
+
   // Test min coefficient
   Real minVal = v.minCoeff();
   EXPECT_DOUBLE_EQ(minVal, -1.0);
-  
+
   // Test max coefficient with index
   int maxIndex;
   Real maxValWithIndex = v.maxCoeff(&maxIndex);
   EXPECT_DOUBLE_EQ(maxValWithIndex, 5.0);
   EXPECT_EQ(maxIndex, 2);
-  
+
   // Test min coefficient with index
   int minIndex;
   Real minValWithIndex = v.minCoeff(&minIndex);
@@ -316,23 +316,23 @@ TEST_F(VectorTest, SegmentOperations)
 {
   Vector<Real> v(6);
   v << 1, 2, 3, 4, 5, 6;
-  
+
   // Test head (first n elements)
   auto head3 = v.head(3);
   EXPECT_EQ(head3.size(), 3);
   EXPECT_DOUBLE_EQ(head3[0], 1.0);
   EXPECT_DOUBLE_EQ(head3[1], 2.0);
   EXPECT_DOUBLE_EQ(head3[2], 3.0);
-  
+
   // Test tail (last n elements)
   auto tail3 = v.tail(3);
   EXPECT_EQ(tail3.size(), 3);
   EXPECT_DOUBLE_EQ(tail3[0], 4.0);
   EXPECT_DOUBLE_EQ(tail3[1], 5.0);
   EXPECT_DOUBLE_EQ(tail3[2], 6.0);
-  
+
   // Test segment (middle elements)
-  auto segment2 = v.segment(2, 2);  // start at index 2, length 2
+  auto segment2 = v.segment(2, 2); // start at index 2, length 2
   EXPECT_EQ(segment2.size(), 2);
   EXPECT_DOUBLE_EQ(segment2[0], 3.0);
   EXPECT_DOUBLE_EQ(segment2[1], 4.0);

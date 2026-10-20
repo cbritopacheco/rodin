@@ -67,28 +67,21 @@ namespace Rodin::FormLanguage
    * @brief Type traits for @c Flow over a shape function: exposes the finite element
    * space, the shape function space and the operand type.
    */
-  template <
-    class Derived,
-    class FES,
-    class VectorField,
-    class Step,
-    class BoundaryPolicy
-  >
-  struct Traits<
-    Variational::Flow<
-      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
-      VectorField, Step, BoundaryPolicy>>
+  template <class Derived, class FES, class VectorField, class Step, class BoundaryPolicy>
+  struct Traits<Variational::Flow<
+    Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>, VectorField,
+    Step, BoundaryPolicy>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType =
-        Variational::TestSpace;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType =
+      Variational::TestSpace;
 
-      /// @brief Operand type.
-      using OperandType =
-        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
+    /// @brief Operand type.
+    using OperandType =
+      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
   };
 }
 
@@ -377,25 +370,17 @@ namespace Rodin::Variational
         const Real sqrtEps = std::sqrt(epsMachine);
         const Real vFloor = std::numeric_limits<Real>::min();
 
-        auto isFinite = [](Real v) -> bool
-        {
-          return std::isfinite(v);
-        };
+        auto isFinite = [](Real v) -> bool { return std::isfinite(v); };
 
-        auto dot = [](const auto& a, const auto& b) -> Real
-        {
-          return b.dot(a);
-        };
+        auto dot = [](const auto& a, const auto& b) -> Real { return b.dot(a); };
 
-        auto norm2 = [&](const auto& v) -> Real
-        {
+        auto norm2 = [&](const auto& v) -> Real {
           const Real v2 = dot(v, v);
           return std::max<Real>(Real(0), v2);
         };
 
         // Normalize the velocity return type in one place.
-        auto vphysOf = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real>
-        {
+        auto vphysOf = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real> {
           const auto v = m_velocity(qp);
           if constexpr (requires { v.col(0); })
           {
@@ -470,8 +455,7 @@ namespace Rodin::Variational
             const auto vref0 = (sgn * q0.getJacobianInverse() * vphysOf(q0));
             const Real ndv0 = dot(nref0, vref0);
 
-            auto interiorScore = [&](Index c, const Math::SpatialPoint& rproj) -> Real
-            {
+            auto interiorScore = [&](Index c, const Math::SpatialPoint& rproj) -> Real {
               const auto gc = mesh.getGeometry(cd, c);
               const Geometry::Polytope::Traits tsc(gc);
               const auto& hsc = tsc.getHalfSpace();
@@ -516,7 +500,7 @@ namespace Rodin::Variational
         }
         else
         {
-          return Trace{ true, Real(0), p, correction };
+          return Trace{true, Real(0), p, correction};
         }
 
         // Resize scratch buffers.
@@ -533,18 +517,15 @@ namespace Rodin::Variational
         // Avoid immediate backtracking if there are alternatives.
         Optional<size_t> lastFace;
 
-        auto phiFace = [&](const auto& hs, size_t j, const Math::SpatialPoint& r) -> Real
-        {
+        auto phiFace = [&](
+                         const auto& hs, size_t j, const Math::SpatialPoint& r) -> Real {
           const auto n = hs.matrix.row(j);
           const Real b = hs.vector[j];
           return b - r.dot(n);
         };
 
-        auto clampIfOutside = [&](const auto& hs,
-                                  const auto& g,
-                                  Math::SpatialPoint& r,
-                                  Real epsPhi) -> void
-        {
+        auto clampIfOutside = [&](const auto& hs, const auto& g, Math::SpatialPoint& r,
+                                Real epsPhi) -> void {
           bool violated = false;
           for (size_t j = 0; j < static_cast<size_t>(hs.vector.size()); ++j)
           {
@@ -582,18 +563,15 @@ namespace Rodin::Variational
           const auto& faces = conn.getIncidence(cd, cd - 1).at(sCell);
           const auto& hs = ts.getHalfSpace();
 
-          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-          {
+          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real> {
             const Geometry::Point qp(cell, r);
             return (sgn * qp.getJacobianInverse() * vphysOf(qp));
           };
 
-          auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
-          {
-            m_step.step(
-              rout, dt, rin,
-              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
-              {
+          auto advance = [&](Math::SpatialPoint& rout, Real dt,
+                           const Math::SpatialPoint& rin) {
+            m_step.step(rout, dt, rin,
+              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real> {
                 return vref(rr);
               });
           };
@@ -653,20 +631,20 @@ namespace Rodin::Variational
 
             if (hScale > Real(0) && isFinite(hScale))
             {
-              dtCap = std::min(dtCap, stepSafety * hScale / std::max<Real>(vphysMag, vFloor));
+              dtCap =
+                std::min(dtCap, stepSafety * hScale / std::max<Real>(vphysMag, vFloor));
             }
 
             if (!(dtCap > Real(0)) || !isFinite(dtCap))
               dtCap = tau;
           }
 
-          const Real dtMin =
-            minStepFactor * sqrtEps * (Real(1) + rnorm) / std::max<Real>(Real(1), vrefMag);
+          const Real dtMin = minStepFactor * sqrtEps * (Real(1) + rnorm) /
+            std::max<Real>(Real(1), vrefMag);
 
           Optional<Trace> exitTrace;
 
-          auto doZeroHops = [&]() -> bool
-          {
+          auto doZeroHops = [&]() -> bool {
             size_t hops = 0;
             while (hops++ < maxZeroHops)
             {
@@ -702,7 +680,7 @@ namespace Rodin::Variational
                 const auto vz2 = vref(sRc);
                 const Real ndv = vz2.dot(hs.matrix.row(j).transpose());
                 const Index fid = faces[j];
-                return { std::abs(ph), -ndv, fid };
+                return {std::abs(ph), -ndv, fid};
               };
 
               size_t best = size_t(-1);
@@ -825,8 +803,7 @@ namespace Rodin::Variational
             return phiFace(hs, j, rOut);
           };
 
-          auto tryBracketFace = [&](size_t j, Real t0, Real& hiOut) -> bool
-          {
+          auto tryBracketFace = [&](size_t j, Real t0, Real& hiOut) -> bool {
             Real t = std::min(t0, tauCell);
             if (!(t > Real(0)) || !isFinite(t))
               return false;
@@ -896,7 +873,7 @@ namespace Rodin::Variational
               if (tlin > tauCell)
                 continue;
 
-              s_candidates.push_back(Candidate{ tlin, j, ndv, phi0, faces[j] });
+              s_candidates.push_back(Candidate{tlin, j, ndv, phi0, faces[j]});
             }
 
             if (s_candidates.empty())
@@ -905,11 +882,8 @@ namespace Rodin::Variational
               break;
             }
 
-            std::sort(
-              s_candidates.begin(),
-              s_candidates.end(),
-              [](const Candidate& a, const Candidate& b)
-              {
+            std::sort(s_candidates.begin(), s_candidates.end(),
+              [](const Candidate& a, const Candidate& b) {
                 if (a.tlin != b.tlin)
                   return a.tlin < b.tlin;
                 if (a.ndv != b.ndv)
@@ -919,8 +893,7 @@ namespace Rodin::Variational
 
             const size_t ntry = std::min(faceTrials, s_candidates.size());
 
-            auto consider = [&](size_t begin, size_t end)
-            {
+            auto consider = [&](size_t begin, size_t end) {
               for (size_t k = begin; k < end; ++k)
               {
                 const auto& c = s_candidates[k];
@@ -1099,8 +1072,7 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         using RangeType = typename FormLanguage::Traits<Operand>::RangeType;
         using ValueType = decltype(std::declval<RangeType>() + Real(0));
@@ -1114,8 +1086,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return m_operand->getLeaf();
       }
@@ -1340,34 +1311,49 @@ namespace Rodin::Variational
     private:
       /// @brief Heuristic sqrt(epsilon) multiplier for near-tangential reference normal velocity.
       static constexpr Real TangentialVelocityRoundoffFactor = Real(10);
+
       /// @brief Squared reference-motion threshold multiplier of epsilon: (10 sqrt(epsilon)) squared.
       static constexpr Real ReferenceProgressRoundoffFactorSquared = Real(100);
+
       /// @brief Halves a rejected cell substep during subdivision.
       static constexpr Real SubdivisionContraction = Real(0.5);
+
       /// @brief Absolute face-crossing bracket resolution floor in tracing-time units; heuristic.
       static constexpr Real AbsoluteBracketTimeFloor = Real(1e-12);
+
       /// @brief Work limit on face hops without consuming tracing time.
       static constexpr size_t DefaultMaxZeroHops = 128;
+
       /// @brief Work limit on face-crossing bracket bisections.
       static constexpr size_t DefaultMaxBisections = 16;
+
       /// @brief Work limit on halvings of a cell substep.
       static constexpr size_t DefaultMaxSubdivisions = 8;
+
       /// @brief Total tracing-loop work limit; not a convergence guarantee.
       static constexpr size_t DefaultMaxOuterIterations = 100000;
+
       /// @brief Work limit on consecutive iterations without sufficient progress.
       static constexpr size_t DefaultMaxStagnations = 512;
+
       /// @brief Face-crossing trial budget per face.
       static constexpr size_t DefaultFaceTrials = 6;
+
       /// @brief Dimensionless geometric growth factor for crossing brackets.
       static constexpr Real DefaultBracketGrowth = Real(2.0);
+
       /// @brief Work limit on crossing-bracket expansions.
       static constexpr size_t DefaultMaxBracketExpansions = 3;
+
       /// @brief Dimensionless safety multiplier of the local cell time-step cap.
       static constexpr Real DefaultStepSafety = Real(0.5);
+
       /// @brief sqrt(epsilon) multiplier of the reference-distance/velocity scale for minimum substeps.
       static constexpr Real DefaultMinStepFactor = Real(10);
+
       /// @brief sqrt(epsilon) multiplier for geometric and directional tolerances.
       static constexpr Real DefaultTolFactor = Real(50);
+
       /// @brief Dimensionless multiplier of the geometric tolerance before clamping.
       static constexpr Real DefaultClampFactor = Real(10);
 

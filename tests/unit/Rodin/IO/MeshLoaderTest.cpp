@@ -166,12 +166,7 @@ namespace Rodin::Tests::Unit
     Mesh<Context::Local> makePointMesh()
     {
       Mesh<Context::Local>::Builder builder;
-      return builder
-        .initialize(1)
-        .nodes(1)
-        .vertex({ 0.0 })
-        .attribute({ 0, 0 }, 7)
-        .finalize();
+      return builder.initialize(1).nodes(1).vertex({0.0}).attribute({0, 0}, 7).finalize();
     }
 
     Mesh<Context::Local> makeCoverageMesh(Polytope::Type geometry)
@@ -181,15 +176,15 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Point:
           return makePointMesh();
         case Polytope::Type::Segment:
-          return LocalMesh::UniformGrid(geometry, { 5 });
+          return LocalMesh::UniformGrid(geometry, {5});
         case Polytope::Type::Triangle:
         case Polytope::Type::Quadrilateral:
-          return LocalMesh::UniformGrid(geometry, { 3, 3 });
+          return LocalMesh::UniformGrid(geometry, {3, 3});
         case Polytope::Type::Tetrahedron:
         case Polytope::Type::Pyramid:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
-          return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
+          return LocalMesh::UniformGrid(geometry, {2, 2, 2});
       }
       assert(false);
       return {};
@@ -255,15 +250,22 @@ namespace Rodin::Tests::Unit
     {
       switch (geometry)
       {
-        case Polytope::Type::Point:         return "Point";
-        case Polytope::Type::Segment:       return "Segment";
-        case Polytope::Type::Triangle:      return "Triangle";
-        case Polytope::Type::Quadrilateral: return "Quadrilateral";
-        case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Point:
+          return "Point";
+        case Polytope::Type::Segment:
+          return "Segment";
+        case Polytope::Type::Triangle:
+          return "Triangle";
+        case Polytope::Type::Quadrilateral:
+          return "Quadrilateral";
+        case Polytope::Type::Tetrahedron:
+          return "Tetrahedron";
         case Polytope::Type::Pyramid:
           return "Pyramid";
-        case Polytope::Type::Hexahedron:    return "Hexahedron";
-        case Polytope::Type::Wedge:         return "Wedge";
+        case Polytope::Type::Hexahedron:
+          return "Hexahedron";
+        case Polytope::Type::Wedge:
+          return "Wedge";
       }
       return "Unknown";
     }
@@ -279,8 +281,7 @@ namespace Rodin::Tests::Unit
     }
 
     void expectSameMeshShape(
-        const Mesh<Context::Local>& actual,
-        const Mesh<Context::Local>& expected)
+      const Mesh<Context::Local>& actual, const Mesh<Context::Local>& expected)
     {
       ASSERT_EQ(actual.getSpaceDimension(), expected.getSpaceDimension());
       ASSERT_EQ(actual.getDimension(), expected.getDimension());
@@ -296,14 +297,17 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t d = 0; d <= expected.getDimension(); ++d)
-        ASSERT_EQ(actual.getPolytopeCount(d), expected.getPolytopeCount(d)) << "dimension " << d;
+      {
+        ASSERT_EQ(actual.getPolytopeCount(d), expected.getPolytopeCount(d))
+          << "dimension " << d;
+      }
 
       const size_t D = expected.getDimension();
       for (Index c = 0; c < static_cast<Index>(expected.getCellCount()); ++c)
       {
         EXPECT_EQ(actual.getGeometry(D, c), expected.getGeometry(D, c)) << "cell " << c;
-        EXPECT_TRUE(Polytope::Key::SymmetricEquality()(
-            actual.getConnectivity().getPolytope(D, c),
+        EXPECT_TRUE(
+          Polytope::Key::SymmetricEquality()(actual.getConnectivity().getPolytope(D, c),
             expected.getConnectivity().getPolytope(D, c)))
           << "cell " << c;
       }

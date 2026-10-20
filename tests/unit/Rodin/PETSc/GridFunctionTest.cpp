@@ -130,7 +130,7 @@ namespace
   /// @brief Verifies sequential operator bracket read write for PET sc grid function by checking tolerance-based numerical results.
   TEST(PETSc_GridFunction, SequentialOperatorBracketReadWrite)
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
@@ -142,8 +142,7 @@ namespace
     for (Index i = 0; i < gf.getSize(); ++i)
     {
       EXPECT_DOUBLE_EQ(
-        static_cast<double>(PetscRealPart(cgf[i])),
-        1.0 + 0.25 * static_cast<double>(i));
+        static_cast<double>(PetscRealPart(cgf[i])), 1.0 + 0.25 * static_cast<double>(i));
     }
     cgf.flush();
   }
@@ -151,7 +150,7 @@ namespace
   /// @brief Verifies sequential vec set keeps operator bracket readable for PET sc grid function by checking tolerance-based numerical results.
   TEST(PETSc_GridFunction, SequentialVecSetKeepsOperatorBracketReadable)
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
     P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 

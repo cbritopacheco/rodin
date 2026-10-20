@@ -42,20 +42,27 @@ namespace
     Boundary,
     NearMiss
   };
+
   /// Small fixed batches amortize timing without dominating curved build runs.
   constexpr size_t QueryBatch = 16;
+
   /// Cheap queries/builds repeat for stable timing; expensive operations finish
   /// after one batch/build. This does not synchronize or constrain locator calls.
   [[maybe_unused]] constexpr double MinimumSampleSeconds = 0.005;
+
   /// Repeated manual samples; all ranks execute the same number of collectives.
   constexpr size_t TimingSamples = 5;
+
   /// Offset from a reference vertex, well outside numerical locator tolerance.
   constexpr Real MissOffset = Real(1e-4);
+
   /// Interior sample pulled toward the centroid to avoid partition boundaries.
   constexpr Real CentroidWeight = Real(0.75);
+
   /// Grid points per axis: two sizes expose scaling without oversized P4 runs.
   constexpr int64_t SmallResolution = 5;
   constexpr int64_t LargeResolution = 9;
+
   /// Distortion arguments use tenths; 0.2 is a moderate injective fixture shear.
   constexpr Real DistortionUnit = Real(0.1);
   constexpr int64_t DistortedFixture = 2;

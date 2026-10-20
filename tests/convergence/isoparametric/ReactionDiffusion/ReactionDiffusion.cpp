@@ -171,16 +171,16 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
           // Adapter selects a scalar component without duplicating analytic data.
           struct Component
           {
-              const Data& data;
-              size_t index;
-              Real getSolution(const Math::SpatialPoint& x) const
-              {
-                return data.getSolution(x, index);
-              }
-              auto getGradient(const Math::SpatialPoint& x) const
-              {
-                return data.getGradient(x, index);
-              }
+            const Data& data;
+            size_t index;
+            Real getSolution(const Math::SpatialPoint& x) const
+            {
+              return data.getSolution(x, index);
+            }
+            auto getGradient(const Math::SpatialPoint& x) const
+            {
+              return data.getGradient(x, index);
+            }
           };
           (*lifted)[0] = LiftedErrorNorm::compute(*m_reference, m_mesh, u.getSolution(),
             Component{data, 0}, SineMap(), integrationOrder);

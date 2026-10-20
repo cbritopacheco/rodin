@@ -568,6 +568,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Model, convergence and backend configuration.
       using Parameters = SWIFT::Parameters;
+
       /// @brief Accepted-geometry and iteration diagnostics.
       using Report = SWIFT::Report;
 
@@ -620,39 +621,39 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief Mesh-validity summary of a displacement.
       struct AdmissibilityState
       {
-          /// @brief Smallest Jacobian over all quality witnesses.
-          Real minJ = std::numeric_limits<Real>::infinity();
+        /// @brief Smallest Jacobian over all quality witnesses.
+        Real minJ = std::numeric_limits<Real>::infinity();
 
-          /// @brief Largest Jacobian over all quality witnesses.
-          Real maxJ = -std::numeric_limits<Real>::infinity();
+        /// @brief Largest Jacobian over all quality witnesses.
+        Real maxJ = -std::numeric_limits<Real>::infinity();
 
-          /// @brief Largest relative distortion over the non-inverted points.
-          Real maxQ = 0;
+        /// @brief Largest relative distortion over the non-inverted points.
+        Real maxQ = 0;
 
-          /// @brief Number of quality witnesses at or below the Jacobian floor.
-          std::size_t inadmissibleCount = 0;
-          Real affineMinJ = std::numeric_limits<Real>::infinity();
-          Real affineMaxQ = 0;
-          Index qualityCell = 0;
-          Real qualityCurrent = 0;
-          Real qualityLinearChange = 0;
-          Real qualityQuadraticChange = 0;
+        /// @brief Number of quality witnesses at or below the Jacobian floor.
+        std::size_t inadmissibleCount = 0;
+        Real affineMinJ = std::numeric_limits<Real>::infinity();
+        Real affineMaxQ = 0;
+        Index qualityCell = 0;
+        Real qualityCurrent = 0;
+        Real qualityLinearChange = 0;
+        Real qualityQuadraticChange = 0;
       };
 
       /// @brief Interface-fit summary of a displacement.
       struct SurfaceState
       {
-          /// @brief Fixed-scale energy used by the current Armijo search.
-          Real energy = 0;
+        /// @brief Fixed-scale energy used by the current Armijo search.
+        Real energy = 0;
 
-          /// @brief Measure of the whole interface.
-          Real totalLen = 0;
+        /// @brief Measure of the whole interface.
+        Real totalLen = 0;
 
-          /// @brief Root-mean-square residual over the complete interface.
-          Real residualRMS = 0;
+        /// @brief Root-mean-square residual over the complete interface.
+        Real residualRMS = 0;
 
-          /// @brief Supremum residual over the complete interface.
-          Real residualSup = 0;
+        /// @brief Supremum residual over the complete interface.
+        Real residualSup = 0;
       };
 
     public:
@@ -680,6 +681,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param other Problem that cannot be copied.
        */
       Problem(const Problem& other) = delete;
+
       /**
        * @brief Copy assignment of a problem with owned solver bindings is disabled.
        * @param other Problem that cannot be assigned.
@@ -1665,9 +1667,9 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief Geometric discrepancy of the complete fitted interface.
       struct InterfaceGeometryState
       {
-          Real rms = std::numeric_limits<Real>::infinity();
-          Real sup = std::numeric_limits<Real>::infinity();
-          Real normalRMS = std::numeric_limits<Real>::infinity();
+        Real rms = std::numeric_limits<Real>::infinity();
+        Real sup = std::numeric_limits<Real>::infinity();
+        Real normalRMS = std::numeric_limits<Real>::infinity();
       };
 
       /**
@@ -1994,8 +1996,8 @@ namespace Rodin::Adaptation::SWIFT
         std::size_t inadmissibleCount = 0;
         struct Witness
         {
-            Real actual = 0, current = 0, linear = 0, quadratic = 0;
-            Index cell = 0;
+          Real actual = 0, current = 0, linear = 0, quadratic = 0;
+          Index cell = 0;
         };
         const bool recordWitness = current && m_parameters.traceQualityWitness;
         std::vector<Witness> witnesses(recordWitness ? validationCells.size() : 0);
@@ -2108,8 +2110,8 @@ namespace Rodin::Adaptation::SWIFT
           phi.acquire();
         struct SurfaceAccumulation
         {
-            SurfaceState state;
-            Real squaredResidual = 0;
+          SurfaceState state;
+          Real squaredResidual = 0;
         };
         std::vector<SurfaceAccumulation> facetStates(interfaceFacets.size());
 #ifdef RODIN_USE_OPENMP
@@ -2195,11 +2197,11 @@ namespace Rodin::Adaptation::SWIFT
 
         struct Accumulation
         {
-            Real measure = 0;
-            Real squaredDistance = 0;
-            Real maximumDistance = 0;
-            Real squaredNormal = 0;
-            std::size_t invalidCount = 0;
+          Real measure = 0;
+          Real squaredDistance = 0;
+          Real maximumDistance = 0;
+          Real squaredNormal = 0;
+          std::size_t invalidCount = 0;
         };
         std::vector<Accumulation> facetStates(interfaceFacets.size());
         constexpr Real gradientFloor = Real(1e-14);
@@ -2354,10 +2356,11 @@ namespace Rodin::Adaptation::SWIFT
        */
       struct RobustScale
       {
-          /// @brief Fixed robust-loss scale in level-set units.
-          Real sigma = 0;
-          /// @brief Maximum sampled target-gradient norm.
-          Real gradientScale = 0;
+        /// @brief Fixed robust-loss scale in level-set units.
+        Real sigma = 0;
+
+        /// @brief Maximum sampled target-gradient norm.
+        Real gradientScale = 0;
       };
 
       /**
@@ -2469,16 +2472,22 @@ namespace Rodin::Adaptation::SWIFT
 
       /// Dimensionless sufficient-decrease coefficient for the frozen inner merit.
       static constexpr Real InnerArmijoCoefficient = Real(1e-4);
+
       /// Safeguard on trials per inner correction, independent of the Newton cap.
       static constexpr size_t InnerMaxBacktracks = 32;
+
       /// Dimensionless reduction shared by the inner and outer Armijo searches.
       static constexpr Real BacktrackingReduction = Real(0.5);
+
       /// Relative floating-point allowance in the quadratic inner merit.
       static constexpr Real MeritRoundoffFactor = Real(64);
+
       /// Dimensionless tolerance for reporting an undamped inner correction.
       static constexpr Real FullStepTolerance = Real(1e-12);
+
       /// Minimum robust scale in units of the reference mesh spacing.
       static constexpr Real RobustScaleMeshFloor = Real(3);
+
       /// Residual quantile used by automatic robust-scale selection.
       static constexpr Real RobustScaleQuantile = Real(0.9);
 
@@ -2491,6 +2500,7 @@ namespace Rodin::Adaptation::SWIFT
       LinearSolver m_linearSolver;
       BilinearFormType m_distributionForm;
       Math::Matrix<Real> m_centering;
+
       /**
        * @brief Fitting metric and fitting force at the outer displacement.
        * Both depend on the outer displacement only, so they are assembled once

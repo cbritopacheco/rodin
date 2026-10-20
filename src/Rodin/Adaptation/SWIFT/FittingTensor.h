@@ -27,11 +27,14 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief Parent class type.
       using Parent = Variational::MatrixFunctionBase<ScalarType,
         FittingTensor<GradDerived, Displacement, LocatorType>>;
+
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
@@ -148,6 +151,7 @@ namespace Rodin::Adaptation::SWIFT
       Real m_normalization;
       std::size_t m_dimension;
   };
+
   /**
    * @brief Deduction guide for FittingTensor.
    * @param grad Gradient of the observation field.

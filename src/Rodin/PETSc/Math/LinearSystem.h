@@ -73,12 +73,10 @@ namespace Rodin::Math
   {
     public:
       /// @brief PETSc matrix type (@c Mat) for the system operator @f$ A @f$.
-      using MatrixType =
-        ::Mat;
+      using MatrixType = ::Mat;
 
       /// @brief PETSc vector type (@c Vec) for @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
-      using VectorType =
-        ::Vec;
+      using VectorType = ::Vec;
 
       /**
        * @brief Parent CRTP base class providing the generic
@@ -105,7 +103,7 @@ namespace Rodin::Math
           /// @brief A single named index set for field-split preconditioning.
           struct Split
           {
-            std::string name;        ///< Human-readable field name.
+            std::string name; ///< Human-readable field name.
             ::IS is = PETSC_NULLPTR; ///< PETSc index set for this field's DOFs.
           };
 
@@ -205,7 +203,7 @@ namespace Rodin::Math
               }
             }
             m_splits.clear();
-            (void) ierr;
+            (void)ierr;
           }
 
           /**
@@ -237,7 +235,7 @@ namespace Rodin::Math
               m_splits.push_back(std::move(out));
             }
 
-            (void) ierr;
+            (void)ierr;
           }
 
           /**
@@ -382,7 +380,7 @@ namespace Rodin::Math
         ierr = VecDestroy(&bc);
         assert(ierr == PETSC_SUCCESS);
 
-        (void) ierr;
+        (void)ierr;
 
         return *this;
       }
@@ -396,7 +394,8 @@ namespace Rodin::Math
        */
       template <class DOFScalar>
       LinearSystemBase& merge(
-          const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+        const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
+        size_t offset = 0)
       {
         Alert::MemberFunctionException(*this, __func__)
           << "Periodic DOF constraint merging is not implemented." << Alert::Raise;
@@ -407,8 +406,7 @@ namespace Rodin::Math
        * @brief Returns the MPI communicator of this linear system.
        * @returns The MPI communicator of this linear system.
        */
-      constexpr
-      MPI_Comm getCommunicator() const noexcept
+      constexpr MPI_Comm getCommunicator() const noexcept
       {
         return m_comm;
       }
@@ -417,8 +415,7 @@ namespace Rodin::Math
        * @brief Returns a mutable reference to the system matrix @f$ A @f$.
        * @returns A mutable reference to the system matrix @f$ A @f$.
        */
-      constexpr
-      MatrixType& getOperator()
+      constexpr MatrixType& getOperator()
       {
         return m_operator;
       }
@@ -427,8 +424,7 @@ namespace Rodin::Math
        * @brief Returns a read-only reference to the system matrix @f$ A @f$.
        * @returns A read-only reference to the system matrix @f$ A @f$.
        */
-      constexpr
-      const MatrixType& getOperator() const
+      constexpr const MatrixType& getOperator() const
       {
         return m_operator;
       }
@@ -437,8 +433,7 @@ namespace Rodin::Math
        * @brief Returns a mutable reference to the right-hand side vector @f$ b @f$.
        * @returns A mutable reference to the right-hand side vector @f$ b @f$.
        */
-      constexpr
-      VectorType& getVector()
+      constexpr VectorType& getVector()
       {
         return m_vector;
       }
@@ -447,8 +442,7 @@ namespace Rodin::Math
        * @brief Returns a read-only reference to the right-hand side vector @f$ b @f$.
        * @returns A read-only reference to the right-hand side vector @f$ b @f$.
        */
-      constexpr
-      const VectorType& getVector() const
+      constexpr const VectorType& getVector() const
       {
         return m_vector;
       }
@@ -457,8 +451,7 @@ namespace Rodin::Math
        * @brief Returns a mutable reference to the solution vector @f$ x @f$.
        * @returns A mutable reference to the solution vector @f$ x @f$.
        */
-      constexpr
-      VectorType& getSolution()
+      constexpr VectorType& getSolution()
       {
         return m_solution;
       }
@@ -467,8 +460,7 @@ namespace Rodin::Math
        * @brief Returns a read-only reference to the solution vector @f$ x @f$.
        * @returns A read-only reference to the solution vector @f$ x @f$.
        */
-      constexpr
-      const VectorType& getSolution() const
+      constexpr const VectorType& getSolution() const
       {
         return m_solution;
       }
@@ -497,7 +489,7 @@ namespace Rodin::Math
       MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
       VectorType m_solution; ///< The solution vector of the linear system.
-      VectorType m_vector;   ///< The vector of the linear system.
+      VectorType m_vector; ///< The vector of the linear system.
 
       FieldSplits m_fieldSplits; ///< The field splits for block preconditioning.
   };

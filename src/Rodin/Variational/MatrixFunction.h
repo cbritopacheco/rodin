@@ -34,10 +34,11 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::MatrixFunctionBase<Scalar, Derived>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Derived CRTP function type.
+    using DerivedType = Derived;
   };
 }
 
@@ -122,8 +123,7 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Matrix value at the point
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -133,10 +133,10 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+        if constexpr (requires(
+                        const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
           return static_cast<const Derived&>(*this).getValue(ip);
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
@@ -149,9 +149,8 @@ namespace Rodin::Variational
        * @param[in] args Arguments specifying the trace domain
        * @returns Reference to derived object (for method chaining)
        */
-      template <class ... Args>
-      constexpr
-      Derived& traceOf(const Args& ... args)
+      template <class... Args>
+      constexpr Derived& traceOf(const Args&... args)
       {
         return static_cast<Derived&>(*this).traceOf(args...);
       }
@@ -160,8 +159,7 @@ namespace Rodin::Variational
        * @brief Gets the number of rows in the matrix.
        * @returns Number of rows
        */
-      constexpr
-      size_t getRows() const
+      constexpr size_t getRows() const
       {
         return static_cast<const Derived&>(*this).getRows();
       }
@@ -170,8 +168,7 @@ namespace Rodin::Variational
        * @brief Gets the number of columns in the matrix.
        * @returns Number of columns
        */
-      constexpr
-      size_t getColumns() const
+      constexpr size_t getColumns() const
       {
         return static_cast<const Derived&>(*this).getColumns();
       }
@@ -181,8 +178,8 @@ namespace Rodin::Variational
        * @param polytope Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(polytope);
       }
@@ -257,8 +254,7 @@ namespace Rodin::Variational
        * @brief Gets the number of rows.
        * @returns The number of rows.
        */
-      constexpr
-      size_t getRows() const
+      constexpr size_t getRows() const
       {
         return m_matrix.rows();
       }
@@ -267,8 +263,7 @@ namespace Rodin::Variational
        * @brief Gets the number of columns in the matrix
        * @returns Number of columns
        */
-      constexpr
-      size_t getColumns() const
+      constexpr size_t getColumns() const
       {
         return m_matrix.cols();
       }
@@ -420,10 +415,13 @@ namespace Rodin::Variational
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<
         std::invoke_result_t<F, const Geometry::Point&>>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief CRTP or finite element base class.
       using Parent = MatrixFunctionBase<ScalarType, MatrixFunction>;
+
       /**
        * @brief Constructs a constant or callable matrix coefficient, or copies its value.
        * @param rows Number of rows.
@@ -442,6 +440,7 @@ namespace Rodin::Variational
             << "Invalid spatial matrix coefficient dimensions." << Alert::Raise;
         }
       }
+
       /**
        * @brief Constructs a constant or callable matrix coefficient, or copies its value.
        * @param other Object to copy from.
@@ -453,6 +452,7 @@ namespace Rodin::Variational
           m_function(other.m_function),
           m_order(other.m_order)
       {}
+
       /**
        * @brief Constructs a constant or callable matrix coefficient, or copies its value.
        * @param other Object to move from.
@@ -464,6 +464,7 @@ namespace Rodin::Variational
           m_function(std::move(other.m_function)),
           m_order(other.m_order)
       {}
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -479,6 +480,7 @@ namespace Rodin::Variational
         }
         return RangeType(result);
       }
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -488,6 +490,7 @@ namespace Rodin::Variational
       {
         return getValue(point.getPoint());
       }
+
       /**
        * @brief Returns the number of matrix rows.
        * @returns The number of matrix rows.
@@ -496,6 +499,7 @@ namespace Rodin::Variational
       {
         return m_rows;
       }
+
       /**
        * @brief Returns the number of matrix columns.
        * @returns The number of matrix columns.
@@ -504,6 +508,7 @@ namespace Rodin::Variational
       {
         return m_columns;
       }
+
       /**
        * @brief Declares polynomial order for coefficient quadrature selection.
        * @param order Polynomial order.
@@ -514,6 +519,7 @@ namespace Rodin::Variational
         m_order = order;
         return *this;
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
@@ -534,6 +540,7 @@ namespace Rodin::Variational
       F m_function;
       Optional<size_t> m_order;
   };
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param rows Number of rows.

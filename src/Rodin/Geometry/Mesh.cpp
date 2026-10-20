@@ -78,8 +78,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Local>&
-  Mesh<Context::Local>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
+  Mesh<Context::Local>& Mesh<Context::Local>::load(
+    const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
     switch (fmt)
     {
@@ -89,8 +89,7 @@ namespace Rodin::Geometry
         if (!input)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open " << filename << " for reading."
-            << Alert::Raise;
+            << "Failed to open " << filename << " for reading." << Alert::Raise;
         }
         IO::MeshLoader<IO::FileFormat::MFEM, Context> loader(*this);
         loader.load(input);
@@ -102,8 +101,7 @@ namespace Rodin::Geometry
         if (!input)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open " << filename << " for reading."
-            << Alert::Raise;
+            << "Failed to open " << filename << " for reading." << Alert::Raise;
         }
         IO::MeshLoader<IO::FileFormat::MEDIT, Context> loader(*this);
         loader.load(input);
@@ -118,8 +116,7 @@ namespace Rodin::Geometry
       default:
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Loading from \"" << fmt << "\" format unsupported."
-          << Alert::Raise;
+          << "Loading from \"" << fmt << "\" format unsupported." << Alert::Raise;
         break;
       }
     }
@@ -127,7 +124,7 @@ namespace Rodin::Geometry
   }
 
   void Mesh<Context::Local>::save(
-      const boost::filesystem::path& filename, IO::FileFormat fmt) const
+    const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
     switch (fmt)
     {
@@ -137,8 +134,7 @@ namespace Rodin::Geometry
         if (!ofs)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open " << filename << " for writing."
-            << Alert::Raise;
+            << "Failed to open " << filename << " for writing." << Alert::Raise;
         }
         IO::MeshPrinter<IO::FileFormat::MFEM, Context> printer(*this);
         printer.print(ofs);
@@ -150,8 +146,7 @@ namespace Rodin::Geometry
         if (!ofs)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open " << filename << " for writing."
-            << Alert::Raise;
+            << "Failed to open " << filename << " for writing." << Alert::Raise;
         }
         IO::MeshPrinter<IO::FileFormat::MEDIT, Context> printer(*this);
         printer.print(ofs);
@@ -166,8 +161,7 @@ namespace Rodin::Geometry
       default:
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Saving to \"" << fmt << "\" format unsupported."
-          << Alert::Raise;
+          << "Saving to \"" << fmt << "\" format unsupported." << Alert::Raise;
       }
     }
   }
@@ -177,7 +171,8 @@ namespace Rodin::Geometry
     return this->keep(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Local> Mesh<Context::Local>::keep(const FlatSet<Attribute>& attrs) const
+  SubMesh<Context::Local> Mesh<Context::Local>::keep(
+    const FlatSet<Attribute>& attrs) const
   {
     const size_t D = this->getDimension();
 
@@ -239,7 +234,8 @@ namespace Rodin::Geometry
     return trim(FlatSet<Attribute>{attr});
   }
 
-  SubMesh<Context::Local> Mesh<Context::Local>::trim(const FlatSet<Attribute>& attrs) const
+  SubMesh<Context::Local> Mesh<Context::Local>::trim(
+    const FlatSet<Attribute>& attrs) const
   {
     const size_t D = this->getDimension();
 
@@ -276,7 +272,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>& Mesh<Context::Local>::trace(
-      const Map<Attribute, Attribute>& interface, const FlatSet<Attribute>& attrs)
+    const Map<Attribute, Attribute>& interface, const FlatSet<Attribute>& attrs)
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
@@ -289,9 +285,7 @@ namespace Rodin::Geometry
 
       // Filter on current face attribute (if any).
       const auto fAttr = getAttribute(D - 1, f);
-      const bool selected =
-        attrs.size() == 0 ||
-        (fAttr && attrs.count(*fAttr));
+      const bool selected = attrs.size() == 0 || (fAttr && attrs.count(*fAttr));
 
       if (!selected)
         continue;
@@ -316,8 +310,8 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>& Mesh<Context::Local>::trace(
-      const Map<Pair<Attribute, Attribute>, Attribute>& interface,
-      const FlatSet<Attribute>& attrs)
+    const Map<Pair<Attribute, Attribute>, Attribute>& interface,
+    const FlatSet<Attribute>& attrs)
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
@@ -329,14 +323,12 @@ namespace Rodin::Geometry
       const Index f = it->getIndex();
 
       const auto fAttr = getAttribute(D - 1, f);
-      const bool selected =
-        attrs.size() == 0 ||
-        (fAttr && attrs.count(*fAttr));
+      const bool selected = attrs.size() == 0 || (fAttr && attrs.count(*fAttr));
 
       if (!selected)
         continue;
 
-      const auto& inc = conn.getIncidence({ D - 1, D }, f);
+      const auto& inc = conn.getIncidence({D - 1, D}, f);
       if (inc.size() != 2)
         continue;
 
@@ -348,7 +340,7 @@ namespace Rodin::Geometry
       if (!a1 || !a2)
         continue;
 
-      if (auto find = interface.find({ *a1, *a2 }); find != interface.end())
+      if (auto find = interface.find({*a1, *a2}); find != interface.end())
       {
         setAttribute({D - 1, f}, find->second);
       }
@@ -368,9 +360,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Local>&
-  Mesh<Context::Local>::setVertexCoordinates(
-      Index idx, const Math::SpatialVector<Real>& coords)
+  Mesh<Context::Local>& Mesh<Context::Local>::setVertexCoordinates(
+    Index idx, const Math::SpatialVector<Real>& coords)
   {
     for (size_t i = 0; i < static_cast<size_t>(coords.size()); ++i)
       m_vertices(i, idx) = coords[i];
@@ -378,8 +369,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Local>&
-  Mesh<Context::Local>::setVertexCoordinates(Index idx, Real xi, size_t i)
+  Mesh<Context::Local>& Mesh<Context::Local>::setVertexCoordinates(
+    Index idx, Real xi, size_t i)
   {
     m_vertices(i, idx) = xi;
     flush();
@@ -401,33 +392,27 @@ namespace Rodin::Geometry
     return m_sdim;
   }
 
-  Mesh<Context::Local>&
-  Mesh<Context::Local>::setPolytopeTransformation(
-      const std::pair<size_t, Index> p, PolytopeTransformation* trans)
+  Mesh<Context::Local>& Mesh<Context::Local>::setPolytopeTransformation(
+    const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
     const size_t d = p.first;
     m_transformations.set(
-        p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
+      p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
     m_quadratures.clear();
     return *this;
   }
 
-  const PolytopeQuadrature&
-  Mesh<Context::Local>::getQuadrature(
+  const PolytopeQuadrature& Mesh<Context::Local>::getQuadrature(
     size_t dimension, Index idx, const QF::QuadratureFormula& qf) const
   {
     const size_t count = this->getPolytopeCount(dimension);
-    return m_quadratures.get(
-        { dimension, idx }, count, qf,
-        [this, dimension, idx, &qf]()
-        {
-          return std::make_unique<PolytopeQuadrature>(
-              Polytope(dimension, idx, *this), qf);
-        });
+    return m_quadratures.get({dimension, idx}, count, qf, [this, dimension, idx, &qf]() {
+      return std::make_unique<PolytopeQuadrature>(Polytope(dimension, idx, *this), qf);
+    });
   }
 
-  PolytopeTransformation*
-  Mesh<Context::Local>::getDefaultPolytopeTransformation(size_t dimension, Index idx) const
+  PolytopeTransformation* Mesh<Context::Local>::getDefaultPolytopeTransformation(
+    size_t dimension, Index idx) const
   {
     if (dimension == 0)
     {
@@ -457,15 +442,14 @@ namespace Rodin::Geometry
     }
   }
 
-  const PolytopeTransformation&
-  Mesh<Context::Local>::getPolytopeTransformation(size_t d, Index i) const
+  const PolytopeTransformation& Mesh<Context::Local>::getPolytopeTransformation(
+    size_t d, Index i) const
   {
     const size_t count = this->getPolytopeCount(d);
-    return m_transformations.get({ d, i }, count,
-        [this](size_t dim, Index idx)
-        {
-          return std::unique_ptr<PolytopeTransformation>(this->getDefaultPolytopeTransformation(dim, idx));
-        });
+    return m_transformations.get({d, i}, count, [this](size_t dim, Index idx) {
+      return std::unique_ptr<PolytopeTransformation>(
+        this->getDefaultPolytopeTransformation(dim, idx));
+    });
   }
 
   Real Mesh<Context::Local>::getVolume() const
@@ -670,26 +654,23 @@ namespace Rodin::Geometry
 
   CellIterator Mesh<Context::Local>::getCell(Index idx) const
   {
-    return CellIterator(
-        *this, BoundedIndexGenerator(idx, this->getCellCount()));
+    return CellIterator(*this, BoundedIndexGenerator(idx, this->getCellCount()));
   }
 
   FaceIterator Mesh<Context::Local>::getFace(Index idx) const
   {
-    return FaceIterator(
-        *this, BoundedIndexGenerator(idx, this->getFaceCount()));
+    return FaceIterator(*this, BoundedIndexGenerator(idx, this->getFaceCount()));
   }
 
   VertexIterator Mesh<Context::Local>::getVertex(Index idx) const
   {
-    return VertexIterator(
-        *this, BoundedIndexGenerator(idx, this->getVertexCount()));
+    return VertexIterator(*this, BoundedIndexGenerator(idx, this->getVertexCount()));
   }
 
   PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension, Index idx) const
   {
     return PolytopeIterator(
-        dimension, *this, BoundedIndexGenerator(idx, this->getPolytopeCount(dimension)));
+      dimension, *this, BoundedIndexGenerator(idx, this->getPolytopeCount(dimension)));
   }
 
   bool Mesh<Context::Local>::isInterface(Index faceIdx) const
@@ -719,13 +700,14 @@ namespace Rodin::Geometry
     return m_connectivity.getGeometry(dimension, idx);
   }
 
-  Optional<Attribute> Mesh<Context::Local>::getAttribute(size_t dimension, Index index) const
+  Optional<Attribute> Mesh<Context::Local>::getAttribute(
+    size_t dimension, Index index) const
   {
-    return m_attributes.get({ dimension, index }, this->getPolytopeCount(dimension));
+    return m_attributes.get({dimension, index}, this->getPolytopeCount(dimension));
   }
 
-  Mesh<Context::Local>&
-  Mesh<Context::Local>::setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
+  Mesh<Context::Local>& Mesh<Context::Local>::setAttribute(
+    const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
   {
     const size_t dimension = p.first;
     m_attributes.set(p, this->getPolytopeCount(dimension), attr);
@@ -768,7 +750,8 @@ namespace Rodin::Geometry
     {
       if (it->get() == *this)
       {
-        return Point(*this->getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
+        return Point(*this->getPolytope(d, i), p.getReferenceCoordinates(),
+          p.getPhysicalCoordinates());
       }
       else if (it->get().isSubMesh())
       {
@@ -788,7 +771,8 @@ namespace Rodin::Geometry
     return {};
   }
 
-  Mesh<Context::Local> Mesh<Context::Local>::UniformGrid(Polytope::Type g, const Array<size_t>& dimensions)
+  Mesh<Context::Local> Mesh<Context::Local>::UniformGrid(
+    Polytope::Type g, const Array<size_t>& dimensions)
   {
     Builder build;
     const size_t dim = Polytope::Traits(g).getDimension();
@@ -825,12 +809,12 @@ namespace Rodin::Geometry
 
         // Vertices on a 1D uniform grid: 0, 1, ..., n-1
         for (size_t i = 0; i < n; ++i)
-          build.vertex({ static_cast<Real>(i) });
+          build.vertex({static_cast<Real>(i)});
 
         // Uniform segments [i, i+1]
         build.reserve(dim, n - 1);
         for (size_t i = 0; i + 1 < n; ++i)
-          build.polytope(g, { i, i + 1 });
+          build.polytope(g, {i, i + 1});
 
         return build.finalize();
       }
@@ -842,7 +826,7 @@ namespace Rodin::Geometry
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
-            build.vertex({ static_cast<Real>(i), static_cast<Real>(j) });
+            build.vertex({static_cast<Real>(i), static_cast<Real>(j)});
         }
 
         build.reserve(dim, 2 * (h - 1) * (w - 1));
@@ -850,8 +834,8 @@ namespace Rodin::Geometry
         {
           for (size_t j = 0; j < h - 1; j++)
           {
-            build.polytope(g, { i + j * w, (i + 1) + j * w , i + (j + 1) * w })
-                 .polytope(g, { (i + 1) + j * w, (i + 1) + (j + 1) * w, i + (j + 1) * w });
+            build.polytope(g, {i + j * w, (i + 1) + j * w, i + (j + 1) * w})
+              .polytope(g, {(i + 1) + j * w, (i + 1) + (j + 1) * w, i + (j + 1) * w});
           }
         }
         return build.finalize();
@@ -864,7 +848,7 @@ namespace Rodin::Geometry
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
-            build.vertex({ static_cast<Real>(i), static_cast<Real>(j) });
+            build.vertex({static_cast<Real>(i), static_cast<Real>(j)});
         }
 
         build.reserve(dim, (h - 1) * (w - 1));
@@ -872,10 +856,8 @@ namespace Rodin::Geometry
         {
           for (size_t j = 0; j < h - 1; j++)
           {
-            build.polytope(g, {
-                i + j * w, ( i + 1) + j * w,
-                (i + 1) + (j + 1) * w, i + (j + 1) * w
-            });
+            build.polytope(
+              g, {i + j * w, (i + 1) + j * w, (i + 1) + (j + 1) * w, i + (j + 1) * w});
           }
         }
 
@@ -887,9 +869,8 @@ namespace Rodin::Geometry
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
 
-        build.initialize(dim)
-             .nodes(w * h * d)
-             .reserve(dim, 6 * (w - 1) * (h - 1) * (d - 1));
+        build.initialize(dim).nodes(w * h * d).reserve(
+          dim, 6 * (w - 1) * (h - 1) * (d - 1));
 
         // Vertex coordinates: integer lattice (i, j, k)
         for (size_t k = 0; k < d; ++k)
@@ -898,16 +879,14 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i < w; ++i)
             {
-              build.vertex({ static_cast<Real>(i),
-                             static_cast<Real>(j),
-                             static_cast<Real>(k) });
+              build.vertex(
+                {static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)});
             }
           }
         }
 
         // Helper: v(i,j,k) = i + j*w + k*w*h
-        const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index
-        {
+        const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index {
           return static_cast<Index>(i + j * w + k * w * h);
         };
 
@@ -918,23 +897,23 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i + 1 < w; ++i)
             {
-              const Index v000 = vid(i,     j,     k);
-              const Index v100 = vid(i + 1, j,     k);
-              const Index v010 = vid(i,     j + 1, k);
+              const Index v000 = vid(i, j, k);
+              const Index v100 = vid(i + 1, j, k);
+              const Index v010 = vid(i, j + 1, k);
               const Index v110 = vid(i + 1, j + 1, k);
 
-              const Index v001 = vid(i,     j,     k + 1);
-              const Index v101 = vid(i + 1, j,     k + 1);
-              const Index v011 = vid(i,     j + 1, k + 1);
+              const Index v001 = vid(i, j, k + 1);
+              const Index v101 = vid(i + 1, j, k + 1);
+              const Index v011 = vid(i, j + 1, k + 1);
               const Index v111 = vid(i + 1, j + 1, k + 1);
 
               // All 6 have positive orientation for an axis-aligned cube.
-              build.polytope(g, { v000, v100, v110, v111 })
-                   .polytope(g, { v000, v110, v010, v111 })
-                   .polytope(g, { v000, v010, v011, v111 })
-                   .polytope(g, { v000, v011, v001, v111 })
-                   .polytope(g, { v000, v001, v101, v111 })
-                   .polytope(g, { v000, v101, v100, v111 });
+              build.polytope(g, {v000, v100, v110, v111})
+                .polytope(g, {v000, v110, v010, v111})
+                .polytope(g, {v000, v010, v011, v111})
+                .polytope(g, {v000, v011, v001, v111})
+                .polytope(g, {v000, v001, v101, v111})
+                .polytope(g, {v000, v101, v100, v111});
             }
           }
         }
@@ -953,9 +932,8 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i < w; i++)
             {
-              build.vertex({ static_cast<Real>(i),
-                             static_cast<Real>(j),
-                             static_cast<Real>(k) });
+              build.vertex(
+                {static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)});
             }
           }
         }
@@ -974,8 +952,8 @@ namespace Rodin::Geometry
               const Index v1p = v1 + w * h;
               const Index v2p = v2 + w * h;
               const Index v3p = v3 + w * h;
-              build.polytope(g, { v0, v1, v2, v0p, v1p, v2p });
-              build.polytope(g, { v1, v3, v2, v1p, v3p, v2p });
+              build.polytope(g, {v0, v1, v2, v0p, v1p, v2p});
+              build.polytope(g, {v1, v3, v2, v1p, v3p, v2p});
             }
           }
         }
@@ -1074,10 +1052,8 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i < w; ++i)
             {
-              build.vertex({
-                  static_cast<Real>(i),
-                  static_cast<Real>(j),
-                  static_cast<Real>(k) });
+              build.vertex(
+                {static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)});
             }
           }
         }
@@ -1097,16 +1073,16 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i < w - 1; ++i)
             {
-              const Index v0  =  i      +  j      * w +  k      * w * h;
-              const Index v1  = (i + 1) +  j      * w +  k      * w * h;
-              const Index v2  = (i + 1) + (j + 1) * w +  k      * w * h;
-              const Index v3  =  i      + (j + 1) * w +  k      * w * h;
+              const Index v0 = i + j * w + k * w * h;
+              const Index v1 = (i + 1) + j * w + k * w * h;
+              const Index v2 = (i + 1) + (j + 1) * w + k * w * h;
+              const Index v3 = i + (j + 1) * w + k * w * h;
               const Index v0p = v0 + w * h;
               const Index v1p = v1 + w * h;
               const Index v2p = v2 + w * h;
               const Index v3p = v3 + w * h;
 
-              build.polytope(g, { v0, v1, v2, v3, v0p, v1p, v2p, v3p });
+              build.polytope(g, {v0, v1, v2, v3, v0p, v1p, v2p, v3p});
             }
           }
         }
@@ -1122,10 +1098,10 @@ namespace Rodin::Geometry
     };
   }
 
-  Mesh<Context::Local>
-  Mesh<Context::Local>::Box(Polytope::Type faceType, const Array<size_t>& n)
+  Mesh<Context::Local> Mesh<Context::Local>::Box(
+    Polytope::Type faceType, const Array<size_t>& n)
   {
-    const size_t dim  = Polytope::Traits(faceType).getDimension();
+    const size_t dim = Polytope::Traits(faceType).getDimension();
     const size_t sdim = dim + 1;
     assert(static_cast<size_t>(n.size()) == sdim);
 
@@ -1140,8 +1116,8 @@ namespace Rodin::Geometry
         const size_t Nx = n.coeff(0);
         assert(Nx >= 1);
         build.nodes(2);
-        build.vertex({ Real(0) });
-        build.vertex({ Real(Nx) });
+        build.vertex({Real(0)});
+        build.vertex({Real(Nx)});
         return build.finalize();
       }
 
@@ -1153,34 +1129,49 @@ namespace Rodin::Geometry
 
         build.nodes(2 * Nx + 2 * Ny);
 
-        for (size_t i = 0; i <= Nx; ++i) { build.vertex({ Real(i), Real(0) }); }
-        for (size_t j = 1; j <= Ny; ++j) { build.vertex({ Real(Nx), Real(j) }); }
-        for (size_t i = Nx; i-- > 0; )  { build.vertex({ Real(i),  Real(Ny) }); }
-        for (size_t j = Ny; j-- > 1; )  { build.vertex({ Real(0),  Real(j)  }); }
+        for (size_t i = 0; i <= Nx; ++i)
+        {
+          build.vertex({Real(i), Real(0)});
+        }
+        for (size_t j = 1; j <= Ny; ++j)
+        {
+          build.vertex({Real(Nx), Real(j)});
+        }
+        for (size_t i = Nx; i-- > 0;)
+        {
+          build.vertex({Real(i), Real(Ny)});
+        }
+        for (size_t j = Ny; j-- > 1;)
+        {
+          build.vertex({Real(0), Real(j)});
+        }
 
         build.reserve(1, 2 * Nx + 2 * Ny);
 
         // bottom
         for (size_t i = 0; i < Nx; ++i)
         {
-          build.polytope(Polytope::Type::Segment, { Index(i), Index(i + 1) });
+          build.polytope(Polytope::Type::Segment, {Index(i), Index(i + 1)});
         }
         // right
         if (Ny >= 1)
         {
-          build.polytope(Polytope::Type::Segment, { Index(Nx), Index(Nx + 1) });
+          build.polytope(Polytope::Type::Segment, {Index(Nx), Index(Nx + 1)});
           for (size_t j = 0; j + 1 < Ny; ++j)
           {
-            build.polytope(Polytope::Type::Segment, { Index(Nx + 1 + j), Index(Nx + 1 + j + 1) });
+            build.polytope(
+              Polytope::Type::Segment, {Index(Nx + 1 + j), Index(Nx + 1 + j + 1)});
           }
         }
         // top
         if (Nx >= 1)
         {
-          build.polytope(Polytope::Type::Segment, { Index(Nx + (Ny ? Ny : 0)), Index(Nx + Ny + 1) });
+          build.polytope(
+            Polytope::Type::Segment, {Index(Nx + (Ny ? Ny : 0)), Index(Nx + Ny + 1)});
           for (size_t t = 0; t + 1 < Nx; ++t)
           {
-            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + 1 + t), Index(Nx + Ny + 1 + t + 1) });
+            build.polytope(Polytope::Type::Segment,
+              {Index(Nx + Ny + 1 + t), Index(Nx + Ny + 1 + t + 1)});
           }
         }
         // left
@@ -1188,16 +1179,20 @@ namespace Rodin::Geometry
         {
           if (Ny > 1)
           {
-            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + (Nx ? Nx : 0)), Index(Nx + Ny + Nx + 1) });
+            build.polytope(Polytope::Type::Segment,
+              {Index(Nx + Ny + (Nx ? Nx : 0)), Index(Nx + Ny + Nx + 1)});
             for (size_t l = 0; l + 1 < Ny - 1; ++l)
             {
-              build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + Nx + 1 + l), Index(Nx + Ny + Nx + 1 + l + 1) });
+              build.polytope(Polytope::Type::Segment,
+                {Index(Nx + Ny + Nx + 1 + l), Index(Nx + Ny + Nx + 1 + l + 1)});
             }
-            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + Nx + (Ny - 1)), Index(0) });
+            build.polytope(
+              Polytope::Type::Segment, {Index(Nx + Ny + Nx + (Ny - 1)), Index(0)});
           }
           else
           {
-            build.polytope(Polytope::Type::Segment, { Index(Nx + Ny + (Nx ? Nx : 0)), Index(0) });
+            build.polytope(
+              Polytope::Type::Segment, {Index(Nx + Ny + (Nx ? Nx : 0)), Index(0)});
           }
         }
 
@@ -1213,12 +1208,13 @@ namespace Rodin::Geometry
         const size_t Lx = Nx + 1, Ly = Ny + 1;
 
         // vertex counts by blocks
-        const size_t cntZ0 = Lx * Ly;                                  // z=0
-        const size_t cntZN = Lx * Ly;                                  // z=Nz
-        const size_t cntX0 = (Nz >= 2 ? (Nz - 1) * Ly : 0);            // x=0, k=1..Nz-1
-        const size_t cntXN = (Nz >= 2 ? (Nz - 1) * Ly : 0);            // x=Nx, k=1..Nz-1
-        const size_t cntY0 = (Nx >= 2 && Nz >= 2 ? (Nx - 1) * (Nz - 1) : 0); // y=0,  i=1..Nx-1,k=1..Nz-1
-        const size_t cntYN = cntY0;                                    // y=Ny
+        const size_t cntZ0 = Lx * Ly; // z=0
+        const size_t cntZN = Lx * Ly; // z=Nz
+        const size_t cntX0 = (Nz >= 2 ? (Nz - 1) * Ly : 0); // x=0, k=1..Nz-1
+        const size_t cntXN = (Nz >= 2 ? (Nz - 1) * Ly : 0); // x=Nx, k=1..Nz-1
+        const size_t cntY0 =
+          (Nx >= 2 && Nz >= 2 ? (Nx - 1) * (Nz - 1) : 0); // y=0,  i=1..Nx-1,k=1..Nz-1
+        const size_t cntYN = cntY0; // y=Ny
 
         // offsets
         const size_t offZ0 = 0;
@@ -1235,7 +1231,7 @@ namespace Rodin::Geometry
         {
           for (size_t i = 0; i < Lx; ++i)
           {
-            build.vertex({ Real(i), Real(j), Real(0) });
+            build.vertex({Real(i), Real(j), Real(0)});
           }
         }
         // z=Nz
@@ -1243,7 +1239,7 @@ namespace Rodin::Geometry
         {
           for (size_t i = 0; i < Lx; ++i)
           {
-            build.vertex({ Real(i), Real(j), Real(Nz) });
+            build.vertex({Real(i), Real(j), Real(Nz)});
           }
         }
         // x=0, k=1..Nz-1
@@ -1253,7 +1249,7 @@ namespace Rodin::Geometry
           {
             for (size_t j = 0; j < Ly; ++j)
             {
-              build.vertex({ Real(0), Real(j), Real(k) });
+              build.vertex({Real(0), Real(j), Real(k)});
             }
           }
         }
@@ -1264,7 +1260,7 @@ namespace Rodin::Geometry
           {
             for (size_t j = 0; j < Ly; ++j)
             {
-              build.vertex({ Real(Nx), Real(j), Real(k) });
+              build.vertex({Real(Nx), Real(j), Real(k)});
             }
           }
         }
@@ -1275,7 +1271,7 @@ namespace Rodin::Geometry
           {
             for (size_t i = 1; i <= Nx - 1; ++i)
             {
-              build.vertex({ Real(i), Real(0), Real(k) });
+              build.vertex({Real(i), Real(0), Real(k)});
             }
           }
         }
@@ -1286,7 +1282,7 @@ namespace Rodin::Geometry
           {
             for (size_t i = 1; i <= Nx - 1; ++i)
             {
-              build.vertex({ Real(i), Real(Ny), Real(k) });
+              build.vertex({Real(i), Real(Ny), Real(k)});
             }
           }
         }
@@ -1302,8 +1298,8 @@ namespace Rodin::Geometry
             Index b = Index(offZ0 + (i + 1) + (j + 0) * Lx);
             Index c = Index(offZ0 + (i + 1) + (j + 1) * Lx);
             Index d = Index(offZ0 + (i + 0) + (j + 1) * Lx);
-            build.polytope(Polytope::Type::Triangle, { a, c, b });
-            build.polytope(Polytope::Type::Triangle, { a, d, c });
+            build.polytope(Polytope::Type::Triangle, {a, c, b});
+            build.polytope(Polytope::Type::Triangle, {a, d, c});
           }
         }
         // z = Nz (+z outward)
@@ -1315,8 +1311,8 @@ namespace Rodin::Geometry
             Index b = Index(offZN + (i + 0) + (j + 1) * Lx);
             Index c = Index(offZN + (i + 1) + (j + 1) * Lx);
             Index d = Index(offZN + (i + 1) + (j + 0) * Lx);
-            build.polytope(Polytope::Type::Triangle, { a, b, c });
-            build.polytope(Polytope::Type::Triangle, { a, c, d });
+            build.polytope(Polytope::Type::Triangle, {a, b, c});
+            build.polytope(Polytope::Type::Triangle, {a, c, d});
           }
         }
         // x = 0  (-x outward)
@@ -1326,12 +1322,16 @@ namespace Rodin::Geometry
           {
             for (size_t k = 0; k < Nz; ++k)
             {
-              Index a = (k == 0)      ? Index(offZ0 + 0 + (j + 0) * Lx) : Index(offX0 + (k - 1) * Ly + (j + 0));
-              Index b = (k == 0)      ? Index(offZ0 + 0 + (j + 1) * Lx) : Index(offX0 + (k - 1) * Ly + (j + 1));
-              Index c = (k + 1 == Nz) ? Index(offZN + 0 + (j + 1) * Lx) : Index(offX0 + (k + 0) * Ly + (j + 1));
-              Index d = (k + 1 == Nz) ? Index(offZN + 0 + (j + 0) * Lx) : Index(offX0 + (k + 0) * Ly + (j + 0));
-              build.polytope(Polytope::Type::Triangle, { a, b, c });
-              build.polytope(Polytope::Type::Triangle, { a, c, d });
+              Index a = (k == 0) ? Index(offZ0 + 0 + (j + 0) * Lx)
+                                 : Index(offX0 + (k - 1) * Ly + (j + 0));
+              Index b = (k == 0) ? Index(offZ0 + 0 + (j + 1) * Lx)
+                                 : Index(offX0 + (k - 1) * Ly + (j + 1));
+              Index c = (k + 1 == Nz) ? Index(offZN + 0 + (j + 1) * Lx)
+                                      : Index(offX0 + (k + 0) * Ly + (j + 1));
+              Index d = (k + 1 == Nz) ? Index(offZN + 0 + (j + 0) * Lx)
+                                      : Index(offX0 + (k + 0) * Ly + (j + 0));
+              build.polytope(Polytope::Type::Triangle, {a, b, c});
+              build.polytope(Polytope::Type::Triangle, {a, c, d});
             }
           }
         }
@@ -1342,12 +1342,16 @@ namespace Rodin::Geometry
           {
             for (size_t k = 0; k < Nz; ++k)
             {
-              Index a = (k == 0)      ? Index(offZ0 + Nx + (j + 0) * Lx) : Index(offXN + (k - 1) * Ly + (j + 0));
-              Index b = (k + 1 == Nz) ? Index(offZN + Nx + (j + 0) * Lx) : Index(offXN + (k + 0) * Ly + (j + 0));
-              Index c = (k + 1 == Nz) ? Index(offZN + Nx + (j + 1) * Lx) : Index(offXN + (k + 0) * Ly + (j + 1));
-              Index d = (k == 0)      ? Index(offZ0 + Nx + (j + 1) * Lx) : Index(offXN + (k - 1) * Ly + (j + 1));
-              build.polytope(Polytope::Type::Triangle, { a, b, c });
-              build.polytope(Polytope::Type::Triangle, { a, c, d });
+              Index a = (k == 0) ? Index(offZ0 + Nx + (j + 0) * Lx)
+                                 : Index(offXN + (k - 1) * Ly + (j + 0));
+              Index b = (k + 1 == Nz) ? Index(offZN + Nx + (j + 0) * Lx)
+                                      : Index(offXN + (k + 0) * Ly + (j + 0));
+              Index c = (k + 1 == Nz) ? Index(offZN + Nx + (j + 1) * Lx)
+                                      : Index(offXN + (k + 0) * Ly + (j + 1));
+              Index d = (k == 0) ? Index(offZ0 + Nx + (j + 1) * Lx)
+                                 : Index(offXN + (k - 1) * Ly + (j + 1));
+              build.polytope(Polytope::Type::Triangle, {a, b, c});
+              build.polytope(Polytope::Type::Triangle, {a, c, d});
             }
           }
         }
@@ -1358,22 +1362,26 @@ namespace Rodin::Geometry
           {
             for (size_t k = 0; k < Nz; ++k)
             {
-              Index a = (k == 0)      ? Index(offZ0 + (i + 0) + 0 * Lx)
-                                      : (i == 0 ? Index(offX0 + (k - 1) * Ly + 0)
-                                                : (i == Nx ? Index(offXN + (k - 1) * Ly + 0)
-                                                           : Index(offY0 + (k - 1) * (Lx - 2) + (i - 1))));
-              Index b = (k + 1 == Nz) ? Index(offZN + (i + 0) + 0 * Lx)
-                                      : (i == 0 ? Index(offX0 + (k + 0) * Ly + 0)
-                                                : (i == Nx ? Index(offXN + (k + 0) * Ly + 0)
-                                                           : Index(offY0 + (k + 0) * (Lx - 2) + (i - 1))));
-              Index c = (k + 1 == Nz) ? Index(offZN + (i + 1) + 0 * Lx)
-                                      : (i + 1 == Nx ? Index(offXN + (k + 0) * Ly + 0)
-                                                     : Index(offY0 + (k + 0) * (Lx - 2) + (i + 0)));
-              Index d = (k == 0)      ? Index(offZ0 + (i + 1) + 0 * Lx)
-                                      : (i + 1 == Nx ? Index(offXN + (k - 1) * Ly + 0)
-                                                     : Index(offY0 + (k - 1) * (Lx - 2) + (i + 0)));
-              build.polytope(Polytope::Type::Triangle, { a, b, c });
-              build.polytope(Polytope::Type::Triangle, { a, c, d });
+              Index a = (k == 0)
+                ? Index(offZ0 + (i + 0) + 0 * Lx)
+                : (i == 0 ? Index(offX0 + (k - 1) * Ly + 0)
+                          : (i == Nx ? Index(offXN + (k - 1) * Ly + 0)
+                                     : Index(offY0 + (k - 1) * (Lx - 2) + (i - 1))));
+              Index b = (k + 1 == Nz)
+                ? Index(offZN + (i + 0) + 0 * Lx)
+                : (i == 0 ? Index(offX0 + (k + 0) * Ly + 0)
+                          : (i == Nx ? Index(offXN + (k + 0) * Ly + 0)
+                                     : Index(offY0 + (k + 0) * (Lx - 2) + (i - 1))));
+              Index c = (k + 1 == Nz)
+                ? Index(offZN + (i + 1) + 0 * Lx)
+                : (i + 1 == Nx ? Index(offXN + (k + 0) * Ly + 0)
+                               : Index(offY0 + (k + 0) * (Lx - 2) + (i + 0)));
+              Index d = (k == 0)
+                ? Index(offZ0 + (i + 1) + 0 * Lx)
+                : (i + 1 == Nx ? Index(offXN + (k - 1) * Ly + 0)
+                               : Index(offY0 + (k - 1) * (Lx - 2) + (i + 0)));
+              build.polytope(Polytope::Type::Triangle, {a, b, c});
+              build.polytope(Polytope::Type::Triangle, {a, c, d});
             }
           }
         }
@@ -1384,22 +1392,26 @@ namespace Rodin::Geometry
           {
             for (size_t k = 0; k < Nz; ++k)
             {
-              Index a = (k == 0)      ? Index(offZ0 + (i + 0) + Ny * Lx)
-                                      : (i == 0 ? Index(offX0 + (k - 1) * Ly + Ny)
-                                                : (i == Nx ? Index(offXN + (k - 1) * Ly + Ny)
-                                                           : Index(offYN + (k - 1) * (Lx - 2) + (i - 1))));
-              Index b = (k == 0)      ? Index(offZ0 + (i + 1) + Ny * Lx)
-                                      : (i + 1 == Nx ? Index(offXN + (k - 1) * Ly + Ny)
-                                                     : Index(offYN + (k - 1) * (Lx - 2) + (i + 0)));
-              Index c = (k + 1 == Nz) ? Index(offZN + (i + 1) + Ny * Lx)
-                                      : (i + 1 == Nx ? Index(offXN + (k + 0) * Ly + Ny)
-                                                     : Index(offYN + (k + 0) * (Lx - 2) + (i + 0)));
-              Index d = (k + 1 == Nz) ? Index(offZN + (i + 0) + Ny * Lx)
-                                      : (i == 0 ? Index(offX0 + (k + 0) * Ly + Ny)
-                                                : (i == Nx ? Index(offXN + (k + 0) * Ly + Ny)
-                                                           : Index(offYN + (k + 0) * (Lx - 2) + (i - 1))));
-              build.polytope(Polytope::Type::Triangle, { a, b, c });
-              build.polytope(Polytope::Type::Triangle, { a, c, d });
+              Index a = (k == 0)
+                ? Index(offZ0 + (i + 0) + Ny * Lx)
+                : (i == 0 ? Index(offX0 + (k - 1) * Ly + Ny)
+                          : (i == Nx ? Index(offXN + (k - 1) * Ly + Ny)
+                                     : Index(offYN + (k - 1) * (Lx - 2) + (i - 1))));
+              Index b = (k == 0)
+                ? Index(offZ0 + (i + 1) + Ny * Lx)
+                : (i + 1 == Nx ? Index(offXN + (k - 1) * Ly + Ny)
+                               : Index(offYN + (k - 1) * (Lx - 2) + (i + 0)));
+              Index c = (k + 1 == Nz)
+                ? Index(offZN + (i + 1) + Ny * Lx)
+                : (i + 1 == Nx ? Index(offXN + (k + 0) * Ly + Ny)
+                               : Index(offYN + (k + 0) * (Lx - 2) + (i + 0)));
+              Index d = (k + 1 == Nz)
+                ? Index(offZN + (i + 0) + Ny * Lx)
+                : (i == 0 ? Index(offX0 + (k + 0) * Ly + Ny)
+                          : (i == Nx ? Index(offXN + (k + 0) * Ly + Ny)
+                                     : Index(offYN + (k + 0) * (Lx - 2) + (i - 1))));
+              build.polytope(Polytope::Type::Triangle, {a, b, c});
+              build.polytope(Polytope::Type::Triangle, {a, c, d});
             }
           }
         }
@@ -1438,14 +1450,14 @@ namespace Rodin::Geometry
         {
           for (size_t i = 0; i < Lx; ++i)
           {
-            build.vertex({ Real(i), Real(j), Real(0) });
+            build.vertex({Real(i), Real(j), Real(0)});
           }
         }
         for (size_t j = 0; j < Ly; ++j)
         {
           for (size_t i = 0; i < Lx; ++i)
           {
-            build.vertex({ Real(i), Real(j), Real(Nz) });
+            build.vertex({Real(i), Real(j), Real(Nz)});
           }
         }
         if (Nz >= 2)
@@ -1454,7 +1466,7 @@ namespace Rodin::Geometry
           {
             for (size_t j = 0; j < Ly; ++j)
             {
-              build.vertex({ Real(0), Real(j), Real(k) });
+              build.vertex({Real(0), Real(j), Real(k)});
             }
           }
         }
@@ -1464,7 +1476,7 @@ namespace Rodin::Geometry
           {
             for (size_t j = 0; j < Ly; ++j)
             {
-              build.vertex({ Real(Nx), Real(j), Real(k) });
+              build.vertex({Real(Nx), Real(j), Real(k)});
             }
           }
         }
@@ -1474,7 +1486,7 @@ namespace Rodin::Geometry
           {
             for (size_t i = 1; i <= Nx - 1; ++i)
             {
-              build.vertex({ Real(i), Real(0), Real(k) });
+              build.vertex({Real(i), Real(0), Real(k)});
             }
           }
         }
@@ -1484,7 +1496,7 @@ namespace Rodin::Geometry
           {
             for (size_t i = 1; i <= Nx - 1; ++i)
             {
-              build.vertex({ Real(i), Real(Ny), Real(k) });
+              build.vertex({Real(i), Real(Ny), Real(k)});
             }
           }
         }
@@ -1496,12 +1508,11 @@ namespace Rodin::Geometry
         {
           for (size_t i = 0; i < Nx; ++i)
           {
-            build.polytope(Polytope::Type::Quadrilateral, {
-              Index(offZ0 + (i + 0) + (j + 0) * Lx),
-              Index(offZ0 + (i + 1) + (j + 0) * Lx),
-              Index(offZ0 + (i + 0) + (j + 1) * Lx),
-              Index(offZ0 + (i + 1) + (j + 1) * Lx)
-            });
+            build.polytope(Polytope::Type::Quadrilateral,
+              {Index(offZ0 + (i + 0) + (j + 0) * Lx),
+                Index(offZ0 + (i + 1) + (j + 0) * Lx),
+                Index(offZ0 + (i + 0) + (j + 1) * Lx),
+                Index(offZ0 + (i + 1) + (j + 1) * Lx)});
           }
         }
 
@@ -1510,12 +1521,11 @@ namespace Rodin::Geometry
         {
           for (size_t i = 0; i < Nx; ++i)
           {
-            build.polytope(Polytope::Type::Quadrilateral, {
-              Index(offZN + (i + 0) + (j + 0) * Lx),
-              Index(offZN + (i + 0) + (j + 1) * Lx),
-              Index(offZN + (i + 1) + (j + 0) * Lx),
-              Index(offZN + (i + 1) + (j + 1) * Lx)
-            });
+            build.polytope(Polytope::Type::Quadrilateral,
+              {Index(offZN + (i + 0) + (j + 0) * Lx),
+                Index(offZN + (i + 0) + (j + 1) * Lx),
+                Index(offZN + (i + 1) + (j + 0) * Lx),
+                Index(offZN + (i + 1) + (j + 1) * Lx)});
           }
         }
 
@@ -1524,12 +1534,15 @@ namespace Rodin::Geometry
         {
           for (size_t k = 0; k < Nz; ++k)
           {
-            build.polytope(Polytope::Type::Quadrilateral, {
-              Index((k == 0)      ? (offZ0 + 0 + (j + 0) * Lx) : (offX0 + (k - 1) * Ly + (j + 0))),
-              Index((k == 0)      ? (offZ0 + 0 + (j + 1) * Lx) : (offX0 + (k - 1) * Ly + (j + 1))),
-              Index((k + 1 == Nz) ? (offZN + 0 + (j + 0) * Lx) : (offX0 + (k + 0) * Ly + (j + 0))),
-              Index((k + 1 == Nz) ? (offZN + 0 + (j + 1) * Lx) : (offX0 + (k + 0) * Ly + (j + 1)))
-            });
+            build.polytope(Polytope::Type::Quadrilateral,
+              {Index((k == 0) ? (offZ0 + 0 + (j + 0) * Lx)
+                              : (offX0 + (k - 1) * Ly + (j + 0))),
+                Index((k == 0) ? (offZ0 + 0 + (j + 1) * Lx)
+                               : (offX0 + (k - 1) * Ly + (j + 1))),
+                Index((k + 1 == Nz) ? (offZN + 0 + (j + 0) * Lx)
+                                    : (offX0 + (k + 0) * Ly + (j + 0))),
+                Index((k + 1 == Nz) ? (offZN + 0 + (j + 1) * Lx)
+                                    : (offX0 + (k + 0) * Ly + (j + 1)))});
           }
         }
 
@@ -1538,12 +1551,15 @@ namespace Rodin::Geometry
         {
           for (size_t k = 0; k < Nz; ++k)
           {
-            build.polytope(Polytope::Type::Quadrilateral, {
-              Index((k == 0)      ? (offZ0 + Nx + (j + 0) * Lx) : (offXN + (k - 1) * Ly + (j + 0))),
-              Index((k + 1 == Nz) ? (offZN + Nx + (j + 0) * Lx) : (offXN + (k + 0) * Ly + (j + 0))),
-              Index((k == 0)      ? (offZ0 + Nx + (j + 1) * Lx) : (offXN + (k - 1) * Ly + (j + 1))),
-              Index((k + 1 == Nz) ? (offZN + Nx + (j + 1) * Lx) : (offXN + (k + 0) * Ly + (j + 1)))
-            });
+            build.polytope(Polytope::Type::Quadrilateral,
+              {Index((k == 0) ? (offZ0 + Nx + (j + 0) * Lx)
+                              : (offXN + (k - 1) * Ly + (j + 0))),
+                Index((k + 1 == Nz) ? (offZN + Nx + (j + 0) * Lx)
+                                    : (offXN + (k + 0) * Ly + (j + 0))),
+                Index((k == 0) ? (offZ0 + Nx + (j + 1) * Lx)
+                               : (offXN + (k - 1) * Ly + (j + 1))),
+                Index((k + 1 == Nz) ? (offZN + Nx + (j + 1) * Lx)
+                                    : (offXN + (k + 0) * Ly + (j + 1)))});
           }
         }
 
@@ -1552,22 +1568,24 @@ namespace Rodin::Geometry
         {
           for (size_t k = 0; k < Nz; ++k)
           {
-            build.polytope(Polytope::Type::Quadrilateral, {
-              Index((k == 0)      ? (offZ0 + (i + 0) + 0 * Lx)
-                                   : (i == 0 ? (offX0 + (k - 1) * Ly + 0)
-                                             : (i == Nx ? (offXN + (k - 1) * Ly + 0)
-                                                        : (offY0 + (k - 1) * (Lx - 2) + (i - 1))))),
-              Index((k == 0)      ? (offZ0 + (i + 1) + 0 * Lx)
-                                   : (i + 1 == Nx ? (offXN + (k - 1) * Ly + 0)
-                                                  : (offY0 + (k - 1) * (Lx - 2) + (i + 0)))),
-              Index((k + 1 == Nz) ? (offZN + (i + 0) + 0 * Lx)
-                                   : (i == 0 ? (offX0 + (k + 0) * Ly + 0)
-                                             : (i == Nx ? (offXN + (k + 0) * Ly + 0)
-                                                        : (offY0 + (k + 0) * (Lx - 2) + (i - 1))))),
-              Index((k + 1 == Nz) ? (offZN + (i + 1) + 0 * Lx)
-                                   : (i + 1 == Nx ? (offXN + (k + 0) * Ly + 0)
-                                                  : (offY0 + (k + 0) * (Lx - 2) + (i + 0))))
-            });
+            build.polytope(Polytope::Type::Quadrilateral,
+              {Index((k == 0)
+                   ? (offZ0 + (i + 0) + 0 * Lx)
+                   : (i == 0 ? (offX0 + (k - 1) * Ly + 0)
+                             : (i == Nx ? (offXN + (k - 1) * Ly + 0)
+                                        : (offY0 + (k - 1) * (Lx - 2) + (i - 1))))),
+                Index((k == 0) ? (offZ0 + (i + 1) + 0 * Lx)
+                               : (i + 1 == Nx ? (offXN + (k - 1) * Ly + 0)
+                                              : (offY0 + (k - 1) * (Lx - 2) + (i + 0)))),
+                Index((k + 1 == Nz)
+                    ? (offZN + (i + 0) + 0 * Lx)
+                    : (i == 0 ? (offX0 + (k + 0) * Ly + 0)
+                              : (i == Nx ? (offXN + (k + 0) * Ly + 0)
+                                         : (offY0 + (k + 0) * (Lx - 2) + (i - 1))))),
+                Index((k + 1 == Nz)
+                    ? (offZN + (i + 1) + 0 * Lx)
+                    : (i + 1 == Nx ? (offXN + (k + 0) * Ly + 0)
+                                   : (offY0 + (k + 0) * (Lx - 2) + (i + 0))))});
           }
         }
 
@@ -1576,22 +1594,24 @@ namespace Rodin::Geometry
         {
           for (size_t k = 0; k < Nz; ++k)
           {
-            build.polytope(Polytope::Type::Quadrilateral, {
-              Index((k == 0)      ? (offZ0 + (i + 0) + Ny * Lx)
-                                   : (i == 0 ? (offX0 + (k - 1) * Ly + Ny)
-                                             : (i == Nx ? (offXN + (k - 1) * Ly + Ny)
-                                                        : (offYN + (k - 1) * (Lx - 2) + (i - 1))))),
-              Index((k == 0)      ? (offZ0 + (i + 1) + Ny * Lx)
-                                   : (i + 1 == Nx ? (offXN + (k - 1) * Ly + Ny)
-                                                  : (offYN + (k - 1) * (Lx - 2) + (i + 0)))),
-              Index((k + 1 == Nz) ? (offZN + (i + 0) + Ny * Lx)
-                                   : (i == 0 ? (offX0 + (k + 0) * Ly + Ny)
-                                             : (i == Nx ? (offXN + (k + 0) * Ly + Ny)
-                                                        : (offYN + (k + 0) * (Lx - 2) + (i - 1))))),
-              Index((k + 1 == Nz) ? (offZN + (i + 1) + Ny * Lx)
-                                   : (i + 1 == Nx ? (offXN + (k + 0) * Ly + Ny)
-                                                  : (offYN + (k + 0) * (Lx - 2) + (i + 0))))
-            });
+            build.polytope(Polytope::Type::Quadrilateral,
+              {Index((k == 0)
+                   ? (offZ0 + (i + 0) + Ny * Lx)
+                   : (i == 0 ? (offX0 + (k - 1) * Ly + Ny)
+                             : (i == Nx ? (offXN + (k - 1) * Ly + Ny)
+                                        : (offYN + (k - 1) * (Lx - 2) + (i - 1))))),
+                Index((k == 0) ? (offZ0 + (i + 1) + Ny * Lx)
+                               : (i + 1 == Nx ? (offXN + (k - 1) * Ly + Ny)
+                                              : (offYN + (k - 1) * (Lx - 2) + (i + 0)))),
+                Index((k + 1 == Nz)
+                    ? (offZN + (i + 0) + Ny * Lx)
+                    : (i == 0 ? (offX0 + (k + 0) * Ly + Ny)
+                              : (i == Nx ? (offXN + (k + 0) * Ly + Ny)
+                                         : (offYN + (k + 0) * (Lx - 2) + (i - 1))))),
+                Index((k + 1 == Nz)
+                    ? (offZN + (i + 1) + Ny * Lx)
+                    : (i + 1 == Nx ? (offXN + (k + 0) * Ly + Ny)
+                                   : (offYN + (k + 0) * (Lx - 2) + (i + 0))))});
           }
         }
 
@@ -1606,4 +1626,5 @@ namespace Rodin::Geometry
     }
   }
 }
+
 /// @endcond

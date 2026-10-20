@@ -58,7 +58,10 @@ namespace Rodin::IO
       }
 
     protected:
-      ObjectType& getObject() override { return m_gf.get(); }
+      ObjectType& getObject() override
+      {
+        return m_gf.get();
+      }
 
     private:
       std::reference_wrapper<ObjectType> m_gf;

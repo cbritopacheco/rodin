@@ -53,12 +53,14 @@ namespace Rodin::FormLanguage
    * space and the shape function space.
    */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
+  struct Traits<
+    Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -92,8 +94,7 @@ namespace Rodin::Variational
        * Creates the trace operator @f$ \text{tr}(A) = \sum_{i=1}^n A_{ii} @f$
        * for a square matrix @f$ A @f$.
        */
-      constexpr
-      Trace(const OperandType& m)
+      constexpr Trace(const OperandType& m)
         : m_operand(m.copy())
       {}
 
@@ -101,8 +102,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Trace to copy
        */
-      constexpr
-      Trace(const Trace& other)
+      constexpr Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
@@ -111,8 +111,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Trace to move from
        */
-      constexpr
-      Trace(Trace&& other)
+      constexpr Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
@@ -125,8 +124,7 @@ namespace Rodin::Variational
        * Computes the sum of diagonal entries of the matrix at the given point.
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p).trace();
       }
@@ -135,8 +133,7 @@ namespace Rodin::Variational
        * @brief Gets the operand matrix function.
        * @return Reference to the matrix being traced
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -147,9 +144,8 @@ namespace Rodin::Variational
        * @param[in] args Arguments forwarded to operand's traceOf method
        * @return Reference to this trace operator
        */
-      template <class ... Args>
-      constexpr
-      Trace& traceOf(const Args& ... args)
+      template <class... Args>
+      constexpr Trace& traceOf(const Args&... args)
       {
         m_operand->traceOf(args...);
         return *this;
@@ -160,8 +156,7 @@ namespace Rodin::Variational
        * @param p Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }
@@ -194,6 +189,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -207,8 +203,7 @@ namespace Rodin::Variational
        * @brief Constructs the expression from its operand.
        * @param operand Operand expression.
        */
-      constexpr
-      Trace(const OperandType& operand)
+      constexpr Trace(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
@@ -217,8 +212,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Trace(const Trace& other)
+      constexpr Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
@@ -227,8 +221,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Trace(Trace&& other)
+      constexpr Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
@@ -237,8 +230,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return *m_operand;
       }
@@ -247,8 +239,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -258,8 +249,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -300,8 +290,7 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).trace();
       }
@@ -320,8 +309,7 @@ namespace Rodin::Variational
        * @param p Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }
@@ -330,6 +318,7 @@ namespace Rodin::Variational
       {
         return new Trace(*this);
       }
+
     private:
       std::unique_ptr<OperandType> m_operand;
   };

@@ -102,11 +102,11 @@ namespace Rodin::Variational
     class MuDerived>
   class LinearElasticityForm final : public BilinearFormBase<Operator>
   {
-      using MeshType = typename FormLanguage::Traits<FES>::MeshType;
-      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    using MeshType = typename FormLanguage::Traits<FES>::MeshType;
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
 
-      static_assert(FormLanguage::IsVectorRange<
-        typename FormLanguage::Traits<FES>::RangeType>::Value);
+    static_assert(FormLanguage::IsVectorRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value);
 
     public:
       /// @brief Solution type of the trial function.

@@ -70,9 +70,9 @@ namespace Rodin::Tests::Unit
 
     // C = F^T F = [[1, 0.1], [0.1, 1.01]]
     const auto& C = state.getRightCauchyGreenTensor();
-    EXPECT_NEAR(C(0, 0), 1.0,  1e-14);
-    EXPECT_NEAR(C(0, 1), 0.1,  1e-14);
-    EXPECT_NEAR(C(1, 0), 0.1,  1e-14);
+    EXPECT_NEAR(C(0, 0), 1.0, 1e-14);
+    EXPECT_NEAR(C(0, 1), 0.1, 1e-14);
+    EXPECT_NEAR(C(1, 0), 0.1, 1e-14);
     EXPECT_NEAR(C(1, 1), 1.01, 1e-14);
   }
 
@@ -158,7 +158,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.0;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.0;
     state.setDisplacementGradient(H);
 
     Math::SpatialVector<Real> a0(2);
@@ -240,7 +243,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.1;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.1;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -263,7 +269,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
 
     Solid::NeoHookean::Cache cache;
@@ -272,7 +281,10 @@ namespace Rodin::Tests::Unit
 
     // Test tangent via finite differences
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
     law.getMaterialTangent(dP_analytical, cache, cp, dF);
@@ -338,7 +350,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
@@ -346,7 +361,10 @@ namespace Rodin::Tests::Unit
     law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
     law.getMaterialTangent(dP_analytical, cache, cp, dF);
@@ -384,7 +402,10 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
     const Real eps = 1e-6;
-    H(0,0)=eps; H(0,1)=0.5*eps; H(1,0)=0.5*eps; H(1,1)=2.0*eps;
+    H(0, 0) = eps;
+    H(0, 1) = 0.5 * eps;
+    H(1, 0) = 0.5 * eps;
+    H(1, 1) = 2.0 * eps;
     state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
@@ -397,7 +418,8 @@ namespace Rodin::Tests::Unit
     // For infinitesimal strain, P ~ sigma = lambda tr(epsilon) I + 2 mu epsilon
     // where epsilon = 0.5 (H + H^T)
     Math::SpatialMatrix<Real> epsilon = 0.5 * (H + H.transpose());
-    Math::SpatialMatrix<Real> I2(2,2); I2.setIdentity();
+    Math::SpatialMatrix<Real> I2(2, 2);
+    I2.setIdentity();
     Math::SpatialMatrix<Real> sigma = lambda * epsilon.trace() * I2 + 2.0 * mu * epsilon;
 
     for (int i = 0; i < 2; ++i)
@@ -443,7 +465,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
 
     Solid::MooneyRivlin::Cache cache;
@@ -451,7 +476,10 @@ namespace Rodin::Tests::Unit
     law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
     law.getMaterialTangent(dP_analytical, cache, cp, dF);
@@ -986,7 +1014,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::Hooke hooke(1.0, 0.5);
     Math::SpatialMatrix<Real> epsilon(2, 2);
-    epsilon(0,0)=0.1; epsilon(0,1)=0.05; epsilon(1,0)=0.05; epsilon(1,1)=0.2;
+    epsilon(0, 0) = 0.1;
+    epsilon(0, 1) = 0.05;
+    epsilon(1, 0) = 0.05;
+    epsilon(1, 1) = 0.2;
 
     Math::SpatialMatrix<Real> sigma;
     hooke.getStress(sigma, epsilon);
@@ -1041,7 +1072,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.0;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.0;
     state.setDisplacementGradient(H);
 
     Solid::GreenLagrangeStrain gl;
@@ -1065,7 +1099,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1290,7 +1327,8 @@ namespace Rodin::Tests::Unit
     force.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
       Math::SpatialVector<Real> fiber(2);
-      fiber[0] = 1.0; fiber[1] = 0.0;
+      fiber[0] = 1.0;
+      fiber[1] = 0.0;
       cp.set<Solid::Tags::FiberDirection>(fiber);
     });
 
@@ -1513,9 +1551,15 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.1; H(0,1)=0.05; H(0,2)=-0.02;
-    H(1,0)=-0.02; H(1,1)=0.15; H(1,2)=0.03;
-    H(2,0)=0.01; H(2,1)=-0.01; H(2,2)=0.08;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(0, 2) = -0.02;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
+    H(1, 2) = 0.03;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.01;
+    H(2, 2) = 0.08;
     state.setDisplacementGradient(H);
 
     Solid::NeoHookean::Cache cache;
@@ -1523,9 +1567,15 @@ namespace Rodin::Tests::Unit
     law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
-    dF(1,0)=0.1; dF(1,1)=0.4; dF(1,2)=-0.15;
-    dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(0, 2) = 0.1;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
+    dF(1, 2) = -0.15;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.2;
+    dF(2, 2) = 0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
     law.getMaterialTangent(dP_analytical, cache, cp, dF);
@@ -1561,9 +1611,15 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.1; H(0,1)=0.05; H(0,2)=-0.02;
-    H(1,0)=-0.02; H(1,1)=0.15; H(1,2)=0.03;
-    H(2,0)=0.01; H(2,1)=-0.01; H(2,2)=0.08;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(0, 2) = -0.02;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
+    H(1, 2) = 0.03;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.01;
+    H(2, 2) = 0.08;
     state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
@@ -1571,9 +1627,15 @@ namespace Rodin::Tests::Unit
     law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
-    dF(1,0)=0.1; dF(1,1)=0.4; dF(1,2)=-0.15;
-    dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(0, 2) = 0.1;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
+    dF(1, 2) = -0.15;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.2;
+    dF(2, 2) = 0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
     law.getMaterialTangent(dP_analytical, cache, cp, dF);
@@ -1608,9 +1670,15 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.1; H(0,1)=0.05; H(0,2)=-0.02;
-    H(1,0)=-0.02; H(1,1)=0.15; H(1,2)=0.03;
-    H(2,0)=0.01; H(2,1)=-0.01; H(2,2)=0.08;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(0, 2) = -0.02;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
+    H(1, 2) = 0.03;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.01;
+    H(2, 2) = 0.08;
     state.setDisplacementGradient(H);
 
     Solid::MooneyRivlin::Cache cache;
@@ -1618,9 +1686,15 @@ namespace Rodin::Tests::Unit
     law.getCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
-    dF(1,0)=0.1; dF(1,1)=0.4; dF(1,2)=-0.15;
-    dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(0, 2) = 0.1;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
+    dF(1, 2) = -0.15;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.2;
+    dF(2, 2) = 0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
     law.getMaterialTangent(dP_analytical, cache, cp, dF);
@@ -1660,7 +1734,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.3;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1678,7 +1755,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.3;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1695,7 +1775,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.3;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1728,7 +1811,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1750,7 +1836,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1771,7 +1860,10 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
     law.getCache(cache, cp);
@@ -1833,20 +1925,20 @@ namespace Rodin::Tests::Unit
     /// @brief A tag declared outside the library, of a declared value type.
     struct UserScalarTag
     {
-        using Type = Real;
+      using Type = Real;
     };
 
     /// @brief A tag declared outside the library, of a type no library tag uses.
     struct UserMatrixTag
     {
-        using Type = Math::SpatialMatrix<Real>;
+      using Type = Math::SpatialMatrix<Real>;
     };
 
     /// @brief A family of distinct tag types, used to exceed ReservedTags.
     template <std::size_t I>
     struct OverflowTag
     {
-        using Type = Real;
+      using Type = Real;
     };
 
     Solid::KinematicState makeIdentityState()

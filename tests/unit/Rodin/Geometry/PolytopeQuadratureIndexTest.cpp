@@ -187,8 +187,7 @@ namespace Rodin::Tests::Unit
     index.resize(2, mesh.getPolytopeCount(2));
 
     size_t factoryCalls = 0;
-    const auto factory = [&]()
-    {
+    const auto factory = [&]() {
       ++factoryCalls;
       return std::make_unique<PolytopeQuadrature>(polytope, qf);
     };
@@ -214,23 +213,11 @@ namespace Rodin::Tests::Unit
     index.initialize(mesh.getDimension());
     index.resize(2, mesh.getPolytopeCount(2));
 
-    const auto& qc = index.get(
-      {2, 0},
-      mesh.getPolytopeCount(2),
-      qf1,
-      [&]()
-      {
-        return std::make_unique<PolytopeQuadrature>(polytope, qf1);
-      });
+    const auto& qc = index.get({2, 0}, mesh.getPolytopeCount(2), qf1,
+      [&]() { return std::make_unique<PolytopeQuadrature>(polytope, qf1); });
 
-    const auto& qg = index.get(
-      {2, 0},
-      mesh.getPolytopeCount(2),
-      qf2,
-      [&]()
-      {
-        return std::make_unique<PolytopeQuadrature>(polytope, qf2);
-      });
+    const auto& qg = index.get({2, 0}, mesh.getPolytopeCount(2), qf2,
+      [&]() { return std::make_unique<PolytopeQuadrature>(polytope, qf2); });
 
     EXPECT_NE(&qc, &qg);
     EXPECT_EQ(&qc.getQuadratureFormula(), &qf1);
@@ -250,8 +237,7 @@ namespace Rodin::Tests::Unit
     index.resize(2, mesh.getPolytopeCount(2));
 
     size_t factoryCalls = 0;
-    const auto factory = [&]()
-    {
+    const auto factory = [&]() {
       ++factoryCalls;
       return std::make_unique<PolytopeQuadrature>(polytope, qf);
     };
@@ -309,15 +295,8 @@ namespace Rodin::Tests::Unit
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());
 
-    EXPECT_THROW(
-      index.get(
-        {3, 0},
-        1,
-        qf,
-        [&]()
-        {
-          return std::make_unique<PolytopeQuadrature>(polytope, qf);
-        }),
+    EXPECT_THROW(index.get({3, 0}, 1, qf,
+                   [&]() { return std::make_unique<PolytopeQuadrature>(polytope, qf); }),
       Alert::Exception);
   }
 
@@ -333,15 +312,8 @@ namespace Rodin::Tests::Unit
     index.initialize(mesh.getDimension());
     index.resize(2, mesh.getPolytopeCount(2));
 
-    EXPECT_THROW(
-      index.get(
-        {2, mesh.getPolytopeCount(2)},
-        mesh.getPolytopeCount(2),
-        qf,
-        [&]()
-        {
-          return std::make_unique<PolytopeQuadrature>(polytope, qf);
-        }),
+    EXPECT_THROW(index.get({2, mesh.getPolytopeCount(2)}, mesh.getPolytopeCount(2), qf,
+                   [&]() { return std::make_unique<PolytopeQuadrature>(polytope, qf); }),
       Alert::Exception);
   }
 
@@ -364,16 +336,10 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Triangle, quadratureFormulas.size()));
 
       EXPECT_NO_THROW(
-        index.get(
-          {2, 0},
-          mesh.getPolytopeCount(2),
-          *quadratureFormulas.back(),
-          [&]()
-          {
-            return std::make_unique<PolytopeQuadrature>(
-              polytope,
-              *quadratureFormulas.back());
-          }));
+        index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.back(), [&]() {
+          return std::make_unique<PolytopeQuadrature>(
+            polytope, *quadratureFormulas.back());
+        }));
     }
   }
 
@@ -398,17 +364,10 @@ namespace Rodin::Tests::Unit
       quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
         Polytope::Type::Triangle, quadratureFormulas.size()));
 
-      index.get(
-        {2, 0},
-        mesh.getPolytopeCount(2),
-        *quadratureFormulas.back(),
-        [&]()
-        {
-          ++factoryCalls;
-          return std::make_unique<PolytopeQuadrature>(
-            polytope,
-            *quadratureFormulas.back());
-        });
+      index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.back(), [&]() {
+        ++factoryCalls;
+        return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
+      });
     }
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope);
@@ -417,32 +376,18 @@ namespace Rodin::Tests::Unit
     quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
       Polytope::Type::Triangle, quadratureFormulas.size()));
 
-    index.get(
-      {2, 0},
-      mesh.getPolytopeCount(2),
-      *quadratureFormulas.back(),
-      [&]()
-      {
-        ++factoryCalls;
-        return std::make_unique<PolytopeQuadrature>(
-          polytope,
-          *quadratureFormulas.back());
-      });
+    index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.back(), [&]() {
+      ++factoryCalls;
+      return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
+    });
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
 
     // Stable formula storage retains the first quadrature until clear().
-    index.get(
-      {2, 0},
-      mesh.getPolytopeCount(2),
-      *quadratureFormulas.front(),
-      [&]()
-      {
-        ++factoryCalls;
-        return std::make_unique<PolytopeQuadrature>(
-          polytope,
-          *quadratureFormulas.front());
-      });
+    index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.front(), [&]() {
+      ++factoryCalls;
+      return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.front());
+    });
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
   }
@@ -467,44 +412,25 @@ namespace Rodin::Tests::Unit
       quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
         Polytope::Type::Triangle, quadratureFormulas.size()));
 
-      index.get(
-        {2, 0},
-        mesh.getPolytopeCount(2),
-        *quadratureFormulas.back(),
-        [&]()
-        {
-          ++factoryCalls;
-          return std::make_unique<PolytopeQuadrature>(
-            polytope,
-            *quadratureFormulas.back());
-        });
+      index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.back(), [&]() {
+        ++factoryCalls;
+        return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
+      });
     }
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
 
     // Immediate repeat of the most recently inserted formula should not rebuild.
-    const auto& q1 = index.get(
-      {2, 0},
-      mesh.getPolytopeCount(2),
-      *quadratureFormulas.back(),
-      [&]()
-      {
+    const auto& q1 =
+      index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.back(), [&]() {
         ++factoryCalls;
-        return std::make_unique<PolytopeQuadrature>(
-          polytope,
-          *quadratureFormulas.back());
+        return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
       });
 
-    const auto& q2 = index.get(
-      {2, 0},
-      mesh.getPolytopeCount(2),
-      *quadratureFormulas.back(),
-      [&]()
-      {
+    const auto& q2 =
+      index.get({2, 0}, mesh.getPolytopeCount(2), *quadratureFormulas.back(), [&]() {
         ++factoryCalls;
-        return std::make_unique<PolytopeQuadrature>(
-          polytope,
-          *quadratureFormulas.back());
+        return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
       });
 
     EXPECT_EQ(&q1, &q2);

@@ -136,19 +136,19 @@ namespace Rodin::Tests::Unit
     using Base = Assembly::AssemblyBase<Math::SparseMatrix<Real>, Form>;
     struct StatefulAssembly final : Base
     {
-        size_t executions = 0;
-        Assembly::Sequential<Math::SparseMatrix<Real>, Form> backend;
+      size_t executions = 0;
+      Assembly::Sequential<Math::SparseMatrix<Real>, Form> backend;
 
-        void execute(Math::SparseMatrix<Real>& out, const Form& input) override
-        {
-          backend.execute(out, input);
-          out *= static_cast<Real>(++executions);
-        }
+      void execute(Math::SparseMatrix<Real>& out, const Form& input) override
+      {
+        backend.execute(out, input);
+        out *= static_cast<Real>(++executions);
+      }
 
-        StatefulAssembly* copy() const noexcept override
-        {
-          return new StatefulAssembly(*this);
-        }
+      StatefulAssembly* copy() const noexcept override
+      {
+        return new StatefulAssembly(*this);
+      }
     } assembly;
     Base& base = assembly;
     const Form& input = form;
@@ -170,14 +170,14 @@ namespace Rodin::Tests::Unit
     MassForm form(u, v);
     struct Kernel
     {
-        Real coefficient = 1;
-        Math::Matrix<Real> scratch;
+      Real coefficient = 1;
+      Math::Matrix<Real> scratch;
 
-        void compute(Math::Matrix<Real>& out, const Polytope& cell)
-        {
-          scratch.setConstant(1, 1, coefficient * cell.getMeasure());
-          out = scratch;
-        }
+      void compute(Math::Matrix<Real>& out, const Polytope& cell)
+      {
+        scratch.setConstant(1, 1, coefficient * cell.getMeasure());
+        out = scratch;
+      }
     } prototype;
     Assembly::SequentialIteration seq(mesh, form.getRegion());
     const FlatSet<Attribute> attributes;

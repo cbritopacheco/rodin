@@ -42,13 +42,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 
   struct LiftedErrors
   {
-      LiftedErrors()
-        : velocity(),
-          pressure(),
-          divergence()
-      {}
-      LiftedErrorNorm::Result velocity, pressure;
-      std::array<Real, 3> divergence;
+    LiftedErrors()
+      : velocity(),
+        pressure(),
+        divergence()
+    {}
+    LiftedErrorNorm::Result velocity, pressure;
+    std::array<Real, 3> divergence;
   };
 
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
@@ -104,27 +104,27 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           assert(m_reference);
           struct VelocityData
           {
-              const StokesData& data;
-              auto getSolution(const Math::SpatialPoint& x) const
-              {
-                return data.getVelocity(x);
-              }
-              auto getJacobian(const Math::SpatialPoint& x) const
-              {
-                return data.getVelocityJacobian(x);
-              }
+            const StokesData& data;
+            auto getSolution(const Math::SpatialPoint& x) const
+            {
+              return data.getVelocity(x);
+            }
+            auto getJacobian(const Math::SpatialPoint& x) const
+            {
+              return data.getVelocityJacobian(x);
+            }
           };
           struct PressureData
           {
-              const StokesData& data;
-              Real getSolution(const Math::SpatialPoint& x) const
-              {
-                return data.getPressure(x);
-              }
-              auto getGradient(const Math::SpatialPoint& x) const
-              {
-                return data.getPressureGradient(x);
-              }
+            const StokesData& data;
+            Real getSolution(const Math::SpatialPoint& x) const
+            {
+              return data.getPressure(x);
+            }
+            auto getGradient(const Math::SpatialPoint& x) const
+            {
+              return data.getPressureGradient(x);
+            }
           };
           std::array<Real, 3> squared{};
           const auto divergence = [&](const auto& derivatives, Real weight) {

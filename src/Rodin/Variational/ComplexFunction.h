@@ -48,7 +48,8 @@ namespace Rodin::Variational
    * @see ComplexFunction, Re, Im, Conjugate
    */
   template <class Derived>
-  class ComplexFunctionBase : public ScalarFunctionBase<Complex, ComplexFunctionBase<Derived>>
+  class ComplexFunctionBase
+    : public ScalarFunctionBase<Complex, ComplexFunctionBase<Derived>>
   {
     public:
       /// @brief Scalar value type.
@@ -88,8 +89,7 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -99,10 +99,10 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+        if constexpr (requires(
+                        const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
           return static_cast<const Derived&>(*this).getValue(ip);
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
@@ -164,8 +164,7 @@ namespace Rodin::Variational
        * @brief Returns the stored constant value.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      const Integer& getValue() const
+      constexpr const Integer& getValue() const
       {
         return m_x;
       }
@@ -208,8 +207,7 @@ namespace Rodin::Variational
 
   /// @brief Complex-valued constant function built from a real.
   template <>
-  class ComplexFunction<Real> final
-    : public ComplexFunctionBase<ComplexFunction<Real>>
+  class ComplexFunction<Real> final : public ComplexFunctionBase<ComplexFunction<Real>>
   {
     public:
       /// @brief Parent class type.
@@ -249,8 +247,7 @@ namespace Rodin::Variational
        * @brief Returns the stored constant value.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      const Real& getValue() const
+      constexpr const Real& getValue() const
       {
         return m_x;
       }
@@ -337,8 +334,7 @@ namespace Rodin::Variational
        * @brief Returns the stored constant value.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      const Complex& getValue() const
+      constexpr const Complex& getValue() const
       {
         return m_x;
       }
@@ -427,8 +423,7 @@ namespace Rodin::Variational
        * @param v Point operand.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      ScalarType getValue(const Geometry::Point& v) const
+      constexpr ScalarType getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
@@ -438,8 +433,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      ScalarType getValue(const IntegrationPoint& ip) const
+      constexpr ScalarType getValue(const IntegrationPoint& ip) const
       {
         return m_nested->getValue(ip);
       }
@@ -449,9 +443,8 @@ namespace Rodin::Variational
        * @param args Arguments forwarded to the constructed object.
        * @returns Reference to this object after the operation.
        */
-      template <class ... Args>
-      constexpr
-      ComplexFunction& traceOf(const Args&... args)
+      template <class... Args>
+      constexpr ComplexFunction& traceOf(const Args&... args)
       {
         m_nested->traceOf(args...);
         return *this;
@@ -489,17 +482,17 @@ namespace Rodin::Variational
    * @brief Complex function built from real and imaginary functions.
    */
   template <class RealNestedDerived, class ImagNestedDerived>
-  class ComplexFunction<FunctionBase<RealNestedDerived>, FunctionBase<ImagNestedDerived>> final
-    : public ComplexFunctionBase<ComplexFunction<FunctionBase<RealNestedDerived>, FunctionBase<ImagNestedDerived>>>
+  class ComplexFunction<FunctionBase<RealNestedDerived>, FunctionBase<ImagNestedDerived>>
+    final
+    : public ComplexFunctionBase<
+        ComplexFunction<FunctionBase<RealNestedDerived>, FunctionBase<ImagNestedDerived>>>
   {
     public:
       /// @brief Real-part function type.
-      using RealFunctionType =
-        FunctionBase<RealNestedDerived>;
+      using RealFunctionType = FunctionBase<RealNestedDerived>;
 
       /// @brief Imaginary-part function type.
-      using ImagFunctionType =
-        FunctionBase<ImagNestedDerived>;
+      using ImagFunctionType = FunctionBase<ImagNestedDerived>;
 
       /// @brief Real-part function range type.
       using RealFunctionRangeType =
@@ -510,11 +503,8 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<ImagFunctionType>::RangeType;
 
       /// @brief Parent class type.
-      using Parent =
-        ComplexFunctionBase<
-          ComplexFunction<
-            FunctionBase<RealNestedDerived>,
-            FunctionBase<ImagNestedDerived>>>;
+      using Parent = ComplexFunctionBase<ComplexFunction<FunctionBase<RealNestedDerived>,
+        FunctionBase<ImagNestedDerived>>>;
 
       using Parent::operator();
 
@@ -528,7 +518,8 @@ namespace Rodin::Variational
        * @param imag Function operand.
        */
       ComplexFunction(const RealFunctionType& re, const ImagFunctionType& imag)
-        : m_re(re.copy()), m_imag(imag.copy())
+        : m_re(re.copy()),
+          m_imag(imag.copy())
       {}
 
       /**
@@ -537,7 +528,8 @@ namespace Rodin::Variational
        */
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
-          m_re(other.m_re->copy()), m_imag(other.m_imag->copy())
+          m_re(other.m_re->copy()),
+          m_imag(other.m_imag->copy())
       {}
 
       /**
@@ -546,7 +538,8 @@ namespace Rodin::Variational
        */
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
-          m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
+          m_re(std::move(other.m_re)),
+          m_imag(std::move(other.m_imag))
       {}
 
       /**
@@ -554,10 +547,9 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      Complex getValue(const Geometry::Point& p) const
+      constexpr Complex getValue(const Geometry::Point& p) const
       {
-        return { m_re->getValue(p), m_imag->getValue(p) };
+        return {m_re->getValue(p), m_imag->getValue(p)};
       }
 
       /**
@@ -565,8 +557,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      Complex getValue(const IntegrationPoint& ip) const
+      constexpr Complex getValue(const IntegrationPoint& ip) const
       {
         Complex res;
         if constexpr (requires { m_re->getValue(ip); })
@@ -586,9 +577,8 @@ namespace Rodin::Variational
        * @param args Arguments forwarded to the constructed object.
        * @returns Reference to this object after the operation.
        */
-      template <class ... Args>
-      constexpr
-      ComplexFunction& traceOf(const Args&... args)
+      template <class... Args>
+      constexpr ComplexFunction& traceOf(const Args&... args)
       {
         m_re->traceOf(args...);
         m_imag->traceOf(args...);
@@ -679,8 +669,7 @@ namespace Rodin::Variational
        * @param v Point operand.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      Complex getValue(const Geometry::Point& v) const
+      constexpr Complex getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
@@ -690,8 +679,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      Complex getValue(const IntegrationPoint& ip) const
+      constexpr Complex getValue(const IntegrationPoint& ip) const
       {
         if constexpr (std::is_invocable_r_v<Complex, F, const IntegrationPoint&>)
           return m_f(ip);
@@ -750,7 +738,8 @@ namespace Rodin::Variational
        * @param imag Imaginary-part function.
        */
       ComplexFunction(const FReal& re, const FImag& imag)
-        : m_re(re), m_imag(imag)
+        : m_re(re),
+          m_imag(imag)
       {}
 
       /**
@@ -759,7 +748,8 @@ namespace Rodin::Variational
        */
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
-          m_re(other.m_re), m_imag(other.m_imag)
+          m_re(other.m_re),
+          m_imag(other.m_imag)
       {}
 
       /**
@@ -768,7 +758,8 @@ namespace Rodin::Variational
        */
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
-          m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
+          m_re(std::move(other.m_re)),
+          m_imag(std::move(other.m_imag))
       {}
 
       /**
@@ -776,10 +767,9 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      Complex getValue(const Geometry::Point& p) const
+      constexpr Complex getValue(const Geometry::Point& p) const
       {
-        return { m_re(p), m_imag(p) };
+        return {m_re(p), m_imag(p)};
       }
 
       /**
@@ -787,8 +777,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      Complex getValue(const IntegrationPoint& ip) const
+      constexpr Complex getValue(const IntegrationPoint& ip) const
       {
         Complex res;
         if constexpr (std::is_invocable_v<FReal, const IntegrationPoint&>)

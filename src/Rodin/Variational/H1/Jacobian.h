@@ -50,32 +50,33 @@ namespace Rodin::FormLanguage
    * space and the operand type.
    */
   template <size_t K, class Range, class Data, class Mesh>
-  struct Traits<
-    Variational::Jacobian<
-      Variational::GridFunction<
-        Variational::H1<K, Range, Mesh>, Data>>>
+  struct Traits<Variational::Jacobian<
+    Variational::GridFunction<Variational::H1<K, Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Range, Mesh>;
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Range, Mesh>;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   /**
    * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
    * space, the shape function space and the operand type.
    */
-  template <size_t K, class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
+  template <size_t K, class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Jacobian<
+    Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Range, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -111,8 +112,7 @@ namespace Rodin::Variational
    */
   template <size_t K, class Scalar, class Data, class Mesh>
   class Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>> final
-    : public JacobianBase<
-        GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
+    : public JacobianBase<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
         Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
@@ -141,7 +141,9 @@ namespace Rodin::Variational
        * @brief Constructs the expression from its operand.
        * @param u Operand expression.
        */
-      Jacobian(const OperandType& u) : Parent(u) {}
+      Jacobian(const OperandType& u)
+        : Parent(u)
+      {}
 
       /**
        * @brief Copy constructor.
@@ -164,8 +166,8 @@ namespace Rodin::Variational
        * @param polytope Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
       {
         const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
         return (k == 0) ? 0 : (k - 1);
@@ -175,7 +177,10 @@ namespace Rodin::Variational
        * @brief Creates a polymorphic copy.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
-      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
+      Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
+      }
 
       /**
        * @brief Interpolates at an integration point.
@@ -196,7 +201,7 @@ namespace Rodin::Variational
         const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index i = polytope.getIndex();
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
@@ -248,8 +253,8 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc  = conn.getIncidence({ meshDim - 1, meshDim }, i);
-          const auto& pc   = p.getPhysicalCoordinates();
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
+          const auto& pc = p.getPhysicalCoordinates();
 
           assert(inc.size() == 1 || inc.size() == 2);
 
@@ -289,14 +294,15 @@ namespace Rodin::Variational
             }
 
             UndeterminedTraceDomainException(
-                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+              << Alert::Raise;
             return;
           }
         }
 
         assert(d == mesh.getDimension());
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
@@ -378,16 +384,18 @@ namespace Rodin::Variational
    * physical images under @f$(J_K^{\dagger})^T@f$ have @f$s@f$ entries, including
    * on embedded cells and zero-dimensional points.
    */
-  template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>> final
-    : public ShapeFunctionBase<
-        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>,
-        H1<K, Math::SpatialVector<Scalar>, Mesh>,
-        Space>
+  template <size_t K, class NestedDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType Space>
+  class Jacobian<
+    ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>
+    final : public ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived,
+                                       H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>,
+              H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -395,17 +403,15 @@ namespace Rodin::Variational
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
       /// @brief Parent class type.
-      using Parent      =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
-          FESType,
-          SpaceType>;
+      using Parent =
+        ShapeFunctionBase<Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
+          FESType, SpaceType>;
 
       /// @brief Scalar value type.
-      using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Range (evaluation value) type.
-      using RangeType         = Math::SpatialMatrix<ScalarType>;
+      using RangeType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
@@ -456,8 +462,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -466,8 +471,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -477,8 +481,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -487,8 +490,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space.
        * @returns The finite element space.
        */
-      constexpr
-      const auto& getFiniteElementSpace() const
+      constexpr const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
@@ -497,8 +499,7 @@ namespace Rodin::Variational
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
@@ -530,12 +531,12 @@ namespace Rodin::Variational
       {
         m_ip = &ip;
 
-        const auto& p  = ip.getPoint();
+        const auto& p = ip.getPoint();
         const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
-        const auto  geom = poly.getGeometry();
+        const auto geom = poly.getGeometry();
         const size_t d = poly.getDimension();
 
         // scalar element for geometry-only tabulation
@@ -546,11 +547,14 @@ namespace Rodin::Variational
           m_cache.gradPhys.resize(nscalar);
 
         for (auto& g : m_cache.gradPhys)
-          if (g.size() != d) g.resize(d);
+        {
+          if (g.size() != d)
+            g.resize(d);
+        }
 
         const auto* tab = qf ? &feS.getTabulation(*qf) : nullptr;
         const auto& rc = p.getReferenceCoordinates();
-        const auto  JinvT = p.getJacobianInverse().transpose();
+        const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
 
@@ -582,7 +586,7 @@ namespace Rodin::Variational
         const std::uint8_t spaceDimension = p.getPolytope().getMesh().getSpaceDimension();
 
         const size_t alpha = local / vdim;
-        const size_t comp  = local % vdim;
+        const size_t comp = local % vdim;
 
         assert(alpha < m_cache.gradPhys.size());
         assert(vdim <= RangeType::MaxSize);
@@ -602,8 +606,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())

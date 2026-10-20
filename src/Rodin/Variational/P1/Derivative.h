@@ -38,37 +38,39 @@ namespace Rodin::FormLanguage
    * element space, the operand type and the range type.
    */
   template <class Range, class Data, class Mesh>
-  struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
+  struct Traits<Variational::Derivative<
+    Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P1<Range, Mesh>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P1<Range, Mesh>;
 
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
+    /// @brief Range (evaluation value) type.
+    using RangeType = Range;
   };
 
   /**
    * @brief Type traits for @c Derivative over a shape function: exposes the finite
    * element space, the shape function space, the operand type and the range type.
    */
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Derivative<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
+  template <class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Derivative<
+    Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P1<Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = Variational::P1<Range, Mesh>;
 
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = Range;
   };
 }
 
@@ -157,7 +159,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // Evaluating on a face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)

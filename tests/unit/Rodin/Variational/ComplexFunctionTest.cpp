@@ -66,9 +66,9 @@ namespace
 /// @brief Verifies integer constant for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, IntegerConstant)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   ComplexFunction f(5);
@@ -81,9 +81,9 @@ TEST(Rodin_Variational_ComplexFunction, IntegerConstant)
 /// @brief Verifies real constant for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, RealConstant)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   ComplexFunction f(3.14);
@@ -96,9 +96,9 @@ TEST(Rodin_Variational_ComplexFunction, RealConstant)
 /// @brief Verifies complex constant for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, ComplexConstant)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   ComplexFunction f(Complex(2.0, 3.0));
@@ -111,9 +111,9 @@ TEST(Rodin_Variational_ComplexFunction, ComplexConstant)
 /// @brief Verifies from real and imag parts for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, FromRealAndImagParts)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   RealFunction re(4.0);
@@ -128,9 +128,9 @@ TEST(Rodin_Variational_ComplexFunction, FromRealAndImagParts)
 /// @brief Verifies callable for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, Callable)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   auto lambda = [](const Geometry::Point&) -> Complex { return Complex(1.0, 2.0); };
@@ -144,9 +144,9 @@ TEST(Rodin_Variational_ComplexFunction, Callable)
 /// @brief Verifies callable pair for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, CallablePair)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   auto reLambda = [](const Geometry::Point&) -> Real { return 10.0; };
@@ -161,9 +161,9 @@ TEST(Rodin_Variational_ComplexFunction, CallablePair)
 /// @brief Verifies copy constant for variational complex function by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_ComplexFunction, CopyConstant)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   ComplexFunction f(Complex(7.0, 8.0));
@@ -177,9 +177,9 @@ TEST(Rodin_Variational_ComplexFunction, CopyConstant)
 /// @brief Verifies copy composite for variational complex function by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_ComplexFunction, CopyComposite)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
 
   RealFunction re(1.0);
@@ -195,7 +195,7 @@ TEST(Rodin_Variational_ComplexFunction, CopyComposite)
 /// @brief Verifies get order constant for variational complex function by checking exact expected values, true predicates.
 TEST(Rodin_Variational_ComplexFunction, GetOrderConstant)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
 
   ComplexFunction f(Complex(1.0, 0.0));
@@ -207,7 +207,7 @@ TEST(Rodin_Variational_ComplexFunction, GetOrderConstant)
 /// @brief Verifies get order callable for variational complex function by checking false predicates.
 TEST(Rodin_Variational_ComplexFunction, GetOrderCallable)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
 
   auto lambda = [](const Geometry::Point&) -> Complex { return Complex(1.0, 0.0); };
@@ -219,9 +219,9 @@ TEST(Rodin_Variational_ComplexFunction, GetOrderCallable)
 /// @brief Verifies callable uses integration point fast path for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
   const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   IntegrationPoint ip(p, &qf, 3);
@@ -237,9 +237,9 @@ TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
 /// @brief Verifies real and imag parts use integration point fast path for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, RealAndImagParts_UseIntegrationPointFastPath)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   Point p(*it, rc);
   const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   IntegrationPoint ip(p, &qf, 4);

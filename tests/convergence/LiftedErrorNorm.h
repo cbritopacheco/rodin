@@ -39,7 +39,7 @@ namespace Rodin::Tests::Convergence
     public:
       struct Result
       {
-          ErrorNorms field{0, 0}, geometry{0, 0}, total{0, 0};
+        ErrorNorms field{0, 0}, geometry{0, 0}, total{0, 0};
       };
       template <class Mesh, class GF, class Data, class Map>
       static Result compute(const Mesh& reference, const Mesh& represented, const GF& uh,

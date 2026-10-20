@@ -22,10 +22,10 @@ namespace Rodin::Geometry
   {
     struct MaxSize
     {
-        size_t operator()(size_t lhs, size_t rhs) const
-        {
-          return std::max(lhs, rhs);
-        }
+      size_t operator()(size_t lhs, size_t rhs) const
+      {
+        return std::max(lhs, rhs);
+      }
     };
   }
 

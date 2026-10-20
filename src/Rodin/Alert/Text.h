@@ -32,7 +32,7 @@ namespace Rodin::Alert
   {
     Bold,      ///< Bold text formatting
     Dark,      ///< Dark text formatting
-    Italic,    ///< Italic text formatting  
+    Italic,    ///< Italic text formatting
     Underline, ///< Underlined text
     Blink,     ///< Blinking text effect
     Reverse,   ///< Reverse video (inverted colors)
@@ -49,8 +49,7 @@ namespace Rodin::Alert
    * Applies the specified text formatting attribute to the output stream
    * using termcolor library functionality.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, Attribute a)
+  inline std::ostream& operator<<(std::ostream& os, Attribute a)
   {
     switch (a)
     {
@@ -165,7 +164,8 @@ namespace Rodin::Alert
        * @param text The text content as a std::string.
        */
       Text(const Foreground& fg, const std::string& text)
-        : m_fg(fg), m_string(text)
+        : m_fg(fg),
+          m_string(text)
       {}
 
       /**
@@ -175,7 +175,9 @@ namespace Rodin::Alert
        * @param text The text content as a std::string.
        */
       Text(const Foreground& fg, const Background& bg, const std::string& text)
-        : m_fg(fg), m_bg(bg), m_string(text)
+        : m_fg(fg),
+          m_bg(bg),
+          m_string(text)
       {}
 
       /**
@@ -194,8 +196,7 @@ namespace Rodin::Alert
        * @brief Gets the text string content.
        * @return Const reference to the text string.
        */
-      inline
-      const std::string& getString() const
+      inline const std::string& getString() const
       {
         return m_string;
       }
@@ -204,8 +205,7 @@ namespace Rodin::Alert
        * @brief Gets the foreground color.
        * @return Const reference to the foreground color.
        */
-      inline
-      const Foreground& getForeground() const
+      inline const Foreground& getForeground() const
       {
         return m_fg;
       }
@@ -214,8 +214,7 @@ namespace Rodin::Alert
        * @brief Gets the background color.
        * @return Const reference to the background color.
        */
-      inline
-      const Background& getBackground() const
+      inline const Background& getBackground() const
       {
         return m_bg;
       }
@@ -368,7 +367,7 @@ namespace Rodin::Alert
     os << text.getForeground() << text.getBackground();
     for (const auto& a : text.getAttributes())
       os << a;
-    os <<  text.getString() << Reset;
+    os << text.getString() << Reset;
     return os;
   }
 
@@ -386,7 +385,7 @@ namespace Rodin::Alert
     os << text.getForeground();
     for (const auto& a : text.getAttributes())
       os << a;
-    os <<  text.getString() << Reset;
+    os << text.getString() << Reset;
     return os;
   }
 
@@ -404,7 +403,7 @@ namespace Rodin::Alert
     os << text.getBackground();
     for (const auto& a : text.getAttributes())
       os << a;
-    os <<  text.getString() << Reset;
+    os << text.getString() << Reset;
     return os;
   }
 
@@ -414,13 +413,12 @@ namespace Rodin::Alert
    * @param text The text to write.
    * @return Reference to the output stream.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const Text<NoColorT, NoColorT>& text)
+  inline std::ostream& operator<<(std::ostream& os, const Text<NoColorT, NoColorT>& text)
   {
     os << Reset;
     for (const auto& a : text.getAttributes())
       os << a;
-    os <<  text.getString() << Reset;
+    os << text.getString() << Reset;
     return os;
   }
 }

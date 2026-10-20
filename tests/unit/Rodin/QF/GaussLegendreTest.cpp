@@ -136,12 +136,12 @@ TEST_F(GaussLegendreTest, QuadrilateralGeometry)
 {
   // Test uniform order
   GaussLegendre gl_uniform(Polytope::Type::Quadrilateral, 2);
-  EXPECT_EQ(gl_uniform.getSize(), 4);  // 2x2 points
+  EXPECT_EQ(gl_uniform.getSize(), 4); // 2x2 points
   EXPECT_EQ(gl_uniform.getGeometry(), Polytope::Type::Quadrilateral);
 
   // Test different orders in x and y
   GaussLegendre gl_mixed(Polytope::Type::Quadrilateral, 2, 3);
-  EXPECT_EQ(gl_mixed.getSize(), 6);  // 2x3 points
+  EXPECT_EQ(gl_mixed.getSize(), 6); // 2x3 points
 
   // Check that all points are 2D
   for (size_t i = 0; i < gl_uniform.getSize(); ++i)
@@ -168,7 +168,7 @@ TEST_F(GaussLegendreTest, QuadrilateralGeometry)
 TEST_F(GaussLegendreTest, TriangleGeometry)
 {
   GaussLegendre gl_tri(Polytope::Type::Triangle, 2);
-  EXPECT_EQ(gl_tri.getSize(), 4);  // 2x2 points
+  EXPECT_EQ(gl_tri.getSize(), 4); // 2x2 points
   EXPECT_EQ(gl_tri.getGeometry(), Polytope::Type::Triangle);
 
   // Check that all points are 2D and within unit triangle
@@ -178,7 +178,7 @@ TEST_F(GaussLegendreTest, TriangleGeometry)
     EXPECT_EQ(point.size(), 2);
     EXPECT_GE(point[0], 0.0);
     EXPECT_GE(point[1], 0.0);
-    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14);  // Allow small numerical error
+    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14); // Allow small numerical error
   }
 
   // Check that weights sum to 0.5 (area of unit triangle)
@@ -195,7 +195,7 @@ TEST_F(GaussLegendreTest, TriangleGeometry)
 TEST_F(GaussLegendreTest, TetrahedronGeometry)
 {
   GaussLegendre gl_tet(Polytope::Type::Tetrahedron, 2, 2, 2);
-  EXPECT_EQ(gl_tet.getSize(), 8);  // 2x2x2 points
+  EXPECT_EQ(gl_tet.getSize(), 8); // 2x2x2 points
   EXPECT_EQ(gl_tet.getGeometry(), Polytope::Type::Tetrahedron);
 
   // Check that all points are 3D and within unit tetrahedron
@@ -206,7 +206,7 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
     EXPECT_GE(point[0], 0.0);
     EXPECT_GE(point[1], 0.0);
     EXPECT_GE(point[2], 0.0);
-    EXPECT_LE(point[0] + point[1] + point[2], 1.0 + 1e-14);  // Allow small numerical error
+    EXPECT_LE(point[0] + point[1] + point[2], 1.0 + 1e-14); // Allow small numerical error
   }
 
   // Check that weights sum to 1/6 (volume of unit tetrahedron)
@@ -215,7 +215,7 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
   {
     total_weight += gl_tet.getWeight(i);
   }
-  EXPECT_NEAR(total_weight, 1.0/6.0, 1e-12);
+  EXPECT_NEAR(total_weight, 1.0 / 6.0, 1e-12);
 }
 
 // Test Wedge geometry
@@ -223,7 +223,7 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
 TEST_F(GaussLegendreTest, WedgeGeometry)
 {
   GaussLegendre gl_wedge(Polytope::Type::Wedge, 2, 3);
-  EXPECT_EQ(gl_wedge.getSize(), 12);  // 2x2x3 points (triangle base * height)
+  EXPECT_EQ(gl_wedge.getSize(), 12); // 2x2x3 points (triangle base * height)
   EXPECT_EQ(gl_wedge.getGeometry(), Polytope::Type::Wedge);
 
   // Check that all points are 3D
@@ -235,7 +235,7 @@ TEST_F(GaussLegendreTest, WedgeGeometry)
     EXPECT_GE(point[1], 0.0);
     EXPECT_GE(point[2], 0.0);
     EXPECT_LE(point[2], 1.0);
-    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14);  // Triangle constraint in xy
+    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14); // Triangle constraint in xy
   }
 
   // Check that weights sum to 0.5 (volume of unit wedge)
@@ -355,8 +355,8 @@ TEST_F(GaussLegendreTest, SymmetryProperties)
     size_t mirror_i = gl.getSize() - 1 - i;
     double x1 = gl.getPoint(i)[0];
     double x2 = gl.getPoint(mirror_i)[0];
-    EXPECT_NEAR(x1 + x2, 1.0, 1e-14);  // Symmetric around 0.5
-    EXPECT_NEAR(gl.getWeight(i), gl.getWeight(mirror_i), 1e-14);  // Equal weights
+    EXPECT_NEAR(x1 + x2, 1.0, 1e-14); // Symmetric around 0.5
+    EXPECT_NEAR(gl.getWeight(i), gl.getWeight(mirror_i), 1e-14); // Equal weights
   }
 }
 

@@ -33,31 +33,32 @@ namespace Rodin::FormLanguage
    */
   template <class Range, class Data, class Mesh>
   struct Traits<
-    Variational::Jacobian<
-      Variational::GridFunction<
-        Variational::P0g<Range, Mesh>, Data>>>
+    Variational::Jacobian<Variational::GridFunction<Variational::P0g<Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P0g<Range, Mesh>;
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P0g<Range, Mesh>;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   /**
    * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
    * space, the shape function space and the operand type.
    */
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::P0g<Range, Mesh>, Space>>>
+  template <class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Jacobian<
+    Variational::ShapeFunction<NestedDerived, Variational::P0g<Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P0g<Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P0g<Range, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -69,8 +70,7 @@ namespace Rodin::Variational
    */
   template <class Data, class Mesh, class Scalar>
   class Jacobian<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>> final
-    : public JacobianBase<
-        GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>,
+    : public JacobianBase<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>,
         Jacobian<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
@@ -79,11 +79,13 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
+
       /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
@@ -124,7 +126,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const size_t spaceDimension = poly.getMesh().getSpaceDimension();
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
@@ -161,21 +163,24 @@ namespace Rodin::Variational
    * This is the Jacobian of the *basis functions* of P0g; since those are constant,
    * their Jacobians are zero.
    */
-  template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>> final
-    : public ShapeFunctionBase<
-        Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>,
-        P0g<Math::SpatialVector<Scalar>, Mesh>,
-        Space>
+  template <class ShapeFunctionDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType Space>
+  class Jacobian<
+    ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>
+    final : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived,
+                                       P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>,
+              P0g<Math::SpatialVector<Scalar>, Mesh>, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -183,11 +188,7 @@ namespace Rodin::Variational
       using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
 
       /// @brief Parent class type.
-      using Parent =
-        ShapeFunctionBase<
-          Jacobian<OperandType>,
-          FESType,
-          SpaceType>;
+      using Parent = ShapeFunctionBase<Jacobian<OperandType>, FESType, SpaceType>;
 
       /**
        * @brief Constructs the expression from its operand.
@@ -223,8 +224,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -234,8 +234,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -244,8 +243,7 @@ namespace Rodin::Variational
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
@@ -277,7 +275,7 @@ namespace Rodin::Variational
         const auto& poly = ip.getPoint().getPolytope();
         const size_t spaceDimension = poly.getMesh().getSpaceDimension();
 
-        const auto& fes  = this->getFiniteElementSpace();
+        const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
         m_zero.resize(vdim, spaceDimension);
@@ -294,10 +292,9 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      const SpatialMatrixType& getBasis(size_t local) const
+      constexpr const SpatialMatrixType& getBasis(size_t local) const
       {
-        (void) local;
+        (void)local;
         assert(m_ip);
         return m_zero;
       }

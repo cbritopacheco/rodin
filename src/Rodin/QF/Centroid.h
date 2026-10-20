@@ -81,8 +81,7 @@ namespace Rodin::QF
        * @brief Gets the polytope geometry of this centroid rule.
        * @return Polytope geometry type.
        */
-      constexpr
-      Geometry::Polytope::Type getGeometry() const
+      constexpr Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
       }

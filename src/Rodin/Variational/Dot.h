@@ -38,34 +38,32 @@ namespace Rodin::FormLanguage
    * operand, the right-hand side operand, the scalar type and the range type.
    */
   template <class LHSDerived, class RHSDerived>
-  struct Traits<
-    Variational::Dot<
-      Variational::FunctionBase<LHSDerived>,
-      Variational::FunctionBase<RHSDerived>>>
+  struct Traits<Variational::Dot<Variational::FunctionBase<LHSDerived>,
+    Variational::FunctionBase<RHSDerived>>>
   {
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::FunctionBase<LHSDerived>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::FunctionBase<LHSDerived>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::FunctionBase<RHSDerived>;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::FunctionBase<RHSDerived>;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 
   /**
@@ -73,40 +71,40 @@ namespace Rodin::FormLanguage
    * space, the shape function space, the left-hand side operand, the right-hand side
    * operand, the scalar type and the range type.
    */
-  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Dot<
-      Variational::FunctionBase<LHSDerived>,
-      Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  template <class LHSDerived, class RHSDerived, class FES,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Dot<Variational::FunctionBase<LHSDerived>,
+    Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::FunctionBase<LHSDerived>;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, Space>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::FunctionBase<LHSDerived>;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, Space>;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 
   /**
@@ -114,36 +112,35 @@ namespace Rodin::FormLanguage
    * operand, the right-hand side operand, the scalar type and the range type.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  struct Traits<
-    Variational::Dot<
-      Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
-      Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
+  struct Traits<Variational::Dot<
+    Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
+    Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
   {
-      /// @brief Left-hand side operand type.
-      using LHSType =
-        Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
+    /// @brief Left-hand side operand type.
+    using LHSType =
+      Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType =
-        Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
+    /// @brief Right-hand side operand type.
+    using RHSType =
+      Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 }
 
@@ -225,7 +222,8 @@ namespace Rodin::Variational
        * @param rhs Right function operand
        */
       Dot(const LHSType& lhs, const RHSType& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+        : m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {}
 
       /**
@@ -234,7 +232,8 @@ namespace Rodin::Variational
        */
       Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       /**
@@ -243,7 +242,8 @@ namespace Rodin::Variational
        */
       Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
       /**
@@ -251,8 +251,8 @@ namespace Rodin::Variational
        * @param args Attribute arguments for trace restriction
        * @returns Reference to this object
        */
-      template <class ... Args>
-      Dot& traceOf(const Args& ... args)
+      template <class... Args>
+      Dot& traceOf(const Args&... args)
       {
         m_lhs->traceOf(args...);
         m_rhs->traceOf(args...);
@@ -263,8 +263,7 @@ namespace Rodin::Variational
        * @brief Gets the left function operand.
        * @returns Reference to first function
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -274,8 +273,7 @@ namespace Rodin::Variational
        * @brief Gets the right function operand.
        * @returns Reference to second function
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -287,8 +285,7 @@ namespace Rodin::Variational
        * @returns @f$ f(p) \cdot g(p) @f$ (scalar result)
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -308,7 +305,6 @@ namespace Rodin::Variational
           return std::nullopt;
         return *lo + *ro;
       }
-
 
       /**
        * @brief Polymorphic copy.
@@ -351,11 +347,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
-    : public ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
+    : public ShapeFunctionBase<
+        Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES,
+        Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
@@ -426,8 +425,7 @@ namespace Rodin::Variational
        * @brief Gets the left-hand side operand.
        * @returns The left-hand side operand.
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -437,8 +435,7 @@ namespace Rodin::Variational
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -448,8 +445,7 @@ namespace Rodin::Variational
        * @brief Gets the left-hand side operand.
        * @returns The left-hand side operand.
        */
-      constexpr
-      LHSType& getLHS()
+      constexpr LHSType& getLHS()
       {
         assert(m_lhs);
         return *m_lhs;
@@ -459,8 +455,7 @@ namespace Rodin::Variational
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
-      constexpr
-      RHSType& getRHS()
+      constexpr RHSType& getRHS()
       {
         assert(m_rhs);
         return *m_rhs;
@@ -470,8 +465,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
@@ -533,8 +527,7 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
         if (const auto* lhs = m_cache.get())
@@ -601,11 +594,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
-    : public ShapeFunctionBase<Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES, Space>
+    : public ShapeFunctionBase<
+        Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES,
+        Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
@@ -676,8 +672,7 @@ namespace Rodin::Variational
        * @brief Gets the left-hand side operand.
        * @returns The left-hand side operand.
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -687,8 +682,7 @@ namespace Rodin::Variational
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -698,8 +692,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
@@ -761,8 +754,7 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
         if (const auto* rhs = m_cache.get())
@@ -780,8 +772,7 @@ namespace Rodin::Variational
        * @param poly Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -829,10 +820,9 @@ namespace Rodin::Variational
    * @tparam TestFES Test finite element space type
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Dot<
-    ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
-    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
-    : public FormLanguage::Base
+  class Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>
+    final : public FormLanguage::Base
   {
     public:
       /// @brief Left-hand side operand type.
@@ -869,37 +859,36 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
-        : m_trial(lhs.copy()), m_test(rhs.copy())
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
+        : m_trial(lhs.copy()),
+          m_test(rhs.copy())
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Dot(const Dot& other)
+      constexpr Dot(const Dot& other)
         : Base(other),
-          m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
+          m_trial(other.m_trial->copy()),
+          m_test(other.m_test->copy())
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Dot(Dot&& other)
+      constexpr Dot(Dot&& other)
         : Base(std::move(other)),
-          m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
+          m_trial(std::move(other.m_trial)),
+          m_test(std::move(other.m_test))
       {}
 
       /**
        * @brief Gets the left-hand side operand.
        * @returns The left-hand side operand.
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_trial);
         return *m_trial;
@@ -909,8 +898,7 @@ namespace Rodin::Variational
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_test);
         return *m_test;
@@ -955,8 +943,7 @@ namespace Rodin::Variational
        * @param te Test shape-function expression.
        * @returns Expression for the selected component.
        */
-      constexpr
-      auto operator()(size_t tr, size_t te)
+      constexpr auto operator()(size_t tr, size_t te)
       {
         decltype(auto) lhs = getLHS().getBasis(tr);
         decltype(auto) rhs = getRHS().getBasis(te);
@@ -968,8 +955,7 @@ namespace Rodin::Variational
        * @param poly Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -1011,15 +997,15 @@ namespace Rodin::Variational
    * @tparam RHSDerived Type of the test shape function
    * @tparam TestFES Test finite element space type
    */
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Dot<
-      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>
-    : public FormLanguage::Base
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
+  class Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> : public FormLanguage::Base
   {
     public:
       /// @brief Left-hand side operand type.
-      using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+      using LHSType =
+        Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
       /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
@@ -1032,37 +1018,36 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
+        : m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Dot(const Dot& other)
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Dot(Dot&& other)
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
       /**
        * @brief Gets the left-hand side operand.
        * @returns The left-hand side operand.
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -1072,8 +1057,7 @@ namespace Rodin::Variational
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;

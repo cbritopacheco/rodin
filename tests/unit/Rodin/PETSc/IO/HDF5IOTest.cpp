@@ -38,15 +38,15 @@ namespace
     switch (type)
     {
       case Polytope::Type::Segment:
-        return LocalMesh::UniformGrid(type, { 11 });
+        return LocalMesh::UniformGrid(type, {11});
       case Polytope::Type::Triangle:
       case Polytope::Type::Quadrilateral:
-        return LocalMesh::UniformGrid(type, { 4, 4 });
+        return LocalMesh::UniformGrid(type, {4, 4});
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Pyramid:
       case Polytope::Type::Wedge:
-        return LocalMesh::UniformGrid(type, { 3, 3, 3 });
+        return LocalMesh::UniformGrid(type, {3, 3, 3});
       default:
         ADD_FAILURE() << "Unsupported polytope type for makeMesh";
         return Geometry::Mesh<Context::Local>();
@@ -57,15 +57,22 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Segment:       return "Segment1D";
-      case Polytope::Type::Triangle:      return "Triangle2D";
-      case Polytope::Type::Quadrilateral: return "Quad2D";
-      case Polytope::Type::Tetrahedron:   return "Tet3D";
-      case Polytope::Type::Hexahedron:    return "Hex3D";
+      case Polytope::Type::Segment:
+        return "Segment1D";
+      case Polytope::Type::Triangle:
+        return "Triangle2D";
+      case Polytope::Type::Quadrilateral:
+        return "Quad2D";
+      case Polytope::Type::Tetrahedron:
+        return "Tet3D";
+      case Polytope::Type::Hexahedron:
+        return "Hex3D";
       case Polytope::Type::Pyramid:
         return "Pyramid3D";
-      case Polytope::Type::Wedge:         return "Wedge3D";
-      default:                            return "Unknown";
+      case Polytope::Type::Wedge:
+        return "Wedge3D";
+      default:
+        return "Unknown";
     }
   }
 
@@ -80,7 +87,7 @@ namespace
   {
     const auto type = GetParam();
     const std::string gfFile =
-        "/tmp/rodin_petsc_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
+      "/tmp/rodin_petsc_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
 
     auto mesh = makeMesh(type);
     P1<PetscScalar> fes(mesh);
@@ -134,7 +141,7 @@ namespace
   {
     const auto type = GetParam();
     const std::string gfFile =
-        "/tmp/rodin_petsc_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
+      "/tmp/rodin_petsc_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
 
     auto mesh = makeMesh(type);
     P1<PetscScalar> fes(mesh);
@@ -173,8 +180,8 @@ namespace
     for (PetscInt i = 0; i < n; ++i)
     {
       EXPECT_DOUBLE_EQ(saved[static_cast<size_t>(i)],
-                        static_cast<double>(std::sin(static_cast<double>(i))))
-          << "DOF mismatch at index " << i;
+        static_cast<double>(std::sin(static_cast<double>(i))))
+        << "DOF mismatch at index " << i;
     }
 
     H5Sclose(dspace);

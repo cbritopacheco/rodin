@@ -33,17 +33,17 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::HelmholtzForm<Solution, TrialFES, TestFES, Operator,
     DiffusionDerived, MassDerived>>
   {
-      /// @brief Solution type of the trial function.
-      using SolutionType = Solution;
+    /// @brief Solution type of the trial function.
+    using SolutionType = Solution;
 
-      /// @brief Trial finite element space type.
-      using TrialFESType = TrialFES;
+    /// @brief Trial finite element space type.
+    using TrialFESType = TrialFES;
 
-      /// @brief Test finite element space type.
-      using TestFESType = TestFES;
+    /// @brief Test finite element space type.
+    using TestFESType = TestFES;
 
-      /// @brief Assembled operator type.
-      using OperatorType = Operator;
+    /// @brief Assembled operator type.
+    using OperatorType = Operator;
   };
 
   /// @brief Marks Variational::HelmholtzForm as a named form.
@@ -52,8 +52,8 @@ namespace Rodin::FormLanguage
   struct IsNamedForm<Variational::HelmholtzForm<Solution, TrialFES, TestFES, Operator,
     DiffusionDerived, MassDerived>> : std::true_type
   {
-      /// @brief True for Helmholtz forms.
-      static constexpr bool Value = true;
+    /// @brief True for Helmholtz forms.
+    static constexpr bool Value = true;
   };
 }
 
@@ -89,10 +89,10 @@ namespace Rodin::Variational
     class DiffusionDerived, class MassDerived>
   class HelmholtzForm final : public BilinearFormBase<Operator>
   {
-      using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
-      using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
-      using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
-      using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
+    using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
+    using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
+    using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
+    using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
 
     public:
       /// @brief Solution type of the trial function.

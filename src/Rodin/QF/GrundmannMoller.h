@@ -31,7 +31,6 @@
  */
 #define RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER 2 * RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1
 
-
 #include <boost/multi_array.hpp>
 
 #include "QuadratureFormula.h"
@@ -126,8 +125,7 @@ namespace Rodin::QF
        * @brief Gets the degree of polynomial exactness.
        * @return Degree @f$ d = 2s + 1 @f$ for which this rule is exact
        */
-      inline
-      size_t getOrder() const
+      inline size_t getOrder() const
       {
         return m_order;
       }

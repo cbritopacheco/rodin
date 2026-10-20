@@ -79,7 +79,7 @@ namespace Rodin::Tests::Unit
     h(0, 1) = 0;
     h(1, 0) = 0;
     h(1, 1) = 1;
-      // H = I gives F = 2I, so j = 4.
+    // H = I gives F = 2I, so j = 4.
     def.setDisplacementGradient(h);
     EXPECT_NEAR(def.getJacobian(), 4.0, 1e-14);
   }
@@ -99,7 +99,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(def.isAdmissible());
     EXPECT_TRUE(def.isInvertible());
 
-      // Defined on an inverted cell; must not trip the admissibility assert.
+    // Defined on an inverted cell; must not trip the admissibility assert.
     const auto& FinvT = def.getInverseTranspose();
     EXPECT_NEAR(FinvT(0, 0), -1.0, 1e-14);
   }
@@ -244,7 +244,7 @@ namespace Rodin::Tests::Unit
     CellDeformation def(2);
 
     def.setDeformationGradient(matrix2(2, 0, 0, 2));
-      // Populate every cache before changing state.
+    // Populate every cache before changing state.
     const Real j0 = def.getJacobian();
     const Real q0 = def.getRelativeDistortion();
     const auto finvT0 = def.getInverseTranspose();

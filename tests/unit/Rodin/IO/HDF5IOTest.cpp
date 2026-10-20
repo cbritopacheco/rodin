@@ -75,7 +75,7 @@ namespace Rodin::Tests::Unit
   {
     const std::string meshFile = "/tmp/rodin_hdf5_mesh_rt.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 2);
@@ -107,9 +107,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
     EXPECT_EQ(loaded.getPolytopeCount(0), mesh.getPolytopeCount(0));
-    EXPECT_EQ(
-        loaded.getPolytopeCount(mesh.getDimension()),
-        mesh.getPolytopeCount(mesh.getDimension()));
+    EXPECT_EQ(loaded.getPolytopeCount(mesh.getDimension()),
+      mesh.getPolytopeCount(mesh.getDimension()));
 
     std::remove(meshFile.c_str());
   }
@@ -121,7 +120,7 @@ namespace Rodin::Tests::Unit
     // Those are only written by the XDMF visualization pipeline.
     const std::string meshFile = "/tmp/rodin_hdf5_no_xdmf.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.save(meshFile, FileFormat::HDF5);
 
     hid_t h5 = H5Fopen(meshFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -156,7 +155,7 @@ namespace Rodin::Tests::Unit
     // path is separate from the visualization path.
     const std::string gfFile = "/tmp/rodin_hdf5_gf_rawdofs.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() * p.x() + p.y(); };
@@ -213,7 +212,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     {
       XDMF xdmf(stem);
@@ -399,9 +398,9 @@ namespace Rodin::Tests::Unit
 
   struct QuadraticXDMFCase
   {
-      Polytope::Type type;
-      unsigned long long topologyId;
-      size_t nodesPerCell;
+    Polytope::Type type;
+    unsigned long long topologyId;
+    size_t nodesPerCell;
   };
 
   class Rodin_IO_HDF5_QuadraticXDMF : public testing::TestWithParam<QuadraticXDMFCase>
@@ -705,7 +704,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf.setName("field");
@@ -756,7 +755,7 @@ namespace Rodin::Tests::Unit
   {
     const std::string gfFile = "/tmp/rodin_hdf5_gf_sa.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
@@ -795,7 +794,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 2);
@@ -892,22 +891,18 @@ namespace
       case Polytope::Type::Point:
       {
         Mesh<Context::Local>::Builder builder;
-        return builder
-          .initialize(1)
-          .nodes(1)
-          .vertex({ 0.0 })
-          .finalize();
+        return builder.initialize(1).nodes(1).vertex({0.0}).finalize();
       }
       case Polytope::Type::Segment:
-        return LocalMesh::UniformGrid(type, { 11 });
+        return LocalMesh::UniformGrid(type, {11});
       case Polytope::Type::Triangle:
       case Polytope::Type::Quadrilateral:
-        return LocalMesh::UniformGrid(type, { 4, 4 });
+        return LocalMesh::UniformGrid(type, {4, 4});
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Pyramid:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Wedge:
-        return LocalMesh::UniformGrid(type, { 3, 3, 3 });
+        return LocalMesh::UniformGrid(type, {3, 3, 3});
       default:
         ADD_FAILURE() << "Unsupported polytope type for makeMesh";
         return Geometry::Mesh<Context::Local>();
@@ -1005,20 +1000,29 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Point:         return "Point0D";
-      case Polytope::Type::Segment:       return "Segment1D";
-      case Polytope::Type::Triangle:      return "Triangle2D";
-      case Polytope::Type::Quadrilateral: return "Quad2D";
-      case Polytope::Type::Tetrahedron:   return "Tet3D";
+      case Polytope::Type::Point:
+        return "Point0D";
+      case Polytope::Type::Segment:
+        return "Segment1D";
+      case Polytope::Type::Triangle:
+        return "Triangle2D";
+      case Polytope::Type::Quadrilateral:
+        return "Quad2D";
+      case Polytope::Type::Tetrahedron:
+        return "Tet3D";
       case Polytope::Type::Pyramid:
         return "Pyramid3D";
-      case Polytope::Type::Hexahedron:    return "Hex3D";
-      case Polytope::Type::Wedge:         return "Wedge3D";
-      default:                            return "Unknown";
+      case Polytope::Type::Hexahedron:
+        return "Hex3D";
+      case Polytope::Type::Wedge:
+        return "Wedge3D";
+      default:
+        return "Unknown";
     }
   }
   // Parameterized test fixture
-  class HDF5MultiDim : public ::testing::TestWithParam<Polytope::Type> {};
+  class HDF5MultiDim : public ::testing::TestWithParam<Polytope::Type>
+  {};
   class HDF5AttributeRegression : public ::testing::TestWithParam<size_t>
   {};
 
@@ -1028,8 +1032,7 @@ namespace
   TEST_P(HDF5MultiDim, MeshRoundTrip)
   {
     const auto type = GetParam();
-    const std::string meshFile =
-        "/tmp/rodin_hdf5_rt_" + polytopeLabel(type) + ".h5";
+    const std::string meshFile = "/tmp/rodin_hdf5_rt_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     ASSERT_GT(mesh.getVertexCount(), 0u);
@@ -1060,9 +1063,8 @@ namespace
     EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
     EXPECT_EQ(loaded.getPolytopeCount(0), mesh.getPolytopeCount(0));
-    EXPECT_EQ(
-        loaded.getPolytopeCount(mesh.getDimension()),
-        mesh.getPolytopeCount(mesh.getDimension()));
+    EXPECT_EQ(loaded.getPolytopeCount(mesh.getDimension()),
+      mesh.getPolytopeCount(mesh.getDimension()));
 
     std::remove(meshFile.c_str());
   }
@@ -1091,8 +1093,7 @@ namespace
   TEST_P(HDF5MultiDim, MeshPersistenceNoXDMF)
   {
     const auto type = GetParam();
-    const std::string meshFile =
-        "/tmp/rodin_hdf5_noxdmf_" + polytopeLabel(type) + ".h5";
+    const std::string meshFile = "/tmp/rodin_hdf5_noxdmf_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     mesh.save(meshFile, FileFormat::HDF5);
@@ -1127,8 +1128,7 @@ namespace
   TEST_P(HDF5MultiDim, GridFunctionPersistenceRawDOFs)
   {
     const auto type = GetParam();
-    const std::string gfFile =
-        "/tmp/rodin_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
+    const std::string gfFile = "/tmp/rodin_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     if (type == Polytope::Type::Point)
@@ -1183,7 +1183,7 @@ namespace
     for (size_t i = 0; i < saved.size(); ++i)
     {
       EXPECT_DOUBLE_EQ(saved[i], static_cast<double>(dofs[static_cast<Eigen::Index>(i)]))
-          << "DOF mismatch at index " << i;
+        << "DOF mismatch at index " << i;
     }
 
     H5Sclose(dspace);
@@ -1197,7 +1197,7 @@ namespace
     for (Eigen::Index i = 0; i < gf.getData().size(); ++i)
     {
       EXPECT_DOUBLE_EQ(loaded.getData()[i], gf.getData()[i])
-          << "Round-trip DOF mismatch at index " << i;
+        << "Round-trip DOF mismatch at index " << i;
     }
 
     std::remove(gfFile.c_str());
@@ -1209,8 +1209,7 @@ namespace
   TEST_P(HDF5MultiDim, GridFunctionStandalone)
   {
     const auto type = GetParam();
-    const std::string gfFile =
-        "/tmp/rodin_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
+    const std::string gfFile = "/tmp/rodin_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     if (type == Polytope::Type::Point)
@@ -1284,8 +1283,7 @@ namespace
   TEST_P(HDF5MultiDim, XDMFVisualizationTopology)
   {
     const auto type = GetParam();
-    const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_topo_" + polytopeLabel(type);
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_topo_" + polytopeLabel(type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
@@ -1339,8 +1337,7 @@ namespace
   TEST_P(HDF5MultiDim, XDMFVisualizationEvaluatedAttributes)
   {
     const auto type = GetParam();
-    const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_eval_" + polytopeLabel(type);
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_eval_" + polytopeLabel(type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
@@ -1414,8 +1411,7 @@ namespace
   TEST_P(HDF5MultiDim, XDMFWriteAndClose)
   {
     const auto type = GetParam();
-    const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_wc_" + polytopeLabel(type);
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_wc_" + polytopeLabel(type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
 

@@ -202,7 +202,7 @@ TEST_F(UnitTest, TypeConversion)
 TEST_F(UnitTest, DifferentTypes)
 {
   // Test with integer type
-  class IntUnit : public Unit<IntUnit, int> 
+  class IntUnit : public Unit<IntUnit, int>
   {
     public:
       using Parent = Unit<IntUnit, int>;
@@ -248,7 +248,8 @@ TEST_F(UnitTest, EdgeCases)
   TestUnit zero(0.0);
   // Note: Division by zero is undefined behavior, but the operation should compile
   auto result = u1 / zero;
-  EXPECT_TRUE(std::isinf(static_cast<Real>(result)) || std::isnan(static_cast<Real>(result)));
+  EXPECT_TRUE(
+    std::isinf(static_cast<Real>(result)) || std::isnan(static_cast<Real>(result)));
 
   // Test with very small values
   TestUnit small1(1e-10);

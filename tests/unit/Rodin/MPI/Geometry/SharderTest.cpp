@@ -35,7 +35,7 @@ using namespace Rodin::Geometry;
 // Global MPI handles initialized in main().
 // ---------------------------------------------------------------------------
 
-static boost::mpi::environment* g_env   = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
@@ -96,8 +96,8 @@ namespace
   /**
    * @brief Creates a local mesh with the incidences required for sharding.
    */
-  Mesh<Context::Local> makeShardableMesh(Polytope::Type type,
-                                         std::initializer_list<size_t> shape)
+  Mesh<Context::Local> makeShardableMesh(
+    Polytope::Type type, std::initializer_list<size_t> shape)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
     const size_t D = mesh.getDimension();
@@ -119,21 +119,21 @@ namespace
   Mesh<Context::Local> makeMixed2DMesh()
   {
     auto mesh = Mesh<Context::Local>::Builder()
-      .initialize(2)
-      .nodes(8)
-      .vertex({0.0, 0.0})
-      .vertex({1.0, 0.0})
-      .vertex({2.0, 0.0})
-      .vertex({3.0, 0.0})
-      .vertex({0.0, 1.0})
-      .vertex({1.0, 1.0})
-      .vertex({2.0, 1.0})
-      .vertex({3.0, 1.0})
-      .polytope(Polytope::Type::Triangle, {0, 1, 4})
-      .polytope(Polytope::Type::Triangle, {1, 5, 4})
-      .polytope(Polytope::Type::Quadrilateral, {1, 2, 6, 5})
-      .polytope(Polytope::Type::Quadrilateral, {2, 3, 7, 6})
-      .finalize();
+                  .initialize(2)
+                  .nodes(8)
+                  .vertex({0.0, 0.0})
+                  .vertex({1.0, 0.0})
+                  .vertex({2.0, 0.0})
+                  .vertex({3.0, 0.0})
+                  .vertex({0.0, 1.0})
+                  .vertex({1.0, 1.0})
+                  .vertex({2.0, 1.0})
+                  .vertex({3.0, 1.0})
+                  .polytope(Polytope::Type::Triangle, {0, 1, 4})
+                  .polytope(Polytope::Type::Triangle, {1, 5, 4})
+                  .polytope(Polytope::Type::Quadrilateral, {1, 2, 6, 5})
+                  .polytope(Polytope::Type::Quadrilateral, {2, 3, 7, 6})
+                  .finalize();
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D, D);
     mesh.getConnectivity().compute(D, 0);
@@ -145,9 +145,7 @@ namespace
    * root-only shard/scatter pattern (see examples/MPI/Geometry/Sharder.cpp).
    */
   Mesh<Context::MPI> distributeFromRoot(
-      const Context::MPI& ctx,
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    const Context::MPI& ctx, Polytope::Type type, std::initializer_list<size_t> shape)
   {
     const auto& comm = ctx.getCommunicator();
 
@@ -170,8 +168,7 @@ namespace
    * boundary/interface/perimeter queries.
    */
   Mesh<Context::Local> makeShardableMeshWithFaces(
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    Polytope::Type type, std::initializer_list<size_t> shape)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
     const size_t D = mesh.getDimension();
@@ -188,9 +185,7 @@ namespace
    * boundary/interface/perimeter queries on the distributed mesh.
    */
   Mesh<Context::MPI> distributeFromRootWithFaces(
-      const Context::MPI& ctx,
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    const Context::MPI& ctx, Polytope::Type type, std::initializer_list<size_t> shape)
   {
     const auto& comm = ctx.getCommunicator();
 
@@ -227,8 +222,7 @@ namespace Rodin::Tests::Unit
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     const auto& shard = mpiMesh.getShard();
-    EXPECT_GT(shard.getCellCount(), 0u)
-      << "Rank " << world.rank() << " has no cells.";
+    EXPECT_GT(shard.getCellCount(), 0u) << "Rank " << world.rank() << " has no cells.";
     EXPECT_GT(shard.getVertexCount(), 0u)
       << "Rank " << world.rank() << " has no vertices.";
   }
@@ -329,12 +323,10 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(local, ownedOrShared)
           << "Rank " << world.rank() << " dim " << d << " idx " << i;
 
-        int count = static_cast<int>(shard.isOwned(d, i))
-                  + static_cast<int>(shard.isShared(d, i))
-                  + static_cast<int>(shard.isGhost(d, i));
-        EXPECT_EQ(count, 1)
-          << "Rank " << world.rank() << " dim " << d << " idx " << i
-          << " has " << count << " states (expected 1).";
+        int count = static_cast<int>(shard.isOwned(d, i)) +
+          static_cast<int>(shard.isShared(d, i)) + static_cast<int>(shard.isGhost(d, i));
+        EXPECT_EQ(count, 1) << "Rank " << world.rank() << " dim " << d << " idx " << i
+                            << " has " << count << " states (expected 1).";
       }
     }
   }
@@ -366,8 +358,8 @@ namespace Rodin::Tests::Unit
         Index parentIdx = pmap.left[li];
         auto it = pmap.right.find(parentIdx);
         ASSERT_NE(it, pmap.right.end())
-          << "Rank " << world.rank() << " dim " << d
-          << " parent " << parentIdx << " not in right map.";
+          << "Rank " << world.rank() << " dim " << d << " parent " << parentIdx
+          << " not in right map.";
         EXPECT_EQ(it->second, li);
       }
     }
@@ -397,9 +389,8 @@ namespace Rodin::Tests::Unit
       const auto& ownerMap = shard.getOwner(d);
       for (const auto& [localIdx, ownerRank] : ownerMap)
       {
-        EXPECT_LT(ownerRank, numRanks)
-          << "Rank " << myRank << " dim " << d
-          << " owner rank out of range: " << ownerRank;
+        EXPECT_LT(ownerRank, numRanks) << "Rank " << myRank << " dim " << d
+                                       << " owner rank out of range: " << ownerRank;
         EXPECT_NE(ownerRank, myRank)
           << "Rank " << myRank << " dim " << d
           << " entity should not be owned by self in owner map.";
@@ -803,11 +794,9 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(local, ownedOrShared)
           << "Rank " << world.rank() << " dim " << d << " idx " << i;
 
-        int count = static_cast<int>(shard.isOwned(d, i))
-                  + static_cast<int>(shard.isShared(d, i))
-                  + static_cast<int>(shard.isGhost(d, i));
-        EXPECT_EQ(count, 1)
-          << "Rank " << world.rank() << " dim " << d << " idx " << i;
+        int count = static_cast<int>(shard.isOwned(d, i)) +
+          static_cast<int>(shard.isShared(d, i)) + static_cast<int>(shard.isGhost(d, i));
+        EXPECT_EQ(count, 1) << "Rank " << world.rank() << " dim " << d << " idx " << i;
       }
     }
   }
@@ -895,8 +884,7 @@ namespace Rodin::Tests::Unit
 
     size_t byType = mpiMesh.getPolytopeCount(Polytope::Type::Triangle);
     EXPECT_EQ(byType, totalCells)
-      << "Rank " << world.rank()
-      << ": getPolytopeCount(Triangle) mismatch.";
+      << "Rank " << world.rank() << ": getPolytopeCount(Triangle) mismatch.";
   }
 
   /**
@@ -924,9 +912,8 @@ namespace Rodin::Tests::Unit
         ASSERT_TRUE(localOpt.has_value())
           << "Rank " << world.rank() << " dim " << d
           << ": getLocalIndex returned nullopt for global " << globalIdx;
-        EXPECT_EQ(*localOpt, i)
-          << "Rank " << world.rank() << " dim " << d
-          << ": round-trip mismatch for local " << i;
+        EXPECT_EQ(*localOpt, i) << "Rank " << world.rank() << " dim " << d
+                                << ": round-trip mismatch for local " << i;
       }
     }
   }
@@ -1026,8 +1013,7 @@ namespace Rodin::Tests::Unit
     {
       auto geom = mpiMesh.getGeometry(D, i);
       EXPECT_EQ(geom, Polytope::Type::Triangle)
-        << "Rank " << world.rank() << " cell " << i
-        << ": expected Triangle geometry.";
+        << "Rank " << world.rank() << " cell " << i << ": expected Triangle geometry.";
     }
   }
 
@@ -1088,8 +1074,7 @@ namespace Rodin::Tests::Unit
     const size_t D = mpiMesh.getDimension();
     size_t distributedCount = mpiMesh.getPolytopeCount(D);
     EXPECT_EQ(distributedCount, totalCells)
-      << "Rank " << world.rank()
-      << ": 3D distributed cell count mismatch.";
+      << "Rank " << world.rank() << ": 3D distributed cell count mismatch.";
   }
 
   // =========================================================================
@@ -1190,18 +1175,16 @@ namespace Rodin::Tests::Unit
 
     // Cell-to-vertex incidence should exist (was computed before sharding)
     const auto& d2v = conn.getIncidence(D, 0);
-    EXPECT_GT(d2v.size(), 0u)
-      << "Rank " << world.rank()
-      << ": cell-to-vertex incidence is empty.";
+    EXPECT_GT(d2v.size(), 0u) << "Rank " << world.rank()
+                              << ": cell-to-vertex incidence is empty.";
 
     // Each triangle cell should have 3 vertices
     const auto& shard = mpiMesh.getShard();
     for (Index ci = 0; ci < shard.getCellCount(); ci++)
     {
       const auto& verts = conn.getIncidence({D, 0}, ci);
-      EXPECT_EQ(verts.size(), 3u)
-        << "Rank " << world.rank() << " cell " << ci
-        << ": expected 3 vertices for triangle.";
+      EXPECT_EQ(verts.size(), 3u) << "Rank " << world.rank() << " cell " << ci
+                                  << ": expected 3 vertices for triangle.";
     }
   }
 
@@ -1233,9 +1216,8 @@ namespace Rodin::Tests::Unit
       ASSERT_TRUE(attr.has_value())
         << "Rank " << world.rank()
         << ": getAttribute returned nullopt after setAttribute.";
-      EXPECT_EQ(*attr, 42u)
-        << "Rank " << world.rank()
-        << ": attribute value mismatch after setAttribute.";
+      EXPECT_EQ(*attr, 42u) << "Rank " << world.rank()
+                            << ": attribute value mismatch after setAttribute.";
     }
   }
 
@@ -1382,8 +1364,7 @@ namespace Rodin::Tests::Unit
     Real distributedArea = mpiMesh.getArea();
 
     EXPECT_NEAR(distributedArea, expectedArea, 1e-10)
-      << "Rank " << world.rank()
-      << ": distributed area does not match parent area.";
+      << "Rank " << world.rank() << ": distributed area does not match parent area.";
   }
 
   // =========================================================================
@@ -1414,8 +1395,7 @@ namespace Rodin::Tests::Unit
     Real distributedVolume = mpiMesh.getVolume();
 
     EXPECT_NEAR(distributedVolume, expectedVolume, 1e-10)
-      << "Rank " << world.rank()
-      << ": distributed volume does not match parent volume.";
+      << "Rank " << world.rank() << ": distributed volume does not match parent volume.";
   }
 
   // =========================================================================
@@ -1443,8 +1423,7 @@ namespace Rodin::Tests::Unit
       const auto& trans = mpiMesh.getPolytopeTransformation(D, ci);
       // Transformation order should be non-negative
       EXPECT_GE(trans.getOrder(), 0u)
-        << "Rank " << world.rank() << " cell " << ci
-        << ": invalid transformation order.";
+        << "Rank " << world.rank() << " cell " << ci << ": invalid transformation order.";
     }
   }
 
@@ -1471,9 +1450,8 @@ namespace Rodin::Tests::Unit
     for (Index ci = 0; ci < shard.getCellCount(); ci++)
     {
       auto it = mpiMesh.getCell(ci);
-      ASSERT_TRUE(static_cast<bool>(it))
-        << "Rank " << world.rank() << " cell " << ci
-        << ": getCell(idx) returned invalid iterator.";
+      ASSERT_TRUE(static_cast<bool>(it)) << "Rank " << world.rank() << " cell " << ci
+                                         << ": getCell(idx) returned invalid iterator.";
       EXPECT_EQ(it->getDimension(), D);
       EXPECT_EQ(it->getIndex(), ci);
     }
@@ -1501,9 +1479,8 @@ namespace Rodin::Tests::Unit
     for (Index vi = 0; vi < shard.getVertexCount(); vi++)
     {
       auto it = mpiMesh.getVertex(vi);
-      ASSERT_TRUE(static_cast<bool>(it))
-        << "Rank " << world.rank() << " vertex " << vi
-        << ": getVertex(idx) returned invalid iterator.";
+      ASSERT_TRUE(static_cast<bool>(it)) << "Rank " << world.rank() << " vertex " << vi
+                                         << ": getVertex(idx) returned invalid iterator.";
       EXPECT_EQ(it->getDimension(), 0u);
       EXPECT_EQ(it->getIndex(), vi);
     }
@@ -1574,8 +1551,7 @@ namespace Rodin::Tests::Unit
     const auto& pq = mpiMesh.getQuadrature(D, 0, qf);
 
     EXPECT_GT(pq.getSize(), 0u)
-      << "Rank " << world.rank()
-      << ": quadrature should have at least one point.";
+      << "Rank " << world.rank() << ": quadrature should have at least one point.";
 
     const auto& qp = pq.getPoint(0);
     EXPECT_EQ(qp.getPolytope().getMesh(), mpiMesh)
@@ -1601,8 +1577,8 @@ namespace Rodin::Tests::Unit
       ++localBoundaryCount;
 
     size_t globalBoundaryCount = 0;
-    boost::mpi::all_reduce(world, localBoundaryCount, globalBoundaryCount,
-                           std::plus<size_t>());
+    boost::mpi::all_reduce(
+      world, localBoundaryCount, globalBoundaryCount, std::plus<size_t>());
 
     auto parentMesh = makeShardableMeshWithFaces(Polytope::Type::Triangle, {4, 4});
     size_t parentBoundaryCount = 0;
@@ -1636,12 +1612,10 @@ namespace Rodin::Tests::Unit
 
       if (!isOwned)
       {
-        EXPECT_FALSE(isBound)
-          << "Rank " << world.rank()
-          << ": non-owned face " << i << " should not be classified as boundary.";
-        EXPECT_FALSE(isIface)
-          << "Rank " << world.rank()
-          << ": non-owned face " << i << " should not be classified as interface.";
+        EXPECT_FALSE(isBound) << "Rank " << world.rank() << ": non-owned face " << i
+                              << " should not be classified as boundary.";
+        EXPECT_FALSE(isIface) << "Rank " << world.rank() << ": non-owned face " << i
+                              << " should not be classified as interface.";
       }
     }
   }
@@ -1662,8 +1636,7 @@ namespace Rodin::Tests::Unit
     Real parentPerimeter = parentMesh.getPerimeter();
 
     EXPECT_NEAR(distribPerimeter, parentPerimeter, 1e-10)
-      << "Rank " << world.rank()
-      << ": distributed perimeter does not match parent.";
+      << "Rank " << world.rank() << ": distributed perimeter does not match parent.";
   }
 
   /// @brief Verifies uniform grid triangle for MPI geometry mesh by checking exact expected values, MPI behavior.
@@ -1677,11 +1650,9 @@ namespace Rodin::Tests::Unit
     auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
 
     EXPECT_EQ(mpiMesh.getDimension(), 2u)
-      << "Rank " << world.rank()
-      << ": UniformGrid dimension should be 2.";
+      << "Rank " << world.rank() << ": UniformGrid dimension should be 2.";
     EXPECT_EQ(mpiMesh.getSpaceDimension(), 2u)
-      << "Rank " << world.rank()
-      << ": UniformGrid space dimension should be 2.";
+      << "Rank " << world.rank() << ": UniformGrid space dimension should be 2.";
 
     size_t localOwnedCells = 0;
     const auto& shard = mpiMesh.getShard();
@@ -1695,9 +1666,8 @@ namespace Rodin::Tests::Unit
     size_t globalCells = 0;
     boost::mpi::all_reduce(world, localOwnedCells, globalCells, std::plus<size_t>());
 
-    EXPECT_GT(globalCells, 0u)
-      << "Rank " << world.rank()
-      << ": UniformGrid should produce cells globally.";
+    EXPECT_GT(globalCells, 0u) << "Rank " << world.rank()
+                               << ": UniformGrid should produce cells globally.";
 
     size_t globalCellsViaAPI = mpiMesh.getPolytopeCount(D);
     EXPECT_EQ(globalCells, globalCellsViaAPI)
@@ -1757,8 +1727,8 @@ namespace Rodin::Tests::Unit
     const size_t vertCountBefore = shard.getVertexCount();
 
     auto tmpDir = boost::filesystem::temp_directory_path();
-    auto tmpPath = tmpDir / ("rodin_mpi_test_rank_"
-                             + std::to_string(world.rank()) + ".mesh");
+    auto tmpPath =
+      tmpDir / ("rodin_mpi_test_rank_" + std::to_string(world.rank()) + ".mesh");
     mpiMesh.save(tmpPath, IO::FileFormat::MEDIT);
 
     Mesh<Context::MPI> loaded(ctx);
@@ -1766,11 +1736,9 @@ namespace Rodin::Tests::Unit
 
     const auto& loadedShard = loaded.getShard();
     EXPECT_EQ(loadedShard.getPolytopeCount(D), cellCountBefore)
-      << "Rank " << world.rank()
-      << ": loaded mesh should have same cell count.";
+      << "Rank " << world.rank() << ": loaded mesh should have same cell count.";
     EXPECT_EQ(loadedShard.getVertexCount(), vertCountBefore)
-      << "Rank " << world.rank()
-      << ": loaded mesh should have same vertex count.";
+      << "Rank " << world.rank() << ": loaded mesh should have same vertex count.";
 
     boost::filesystem::remove(tmpPath);
   }
@@ -1792,8 +1760,8 @@ namespace Rodin::Tests::Unit
       ++localInterfaceCount;
 
     size_t globalInterfaceCount = 0;
-    boost::mpi::all_reduce(world, localInterfaceCount, globalInterfaceCount,
-                           std::plus<size_t>());
+    boost::mpi::all_reduce(
+      world, localInterfaceCount, globalInterfaceCount, std::plus<size_t>());
     EXPECT_GT(globalInterfaceCount, 0u)
       << "With multiple ranks, there should be interface faces.";
   }
@@ -1820,7 +1788,8 @@ namespace Rodin::Tests::Unit
 
     size_t totalEdges = 0;
     {
-      auto localMesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+      auto localMesh =
+        Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
       localMesh.getConnectivity().compute(1, 2);
       totalEdges = localMesh.getPolytopeCount(1);
     }
@@ -1864,19 +1833,16 @@ namespace Rodin::Tests::Unit
     const auto& pmap = shard.getPolytopeMap(1);
 
     EXPECT_EQ(pmap.left.size(), pmap.right.size())
-      << "Rank " << world.rank()
-      << ": polytope map left/right size mismatch for edges.";
+      << "Rank " << world.rank() << ": polytope map left/right size mismatch for edges.";
 
     for (Index li = 0; li < pmap.left.size(); ++li)
     {
       Index distId = pmap.left[li];
       auto it = pmap.right.find(distId);
       ASSERT_NE(it, pmap.right.end())
-        << "Rank " << world.rank()
-        << ": distId " << distId << " not in right map.";
+        << "Rank " << world.rank() << ": distId " << distId << " not in right map.";
       EXPECT_EQ(it->second, li)
-        << "Rank " << world.rank()
-        << ": round-trip mismatch for local edge " << li;
+        << "Rank " << world.rank() << ": round-trip mismatch for local edge " << li;
     }
   }
 
@@ -1898,12 +1864,10 @@ namespace Rodin::Tests::Unit
     const auto& shard = mpiMesh.getShard();
     for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
     {
-      int count = static_cast<int>(shard.isOwned(1, i))
-                + static_cast<int>(shard.isShared(1, i))
-                + static_cast<int>(shard.isGhost(1, i));
-      EXPECT_EQ(count, 1)
-        << "Rank " << world.rank() << " edge " << i
-        << " has " << count << " states (expected 1).";
+      int count = static_cast<int>(shard.isOwned(1, i)) +
+        static_cast<int>(shard.isShared(1, i)) + static_cast<int>(shard.isGhost(1, i));
+      EXPECT_EQ(count, 1) << "Rank " << world.rank() << " edge " << i << " has " << count
+                          << " states (expected 1).";
     }
   }
 
@@ -1933,11 +1897,9 @@ namespace Rodin::Tests::Unit
         << "Rank " << myRank << " edge " << localIdx
         << ": entity in owner map should be ghost.";
       EXPECT_LT(ownerRank, numRanks)
-        << "Rank " << myRank << " edge " << localIdx
-        << ": owner rank out of range.";
+        << "Rank " << myRank << " edge " << localIdx << ": owner rank out of range.";
       EXPECT_NE(ownerRank, myRank)
-        << "Rank " << myRank << " edge " << localIdx
-        << ": owner should not be self.";
+        << "Rank " << myRank << " edge " << localIdx << ": owner should not be self.";
     }
   }
 
@@ -1977,8 +1939,7 @@ namespace Rodin::Tests::Unit
         {
           auto [it, inserted] = allIds.insert(id);
           EXPECT_TRUE(inserted)
-            << "Distributed edge ID " << id
-            << " is owned by multiple ranks.";
+            << "Distributed edge ID " << id << " is owned by multiple ranks.";
         }
       }
     }
@@ -2006,17 +1967,14 @@ namespace Rodin::Tests::Unit
     const auto& haloMap = shard.getHalo(1);
     for (const auto& [localIdx, ranks] : haloMap)
     {
-      EXPECT_TRUE(shard.isOwned(1, localIdx))
-        << "Rank " << myRank << " edge " << localIdx
-        << ": entity in halo map should be owned.";
+      EXPECT_TRUE(shard.isOwned(1, localIdx)) << "Rank " << myRank << " edge " << localIdx
+                                              << ": entity in halo map should be owned.";
       for (Index r : ranks)
       {
-        EXPECT_LT(r, numRanks)
-          << "Rank " << myRank << " edge " << localIdx
-          << ": halo rank out of range.";
-        EXPECT_NE(r, myRank)
-          << "Rank " << myRank << " edge " << localIdx
-          << ": halo should not reference self.";
+        EXPECT_LT(r, numRanks) << "Rank " << myRank << " edge " << localIdx
+                               << ": halo rank out of range.";
+        EXPECT_NE(r, myRank) << "Rank " << myRank << " edge " << localIdx
+                             << ": halo should not reference self.";
       }
     }
   }
@@ -2040,8 +1998,7 @@ namespace Rodin::Tests::Unit
     for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
     {
       EXPECT_TRUE(shard.isOwned(1, i))
-        << "With single rank, all edges should be owned, but edge "
-        << i << " is not.";
+        << "With single rank, all edges should be owned, but edge " << i << " is not.";
     }
 
     EXPECT_TRUE(shard.getOwner(1).empty())
@@ -2108,12 +2065,14 @@ namespace Rodin::Tests::Unit
 
     size_t totalEdges = 0;
     {
-      auto localMesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
+      auto localMesh =
+        Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
       localMesh.getConnectivity().compute(1, 2);
       totalEdges = localMesh.getPolytopeCount(1);
     }
 
-    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Quadrilateral, {4, 4});
+    auto mpiMesh =
+      Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Quadrilateral, {4, 4});
     mpiMesh.getConnectivity().compute(1, 2);
     mpiMesh.reconcile(1);
 
@@ -2160,12 +2119,14 @@ namespace Rodin::Tests::Unit
     for (Index i = 0; i < shard.getPolytopeCount(2); ++i)
     {
       int count = 0;
-      if (shard.isOwned(2, i))  ++count;
-      if (shard.isShared(2, i)) ++count;
-      if (shard.isGhost(2, i))  ++count;
-      EXPECT_EQ(count, 1)
-        << "Rank " << world.rank()
-        << ": face " << i << " has " << count << " states (expected 1).";
+      if (shard.isOwned(2, i))
+        ++count;
+      if (shard.isShared(2, i))
+        ++count;
+      if (shard.isGhost(2, i))
+        ++count;
+      EXPECT_EQ(count, 1) << "Rank " << world.rank() << ": face " << i << " has " << count
+                          << " states (expected 1).";
     }
   }
 
@@ -2192,9 +2153,8 @@ namespace Rodin::Tests::Unit
     {
       const Index globalIdx = pm.left[localIdx];
       auto it = pm.right.find(globalIdx);
-      ASSERT_NE(it, pm.right.end())
-        << "Rank " << world.rank()
-        << ": global face " << globalIdx << " missing in right map.";
+      ASSERT_NE(it, pm.right.end()) << "Rank " << world.rank() << ": global face "
+                                    << globalIdx << " missing in right map.";
       EXPECT_EQ(it->second, localIdx);
     }
   }
@@ -2220,13 +2180,19 @@ namespace Rodin::Tests::Unit
     const size_t ne = shard.getPolytopeCount(1);
     std::vector<Index> firstGlobal(ne);
 
-    enum LocalState : int { kOwned = 0, kShared = 1, kGhost = 2 };
+    enum LocalState : int
+    {
+      kOwned = 0,
+      kShared = 1,
+      kGhost = 2
+    };
     std::vector<int> firstState(ne);
 
-    auto classifyState = [&](size_t d, Index i) -> int
-    {
-      if (shard.isOwned(d, i))  return kOwned;
-      if (shard.isShared(d, i)) return kShared;
+    auto classifyState = [&](size_t d, Index i) -> int {
+      if (shard.isOwned(d, i))
+        return kOwned;
+      if (shard.isShared(d, i))
+        return kShared;
       return kGhost;
     };
 
@@ -2243,12 +2209,12 @@ namespace Rodin::Tests::Unit
     for (Index i = 0; i < ne; ++i)
     {
       EXPECT_EQ(shard.getPolytopeMap(1).left.at(i), firstGlobal[i])
-        << "Rank " << world.rank()
-        << ": edge " << i << " global ID changed on second reconcile.";
+        << "Rank " << world.rank() << ": edge " << i
+        << " global ID changed on second reconcile.";
 
       EXPECT_EQ(classifyState(1, i), firstState[i])
-        << "Rank " << world.rank()
-        << ": edge " << i << " state changed on second reconcile.";
+        << "Rank " << world.rank() << ": edge " << i
+        << " state changed on second reconcile.";
     }
   }
 
@@ -2307,8 +2273,10 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto baseline = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
-    auto throttled = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    auto baseline =
+      Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    auto throttled =
+      Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
 
     baseline.getConnectivity().compute(1, 2);
     throttled.getConnectivity().compute(1, 2);
@@ -2380,10 +2348,9 @@ namespace Rodin::Tests::Unit
     const size_t cellsBefore = shard.getCellCount();
     const size_t vertsBefore = shard.getVertexCount();
 
-    const boost::filesystem::path tmpDir =
-        boost::filesystem::temp_directory_path();
+    const boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
     const boost::filesystem::path rankFile =
-        tmpDir / ("rodin_mpi_hdf5_rt_r" + std::to_string(world.rank()) + ".h5");
+      tmpDir / ("rodin_mpi_hdf5_rt_r" + std::to_string(world.rank()) + ".h5");
 
     // Step 2: Save – use the MPI HDF5 printer so both base-mesh topology
     // and /Shard/... metadata datasets are written to the file.
@@ -2439,10 +2406,8 @@ namespace Rodin::Tests::Unit
     // Step 1: Shard.
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
-    const boost::filesystem::path tmpDir =
-        boost::filesystem::temp_directory_path();
-    const auto rankPath = [&](int r) -> boost::filesystem::path
-    {
+    const boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
+    const auto rankPath = [&](int r) -> boost::filesystem::path {
       return tmpDir / ("rodin_mpi_hdf5_wf_r" + std::to_string(r) + ".h5");
     };
 
@@ -2477,8 +2442,7 @@ namespace Rodin::Tests::Unit
     }
 
     size_t ownedEdgesGlobal = 0;
-    boost::mpi::all_reduce(world, ownedEdgesLocal, ownedEdgesGlobal,
-                           std::plus<size_t>());
+    boost::mpi::all_reduce(world, ownedEdgesLocal, ownedEdgesGlobal, std::plus<size_t>());
 
     EXPECT_EQ(ownedEdgesGlobal, totalEdges)
       << "After HDF5 reload and reconcile, global owned-edge count mismatch.";

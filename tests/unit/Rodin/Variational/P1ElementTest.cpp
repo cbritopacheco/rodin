@@ -329,8 +329,10 @@ namespace Rodin::Tests::Unit
 
     {
       EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0.5, 0.5}}), 0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(k.getBasis(1)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(k.getBasis(2)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(
+        k.getBasis(1)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(
+        k.getBasis(2)(Math::Vector<Real>{{0.5, 0.5}}), 0.5, RODIN_FUZZY_CONSTANT);
     }
 
     {
@@ -352,7 +354,8 @@ namespace Rodin::Tests::Unit
       for (size_t i = 0; i < n; i++)
       {
         const auto& s = gen();
-        Math::Vector<Real> p = s * Math::Vector<Real>{{0, 0}} + (1 - s) * Math::Vector<Real>{{1, 0}};
+        Math::Vector<Real> p =
+          s * Math::Vector<Real>{{0, 0}} + (1 - s) * Math::Vector<Real>{{1, 0}};
         EXPECT_NEAR(k.getBasis(0)(p), -p.x() - p.y() + 1, RODIN_FUZZY_CONSTANT);
         EXPECT_NEAR(k.getBasis(1)(p), p.x(), RODIN_FUZZY_CONSTANT);
         EXPECT_NEAR(k.getBasis(2)(p), p.y(), RODIN_FUZZY_CONSTANT);
@@ -589,7 +592,8 @@ namespace Rodin::Tests::Unit
       if (s + t + u <= 1.0)
       {
         Math::Vector<Real> p{{s, t, u}};
-        Real sum = k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
+        Real sum =
+          k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
         EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
       }
     }
@@ -686,7 +690,8 @@ namespace Rodin::Tests::Unit
       const auto& s = gen();
       const auto& t = gen();
       Math::Vector<Real> p{{s, t}};
-      Real sum = k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
+      Real sum =
+        k.getBasis(0)(p) + k.getBasis(1)(p) + k.getBasis(2)(p) + k.getBasis(3)(p);
       EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
     }
   }
@@ -795,7 +800,7 @@ namespace Rodin::Tests::Unit
     RealP1Element elem(Polytope::Type::Segment);
 
     // Test linear function f(x) = 2 + 3*x
-    Real c0 = 2.0, c1 = 3.0;  // f(0) = 2, f(1) = 5
+    Real c0 = 2.0, c1 = 3.0; // f(0) = 2, f(1) = 5
     Real f_at_0 = c0;
     Real f_at_1 = c0 + c1;
 
@@ -819,7 +824,8 @@ namespace Rodin::Tests::Unit
     // Test at arbitrary point
     Math::Vector<Real> p{{0.3, 0.4}};
     Real exact = 1.0 + 2.0 * p(0) + 3.0 * p(1);
-    Real interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
+    Real interpolated =
+      f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
 
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
@@ -865,11 +871,11 @@ namespace Rodin::Tests::Unit
     using Complex = std::complex<Real>;
     P1Element<Complex> elem(Polytope::Type::Segment);
 
-    Complex f0(1.0, 2.0);  // x=0
-    Complex f1(4.0, 6.0);  // x=1
+    Complex f0(1.0, 2.0); // x=0
+    Complex f1(4.0, 6.0); // x=1
 
-    Math::Vector<Real> p{{0.6}};         // if reference segment is [0,1]
-    Complex exact(2.8, 4.4);             // correct value
+    Math::Vector<Real> p{{0.6}}; // if reference segment is [0,1]
+    Complex exact(2.8, 4.4); // correct value
     Complex interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p);
 
     EXPECT_NEAR(interpolated.real(), exact.real(), RODIN_FUZZY_CONSTANT);
@@ -880,7 +886,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_P1Element_Vector, ComponentStructure_2D_Segment)
   {
     VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
-    EXPECT_EQ(elem.getCount(), 4);  // 2 nodes × 2 components
+    EXPECT_EQ(elem.getCount(), 4); // 2 nodes × 2 components
 
     Math::Vector<Real> p{{0.5}};
 
@@ -892,7 +898,7 @@ namespace Rodin::Tests::Unit
 
       // Only one component should be non-zero
       size_t component = i % 2;
-      EXPECT_NEAR(val(component), 0.5, RODIN_FUZZY_CONSTANT);  // P1 basis at midpoint
+      EXPECT_NEAR(val(component), 0.5, RODIN_FUZZY_CONSTANT); // P1 basis at midpoint
       EXPECT_NEAR(val(1 - component), 0.0, RODIN_FUZZY_CONSTANT);
     }
   }
@@ -908,14 +914,15 @@ namespace Rodin::Tests::Unit
     Math::Vector<Real> v1{{3.0, 7.0}};
 
     Math::Vector<Real> p{{0.4}};
-    Math::Vector<Real> exact{{1.8, 4.6}};  // [1+2*0.4, 3+4*0.4]
+    Math::Vector<Real> exact{{1.8, 4.6}}; // [1+2*0.4, 3+4*0.4]
 
     // Interpolate
-    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
-    interpolated += v0(0) * elem.getBasis(0)(p);  // x-component, node 0
-    interpolated += v0(1) * elem.getBasis(1)(p);  // y-component, node 0
-    interpolated += v1(0) * elem.getBasis(2)(p);  // x-component, node 1
-    interpolated += v1(1) * elem.getBasis(3)(p);  // y-component, node 1
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2));
+    interpolated.setZero();
+    interpolated += v0(0) * elem.getBasis(0)(p); // x-component, node 0
+    interpolated += v0(1) * elem.getBasis(1)(p); // y-component, node 0
+    interpolated += v1(0) * elem.getBasis(2)(p); // x-component, node 1
+    interpolated += v1(1) * elem.getBasis(3)(p); // y-component, node 1
 
     EXPECT_NEAR(interpolated(0), exact(0), RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated(1), exact(1), RODIN_FUZZY_CONSTANT);
@@ -935,7 +942,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 6);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);  // Wedge is tensor product, so order 2
+    EXPECT_EQ(k.getOrder(), 2); // Wedge is tensor product, so order 2
 
     // Test Lagrange property at vertices
     // Bottom triangle vertices: (0,0,0), (1,0,0), (0,1,0)
@@ -989,7 +996,7 @@ namespace Rodin::Tests::Unit
     {
       // Generate random point inside wedge
       Real s = gen();
-      Real t = gen() * (1 - s);  // Ensure s + t <= 1
+      Real t = gen() * (1 - s); // Ensure s + t <= 1
       Real r = gen();
       Math::Vector<Real> p{{s, t, r}};
 
@@ -1035,7 +1042,7 @@ namespace Rodin::Tests::Unit
     // Test vdim=1 (scalar-like)
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, 1);
-      EXPECT_EQ(elem.getCount(), 2);  // 1 component × 2 nodes
+      EXPECT_EQ(elem.getCount(), 2); // 1 component × 2 nodes
 
       Math::Vector<Real> p{{0.5}};
       const auto& val = elem.getBasis(0)(p);
@@ -1046,15 +1053,15 @@ namespace Rodin::Tests::Unit
     // Test vdim=2
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
-      EXPECT_EQ(elem.getCount(), 4);  // 2 components × 2 nodes
+      EXPECT_EQ(elem.getCount(), 4); // 2 components × 2 nodes
 
       Math::Vector<Real> p{{0.5}};
-      const auto& val0 = elem.getBasis(0)(p);  // First component, first node
+      const auto& val0 = elem.getBasis(0)(p); // First component, first node
       EXPECT_EQ(val0.size(), 2);
       EXPECT_NEAR(val0(0), 0.5, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(val0(1), 0.0, RODIN_FUZZY_CONSTANT);
 
-      const auto& val1 = elem.getBasis(1)(p);  // Second component, first node
+      const auto& val1 = elem.getBasis(1)(p); // Second component, first node
       EXPECT_NEAR(val1(0), 0.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(val1(1), 0.5, RODIN_FUZZY_CONSTANT);
     }
@@ -1062,7 +1069,7 @@ namespace Rodin::Tests::Unit
     // Test vdim=3
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, 3);
-      EXPECT_EQ(elem.getCount(), 6);  // 3 components × 2 nodes
+      EXPECT_EQ(elem.getCount(), 6); // 3 components × 2 nodes
 
       Math::Vector<Real> p{{0.5}};
       for (size_t i = 0; i < 3; i++)
@@ -1086,19 +1093,19 @@ namespace Rodin::Tests::Unit
     // Test vdim=1 on Triangle
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, 1);
-      EXPECT_EQ(elem.getCount(), 3);  // 1 component × 3 nodes
+      EXPECT_EQ(elem.getCount(), 3); // 1 component × 3 nodes
     }
 
     // Test vdim=2 on Triangle
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, 2);
-      EXPECT_EQ(elem.getCount(), 6);  // 2 components × 3 nodes
+      EXPECT_EQ(elem.getCount(), 6); // 2 components × 3 nodes
     }
 
     // Test vdim=3 on Triangle
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, 3);
-      EXPECT_EQ(elem.getCount(), 9);  // 3 components × 3 nodes
+      EXPECT_EQ(elem.getCount(), 9); // 3 components × 3 nodes
     }
   }
 
@@ -1107,7 +1114,7 @@ namespace Rodin::Tests::Unit
   {
     // Test vdim=3 on Tetrahedron (typical 3D case)
     VectorP1Element<Real> elem(Polytope::Type::Tetrahedron, 3);
-    EXPECT_EQ(elem.getCount(), 12);  // 3 components × 4 nodes
+    EXPECT_EQ(elem.getCount(), 12); // 3 components × 4 nodes
 
     Math::Vector<Real> p{{0.25, 0.25, 0.25}};
     Real sum_per_component[3] = {0, 0, 0};
@@ -1130,7 +1137,7 @@ namespace Rodin::Tests::Unit
   {
     // Test vdim=3 on Wedge
     VectorP1Element<Real> elem(Polytope::Type::Wedge, 3);
-    EXPECT_EQ(elem.getCount(), 18);  // 3 components × 6 nodes
+    EXPECT_EQ(elem.getCount(), 18); // 3 components × 6 nodes
   }
 
   /// @brief Verifies vector dimensions pyramid for final test P1 element vector by checking exact expected values.
@@ -1489,7 +1496,8 @@ namespace Rodin::Tests::Unit
 
       // Test interpolation at a point
       Math::Vector<Real> p{{0.3, 0.4}};
-      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim));
+      interpolated.setZero();
 
       for (size_t i = 0; i < elem.getCount(); i++)
         interpolated += dof_values[i] * elem.getBasis(i)(p);

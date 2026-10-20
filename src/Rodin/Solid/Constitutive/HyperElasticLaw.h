@@ -70,10 +70,8 @@ namespace Rodin::Solid
        * @param[in] cp Constitutive point
        */
       template <class Cache>
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const ConstitutivePoint& cp) const
       {
         static_cast<const Derived&>(*this).getFirstPiolaKirchhoffStress(P, cache, cp);
       }
@@ -94,11 +92,8 @@ namespace Rodin::Solid
        * @param[in] dF Perturbation of the deformation gradient
        */
       template <class Cache>
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
+        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
         static_cast<const Derived&>(*this).getMaterialTangent(dP, cache, cp, dF);
       }
@@ -115,9 +110,7 @@ namespace Rodin::Solid
        * @returns Strain energy density value
        */
       template <class Cache>
-      Real getStrainEnergyDensity(
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         return static_cast<const Derived&>(*this).getStrainEnergyDensity(cache, cp);
       }
@@ -125,22 +118,26 @@ namespace Rodin::Solid
     protected:
       /// @brief Default constructor for derived CRTP laws.
       HyperElasticLaw() = default;
+
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
       HyperElasticLaw(const HyperElasticLaw& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       HyperElasticLaw(HyperElasticLaw&& other) = default;
+
       /**
        * @brief Copy assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to copy from.
        */
       HyperElasticLaw& operator=(const HyperElasticLaw& other) = default;
+
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.

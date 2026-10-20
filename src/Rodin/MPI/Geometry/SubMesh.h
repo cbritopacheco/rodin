@@ -267,7 +267,7 @@ namespace Rodin::Geometry
 
     private:
       std::reference_wrapper<const Mesh<Context::MPI>>
-        m_parent;  ///< Parent mesh reference
+        m_parent; ///< Parent mesh reference
       std::vector<PolytopeMap> m_s2ps; ///< Submesh-to-parent index maps
       Deque<Ancestor> m_ancestors; ///< Ancestor mesh chain
   };

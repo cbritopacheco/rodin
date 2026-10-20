@@ -85,6 +85,7 @@ namespace Examples
       {
         return m_center;
       }
+
       /** @return Whether a degenerate library result required support search. */
       bool usedFallback() const
       {

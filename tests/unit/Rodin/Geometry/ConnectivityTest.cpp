@@ -16,9 +16,8 @@ namespace Rodin::Tests::Unit
     constexpr const size_t nodes = 3;
 
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity.initialize(meshDim).nodes(nodes).polytope(
+      Polytope::Type::Triangle, {0, 1, 2});
 
     EXPECT_EQ(connectivity.getDimension(), 2);
 
@@ -36,12 +35,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({d, d}, 0).size(), 0);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 0 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({0}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({0}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({0}));
 
     connectivity.compute(d, d - 1);
-    EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0), IndexVector({ {0, 1, 2} }));
+    EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0), IndexVector({{0, 1, 2}}));
 
     d = 1;
     connectivity.compute(d, 0);
@@ -69,9 +68,9 @@ namespace Rodin::Tests::Unit
 
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {1, 2, 3});
+      .nodes(nodes)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
     size_t d;
 
@@ -88,10 +87,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({d, d}, 1).size(), 1);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({0}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({0, 1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({0, 1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({1}));
 
     connectivity.compute(d, d - 1);
     EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0).size(), 3);
@@ -116,10 +115,10 @@ namespace Rodin::Tests::Unit
 
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {1, 2, 3})
-                .polytope(Polytope::Type::Triangle, {2, 3, 4});
+      .nodes(nodes)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3})
+      .polytope(Polytope::Type::Triangle, {2, 3, 4});
 
     size_t d;
 
@@ -138,11 +137,11 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({d, d}, 2), IndexVector({0, 1}));
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 0, 1, 2 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1, 2 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({0}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({0, 1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({0, 1, 2}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({1, 2}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({2}));
 
     connectivity.compute(d, d - 1);
     EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0).size(), 3);
@@ -167,9 +166,9 @@ namespace Rodin::Tests::Unit
 
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Triangle, {0, 1, 4})
-                .polytope(Polytope::Type::Quadrilateral, {1, 2, 4, 3});
+      .nodes(nodes)
+      .polytope(Polytope::Type::Triangle, {0, 1, 4})
+      .polytope(Polytope::Type::Quadrilateral, {1, 2, 4, 3});
 
     size_t d;
 
@@ -178,11 +177,11 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 2);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 0, 1 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({0}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({0, 1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({0, 1}));
   }
 
   /// @brief Verifies sanity test 2 D 9 nodes mixed for geometry connectivity by checking exact expected values, mesh connectivity computation.
@@ -193,11 +192,11 @@ namespace Rodin::Tests::Unit
 
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Triangle, {0, 1, 4})
-                .polytope(Polytope::Type::Quadrilateral, {1, 2, 4, 3})
-                .polytope(Polytope::Type::Quadrilateral, {8, 0, 7, 6})
-                .polytope(Polytope::Type::Quadrilateral, {0, 4, 6, 5});
+      .nodes(nodes)
+      .polytope(Polytope::Type::Triangle, {0, 1, 4})
+      .polytope(Polytope::Type::Quadrilateral, {1, 2, 4, 3})
+      .polytope(Polytope::Type::Quadrilateral, {8, 0, 7, 6})
+      .polytope(Polytope::Type::Quadrilateral, {0, 4, 6, 5});
 
     size_t d;
 
@@ -207,15 +206,15 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
 
     connectivity.compute(0, d);
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({ 0, 2, 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({ 0, 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({ 1 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 0, 1, 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 5), IndexVector({ 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 6), IndexVector({ 2, 3 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 7), IndexVector({ 2 }));
-    EXPECT_EQ(connectivity.getIncidence({0, d}, 8), IndexVector({ 2 }));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 0), IndexVector({0, 2, 3}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 1), IndexVector({0, 1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 2), IndexVector({1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 3), IndexVector({1}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({0, 1, 3}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 5), IndexVector({3}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 6), IndexVector({2, 3}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 7), IndexVector({2}));
+    EXPECT_EQ(connectivity.getIncidence({0, d}, 8), IndexVector({2}));
 
     d = 1;
     connectivity.compute(d, 0);
@@ -235,9 +234,8 @@ namespace Rodin::Tests::Unit
     constexpr const size_t nodes = 4;
 
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2});
+    connectivity.initialize(meshDim).nodes(nodes).polytope(
+      Polytope::Type::Quadrilateral, {0, 1, 3, 2});
 
     EXPECT_EQ(connectivity.getDimension(), 2);
 
@@ -262,9 +260,8 @@ namespace Rodin::Tests::Unit
     constexpr const size_t nodes = 4;
 
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
+    connectivity.initialize(meshDim).nodes(nodes).polytope(
+      Polytope::Type::Tetrahedron, {0, 1, 2, 3});
 
     EXPECT_EQ(connectivity.getDimension(), 3);
 
@@ -340,9 +337,8 @@ namespace Rodin::Tests::Unit
     constexpr const size_t nodes = 3;
 
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity.initialize(meshDim).nodes(nodes).polytope(
+      Polytope::Type::Triangle, {0, 1, 2});
 
     size_t d = 2;
     connectivity.compute(d, 0);
@@ -397,9 +393,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_1D_SingleSegment)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(1)
-                .nodes(2)
-                .polytope(Polytope::Type::Segment, {0, 1});
+    connectivity.initialize(1).nodes(2).polytope(Polytope::Type::Segment, {0, 1});
 
     EXPECT_EQ(connectivity.getDimension(), 1);
 
@@ -418,10 +412,10 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(1)
-                .nodes(4)
-                .polytope(Polytope::Type::Segment, {0, 1})
-                .polytope(Polytope::Type::Segment, {1, 2})
-                .polytope(Polytope::Type::Segment, {2, 3});
+      .nodes(4)
+      .polytope(Polytope::Type::Segment, {0, 1})
+      .polytope(Polytope::Type::Segment, {1, 2})
+      .polytope(Polytope::Type::Segment, {2, 3});
 
     size_t d = 1;
     connectivity.compute(d, 0);
@@ -441,9 +435,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_3D_SingleTetrahedron)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(3)
-                .nodes(4)
-                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
+    connectivity.initialize(3).nodes(4).polytope(
+      Polytope::Type::Tetrahedron, {0, 1, 2, 3});
 
     EXPECT_EQ(connectivity.getDimension(), 3);
 
@@ -473,9 +466,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_CopyConstruction)
   {
     Connectivity<Context::Local> connectivity1;
-    connectivity1.initialize(2)
-                 .nodes(3)
-                 .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity1.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     connectivity1.compute(2, 0);
     connectivity1.compute(1, 0);
@@ -494,9 +485,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_MoveConstruction)
   {
     Connectivity<Context::Local> connectivity1;
-    connectivity1.initialize(2)
-                 .nodes(3)
-                 .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity1.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     connectivity1.compute(2, 0);
     size_t originalCount = connectivity1.getCount(2);
@@ -512,9 +501,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_CopyAssignment)
   {
     Connectivity<Context::Local> connectivity1;
-    connectivity1.initialize(2)
-                 .nodes(3)
-                 .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity1.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     connectivity1.compute(2, 0);
     connectivity1.compute(1, 0);
@@ -531,9 +518,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_MoveAssignment)
   {
     Connectivity<Context::Local> connectivity1;
-    connectivity1.initialize(2)
-                 .nodes(4)
-                 .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2});
+    connectivity1.initialize(2).nodes(4).polytope(
+      Polytope::Type::Quadrilateral, {0, 1, 3, 2});
 
     connectivity1.compute(2, 0);
     size_t originalCount = connectivity1.getCount(2);
@@ -550,9 +536,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_DegenerateTriangle_DuplicateVertex)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2)
-                .nodes(2)
-                .polytope(Polytope::Type::Triangle, {0, 0, 1});
+    connectivity.initialize(2).nodes(2).polytope(Polytope::Type::Triangle, {0, 0, 1});
 
     connectivity.compute(2, 0);
     EXPECT_EQ(connectivity.getCount(2), 1);
@@ -566,9 +550,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_ComputeOrder_Dependency)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2)
-                .nodes(3)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     // Compute higher dimension first
     connectivity.compute(2, 0);
@@ -587,10 +569,10 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(5)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {1, 2, 3})
-                .polytope(Polytope::Type::Quadrilateral, {2, 3, 4, 1});
+      .nodes(5)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3})
+      .polytope(Polytope::Type::Quadrilateral, {2, 3, 4, 1});
 
     connectivity.compute(2, 0);
 
@@ -603,9 +585,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(6)
-                .polytope(Polytope::Type::Quadrilateral, {0, 1, 4, 3})
-                .polytope(Polytope::Type::Quadrilateral, {1, 2, 5, 4});
+      .nodes(6)
+      .polytope(Polytope::Type::Quadrilateral, {0, 1, 4, 3})
+      .polytope(Polytope::Type::Quadrilateral, {1, 2, 5, 4});
 
     size_t d = 2;
     connectivity.compute(d, 0);
@@ -624,9 +606,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(3)
-                .nodes(5)
-                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
-                .polytope(Polytope::Type::Tetrahedron, {1, 2, 3, 4});
+      .nodes(5)
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .polytope(Polytope::Type::Tetrahedron, {1, 2, 3, 4});
 
     size_t d = 3;
     connectivity.compute(d, 0);
@@ -648,9 +630,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(4)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {1, 2, 3});
+      .nodes(4)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
     // Compute cell to vertex
     connectivity.compute(2, 0);
@@ -668,9 +650,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_Clear_Specific_Connectivity)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2)
-                .nodes(3)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     connectivity.compute(2, 0);
     connectivity.compute(1, 0);
@@ -697,7 +677,7 @@ namespace Rodin::Tests::Unit
     // Add multiple triangles
     for (size_t i = 0; i < 10; ++i)
     {
-      connectivity.polytope(Polytope::Type::Triangle, {i, i+1, i+2});
+      connectivity.polytope(Polytope::Type::Triangle, {i, i + 1, i + 2});
     }
 
     connectivity.compute(2, 0);
@@ -708,9 +688,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_GetGeometry_AllDimensions)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2)
-                .nodes(3)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     connectivity.compute(2, 0);
     connectivity.compute(1, 0);
@@ -726,9 +704,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_GetPolytope_VertexIndices)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2)
-                .nodes(4)
-                .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2});
+    connectivity.initialize(2).nodes(4).polytope(
+      Polytope::Type::Quadrilateral, {0, 1, 3, 2});
 
     connectivity.compute(2, 0);
 
@@ -744,9 +721,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Connectivity, EdgeCase_InterfaceBoundary_SingleCell)
   {
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(2)
-                .nodes(3)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2});
+    connectivity.initialize(2).nodes(3).polytope(Polytope::Type::Triangle, {0, 1, 2});
 
     size_t d = 2;
     connectivity.compute(d, d);
@@ -764,9 +739,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(4)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {1, 2, 3});
+      .nodes(4)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
     // Before computing edges, they don't exist
     EXPECT_EQ(connectivity.getCount(1), 0);
@@ -784,9 +759,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(4)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {1, 2, 3});
+      .nodes(4)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
     // First, discover edges normally
     connectivity.compute(2, 1, Connectivity<Context::Local>::Mode::Discover);
@@ -800,7 +775,7 @@ namespace Rodin::Tests::Unit
 
     // Should have computed the relation without changing edge count
     EXPECT_EQ(connectivity.getCount(1), 5);
-    EXPECT_EQ(connectivity.getIncidence(2, 1).size(), 2);  // 2 cells
+    EXPECT_EQ(connectivity.getIncidence(2, 1).size(), 2); // 2 cells
   }
 
   /// @brief Verifies mode discover 3 D adds faces for geometry connectivity by checking exact expected values, mesh connectivity computation.
@@ -808,9 +783,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(3)
-                .nodes(5)
-                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
-                .polytope(Polytope::Type::Tetrahedron, {1, 2, 3, 4});
+      .nodes(5)
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .polytope(Polytope::Type::Tetrahedron, {1, 2, 3, 4});
 
     // Before computing faces, they don't exist
     EXPECT_EQ(connectivity.getCount(2), 0);
@@ -828,9 +803,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(3)
-                .nodes(5)
-                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
-                .polytope(Polytope::Type::Tetrahedron, {1, 2, 3, 4});
+      .nodes(5)
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .polytope(Polytope::Type::Tetrahedron, {1, 2, 3, 4});
 
     // First, discover faces
     connectivity.compute(3, 2, Connectivity<Context::Local>::Mode::Discover);
@@ -852,10 +827,10 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(6)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Quadrilateral, {1, 3, 4, 2})
-                .polytope(Polytope::Type::Triangle, {3, 4, 5});
+      .nodes(6)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Quadrilateral, {1, 3, 4, 2})
+      .polytope(Polytope::Type::Triangle, {3, 4, 5});
 
     // Compute edges with Discover mode
     connectivity.compute(2, 1, Connectivity<Context::Local>::Mode::Discover);
@@ -864,13 +839,13 @@ namespace Rodin::Tests::Unit
     // Triangle: 3 edges, Quad: 4 edges, Triangle: 3 edges
     // Shared edges reduce the count
     EXPECT_GT(connectivity.getCount(1), 0);
-    EXPECT_LE(connectivity.getCount(1), 10);  // Max 10 if no sharing
+    EXPECT_LE(connectivity.getCount(1), 10); // Max 10 if no sharing
 
     // Verify cell-to-edge connectivity
-    EXPECT_EQ(connectivity.getIncidence(2, 1).size(), 3);  // 3 cells
-    EXPECT_EQ(connectivity.getIncidence({2, 1}, 0).size(), 3);  // Triangle has 3 edges
-    EXPECT_EQ(connectivity.getIncidence({2, 1}, 1).size(), 4);  // Quad has 4 edges
-    EXPECT_EQ(connectivity.getIncidence({2, 1}, 2).size(), 3);  // Triangle has 3 edges
+    EXPECT_EQ(connectivity.getIncidence(2, 1).size(), 3); // 3 cells
+    EXPECT_EQ(connectivity.getIncidence({2, 1}, 0).size(), 3); // Triangle has 3 edges
+    EXPECT_EQ(connectivity.getIncidence({2, 1}, 1).size(), 4); // Quad has 4 edges
+    EXPECT_EQ(connectivity.getIncidence({2, 1}, 2).size(), 3); // Triangle has 3 edges
   }
 
   /// @brief Verifies mode restrict with partial edges for geometry connectivity by checking exact expected values, mesh connectivity computation.
@@ -878,9 +853,9 @@ namespace Rodin::Tests::Unit
   {
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(5)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {2, 3, 4});
+      .nodes(5)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {2, 3, 4});
 
     // Manually add only some edges
     connectivity.polytope(Polytope::Type::Segment, {0, 1});
@@ -941,10 +916,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getDimension(), 2);
 
     // Compute various connectivity relations
-    connectivity.compute(2, 0);  // Cell to vertex
-    connectivity.compute(1, 0);  // Edge to vertex
-    connectivity.compute(2, 1);  // Cell to edge
-    connectivity.compute(2, 2);  // Cell to cell (neighbors)
+    connectivity.compute(2, 0); // Cell to vertex
+    connectivity.compute(1, 0); // Edge to vertex
+    connectivity.compute(2, 1); // Cell to edge
+    connectivity.compute(2, 2); // Cell to cell (neighbors)
 
     // Check that all cells have exactly 3 vertices
     for (size_t i = 0; i < mesh.getCellCount(); ++i)
@@ -967,11 +942,11 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(connectivity.getDimension(), 2);
     EXPECT_EQ(mesh.getVertexCount(), 25);
-    EXPECT_EQ(mesh.getCellCount(), 16);  // (5-1)*(5-1) = 16 quads
+    EXPECT_EQ(mesh.getCellCount(), 16); // (5-1)*(5-1) = 16 quads
 
     // Compute connectivity
-    connectivity.compute(2, 1);  // Cell to edge
-    connectivity.compute(2, 0);  // Cell to vertex
+    connectivity.compute(2, 1); // Cell to edge
+    connectivity.compute(2, 0); // Cell to vertex
 
     // All cells should have 4 edges and 4 vertices (quadrilaterals)
     for (size_t i = 0; i < mesh.getCellCount(); ++i)
@@ -993,8 +968,8 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getVertexCount(), 0);
 
     // Compute connectivity
-    connectivity.compute(3, 2);  // Cell to face
-    connectivity.compute(3, 0);  // Cell to vertex
+    connectivity.compute(3, 2); // Cell to face
+    connectivity.compute(3, 0); // Cell to vertex
 
     // All cells should have 4 faces and 4 vertices (tetrahedra)
     for (size_t i = 0; i < mesh.getCellCount(); ++i)
@@ -1042,18 +1017,18 @@ namespace Rodin::Tests::Unit
     // Create a more complex mixed mesh
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(9)
-                // Bottom row: 2 triangles
-                .polytope(Polytope::Type::Triangle, {0, 1, 3})
-                .polytope(Polytope::Type::Triangle, {1, 4, 3})
-                // Middle: 1 quad
-                .polytope(Polytope::Type::Quadrilateral, {3, 4, 7, 6})
-                // Top: 2 triangles
-                .polytope(Polytope::Type::Triangle, {4, 5, 7})
-                .polytope(Polytope::Type::Triangle, {5, 8, 7})
-                // Side triangles
-                .polytope(Polytope::Type::Triangle, {1, 2, 4})
-                .polytope(Polytope::Type::Triangle, {2, 5, 4});
+      .nodes(9)
+      // Bottom row: 2 triangles
+      .polytope(Polytope::Type::Triangle, {0, 1, 3})
+      .polytope(Polytope::Type::Triangle, {1, 4, 3})
+      // Middle: 1 quad
+      .polytope(Polytope::Type::Quadrilateral, {3, 4, 7, 6})
+      // Top: 2 triangles
+      .polytope(Polytope::Type::Triangle, {4, 5, 7})
+      .polytope(Polytope::Type::Triangle, {5, 8, 7})
+      // Side triangles
+      .polytope(Polytope::Type::Triangle, {1, 2, 4})
+      .polytope(Polytope::Type::Triangle, {2, 5, 4});
 
     EXPECT_EQ(connectivity.getCount(2), 7);
 
@@ -1086,10 +1061,10 @@ namespace Rodin::Tests::Unit
     // Create a 3D mixed mesh with tets and wedges (triangular prisms)
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(3)
-                .nodes(9)
-                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
-                .polytope(Polytope::Type::Wedge, {1, 2, 4, 3, 5, 6})
-                .polytope(Polytope::Type::Tetrahedron, {2, 4, 5, 8});
+      .nodes(9)
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .polytope(Polytope::Type::Wedge, {1, 2, 4, 3, 5, 6})
+      .polytope(Polytope::Type::Tetrahedron, {2, 4, 5, 8});
 
     EXPECT_EQ(connectivity.getCount(3), 3);
 
@@ -1102,9 +1077,9 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(Polytope::Type::Wedge), 1);
 
     // Verify face counts
-    EXPECT_EQ(connectivity.getIncidence({3, 2}, 0).size(), 4);  // Tet has 4 faces
-    EXPECT_EQ(connectivity.getIncidence({3, 2}, 1).size(), 5);  // Wedge has 5 faces
-    EXPECT_EQ(connectivity.getIncidence({3, 2}, 2).size(), 4);  // Tet has 4 faces
+    EXPECT_EQ(connectivity.getIncidence({3, 2}, 0).size(), 4); // Tet has 4 faces
+    EXPECT_EQ(connectivity.getIncidence({3, 2}, 1).size(), 5); // Wedge has 5 faces
+    EXPECT_EQ(connectivity.getIncidence({3, 2}, 2).size(), 4); // Tet has 4 faces
 
     // Total faces should be computed
     EXPECT_GT(connectivity.getCount(2), 0);
@@ -1120,9 +1095,9 @@ namespace Rodin::Tests::Unit
     // Create two separate triangles (disconnected mesh)
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(6)
-                .polytope(Polytope::Type::Triangle, {0, 1, 2})
-                .polytope(Polytope::Type::Triangle, {3, 4, 5});
+      .nodes(6)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {3, 4, 5});
 
     EXPECT_EQ(connectivity.getCount(2), 2);
 
@@ -1143,14 +1118,14 @@ namespace Rodin::Tests::Unit
     // Create a mesh where multiple cells share edges in complex ways
     Connectivity<Context::Local> connectivity;
     connectivity.initialize(2)
-                .nodes(7)
-                // Central vertex with 6 triangles around it
-                .polytope(Polytope::Type::Triangle, {0, 1, 6})
-                .polytope(Polytope::Type::Triangle, {0, 2, 1})
-                .polytope(Polytope::Type::Triangle, {0, 3, 2})
-                .polytope(Polytope::Type::Triangle, {0, 4, 3})
-                .polytope(Polytope::Type::Triangle, {0, 5, 4})
-                .polytope(Polytope::Type::Triangle, {0, 6, 5});
+      .nodes(7)
+      // Central vertex with 6 triangles around it
+      .polytope(Polytope::Type::Triangle, {0, 1, 6})
+      .polytope(Polytope::Type::Triangle, {0, 2, 1})
+      .polytope(Polytope::Type::Triangle, {0, 3, 2})
+      .polytope(Polytope::Type::Triangle, {0, 4, 3})
+      .polytope(Polytope::Type::Triangle, {0, 5, 4})
+      .polytope(Polytope::Type::Triangle, {0, 6, 5});
 
     EXPECT_EQ(connectivity.getCount(2), 6);
 
@@ -1188,7 +1163,7 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    EXPECT_EQ(connectivity.getCount(2), 32);  // 4*4*2 = 32 triangles
+    EXPECT_EQ(connectivity.getCount(2), 32); // 4*4*2 = 32 triangles
 
     // Compute all connectivity with Discover
     connectivity.compute(2, 1, Connectivity<Context::Local>::Mode::Discover);
@@ -1225,14 +1200,14 @@ namespace Rodin::Tests::Unit
     auto& connectivity = mesh.getConnectivity();
 
     // Compute all possible connectivity relations
-    connectivity.compute(2, 0);  // Cell to vertex
-    connectivity.compute(2, 1);  // Cell to edge
-    connectivity.compute(2, 2);  // Cell to cell
-    connectivity.compute(1, 0);  // Edge to vertex
-    connectivity.compute(1, 1);  // Edge to edge
-    connectivity.compute(1, 2);  // Edge to cell
-    connectivity.compute(0, 1);  // Vertex to edge
-    connectivity.compute(0, 2);  // Vertex to cell
+    connectivity.compute(2, 0); // Cell to vertex
+    connectivity.compute(2, 1); // Cell to edge
+    connectivity.compute(2, 2); // Cell to cell
+    connectivity.compute(1, 0); // Edge to vertex
+    connectivity.compute(1, 1); // Edge to edge
+    connectivity.compute(1, 2); // Edge to cell
+    connectivity.compute(0, 1); // Vertex to edge
+    connectivity.compute(0, 2); // Vertex to cell
 
     // Verify all counts are positive
     EXPECT_GT(connectivity.getCount(0), 0);
@@ -1259,13 +1234,15 @@ namespace Rodin::Tests::Unit
     Connectivity<Context::Local> conn1, conn2;
 
     // Setup identical meshes
-    conn1.initialize(2).nodes(4)
-         .polytope(Polytope::Type::Triangle, {0, 1, 2})
-         .polytope(Polytope::Type::Triangle, {1, 2, 3});
+    conn1.initialize(2)
+      .nodes(4)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
-    conn2.initialize(2).nodes(4)
-         .polytope(Polytope::Type::Triangle, {0, 1, 2})
-         .polytope(Polytope::Type::Triangle, {1, 2, 3});
+    conn2.initialize(2)
+      .nodes(4)
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 2, 3});
 
     // For conn1: use Discover mode
     conn1.compute(2, 1, Connectivity<Context::Local>::Mode::Discover);

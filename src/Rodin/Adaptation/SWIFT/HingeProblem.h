@@ -32,6 +32,7 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief Native variational tangent problem type.
       using Parent = std::decay_t<decltype(Variational::Problem(
         std::declval<TrialFunction&>(), std::declval<TestFunction&>()))>;
+
       /// @brief Solution field holding the current increment.
       using Displacement = typename Parent::SolutionType;
       using Parent::operator=;

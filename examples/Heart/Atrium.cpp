@@ -564,14 +564,14 @@ namespace Rodin::Examples::Heart
       Integral(Div(m_u), m_q) +
       m_cfg.pressurePenalty * Integral(m_p, m_q)
 
-           // PSPG. Required by the equal-order pair.
+      // PSPG. Required by the equal-order pair.
       + Integral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
       BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
 
-           // Source impedance of the pressure inlets and mitral resistance,
-           // both positive semidefinite and assembled implicitly.
+      // Source impedance of the pressure inlets and mitral resistance,
+      // both positive semidefinite and assembled implicitly.
       + m_cfg.inletImpedance * BoundaryIntegral(Dot(uNormal, m_v)).over(m_inletSet) +
       BoundaryIntegral(mitralFn * Dot(uNormal, m_v)).over(m_cfg.outlet)
 

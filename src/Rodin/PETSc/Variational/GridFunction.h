@@ -175,8 +175,7 @@ namespace Rodin::Variational
    * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a> convenience wrapper
    */
   template <class FES>
-  class GridFunction<FES, ::Vec>
-    : public GridFunctionBase<GridFunction<FES, ::Vec>>
+  class GridFunction<FES, ::Vec> : public GridFunctionBase<GridFunction<FES, ::Vec>>
   {
     public:
       /**
@@ -212,9 +211,9 @@ namespace Rodin::Variational
        */
       struct ArrayWrite
       {
-        Boolean acquired = false;            ///< `true` while the array is locked for writing.
-        ::Vec ghost = PETSC_NULLPTR;         ///< Local form of the ghosted vector (MPI only).
-        PetscScalar* raw = PETSC_NULLPTR;    ///< Raw pointer to the mutable DOF array.
+        Boolean acquired = false; ///< `true` while the array is locked for writing.
+        ::Vec ghost = PETSC_NULLPTR; ///< Local form of the ghosted vector (MPI only).
+        PetscScalar* raw = PETSC_NULLPTR; ///< Raw pointer to the mutable DOF array.
       };
 
       /**
@@ -226,58 +225,52 @@ namespace Rodin::Variational
        */
       struct ArrayRead
       {
-        Boolean acquired = false;              ///< `true` while the array is locked for reading.
-        ::Vec ghost = PETSC_NULLPTR;           ///< Local form of the ghosted vector (MPI only).
-        const PetscScalar* raw = PETSC_NULLPTR; ///< Raw pointer to the read-only DOF array.
+        Boolean acquired = false; ///< `true` while the array is locked for reading.
+        ::Vec ghost = PETSC_NULLPTR; ///< Local form of the ghosted vector (MPI only).
+        const PetscScalar* raw =
+          PETSC_NULLPTR; ///< Raw pointer to the read-only DOF array.
       };
 
       /// @brief Finite element space type, e.g. @ref Rodin::Variational::P1.
-      using FESType =
-        FES;
+      using FESType = FES;
 
       /**
        * @brief Underlying PETSc vector data type (@c Vec), used to store the
        *        DOF coefficient vector @f$ \mathbf{u} @f$.
        */
-      using DataType =
-        ::Vec;
+      using DataType = ::Vec;
 
       /**
        * @brief Scalar type of each DOF coefficient (`PetscScalar`); determines
        *        the arithmetic precision of all vector operations.
        */
-      using ScalarType =
-        PetscScalar;
+      using ScalarType = PetscScalar;
 
       /**
        * @brief Range type of the finite element space (e.g. `PetscScalar`
        *        for scalar FE spaces, or `Math::Vector<PetscScalar>` for
        *        vector-valued spaces).
        */
-      using RangeType =
-        typename FormLanguage::Traits<FESType>::RangeType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /**
        * @brief Mesh type associated with the finite element space (e.g.
        *        `Geometry::Mesh<Context::Local>` or `Geometry::Mesh<Context::MPI>`).
        */
-      using FESMeshType =
-        typename FormLanguage::Traits<FESType>::MeshType;
+      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
       /**
        * @brief Context type of the finite element space mesh; either
        *        @ref Rodin::Context::Local for sequential problems or
        *        @ref Rodin::Context::MPI for distributed problems.
        */
-      using FESMeshContextType =
-        typename FormLanguage::Traits<FESMeshType>::ContextType;
+      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       /**
        * @brief Parent CRTP base class providing the generic
        *        GridFunctionBase interface (projection, interpolation, I/O).
        */
-      using Parent =
-        GridFunctionBase<GridFunction<FESType, DataType>>;
+      using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;
 
@@ -287,9 +280,8 @@ namespace Rodin::Variational
 
       using Parent::max;
 
-      static_assert(
-          std::is_same_v<FESMeshContextType, Context::Local> ||
-          std::is_same_v<FESMeshContextType, Context::MPI>);
+      static_assert(std::is_same_v<FESMeshContextType, Context::Local> ||
+        std::is_same_v<FESMeshContextType, Context::MPI>);
 
       /**
        * @brief Constructs a zero-initialised grid function on the given
@@ -395,7 +387,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
       }
 
       /**
@@ -434,7 +426,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
       }
 
       /**
@@ -523,7 +515,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -589,7 +581,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -615,8 +607,7 @@ namespace Rodin::Variational
        * @param[out] idx On return, the global index of the minimum value.
        * @returns The minimum scalar value @f$ \min_i u_i @f$.
        */
-      constexpr
-      ScalarType min(Index& idx) const
+      constexpr ScalarType min(Index& idx) const
       {
         this->sync();
         PetscErrorCode ierr;
@@ -625,7 +616,7 @@ namespace Rodin::Variational
         PetscReal res;
         ierr = VecMin(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
         idx = static_cast<Index>(pidx);
         return static_cast<ScalarType>(res);
       }
@@ -652,8 +643,7 @@ namespace Rodin::Variational
        * @param[out] idx On return, the global index of the maximum value.
        * @returns The maximum scalar value @f$ \max_i u_i @f$.
        */
-      constexpr
-      ScalarType max(Index& idx) const
+      constexpr ScalarType max(Index& idx) const
       {
         this->sync();
         PetscErrorCode ierr;
@@ -662,7 +652,7 @@ namespace Rodin::Variational
         PetscReal res;
         ierr = VecMax(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
         idx = static_cast<Index>(pidx);
         return static_cast<ScalarType>(res);
       }
@@ -796,7 +786,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -824,7 +814,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -851,7 +841,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -878,7 +868,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return static_cast<GridFunction&>(*this);
       }
 
@@ -919,7 +909,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -980,7 +970,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1009,7 +999,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1037,8 +1027,10 @@ namespace Rodin::Variational
 
         // Global size checks
         PetscInt nDst = 0, nSrc = 0;
-        ierr = VecGetSize(m_data, &nDst); assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetSize(data,   &nSrc); assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetSize(m_data, &nDst);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetSize(data, &nSrc);
+        assert(ierr == PETSC_SUCCESS);
 
         const PetscInt off = static_cast<PetscInt>(offset);
         assert(off >= 0);
@@ -1081,7 +1073,7 @@ namespace Rodin::Variational
 
           // Important: IS local size must be nLocal, not nDst (global)
           MPI_Comm comm;
-          PetscObjectGetComm((PetscObject) m_data, &comm);
+          PetscObjectGetComm((PetscObject)m_data, &comm);
 
           IS is = nullptr;
           ierr = ISCreateStride(comm, nLocal, start, 1, &is);
@@ -1144,7 +1136,8 @@ namespace Rodin::Variational
        * @returns Reference to `*this`.
        */
       template <class Function, class Pred>
-      GridFunction& project(const Geometry::Region& region, const Function& v, const Pred& pred)
+      GridFunction& project(
+        const Geometry::Region& region, const Function& v, const Pred& pred)
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
@@ -1201,7 +1194,7 @@ namespace Rodin::Variational
         {
           const auto& polytope = *it;
           if (pred(polytope))
-            this->project({ polytope.getDimension(), polytope.getIndex() }, v);
+            this->project({polytope.getDimension(), polytope.getIndex()}, v);
           ++it;
         }
 
@@ -1263,7 +1256,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1318,7 +1311,7 @@ namespace Rodin::Variational
           assert(false);
         }
         m_readAcquired.store(true, std::memory_order_release);
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1394,7 +1387,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1441,7 +1434,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1636,16 +1629,19 @@ namespace Rodin::Variational
           m_data = PETSC_NULLPTR;
         }
 
-        (void) ierr;
+        (void)ierr;
       }
 
     private:
       DataType
         m_data; ///< Underlying PETSc @c Vec storing the DOF coefficient vector @f$ \mathbf{u} @f$.
-      size_t m_begin, m_end;    ///< Owned DOF range @f$[\texttt{m\_begin}, \texttt{m\_end})@f$ (MPI mode); unused in Local mode.
-      GhostBimap m_ghosts;      ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
+      size_t m_begin,
+        m_end; ///< Owned DOF range @f$[\texttt{m\_begin}, \texttt{m\_end})@f$ (MPI mode); unused in Local mode.
+      GhostBimap
+        m_ghosts; ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
 
-      mutable ArrayRead m_read;   ///< Read-access state (mutable to allow const `acquire`/`flush`).
+      mutable ArrayRead
+        m_read; ///< Read-access state (mutable to allow const `acquire`/`flush`).
       ArrayWrite m_write; ///< Write-access state owned by the mutable writer.
       mutable std::atomic_bool m_readAcquired{false};
       mutable std::mutex m_readMutex;
@@ -1674,21 +1670,20 @@ namespace Rodin::PETSc::Variational
    * @see <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::Variational::GridFunction<FES, ::Vec></a>
    */
   template <class FES>
-  class GridFunction
-    : public Rodin::Variational::GridFunction<FES, ::Vec>
+  class GridFunction : public Rodin::Variational::GridFunction<FES, ::Vec>
   {
     public:
       /// @brief Parent specialization type.
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
-      using Parent::Parent;       ///< Inherit all constructors.
-      using Parent::operator[];   ///< Inherit element-access operators.
-      using Parent::operator();   ///< Inherit point-evaluation operator.
-      using Parent::getValue;     ///< Inherit getValue.
-      using Parent::operator=;    ///< Inherit assignment operators.
-      using Parent::operator+=;   ///< Inherit addition operators.
-      using Parent::operator-=;   ///< Inherit subtraction operators.
-      using Parent::operator*=;   ///< Inherit multiplication operators.
-      using Parent::operator/=;   ///< Inherit division operators.
+      using Parent::Parent; ///< Inherit all constructors.
+      using Parent::operator[]; ///< Inherit element-access operators.
+      using Parent::operator(); ///< Inherit point-evaluation operator.
+      using Parent::getValue; ///< Inherit getValue.
+      using Parent::operator=; ///< Inherit assignment operators.
+      using Parent::operator+=; ///< Inherit addition operators.
+      using Parent::operator-=; ///< Inherit subtraction operators.
+      using Parent::operator*=; ///< Inherit multiplication operators.
+      using Parent::operator/=; ///< Inherit division operators.
   };
 
   /**
@@ -1716,6 +1711,7 @@ namespace Rodin::FormLanguage
   {
     /// @brief Finite element space type associated with this grid function.
     using FESType = FES;
+
     /// @brief Data storage type (PETSc vector @c Vec).
     using DataType = ::Vec;
   };

@@ -92,22 +92,26 @@ namespace Rodin::Solid
     protected:
       /// @brief Default constructor for derived CRTP outputs.
       Output() = default;
+
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
       Output(const Output& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       Output(Output&& other) = default;
+
       /**
        * @brief Copy assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to copy from.
        */
       Output& operator=(const Output& other) = default;
+
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.

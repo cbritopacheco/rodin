@@ -186,17 +186,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies linear form scalar linear coefficient uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     P1 fes(mesh);
     TestFunction v(fes);
@@ -223,17 +223,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies bilinear form linear coefficient mass uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, BilinearForm_LinearCoefficientMass_UsesMultiPointQuadrature)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    BilinearForm_LinearCoefficientMass_UsesMultiPointQuadrature)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     P1 fes(mesh);
     TrialFunction u(fes);

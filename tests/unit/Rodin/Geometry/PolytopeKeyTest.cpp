@@ -297,7 +297,7 @@ namespace Rodin::Tests::Unit
       boost::archive::text_oarchive oa(ss);
       oa << original;
     }
-    Polytope::Key loaded(5);  // non-empty initially
+    Polytope::Key loaded(5); // non-empty initially
     {
       boost::archive::text_iarchive ia(ss);
       ia >> loaded;

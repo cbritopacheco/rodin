@@ -30,20 +30,27 @@ namespace
   using MeshType = Mesh<Context::Local>;
   using G = Polytope::Type;
   using Clock = std::chrono::steady_clock;
+
   /// At most 64 spatially distributed queries per class limit diagnostic cost.
   constexpr size_t QueryLimit = 64;
+
   /// Seven interleaved query groups cover every sample with alternating paired runs.
   /// Expensive groups run once; cheap groups repeat for at least BlockSeconds.
   [[maybe_unused]] constexpr size_t TimingBlocks = 7;
+
   /// Three paired constructions suffice for a median; expensive P4 builds can
   /// take seconds, so query groups and construction repetitions have separate budgets.
   [[maybe_unused]] constexpr size_t ConstructionRepetitions = 3;
+
   /// Each block lasts at least 3 ms; longer runs can scale this via the CLI.
   constexpr double BlockSeconds = 0.003;
+
   /// Face incidence uses roundoff-scale reference-coordinate comparisons.
   constexpr Real FaceTolerance = 1e-12;
+
   /// Nearby misses are displaced by this fraction of one cell width.
   constexpr Real MissCellFraction = 1e-4;
+
   /// Membership comparison is substantially tighter than fixture curvature.
   constexpr Real ComparisonTolerance = 1e-8;
 #ifndef RODIN_AABB_WORKLOAD_DIAGNOSTICS

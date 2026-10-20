@@ -442,16 +442,13 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Finite element space type.
-      using FESType =
-        FES;
+      using FESType = FES;
 
       /// Operand type
-      using OperandType =
-        TrialFunction<Solution, FESType>;
+      using OperandType = TrialFunction<Solution, FESType>;
 
       /// Scalar type
-      using ScalarType =
-        typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
@@ -463,20 +460,16 @@ namespace Rodin::Variational
       using DOFs = typename Parent::DOFs;
 
       /// Value type
-      using ValueType =
-        FunctionBase<ValueDerived>;
+      using ValueType = FunctionBase<ValueDerived>;
 
       /// @brief Mesh type of the finite element space.
-      using FESMeshType =
-        typename FormLanguage::Traits<FESType>::MeshType;
+      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
       /// @brief Range type of the finite element space.
-      using FESRangeType =
-        typename FormLanguage::Traits<FESType>::RangeType;
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Execution context of the finite element space mesh.
-      using FESMeshContextType =
-        typename FormLanguage::Traits<FESMeshType>::ContextType;
+      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
@@ -484,8 +477,7 @@ namespace Rodin::Variational
           DirichletBC>;
 
       /// @brief Assembly backend type.
-      using AssemblyType =
-        DefaultAssemblyType;
+      using AssemblyType = DefaultAssemblyType;
 
       /**
        * @brief Constructs the object given the Operand and Value.
@@ -493,7 +485,8 @@ namespace Rodin::Variational
        * @param[in] v Value object
        */
       DirichletBC(const OperandType& u, const ValueType& v)
-        : m_u(u), m_value(v.copy())
+        : m_u(u),
+          m_value(v.copy())
       {}
 
       /**
@@ -528,8 +521,7 @@ namespace Rodin::Variational
        * @param[in] bdrAtr Attribute associated to the boundary region
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      DirichletBC& on(Geometry::Attribute bdrAtr)
+      constexpr DirichletBC& on(Geometry::Attribute bdrAtr)
       {
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
@@ -544,7 +536,7 @@ namespace Rodin::Variational
        */
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
-        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+        return on(FlatSet<Geometry::Attribute>{a1, a2, as...});
       }
 
       /**
@@ -553,8 +545,7 @@ namespace Rodin::Variational
        * @param[in] bdrAttrs Attributes associated to the boundary regions
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
+      constexpr DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
         assert(bdrAttrs.size() > 0);
         m_essBdr = bdrAttrs;
@@ -562,8 +553,7 @@ namespace Rodin::Variational
       }
 
       /// @returns Attributes over which the boundary condition is imposed.
-      constexpr
-      const FlatSet<Geometry::Attribute>& getAttributes() const
+      constexpr const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_essBdr;
       }

@@ -139,8 +139,7 @@ TEST_F(CommonTest, ConjMatrixFunction)
 
   // Test conjugate of real matrix (should be unchanged)
   MatrixType realMat;
-  realMat << 1.0, 2.0,
-             3.0, 4.0;
+  realMat << 1.0, 2.0, 3.0, 4.0;
 
   auto conjRealMat = conj(realMat);
   EXPECT_DOUBLE_EQ(conjRealMat(0, 0), 1.0);
@@ -150,8 +149,8 @@ TEST_F(CommonTest, ConjMatrixFunction)
 
   // Test conjugate of complex matrix
   Eigen::Matrix<Complex, 2, 2> complexMat;
-  complexMat << Complex(1.0, 2.0), Complex(3.0, -1.0),
-                Complex(-2.0, 1.0), Complex(0.0, 3.0);
+  complexMat << Complex(1.0, 2.0), Complex(3.0, -1.0), Complex(-2.0, 1.0),
+    Complex(0.0, 3.0);
 
   auto conjComplexMat = conj(complexMat);
   EXPECT_DOUBLE_EQ(conjComplexMat(0, 0).real(), 1.0);
@@ -513,12 +512,16 @@ TEST_F(CommonTest, DotProductSpatialVector)
 TEST_F(CommonTest, DotProductSpatialMatrix)
 {
   SpatialMatrix<Real> a(2, 2);
-  a(0, 0) = 1; a(0, 1) = 2;
-  a(1, 0) = 3; a(1, 1) = 4;
+  a(0, 0) = 1;
+  a(0, 1) = 2;
+  a(1, 0) = 3;
+  a(1, 1) = 4;
 
   SpatialMatrix<Real> b(2, 2);
-  b(0, 0) = 5; b(0, 1) = 6;
-  b(1, 0) = 7; b(1, 1) = 8;
+  b(0, 0) = 5;
+  b(0, 1) = 6;
+  b(1, 0) = 7;
+  b(1, 1) = 8;
 
   EXPECT_DOUBLE_EQ(dot(a, b), 70.0);
 

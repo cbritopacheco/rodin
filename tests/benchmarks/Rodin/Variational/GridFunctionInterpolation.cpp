@@ -186,5 +186,6 @@ namespace Rodin::Tests::Benchmarks
     }
     return true;
   }();
+
   /// @endcond
 }

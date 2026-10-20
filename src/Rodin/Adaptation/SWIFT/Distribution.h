@@ -31,6 +31,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar coefficient type of the trial field.
       using ScalarType = typename TrialFunction::ScalarType;
+
       /// @brief Native cell-integrator interface.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -225,6 +226,7 @@ namespace Rodin::Adaptation::SWIFT
         : m_gradient(Variational::Jacobian(current)),
           m_dimension(dimension)
       {}
+
       /**
        * @brief Evaluates the inverse deformation gradient.
        * @param point Reference-mesh evaluation point.
@@ -237,6 +239,7 @@ namespace Rodin::Adaptation::SWIFT
         deformation.setDisplacementGradient(m_gradient.getValue(point));
         return Math::SpatialMatrix<Real>(deformation.getInverseTranspose().transpose());
       }
+
       /**
        * @brief Returns the coefficient's row count.
        * @returns The spatial dimension.
@@ -245,6 +248,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_dimension;
       }
+
       /**
        * @brief Returns the coefficient's column count.
        * @returns The spatial dimension.
@@ -253,6 +257,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_dimension;
       }
+
       /**
        * @brief Reports that inversion has no polynomial order guarantee.
        * @param polytope Entity whose coefficient order is requested.

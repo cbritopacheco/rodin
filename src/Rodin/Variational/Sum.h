@@ -34,13 +34,14 @@ namespace Rodin::FormLanguage
    * operand and the right-hand side operand.
    */
   template <class LHSDerived, class RHSDerived>
-  struct Traits<
-    Variational::Sum<Variational::FunctionBase<LHSDerived>, Variational::FunctionBase<RHSDerived>>>
+  struct Traits<Variational::Sum<Variational::FunctionBase<LHSDerived>,
+    Variational::FunctionBase<RHSDerived>>>
   {
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::FunctionBase<LHSDerived>;
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::FunctionBase<RHSDerived>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::FunctionBase<RHSDerived>;
   };
 
   /**
@@ -48,20 +49,22 @@ namespace Rodin::FormLanguage
    * space, the left-hand side operand, the right-hand side operand and the shape
    * function space.
    */
-  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Sum<
-      Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
-      Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  template <class LHSDerived, class RHSDerived, class FES,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Sum<Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+    Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::FunctionBase<LHSDerived>;
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::FunctionBase<RHSDerived>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::FunctionBase<LHSDerived>;
+
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::FunctionBase<RHSDerived>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 
   /**
@@ -69,25 +72,23 @@ namespace Rodin::FormLanguage
    * side operand, the right-hand side operand and the scalar type.
    */
   template <class LHSNumber, class RHSNumber>
-  struct Traits<
-    Variational::Sum<
-      Variational::LinearFormIntegratorBase<LHSNumber>,
-      Variational::LinearFormIntegratorBase<RHSNumber>>>
+  struct Traits<Variational::Sum<Variational::LinearFormIntegratorBase<LHSNumber>,
+    Variational::LinearFormIntegratorBase<RHSNumber>>>
   {
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = LHSNumber;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = LHSNumber;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = RHSNumber;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = RHSNumber;
 
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::LinearFormIntegratorBase<LHSScalarType>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::LinearFormIntegratorBase<LHSScalarType>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::LinearFormIntegratorBase<RHSScalarType>;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::LinearFormIntegratorBase<RHSScalarType>;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Sum<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Sum<LHSScalarType, RHSScalarType>::Type;
   };
 
 }
@@ -126,16 +127,19 @@ namespace Rodin::Variational
     public:
       /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
+
       /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
       /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
       /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
       /// @brief Parent class type.
-      using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
+      using Parent =
+        FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       /**
@@ -143,37 +147,36 @@ namespace Rodin::Variational
        * @param lhs Left operand function
        * @param rhs Right operand function
        */
-      constexpr
-      Sum(const LHSType& lhs, const RHSType& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      constexpr Sum(const LHSType& lhs, const RHSType& rhs)
+        : m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Sum(const Sum& other)
+      constexpr Sum(const Sum& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Sum(Sum&& other)
+      constexpr Sum(Sum&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
       /**
        * @brief Gets the left operand.
        * @returns Reference to left function
        */
-      constexpr
-      const auto& getLHS() const
+      constexpr const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -183,8 +186,7 @@ namespace Rodin::Variational
        * @brief Gets the right operand.
        * @returns Reference to right function
        */
-      constexpr
-      const auto& getRHS() const
+      constexpr const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -195,9 +197,8 @@ namespace Rodin::Variational
        * @param args Arguments for trace restriction
        * @returns Reference to this object
        */
-      template <class ... Args>
-      constexpr
-      Sum& traceOf(const Args& ... args)
+      template <class... Args>
+      constexpr Sum& traceOf(const Args&... args)
       {
         m_lhs->traceOf(args...);
         m_rhs->traceOf(args...);
@@ -210,8 +211,7 @@ namespace Rodin::Variational
        * @returns Sum @f$ f(p) + g(p) @f$
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
@@ -261,9 +261,8 @@ namespace Rodin::Variational
    * @relates Sum
    */
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto
-  operator+(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  constexpr auto operator+(
+    const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -276,9 +275,7 @@ namespace Rodin::Variational
    * @relates Sum
    */
   template <class LHSDerived>
-  constexpr
-  auto
-  operator+(const FunctionBase<LHSDerived>& lhs, Real rhs)
+  constexpr auto operator+(const FunctionBase<LHSDerived>& lhs, Real rhs)
   {
     return Sum(lhs, RealFunction(rhs));
   }
@@ -291,9 +288,7 @@ namespace Rodin::Variational
    * @relates Sum
    */
   template <class RHSDerived>
-  constexpr
-  auto
-  operator+(Real lhs, const FunctionBase<RHSDerived>& rhs)
+  constexpr auto operator+(Real lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Sum(RealFunction(lhs), rhs);
   }
@@ -306,9 +301,7 @@ namespace Rodin::Variational
    * @relates Sum
    */
   template <class LHSDerived>
-  constexpr
-  auto
-  operator+(const FunctionBase<LHSDerived>& lhs, Complex rhs)
+  constexpr auto operator+(const FunctionBase<LHSDerived>& lhs, Complex rhs)
   {
     return Sum(lhs, ComplexFunction(rhs));
   }
@@ -321,9 +314,7 @@ namespace Rodin::Variational
    * @relates Sum
    */
   template <class RHSDerived>
-  constexpr
-  auto
-  operator+(Complex lhs, const FunctionBase<RHSDerived>& rhs)
+  constexpr auto operator+(Complex lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Sum(ComplexFunction(lhs), rhs);
   }
@@ -344,12 +335,15 @@ namespace Rodin::Variational
    * @ingroup SumSpecializations
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>> final
-    : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>>
+  class Sum<ShapeFunctionBase<LHSDerived, FES, Space>,
+    ShapeFunctionBase<RHSDerived, FES, Space>>
+    final : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>,
+              ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -374,10 +368,10 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Sum(const LHSType& lhs, const RHSType& rhs)
+      constexpr Sum(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
       }
@@ -386,28 +380,27 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Sum(const Sum& other)
+      constexpr Sum(const Sum& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Sum(Sum&& other)
+      constexpr Sum(Sum&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
       /**
        * @brief Gets the left-hand side operand.
        * @returns The left-hand side operand.
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -417,8 +410,7 @@ namespace Rodin::Variational
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -428,8 +420,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
@@ -439,8 +430,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
         return getLHS().getDOFs(element);
@@ -484,8 +474,7 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr auto getBasis(size_t local) const
       {
         decltype(auto) lhs = getLHS().getBasis(local);
         decltype(auto) rhs = getRHS().getBasis(local);
@@ -496,8 +485,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space.
        * @returns The finite element space.
        */
-      constexpr
-      const auto& getFiniteElementSpace() const
+      constexpr const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
@@ -632,9 +620,10 @@ namespace Rodin::Variational
 
   /// @brief Sum of a linear form integrator and a list of them.
   template <class LHSNumber, class RHSNumber>
-  class Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>
+  class Sum<LinearFormIntegratorBase<LHSNumber>,
+    FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>
     : public FormLanguage::List<
-              LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+        LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.
@@ -710,10 +699,10 @@ namespace Rodin::Variational
 
   /// @brief Sum of a list of linear form integrators and a single one.
   template <class LHSNumber, class RHSNumber>
-  class Sum<
-    FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>
+  class Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
+    LinearFormIntegratorBase<RHSNumber>>
     : public FormLanguage::List<
-              LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+        LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.
@@ -789,11 +778,10 @@ namespace Rodin::Variational
 
   /// @brief Sum of two lists of linear form integrators.
   template <class LHSNumber, class RHSNumber>
-  class Sum<
-    FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
+  class Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
     FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>
-      : public FormLanguage::List<
-          LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+    : public FormLanguage::List<
+        LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.
@@ -869,9 +857,10 @@ namespace Rodin::Variational
 
   /// @brief Sum expression.
   template <class LHSNumber, class RHSNumber>
-  class Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>
-    : public FormLanguage::List<
-              LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+  class Sum<LocalBilinearFormIntegratorBase<LHSNumber>,
+    LocalBilinearFormIntegratorBase<RHSNumber>>
+    : public FormLanguage::List<LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.
@@ -927,8 +916,9 @@ namespace Rodin::Variational
    */
   template <class LHSNumber, class RHSNumber>
   Sum(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
-      const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
-    -> Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>;
+    const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+    -> Sum<LocalBilinearFormIntegratorBase<LHSNumber>,
+      LocalBilinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
@@ -946,9 +936,10 @@ namespace Rodin::Variational
 
   /// @brief Sum of a bilinear form integrator and a list of them.
   template <class LHSNumber, class RHSNumber>
-  class Sum<LocalBilinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>
-    : public FormLanguage::List<
-              LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+  class Sum<LocalBilinearFormIntegratorBase<LHSNumber>,
+    FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>
+    : public FormLanguage::List<LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.
@@ -1024,10 +1015,10 @@ namespace Rodin::Variational
 
   /// @brief Sum of a list of bilinear form integrators and a single one.
   template <class LHSNumber, class RHSNumber>
-  class Sum<
-    FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>, LocalBilinearFormIntegratorBase<RHSNumber>>
-    : public FormLanguage::List<
-              LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+  class Sum<FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+    LocalBilinearFormIntegratorBase<RHSNumber>>
+    : public FormLanguage::List<LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.
@@ -1103,11 +1094,10 @@ namespace Rodin::Variational
 
   /// @brief Sum of two lists of bilinear form integrators.
   template <class LHSNumber, class RHSNumber>
-  class Sum<
-    FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+  class Sum<FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
     FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>
-      : public FormLanguage::List<
-          LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
+    : public FormLanguage::List<LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
       /// @brief Scalar type of the left-hand side operand.

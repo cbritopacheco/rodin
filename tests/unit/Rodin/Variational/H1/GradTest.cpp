@@ -343,7 +343,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies shape function construction for variational H1 grad.
   TEST(Rodin_Variational_H1_Grad, ShapeFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -361,7 +361,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function construction for variational H1 grad by checking exact expected values.
   TEST(Rodin_Variational_H1_Grad, GridFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -377,7 +377,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function linear function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, GridFunction_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -386,7 +386,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a linear function: f(x,y) = 3x + 4y
-    RealFunction linear_func([](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -407,7 +408,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function constant function for variational H1 grad by checking tolerance-based numerical results.
   TEST(Rodin_Variational_H1_Grad, GridFunction_ConstantFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -432,7 +433,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy for variational H1 grad by checking copy semantics.
   TEST(Rodin_Variational_H1_Grad, Copy)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -451,7 +452,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies usage in bilinear form for variational H1 grad by checking false predicates, form assembly.
   TEST(Rodin_Variational_H1_Grad, UsageInBilinearForm)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -476,7 +477,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function quadratic function H1 2 for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, GridFunction_QuadraticFunction_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -485,9 +486,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a quadratic function: f(x,y) = x^2 + y^2
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() + p.y() * p.y(); 
-    });
+    RealFunction quadratic_func(
+      [](const Geometry::Point& p) { return p.x() * p.x() + p.y() * p.y(); });
     gf.project(quadratic_func);
 
     auto grad_gf = Grad(gf);
@@ -495,7 +495,7 @@ namespace Rodin::Tests::Unit
     // Evaluate at a point in the center of the domain
     auto it = mesh.getPolytope(mesh.getDimension(), mesh.getCellCount() / 2);
     const auto& polytope = *it;
-    const Math::Vector<Real> rc{{1.0/3.0, 1.0/3.0}};
+    const Math::Vector<Real> rc{{1.0 / 3.0, 1.0 / 3.0}};
     Point p(polytope, rc);
 
     auto grad_value = grad_gf.getValue(p);
@@ -510,7 +510,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function quadratic function H1 3 for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, GridFunction_QuadraticFunction_H1_3)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -519,8 +519,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a quadratic function: f(x,y) = x^2 + 2xy + y^2
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() + 2.0 * p.x() * p.y() + p.y() * p.y(); 
+    RealFunction quadratic_func([](const Geometry::Point& p) {
+      return p.x() * p.x() + 2.0 * p.x() * p.y() + p.y() * p.y();
     });
     gf.project(quadratic_func);
 
@@ -530,12 +530,8 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
 
-    std::vector<Math::Vector<Real>> test_coords =
-    {
-      Math::Vector<Real>{{ 0.2, 0.2 }},
-      Math::Vector<Real>{{ 0.6, 0.2 }},
-      Math::Vector<Real>{{ 0.2, 0.6 }}
-    };
+    std::vector<Math::Vector<Real>> test_coords = {Math::Vector<Real>{{0.2, 0.2}},
+      Math::Vector<Real>{{0.6, 0.2}}, Math::Vector<Real>{{0.2, 0.6}}};
 
     for (const auto& rc : test_coords)
     {
@@ -555,7 +551,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies multiple evaluations for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, MultipleEvaluations)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -563,7 +559,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a linear function: f(x,y) = x + 2y
-    RealFunction linear_func([](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -572,13 +569,10 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
 
-    std::vector<Math::Vector<Real>> test_coords =
-    {
-      Math::Vector<Real>{{ 0.2, 0.2 }},
-      Math::Vector<Real>{{ 0.6, 0.2 }},
-      Math::Vector<Real>{{ 0.2, 0.6 }},
-      Math::Vector<Real>{{ 1.0/3.0, 1.0/3.0 }},
-      Math::Vector<Real>{{ 0.1, 0.7 }} // sum=0.8
+    std::vector<Math::Vector<Real>> test_coords = {
+      Math::Vector<Real>{{0.2, 0.2}}, Math::Vector<Real>{{0.6, 0.2}},
+      Math::Vector<Real>{{0.2, 0.6}}, Math::Vector<Real>{{1.0 / 3.0, 1.0 / 3.0}},
+      Math::Vector<Real>{{0.1, 0.7}} // sum=0.8
     };
 
     for (const auto& rc : test_coords)
@@ -594,12 +588,13 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies different polynomial degrees for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, DifferentPolynomialDegrees)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
     // Linear function for testing
-    RealFunction linear_func([](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); });
 
     // Test with H1<1> (linear)
     {
@@ -653,7 +648,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies shape function construction for variational H1 grad tet.
   TEST(Rodin_Variational_H1_Grad_Tet, ShapeFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -673,7 +668,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function construction for variational H1 grad tet by checking exact expected values.
   TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -689,7 +684,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function constant function for variational H1 grad tet by checking tolerance-based numerical results.
   TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_ConstantFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -705,7 +700,7 @@ namespace Rodin::Tests::Unit
     const auto& cell = *it;
 
     // Interior reference point (sum < 1)
-    const Math::Vector<Real> rc{{ 0.2, 0.2, 0.2 }};
+    const Math::Vector<Real> rc{{0.2, 0.2, 0.2}};
     Point p(cell, rc);
 
     auto grad_value = grad_gf.getValue(p);
@@ -715,7 +710,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function linear function H1 2 for variational H1 grad tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_LinearFunction_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -725,10 +720,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // f(x,y,z) = 3x + 4y + 5z
-    RealFunction linear_func([](const Geometry::Point& p)
-    {
-      return 3.0 * p.x() + 4.0 * p.y() + 5.0 * p.z();
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y() + 5.0 * p.z(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -736,7 +729,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& cell = *it;
 
-    const Math::Vector<Real> rc{{ 0.25, 0.25, 0.25 }};
+    const Math::Vector<Real> rc{{0.25, 0.25, 0.25}};
     Point p(cell, rc);
 
     auto grad_value = grad_gf.getValue(p);
@@ -749,7 +742,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function quadratic function H1 2 for variational H1 grad tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_QuadraticFunction_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -759,8 +752,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // f(x,y,z) = x^2 + y^2 + z^2
-    RealFunction quad([](const Geometry::Point& p)
-    {
+    RealFunction quad([](const Geometry::Point& p) {
       return p.x() * p.x() + p.y() * p.y() + p.z() * p.z();
     });
     gf.project(quad);
@@ -770,7 +762,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), mesh.getCellCount() / 2);
     const auto& cell = *it;
 
-    const Math::Vector<Real> rc{{ 0.2, 0.3, 0.1 }}; // sum = 0.6 < 1
+    const Math::Vector<Real> rc{{0.2, 0.3, 0.1}}; // sum = 0.6 < 1
     Point p(cell, rc);
 
     auto grad_value = grad_gf.getValue(p);
@@ -784,7 +776,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function quadratic function H1 3 for variational H1 grad tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_QuadraticFunction_H1_3)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -794,9 +786,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // f(x,y,z) = x^2 + 2xy + y^2 + 3z^2
-    RealFunction quad([](const Geometry::Point& p)
-    {
-      return p.x()*p.x() + 2.0*p.x()*p.y() + p.y()*p.y() + 3.0*p.z()*p.z();
+    RealFunction quad([](const Geometry::Point& p) {
+      return p.x() * p.x() + 2.0 * p.x() * p.y() + p.y() * p.y() + 3.0 * p.z() * p.z();
     });
     gf.project(quad);
 
@@ -805,11 +796,10 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& cell = *it;
 
-    std::vector<Math::Vector<Real>> test_coords =
-    {
-      Math::Vector<Real>{{ 0.1, 0.1, 0.1 }}, // sum=0.3
-      Math::Vector<Real>{{ 0.2, 0.3, 0.1 }}, // sum=0.6
-      Math::Vector<Real>{{ 0.3, 0.1, 0.2 }}  // sum=0.6
+    std::vector<Math::Vector<Real>> test_coords = {
+      Math::Vector<Real>{{0.1, 0.1, 0.1}}, // sum=0.3
+      Math::Vector<Real>{{0.2, 0.3, 0.1}}, // sum=0.6
+      Math::Vector<Real>{{0.3, 0.1, 0.2}} // sum=0.6
     };
 
     for (const auto& rc : test_coords)
@@ -833,7 +823,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies multiple evaluations for variational H1 grad tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Tet, MultipleEvaluations)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -842,10 +832,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // f(x,y,z) = x + 2y + 3z  -> \nablaf = [1,2,3]
-    RealFunction linear_func([](const Geometry::Point& p)
-    {
-      return p.x() + 2.0 * p.y() + 3.0 * p.z();
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y() + 3.0 * p.z(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -853,14 +841,9 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& cell = *it;
 
-    std::vector<Math::Vector<Real>> test_coords =
-    {
-      Math::Vector<Real>{{ 0.1, 0.1, 0.1 }},
-      Math::Vector<Real>{{ 0.2, 0.2, 0.1 }},
-      Math::Vector<Real>{{ 0.3, 0.1, 0.1 }},
-      Math::Vector<Real>{{ 0.2, 0.3, 0.1 }},
-      Math::Vector<Real>{{ 0.1, 0.2, 0.3 }}
-    };
+    std::vector<Math::Vector<Real>> test_coords = {Math::Vector<Real>{{0.1, 0.1, 0.1}},
+      Math::Vector<Real>{{0.2, 0.2, 0.1}}, Math::Vector<Real>{{0.3, 0.1, 0.1}},
+      Math::Vector<Real>{{0.2, 0.3, 0.1}}, Math::Vector<Real>{{0.1, 0.2, 0.3}}};
 
     for (const auto& rc : test_coords)
     {
@@ -877,20 +860,18 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies different polynomial degrees for variational H1 grad tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Tet, DifferentPolynomialDegrees)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
     // f(x,y,z) = 3x + 4y + 5z
-    RealFunction linear_func([](const Geometry::Point& p)
-    {
-      return 3.0 * p.x() + 4.0 * p.y() + 5.0 * p.z();
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y() + 5.0 * p.z(); });
 
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& cell = *it;
-    Point p(cell, Math::Vector<Real>{{ 0.25, 0.25, 0.25 }});
+    Point p(cell, Math::Vector<Real>{{0.25, 0.25, 0.25}});
 
     // H1<1>
     {
@@ -935,7 +916,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates linear function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, RandomCoordinates_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -944,9 +925,8 @@ namespace Rodin::Tests::Unit
 
     // Project a linear function: f(x,y) = 2x + 3y
     // Gradient should be constant: [2, 3]
-    RealFunction linear_func([](const Geometry::Point& p) { 
-      return 2.0 * p.x() + 3.0 * p.y(); 
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 2.0 * p.x() + 3.0 * p.y(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -961,7 +941,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -977,7 +958,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates quadratic function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, RandomCoordinates_QuadraticFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -987,9 +968,8 @@ namespace Rodin::Tests::Unit
 
     // Project a quadratic function: f(x,y) = x^2 + y^2
     // Gradient should be: [2x, 2y]
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() + p.y() * p.y(); 
-    });
+    RealFunction quadratic_func(
+      [](const Geometry::Point& p) { return p.x() * p.x() + p.y() * p.y(); });
     gf.project(quadratic_func);
 
     auto grad_gf = Grad(gf);
@@ -1004,7 +984,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -1023,7 +1004,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates H1 3 quadratic function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, RandomCoordinates_H1_3_QuadraticFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1033,8 +1014,8 @@ namespace Rodin::Tests::Unit
 
     // Project: f(x,y) = x^2 - xy + 2y^2
     // Gradient: [2x - y, -x + 4y]
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() - p.x() * p.y() + 2.0 * p.y() * p.y(); 
+    RealFunction quadratic_func([](const Geometry::Point& p) {
+      return p.x() * p.x() - p.x() * p.y() + 2.0 * p.y() * p.y();
     });
     gf.project(quadratic_func);
 
@@ -1050,7 +1031,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -1072,7 +1054,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates zero gradient for variational H1 grad by checking tolerance-based numerical results.
   TEST(Rodin_Variational_H1_Grad, RandomCoordinates_ZeroGradient)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1094,7 +1076,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -1109,7 +1092,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates H1 5 quartic function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, RandomCoordinates_H1_5_QuarticFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1119,10 +1102,10 @@ namespace Rodin::Tests::Unit
 
     // Project a quartic function: f(x,y) = x^4 + x^2*y^2 + y^4
     // Gradient: [4x^3 + 2xy^2, 2x^2*y + 4y^3]
-    RealFunction quartic_func([](const Geometry::Point& p) { 
+    RealFunction quartic_func([](const Geometry::Point& p) {
       Real x = p.x();
       Real y = p.y();
-      return x*x*x*x + x*x*y*y + y*y*y*y; 
+      return x * x * x * x + x * x * y * y + y * y * y * y;
     });
     gf.project(quartic_func);
 
@@ -1138,7 +1121,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -1152,8 +1136,8 @@ namespace Rodin::Tests::Unit
       Real py = phys_coords(1);
 
       // Expected gradient: [4x^3 + 2xy^2, 2x^2*y + 4y^3]
-      Real expected_grad_x = 4.0 * px*px*px + 2.0 * px * py*py;
-      Real expected_grad_y = 2.0 * px*px * py + 4.0 * py*py*py;
+      Real expected_grad_x = 4.0 * px * px * px + 2.0 * px * py * py;
+      Real expected_grad_y = 2.0 * px * px * py + 4.0 * py * py * py;
 
       EXPECT_NEAR(grad_value(0), expected_grad_x, 1e-9);
       EXPECT_NEAR(grad_value(1), expected_grad_y, 1e-9);
@@ -1163,7 +1147,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies project grad onto grid function linear function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, ProjectGradOntoGridFunction_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1172,9 +1156,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes_scalar);
 
     // Project linear function f(x,y) = 2x + 3y with gradient [2, 3]
-    RealFunction linear_func([](const Geometry::Point& p) { 
-      return 2.0 * p.x() + 3.0 * p.y(); 
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 2.0 * p.x() + 3.0 * p.y(); });
     gf.project(linear_func);
 
     // Create vector H1<2> space for the gradient (dimension = 2)
@@ -1194,7 +1177,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -1205,7 +1189,7 @@ namespace Rodin::Tests::Unit
       auto grad_value = gf_grad.getValue(p);
 
       // Should match the constant gradient [2, 3]
-      EXPECT_NEAR(grad_value(0), 2.0, 0.1);  // Relaxed tolerance for FE projection
+      EXPECT_NEAR(grad_value(0), 2.0, 0.1); // Relaxed tolerance for FE projection
       EXPECT_NEAR(grad_value(1), 3.0, 0.1);
     }
   }
@@ -1213,7 +1197,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies project grad onto grid function quadratic function for variational H1 grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad, ProjectGradOntoGridFunction_QuadraticFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1222,9 +1206,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes_scalar);
 
     // Project quadratic function f(x,y) = x^2 + y^2 with gradient [2x, 2y]
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() + p.y() * p.y(); 
-    });
+    RealFunction quadratic_func(
+      [](const Geometry::Point& p) { return p.x() * p.x() + p.y() * p.y(); });
     gf.project(quadratic_func);
 
     // Create vector H1<3> space for the gradient
@@ -1232,7 +1215,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf_grad(fes_vector);
 
     // Project Grad(gf) onto gf_grad
-    gf_grad = Grad(gf);  // Using operator= instead of project()
+    gf_grad = Grad(gf); // Using operator= instead of project()
 
     // Test at multiple random points
     RandomFloat gen(0.0, 1.0);
@@ -1244,7 +1227,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -1256,7 +1240,8 @@ namespace Rodin::Tests::Unit
       const auto& phys_coords = p.getPhysicalCoordinates();
 
       // Should match gradient [2x, 2y]
-      EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0), 1.0);  // Larger tolerance for quadratic FE projection
+      EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0),
+        1.0); // Larger tolerance for quadratic FE projection
       EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1.0);
     }
   }
@@ -1268,7 +1253,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies shape function construction for variational H1 grad quad.
   TEST(Rodin_Variational_H1_Grad_Quad, ShapeFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1286,7 +1271,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function construction for variational H1 grad quad by checking exact expected values.
   TEST(Rodin_Variational_H1_Grad_Quad, GridFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1302,7 +1287,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function linear function for variational H1 grad quad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Quad, GridFunction_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1331,7 +1316,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function quadratic function H1 2 for variational H1 grad quad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Quad, GridFunction_QuadraticFunction_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1340,9 +1325,8 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a quadratic function: f(x,y) = x^2 + y^2
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() + p.y() * p.y(); 
-    });
+    RealFunction quadratic_func(
+      [](const Geometry::Point& p) { return p.x() * p.x() + p.y() * p.y(); });
     gf.project(quadratic_func);
 
     auto grad_gf = Grad(gf);
@@ -1365,7 +1349,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates quadratic function for variational H1 grad quad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Grad_Quad, RandomCoordinates_QuadraticFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1375,8 +1359,8 @@ namespace Rodin::Tests::Unit
 
     // Project a quadratic function: f(x,y) = x^2 - xy + 2y^2
     // Gradient: [2x - y, -x + 4y]
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() - p.x() * p.y() + 2.0 * p.y() * p.y(); 
+    RealFunction quadratic_func([](const Geometry::Point& p) {
+      return p.x() * p.x() - p.x() * p.y() + 2.0 * p.y() * p.y();
     });
     gf.project(quadratic_func);
 
@@ -1442,5 +1426,3 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(grad_u.getDOFs(*cellIt), 10);
   }
 }
-
-

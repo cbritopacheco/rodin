@@ -321,18 +321,15 @@ namespace Rodin::Geometry
         {
           Alert::MemberFunctionException(*this, __func__)
             << "Requested dimension " << d
-            << " is out of range for an index initialized with "
-            << m_dimensions.size() << " dimension buckets."
-            << Alert::Raise;
+            << " is out of range for an index initialized with " << m_dimensions.size()
+            << " dimension buckets." << Alert::Raise;
         }
 
         if (idx >= count)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Polytope index " << idx
-            << " is out of range for dimension " << d
-            << " with expected count " << count << "."
-            << Alert::Raise;
+            << "Polytope index " << idx << " is out of range for dimension " << d
+            << " with expected count " << count << "." << Alert::Raise;
         }
 
         const auto* pointer = std::addressof(qf);
@@ -411,8 +408,8 @@ namespace Rodin::Geometry
     private:
       struct Slot
       {
-          std::atomic<PolytopeQuadrature*> ptr{nullptr};
-          std::unique_ptr<PolytopeQuadrature> owner;
+        std::atomic<PolytopeQuadrature*> ptr{nullptr};
+        std::unique_ptr<PolytopeQuadrature> owner;
       };
 
       struct Formula
@@ -454,42 +451,46 @@ namespace Rodin::Geometry
 
       struct Dimension
       {
-          // Heuristic fast-lookup slot budget; larger formula sets use the full index.
-          static constexpr size_t LookupCapacity = 16;
+        // Heuristic fast-lookup slot budget; larger formula sets use the full index.
+        static constexpr size_t LookupCapacity = 16;
 
-          Dimension() = default;
-          /**
-           * @brief Constructs an entity-dimension cache from another cache.
-           * @param other Object whose copying or moving is disabled.
-           */
-          Dimension(const Dimension& other) = delete;
-          /**
-           * @brief Assigns the state of another object.
-           * @param other Object to copy from.
-           */
-          Dimension& operator=(const Dimension& other) = delete;
-          /**
-           * @brief Constructs an entity-dimension cache from another cache.
-           * @param other Object to move from.
-           */
+        Dimension() = default;
 
-          Dimension(Dimension&& other) noexcept
-            : formulas(std::move(other.formulas))
-          {
-            rebuildLookup();
-          }
-          /**
+        /**
+         * @brief Constructs an entity-dimension cache from another cache.
+         * @param other Object whose copying or moving is disabled.
+         */
+        Dimension(const Dimension& other) = delete;
+
+        /**
+         * @brief Assigns the state of another object.
+         * @param other Object to copy from.
+         */
+        Dimension& operator=(const Dimension& other) = delete;
+
+        /**
+         * @brief Constructs an entity-dimension cache from another cache.
+         * @param other Object to move from.
+         */
+
+        Dimension(Dimension&& other) noexcept
+          : formulas(std::move(other.formulas))
+        {
+          rebuildLookup();
+        }
+
+        /**
          * @brief Assigns the state of another object.
          * @param other Object to move from.
          * @returns Reference to this object after assignment.
          */
 
-          Dimension& operator=(Dimension&& other) noexcept
-          {
-            formulas = std::move(other.formulas);
-            rebuildLookup();
-            return *this;
-          }
+        Dimension& operator=(Dimension&& other) noexcept
+        {
+          formulas = std::move(other.formulas);
+          rebuildLookup();
+          return *this;
+        }
 
         void rebuildLookup()
         {
@@ -506,6 +507,7 @@ namespace Rodin::Geometry
         std::atomic<Formula*> hot{nullptr};
         mutable std::mutex mutex;
       };
+
       /**
        * @brief Serializes the cached state.
        * @param ar Archive storing or restoring the cached state.
@@ -516,6 +518,7 @@ namespace Rodin::Geometry
       void save(
         [[maybe_unused]] Archive& ar, [[maybe_unused]] const unsigned int version) const
       {}
+
       /**
        * @brief Restores the cached state from an archive.
        * @param ar Archive storing or restoring the cached state.

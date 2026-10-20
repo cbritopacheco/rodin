@@ -65,9 +65,9 @@ namespace
 {
   struct StepDiagnostics
   {
-      Real minActiveExtension = std::numeric_limits<Real>::infinity();
-      Real maxActiveExtension = -std::numeric_limits<Real>::infinity();
-      Real maxGamma = 0.0;
+    Real minActiveExtension = std::numeric_limits<Real>::infinity();
+    Real maxActiveExtension = -std::numeric_limits<Real>::infinity();
+    Real maxGamma = 0.0;
     Real maxBeta = 0.0;
   };
 
@@ -192,11 +192,11 @@ int main(int argc, char** argv)
   // time so there is a quiet relaxation gap between waves.
   struct PlaneWaveParams
   {
-      Real amplitude;
-      Real speed;
-      Real width;
-      Real start;
-      Real gap;
+    Real amplitude;
+    Real speed;
+    Real width;
+    Real start;
+    Real gap;
   };
 
   const size_t nWaves = 2;

@@ -66,28 +66,28 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 
   struct Errors
   {
-      Errors(
-        ErrorNorms displacementValue = {0, 0}, Real strainValue = 0, Real stressValue = 0)
-        : displacement(displacementValue),
-          strain(strainValue),
-          stress(stressValue)
-      {}
+    Errors(
+      ErrorNorms displacementValue = {0, 0}, Real strainValue = 0, Real stressValue = 0)
+      : displacement(displacementValue),
+        strain(strainValue),
+        stress(stressValue)
+    {}
 
-      ErrorNorms displacement;
-      Real strain;
-      Real stress;
+    ErrorNorms displacement;
+    Real strain;
+    Real stress;
   };
 
   struct LiftedErrors
   {
-      LiftedErrors()
-        : displacement(),
-          strain(),
-          stress()
-      {}
+    LiftedErrors()
+      : displacement(),
+        strain(),
+        stress()
+    {}
 
-      LiftedErrorNorm::Result displacement;
-      std::array<Real, 3> strain, stress;
+    LiftedErrorNorm::Result displacement;
+    std::array<Real, 3> strain, stress;
   };
 
   /**
@@ -610,15 +610,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         const size_t dim = problem.getMesh().getSpaceDimension();
         struct ComplexData
         {
-            Data real;
-            Math::SpatialVector<Complex> getSolution(const Math::SpatialPoint& x) const
-            {
-              return Complex(1, 1) * real.getSolution(x);
-            }
-            Math::SpatialMatrix<Complex> getJacobian(const Math::SpatialPoint& x) const
-            {
-              return Complex(1, 1) * real.getJacobian(x);
-            }
+          Data real;
+          Math::SpatialVector<Complex> getSolution(const Math::SpatialPoint& x) const
+          {
+            return Complex(1, 1) * real.getSolution(x);
+          }
+          Math::SpatialMatrix<Complex> getJacobian(const Math::SpatialPoint& x) const
+          {
+            return Complex(1, 1) * real.getJacobian(x);
+          }
         };
         const ComplexData data{Data(dim, Lambda, Mu, Data::Field::AsymmetricAffine)};
         H1<2, Math::SpatialVector<Complex>, Mesh<ContextType>> space(

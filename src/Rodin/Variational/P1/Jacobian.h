@@ -50,10 +50,11 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Jacobian<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P1<Range, Mesh>;
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P1<Range, Mesh>;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   /**
@@ -66,12 +67,14 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Jacobian<
     Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P1<Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P1<Range, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -318,11 +321,12 @@ namespace Rodin::Variational
         Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
   {
     static_assert(FormLanguage::IsVectorRange<Range>::Value,
-                  "Jacobian<P1> specialization is intended for vector-valued P1.");
+      "Jacobian<P1> specialization is intended for vector-valued P1.");
 
     public:
       /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -419,52 +423,52 @@ namespace Rodin::Variational
         /// @brief Key identifying the quadrature point a tabulation was computed for.
         struct QuadraturePointKey
         {
-            /// @brief Quadrature formula the cached tabulation belongs to.
+          /// @brief Quadrature formula the cached tabulation belongs to.
           const QF::QuadratureFormula* formula;
 
-            /// @brief Index of the quadrature point.
+          /// @brief Index of the quadrature point.
           size_t index;
 
-            /// @brief Whether the key holds a cached entry.
-            bool valid;
+          /// @brief Whether the key holds a cached entry.
+          bool valid;
 
-            /// @brief Constructs an invalid quadrature cache key.
+          /// @brief Constructs an invalid quadrature cache key.
           QuadraturePointKey()
             : formula(nullptr),
 
               index(0),
-                valid(false)
-            {}
+              valid(false)
+          {}
 
-            /**
-             * @brief Tests whether the key holds a cached entry.
-             * @returns True if the key identifies a cached entry; false otherwise.
-             */
-            explicit operator bool() const noexcept
-            {
-              return valid;
-            }
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
+          explicit operator bool() const noexcept
+          {
+            return valid;
+          }
 
-            /**
-             * @brief Equality comparison.
-             * @returns Whether the operands compare equal.
-             * @param o Key to compare with this key.
-             */
+          /**
+           * @brief Equality comparison.
+           * @returns Whether the operands compare equal.
+           * @param o Key to compare with this key.
+           */
           bool operator==(const QuadraturePointKey& o) const noexcept
-            {
-              if (!valid || !o.valid)
-                return false;
+          {
+            if (!valid || !o.valid)
+              return false;
             return formula == o.formula && index == o.index;
-            }
+          }
 
           /// @brief Resets the key, invalidating the cached entry.
           void reset() noexcept
-            {
-              valid = false;
+          {
+            valid = false;
             formula = nullptr;
 
             index = 0;
-            }
+          }
         };
 
         // Cached physical Jacobians, one per vector DOF: size = vdim * nvertices
@@ -473,6 +477,7 @@ namespace Rodin::Variational
 
         /// @brief Key of the cached cell tabulation.
         CellKey cellKey;
+
         /// @brief Key of the cached quadrature-point tabulation.
         QuadraturePointKey quadraturePointKey;
       };

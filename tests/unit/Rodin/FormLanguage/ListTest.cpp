@@ -16,16 +16,22 @@
 class TestElement : public Rodin::FormLanguage::Base
 {
   public:
-    TestElement() : m_value(0) {}
+    TestElement()
+      : m_value(0)
+    {}
 
-    explicit TestElement(int value) : m_value(value) {}
+    explicit TestElement(int value)
+      : m_value(value)
+    {}
 
     TestElement(const TestElement& other)
-      : Base(other), m_value(other.m_value)
+      : Base(other),
+        m_value(other.m_value)
     {}
 
     TestElement(TestElement&& other)
-      : Base(std::move(other)), m_value(other.m_value)
+      : Base(std::move(other)),
+        m_value(other.m_value)
     {}
 
     TestElement& operator=(const TestElement& other)
@@ -43,8 +49,14 @@ class TestElement : public Rodin::FormLanguage::Base
       return *this;
     }
 
-    int getValue() const { return m_value; }
-    void setValue(int value) { m_value = value; }
+    int getValue() const
+    {
+      return m_value;
+    }
+    void setValue(int value)
+    {
+      m_value = value;
+    }
 
     virtual TestElement* copy() const noexcept override
     {
@@ -195,7 +207,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list2.size(), 1);
     EXPECT_EQ(list2.at(0).getValue(), 42);
   }
-
 
   //=== Add and Access Tests =================================================
 

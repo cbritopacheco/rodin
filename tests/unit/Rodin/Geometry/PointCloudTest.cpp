@@ -96,9 +96,12 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, ElementAccessReadWrite)
   {
     PointCloud pc(2, 3);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
-    pc(0, 2) = 5.0; pc(1, 2) = 6.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
+    pc(0, 2) = 5.0;
+    pc(1, 2) = 6.0;
 
     EXPECT_NEAR(pc(0, 0), 1.0, 1e-14);
     EXPECT_NEAR(pc(1, 0), 2.0, 1e-14);
@@ -114,8 +117,10 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, CopyConstruction)
   {
     PointCloud pc(2, 2);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
 
     PointCloud copy(pc);
     EXPECT_EQ(copy.getDimension(), 2);
@@ -128,7 +133,8 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, MoveConstruction)
   {
     PointCloud pc(2, 2);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
 
     PointCloud moved(std::move(pc));
     EXPECT_EQ(moved.getDimension(), 2);
@@ -162,9 +168,12 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, GetMatrix)
   {
     PointCloud pc(2, 3);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
-    pc(0, 2) = 5.0; pc(1, 2) = 6.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
+    pc(0, 2) = 5.0;
+    pc(1, 2) = 6.0;
 
     auto mat = pc.getMatrix();
     EXPECT_EQ(mat.rows(), 2);
@@ -177,8 +186,10 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, GetPackedMatrix)
   {
     PointCloud pc(2, 2);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
 
     auto pmat = pc.getPackedMatrix();
     EXPECT_EQ(pmat.rows(), 3);

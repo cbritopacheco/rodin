@@ -44,7 +44,7 @@ namespace Rodin::Hilbert
     /// Scalar type from the finite element space
     using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
 
-    /// Range type from the finite element space  
+    /// Range type from the finite element space
     using FESRange = typename FormLanguage::Traits<FES>::RangeType;
 
     /// Linear system type for the regularized problem
@@ -94,13 +94,13 @@ namespace Rodin::Hilbert
       auto operator()(const Differential& lf)
       {
         auto body = [&]() {
-        if constexpr (std::is_same_v<FESRange, Real>)
+          if constexpr (std::is_same_v<FESRange, Real>)
           {
             return Variational::Integral(m_alpha * m_alpha * Variational::Grad(m_trial),
                      Variational::Grad(m_test)) +
               Variational::Integral(m_trial, m_test) - lf;
           }
-        else
+          else
           {
             return Variational::Integral(
                      m_alpha * m_alpha * Variational::Jacobian(m_trial),

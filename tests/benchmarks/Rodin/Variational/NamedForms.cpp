@@ -160,6 +160,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralMass(state, fes);
   }
+
   /// @brief Registers the P1IntegralMass benchmark.
   BENCHMARK(P1IntegralMass);
 
@@ -170,6 +171,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedMass(state, fes);
   }
+
   /// @brief Registers the P1NamedMass benchmark.
   BENCHMARK(P1NamedMass);
 
@@ -180,6 +182,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralDiffusion(state, fes);
   }
+
   /// @brief Registers the P1IntegralDiffusion benchmark.
   BENCHMARK(P1IntegralDiffusion);
 
@@ -190,6 +193,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedDiffusion(state, fes);
   }
+
   /// @brief Registers the P1NamedDiffusion benchmark.
   BENCHMARK(P1NamedDiffusion);
 
@@ -200,6 +204,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralMass(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralMass benchmark.
   BENCHMARK(H1P2IntegralMass);
 
@@ -210,6 +215,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedMass(state, fes);
   }
+
   /// @brief Registers the H1P2NamedMass benchmark.
   BENCHMARK(H1P2NamedMass);
 
@@ -220,6 +226,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralDiffusion(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralDiffusion benchmark.
   BENCHMARK(H1P2IntegralDiffusion);
 
@@ -230,6 +237,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedDiffusion(state, fes);
   }
+
   /// @brief Registers the H1P2NamedDiffusion benchmark.
   BENCHMARK(H1P2NamedDiffusion);
 
@@ -240,6 +248,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralMass(state, fes);
   }
+
   /// @brief Registers the P1IntegralMass3D benchmark.
   BENCHMARK(P1IntegralMass3D);
 
@@ -250,6 +259,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedMass(state, fes);
   }
+
   /// @brief Registers the P1NamedMass3D benchmark.
   BENCHMARK(P1NamedMass3D);
 
@@ -260,6 +270,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralDiffusion(state, fes);
   }
+
   /// @brief Registers the P1IntegralDiffusion3D benchmark.
   BENCHMARK(P1IntegralDiffusion3D);
 
@@ -270,6 +281,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedDiffusion(state, fes);
   }
+
   /// @brief Registers the P1NamedDiffusion3D benchmark.
   BENCHMARK(P1NamedDiffusion3D);
 
@@ -280,6 +292,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralMass(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralMass3D benchmark.
   BENCHMARK(H1P2IntegralMass3D);
 
@@ -290,6 +303,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedMass(state, fes);
   }
+
   /// @brief Registers the H1P2NamedMass3D benchmark.
   BENCHMARK(H1P2NamedMass3D);
 
@@ -300,6 +314,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralDiffusion(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralDiffusion3D benchmark.
   BENCHMARK(H1P2IntegralDiffusion3D);
 
@@ -310,8 +325,10 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedDiffusion(state, fes);
   }
+
   /// @brief Registers the H1P2NamedDiffusion3D benchmark.
   BENCHMARK(H1P2NamedDiffusion3D);
+
   /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 mass form built through Integral.
   static void P1IntegralMassFirst(benchmark::State& state)
   {
@@ -319,6 +336,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralMassFirst(state, fes);
   }
+
   /// @brief Registers the P1IntegralMassFirst benchmark.
   BENCHMARK(P1IntegralMassFirst);
 
@@ -329,6 +347,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedMassFirst(state, fes);
   }
+
   /// @brief Registers the P1NamedMassFirst benchmark.
   BENCHMARK(P1NamedMassFirst);
 
@@ -339,6 +358,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the P1IntegralDiffusionFirst benchmark.
   BENCHMARK(P1IntegralDiffusionFirst);
 
@@ -349,6 +369,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the P1NamedDiffusionFirst benchmark.
   BENCHMARK(P1NamedDiffusionFirst);
 
@@ -359,6 +380,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralMassFirst(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralMassFirst benchmark.
   BENCHMARK(H1P2IntegralMassFirst);
 
@@ -369,6 +391,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedMassFirst(state, fes);
   }
+
   /// @brief Registers the H1P2NamedMassFirst benchmark.
   BENCHMARK(H1P2NamedMassFirst);
 
@@ -379,6 +402,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralDiffusionFirst benchmark.
   BENCHMARK(H1P2IntegralDiffusionFirst);
 
@@ -389,6 +413,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the H1P2NamedDiffusionFirst benchmark.
   BENCHMARK(H1P2NamedDiffusionFirst);
 
@@ -399,6 +424,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralMassFirst(state, fes);
   }
+
   /// @brief Registers the P1IntegralMass3DFirst benchmark.
   BENCHMARK(P1IntegralMass3DFirst);
 
@@ -409,6 +435,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedMassFirst(state, fes);
   }
+
   /// @brief Registers the P1NamedMass3DFirst benchmark.
   BENCHMARK(P1NamedMass3DFirst);
 
@@ -419,6 +446,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     integralDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the P1IntegralDiffusion3DFirst benchmark.
   BENCHMARK(P1IntegralDiffusion3DFirst);
 
@@ -429,6 +457,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh);
     namedDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the P1NamedDiffusion3DFirst benchmark.
   BENCHMARK(P1NamedDiffusion3DFirst);
 
@@ -439,6 +468,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralMassFirst(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralMass3DFirst benchmark.
   BENCHMARK(H1P2IntegralMass3DFirst);
 
@@ -449,6 +479,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedMassFirst(state, fes);
   }
+
   /// @brief Registers the H1P2NamedMass3DFirst benchmark.
   BENCHMARK(H1P2NamedMass3DFirst);
 
@@ -459,6 +490,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     integralDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the H1P2IntegralDiffusion3DFirst benchmark.
   BENCHMARK(H1P2IntegralDiffusion3DFirst);
 
@@ -469,8 +501,10 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     namedDiffusionFirst(state, fes);
   }
+
   /// @brief Registers the H1P2NamedDiffusion3DFirst benchmark.
   BENCHMARK(H1P2NamedDiffusion3DFirst);
+
   /// @brief Measures 2D construction and first assembly of the P1 mass form built through Integral
   /// on a fresh mesh, so that every polytope's quadrature is mapped during the
   /// measurement; building the mesh and the space is not timed.
@@ -496,6 +530,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1IntegralMassCold benchmark.
   BENCHMARK(P1IntegralMassCold);
 
@@ -522,6 +557,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1NamedMassCold benchmark.
   BENCHMARK(P1NamedMassCold);
 
@@ -550,6 +586,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1IntegralDiffusionCold benchmark.
   BENCHMARK(P1IntegralDiffusionCold);
 
@@ -576,6 +613,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1NamedDiffusionCold benchmark.
   BENCHMARK(P1NamedDiffusionCold);
 
@@ -604,6 +642,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2IntegralMassCold benchmark.
   BENCHMARK(H1P2IntegralMassCold);
 
@@ -630,6 +669,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2NamedMassCold benchmark.
   BENCHMARK(H1P2NamedMassCold);
 
@@ -658,6 +698,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2IntegralDiffusionCold benchmark.
   BENCHMARK(H1P2IntegralDiffusionCold);
 
@@ -684,6 +725,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2NamedDiffusionCold benchmark.
   BENCHMARK(H1P2NamedDiffusionCold);
 
@@ -712,6 +754,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1IntegralMass3DCold benchmark.
   BENCHMARK(P1IntegralMass3DCold);
 
@@ -738,6 +781,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1NamedMass3DCold benchmark.
   BENCHMARK(P1NamedMass3DCold);
 
@@ -766,6 +810,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1IntegralDiffusion3DCold benchmark.
   BENCHMARK(P1IntegralDiffusion3DCold);
 
@@ -792,6 +837,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the P1NamedDiffusion3DCold benchmark.
   BENCHMARK(P1NamedDiffusion3DCold);
 
@@ -820,6 +866,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2IntegralMass3DCold benchmark.
   BENCHMARK(H1P2IntegralMass3DCold);
 
@@ -846,6 +893,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2NamedMass3DCold benchmark.
   BENCHMARK(H1P2NamedMass3DCold);
 
@@ -874,6 +922,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2IntegralDiffusion3DCold benchmark.
   BENCHMARK(H1P2IntegralDiffusion3DCold);
 
@@ -900,6 +949,7 @@ namespace Rodin::Tests::Benchmarks
       state.ResumeTiming();
     }
   }
+
   /// @brief Registers the H1P2NamedDiffusion3DCold benchmark.
   BENCHMARK(H1P2NamedDiffusion3DCold);
 }

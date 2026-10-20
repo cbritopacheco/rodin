@@ -21,7 +21,7 @@ using namespace Rodin::Alert;
 class ExceptionTest : public ::testing::Test
 {
   protected:
-    void SetUp() override 
+    void SetUp() override
     {
       // Reset string streams for each test
       errorStream.str("");

@@ -58,19 +58,26 @@ namespace Rodin::Eikonal
    * @tparam SpeedFunction Type of the speed function
    */
   template <class Data, class SpeedFunction>
-  class FMM<Variational::GridFunction<Variational::P1<Real, Geometry::Mesh<Context::Local>>, Data>, SpeedFunction>
+  class FMM<Variational::GridFunction<
+              Variational::P1<Real, Geometry::Mesh<Context::Local>>, Data>,
+    SpeedFunction>
   {
     public:
       /// Scalar type for computations
       using ScalarType = Real;
+
       /// Computation context (local, non-distributed)
       using Context = Context::Local;
+
       /// Mesh type
       using Mesh = Geometry::Mesh<Context>;
+
       /// Finite element space type (P1)
       using FES = Variational::P1<ScalarType, Mesh>;
+
       /// Solution type: grid function storing arrival times
       using SolutionType = Variational::GridFunction<FES, Math::Vector<ScalarType>>;
+
       /// Speed function type
       using SpeedFunctionType = SpeedFunction;
 
@@ -94,12 +101,16 @@ namespace Rodin::Eikonal
       {
         Index nodeIndex;
         Real value;
+
         /**
          * @brief Compares priority-queue arrival values.
          * @param other Object compared with this object.
          * @returns True when this item has a larger arrival value than the other item.
          */
-        bool operator>(const PQItem& other) const { return value > other.value; }
+        bool operator>(const PQItem& other) const
+        {
+          return value > other.value;
+        }
       };
 
       using PriorityQueue =
@@ -115,7 +126,8 @@ namespace Rodin::Eikonal
        */
       template <class Callable>
       FMM(SolutionType& u, Callable&& speed)
-        : m_u(u), m_speed(std::forward<Callable>(speed))
+        : m_u(u),
+          m_speed(std::forward<Callable>(speed))
       {}
 
       /**
@@ -176,7 +188,7 @@ namespace Rodin::Eikonal
               assert(!std::isnan(u[nb]));
               assert(nb < m_labels.size());
               m_labels[nb] = Label::Considered;
-              m_pq.push({ nb, arr });
+              m_pq.push({nb, arr});
             }
           }
         }
@@ -215,7 +227,8 @@ namespace Rodin::Eikonal
         // March
         while (!m_pq.empty())
         {
-          const auto cur = m_pq.top(); m_pq.pop();
+          const auto cur = m_pq.top();
+          m_pq.pop();
           const Index i = cur.nodeIndex;
 
           if (i >= nV)
@@ -238,11 +251,13 @@ namespace Rodin::Eikonal
             if (std::isnan(arr))
               continue;
             assert(!std::isnan(arr));
-            if (arr < u[j]) {
+            if (arr < u[j])
+            {
               u[j] = arr;
               assert(!std::isnan(u[j]));
-              if (m_labels[j] == Label::Far) m_labels[j] = Label::Considered;
-              m_pq.push({ j, arr });
+              if (m_labels[j] == Label::Far)
+                m_labels[j] = Label::Considered;
+              m_pq.push({j, arr});
             }
           }
         }
@@ -262,15 +277,13 @@ namespace Rodin::Eikonal
 
         const int D = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
-        const auto& v2c  = conn.getIncidence(0, D);
-        const auto& c2v  = conn.getIncidence(D, 0);
+        const auto& v2c = conn.getIncidence(0, D);
+        const auto& c2v = conn.getIncidence(D, 0);
 
         const Geometry::VertexIterator vertex = mesh.getVertex(p);
-        const Real s =
-          m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
-        const Real F =
-          std::isnan(s) ?
-            std::numeric_limits<Real>::infinity() : std::max(std::numeric_limits<Real>::min(), s);
+        const Real s = m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
+        const Real F = std::isnan(s) ? std::numeric_limits<Real>::infinity()
+                                     : std::max(std::numeric_limits<Real>::min(), s);
 
         if (!(F > 0) || std::isnan(F))
           return std::numeric_limits<Real>::infinity();
@@ -281,7 +294,8 @@ namespace Rodin::Eikonal
         {
           const auto& verts = c2v.at(cid);
 
-          Index A[3]; int k = 0;
+          Index A[3];
+          int k = 0;
           for (Index q : verts)
           {
             if (q == p)
@@ -296,7 +310,6 @@ namespace Rodin::Eikonal
 
           if (k == 0)
             continue;
-
 
           if (k == 1)
           {
@@ -336,6 +349,7 @@ namespace Rodin::Eikonal
         assert(!std::isnan(best));
         return best;
       }
+
       /**
        * @brief Measures distance between mesh vertices.
        * @param a First vertex index.
@@ -356,6 +370,7 @@ namespace Rodin::Eikonal
         assert(!std::isnan(distance));
         return distance;
       }
+
       /**
        * @brief Measures the geometric length between edge vertices.
        * @param a First vertex index.
@@ -366,7 +381,6 @@ namespace Rodin::Eikonal
 
       static Real computeEdgeDistance(Index a, Index b, const Mesh& mesh)
       {
-
         return computeGeometricDistance(a, b, mesh);
         // // Check if there's a direct edge between vertices a and b
         // // If so, compute the geodesic distance along the edge
@@ -394,6 +408,7 @@ namespace Rodin::Eikonal
         // // No direct edge, fallback to geometric distance
         // return computeGeometricDistance(a, b, mesh);
       }
+
       /**
        * @brief Measures the physical length of a mapped mesh edge.
        * @param a First vertex index.
@@ -424,8 +439,8 @@ namespace Rodin::Eikonal
        * @param F Local propagation cost multiplying geometric distance.
        * @returns Candidate arrival time obtained from the accepted supporting vertices.
        */
-      Real surfaceTriangleUpdate(Index p, Index i, Index j,
-                                 const SolutionType& u, const Mesh& mesh, Real F) const
+      Real surfaceTriangleUpdate(
+        Index p, Index i, Index j, const SolutionType& u, const Mesh& mesh, Real F) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -445,8 +460,8 @@ namespace Rodin::Eikonal
         if (!(det > 0) || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real inv11 =  g22 / det;
-        const Real inv22 =  g11 / det;
+        const Real inv11 = g22 / det;
+        const Real inv22 = g11 / det;
         const Real inv12 = -g12 / det;
 
         const Real ui = u[i], uj = u[j];
@@ -455,7 +470,7 @@ namespace Rodin::Eikonal
 
         // Same structure as the 2-neighbor tetra update
         const Real alpha = inv11 + inv22 + 2 * inv12;
-        const Real beta  = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
+        const Real beta = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
         const Real gamma = inv11 * ui * ui + 2 * inv12 * ui * uj + inv22 * uj * uj;
 
         if (!(alpha > 0) || std::isnan(alpha) || std::isnan(beta) || std::isnan(gamma))
@@ -506,8 +521,7 @@ namespace Rodin::Eikonal
        * @returns Candidate arrival time obtained from the accepted supporting vertices.
        */
       Real volumeTetrahedronUpdate(
-          Index p, Index i, Index j,
-          const SolutionType& u, const Mesh& mesh, Real F) const
+        Index p, Index i, Index j, const SolutionType& u, const Mesh& mesh, Real F) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -527,8 +541,8 @@ namespace Rodin::Eikonal
         if (!(det > 0) || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real inv11 =  g22 / det;
-        const Real inv22 =  g11 / det;
+        const Real inv11 = g22 / det;
+        const Real inv22 = g11 / det;
         const Real inv12 = -g12 / det;
 
         const Real ui = u[i], uj = u[j];
@@ -537,7 +551,7 @@ namespace Rodin::Eikonal
 
         // Quadratic in t: alpha t^2 - 2 beta t + (gamma - 1/F^2) = 0
         const Real alpha = inv11 + inv22 + 2 * inv12;
-        const Real beta  = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
+        const Real beta = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
         const Real gamma = inv11 * ui * ui + 2 * inv12 * ui * uj + inv22 * uj * uj;
 
         if (!(alpha > 0) || std::isnan(alpha) || std::isnan(beta) || std::isnan(gamma))
@@ -594,9 +608,8 @@ namespace Rodin::Eikonal
        * @param F Local propagation cost multiplying geometric distance.
        * @returns Candidate arrival time obtained from the accepted supporting vertices.
        */
-      Real volumeTetrahedronUpdate(
-          Index p, Index i, Index j, Index k,
-          const SolutionType& u, const Mesh& mesh, Real F) const
+      Real volumeTetrahedronUpdate(Index p, Index i, Index j, Index k,
+        const SolutionType& u, const Mesh& mesh, Real F) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -617,19 +630,17 @@ namespace Rodin::Eikonal
         if (!(g11 > 0 && g22 > 0 && g33 > 0))
           return std::numeric_limits<Real>::infinity();
 
-        const Real det =
-            g11 * (g22 * g33 - g23 * g23)
-          - g12 * (g12 * g33 - g13 * g23)
-          + g13 * (g12 * g23 - g13 * g22);
+        const Real det = g11 * (g22 * g33 - g23 * g23) - g12 * (g12 * g33 - g13 * g23) +
+          g13 * (g12 * g23 - g13 * g22);
 
         if (!(det > 0) || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real c11 =  (g22 * g33 - g23 * g23);
-        const Real c22 =  (g11 * g33 - g13 * g13);
-        const Real c33 =  (g11 * g22 - g12 * g12);
+        const Real c11 = (g22 * g33 - g23 * g23);
+        const Real c22 = (g11 * g33 - g13 * g13);
+        const Real c33 = (g11 * g22 - g12 * g12);
         const Real c12 = -(g12 * g33 - g13 * g23);
-        const Real c13 =  (g12 * g23 - g13 * g22);
+        const Real c13 = (g12 * g23 - g13 * g22);
         const Real c23 = -(g11 * g23 - g12 * g13);
 
         const Real inv11 = c11 / det, inv22 = c22 / det, inv33 = c33 / det;
@@ -642,13 +653,10 @@ namespace Rodin::Eikonal
         // Quadratic in t:
         // alpha t^2 - 2 beta t + (gamma - 1/F^2) = 0
         const Real alpha = inv11 + inv22 + inv33 + 2 * (inv12 + inv13 + inv23);
-        const Real beta  =
-            (inv11 * ui + inv12 * uj + inv13 * uk)
-          + (inv12 * ui + inv22 * uj + inv23 * uk)
-          + (inv13 * ui + inv23 * uj + inv33 * uk);
-        const Real gamma =
-            inv11 * ui * ui + inv22 * uj * uj + inv33 * uk * uk
-          + 2 * (inv12 * ui * uj + inv13 * ui * uk + inv23 * uj * uk);
+        const Real beta = (inv11 * ui + inv12 * uj + inv13 * uk) +
+          (inv12 * ui + inv22 * uj + inv23 * uk) + (inv13 * ui + inv23 * uj + inv33 * uk);
+        const Real gamma = inv11 * ui * ui + inv22 * uj * uj + inv33 * uk * uk +
+          2 * (inv12 * ui * uj + inv13 * ui * uk + inv23 * uj * uk);
 
         if (std::isnan(alpha) || std::isnan(beta) || std::isnan(gamma))
           return std::numeric_limits<Real>::infinity();

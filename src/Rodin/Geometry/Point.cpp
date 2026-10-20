@@ -137,7 +137,8 @@ namespace Rodin::Geometry
     if (!m_jacobian)
     {
       auto& jac = m_jacobian.emplace();
-      this->getPolytope().getTransformation().jacobian(jac, this->getReferenceCoordinates());
+      this->getPolytope().getTransformation().jacobian(
+        jac, this->getReferenceCoordinates());
       return jac;
     }
     assert(m_jacobian);
@@ -200,7 +201,7 @@ namespace Rodin::Geometry
             const Real E = a * i - c * g;
             const Real F = -(a * h - b * g);
             const Real G = b * f - c * e;
-            const Real H = - (a * f  - c * d);
+            const Real H = -(a * f - c * d);
             const Real I = a * e - b * d;
             const auto& det = m_jacobianDeterminant.emplace(a * A + b * B + c * C);
             assert(det != 0);
@@ -280,7 +281,7 @@ namespace Rodin::Geometry
       else
       {
         return m_jacobianDeterminant.emplace(
-            Math::sqrt((jac.transpose() * jac).determinant()));
+          Math::sqrt((jac.transpose() * jac).determinant()));
       }
     }
     assert(m_jacobianDeterminant);

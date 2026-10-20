@@ -93,10 +93,13 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = Law;
+
       /// @brief Current displacement state type.
       using StateType = State;
+
       /// @brief The law's cache type, handed to the output by @c commit().
       using CacheType = typename Law::Cache;
+
       /// @brief Type-erased output callable for this law.
       using OutputFunctionType = OutputFunction<CacheType>;
 
@@ -293,8 +296,8 @@ namespace Rodin::Solid
         return integrator;
       }
 
-      // operator()(u, v) → ProblemBody{Tangent, Residual} is provided by the
-      // NonLinearFormIntegrator CRTP base.
+    // operator()(u, v) → ProblemBody{Tangent, Residual} is provided by the
+    // NonLinearFormIntegrator CRTP base.
 
     private:
       Law m_law;

@@ -58,10 +58,10 @@ namespace Rodin::Solid
       /// Precomputed cache for the Yeoh law.
       struct Cache
       {
-          Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
-          Real J;       ///< Jacobian
-          Real Jm2d;    ///< @f$ J^{-2/d} @f$
-          Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
+        Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
+        Real J;       ///< Jacobian
+        Real Jm2d;    ///< @f$ J^{-2/d} @f$
+        Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
       };
 
       /**
@@ -83,6 +83,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       Yeoh(const Yeoh& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.

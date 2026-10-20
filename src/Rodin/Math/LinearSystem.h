@@ -24,14 +24,14 @@ namespace Rodin::FormLanguage
   template <class Operator, class Vector>
   struct Traits<Math::LinearSystem<Operator, Vector>>
   {
-      /// @brief Assembled operator type.
-      using OperatorType = Operator;
+    /// @brief Assembled operator type.
+    using OperatorType = Operator;
 
-      /// @brief Vector type of the linear system.
-      using VectorType = Vector;
+    /// @brief Vector type of the linear system.
+    using VectorType = Vector;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename Traits<OperatorType>::ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename Traits<OperatorType>::ScalarType;
   };
 }
 
@@ -53,30 +53,25 @@ namespace Rodin::Math
   {
     public:
       /// Matrix type for the linear operator
-      using MatrixType =
-        Matrix;
+      using MatrixType = Matrix;
 
       /// Vector type for solution and right-hand side
-      using VectorType =
-        Vector;
+      using VectorType = Vector;
 
       /// Default constructor
-      constexpr
-      LinearSystemBase() = default;
+      constexpr LinearSystemBase() = default;
 
       /**
        * Copy constructor
        * @param other Object to copy from.
        */
-      constexpr
-      LinearSystemBase(const LinearSystemBase& other) = default;
+      constexpr LinearSystemBase(const LinearSystemBase& other) = default;
 
       /**
        * Move constructor
        * @param other Object to move from.
        */
-      constexpr
-      LinearSystemBase(LinearSystemBase&& other) noexcept = default;
+      constexpr LinearSystemBase(LinearSystemBase&& other) noexcept = default;
 
       /// Virtual destructor
       virtual ~LinearSystemBase() = default;
@@ -86,16 +81,14 @@ namespace Rodin::Math
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      LinearSystemBase& operator=(const LinearSystemBase& other) = default;
+      constexpr LinearSystemBase& operator=(const LinearSystemBase& other) = default;
 
       /**
        * Move assignment operator
        * @param other Object to move from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      LinearSystemBase& operator=(LinearSystemBase&& other) noexcept = default;
+      constexpr LinearSystemBase& operator=(LinearSystemBase&& other) noexcept = default;
 
       /**
        * @brief Eliminates degrees of freedom from the linear system.
@@ -105,9 +98,8 @@ namespace Rodin::Math
        * @return Reference to this linear system
        */
       template <class DOFScalar>
-      constexpr
-      LinearSystemBase& eliminate(
-          const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      constexpr LinearSystemBase& eliminate(
+        const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
         return static_cast<Derived&>(*this).eliminate(dofs, offset);
       }
@@ -120,9 +112,9 @@ namespace Rodin::Math
        * @return Reference to this linear system
        */
       template <class DOFScalar>
-      constexpr
-      LinearSystemBase& merge(
-          const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      constexpr LinearSystemBase& merge(
+        const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
+        size_t offset = 0)
       {
         return static_cast<Derived&>(*this).merge(dofs, offset);
       }
@@ -132,8 +124,7 @@ namespace Rodin::Math
        * @return Reference to the matrix operator
        */
       /// @brief Returns the system operator matrix @f$ A @f$.
-      constexpr
-      MatrixType& getOperator()
+      constexpr MatrixType& getOperator()
       {
         return static_cast<Derived&>(*this).getOperator();
       }
@@ -143,8 +134,7 @@ namespace Rodin::Math
        * @return Const reference to the matrix operator
        */
       /// @brief Returns the system operator matrix @f$ A @f$.
-      constexpr
-      const MatrixType& getOperator() const
+      constexpr const MatrixType& getOperator() const
       {
         return static_cast<const Derived&>(*this).getOperator();
       }
@@ -154,8 +144,7 @@ namespace Rodin::Math
        * @return Reference to the right-hand side vector
        */
       /// @brief Returns the right-hand side vector @f$ b @f$.
-      constexpr
-      VectorType& getVector()
+      constexpr VectorType& getVector()
       {
         return static_cast<Derived&>(*this).getVector();
       }
@@ -165,8 +154,7 @@ namespace Rodin::Math
        * @return Const reference to the right-hand side vector
        */
       /// @brief Returns the right-hand side vector @f$ b @f$.
-      constexpr
-      const VectorType& getVector() const
+      constexpr const VectorType& getVector() const
       {
         return static_cast<const Derived&>(*this).getVector();
       }
@@ -176,8 +164,7 @@ namespace Rodin::Math
        * @return Reference to the solution vector
        */
       /// @brief Returns the solution vector @f$ x @f$.
-      constexpr
-      VectorType& getSolution()
+      constexpr VectorType& getSolution()
       {
         return static_cast<Derived&>(*this).getSolution();
       }
@@ -187,8 +174,7 @@ namespace Rodin::Math
        * @return Const reference to the solution vector
        */
       /// @brief Returns the solution vector @f$ x @f$.
-      constexpr
-      const VectorType& getSolution() const
+      constexpr const VectorType& getSolution() const
       {
         return static_cast<const Derived&>(*this).getSolution();
       }
@@ -220,12 +206,10 @@ namespace Rodin::Math
   {
     public:
       /// Sparse matrix type for the linear operator
-      using MatrixType =
-        Math::SparseMatrix<MatrixScalar>;
+      using MatrixType = Math::SparseMatrix<MatrixScalar>;
 
       /// Vector type for solution and right-hand side
-      using VectorType =
-        Math::Vector<VectorScalar>;
+      using VectorType = Math::Vector<VectorScalar>;
 
       /// Parent class type
       using Parent =
@@ -233,15 +217,13 @@ namespace Rodin::Math
           LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>>;
 
       /// Default constructor
-      constexpr
-      LinearSystem() = default;
+      constexpr LinearSystem() = default;
 
       /**
        * Copy constructor
        * @param other Object to copy from.
        */
-      constexpr
-      LinearSystem(const LinearSystem& other)
+      constexpr LinearSystem(const LinearSystem& other)
         : Parent(other),
           m_operator(other.m_operator),
           m_vector(other.m_vector),
@@ -252,8 +234,7 @@ namespace Rodin::Math
        * Move constructor
        * @param other Object to move from.
        */
-      constexpr
-      LinearSystem(LinearSystem&& other) noexcept
+      constexpr LinearSystem(LinearSystem&& other) noexcept
         : Parent(std::move(other)),
           m_operator(std::move(other.m_operator)),
           m_vector(std::move(other.m_vector)),
@@ -265,8 +246,7 @@ namespace Rodin::Math
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      LinearSystem& operator=(const LinearSystem& other)
+      constexpr LinearSystem& operator=(const LinearSystem& other)
       {
         if (this != &other)
         {
@@ -283,8 +263,7 @@ namespace Rodin::Math
        * @param other Object to move from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      LinearSystem& operator=(LinearSystem&& other) noexcept
+      constexpr LinearSystem& operator=(LinearSystem&& other) noexcept
       {
         if (this != &other)
         {
@@ -307,8 +286,8 @@ namespace Rodin::Math
        * @return Reference to this linear system
        */
       template <class DOFScalar>
-      constexpr
-      LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
+      constexpr LinearSystem& eliminate(
+        const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {
         auto& stiffness = this->getOperator();
         auto& mass = this->getVector();
@@ -323,8 +302,10 @@ namespace Rodin::Math
         {
           const Index& global = kv.first;
           const auto& dof = kv.second;
-          for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(stiffness, global + offset); it; ++it)
-             mass.coeffRef(it.row()) -= it.value() * dof;
+          for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(
+                 stiffness, global + offset);
+               it; ++it)
+            mass.coeffRef(it.row()) -= it.value() * dof;
         }
         for (const auto& [global, dof] : dofs)
         {
@@ -344,8 +325,8 @@ namespace Rodin::Math
               {
                 if (static_cast<Index>(innerPtr[k]) == global + offset)
                 {
-                   valuePtr[k] = 0;
-                   break;
+                  valuePtr[k] = 0;
+                  break;
                 }
               }
             }
@@ -369,7 +350,9 @@ namespace Rodin::Math
        * @return Reference to @f$ *this @f$
        */
       template <class DOFScalar>
-      LinearSystem& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      LinearSystem& merge(
+        const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
+        size_t offset = 0)
       {
         auto& stiffness = this->getOperator();
         auto& mass = this->getVector();
@@ -420,7 +403,9 @@ namespace Rodin::Math
           }
 
           // Assumes CCS format
-          for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(stiffness, parent); it; ++it)
+          for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(
+                 stiffness, parent);
+               it; ++it)
             it.valueRef() = 0;
 
           // Eliminate the parent row, adding it to the child rows
@@ -430,7 +415,9 @@ namespace Rodin::Math
           {
             Boolean parentFound = false;
             size_t childrenFound = 0;
-            for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(stiffness, col); it; ++it)
+            for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(
+                   stiffness, col);
+                 it; ++it)
             {
               if (parentFound && childrenFound == count)
               {
@@ -507,8 +494,7 @@ namespace Rodin::Math
        * @brief Returns the system operator matrix @f$ A @f$.
        * @returns The system operator matrix @f$ A @f$.
        */
-      constexpr
-      MatrixType& getOperator()
+      constexpr MatrixType& getOperator()
       {
         return m_operator;
       }
@@ -517,8 +503,7 @@ namespace Rodin::Math
        * @brief Returns the system operator matrix @f$ A @f$.
        * @returns The system operator matrix @f$ A @f$.
        */
-      constexpr
-      const MatrixType& getOperator() const
+      constexpr const MatrixType& getOperator() const
       {
         return m_operator;
       }
@@ -527,8 +512,7 @@ namespace Rodin::Math
        * @brief Returns the right-hand side vector @f$ b @f$.
        * @returns The right-hand side vector @f$ b @f$.
        */
-      constexpr
-      VectorType& getVector()
+      constexpr VectorType& getVector()
       {
         return m_vector;
       }
@@ -537,8 +521,7 @@ namespace Rodin::Math
        * @brief Returns the right-hand side vector @f$ b @f$.
        * @returns The right-hand side vector @f$ b @f$.
        */
-      constexpr
-      const VectorType& getVector() const
+      constexpr const VectorType& getVector() const
       {
         return m_vector;
       }
@@ -547,8 +530,7 @@ namespace Rodin::Math
        * @brief Returns the solution vector @f$ x @f$.
        * @returns The solution vector @f$ x @f$.
        */
-      constexpr
-      VectorType& getSolution()
+      constexpr VectorType& getSolution()
       {
         return m_solution;
       }
@@ -557,8 +539,7 @@ namespace Rodin::Math
        * @brief Returns the solution vector @f$ x @f$.
        * @returns The solution vector @f$ x @f$.
        */
-      constexpr
-      const VectorType& getSolution() const
+      constexpr const VectorType& getSolution() const
       {
         return m_solution;
       }
@@ -585,28 +566,24 @@ namespace Rodin::Math
         LinearSystem<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>>
   {
     public:
-      /// Dense matrix type for the linear operator  
-      using MatrixType =
-        Math::Matrix<MatrixScalar>;
+      /// Dense matrix type for the linear operator
+      using MatrixType = Math::Matrix<MatrixScalar>;
 
       /// Vector type for solution and right-hand side
-      using VectorType =
-        Math::Vector<VectorScalar>;
+      using VectorType = Math::Vector<VectorScalar>;
 
       /// Parent class type
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
       /// Default constructor
-      constexpr
-      LinearSystem() = default;
+      constexpr LinearSystem() = default;
 
       /**
        * Copy constructor
        * @param other Object to copy from.
        */
-      constexpr
-      LinearSystem(const LinearSystem& other)
+      constexpr LinearSystem(const LinearSystem& other)
         : Parent(other),
           m_operator(other.m_operator),
           m_vector(other.m_vector),
@@ -617,8 +594,7 @@ namespace Rodin::Math
        * Move constructor
        * @param other Object to move from.
        */
-      constexpr
-      LinearSystem(LinearSystem&& other) noexcept
+      constexpr LinearSystem(LinearSystem&& other) noexcept
         : Parent(std::move(other)),
           m_operator(std::move(other.m_operator)),
           m_vector(std::move(other.m_vector)),
@@ -633,8 +609,7 @@ namespace Rodin::Math
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      LinearSystem& operator=(const LinearSystem& other)
+      constexpr LinearSystem& operator=(const LinearSystem& other)
       {
         if (this != &other)
         {
@@ -651,8 +626,7 @@ namespace Rodin::Math
        * @param other Object to move from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      LinearSystem& operator=(LinearSystem&& other) noexcept
+      constexpr LinearSystem& operator=(LinearSystem&& other) noexcept
       {
         if (this != &other)
         {
@@ -718,7 +692,9 @@ namespace Rodin::Math
        * @return Reference to @f$ *this @f$
        */
       template <class DOFScalar>
-      LinearSystem& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+      LinearSystem& merge(
+        const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
+        size_t offset = 0)
       {
         auto& stiffness = this->getOperator();
         auto& mass = this->getVector();
@@ -777,7 +753,8 @@ namespace Rodin::Math
           {
             bool parentFound = false;
             size_t childrenFound = 0;
-            for (typename Math::Matrix<MatrixScalar>::InnerIterator it(stiffness, col); it; ++it)
+            for (typename Math::Matrix<MatrixScalar>::InnerIterator it(stiffness, col);
+                 it; ++it)
             {
               if (parentFound && childrenFound == count)
               {
@@ -854,8 +831,7 @@ namespace Rodin::Math
        * @brief Returns the system operator matrix @f$ A @f$.
        * @returns The system operator matrix @f$ A @f$.
        */
-      constexpr
-      MatrixType& getOperator()
+      constexpr MatrixType& getOperator()
       {
         return m_operator;
       }
@@ -864,8 +840,7 @@ namespace Rodin::Math
        * @brief Returns the system operator matrix @f$ A @f$.
        * @returns The system operator matrix @f$ A @f$.
        */
-      constexpr
-      const MatrixType& getOperator() const
+      constexpr const MatrixType& getOperator() const
       {
         return m_operator;
       }
@@ -874,8 +849,7 @@ namespace Rodin::Math
        * @brief Returns the right-hand side vector @f$ b @f$.
        * @returns The right-hand side vector @f$ b @f$.
        */
-      constexpr
-      VectorType& getVector()
+      constexpr VectorType& getVector()
       {
         return m_vector;
       }
@@ -884,8 +858,7 @@ namespace Rodin::Math
        * @brief Returns the right-hand side vector @f$ b @f$.
        * @returns The right-hand side vector @f$ b @f$.
        */
-      constexpr
-      const VectorType& getVector() const
+      constexpr const VectorType& getVector() const
       {
         return m_vector;
       }
@@ -894,8 +867,7 @@ namespace Rodin::Math
        * @brief Returns the solution vector @f$ x @f$.
        * @returns The solution vector @f$ x @f$.
        */
-      constexpr
-      VectorType& getSolution()
+      constexpr VectorType& getSolution()
       {
         return m_solution;
       }
@@ -904,8 +876,7 @@ namespace Rodin::Math
        * @brief Returns the solution vector @f$ x @f$.
        * @returns The solution vector @f$ x @f$.
        */
-      constexpr
-      const VectorType& getSolution() const
+      constexpr const VectorType& getSolution() const
       {
         return m_solution;
       }
@@ -921,30 +892,31 @@ namespace std
 {
   template <class Matrix, class Vector>
   struct tuple_size<Rodin::Math::LinearSystem<Matrix, Vector>>
-    : std::integral_constant<std::size_t, 3> {};
+    : std::integral_constant<std::size_t, 3>
+  {};
 
   /// @brief Structured-binding element 0 of a LinearSystem: the operator @f$ A @f$.
   template <class Matrix, class Vector>
   struct tuple_element<0, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-      /// @brief Type of element 0 (the operator matrix).
-      using type = Matrix;
+    /// @brief Type of element 0 (the operator matrix).
+    using type = Matrix;
   };
 
   /// @brief Structured-binding element 1 of a LinearSystem: the solution @f$ x @f$.
   template <class Matrix, class Vector>
   struct tuple_element<1, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-      /// @brief Type of element 1 (the solution vector).
-      using type = Vector;
+    /// @brief Type of element 1 (the solution vector).
+    using type = Vector;
   };
 
   /// @brief Structured-binding element 2 of a LinearSystem: the right-hand side @f$ b @f$.
   template <class Matrix, class Vector>
   struct tuple_element<2, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-      /// @brief Type of element 2 (the right-hand side vector).
-      using type = Vector;
+    /// @brief Type of element 2 (the right-hand side vector).
+    using type = Vector;
   };
 }
 
@@ -960,9 +932,12 @@ namespace Rodin::Math
   decltype(auto) get(LinearSystem<Matrix, Vector>& ls)
   {
     static_assert(I < 3);
-    if constexpr (I == 0) return (ls.getOperator());
-    else if constexpr (I == 1) return (ls.getSolution());
-    else return (ls.getVector());
+    if constexpr (I == 0)
+      return (ls.getOperator());
+    else if constexpr (I == 1)
+      return (ls.getSolution());
+    else
+      return (ls.getVector());
   }
 
   /**
@@ -974,9 +949,12 @@ namespace Rodin::Math
   decltype(auto) get(const LinearSystem<Matrix, Vector>& ls)
   {
     static_assert(I < 3);
-    if constexpr (I == 0) return (ls.getOperator());
-    else if constexpr (I == 1) return (ls.getSolution());
-    else return (ls.getVector());
+    if constexpr (I == 0)
+      return (ls.getOperator());
+    else if constexpr (I == 1)
+      return (ls.getSolution());
+    else
+      return (ls.getVector());
   }
 
   /**
@@ -988,9 +966,12 @@ namespace Rodin::Math
   decltype(auto) get(LinearSystem<Matrix, Vector>&& ls)
   {
     static_assert(I < 3);
-    if constexpr (I == 0) return std::move(ls.getOperator());
-    else if constexpr (I == 1) return std::move(ls.getSolution());
-    else return std::move(ls.getVector());
+    if constexpr (I == 0)
+      return std::move(ls.getOperator());
+    else if constexpr (I == 1)
+      return std::move(ls.getSolution());
+    else
+      return std::move(ls.getVector());
   }
 
   /**
@@ -1002,11 +983,13 @@ namespace Rodin::Math
   decltype(auto) get(const LinearSystem<Matrix, Vector>&& ls)
   {
     static_assert(I < 3);
-    if constexpr (I == 0) return std::move(ls.getOperator());
-    else if constexpr (I == 1) return std::move(ls.getSolution());
-    else return std::move(ls.getVector());
+    if constexpr (I == 0)
+      return std::move(ls.getOperator());
+    else if constexpr (I == 1)
+      return std::move(ls.getSolution());
+    else
+      return std::move(ls.getVector());
   }
 }
 
 #endif
-

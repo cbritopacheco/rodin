@@ -73,13 +73,13 @@ namespace Rodin::Solid
   template <class... Args>
   class InternalVirtualWorkTangent;
 
-/**
- * @brief Displacement tangent (pure displacement formulation).
- *
- * @f[
- *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
- * @f]
- */
+  /**
+   * @brief Displacement tangent (pure displacement formulation).
+   *
+   * @f[
+   *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
+   * @f]
+   */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType>
   class InternalVirtualWorkTangent<LawDerived, TrialFunctionType, TestFunctionType,
@@ -89,21 +89,28 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Trial function type.
       using TrialType = TrialFunctionType;
+
       /// @brief Test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Trial finite element space type.
       using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+
       /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
@@ -112,13 +119,13 @@ namespace Rodin::Solid
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkTangent expects a Rodin test function.");
 
-  /**
-   * @brief Constructs the pure-displacement tangent integrator.
-   * @param law The constitutive law
-   * @param u The trial displacement function
-   * @param v The test displacement function
-   * @param displacement The current displacement state
-   */
+      /**
+       * @brief Constructs the pure-displacement tangent integrator.
+       * @param law The constitutive law
+       * @param u The trial displacement function
+       * @param v The test displacement function
+       * @param displacement The current displacement state
+       */
       InternalVirtualWorkTangent(const LawDerived& law, const TrialType& u,
         const TestType& v, const StateType& displacement)
         : Parent(u, v),
@@ -151,11 +158,11 @@ namespace Rodin::Solid
           m_input(other.m_input)
       {}
 
-  /**
-   * @brief Rebinds the displacement linearization point.
-   * @param gf The new displacement state
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -164,22 +171,22 @@ namespace Rodin::Solid
         return *this;
       }
 
-  /**
-   * @brief Sets the quadrature order.
-   * @param order The quadrature order, or zero for automatic selection
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
         return *this;
       }
 
-  /**
-   * @brief Sets an auxiliary constitutive input callback.
-   * @param input The callback invoked on each constitutive point
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Sets an auxiliary constitutive input callback.
+       * @param input The callback invoked on each constitutive point
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setInput(InputFunction input)
       {
         m_input = std::move(input);
@@ -258,7 +265,7 @@ namespace Rodin::Solid
             Math::SpatialMatrix<ScalarType> dP;
             m_law.getMaterialTangent(dP, cache, cp, dF);
 
-        // K_{te,tr} += w (A : grad du_tr) : grad v_te
+            // K_{te,tr} += w (A : grad du_tr) : grad v_te
             for (size_t te = 0; te < testDofs; ++te)
             {
               const auto gradTest = testGradient.getBasis(te);
@@ -358,20 +365,20 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-/**
- * @brief Displacement-displacement block @f$ K_{uu} @f$ of the mixed u-p
- * formulation. Bound to the (u, v) pair.
- *
- * @f[
- *   K^e_{ij} = \int_K \Big( D\mathbf{P}_{\text{iso}}[\nabla_0\phi_j]
- *     + p\,J\big[(\mathbf{F}^{-T} : \nabla_0\phi_j)\,\mathbf{F}^{-T}
- *     - \mathbf{F}^{-T} (\nabla_0\phi_j)^T \mathbf{F}^{-T}\big]\Big)
- *     : \nabla_0\phi_i \, dX
- * @f]
- *
- * The constitutive law must supply only the isochoric part of the stress;
- * the volumetric response is carried by the pressure field.
- */
+  /**
+   * @brief Displacement-displacement block @f$ K_{uu} @f$ of the mixed u-p
+   * formulation. Bound to the (u, v) pair.
+   *
+   * @f[
+   *   K^e_{ij} = \int_K \Big( D\mathbf{P}_{\text{iso}}[\nabla_0\phi_j]
+   *     + p\,J\big[(\mathbf{F}^{-T} : \nabla_0\phi_j)\,\mathbf{F}^{-T}
+   *     - \mathbf{F}^{-T} (\nabla_0\phi_j)^T \mathbf{F}^{-T}\big]\Big)
+   *     : \nabla_0\phi_i \, dX
+   * @f]
+   *
+   * The constitutive law must supply only the isochoric part of the stress;
+   * the volumetric response is carried by the pressure field.
+   */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType, class PressureType>
   class InternalVirtualWorkTangent<LawDerived, TrialFunctionType, TestFunctionType,
@@ -381,25 +388,34 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Trial function type.
       using TrialType = TrialFunctionType;
+
       /// @brief Test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
+
       /// @brief Current pressure state type.
       using PressureStateType = PressureType;
 
       /// @brief Trial finite element space type.
       using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+
       /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
+
       /// @brief Pressure state finite element space type.
       using PressureFESType = typename FormLanguage::Traits<PressureStateType>::FESType;
 
@@ -408,14 +424,14 @@ namespace Rodin::Solid
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkTangent expects a Rodin test function.");
 
-  /**
-   * @brief Constructs the mixed @f$ K_{uu} @f$ tangent integrator.
-   * @param law The isochoric constitutive law
-   * @param u The trial displacement function
-   * @param v The test displacement function
-   * @param displacement The current displacement state
-   * @param pressure The current pressure state
-   */
+      /**
+       * @brief Constructs the mixed @f$ K_{uu} @f$ tangent integrator.
+       * @param law The isochoric constitutive law
+       * @param u The trial displacement function
+       * @param v The test displacement function
+       * @param displacement The current displacement state
+       * @param pressure The current pressure state
+       */
       InternalVirtualWorkTangent(const LawDerived& law, const TrialType& u,
         const TestType& v, const StateType& displacement,
         const PressureStateType& pressure)
@@ -453,11 +469,11 @@ namespace Rodin::Solid
           m_input(other.m_input)
       {}
 
-  /**
-   * @brief Rebinds the displacement linearization point.
-   * @param gf The new displacement state
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -466,11 +482,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-  /**
-   * @brief Rebinds the pressure linearization point.
-   * @param gf The new pressure state
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Rebinds the pressure linearization point.
+       * @param gf The new pressure state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setPressure(const PressureStateType& gf)
       {
         m_pressure = std::cref(gf);
@@ -478,22 +494,22 @@ namespace Rodin::Solid
         return *this;
       }
 
-  /**
-   * @brief Sets the quadrature order.
-   * @param order The quadrature order, or zero for automatic selection
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
         return *this;
       }
 
-  /**
-   * @brief Sets an auxiliary constitutive input callback.
-   * @param input The callback invoked on each constitutive point
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Sets an auxiliary constitutive input callback.
+       * @param input The callback invoked on each constitutive point
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangent& setInput(InputFunction input)
       {
         m_input = std::move(input);
@@ -579,7 +595,7 @@ namespace Rodin::Solid
             Math::SpatialMatrix<ScalarType> dP;
             m_law.getMaterialTangent(dP, cache, cp, dF);
 
-        // DJ[du] = J (F^{-T} : grad du)
+            // DJ[du] = J (F^{-T} : grad du)
             ScalarType FinvTdF = 0;
             for (size_t c = 0; c < vdim; ++c)
             {
@@ -587,12 +603,12 @@ namespace Rodin::Solid
                 FinvTdF += FinvT(c, k) * dF(c, k);
             }
 
-        // D(F^{-T})[du] = -F^{-T} (grad du)^T F^{-T}
+            // D(F^{-T})[du] = -F^{-T} (grad du)^T F^{-T}
             const Math::SpatialMatrix<ScalarType> M = FinvT * dF.transpose() * FinvT;
 
-        // K_{te,tr} += w [ (A : grad du) : grad v
-        //   + p J ( (F^{-T} : grad du)(F^{-T} : grad v)
-        //           - (F^{-T} (grad du)^T F^{-T}) : grad v ) ]
+            // K_{te,tr} += w [ (A : grad du) : grad v
+            //   + p J ( (F^{-T} : grad du)(F^{-T} : grad v)
+            //           - (F^{-T} (grad du)^T F^{-T}) : grad v ) ]
             for (size_t te = 0; te < testDofs; ++te)
             {
               const auto gradTest = testGradient.getBasis(te);
@@ -704,14 +720,14 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-/**
- * @brief Displacement-pressure coupling block @f$ K_{up} @f$. Bound to the
- * (p, v) pair: columns are pressure DOFs, rows are displacement test DOFs.
- *
- * @f[
- *   K^e_{ij} = \int_K \psi_j \, J\,\mathbf{F}^{-T} : \nabla_0\phi_i \, dX
- * @f]
- */
+  /**
+   * @brief Displacement-pressure coupling block @f$ K_{up} @f$. Bound to the
+   * (p, v) pair: columns are pressure DOFs, rows are displacement test DOFs.
+   *
+   * @f[
+   *   K^e_{ij} = \int_K \psi_j \, J\,\mathbf{F}^{-T} : \nabla_0\phi_i \, dX
+   * @f]
+   */
   template <class TrialPressFunctionType, class TestFunctionType, class DisplacementType>
   class InternalVirtualWorkTangentUP final
     : public Variational::LocalBilinearFormIntegratorBase<Real>
@@ -719,19 +735,25 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
       /// @brief Pressure trial function type.
       using TrialType = TrialPressFunctionType;
+
       /// @brief Displacement test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Pressure trial finite element space type.
       using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+
       /// @brief Displacement test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
@@ -740,12 +762,12 @@ namespace Rodin::Solid
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkTangentUP expects a Rodin test function.");
 
-  /**
-   * @brief Constructs the mixed @f$ K_{up} @f$ tangent integrator.
-   * @param p The trial pressure function
-   * @param v The test displacement function
-   * @param displacement The current displacement state
-   */
+      /**
+       * @brief Constructs the mixed @f$ K_{up} @f$ tangent integrator.
+       * @param p The trial pressure function
+       * @param v The test displacement function
+       * @param displacement The current displacement state
+       */
       InternalVirtualWorkTangentUP(
         const TrialType& p, const TestType& v, const StateType& displacement)
         : Parent(p, v),
@@ -775,11 +797,11 @@ namespace Rodin::Solid
           m_quadOrder(other.m_quadOrder)
       {}
 
-  /**
-   * @brief Rebinds the displacement linearization point.
-   * @param gf The new displacement state
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangentUP& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -788,11 +810,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-  /**
-   * @brief Sets the quadrature order.
-   * @param order The quadrature order, or zero for automatic selection
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangentUP& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
@@ -855,7 +877,7 @@ namespace Rodin::Solid
           const auto& FinvT = state.getDeformationGradientInverseTranspose();
           const auto& rc = pt.getReferenceCoordinates();
 
-      // K_{te,tr} += w dp_tr J (F^{-T} : grad v_te)
+          // K_{te,tr} += w dp_tr J (F^{-T} : grad v_te)
           for (size_t te = 0; te < testDofs; ++te)
           {
             const auto gradTest = testGradient.getBasis(te);
@@ -946,15 +968,15 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-/**
- * @brief Pressure-displacement coupling block @f$ K_{pu} @f$ (linearized
- * incompressibility constraint). Bound to the (u, q) pair: columns are
- * displacement DOFs, rows are pressure test DOFs.
- *
- * @f[
- *   K^e_{ij} = \int_K \psi_i \, J\,\mathbf{F}^{-T} : \nabla_0\phi_j \, dX
- * @f]
- */
+  /**
+   * @brief Pressure-displacement coupling block @f$ K_{pu} @f$ (linearized
+   * incompressibility constraint). Bound to the (u, q) pair: columns are
+   * displacement DOFs, rows are pressure test DOFs.
+   *
+   * @f[
+   *   K^e_{ij} = \int_K \psi_i \, J\,\mathbf{F}^{-T} : \nabla_0\phi_j \, dX
+   * @f]
+   */
   template <class TrialFunctionType, class TestPressFunctionType, class DisplacementType>
   class InternalVirtualWorkTangentPU final
     : public Variational::LocalBilinearFormIntegratorBase<Real>
@@ -962,19 +984,25 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
       /// @brief Displacement trial function type.
       using TrialType = TrialFunctionType;
+
       /// @brief Pressure test function type.
       using TestType = TestPressFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Displacement trial finite element space type.
       using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+
       /// @brief Pressure test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
@@ -983,12 +1011,12 @@ namespace Rodin::Solid
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkTangentPU expects a Rodin test function.");
 
-  /**
-   * @brief Constructs the mixed @f$ K_{pu} @f$ tangent integrator.
-   * @param u The trial displacement function
-   * @param q The test pressure function
-   * @param displacement The current displacement state
-   */
+      /**
+       * @brief Constructs the mixed @f$ K_{pu} @f$ tangent integrator.
+       * @param u The trial displacement function
+       * @param q The test pressure function
+       * @param displacement The current displacement state
+       */
       InternalVirtualWorkTangentPU(
         const TrialType& u, const TestType& q, const StateType& displacement)
         : Parent(u, q),
@@ -1018,11 +1046,11 @@ namespace Rodin::Solid
           m_quadOrder(other.m_quadOrder)
       {}
 
-  /**
-   * @brief Rebinds the displacement linearization point.
-   * @param gf The new displacement state
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangentPU& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -1031,11 +1059,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-  /**
-   * @brief Sets the quadrature order.
-   * @param order The quadrature order, or zero for automatic selection
-   * @returns Reference to this object
-   */
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkTangentPU& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
@@ -1098,7 +1126,7 @@ namespace Rodin::Solid
           const auto& FinvT = state.getDeformationGradientInverseTranspose();
           const auto& rc = pt.getReferenceCoordinates();
 
-      // K_{te,tr} += w q_te DJ[du_tr],  DJ[du] = J (F^{-T} : grad du)
+          // K_{te,tr} += w q_te DJ[du_tr],  DJ[du] = J (F^{-T} : grad du)
           for (size_t tr = 0; tr < trialDofs; ++tr)
           {
             const auto dF = trialGradient.getBasis(tr);

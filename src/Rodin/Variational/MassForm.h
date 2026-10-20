@@ -35,17 +35,17 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::MassForm<Solution, TrialFES, TestFES, Operator, CoefficientDerived>>
   {
-      /// @brief Solution type of the trial function.
-      using SolutionType = Solution;
+    /// @brief Solution type of the trial function.
+    using SolutionType = Solution;
 
-      /// @brief Trial finite element space type.
-      using TrialFESType = TrialFES;
+    /// @brief Trial finite element space type.
+    using TrialFESType = TrialFES;
 
-      /// @brief Test finite element space type.
-      using TestFESType = TestFES;
+    /// @brief Test finite element space type.
+    using TestFESType = TestFES;
 
-      /// @brief Assembled operator type.
-      using OperatorType = Operator;
+    /// @brief Assembled operator type.
+    using OperatorType = Operator;
   };
 
   /// @brief Marks Variational::MassForm as a named form.
@@ -55,8 +55,8 @@ namespace Rodin::FormLanguage
     Variational::MassForm<Solution, TrialFES, TestFES, Operator, CoefficientDerived>>
     : std::true_type
   {
-      /// @brief True for mass forms.
-      static constexpr bool Value = true;
+    /// @brief True for mass forms.
+    static constexpr bool Value = true;
   };
 }
 
@@ -85,10 +85,10 @@ namespace Rodin::Variational
     class CoefficientDerived>
   class MassForm final : public BilinearFormBase<Operator>
   {
-      using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
-      using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
-      using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
-      using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
+    using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
+    using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
+    using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
+    using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
 
     public:
       /// @brief Solution type of the trial function.

@@ -24,19 +24,18 @@ using namespace Rodin::Variational;
 static Geometry::Point makePoint(Mesh<Context::Local>& mesh)
 {
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::Vector<Real> rc{{0.25, 0.25}};
   return Geometry::Point(*it, rc);
 }
 
 /// @brief Verifies constant matrix for variational matrix function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_MatrixFunction, ConstantMatrix)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto p = makePoint(mesh);
 
   Math::Matrix<Real> m(2, 2);
-  m << 1.0, 2.0,
-       3.0, 4.0;
+  m << 1.0, 2.0, 3.0, 4.0;
   MatrixFunction mf(m);
 
   const auto& val = mf.getValue(p);
@@ -61,14 +60,13 @@ TEST(Rodin_Variational_MatrixFunction, RowsAndColumns)
 TEST(Rodin_Variational_MatrixFunction, Copy)
 {
   Math::Matrix<Real> m(2, 2);
-  m << 5.0, 6.0,
-       7.0, 8.0;
+  m << 5.0, 6.0, 7.0, 8.0;
   MatrixFunction mf(m);
 
   auto* mfCopy = mf.copy();
   ASSERT_NE(mfCopy, nullptr);
 
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto p = makePoint(mesh);
 
   const auto& val = mfCopy->getValue(p);
@@ -85,7 +83,7 @@ TEST(Rodin_Variational_MatrixFunction, GetOrder)
   m.setIdentity();
   MatrixFunction mf(m);
 
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto it = mesh.getCell();
   auto polytope = *it;
 
@@ -101,7 +99,7 @@ TEST(Rodin_Variational_MatrixFunction, IdentityMatrix2x2)
   m.setIdentity();
   MatrixFunction mf(m);
 
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   auto p = makePoint(mesh);
 
   const auto& val = mf.getValue(p);

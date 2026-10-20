@@ -64,10 +64,11 @@ namespace Rodin::QF
    */
   class GaussLegendre final : public QuadratureFormulaBase
   {
-      /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
-      static constexpr size_t DefaultRootMaxIterations = 100;
-      /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
-      static constexpr Real DefaultRootTolerance = 1e-14;
+    /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
+    static constexpr size_t DefaultRootMaxIterations = 100;
+
+    /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
+    static constexpr Real DefaultRootTolerance = 1e-14;
 
     public:
       /**

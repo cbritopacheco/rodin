@@ -89,8 +89,7 @@ namespace Rodin::Math
        * @brief Constructs a unit from a value.
        * @param[in] v The value to wrap in the unit
        */
-      constexpr
-      Unit(T v)
+      constexpr Unit(T v)
         : m_v(v)
       {}
 
@@ -124,8 +123,7 @@ namespace Rodin::Math
        * @brief Explicit conversion to underlying type.
        * @return The underlying value
        */
-      explicit
-      operator T() const
+      explicit operator T() const
       {
         return m_v;
       }
@@ -135,8 +133,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if values are equal
        */
-      constexpr
-      bool operator==(const Unit& other) const
+      constexpr bool operator==(const Unit& other) const
       {
         return m_v == other.m_v;
       }
@@ -146,8 +143,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if values are not equal
        */
-      constexpr
-      bool operator!=(const Unit& other) const
+      constexpr bool operator!=(const Unit& other) const
       {
         return !operator==(other);
       }
@@ -157,8 +153,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is less than other
        */
-      constexpr
-      bool operator<(const Unit& other) const
+      constexpr bool operator<(const Unit& other) const
       {
         return m_v < other.m_v;
       }
@@ -168,8 +163,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is greater than other
        */
-      constexpr
-      bool operator>(const Unit& other) const
+      constexpr bool operator>(const Unit& other) const
       {
         return m_v > other.m_v;
       }
@@ -179,8 +173,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is less than or equal to other
        */
-      constexpr
-      bool operator<=(const Unit& other) const
+      constexpr bool operator<=(const Unit& other) const
       {
         return m_v <= other.m_v;
       }
@@ -190,8 +183,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is greater than or equal to other
        */
-      constexpr
-      bool operator>=(const Unit& other) const
+      constexpr bool operator>=(const Unit& other) const
       {
         return m_v >= other.m_v;
       }
@@ -225,7 +217,6 @@ namespace Rodin::Math
       {
         return Derived(m_v * other.m_v);
       }
-
 
       /**
        * @brief Division operator.

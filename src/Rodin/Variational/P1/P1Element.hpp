@@ -51,8 +51,8 @@
 namespace Rodin::Variational
 {
   template <class Scalar>
-  constexpr
-  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
+  constexpr Scalar P1Element<Scalar>::BasisFunction::operator()(
+    const Math::SpatialPoint& r) const
   {
     switch (m_g)
     {
@@ -72,11 +72,12 @@ namespace Rodin::Variational
           {
             return r.x();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Triangle:
@@ -95,11 +96,12 @@ namespace Rodin::Variational
           {
             return r.y();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Quadrilateral:
@@ -124,11 +126,12 @@ namespace Rodin::Variational
           {
             return r.y() * (1 - r.x());
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Tetrahedron:
@@ -137,7 +140,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return - r.x() - r.y() - r.z() + 1;
+            return -r.x() - r.y() - r.z() + 1;
           }
           case 1:
           {
@@ -151,11 +154,12 @@ namespace Rodin::Variational
           {
             return r.z();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Pyramid:
@@ -203,7 +207,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1;
+            return r.x() * r.z() - r.x() + r.y() * r.z() - r.y() - r.z() + 1;
           }
           case 1:
           {
@@ -225,11 +229,12 @@ namespace Rodin::Variational
           {
             return r.y() * r.z();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
 
@@ -281,11 +286,12 @@ namespace Rodin::Variational
             // (1 - x) y z
             return (1 - x) * y * z;
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
     }
@@ -295,9 +301,9 @@ namespace Rodin::Variational
 
   template <class Scalar>
   template <size_t Order>
-  constexpr
-  Scalar P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
-      const Math::SpatialPoint& r) const
+  constexpr Scalar
+  P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
+    const Math::SpatialPoint& r) const
   {
     if constexpr (Order == 0)
     {
@@ -324,11 +330,12 @@ namespace Rodin::Variational
             {
               return 1;
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Triangle:
@@ -383,11 +390,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Quadrilateral:
@@ -549,11 +557,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Pyramid:
@@ -800,11 +809,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
 
@@ -992,11 +1002,12 @@ namespace Rodin::Variational
               }
             }
 
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
       }

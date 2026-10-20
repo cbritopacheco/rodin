@@ -31,23 +31,24 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Component<Variational::ShapeFunctionBase<OperandDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Operand type.
-      using OperandType =
-        Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Range type of the operand.
-      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+    /// @brief Operand type.
+    using OperandType =
+      Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
+    /// @brief Range type of the operand.
+    using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 }
 
@@ -86,23 +87,21 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
 
-
       /**
        * @brief Constructs component extractor for vector function.
        * @param fn Vector function to extract component from
        * @param component Zero-based component index @f$ i @f$
        */
-      constexpr
-      Component(const OperandType& fn, size_t component)
-        : m_fn(fn.copy()), m_idx(component)
+      constexpr Component(const OperandType& fn, size_t component)
+        : m_fn(fn.copy()),
+          m_idx(component)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Component(const Component& other)
+      constexpr Component(const Component& other)
         : Parent(other),
           m_fn(other.m_fn->copy()),
           m_idx(other.m_idx)
@@ -112,8 +111,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Component(Component&& other)
+      constexpr Component(Component&& other)
         : Parent(std::move(other)),
           m_fn(std::move(other.m_fn)),
           m_idx(std::move(other.m_idx))
@@ -123,8 +121,7 @@ namespace Rodin::Variational
        * @brief Gets the component index.
        * @returns Component index @f$ i @f$
        */
-      constexpr
-      size_t getIndex() const
+      constexpr size_t getIndex() const
       {
         return m_idx;
       }
@@ -133,8 +130,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying vector function.
        * @returns Reference to the operand function
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         assert(m_fn);
         return *m_fn;
@@ -146,8 +142,7 @@ namespace Rodin::Variational
        * @returns Scalar value @f$ f_i(p) @f$
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p)(m_idx);
       }
@@ -157,8 +152,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return getOperand().getOrder(geom);
       }
@@ -223,17 +217,17 @@ namespace Rodin::Variational
        * @param i Zero-based row index
        * @param j Zero-based column index
        */
-      constexpr
-      Component(const OperandType& fn, size_t i, size_t j)
-        : m_fn(fn.copy()), m_i(i), m_j(j)
+      constexpr Component(const OperandType& fn, size_t i, size_t j)
+        : m_fn(fn.copy()),
+          m_i(i),
+          m_j(j)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Component(const Component& other)
+      constexpr Component(const Component& other)
         : Parent(other),
           m_fn(other.m_fn->copy()),
           m_i(other.m_i),
@@ -244,8 +238,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Component(Component&& other)
+      constexpr Component(Component&& other)
         : Parent(std::move(other)),
           m_fn(std::move(other.m_fn)),
           m_i(std::move(other.m_i)),
@@ -256,8 +249,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying matrix function.
        * @returns Reference to the operand function
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         assert(m_fn);
         return *m_fn;
@@ -269,8 +261,7 @@ namespace Rodin::Variational
        * @returns Scalar value @f$ A_{ij}(p) @f$
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p)(m_i, m_j);
       }
@@ -280,8 +271,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return getOperand().getOrder(geom);
       }
@@ -341,17 +331,16 @@ namespace Rodin::Variational
        * @param u Vector-valued GridFunction
        * @param component Zero-based component index
        */
-      constexpr
-      Component(OperandType& u, size_t component)
-        : m_u(u), m_idx(component)
+      constexpr Component(OperandType& u, size_t component)
+        : m_u(u),
+          m_idx(component)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Component(const Component& other)
+      constexpr Component(const Component& other)
         : Parent(other),
           m_u(other.m_u),
           m_idx(other.m_idx)
@@ -361,8 +350,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Component(Component&& other)
+      constexpr Component(Component&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_idx(std::move(other.m_idx))
@@ -372,8 +360,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying GridFunction.
        * @returns Reference to the grid function
        */
-      constexpr
-      OperandType& getGridFunction()
+      constexpr OperandType& getGridFunction()
       {
         return m_u.get();
       }
@@ -382,8 +369,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying GridFunction (const version).
        * @returns Const reference to the grid function
        */
-      constexpr
-      const OperandType& getGridFunction() const
+      constexpr const OperandType& getGridFunction() const
       {
         return m_u.get();
       }
@@ -394,8 +380,7 @@ namespace Rodin::Variational
        * @returns Scalar value of the component
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         return m_u.get().getValue(p)(m_idx);
       }
@@ -405,8 +390,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return getGridFunction().getOrder(geom);
       }
@@ -442,11 +426,13 @@ namespace Rodin::Variational
    */
   template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
   class Component<ShapeFunctionBase<OperandDerived, FES, Space>> final
-    : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>
+    : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>,
+        FES, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr const ShapeFunctionSpaceType SpaceType = Space;
 
@@ -502,8 +488,7 @@ namespace Rodin::Variational
        * @brief Gets the component index.
        * @returns Component index
        */
-      constexpr
-      size_t getIndex() const
+      constexpr size_t getIndex() const
       {
         return m_idx;
       }
@@ -512,8 +497,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying shape function.
        * @returns Reference to the operand
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         assert(m_u);
         return *m_u;
@@ -523,8 +507,7 @@ namespace Rodin::Variational
        * @brief Gets the leaf (underlying trial/test function).
        * @returns Reference to the leaf function
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -534,8 +517,7 @@ namespace Rodin::Variational
        * @param polytope Mesh polytope
        * @returns Number of DOFs
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
+      constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         const size_t d = polytope.getDimension();
         const size_t i = polytope.getIndex();
@@ -578,8 +560,7 @@ namespace Rodin::Variational
        * @param local Local DOF index
        * @returns Scalar basis function value
        */
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr auto getBasis(size_t local) const
       {
         decltype(auto) basis = this->getOperand().getBasis(local);
         return basis(m_idx);
@@ -590,8 +571,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return getOperand().getOrder(geom);
       }
@@ -637,6 +617,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Trial or test shape-function space.
       static constexpr const ShapeFunctionSpaceType SpaceType = Space;
 
@@ -818,10 +799,13 @@ namespace Rodin::Variational
     public:
       /// @brief Cloned or referenced expression operand type.
       using OperandType = FunctionBase<Derived>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+
       /// @brief CRTP or finite element base class.
       using Parent = ScalarFunctionBase<ScalarType, Component>;
+
       /**
        * @brief Constructs entry access, or copies the owned expression operand.
        * @param operand Operand expression.
@@ -835,6 +819,7 @@ namespace Rodin::Variational
           m_column(column),
           m_direction(direction)
       {}
+
       /**
        * @brief Constructs entry access, or copies the owned expression operand.
        * @param other Object to copy from.
@@ -846,6 +831,7 @@ namespace Rodin::Variational
           m_column(other.m_column),
           m_direction(other.m_direction)
       {}
+
       /**
        * @brief Constructs entry access, or copies the owned expression operand.
        * @param other Object to move from.
@@ -857,6 +843,7 @@ namespace Rodin::Variational
           m_column(other.m_column),
           m_direction(other.m_direction)
       {}
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -867,6 +854,7 @@ namespace Rodin::Variational
       {
         return m_operand->getValue(point)(m_row, m_column, m_direction);
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -885,6 +873,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
       size_t m_row, m_column, m_direction;
   };
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param operand Operand expression.
@@ -906,10 +895,13 @@ namespace Rodin::Variational
     public:
       /// @brief Cloned or referenced expression operand type.
       using OperandType = ShapeFunctionBase<Derived, FES, Space>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+
       /// @brief CRTP or finite element base class.
       using Parent = ShapeFunctionBase<Component, FES, Space>;
+
       /**
        * @brief Constructs entry access, or copies the owned expression operand.
        * @param operand Operand expression.
@@ -924,6 +916,7 @@ namespace Rodin::Variational
           m_column(column),
           m_direction(direction)
       {}
+
       /**
        * @brief Constructs entry access, or copies the owned expression operand.
        * @param other Object to copy from.
@@ -935,6 +928,7 @@ namespace Rodin::Variational
           m_column(other.m_column),
           m_direction(other.m_direction)
       {}
+
       /**
        * @brief Constructs entry access, or copies the owned expression operand.
        * @param other Object to move from.
@@ -946,6 +940,7 @@ namespace Rodin::Variational
           m_column(other.m_column),
           m_direction(other.m_direction)
       {}
+
       /**
        * @brief Returns the leaf shape function used for assembly.
        * @returns The leaf shape function used for assembly.
@@ -954,6 +949,7 @@ namespace Rodin::Variational
       {
         return m_operand->getLeaf();
       }
+
       /**
        * @brief Returns the local basis count for the selected polytope.
        * @param poly Mesh entity used by this operation.
@@ -963,6 +959,7 @@ namespace Rodin::Variational
       {
         return m_operand->getDOFs(poly);
       }
+
       /**
        * @brief Returns the currently bound integration point.
        * @returns The currently bound integration point.
@@ -993,6 +990,7 @@ namespace Rodin::Variational
         m_operand->setIntegrationPoint(point);
         return *this;
       }
+
       /**
        * @brief Returns a basis value at the bound integration point.
        * @param local Index in the local numbering.
@@ -1002,6 +1000,7 @@ namespace Rodin::Variational
       {
         return m_operand->getBasis(local)(m_row, m_column, m_direction);
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -1020,6 +1019,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
       size_t m_row, m_column, m_direction;
   };
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param operand Operand expression.

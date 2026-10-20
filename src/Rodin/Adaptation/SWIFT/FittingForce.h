@@ -22,13 +22,17 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
+
       /// @brief Parent class type.
       using Parent = Variational::VectorFunctionBase<ScalarType,
         FittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>;
+
       /// @brief Level-set function type.
       using PhiType = Variational::RealFunctionBase<PhiDerived>;
+
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
@@ -123,6 +127,7 @@ namespace Rodin::Adaptation::SWIFT
       Real m_normalization;
       std::size_t m_dimension;
   };
+
   /**
    * @brief Deduction guide for FittingForce.
    * @param phi Observation field.

@@ -72,32 +72,27 @@ namespace Rodin::Geometry
     return m_n;
   }
 
-  const Polytope::Key::Vertices&
-  Polytope::Key::getVertices() const
+  const Polytope::Key::Vertices& Polytope::Key::getVertices() const
   {
     return m_vertices;
   }
 
-  Polytope::Key::Vertices::iterator
-  Polytope::Key::begin()
+  Polytope::Key::Vertices::iterator Polytope::Key::begin()
   {
     return m_vertices.begin();
   }
 
-  Polytope::Key::Vertices::iterator
-  Polytope::Key::end()
+  Polytope::Key::Vertices::iterator Polytope::Key::end()
   {
     return m_vertices.begin() + m_n;
   }
 
-  Polytope::Key::Vertices::const_iterator
-  Polytope::Key::begin() const
+  Polytope::Key::Vertices::const_iterator Polytope::Key::begin() const
   {
     return m_vertices.begin();
   }
 
-  Polytope::Key::Vertices::const_iterator
-  Polytope::Key::end() const
+  Polytope::Key::Vertices::const_iterator Polytope::Key::end() const
   {
     return m_vertices.begin() + m_n;
   }
@@ -127,8 +122,7 @@ namespace Rodin::Geometry
         cswap(a0, a1);
         cswap(b0, b1);
 
-        return a0 == b0
-            && a1 == b1;
+        return a0 == b0 && a1 == b1;
       }
 
       case 3:
@@ -149,9 +143,7 @@ namespace Rodin::Geometry
         cswap(b1, b2);
         cswap(b0, b1);
 
-        return a0 == b0
-            && a1 == b1
-            && a2 == b2;
+        return a0 == b0 && a1 == b1 && a2 == b2;
       }
 
       case 4:
@@ -178,10 +170,7 @@ namespace Rodin::Geometry
         cswap(b1, b3);
         cswap(b1, b2);
 
-        return a0 == b0
-            && a1 == b1
-            && a2 == b2
-            && a3 == b3;
+        return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3;
       }
 
       case 5:
@@ -218,11 +207,7 @@ namespace Rodin::Geometry
         cswap(b1, b3);
         cswap(b1, b2);
 
-        return a0 == b0
-            && a1 == b1
-            && a2 == b2
-            && a3 == b3
-            && a4 == b4;
+        return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4;
       }
 
       case 6:
@@ -267,12 +252,7 @@ namespace Rodin::Geometry
         cswap(b1, b3);
         cswap(b2, b3);
 
-        return a0 == b0
-            && a1 == b1
-            && a2 == b2
-            && a3 == b3
-            && a4 == b4
-            && a5 == b5;
+        return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4 && a5 == b5;
       }
 
       case 7:
@@ -331,13 +311,8 @@ namespace Rodin::Geometry
         cswap(b1, b2);
         cswap(b0, b1);
 
-        return a0 == b0
-            && a1 == b1
-            && a2 == b2
-            && a3 == b3
-            && a4 == b4
-            && a5 == b5
-            && a6 == b6;
+        return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4 && a5 == b5 &&
+          a6 == b6;
       }
 
       case 8:
@@ -400,22 +375,15 @@ namespace Rodin::Geometry
         cswap(b3, b4);
         cswap(b5, b6);
 
-        return a0 == b0
-            && a1 == b1
-            && a2 == b2
-            && a3 == b3
-            && a4 == b4
-            && a5 == b5
-            && a6 == b6
-            && a7 == b7;
+        return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4 && a5 == b5 &&
+          a6 == b6 && a7 == b7;
       }
     }
 
     return false;
   }
 
-  std::size_t Polytope::Key::SymmetricHash::operator()(
-      const Key& key) const
+  std::size_t Polytope::Key::SymmetricHash::operator()(const Key& key) const
   {
     using U64 = std::uint64_t;
     // Fixed seeds and salts for canonical, sorted vertex positions. Each sorted
@@ -750,22 +718,23 @@ namespace Rodin::Geometry
       }
       case Geometry::Polytope::Type::Segment:
       {
-        static const Math::SpatialVector<Real> s_node{ 0.5 };
+        static const Math::SpatialVector<Real> s_node{0.5};
         return s_node;
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        static const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3) }};
+        static const Math::SpatialVector<Real> s_node{
+          {Real(1) / Real(3), Real(1) / Real(3)}};
         return s_node;
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        static const Math::SpatialVector<Real> s_node{{ 0.5, 0.5 }};
+        static const Math::SpatialVector<Real> s_node{{0.5, 0.5}};
         return s_node;
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        static const Math::SpatialVector<Real> s_node{{ 0.25, 0.25, 0.25 }};
+        static const Math::SpatialVector<Real> s_node{{0.25, 0.25, 0.25}};
         return s_node;
       }
       case Geometry::Polytope::Type::Pyramid:
@@ -775,12 +744,13 @@ namespace Rodin::Geometry
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        static const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
+        static const Math::SpatialVector<Real> s_node{
+          {Real(1) / Real(3), Real(1) / Real(3), 0.5}};
         return s_node;
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
-        static const Math::SpatialVector<Real> s_node{{ 0.5, 0.5, 0.5 }};
+        static const Math::SpatialVector<Real> s_node{{0.5, 0.5, 0.5}};
         return s_node;
       }
     }
@@ -801,43 +771,29 @@ namespace Rodin::Geometry
       }
       case Type::Segment:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{ 0 },
-          Math::SpatialPoint{ 1 }
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{0}, Math::SpatialPoint{1}};
         return s_nodes[i];
       }
       case Type::Triangle:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0 }},
-          Math::SpatialPoint{{ 1, 0 }},
-          Math::SpatialPoint{{ 0, 1 }}
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0}}, Math::SpatialPoint{{1, 0}},
+          Math::SpatialPoint{{0, 1}}};
         return s_nodes[i];
       }
       case Type::Quadrilateral:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0 }},
-          Math::SpatialPoint{{ 1, 0 }},
-          Math::SpatialPoint{{ 1, 1 }},
-          Math::SpatialPoint{{ 0, 1 }}
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0}}, Math::SpatialPoint{{1, 0}},
+          Math::SpatialPoint{{1, 1}}, Math::SpatialPoint{{0, 1}}};
         return s_nodes[i];
       }
       case Type::Tetrahedron:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0, 0 }},
-          Math::SpatialPoint{{ 1, 0, 0 }},
-          Math::SpatialPoint{{ 0, 1, 0 }},
-          Math::SpatialPoint{{ 0, 0, 1 }}
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0, 0}}, Math::SpatialPoint{{1, 0, 0}},
+          Math::SpatialPoint{{0, 1, 0}}, Math::SpatialPoint{{0, 0, 1}}};
         return s_nodes[i];
       }
       case Type::Pyramid:
@@ -850,30 +806,24 @@ namespace Rodin::Geometry
       }
       case Type::Hexahedron:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0, 0 }}, // 0: (x=0,y=0,z=0)
-          Math::SpatialPoint{{ 1, 0, 0 }}, // 1: (1,0,0)
-          Math::SpatialPoint{{ 1, 1, 0 }}, // 2: (1,1,0)
-          Math::SpatialPoint{{ 0, 1, 0 }}, // 3: (0,1,0)
-          Math::SpatialPoint{{ 0, 0, 1 }}, // 4: (0,0,1)
-          Math::SpatialPoint{{ 1, 0, 1 }}, // 5: (1,0,1)
-          Math::SpatialPoint{{ 1, 1, 1 }}, // 6: (1,1,1)
-          Math::SpatialPoint{{ 0, 1, 1 }}  // 7: (0,1,1)
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0, 0}}, // 0: (x=0,y=0,z=0)
+          Math::SpatialPoint{{1, 0, 0}}, // 1: (1,0,0)
+          Math::SpatialPoint{{1, 1, 0}}, // 2: (1,1,0)
+          Math::SpatialPoint{{0, 1, 0}}, // 3: (0,1,0)
+          Math::SpatialPoint{{0, 0, 1}}, // 4: (0,0,1)
+          Math::SpatialPoint{{1, 0, 1}}, // 5: (1,0,1)
+          Math::SpatialPoint{{1, 1, 1}}, // 6: (1,1,1)
+          Math::SpatialPoint{{0, 1, 1}}  // 7: (0,1,1)
         };
         return s_nodes[i];
       }
       case Type::Wedge:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0, 0 }},
-          Math::SpatialPoint{{ 1, 0, 0 }},
-          Math::SpatialPoint{{ 0, 1, 0 }},
-          Math::SpatialPoint{{ 0, 0, 1 }},
-          Math::SpatialPoint{{ 1, 0, 1 }},
-          Math::SpatialPoint{{ 0, 1, 1 }}
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0, 0}}, Math::SpatialPoint{{1, 0, 0}},
+          Math::SpatialPoint{{0, 1, 0}}, Math::SpatialPoint{{0, 0, 1}},
+          Math::SpatialPoint{{1, 0, 1}}, Math::SpatialPoint{{0, 1, 1}}};
         return s_nodes[i];
       }
     }
@@ -1066,7 +1016,7 @@ namespace Rodin::Geometry
   {
     const auto& vertices = getVertices();
     return VertexIterator(
-        this->getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
+      this->getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
   const Polytope::Key& Polytope::getVertices() const
@@ -1082,8 +1032,7 @@ namespace Rodin::Geometry
     RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
     const auto& inc = conn.getIncidence(d, d);
     const auto& adj = inc.at(getIndex());
-    return PolytopeIterator(
-        d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));
+    return PolytopeIterator(d, getMesh(), IteratorIndexGenerator(adj.begin(), adj.end()));
   }
 
   const PolytopeTransformation& Polytope::getTransformation() const
@@ -1171,7 +1120,8 @@ namespace Rodin::Geometry
     : m_g(g)
   {}
 
-  void Polytope::Project::cell(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
+  void Polytope::Project::cell(
+    Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
   {
     assert(rc.size() >= 0);
     assert(static_cast<size_t>(rc.size()) == Polytope::Traits(m_g).getDimension());
@@ -1209,16 +1159,27 @@ namespace Rodin::Geometry
         Real y = std::max(rc[1], Real(0));
         Real z = std::max(rc[2], Real(0));
         const Real s = x + y + z;
-        if (s <= Real(1)) { out[0] = x; out[1] = y; out[2] = z; return; }
+        if (s <= Real(1))
+        {
+          out[0] = x;
+          out[1] = y;
+          out[2] = z;
+          return;
+        }
 
         Real u0 = x, u1 = y, u2 = z;
-        if (u1 > u0) std::swap(u0, u1);
-        if (u2 > u1) std::swap(u1, u2);
-        if (u1 > u0) std::swap(u0, u1);
+        if (u1 > u0)
+          std::swap(u0, u1);
+        if (u2 > u1)
+          std::swap(u1, u2);
+        if (u1 > u0)
+          std::swap(u0, u1);
         const Real s1 = u0, s2 = u0 + u1, s3 = s2 + u2;
         Real theta = s1 - Real(1);
-        if (u1 - (s2 - Real(1)) / 2.0 > Real(0)) theta = (s2 - Real(1)) / 2.0;
-        if (u2 - (s3 - Real(1)) / 3.0 > Real(0)) theta = (s3 - Real(1)) / 3.0;
+        if (u1 - (s2 - Real(1)) / 2.0 > Real(0))
+          theta = (s2 - Real(1)) / 2.0;
+        if (u2 - (s3 - Real(1)) / 3.0 > Real(0))
+          theta = (s3 - Real(1)) / 3.0;
 
         out[0] = std::max(x - theta, Real(0));
         out[1] = std::max(y - theta, Real(0));
@@ -1258,7 +1219,8 @@ namespace Rodin::Geometry
     assert(false);
   }
 
-  void Polytope::Project::boundary(Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
+  void Polytope::Project::boundary(
+    Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
   {
     assert(rc.size() >= 0);
     assert(static_cast<size_t>(rc.size()) == Polytope::Traits(m_g).getDimension());
@@ -1295,9 +1257,21 @@ namespace Rodin::Geometry
         const Real d1 = (rc[0] - e1x) * (rc[0] - e1x) + (rc[1] - e1y) * (rc[1] - e1y);
         const Real d2 = (rc[0] - e2x) * (rc[0] - e2x) + (rc[1] - e2y) * (rc[1] - e2y);
 
-        if (d0 <= d1 && d0 <= d2) { out[0] = e0x; out[1] = e0y; return; }
-        if (d1 <= d2)             { out[0] = e1x; out[1] = e1y; return; }
-        out[0] = e2x; out[1] = e2y; return;
+        if (d0 <= d1 && d0 <= d2)
+        {
+          out[0] = e0x;
+          out[1] = e0y;
+          return;
+        }
+        if (d1 <= d2)
+        {
+          out[0] = e1x;
+          out[1] = e1y;
+          return;
+        }
+        out[0] = e2x;
+        out[1] = e2y;
+        return;
       }
       case Type::Quadrilateral:
       {
@@ -1306,15 +1280,32 @@ namespace Rodin::Geometry
         const Real e2x = std::clamp(rc[0], Real(0), Real(1)), e2y = Real(1);
         const Real e3x = Real(0), e3y = std::clamp(rc[1], Real(0), Real(1));
 
-        const Real d0 = (rc[0] - e0x)*(rc[0] - e0x) + (rc[1] - e0y)*(rc[1] - e0y);
-        const Real d1 = (rc[0] - e1x)*(rc[0] - e1x) + (rc[1] - e1y)*(rc[1] - e1y);
-        const Real d2 = (rc[0] - e2x)*(rc[0] - e2x) + (rc[1] - e2y)*(rc[1] - e2y);
-        const Real d3 = (rc[0] - e3x)*(rc[0] - e3x) + (rc[1] - e3y)*(rc[1] - e3y);
+        const Real d0 = (rc[0] - e0x) * (rc[0] - e0x) + (rc[1] - e0y) * (rc[1] - e0y);
+        const Real d1 = (rc[0] - e1x) * (rc[0] - e1x) + (rc[1] - e1y) * (rc[1] - e1y);
+        const Real d2 = (rc[0] - e2x) * (rc[0] - e2x) + (rc[1] - e2y) * (rc[1] - e2y);
+        const Real d3 = (rc[0] - e3x) * (rc[0] - e3x) + (rc[1] - e3y) * (rc[1] - e3y);
 
-        if (d0 <= d1 && d0 <= d2 && d0 <= d3) { out[0] = e0x; out[1] = e0y; return; }
-        if (d1 <= d2 && d1 <= d3)             { out[0] = e1x; out[1] = e1y; return; }
-        if (d2 <= d3)                         { out[0] = e2x; out[1] = e2y; return; }
-        out[0] = e3x; out[1] = e3y; return;
+        if (d0 <= d1 && d0 <= d2 && d0 <= d3)
+        {
+          out[0] = e0x;
+          out[1] = e0y;
+          return;
+        }
+        if (d1 <= d2 && d1 <= d3)
+        {
+          out[0] = e1x;
+          out[1] = e1y;
+          return;
+        }
+        if (d2 <= d3)
+        {
+          out[0] = e2x;
+          out[1] = e2y;
+          return;
+        }
+        out[0] = e3x;
+        out[1] = e3y;
+        return;
       }
       case Type::Tetrahedron:
       {
@@ -1344,11 +1335,23 @@ namespace Rodin::Geometry
 
           // sort u0>=u1>=u2 of (a,b,c) with indices, no std::sort
           Real u0 = a, u1 = b, u2 = c;
-          int  i0 = 0, i1 = 1, i2 = 2;
+          int i0 = 0, i1 = 1, i2 = 2;
 
-          if (u1 > u0) { std::swap(u0, u1); std::swap(i0, i1); }
-          if (u2 > u0) { std::swap(u0, u2); std::swap(i0, i2); }
-          if (u2 > u1) { std::swap(u1, u2); std::swap(i1, i2); }
+          if (u1 > u0)
+          {
+            std::swap(u0, u1);
+            std::swap(i0, i1);
+          }
+          if (u2 > u0)
+          {
+            std::swap(u0, u2);
+            std::swap(i0, i2);
+          }
+          if (u2 > u1)
+          {
+            std::swap(u1, u2);
+            std::swap(i1, i2);
+          }
 
           // Compute theta (standard simplex projection, equality sum=1)
           Real theta = (u0 - Real(1)); // k=1
@@ -1365,12 +1368,14 @@ namespace Rodin::Geometry
           const Real dx = rc[0] - x;
           const Real dy = rc[1] - y;
           const Real dz = rc[2] - z;
-          const Real d  = dx*dx + dy*dy + dz*dz;
+          const Real d = dx * dx + dy * dy + dz * dz;
 
           if (d < bestd)
           {
             bestd = d;
-            bx = x; by = y; bz = z;
+            bx = x;
+            by = y;
+            bz = z;
           }
         }
 
@@ -1391,12 +1396,14 @@ namespace Rodin::Geometry
           const Real dx = rc[0] - x;
           const Real dy = rc[1] - y;
           const Real dz = rc[2] - z;
-          const Real d  = dx*dx + dy*dy + dz*dz;
+          const Real d = dx * dx + dy * dy + dz * dz;
 
           if (d < bestd)
           {
             bestd = d;
-            bx = x; by = y; bz = z;
+            bx = x;
+            by = y;
+            bz = z;
           }
         }
 
@@ -1417,12 +1424,14 @@ namespace Rodin::Geometry
           const Real dx = rc[0] - x;
           const Real dy = rc[1] - y;
           const Real dz = rc[2] - z;
-          const Real d  = dx*dx + dy*dy + dz*dz;
+          const Real d = dx * dx + dy * dy + dz * dz;
 
           if (d < bestd)
           {
             bestd = d;
-            bx = x; by = y; bz = z;
+            bx = x;
+            by = y;
+            bz = z;
           }
         }
 
@@ -1443,12 +1452,14 @@ namespace Rodin::Geometry
           const Real dx = rc[0] - x;
           const Real dy = rc[1] - y;
           const Real dz = rc[2] - z;
-          const Real d  = dx*dx + dy*dy + dz*dz;
+          const Real d = dx * dx + dy * dy + dz * dz;
 
           if (d < bestd)
           {
             bestd = d;
-            bx = x; by = y; bz = z;
+            bx = x;
+            by = y;
+            bz = z;
           }
         }
 
@@ -1479,23 +1490,54 @@ namespace Rodin::Geometry
 
         const auto sq = [](Real v) { return v * v; };
 
-        const Real d0 = sq(rc[0]-h0x) + sq(rc[1]-h0y) + sq(rc[2]-h0z);
-        const Real d1 = sq(rc[0]-h1x) + sq(rc[1]-h1y) + sq(rc[2]-h1z);
-        const Real d2 = sq(rc[0]-h2x) + sq(rc[1]-h2y) + sq(rc[2]-h2z);
-        const Real d3 = sq(rc[0]-h3x) + sq(rc[1]-h3y) + sq(rc[2]-h3z);
-        const Real d4 = sq(rc[0]-h4x) + sq(rc[1]-h4y) + sq(rc[2]-h4z);
-        const Real d5 = sq(rc[0]-h5x) + sq(rc[1]-h5y) + sq(rc[2]-h5z);
+        const Real d0 = sq(rc[0] - h0x) + sq(rc[1] - h0y) + sq(rc[2] - h0z);
+        const Real d1 = sq(rc[0] - h1x) + sq(rc[1] - h1y) + sq(rc[2] - h1z);
+        const Real d2 = sq(rc[0] - h2x) + sq(rc[1] - h2y) + sq(rc[2] - h2z);
+        const Real d3 = sq(rc[0] - h3x) + sq(rc[1] - h3y) + sq(rc[2] - h3z);
+        const Real d4 = sq(rc[0] - h4x) + sq(rc[1] - h4y) + sq(rc[2] - h4z);
+        const Real d5 = sq(rc[0] - h5x) + sq(rc[1] - h5y) + sq(rc[2] - h5z);
 
         Real bx = h0x, by = h0y, bz = h0z;
         Real bd = d0;
 
-        if (d1 < bd) { bd = d1; bx = h1x; by = h1y; bz = h1z; }
-        if (d2 < bd) { bd = d2; bx = h2x; by = h2y; bz = h2z; }
-        if (d3 < bd) { bd = d3; bx = h3x; by = h3y; bz = h3z; }
-        if (d4 < bd) { bd = d4; bx = h4x; by = h4y; bz = h4z; }
-        if (d5 < bd) {           bx = h5x; by = h5y; bz = h5z; }
+        if (d1 < bd)
+        {
+          bd = d1;
+          bx = h1x;
+          by = h1y;
+          bz = h1z;
+        }
+        if (d2 < bd)
+        {
+          bd = d2;
+          bx = h2x;
+          by = h2y;
+          bz = h2z;
+        }
+        if (d3 < bd)
+        {
+          bd = d3;
+          bx = h3x;
+          by = h3y;
+          bz = h3z;
+        }
+        if (d4 < bd)
+        {
+          bd = d4;
+          bx = h4x;
+          by = h4y;
+          bz = h4z;
+        }
+        if (d5 < bd)
+        {
+          bx = h5x;
+          by = h5y;
+          bz = h5z;
+        }
 
-        out[0] = bx; out[1] = by; out[2] = bz;
+        out[0] = bx;
+        out[1] = by;
+        out[2] = bz;
         return;
       }
       case Type::Pyramid:
@@ -1575,23 +1617,56 @@ namespace Rodin::Geometry
         const Real g4y = g0y;
         const Real g4z = Real(1);
 
-        const Real d0 = (rc[0] - g0x) * (rc[0] - g0x) + (rc[1] - g0y) * (rc[1] - g0y) + (rc[2] - g0z) * (rc[2] - g0z);
-        const Real d1 = (rc[0] - g1x) * (rc[0] - g1x) + (rc[1] - g1y) * (rc[1] - g1y) + (rc[2] - g1z) * (rc[2] - g1z);
-        const Real d2 = (rc[0] - g2x) * (rc[0] - g2x) + (rc[1] - g2y) * (rc[1] - g2y) + (rc[2] - g2z) * (rc[2] - g2z);
-        const Real d3 = (rc[0] - g3x) * (rc[0] - g3x) + (rc[1] - g3y) * (rc[1] - g3y) + (rc[2] - g3z) * (rc[2] - g3z);
-        const Real d4 = (rc[0] - g4x) * (rc[0] - g4x) + (rc[1] - g4y) * (rc[1] - g4y) + (rc[2] - g4z) * (rc[2] - g4z);
+        const Real d0 = (rc[0] - g0x) * (rc[0] - g0x) + (rc[1] - g0y) * (rc[1] - g0y) +
+          (rc[2] - g0z) * (rc[2] - g0z);
+        const Real d1 = (rc[0] - g1x) * (rc[0] - g1x) + (rc[1] - g1y) * (rc[1] - g1y) +
+          (rc[2] - g1z) * (rc[2] - g1z);
+        const Real d2 = (rc[0] - g2x) * (rc[0] - g2x) + (rc[1] - g2y) * (rc[1] - g2y) +
+          (rc[2] - g2z) * (rc[2] - g2z);
+        const Real d3 = (rc[0] - g3x) * (rc[0] - g3x) + (rc[1] - g3y) * (rc[1] - g3y) +
+          (rc[2] - g3z) * (rc[2] - g3z);
+        const Real d4 = (rc[0] - g4x) * (rc[0] - g4x) + (rc[1] - g4y) * (rc[1] - g4y) +
+          (rc[2] - g4z) * (rc[2] - g4z);
 
-        if (d0 <= d1 && d0 <= d2 && d0 <= d3 && d0 <= d4) { out[0] = g0x; out[1] = g0y; out[2] = g0z; return; }
-        if (d1 <= d2 && d1 <= d3 && d1 <= d4)             { out[0] = g1x; out[1] = g1y; out[2] = g1z; return; }
-        if (d2 <= d3 && d2 <= d4)                         { out[0] = g2x; out[1] = g2y; out[2] = g2z; return; }
-        if (d3 <= d4)                                     { out[0] = g3x; out[1] = g3y; out[2] = g3z; return; }
-        out[0]=g4x; out[1]=g4y; out[2]=g4z; return;
+        if (d0 <= d1 && d0 <= d2 && d0 <= d3 && d0 <= d4)
+        {
+          out[0] = g0x;
+          out[1] = g0y;
+          out[2] = g0z;
+          return;
+        }
+        if (d1 <= d2 && d1 <= d3 && d1 <= d4)
+        {
+          out[0] = g1x;
+          out[1] = g1y;
+          out[2] = g1z;
+          return;
+        }
+        if (d2 <= d3 && d2 <= d4)
+        {
+          out[0] = g2x;
+          out[1] = g2y;
+          out[2] = g2z;
+          return;
+        }
+        if (d3 <= d4)
+        {
+          out[0] = g3x;
+          out[1] = g3y;
+          out[2] = g3z;
+          return;
+        }
+        out[0] = g4x;
+        out[1] = g4y;
+        out[2] = g4z;
+        return;
       }
     }
     assert(false);
   }
 
-  void Polytope::Project::face(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
+  void Polytope::Project::face(
+    size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const
   {
     assert(rc.size() >= 0);
     assert(static_cast<size_t>(rc.size()) == Polytope::Traits(m_g).getDimension());
@@ -1640,21 +1715,28 @@ namespace Rodin::Geometry
       case Type::Quadrilateral:
       {
         assert(local < 4);
-        if (local == 0) {                    // y = 0,  (0,0) → (1,0)
+        if (local == 0)
+        { // y = 0,  (0,0) → (1,0)
           const Real x = std::clamp(rc[0], Real(0), Real(1));
-          out[0] = x; out[1] = Real(0); return;
+          out[0] = x;
+          out[1] = Real(0);
+          return;
         }
-        if (local == 1) {                    // x = 1,  (1,0) → (1,1)
+        if (local == 1)
+        { // x = 1,  (1,0) → (1,1)
           const Real y = std::clamp(rc[1], Real(0), Real(1));
-          out[0] = Real(1); out[1] = y; return;
+          out[0] = Real(1);
+          out[1] = y;
+          return;
         }
-        if (local == 2) {                    // y = 1,  (1,1) → (0,1)
+        if (local == 2)
+        { // y = 1,  (1,1) → (0,1)
           const Real x = std::clamp(rc[0], Real(0), Real(1));
           out[0] = x;
           out[1] = Real(1);
           return;
         }
-        {                                    // x = 0,  (0,1) → (0,0)
+        { // x = 0,  (0,1) → (0,0)
           const Real y = std::clamp(rc[1], Real(0), Real(1));
           out[0] = Real(0);
           out[1] = y;
@@ -1676,15 +1758,17 @@ namespace Rodin::Geometry
 
         // Project (a,b,c) onto {x>=0,y>=0,z>=0,x+y+z=1} without std::sort:
         // Uses a 3-element sorting network (comparisons + swaps) and the standard simplex projection formula.
-        auto proj_sum1 = [](Real a, Real b, Real c, Real& x, Real& y, Real& z)
-        {
+        auto proj_sum1 = [](Real a, Real b, Real c, Real& x, Real& y, Real& z) {
           // Keep original order in v0,v1,v2; sort copies u0>=u1>=u2 with indices.
           Real u0 = a, u1 = b, u2 = c;
-          int  i0 = 0, i1 = 1, i2 = 2;
+          int i0 = 0, i1 = 1, i2 = 2;
 
-          auto swap_uv = [](Real& uA, Real& uB, int& iA, int& iB)
-          {
-            if (uB > uA) { std::swap(uA, uB); std::swap(iA, iB); }
+          auto swap_uv = [](Real& uA, Real& uB, int& iA, int& iB) {
+            if (uB > uA)
+            {
+              std::swap(uA, uB);
+              std::swap(iA, iB);
+            }
           };
 
           // Sorting network for 3 elements (descending)
@@ -1733,28 +1817,36 @@ namespace Rodin::Geometry
         {
           Real x, y, z;
           proj_sum1(rc[0], rc[1], rc[2], x, y, z);
-          out[0] = x; out[1] = y; out[2] = z;
+          out[0] = x;
+          out[1] = y;
+          out[2] = z;
           return;
         }
         if (local == 1)
         {
           Real y, z;
-          proj_edge01(rc[1], rc[2], y, z);          // y,z >=0, y+z<=1
-          out[0] = Real(0); out[1] = y; out[2] = z; // x=0
+          proj_edge01(rc[1], rc[2], y, z); // y,z >=0, y+z<=1
+          out[0] = Real(0);
+          out[1] = y;
+          out[2] = z; // x=0
           return;
         }
         if (local == 2)
         {
           Real x, z;
-          proj_edge01(rc[0], rc[2], x, z);          // x,z >=0, x+z<=1
-          out[0] = x; out[1] = Real(0); out[2] = z; // y=0
+          proj_edge01(rc[0], rc[2], x, z); // x,z >=0, x+z<=1
+          out[0] = x;
+          out[1] = Real(0);
+          out[2] = z; // y=0
           return;
         }
         // local == 3
         {
           Real x, y;
-          proj_edge01(rc[0], rc[1], x, y);          // x,y >=0, x+y<=1
-          out[0] = x; out[1] = y; out[2] = Real(0); // z=0
+          proj_edge01(rc[0], rc[1], x, y); // x,y >=0, x+y<=1
+          out[0] = x;
+          out[1] = y;
+          out[2] = Real(0); // z=0
           return;
         }
       }
@@ -1776,17 +1868,35 @@ namespace Rodin::Geometry
         switch (local)
         {
           case 0: // z = 0
-            out[0] = cx; out[1] = cy; out[2] = Real(0); return;
+            out[0] = cx;
+            out[1] = cy;
+            out[2] = Real(0);
+            return;
           case 1: // y = 0
-            out[0] = cx; out[1] = Real(0); out[2] = cz; return;
+            out[0] = cx;
+            out[1] = Real(0);
+            out[2] = cz;
+            return;
           case 2: // x = 1
-            out[0] = Real(1); out[1] = cy; out[2] = cz; return;
+            out[0] = Real(1);
+            out[1] = cy;
+            out[2] = cz;
+            return;
           case 3: // y = 1
-            out[0] = cx; out[1] = Real(1); out[2] = cz; return;
+            out[0] = cx;
+            out[1] = Real(1);
+            out[2] = cz;
+            return;
           case 4: // x = 0
-            out[0] = Real(0); out[1] = cy; out[2] = cz; return;
+            out[0] = Real(0);
+            out[1] = cy;
+            out[2] = cz;
+            return;
           default: // 5: z = 1
-            out[0] = cx; out[1] = cy; out[2] = Real(1); return;
+            out[0] = cx;
+            out[1] = cy;
+            out[2] = Real(1);
+            return;
         }
       }
       case Type::Pyramid:
@@ -1864,7 +1974,10 @@ namespace Rodin::Geometry
         {
           const Real x = std::clamp(rc[0], Real(0), Real(1));
           const Real z = std::clamp(rc[2], Real(0), Real(1));
-          out[0] = x; out[1] = Real(0); out[2] = z; return;
+          out[0] = x;
+          out[1] = Real(0);
+          out[2] = z;
+          return;
         }
         if (local == 2)
         {
@@ -1873,13 +1986,19 @@ namespace Rodin::Geometry
           t = std::clamp(t, Real(0), Real(1));
           const Real x = Real(1) - t, y = t;
           const Real z = std::clamp(rc[2], Real(0), Real(1));
-          out[0] = x; out[1] = y; out[2] = z; return;
+          out[0] = x;
+          out[1] = y;
+          out[2] = z;
+          return;
         }
         if (local == 3)
         {
           const Real y = std::clamp(rc[1], Real(0), Real(1));
           const Real z = std::clamp(rc[2], Real(0), Real(1));
-          out[0] = Real(0); out[1] = y; out[2] = z; return;
+          out[0] = Real(0);
+          out[1] = y;
+          out[2] = z;
+          return;
         }
         {
           const Math::SpatialPoint input{rc[0], rc[1]};
@@ -1895,7 +2014,8 @@ namespace Rodin::Geometry
     assert(false);
   }
 
-  void Polytope::Project::vertex(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint&) const
+  void Polytope::Project::vertex(
+    size_t local, Math::SpatialPoint& out, const Math::SpatialPoint&) const
   {
     const Traits ts(m_g);
     assert(local < ts.getVertexCount());

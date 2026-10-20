@@ -53,7 +53,10 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      const ObjectType& getObject() const override { return m_gf.get(); }
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
 
     private:
       std::reference_wrapper<const ObjectType> m_gf;

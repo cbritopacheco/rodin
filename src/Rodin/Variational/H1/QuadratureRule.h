@@ -69,6 +69,7 @@ namespace Rodin::Variational
 
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
+
       /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>, FESType,
@@ -76,8 +77,10 @@ namespace Rodin::Variational
 
       /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
@@ -317,6 +320,7 @@ namespace Rodin::Variational
 
       /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+
       /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
@@ -603,6 +607,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
@@ -617,8 +622,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -1069,6 +1076,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
@@ -1095,8 +1103,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -1488,11 +1498,13 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
       /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+
       /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
@@ -1513,8 +1525,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -1864,6 +1878,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
@@ -1881,10 +1896,13 @@ namespace Rodin::Variational
 
       /// @brief Type of the inner integrand.
       using InnerIntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2140,6 +2158,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, TestRange, Mesh>;
 
@@ -2154,8 +2173,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2461,6 +2482,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, TestRange, Mesh>;
 
@@ -2476,8 +2498,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2813,11 +2837,13 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 
       /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+
       /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
@@ -2838,8 +2864,10 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -3311,6 +3339,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = H1<KTest, Scalar, Mesh>;
 

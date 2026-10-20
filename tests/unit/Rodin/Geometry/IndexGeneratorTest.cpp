@@ -32,7 +32,7 @@ namespace Rodin::Tests::Unit
   {
     EmptyIndexGenerator gen1;
     EmptyIndexGenerator gen2(gen1);
-    
+
     EXPECT_TRUE(gen2.end());
   }
 
@@ -41,7 +41,7 @@ namespace Rodin::Tests::Unit
   {
     EmptyIndexGenerator gen1;
     EmptyIndexGenerator gen2(std::move(gen1));
-    
+
     EXPECT_TRUE(gen2.end());
   }
 
@@ -57,7 +57,7 @@ namespace Rodin::Tests::Unit
   {
     EmptyIndexGenerator gen;
     std::unique_ptr<EmptyIndexGenerator> copy(gen.copy());
-    
+
     EXPECT_TRUE(copy->end());
   }
 
@@ -66,7 +66,7 @@ namespace Rodin::Tests::Unit
   {
     EmptyIndexGenerator gen;
     std::unique_ptr<EmptyIndexGenerator> moved(gen.move());
-    
+
     EXPECT_TRUE(moved->end());
   }
 
@@ -103,7 +103,7 @@ namespace Rodin::Tests::Unit
   {
     BoundedIndexGenerator gen1(0, 3);
     BoundedIndexGenerator gen2(std::move(gen1));
-    
+
     EXPECT_FALSE(gen2.end());
   }
 
@@ -118,7 +118,7 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_BoundedIndexGenerator, Increment)
   {
     BoundedIndexGenerator gen(0, 3);
-    
+
     EXPECT_EQ(*gen, 0);
     ++gen;
     EXPECT_EQ(*gen, 1);
@@ -132,14 +132,14 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_BoundedIndexGenerator, FullIteration)
   {
     BoundedIndexGenerator gen(5, 10);
-    
+
     std::vector<Index> indices;
     while (!gen.end())
     {
       indices.push_back(*gen);
       ++gen;
     }
-    
+
     EXPECT_EQ(indices.size(), 5);
     EXPECT_EQ(indices[0], 5);
     EXPECT_EQ(indices[1], 6);
@@ -163,7 +163,7 @@ namespace Rodin::Tests::Unit
   {
     BoundedIndexGenerator gen(0, 3);
     std::unique_ptr<BoundedIndexGenerator> moved(gen.move());
-    
+
     EXPECT_FALSE(moved->end());
     EXPECT_EQ(**moved, 0);
   }
@@ -172,7 +172,7 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_BoundedIndexGenerator, SingleElement)
   {
     BoundedIndexGenerator gen(42, 43);
-    
+
     EXPECT_FALSE(gen.end());
     EXPECT_EQ(*gen, 42);
     ++gen;
@@ -183,14 +183,14 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_BoundedIndexGenerator, LargeRange)
   {
     BoundedIndexGenerator gen(0, 1000);
-    
+
     int count = 0;
     while (!gen.end())
     {
       ++gen;
       ++count;
     }
-    
+
     EXPECT_EQ(count, 1000);
   }
 
@@ -203,7 +203,7 @@ namespace Rodin::Tests::Unit
   {
     std::vector<Index> indices;
     VectorIndexGenerator gen(std::move(indices));
-    
+
     EXPECT_TRUE(gen.end());
   }
 
@@ -212,7 +212,7 @@ namespace Rodin::Tests::Unit
   {
     std::vector<Index> indices{42};
     VectorIndexGenerator gen(std::move(indices));
-    
+
     EXPECT_FALSE(gen.end());
     EXPECT_EQ(*gen, 42);
     ++gen;
@@ -224,7 +224,7 @@ namespace Rodin::Tests::Unit
   {
     std::vector<Index> indices{10, 20, 30, 40};
     VectorIndexGenerator gen(std::move(indices));
-    
+
     EXPECT_EQ(*gen, 10);
     ++gen;
     EXPECT_EQ(*gen, 20);
@@ -241,14 +241,14 @@ namespace Rodin::Tests::Unit
   {
     std::vector<Index> original{1, 3, 5, 7, 9};
     VectorIndexGenerator gen(std::move(original));
-    
+
     std::vector<Index> result;
     while (!gen.end())
     {
       result.push_back(*gen);
       ++gen;
     }
-    
+
     EXPECT_EQ(result.size(), 5);
     EXPECT_EQ(result[0], 1);
     EXPECT_EQ(result[1], 3);
@@ -262,9 +262,9 @@ namespace Rodin::Tests::Unit
   {
     std::vector<Index> indices{1, 2, 3};
     VectorIndexGenerator gen(std::move(indices));
-    
+
     std::unique_ptr<VectorIndexGenerator> copy(gen.copy());
-    
+
     // Both should iterate the same way
     EXPECT_EQ(**copy, 1);
     ++(*copy);
@@ -276,9 +276,9 @@ namespace Rodin::Tests::Unit
   {
     std::vector<Index> indices{5, 10, 15};
     VectorIndexGenerator gen(std::move(indices));
-    
+
     std::unique_ptr<VectorIndexGenerator> moved(gen.move());
-    
+
     EXPECT_FALSE(moved->end());
     EXPECT_EQ(**moved, 5);
   }
@@ -292,7 +292,7 @@ namespace Rodin::Tests::Unit
   {
     IndexSet indices;
     SetIndexGenerator gen(std::move(indices));
-    
+
     EXPECT_TRUE(gen.end());
   }
 
@@ -301,7 +301,7 @@ namespace Rodin::Tests::Unit
   {
     IndexSet indices{42};
     SetIndexGenerator gen(std::move(indices));
-    
+
     EXPECT_FALSE(gen.end());
     EXPECT_EQ(*gen, 42);
     ++gen;
@@ -311,9 +311,9 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies multiple elements sorted for geometry set index generator by checking exact expected values, move semantics.
   TEST(Geometry_SetIndexGenerator, MultipleElementsSorted)
   {
-    IndexSet indices{30, 10, 20, 40};  // Set will sort these
+    IndexSet indices{30, 10, 20, 40}; // Set will sort these
     SetIndexGenerator gen(std::move(indices));
-    
+
     // Sets are sorted, so we should get them in order
     std::vector<Index> result;
     while (!gen.end())
@@ -321,7 +321,7 @@ namespace Rodin::Tests::Unit
       result.push_back(*gen);
       ++gen;
     }
-    
+
     EXPECT_EQ(result.size(), 4);
     EXPECT_EQ(result[0], 10);
     EXPECT_EQ(result[1], 20);
@@ -334,9 +334,9 @@ namespace Rodin::Tests::Unit
   {
     IndexSet indices{1, 2, 3};
     SetIndexGenerator gen(indices);
-    
+
     std::unique_ptr<SetIndexGenerator> copy(gen.copy());
-    
+
     EXPECT_FALSE(copy->end());
     EXPECT_EQ(**copy, 1);
   }
@@ -346,9 +346,9 @@ namespace Rodin::Tests::Unit
   {
     IndexSet indices{5, 10, 15};
     SetIndexGenerator gen(std::move(indices));
-    
+
     std::unique_ptr<SetIndexGenerator> moved(gen.move());
-    
+
     EXPECT_FALSE(moved->end());
     EXPECT_EQ(**moved, 5);
   }
@@ -357,8 +357,8 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_SetIndexGenerator, ConstructWithConstRef)
   {
     IndexSet indices{7, 14, 21};
-    SetIndexGenerator gen(indices);  // const ref constructor
-    
+    SetIndexGenerator gen(indices); // const ref constructor
+
     EXPECT_FALSE(gen.end());
     EXPECT_EQ(*gen, 7);
   }

@@ -73,24 +73,24 @@ namespace Rodin::Tests::Convergence
 
       struct Result
       {
-          Result()
-            : freeVelocity(0),
-              zeroMeanPressure(0),
-              eigenvalues(),
-              meanBasisDefect(0),
-              eigenResidual(0),
-              spectralDifference(0),
-              velocityResidual(0)
-          {}
+        Result()
+          : freeVelocity(0),
+            zeroMeanPressure(0),
+            eigenvalues(),
+            meanBasisDefect(0),
+            eigenResidual(0),
+            spectralDifference(0),
+            velocityResidual(0)
+        {}
 
-          Index freeVelocity, zeroMeanPressure;
-          Math::Vector<Real> eigenvalues;
-          Real meanBasisDefect, eigenResidual, spectralDifference, velocityResidual;
+        Index freeVelocity, zeroMeanPressure;
+        Math::Vector<Real> eigenvalues;
+        Real meanBasisDefect, eigenResidual, spectralDifference, velocityResidual;
 
-          bool isDimensionObstructed() const
-          {
-            return freeVelocity < zeroMeanPressure;
-          }
+        bool isDimensionObstructed() const
+        {
+          return freeVelocity < zeroMeanPressure;
+        }
       };
 
       static void compute(Result& result, const Math::SparseMatrix<Real>& fullA,

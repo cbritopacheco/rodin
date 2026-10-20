@@ -771,8 +771,8 @@ namespace Rodin::Examples::Heart
     if (tau < cfg.tNegativeEnd)
       return cfg.negativeValue;
 
-  // Smooth return from the negative plateau back to baseline over the rest of
-  // the cycle (removes the old instantaneous negativeValue -> 0 jump).
+    // Smooth return from the negative plateau back to baseline over the rest of
+    // the cycle (removes the old instantaneous negativeValue -> 0 jump).
     return cfg.negativeValue *
       (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
   }
@@ -783,8 +783,8 @@ namespace Rodin::Examples::Heart
     const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
 
-  // C1-continuous (smoothstep) ramps between the same plateau values, so the
-  // prescribed atrial/venous pressure has no derivative kinks.
+    // C1-continuous (smoothstep) ramps between the same plateau values, so the
+    // prescribed atrial/venous pressure has no derivative kinks.
     auto ss = [](Real s) {
       s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
       return s * s * (3.0 - 2.0 * s);
@@ -919,32 +919,32 @@ namespace Rodin::Examples::Heart
     // on radius, length or branch.
     m_wrms = buildWRMSTable(m_cfg, m_cfg.viscosity);
 
-  // ---- Outlet calibration -------------------------------------------------
-  //
-  // Three divisions per outlet. The model needs exactly the three lumped
-  // quantities that appear in the balance -- R_a, R_v and C -- so the
-  // calibration produces those and nothing else. The previous scheme built an
-  // explicit microvascular geometry (radii, effective lengths, parallel
-  // multiplicities, unstressed areas, wall stiffnesses, transit times) from
-  // which those three were emergent; that geometry never entered the physics
-  // except through them, and it carried nine constants and a nested solve.
-  //
-  // Per branch, with dP = p_ar(0) - P_RA the resting budget and the Murray
-  // split w_i = r_i^3 / sum_j r_j^3 measured on the mesh:
-  //
-  //   Q_i = Q_tot w_i,      C_i = C_tot w_i,
-  //   R_v,i = f_v dP / Q_i, R_a,i = (1 - f_v) dP / Q_i,
-  //   p_tm,i(0) = P_RA + f_v dP - alpha p_LV(0).
-  //
-  // The epicardial conduit is not a separate element any more: its share of
-  // the head loss is under 1 per cent (its own budget table says so) and it is
-  // absorbed into R_a. The characteristic impedance and the epicardial
-  // compliance are gone with it -- Z_c existed only to damp C_a, and C_a
-  // existed only to keep the lagged coupling stable, which the implicit
-  // assembly of R_a now does unconditionally.
-  //
-  // The run-off time constant tau = C_i R_v,i is a *prediction*: it is what
-  // the diastolic decay of the CSV should be checked against.
+    // ---- Outlet calibration -------------------------------------------------
+    //
+    // Three divisions per outlet. The model needs exactly the three lumped
+    // quantities that appear in the balance -- R_a, R_v and C -- so the
+    // calibration produces those and nothing else. The previous scheme built an
+    // explicit microvascular geometry (radii, effective lengths, parallel
+    // multiplicities, unstressed areas, wall stiffnesses, transit times) from
+    // which those three were emergent; that geometry never entered the physics
+    // except through them, and it carried nine constants and a nested solve.
+    //
+    // Per branch, with dP = p_ar(0) - P_RA the resting budget and the Murray
+    // split w_i = r_i^3 / sum_j r_j^3 measured on the mesh:
+    //
+    //   Q_i = Q_tot w_i,      C_i = C_tot w_i,
+    //   R_v,i = f_v dP / Q_i, R_a,i = (1 - f_v) dP / Q_i,
+    //   p_tm,i(0) = P_RA + f_v dP - alpha p_LV(0).
+    //
+    // The epicardial conduit is not a separate element any more: its share of
+    // the head loss is under 1 per cent (its own budget table says so) and it is
+    // absorbed into R_a. The characteristic impedance and the epicardial
+    // compliance are gone with it -- Z_c existed only to damp C_a, and C_a
+    // existed only to keep the lagged coupling stable, which the implicit
+    // assembly of R_a now does unconditionally.
+    //
+    // The run-off time constant tau = C_i R_v,i is a *prediction*: it is what
+    // the diastolic decay of the CSV should be checked against.
     if (m_cfg.autoCalibrateOutlets)
     {
       const Real PI = std::numbers::pi_v<Real>;
@@ -1331,7 +1331,7 @@ namespace Rodin::Examples::Heart
     const auto divLag = Div(uLag);
     const auto oseenTemam = divLag * Dot(m_u, m_v); // Temam stabilization
 
-  // Backflow damping (keeps BCs stable even in steady solve)
+    // Backflow damping (keeps BCs stable even in steady solve)
     const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
     const auto outletBackflowDamping =
       0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
@@ -1515,18 +1515,18 @@ namespace Rodin::Examples::Heart
       Pow(carreauBase, (nCY - 1.0 - yasuda) / yasuda) * std::pow(lambda, yasuda) *
       Pow(gamma, yasuda - 1.0) * dgamma;
 
-  /*
-   * Convective residual target:
-   *
-   *   a^n = (grad u^n) u^n.
-   */
+    /*
+     * Convective residual target:
+     *
+     *   a^n = (grad u^n) u^n.
+     */
     const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
-  /*
-   * L2 projection of the convective term:
-   *
-   *   int proj_conv_h · v = int u^n · grad u^n  · v.
-   */
+    /*
+     * L2 projection of the convective term:
+     *
+     *   int proj_conv_h · v = int u^n · grad u^n  · v.
+     */
 
     m_l2ConvU = Integral(m_up, m_vp) - Integral(convectionTarget, m_vp);
     m_l2ConvU.assemble();
@@ -1568,11 +1568,11 @@ namespace Rodin::Examples::Heart
         return out;
       });
 
-  /*
-   * L2 projection of the dynamic subscale into m_sub:
-   *
-   *   int sub_h · v = int subUpdate · v.
-   */
+    /*
+     * L2 projection of the dynamic subscale into m_sub:
+     *
+     *   int sub_h · v = int subUpdate · v.
+     */
 
     m_subProjection = Integral(m_sub, m_vp) - Integral(subUpdate, m_vp);
     m_subProjection.assemble();

@@ -44,8 +44,8 @@ namespace Rodin::MMG
       MMG5Exception(const FuncName& funcName)
       {
         const auto& className = boost::typeindex::type_id_with_cvr<MMG5>().pretty_name();
-        *this << "In " << Alert::Identifier::Function(funcName)
-              << " of class " << Alert::Identifier::Class(className) << ": ";
+        *this << "In " << Alert::Identifier::Function(funcName) << " of class "
+              << Alert::Identifier::Class(className) << ": ";
       }
   };
 
@@ -84,7 +84,8 @@ namespace Rodin::MMG
        * @ref destroyMesh.
        * @throws Alert::Exception if the supplied dimensions are unsupported.
        */
-      static MMG5_pMesh createMesh(size_t version, size_t dim, Optional<size_t> spaceDim = {});
+      static MMG5_pMesh createMesh(
+        size_t version, size_t dim, Optional<size_t> spaceDim = {});
 
       /**
        * @brief Copies source mesh to a destination mesh.
@@ -210,7 +211,7 @@ namespace Rodin::MMG
           const size_t n = data.size();
           if (n)
           {
-            dst->np  = n;
+            dst->np = n;
             dst->npi = n;
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
             assert(dst->size == 1);
@@ -219,13 +220,14 @@ namespace Rodin::MMG
             {
               // So 2 * (dst->np + 1) seems to work for most applications
               MMG5_SAFE_CALLOC(dst->m, 2 * (dst->npmax + 1), Real,
-                Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m." << Alert::Raise);
+                Alert::Exception()
+                  << "Failed to allocate memory for MMG5_pSol->m." << Alert::Raise);
             }
             std::copy(data.data(), data.data() + n, dst->m + 1);
           }
           else
           {
-            dst->np  = 0;
+            dst->np = 0;
             dst->npi = 0;
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           }
@@ -241,7 +243,7 @@ namespace Rodin::MMG
           assert(dst->size == data.rows());
           const size_t n = data.cols();
           assert(n > 0);
-          dst->np  = n;
+          dst->np = n;
           dst->npi = n;
           dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           assert(dst->np < dst->npmax);
@@ -252,13 +254,14 @@ namespace Rodin::MMG
               // So (dst->size + 1) * (dst->np + 1) seems to work for most
               // applications
               MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->npmax + 1), Real,
-                Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
+                Alert::Exception()
+                  << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
             }
             std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
           }
           else
           {
-            dst->np  = 0;
+            dst->np = 0;
             dst->npi = 0;
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           }
@@ -409,7 +412,8 @@ namespace Rodin::MMG
       MMG5& setParameters(MMG5_pMesh mesh);
 
     private:
-      Optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad; ///< Optional MMG scalar parameters.
+      Optional<Real> m_hmin, m_hmax, m_hausd,
+        m_hgrad; ///< Optional MMG scalar parameters.
       bool m_ridgeDetection; ///< Whether ridge angle detection is enabled.
   };
 }

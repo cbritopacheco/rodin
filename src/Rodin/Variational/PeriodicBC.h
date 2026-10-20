@@ -206,7 +206,7 @@ namespace Rodin::Variational
           Math::Vector<ScalarType> coeffs(v.size());
           coeffs.setOnes();
           coeffs.array() /= v.size();
-          m_dofs.emplace(k, std::pair{ std::move(dofs), std::move(coeffs) });
+          m_dofs.emplace(k, std::pair{std::move(dofs), std::move(coeffs)});
         }
       }
 

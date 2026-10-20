@@ -43,11 +43,11 @@ namespace Rodin::Assembly
       /// @brief One master DOF contribution in an expansion row.
       struct Entry
       {
-          /// @brief Master DOF index.
-          Index index;
+        /// @brief Master DOF index.
+        Index index;
 
-          /// @brief Coefficient multiplying the master DOF.
-          Scalar coefficient;
+        /// @brief Coefficient multiplying the master DOF.
+        Scalar coefficient;
       };
 
       /// @brief Expansion row for a constrained DOF.
@@ -324,6 +324,7 @@ namespace Rodin::Assembly
             << m_expansions.size() << ")." << Alert::Raise;
         }
       }
+
       /**
        * @brief Adds a coefficient to the matching constraint entry.
        * @param expansion Constraint expansion to update.
@@ -348,6 +349,7 @@ namespace Rodin::Assembly
           it->coefficient += coefficient;
         }
       }
+
       /**
        * @brief Removes constraint entries with zero coefficients.
        * @param expansion Constraint expansion to update.
@@ -359,6 +361,7 @@ namespace Rodin::Assembly
                           [](const Entry& e) { return e.coefficient == Scalar(0); }),
           expansion.end());
       }
+
       /**
        * @brief Combines repeated constraint entries and removes zero coefficients.
        * @param entries Constraint entries to combine or canonicalize.

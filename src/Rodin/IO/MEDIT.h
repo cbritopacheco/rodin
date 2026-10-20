@@ -76,9 +76,7 @@ namespace Rodin::IO::MEDIT
    * @param[in] kw Keyword to convert
    * @returns C-style string representation of the keyword
    */
-  inline
-  constexpr
-  const char* toCharString(Keyword kw)
+  inline constexpr const char* toCharString(Keyword kw)
   {
     switch (kw)
     {
@@ -141,6 +139,7 @@ namespace Rodin::IO::MEDIT
     }
     return nullptr;
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param str Text to compare or convert to a format keyword.
@@ -148,11 +147,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(const std::string& str, Keyword kw)
+  inline bool operator==(const std::string& str, Keyword kw)
   {
     return str == toCharString(kw);
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param str Text to compare or convert to a format keyword.
@@ -160,11 +159,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(const std::string& str, Keyword kw)
+  inline bool operator!=(const std::string& str, Keyword kw)
   {
     return str != toCharString(kw);
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param kw Format keyword to compare or write.
@@ -172,11 +171,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(Keyword kw, const std::string& str)
+  inline bool operator==(Keyword kw, const std::string& str)
   {
     return str == toCharString(kw);
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param kw Format keyword to compare or write.
@@ -184,11 +183,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(Keyword kw, const std::string& str)
+  inline bool operator!=(Keyword kw, const std::string& str)
   {
     return str != toCharString(kw);
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param kw Format keyword to compare or write.
@@ -196,11 +195,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(Keyword kw, const char* str)
+  inline bool operator==(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param kw Format keyword to compare or write.
@@ -208,11 +207,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(Keyword kw, const char* str)
+  inline bool operator!=(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) != 0;
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param str Text to compare or convert to a format keyword.
@@ -220,11 +219,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(const char* str, Keyword kw)
+  inline bool operator==(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param str Text to compare or convert to a format keyword.
@@ -232,11 +231,11 @@ namespace Rodin::IO::MEDIT
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(const char* str, Keyword kw)
+  inline bool operator!=(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) != 0;
   }
+
   /**
    * @brief Writes the format keyword to a stream.
    * @param os Output stream receiving the formatted data.
@@ -244,20 +243,19 @@ namespace Rodin::IO::MEDIT
    * @returns Reference to the output stream after insertion.
    */
 
-  inline
-  std::ostream& operator<<(std::ostream& os, Keyword kw)
+  inline std::ostream& operator<<(std::ostream& os, Keyword kw)
   {
     os << toCharString(kw);
     return os;
   }
+
   /**
    * @brief Converts text to a format keyword.
    * @param str Text to compare or convert to a format keyword.
    * @returns Matching keyword, or an empty optional if the text is not recognized.
    */
 
-  inline
-  Optional<Keyword> toKeyword(const char* str)
+  inline Optional<Keyword> toKeyword(const char* str)
   {
     Keyword res;
     if (str == Keyword::MeshVersionFormatted)
@@ -354,8 +352,7 @@ namespace Rodin::IO::MEDIT
        * @brief Constructs an entity parser for @p n vertices.
        * @param[in] n Number of vertices in the entity
        */
-      constexpr
-      ParseEntity(size_t n)
+      constexpr ParseEntity(size_t n)
         : m_n(n)
       {}
 
@@ -374,7 +371,7 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Array<Index>(m_n), ~Geometry::Attribute(0) };
+        Data res{Array<Index>(m_n), ~Geometry::Attribute(0)};
         const auto getVertex = [&](auto& ctx) {
           assert(i < m_n);
           res.vertices(i++) = _attr(ctx);
@@ -405,8 +402,7 @@ namespace Rodin::IO::MEDIT
         Geometry::Attribute attribute;
       };
 
-      constexpr
-      ParseVertex(size_t sdim)
+      constexpr ParseVertex(size_t sdim)
         : m_sdim(sdim)
       {}
 
@@ -419,14 +415,13 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         size_t i = 0;
-        Data res{ Math::SpatialPoint(m_sdim), ~Geometry::Attribute(0) };
+        Data res{Math::SpatialPoint(m_sdim), ~Geometry::Attribute(0)};
         const auto getX = [&](auto& ctx) {
           assert(i < m_sdim);
           res.vertex(i++) = _attr(ctx);
         };
         const auto getAttribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
-        const bool r = [&]()
-        {
+        const bool r = [&]() {
           if (m_sdim == 0)
           {
             return boost::spirit::x3::phrase_parse(
@@ -439,7 +434,11 @@ namespace Rodin::IO::MEDIT
         if (begin != end)
           return {};
         else if (r)
-          return { res, };
+        {
+          return {
+            res,
+          };
+        }
         else
           return {};
       }
@@ -552,7 +551,8 @@ namespace Rodin::IO::MEDIT
     template <class Iterator>
     Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
-      static constexpr const char* expected = toCharString(Keyword::MeshVersionFormatted);
+      static constexpr const char* expected =
+        toCharString(Keyword::MeshVersionFormatted);
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
       using boost::spirit::x3::uint_;
@@ -570,7 +570,8 @@ namespace Rodin::IO::MEDIT
           unsigned int version;
           const auto getVersion = [&](auto& ctx) { version = _attr(ctx); };
           const auto pversion = uint_[getVersion];
-          const bool rversion = boost::spirit::x3::phrase_parse(begin, end, pversion, space);
+          const bool rversion =
+            boost::spirit::x3::phrase_parse(begin, end, pversion, space);
           if (begin != end)
             return {};
           else if (rversion)
@@ -616,7 +617,8 @@ namespace Rodin::IO::MEDIT
           unsigned int dimension;
           const auto getDimension = [&](auto& ctx) { dimension = _attr(ctx); };
           const auto pdimension = uint_[getDimension];
-          const bool rdimension = boost::spirit::x3::phrase_parse(begin, end, pdimension, space);
+          const bool rdimension =
+            boost::spirit::x3::phrase_parse(begin, end, pdimension, space);
           if (begin != end)
             return {};
           else if (rdimension)
@@ -638,6 +640,7 @@ namespace Rodin::IO::MEDIT
       return {};
     }
   };
+
   /// @endcond
 }
 
@@ -679,12 +682,16 @@ namespace Rodin::IO
 
       /// @brief Reads one logical line while tracking line numbers.
       std::istream& getline(std::istream& is, std::string& line);
+
       /// @brief Skips blank lines and returns the next non-empty line.
       std::string skipEmptyLines(std::istream& is);
+
       /// @brief Reads and validates the MEDIT version section.
       void readVersion(std::istream& is);
+
       /// @brief Reads and validates the MEDIT dimension section.
       void readDimension(std::istream& is);
+
       /// @brief Reads vertex and element entities from the MEDIT stream.
       void readEntities(std::istream& is);
 
@@ -707,7 +714,8 @@ namespace Rodin::IO
       }
 
       /// @brief Returns stream positions for parsed MEDIT sections.
-      const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap() const
+      const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>&
+      getPositionMap() const
       {
         return m_pos;
       }
@@ -761,21 +769,25 @@ namespace Rodin::IO
        * @param printEnd Whether to write the mesh terminator.
        */
       void printMesh(std::ostream& os, bool printEnd);
+
       /**
        * @brief Prints the MEDIT file version section.
        * @param os Output stream.
        */
       void printVersion(std::ostream& os);
+
       /**
        * @brief Prints the MEDIT dimension section.
        * @param os Output stream.
        */
       void printDimension(std::ostream& os);
+
       /**
        * @brief Prints all supported mesh entity sections.
        * @param os Output stream.
        */
       void printEntities(std::ostream& os);
+
       /**
        * @brief Prints the MEDIT end marker.
        * @param os Output stream.
@@ -894,7 +906,8 @@ namespace Rodin::IO
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
-        Optional<unsigned int> dimension = MEDIT::ParseDimension()(line.begin(), line.end());
+        Optional<unsigned int> dimension =
+          MEDIT::ParseDimension()(line.begin(), line.end());
         if (dimension) // Version was on the same line
           m_spaceDimension = *dimension;
         else // Version is not on the same line
@@ -928,8 +941,7 @@ namespace Rodin::IO
         const auto& mesh = fes.getMesh();
 
         auto line = skipEmptyLines(is);
-        Optional<std::string> kw =
-          MEDIT::ParseKeyword()(line.begin(), line.end());
+        Optional<std::string> kw = MEDIT::ParseKeyword()(line.begin(), line.end());
         if (!kw || *kw != MEDIT::Keyword::SolAtVertices)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -938,7 +950,8 @@ namespace Rodin::IO
         }
 
         line = skipEmptyLines(is);
-        Optional<unsigned int> size = MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
+        Optional<unsigned int> size =
+          MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
         if (!size)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -980,14 +993,14 @@ namespace Rodin::IO
 
         const size_t vdim = fes.getVectorDimension();
         if ((solutionType == MEDIT::SolutionType::Real && vdim != 1) ||
-            (solutionType == MEDIT::SolutionType::Vector && vdim == 1))
+          (solutionType == MEDIT::SolutionType::Vector && vdim == 1))
         {
           Alert::MemberFunctionException(*this, __func__)
             << "MEDIT solution type does not match finite element space vector dimension."
             << Alert::Raise;
         }
         if (solutionType != MEDIT::SolutionType::Real &&
-            solutionType != MEDIT::SolutionType::Vector)
+          solutionType != MEDIT::SolutionType::Vector)
         {
           Alert::MemberFunctionException(*this, __func__)
             << "Unsupported MEDIT solution type: " << solutionType << Alert::Raise;
@@ -1028,15 +1041,19 @@ namespace Rodin::IO
   {
     public:
       /// @brief Finite element space type.
-      using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
       /// @brief Coefficient data storage type.
-      using DataType   = Math::Vector<ScalarType>;
+      using DataType = Math::Vector<ScalarType>;
+
       /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+
       /// @brief Parent loader base type.
-      using Parent     = GridFunctionLoaderBase<FESType, DataType>;
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       /**
        * @brief Constructs a MEDIT H1 grid-function loader.
@@ -1187,10 +1204,10 @@ namespace Rodin::IO
 
   /// @brief MEDIT grid-function printer for vector-backed grid functions.
   template <class FES>
-  class GridFunctionPrinter<
-    FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
-    : public GridFunctionPrinterBase<
-        FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  class GridFunctionPrinter<FileFormat::MEDIT, FES,
+    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionPrinterBase<FileFormat::MEDIT, FES,
+        Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
       /// @brief Finite element space type.
@@ -1225,10 +1242,7 @@ namespace Rodin::IO
         const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
         for (auto it = mesh.getVertex(); !it.end(); ++it)
         {
-          const Geometry::Point p(
-              *it,
-              ts.getVertex(0),
-              it->getCoordinates());
+          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
           if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
           {
             const auto value = gf(p);
@@ -1245,6 +1259,7 @@ namespace Rodin::IO
         os << '\n';
       }
   };
+
   /** @brief Reads matrix entries stored as independent MEDIT scalar vertex fields.
    * Higher-order spaces interpolate the vertex field, as required by SolAtVertices.
    */
@@ -1259,6 +1274,7 @@ namespace Rodin::IO
     public:
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief CRTP or finite element base class.
       using Parent = GridFunctionLoaderBase<FES, Math::Vector<ScalarType>>;
       using Parent::Parent;

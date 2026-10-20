@@ -139,8 +139,8 @@ namespace Rodin::QF
             for (Eigen::Index k = 0; k < rightDimension; ++k)
               p[leftDimension + k] = rightPoint[k];
             m_weights.push_back(leftWeight * right.getWeight(j));
+          }
         }
-      }
       }
 
       Geometry::Polytope::Type m_geometry;

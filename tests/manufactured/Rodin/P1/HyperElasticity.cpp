@@ -41,17 +41,17 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
     struct SolveResult
     {
-        Real l2ErrorSquared;
-        bool converged;
-        Real initialResidual;
-        Real finalResidual;
+      Real l2ErrorSquared;
+      bool converged;
+      Real initialResidual;
+      Real finalResidual;
     };
 
     auto makeUnitSquareMesh()
     {
       constexpr Real meshElementSize = 1.0 / 16.0;
       Mesh mesh;
-      mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 17, 17 });
+      mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {17, 17});
       mesh.scale(meshElementSize);
       mesh.getConnectivity().compute(1, 2);
       return mesh;

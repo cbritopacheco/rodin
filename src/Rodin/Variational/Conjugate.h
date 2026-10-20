@@ -30,10 +30,11 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Conjugate<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -109,8 +110,7 @@ namespace Rodin::Variational
        * @returns Conjugate value @f$ \overline{f(p)} @f$
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         const auto v = getOperand().getValue(p);
         return Math::conj(v);
@@ -131,8 +131,8 @@ namespace Rodin::Variational
        * @param geometry Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geometry) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& geometry) const noexcept
       {
         return getOperand().getOrder(geometry);
       }
@@ -168,16 +168,15 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
-      using OperandType =
-        ShapeFunctionBase<NestedDerived, FES, Space>;
+      using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
       /// @brief Range (evaluation value) type.
-      using RangeType =
-        typename FormLanguage::Traits<OperandType>::RangeType;
+      using RangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
       /// @brief Parent class type.
       using Parent =
@@ -187,8 +186,7 @@ namespace Rodin::Variational
        * @brief Constructs conjugate of a shape function.
        * @param[in] op Shape function to conjugate
        */
-      constexpr
-      Conjugate(const OperandType& op)
+      constexpr Conjugate(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_operand(op.copy())
       {}
@@ -197,8 +195,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Conjugate(const Conjugate& other)
+      constexpr Conjugate(const Conjugate& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
@@ -207,8 +204,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Conjugate(Conjugate&& other)
+      constexpr Conjugate(Conjugate&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
@@ -217,8 +213,7 @@ namespace Rodin::Variational
        * @brief Gets the operand shape function.
        * @returns Reference to the operand
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return *m_operand;
       }
@@ -227,8 +222,7 @@ namespace Rodin::Variational
        * @brief Gets the leaf shape function.
        * @returns Reference to the underlying shape function
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -238,8 +232,7 @@ namespace Rodin::Variational
        * @param[in] element Element polytope
        * @returns Number of DOFs on element
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -260,8 +253,7 @@ namespace Rodin::Variational
        * @param[in] p Point for evaluation
        * @returns Reference to this
        */
-      constexpr
-      Conjugate& setIntegrationPoint(const IntegrationPoint& p)
+      constexpr Conjugate& setIntegrationPoint(const IntegrationPoint& p)
       {
         m_operand->setIntegrationPoint(p);
         return *this;
@@ -281,8 +273,7 @@ namespace Rodin::Variational
        * @param[in] local Local DOF index
        * @returns Conjugate of basis function value
        */
-      constexpr
-      decltype(auto) getBasis(size_t local) const
+      constexpr decltype(auto) getBasis(size_t local) const
       {
         decltype(auto) v = this->getOperand().getBasis(local);
         return Math::conj(v);
@@ -302,8 +293,8 @@ namespace Rodin::Variational
        * @param geometry Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geometry) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& geometry) const noexcept
       {
         return getOperand().getOrder(geometry);
       }
@@ -312,6 +303,7 @@ namespace Rodin::Variational
       {
         return new Conjugate(*this);
       }
+
     private:
       std::unique_ptr<OperandType> m_operand;
   };

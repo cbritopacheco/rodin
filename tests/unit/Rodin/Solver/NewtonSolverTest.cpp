@@ -127,8 +127,7 @@ namespace Rodin::Tests::Unit::NewtonSolverTestHelpers
         return *this;
       }
 
-      void solve(Solver::LinearSolverBase<DenseLinearSystem>&) override
-      {}
+      void solve(Solver::LinearSolverBase<DenseLinearSystem>&) override {}
 
       FailingAssembleProblem& assemble() override
       {
@@ -175,9 +174,7 @@ TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
   ScalarNonlinearProblem pb(u);
   DenseLinearSolver linearSolver(pb);
   Solver::NewtonSolver newton(linearSolver);
-  newton.setMaxIterations(30)
-    .setAbsoluteTolerance(1e-12)
-    .setRelativeTolerance(1e-12);
+  newton.setMaxIterations(30).setAbsoluteTolerance(1e-12).setRelativeTolerance(1e-12);
 
   newton.solve(u);
 

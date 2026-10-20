@@ -548,7 +548,7 @@ TEST(Rodin_Variational_Problem, CompoundAssignmentInvalidatesSolveAndRetainsCopi
 /// @brief Verifies construction from trial test for variational problem.
 TEST(Rodin_Variational_Problem, ConstructionFromTrialTest)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   P1 Vh(mesh);
   TrialFunction u(Vh);
   TestFunction v(Vh);
@@ -561,7 +561,7 @@ TEST(Rodin_Variational_Problem, ConstructionFromTrialTest)
 /// @brief Verifies assemble poisson for variational problem by checking form assembly.
 TEST(Rodin_Variational_Problem, AssemblePoisson)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   mesh.getConnectivity().compute(1, 2);
   P1 Vh(mesh);
   TrialFunction u(Vh);
@@ -570,9 +570,8 @@ TEST(Rodin_Variational_Problem, AssemblePoisson)
   RealFunction f(1.0);
 
   Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, RealFunction(0.0));
+  problem =
+    Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, RealFunction(0.0));
   problem.assemble();
 
   // Assemble succeeds
@@ -582,7 +581,7 @@ TEST(Rodin_Variational_Problem, AssemblePoisson)
 /// @brief Verifies solve poisson for variational problem by checking true predicates, solver behavior.
 TEST(Rodin_Variational_Problem, SolvePoisson)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   mesh.getConnectivity().compute(1, 2);
   P1 Vh(mesh);
   TrialFunction u(Vh);
@@ -591,9 +590,8 @@ TEST(Rodin_Variational_Problem, SolvePoisson)
   RealFunction f(1.0);
 
   Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, RealFunction(0.0));
+  problem =
+    Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, RealFunction(0.0));
 
   Solver::CG(problem).solve();
 
@@ -614,7 +612,7 @@ TEST(Rodin_Variational_Problem, SolvePoisson)
 /// @brief Verifies solution size for variational problem by checking exact expected values, solver behavior.
 TEST(Rodin_Variational_Problem, SolutionSize)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   mesh.getConnectivity().compute(1, 2);
   P1 Vh(mesh);
   TrialFunction u(Vh);
@@ -623,9 +621,8 @@ TEST(Rodin_Variational_Problem, SolutionSize)
   RealFunction f(1.0);
 
   Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, RealFunction(0.0));
+  problem =
+    Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, RealFunction(0.0));
 
   Solver::CG(problem).solve();
 

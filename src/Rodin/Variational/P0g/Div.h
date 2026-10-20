@@ -33,33 +33,39 @@ namespace Rodin::FormLanguage
    * space, the scalar type and the operand type.
    */
   template <class Scalar, class Data, class Mesh>
-  struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
+  struct Traits<Variational::Div<
+    Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
+
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   /**
    * @brief Type traits for @c Div over a shape function: exposes the finite element
    * space, the shape function space, the scalar type and the operand type.
    */
-  template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>>
+  template <class NestedDerived, class Scalar, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Div<Variational::ShapeFunction<NestedDerived,
+    Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -74,18 +80,19 @@ namespace Rodin::Variational
    */
   template <class Scalar, class Data, class Mesh>
   class Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>> final
-    : public DivBase<
-        GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>,
+    : public DivBase<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>,
         Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
+
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
@@ -150,15 +157,16 @@ namespace Rodin::Variational
    * @brief Divergence of a P0g vector ShapeFunction (identically zero).
    */
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>> final
+  class Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>
+    final
     : public ShapeFunctionBase<
         Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>,
-        P0g<Math::SpatialVector<Scalar>, Mesh>,
-        Space>
+        P0g<Math::SpatialVector<Scalar>, Mesh>, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -208,8 +216,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -219,8 +226,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -229,8 +235,7 @@ namespace Rodin::Variational
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
@@ -268,10 +273,9 @@ namespace Rodin::Variational
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      constexpr
-      ScalarType getBasis(size_t local) const
+      constexpr ScalarType getBasis(size_t local) const
       {
-        (void) local;
+        (void)local;
         assert(m_ip);
         return m_zero;
       }

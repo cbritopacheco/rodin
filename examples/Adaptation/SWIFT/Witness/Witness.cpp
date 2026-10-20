@@ -50,23 +50,23 @@ namespace Examples
 
       struct Options
       {
-          size_t subdivisions = 2, iterations = 100, resolution = 12, seed = 13,
-                 maxEvaluations = 0;
-          Real stepTolerance = 1e-6;
-          std::string geometry = "triangle", output, evaluate;
+        size_t subdivisions = 2, iterations = 100, resolution = 12, seed = 13,
+               maxEvaluations = 0;
+        Real stepTolerance = 1e-6;
+        std::string geometry = "triangle", output, evaluate;
       };
 
       struct Plane
       {
-          Point normal;
-          Real bound;
+        Point normal;
+        Real bound;
       };
 
       struct Coverage
       {
-          Real radius = std::numeric_limits<Real>::infinity();
-          std::vector<Points> cells;
-          Points holes;
+        Real radius = std::numeric_limits<Real>::infinity();
+        std::vector<Points> cells;
+        Points holes;
       };
 
       static const std::vector<std::pair<std::string, Type>>& geometries()

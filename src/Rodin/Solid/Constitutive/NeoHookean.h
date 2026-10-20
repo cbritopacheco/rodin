@@ -76,6 +76,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       NeoHookean(const NeoHookean& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -86,13 +87,19 @@ namespace Rodin::Solid
        * @brief Gets the first Lamé parameter.
        * @returns The first Lamé parameter.
        */
-      Real getLameFirstParameter() const { return m_lambda; }
+      Real getLameFirstParameter() const
+      {
+        return m_lambda;
+      }
 
       /**
        * @brief Gets the shear modulus.
        * @returns The shear modulus.
        */
-      Real getShearModulus() const { return m_mu; }
+      Real getShearModulus() const
+      {
+        return m_mu;
+      }
 
       /**
        * @brief Populates the invariant cache at a constitutive point.
@@ -117,9 +124,8 @@ namespace Rodin::Solid
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const size_t d = cp.getKinematicState().getDimension();
-        return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d))
-             - m_mu * cache.logJ
-             + 0.5 * m_lambda * cache.logJ * cache.logJ;
+        return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d)) - m_mu * cache.logJ +
+          0.5 * m_lambda * cache.logJ * cache.logJ;
       }
 
       /**
@@ -128,10 +134,8 @@ namespace Rodin::Solid
        * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        */
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
@@ -148,11 +152,8 @@ namespace Rodin::Solid
        * @param cp Constitutive evaluation point.
        * @param dF Increment of the deformation gradient.
        */
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
+        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
         const auto& state = cp.getKinematicState();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
@@ -162,9 +163,8 @@ namespace Rodin::Solid
 
         // dP = mu dF + lambda (F^{-T} : dF) F^{-T}
         //    + (mu - lambda ln J) F^{-T} dF^T F^{-T}
-        dP = m_mu * dF
-           + m_lambda * FinvT_dF * FinvT
-           + (m_mu - m_lambda * cache.logJ) * FinvT * dF.transpose() * FinvT;
+        dP = m_mu * dF + m_lambda * FinvT_dF * FinvT +
+          (m_mu - m_lambda * cache.logJ) * FinvT * dF.transpose() * FinvT;
       }
 
     private:

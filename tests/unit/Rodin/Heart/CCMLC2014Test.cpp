@@ -39,7 +39,7 @@ namespace
     cardiacInput.Cd = 1.0e-8;
 
     cardiacInput.Kat = 8.0e-7;
-    cardiacInput.Kp  = 5.0e-10;
+    cardiacInput.Kp = 5.0e-10;
     cardiacInput.Kar = 1.3e-5;
 
     cardiacInput.cavityCapacity = 5.0e-12;
@@ -315,28 +315,24 @@ namespace
    * @returns Relative matrix error
    * @f$ \|J_{analytic} - J_{fd}\| / \max(\|J_{fd}\|, 10^{-14}) @f$.
    */
-  Real computeDynamicJacobianRelativeError(
-      const Model::Input& cardiacInput,
-      const Model::DenseVector& candidateState,
-      const Model::State& currentState,
-      const Model::State& previousState,
-      Real dt,
-      Real relativePerturbation)
+  Real computeDynamicJacobianRelativeError(const Model::Input& cardiacInput,
+    const Model::DenseVector& candidateState, const Model::State& currentState,
+    const Model::State& previousState, Real dt, Real relativePerturbation)
   {
     using InputType = Model::Input;
-    Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
-        dynamicSystem(cardiacInput);
+    Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType> dynamicSystem(
+      cardiacInput);
     const Real nextTime = currentState.t + dt;
 
     Model::EvalData evaluationData;
     dynamicSystem.buildEvalData(
-        candidateState, currentState, previousState, nextTime, dt, evaluationData);
+      candidateState, currentState, previousState, nextTime, dt, evaluationData);
 
     Model::DenseMatrix analyticalJacobian;
     dynamicSystem.evaluateJacobian(evaluationData, analyticalJacobian, dt);
 
     Model::DenseMatrix finiteDifferenceJacobian(
-        CCMLC2014Vars::NumberOfVariables, CCMLC2014Vars::NumberOfVariables);
+      CCMLC2014Vars::NumberOfVariables, CCMLC2014Vars::NumberOfVariables);
     finiteDifferenceJacobian.setZero();
 
     for (Index j = 0; j < CCMLC2014Vars::NumberOfVariables; ++j)
@@ -351,9 +347,9 @@ namespace
       Model::EvalData evaluationDataPlus;
       Model::EvalData evaluationDataMinus;
       dynamicSystem.buildEvalData(
-          statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
+        statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
       dynamicSystem.buildEvalData(
-          stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
+        stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
 
       Model::DenseVector residualPlus;
       Model::DenseVector residualMinus;
@@ -363,8 +359,8 @@ namespace
         (residualPlus - residualMinus) / (2.0 * perturbation);
     }
 
-    return (analyticalJacobian - finiteDifferenceJacobian).norm()
-      / std::max<Real>(finiteDifferenceJacobian.norm(), 1e-14);
+    return (analyticalJacobian - finiteDifferenceJacobian).norm() /
+      std::max<Real>(finiteDifferenceJacobian.norm(), 1e-14);
   }
 }
 
@@ -443,10 +439,10 @@ TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 
   Model model(cardiacInput);
   model.setMaxIterations(200)
-       .setAbsoluteTolerance(1e-8)
-       .setRelativeTolerance(1e-8)
-       .setStepTolerance(1e-10)
-       .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   Model::State initial;
   initial.t = 0.0;
@@ -652,7 +648,7 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 
   const Real dt = 1e-3;
   const Real relativeError = computeDynamicJacobianRelativeError(
-      cardiacInput, candidateState, currentState, previousState, dt, 1e-7);
+    cardiacInput, candidateState, currentState, previousState, dt, 1e-7);
   EXPECT_LT(relativeError, 1e-3);
 }
 
@@ -850,13 +846,8 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossPerturbationScal
   const std::array<Real, 3> perturbations{{1e-6, 1e-7, 1e-8}};
   for (const Real relativePerturbation : perturbations)
   {
-    const Real relativeError = computeDynamicJacobianRelativeError(
-        cardiacInput,
-        candidateState,
-        currentState,
-        previousState,
-        dt,
-        relativePerturbation);
+    const Real relativeError = computeDynamicJacobianRelativeError(cardiacInput,
+      candidateState, currentState, previousState, dt, relativePerturbation);
     EXPECT_LT(relativeError, 2e-3);
   }
 }
@@ -874,12 +865,7 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossDataScales)
     Model::State previousState = makePreviousState(currentState, pressureScale);
 
     const Real relativeError = computeDynamicJacobianRelativeError(
-        cardiacInput,
-        candidateState,
-        currentState,
-        previousState,
-        1e-3,
-        1e-7);
+      cardiacInput, candidateState, currentState, previousState, 1e-3, 1e-7);
     EXPECT_LT(relativeError, 3e-3);
   }
 }

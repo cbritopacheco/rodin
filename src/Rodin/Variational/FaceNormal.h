@@ -146,10 +146,13 @@ namespace Rodin::Variational
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
+
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
       /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
 
@@ -188,8 +191,7 @@ namespace Rodin::Variational
        * @brief Gets the spatial vector dimension.
        * @returns The spatial vector dimension.
        */
-      constexpr
-      size_t getDimension() const
+      constexpr size_t getDimension() const
       {
         return m_sdim;
       }
@@ -221,19 +223,15 @@ namespace Rodin::Variational
         {
           if (jacobian.cols() == 2)
           {
-            res[0] =
-              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-            res[1] =
-              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-            res[2] =
-              jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+            res[0] = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+            res[1] = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+            res[2] = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
           else if (jacobian.cols() != 1)
           {
             Alert::MemberFunctionException(*this, __func__)
-              << "Cannot compute FaceNormal from a 3D Jacobian with "
-              << jacobian.cols() << " columns on polytope (" << d << ", " << i << ")."
-              << Alert::Raise;
+              << "Cannot compute FaceNormal from a 3D Jacobian with " << jacobian.cols()
+              << " columns on polytope (" << d << ", " << i << ")." << Alert::Raise;
             assert(false);
             res.setConstant(Math::nan<ScalarType>());
             return res;
@@ -242,21 +240,18 @@ namespace Rodin::Variational
         else
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Cannot compute FaceNormal from a Jacobian with "
-            << jacobian.rows() << " rows on polytope (" << d << ", " << i << ")."
-            << Alert::Raise;
+            << "Cannot compute FaceNormal from a Jacobian with " << jacobian.rows()
+            << " rows on polytope (" << d << ", " << i << ")." << Alert::Raise;
           assert(false);
           res.setConstant(Math::nan<ScalarType>());
           return res;
         }
 
-        const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
+        const auto& incidence = mesh.getConnectivity().getIncidence({d, d + 1}, i);
         assert(incidence.size() == 1 || incidence.size() == 2);
 
-        const auto orientFromCell =
-          [&](const Geometry::Polytope& cellPoly)
-          {
-            const auto xf = p.getCoordinates();
+        const auto orientFromCell = [&](const Geometry::Polytope& cellPoly) {
+          const auto xf = p.getCoordinates();
 
           if (jacobian.rows() == 3 && jacobian.cols() == 1)
           {
@@ -274,27 +269,26 @@ namespace Rodin::Variational
             res = first.cross(second).cross(tangent);
           }
 
-            const auto rc =
-              Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
-            Geometry::Point pc(cellPoly, rc);
-            const auto xc = pc.getCoordinates();
+          const auto rc =
+            Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+          Geometry::Point pc(cellPoly, rc);
+          const auto xc = pc.getCoordinates();
 
-            if (res.dot(xc - xf) > 0)
-              res *= ScalarType(-1);
+          if (res.dot(xc - xf) > 0)
+            res *= ScalarType(-1);
 
-            const auto norm = res.norm();
-            if (!std::isfinite(norm) || !(norm > ScalarType(0)))
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Cannot normalize FaceNormal on polytope (" << d << ", " << i
-                << "). Computed norm is " << norm << "."
-                << Alert::Raise;
-              assert(false);
-              res.setConstant(Math::nan<ScalarType>());
-              return;
-            }
-            res /= norm;
-          };
+          const auto norm = res.norm();
+          if (!std::isfinite(norm) || !(norm > ScalarType(0)))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Cannot normalize FaceNormal on polytope (" << d << ", " << i
+              << "). Computed norm is " << norm << "." << Alert::Raise;
+            assert(false);
+            res.setConstant(Math::nan<ScalarType>());
+            return;
+          }
+          res /= norm;
+        };
 
         if (incidence.size() == 1)
         {
@@ -334,7 +328,8 @@ namespace Rodin::Variational
           if (!matched)
           {
             UndeterminedTraceDomainException(
-              *this, __func__, { d, i }, traceDomain.begin(), traceDomain.end()).raise();
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+              .raise();
           }
         }
 

@@ -39,7 +39,7 @@ namespace Rodin::Solid
    * law.getCache(cache, state);
    *
    * FirstPiolaKirchhoffStress<NeoHookean> pk1(law);
-    * Math::SpatialMatrix<Real> P;
+   * Math::SpatialMatrix<Real> P;
    * pk1.getFirstPiolaKirchhoffStress(P, cache, state);
    * @endcode
    *
@@ -51,6 +51,7 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Cache type used by the constitutive law.
       using CacheType = typename LawType::Cache;
 
@@ -67,6 +68,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       FirstPiolaKirchhoffStress(const FirstPiolaKirchhoffStress& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -79,10 +81,8 @@ namespace Rodin::Solid
        * @param[in] cache Constitutive invariant cache populated by getCache().
        * @param[in] cp Constitutive point
        */
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const CacheType& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
+        const CacheType& cache, const ConstitutivePoint& cp) const
       {
         m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
       }
@@ -91,7 +91,10 @@ namespace Rodin::Solid
        * @brief Gets the constitutive law.
        * @returns The constitutive law.
        */
-      const LawType& getLaw() const { return m_law; }
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       const LawType& m_law;

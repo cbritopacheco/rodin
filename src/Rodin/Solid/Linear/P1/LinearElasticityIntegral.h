@@ -81,6 +81,7 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
+
       /// @brief Test finite element space type.
       using TestFESType = P1<Range, Mesh>;
 

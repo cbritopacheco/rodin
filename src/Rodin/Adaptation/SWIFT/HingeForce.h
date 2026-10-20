@@ -19,6 +19,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar value type.
       using ScalarType = typename TestFunction::ScalarType;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 

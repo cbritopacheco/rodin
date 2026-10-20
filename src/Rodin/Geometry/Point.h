@@ -94,16 +94,14 @@ namespace Rodin::Geometry
        * @brief Constructs a point on a polytope.
        * @param[in] polytope The polytope containing this point
        */
-      explicit
-      PointBase(const Polytope& polytope);
+      explicit PointBase(const Polytope& polytope);
 
       /**
        * @brief Constructs a point with physical coordinates.
        * @param[in] polytope The polytope containing this point
        * @param[in] pc Physical coordinates
        */
-      explicit
-      PointBase(const Polytope& polytope, const Math::SpatialPoint& pc);
+      explicit PointBase(const Polytope& polytope, const Math::SpatialPoint& pc);
 
       /**
        * @brief Constructs a point with its geometric Jacobian already evaluated.
@@ -260,7 +258,8 @@ namespace Rodin::Geometry
        * @param[in] coords Type of coordinates to retrieve
        * @returns Reference to coordinate vector
        */
-      const Math::SpatialVector<Real>& getCoordinates(Coordinates coords = Coordinates::Physical) const;
+      const Math::SpatialVector<Real>& getCoordinates(
+        Coordinates coords = Coordinates::Physical) const;
 
       /**
        * @brief Computes the Jacobian matrix at this point.
@@ -352,8 +351,8 @@ namespace Rodin::Geometry
       mutable PhysicalCoordinateState m_pc;
       mutable Optional<Math::SpatialMatrix<Real>> m_jacobian;
       mutable Optional<Math::SpatialMatrix<Real>> m_jacobianInverse;
-      mutable Optional<Real>                      m_jacobianDeterminant;
-      mutable Optional<Real>                      m_distortion;
+      mutable Optional<Real> m_jacobianDeterminant;
+      mutable Optional<Real> m_distortion;
   };
 
   /**
@@ -397,8 +396,7 @@ namespace Rodin::Geometry
        * @param[in] polytope Polytope containing the point
        * @param[in] rc Reference coordinates
        */
-      explicit
-      Point(const Polytope& polytope, const Math::SpatialPoint& rc);
+      explicit Point(const Polytope& polytope, const Math::SpatialPoint& rc);
 
       /**
        * @brief Constructs with both reference and physical coordinates.
@@ -406,8 +404,8 @@ namespace Rodin::Geometry
        * @param[in] rc Reference coordinates
        * @param[in] pc Physical coordinates
        */
-      explicit
-      Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc);
+      explicit Point(const Polytope& polytope, const Math::SpatialPoint& rc,
+        const Math::SpatialPoint& pc);
 
       /**
        * @brief Constructs a reference point with a precomputed geometric Jacobian.
@@ -470,8 +468,7 @@ namespace Rodin::Geometry
    * @returns Result vector
    */
   template <class EigenDerived>
-  auto
-  operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
+  auto operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
   {
     return p.vector() + q;
   }
@@ -484,8 +481,7 @@ namespace Rodin::Geometry
    * @returns Result vector
    */
   template <class EigenDerived>
-  auto
-  operator+(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
+  auto operator+(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
   {
     return p + q.vector();
   }
@@ -498,8 +494,7 @@ namespace Rodin::Geometry
    * @returns Result vector
    */
   template <class EigenDerived>
-  auto
-  operator-(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
+  auto operator-(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
   {
     return p.vector() - q;
   }
@@ -512,8 +507,7 @@ namespace Rodin::Geometry
    * @returns Result vector
    */
   template <class EigenDerived>
-  auto
-  operator-(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
+  auto operator-(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
   {
     return p - q.vector();
   }
@@ -524,9 +518,7 @@ namespace Rodin::Geometry
    * @param[in] q Second point
    * @returns Result vector (sum of physical coordinates)
    */
-  inline
-  auto
-  operator+(const Geometry::Point& p, const Geometry::Point& q)
+  inline auto operator+(const Geometry::Point& p, const Geometry::Point& q)
   {
     return p.vector() + q.vector();
   }
@@ -537,9 +529,7 @@ namespace Rodin::Geometry
    * @param[in] q Second point
    * @returns Result vector (difference of physical coordinates)
    */
-  inline
-  auto
-  operator-(const Geometry::Point& p, const Geometry::Point& q)
+  inline auto operator-(const Geometry::Point& p, const Geometry::Point& q)
   {
     return p.vector() - q.vector();
   }
@@ -550,9 +540,7 @@ namespace Rodin::Geometry
    * @param[in] p Point
    * @returns Scaled vector
    */
-  inline
-  auto
-  operator*(Real s, const Geometry::Point& p)
+  inline auto operator*(Real s, const Geometry::Point& p)
   {
     return s * p.vector();
   }
@@ -563,9 +551,7 @@ namespace Rodin::Geometry
    * @param[in] s Scalar value
    * @returns Scaled vector
    */
-  inline
-  auto
-  operator*(const Geometry::Point& p, Real s)
+  inline auto operator*(const Geometry::Point& p, Real s)
   {
     return p.vector() * s;
   }
@@ -577,8 +563,7 @@ namespace Rodin::Geometry
    * @returns Sum of the operands.
    */
   template <class Scalar>
-  auto operator+(
-    const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
+  auto operator+(const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
   {
     return v + p.vector();
   }
@@ -590,8 +575,7 @@ namespace Rodin::Geometry
    * @returns Sum of the operands.
    */
   template <class Scalar>
-  auto operator+(
-    const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
+  auto operator+(const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
   {
     return p.vector() + v;
   }
@@ -603,8 +587,7 @@ namespace Rodin::Geometry
    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class Scalar>
-  auto operator-(
-    const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
+  auto operator-(const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
   {
     return v - p.vector();
   }
@@ -616,8 +599,7 @@ namespace Rodin::Geometry
    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class Scalar>
-  auto operator-(
-    const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
+  auto operator-(const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
   {
     return p.vector() - v;
   }

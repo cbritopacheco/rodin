@@ -230,10 +230,13 @@ namespace Rodin::Math::RootFinding
     private:
       /// @brief Absolute bracket-width tolerance in root-coordinate units.
       static constexpr Scalar DefaultAbsoluteIntervalTolerance = 1e-12;
+
       /// @brief Dimensionless bracket-width tolerance relative to the root-coordinate scale.
       static constexpr Scalar DefaultRelativeIntervalTolerance = 1e-9;
+
       /// @brief Absolute root residual tolerance in function-value units.
       static constexpr Scalar DefaultAbsoluteFunctionTolerance = 1e-12;
+
       /// @brief Root-solve work budget; does not guarantee convergence.
       static constexpr std::size_t DefaultMaxIterations = 25;
 

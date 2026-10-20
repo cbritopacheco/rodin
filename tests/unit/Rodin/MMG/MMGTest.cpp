@@ -633,7 +633,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     EXPECT_FALSE(mesh.isEmpty());
     EXPECT_EQ(mesh.getVertexCount(), n * n);
     EXPECT_EQ(mesh.getCellCount(), 2 * (n - 1) * (n - 1));
@@ -646,7 +646,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     mesh.setCorner(0);
     mesh.setCorner(3);
@@ -665,7 +665,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     size_t ridgeCount = 0;
@@ -683,7 +683,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, SetRequiredVertex)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     mesh.setRequiredVertex(0);
     mesh.setRequiredVertex(5);
@@ -697,7 +697,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, SetRequiredEdge)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     mesh.setRequiredEdge(0);
@@ -744,7 +744,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, CopyConstruction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
     mesh.setCorner(3);
     mesh.setRidge(0);
@@ -772,7 +772,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, MoveConstruction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
     mesh.setRidge(0);
     mesh.setRequiredVertex(5);
@@ -798,7 +798,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, MoveAssignment)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
     mesh.setRidge(0);
 
@@ -817,7 +817,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, MoveFromParent)
   {
     Mesh<Context::Local> parentMesh;
-    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     size_t vertexCount = parentMesh.getVertexCount();
     size_t cellCount = parentMesh.getCellCount();
 
@@ -836,21 +836,20 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies triangle mesh with MMG metadata for MMG mesh builder by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_Builder, TriangleMeshWithMMGMetadata)
   {
-    MMG::Mesh mesh =
-      MMG::Mesh::Builder()
-      .initialize(2)
-      .nodes(4)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .vertex({1, 1})
-      .polytope(Polytope::Type::Triangle, {0, 1, 2})
-      .polytope(Polytope::Type::Triangle, {1, 3, 2})
-      .corner(0)
-      .corner(1)
-      .corner(2)
-      .corner(3)
-      .finalize();
+    MMG::Mesh mesh = MMG::Mesh::Builder()
+                       .initialize(2)
+                       .nodes(4)
+                       .vertex({0, 0})
+                       .vertex({1, 0})
+                       .vertex({0, 1})
+                       .vertex({1, 1})
+                       .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                       .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                       .corner(0)
+                       .corner(1)
+                       .corner(2)
+                       .corner(3)
+                       .finalize();
 
     EXPECT_EQ(mesh.getVertexCount(), 4);
     EXPECT_EQ(mesh.getCellCount(), 2);
@@ -975,7 +974,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     // Set some MMG metadata
@@ -1117,7 +1116,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Save without any MMG metadata
     const std::string filename = "/tmp/rodin_mmg_test_empty_metadata.mesh";
@@ -1147,7 +1146,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     size_t origVertexCount = mesh.getVertexCount();
     size_t origCellCount = mesh.getCellCount();
@@ -1169,7 +1168,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     mesh.setCorner(0);
@@ -1347,7 +1346,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     MMG::Optimizer optimizer;
     optimizer.setHMax(0.5);
@@ -1365,14 +1364,11 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Fluent API method chaining
-    MMG::Optimizer()
-      .setHMax(0.5)
-      .setAngleDetection(true)
-      .setGradation(1.3)
-      .optimize(mesh);
+    MMG::Optimizer().setHMax(0.5).setAngleDetection(true).setGradation(1.3).optimize(
+      mesh);
 
     EXPECT_FALSE(mesh.isEmpty());
     EXPECT_GT(mesh.getVertexCount(), 0);
@@ -1384,7 +1380,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     // Mark corners
@@ -1502,7 +1498,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Create a constant size map
     P1 fes(mesh);
@@ -1525,13 +1521,12 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     // Create a variable size map: smaller near center, larger near boundary
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
-    sizeMap = [&](const Geometry::Point& p)
-    {
+    sizeMap = [&](const Geometry::Point& p) {
       Real cx = static_cast<Real>(n - 1) / 2.0;
       Real cy = cx;
       Real dx = p.x() - cx;
@@ -1555,7 +1550,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
@@ -1589,27 +1584,25 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     // Set all cells to interior attribute
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, interior);
 
     // Create level-set function: circle of given radius centered at (0.5, 0.5)
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
     };
 
-    MMG::Mesh result =
-      MMG::LevelSetDiscretizer()
-        .split(interior, { interior, exterior })
-        .setBoundaryReference(boundary)
-        .setHMax(0.1)
-        .discretize(ls);
+    MMG::Mesh result = MMG::LevelSetDiscretizer()
+                         .split(interior, {interior, exterior})
+                         .setBoundaryReference(boundary)
+                         .setHMax(0.1)
+                         .discretize(ls);
 
     // Result should be a valid non-empty mesh
     EXPECT_FALSE(result.isEmpty());
@@ -1626,29 +1619,27 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, interior);
 
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
     // Verify fluent API chaining compiles and works
-    MMG::Mesh result =
-      MMG::LevelSetDiscretizer()
-        .split(interior, { interior, exterior })
-        .setBoundaryReference(10)
-        .setHMin(0.01)
-        .setHMax(0.1)
-        .setGradation(1.3)
-        .setAngleDetection(true)
-        .discretize(ls);
+    MMG::Mesh result = MMG::LevelSetDiscretizer()
+                         .split(interior, {interior, exterior})
+                         .setBoundaryReference(10)
+                         .setHMin(0.01)
+                         .setHMax(0.1)
+                         .setGradation(1.3)
+                         .setAngleDetection(true)
+                         .discretize(ls);
 
     EXPECT_FALSE(result.isEmpty());
   }
@@ -1661,22 +1652,21 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     // Set half the cells to mat1, half to mat2
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, mat1);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, mat1);
 
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
     MMG::LevelSetDiscretizer discretizer;
-    discretizer.split(mat1, { mat1, exterior });
+    discretizer.split(mat1, {mat1, exterior});
     discretizer.setBoundaryReference(10);
     discretizer.setHMax(0.1);
 
@@ -1697,27 +1687,25 @@ namespace Rodin::Tests::Unit
 
     const size_t n = 16;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(1.0 / (n - 1));
 
     for (auto it = mesh.getCell(); it; ++it)
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, interior);
 
     P1 fes(mesh);
     MMG::RealGridFunction ls(fes);
-    ls = [](const Geometry::Point& p)
-    {
+    ls = [](const Geometry::Point& p) {
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
     // Discretize at a non-zero level-set value
-    MMG::Mesh result =
-      MMG::LevelSetDiscretizer()
-        .split(interior, { interior, exterior })
-        .setBoundaryReference(10)
-        .setLevelSet(0.0)
-        .setHMax(0.1)
-        .discretize(ls);
+    MMG::Mesh result = MMG::LevelSetDiscretizer()
+                         .split(interior, {interior, exterior})
+                         .setBoundaryReference(10)
+                         .setLevelSet(0.0)
+                         .setHMax(0.1)
+                         .discretize(ls);
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getVertexCount(), 0);
@@ -2630,7 +2618,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Common, SplitMapConstruction)
   {
     MMG::SplitMap splitMap;
-    splitMap[1] = MMG::Split{ 2, 3 };
+    splitMap[1] = MMG::Split{2, 3};
     splitMap[4] = MMG::NoSplit;
 
     EXPECT_EQ(splitMap.size(), 2);
@@ -2650,7 +2638,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarGridFunctionConstruction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
@@ -2664,13 +2652,12 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorGridFunctionConstruction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     P1 fes(mesh, 2);
     MMG::VectorGridFunction gf(fes);
-    gf = [](const Geometry::Point& p)
-    {
-      return Math::SpatialVector<Real>{{ p.x(), p.y() }};
+    gf = [](const Geometry::Point& p) {
+      return Math::SpatialVector<Real>{{p.x(), p.y()}};
     };
 
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
@@ -2748,7 +2735,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.scale(0.5);
 
     EXPECT_EQ(mesh.getVertexCount(), n * n);
@@ -2761,12 +2748,12 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     static constexpr Attribute label = 42;
     for (auto it = mesh.getCell(); it; ++it)
     {
-      mesh.setAttribute({ it->getDimension(), it->getIndex() }, label);
+      mesh.setAttribute({it->getDimension(), it->getIndex()}, label);
     }
 
     // Verify attributes are set correctly
@@ -2782,7 +2769,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, VertexCoordinates)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
 
     // Vertices on a 3x3 grid at integer coordinates
     const size_t vertexCount = mesh.getVertexCount();
@@ -2801,14 +2788,14 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, ScaleAffectsCoordinates)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.scale(0.5);
 
     // After scaling by 0.5, max coordinates should be halved
     for (Index i = 0; i < static_cast<Index>(mesh.getVertexCount()); i++)
     {
       auto coords = mesh.getVertexCoordinates(i);
-      EXPECT_LE(coords(0), 1.1);  // Allow small FP tolerance
+      EXPECT_LE(coords(0), 1.1); // Allow small FP tolerance
       EXPECT_LE(coords(1), 1.1);
     }
   }
@@ -2818,7 +2805,7 @@ namespace Rodin::Tests::Unit
   {
     const size_t n = 4;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     // After computing face→cell incidence, boundary detection works
@@ -2836,7 +2823,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, IdempotentSetCorner)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     mesh.setCorner(0);
     mesh.setCorner(0);
@@ -2850,7 +2837,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, IdempotentSetRidge)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     mesh.setRidge(0);
     mesh.setRidge(0);
@@ -2862,7 +2849,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, MoveAssignmentClearsSource)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
     mesh.setCorner(3);
     mesh.setRidge(1);
@@ -2888,7 +2875,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, CopyPreservesMetadataAfterMutation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
 
     MMG::Mesh copy(mesh);
@@ -2907,7 +2894,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, ParentMoveAssignmentClearsMMGMetadata)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.setCorner(0);
     mesh.setRidge(1);
     mesh.setRequiredTriangle(0);
@@ -2915,7 +2902,7 @@ namespace Rodin::Tests::Unit
 
     // Assign from parent type (which has no MMG metadata)
     Mesh<Context::Local> parentMesh;
-    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh = std::move(parentMesh);
 
     // After parent assignment, topology changes and MMG metadata is cleared.
@@ -2933,7 +2920,7 @@ namespace Rodin::Tests::Unit
   {
     // A 2D uniform grid on triangles is not a surface mesh
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     EXPECT_FALSE(mesh.isSurface());
   }
 
@@ -2941,7 +2928,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, GetArea)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.getConnectivity().compute(1, 2);
 
     // The area of the default 2D grid
@@ -2957,7 +2944,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarZeroInitialization)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2973,7 +2960,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarProjectFromLambda)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -2993,7 +2980,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarProjectConstant)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3009,7 +2996,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarDataAccess)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3027,7 +3014,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarOperatorBracket)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3048,7 +3035,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3065,7 +3052,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3082,7 +3069,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3099,7 +3086,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivScalar)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3116,7 +3103,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -3134,7 +3121,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -3152,7 +3139,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -3170,7 +3157,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivGridFunction)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
 
@@ -3188,7 +3175,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarMinMax)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3205,7 +3192,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarArgMinArgMax)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3222,7 +3209,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarCopyConstructor)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes);
     gf1 = RealFunction(5.0);
@@ -3245,7 +3232,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarMoveConstructor)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes);
     gf1 = RealFunction(7.0);
@@ -3263,7 +3250,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarCopyAssignment)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf1(fes), gf2(fes);
     gf1 = RealFunction(3.0);
@@ -3280,7 +3267,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarFESAssociation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3294,7 +3281,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarPointEvaluation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3304,7 +3291,7 @@ namespace Rodin::Tests::Unit
     // Get the first cell and evaluate at a reference point inside it
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+    const Math::Vector<Real> rc{{0.25, 0.25}};
     Geometry::Point p(polytope, rc);
 
     Real value = gf.getValue(p);
@@ -3315,7 +3302,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarLinearFunctionExactInterpolation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 
@@ -3329,7 +3316,7 @@ namespace Rodin::Tests::Unit
       const auto& polytope = *it;
       const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), cellIdx);
 
-      const Math::Vector<Real> rc{{ 1.0 / 3.0, 1.0 / 3.0 }};
+      const Math::Vector<Real> rc{{1.0 / 3.0, 1.0 / 3.0}};
       Math::SpatialPoint pc;
       trans.transform(pc, rc);
       Geometry::Point p(polytope, rc);
@@ -3344,13 +3331,12 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorProjectFromLambda)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh, 2);
     MMG::VectorGridFunction gf(fes);
 
-    gf = [](const Geometry::Point& p)
-    {
-      return Math::SpatialVector<Real>{{ p.x(), p.y() }};
+    gf = [](const Geometry::Point& p) {
+      return Math::SpatialVector<Real>{{p.x(), p.y()}};
     };
 
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
@@ -3361,7 +3347,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorFESAssociation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh, 3);
     MMG::GridFunction<Math::SpatialVector<Real>> gf(fes);
 
@@ -3374,7 +3360,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMEDIT)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
@@ -3405,7 +3391,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMFEM)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
     gf = RealFunction(3.14);
@@ -3439,7 +3425,7 @@ namespace Rodin::Tests::Unit
     // mesh can host a new grid function.
     const size_t n = 8;
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {n, n});
 
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
@@ -3461,20 +3447,17 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, VectorPointEvaluation)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh, 2);
     MMG::VectorGridFunction gf(fes);
 
     // Project a constant vector function
-    gf = [](const Geometry::Point&)
-    {
-      return Math::SpatialVector<Real>{{ 1.0, 2.0 }};
-    };
+    gf = [](const Geometry::Point&) { return Math::SpatialVector<Real>{{1.0, 2.0}}; };
 
     // Evaluate at a point inside the first cell
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+    const Math::Vector<Real> rc{{0.25, 0.25}};
     Geometry::Point p(polytope, rc);
 
     auto value = gf.getValue(p);
@@ -3486,7 +3469,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_GridFunction, ScalarSetData)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     MMG::RealGridFunction gf(fes);
 

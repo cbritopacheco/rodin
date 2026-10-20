@@ -35,10 +35,11 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P0<Range, Mesh>;
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P0<Range, Mesh>;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   /**
@@ -51,12 +52,14 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Grad<
     Variational::ShapeFunction<NestedDerived, Variational::P0<Range, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::P0<Range, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+    /// @brief Finite element space type.
+    using FESType = Variational::P0<Range, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
   };
 }
 
@@ -148,7 +151,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // Evaluating on a face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)
@@ -188,7 +191,8 @@ namespace Rodin::Variational
                 }
               }
               UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+                << Alert::Raise;
             }
             return;
           }
@@ -284,8 +288,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -294,8 +297,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -316,8 +318,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -361,7 +362,8 @@ namespace Rodin::Variational
        */
       auto getBasis(size_t local) const
       {
-        const size_t sdim = getIntegrationPoint().getPoint().getPolytope().getMesh().getSpaceDimension();
+        const size_t sdim =
+          getIntegrationPoint().getPoint().getPolytope().getMesh().getSpaceDimension();
         return Math::SpatialVector<ScalarType>::Zero(sdim);
       }
 
@@ -391,18 +393,20 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Grad<
     Variational::GridFunction<Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>, Data>>>
   {
-      /// @brief Finite element space of this family.
-      using FES = Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>;
-      /// @brief Finite element space type.
-      using FESType = FES;
+    /// @brief Finite element space of this family.
+    using FES = Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>;
 
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Range (evaluation value) type.
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-      /// @brief Rank-three derivative tensor.
-      using RangeType = Math::SpatialTensor<ScalarType>;
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
+
+    /// @brief Range (evaluation value) type.
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+    /// @brief Rank-three derivative tensor.
+    using RangeType = Math::SpatialTensor<ScalarType>;
   };
 
   /// @brief Rank-three physical gradient range for matrix P0 shape functions.
@@ -411,18 +415,23 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Grad<Variational::ShapeFunction<Derived,
     Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>, Space>>>
   {
-      /// @brief Finite element space of this family.
-      using FES = Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>;
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = typename Traits<FES>::ScalarType;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialTensor<ScalarType>;
-      /// @brief Cloned or referenced expression operand type.
-      using OperandType = Variational::ShapeFunction<Derived, FES, Space>;
-      /// @brief Trial or test shape-function space.
-      static constexpr auto SpaceType = Space;
+    /// @brief Finite element space of this family.
+    using FES = Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>;
+
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = typename Traits<FES>::ScalarType;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialTensor<ScalarType>;
+
+    /// @brief Cloned or referenced expression operand type.
+    using OperandType = Variational::ShapeFunction<Derived, FES, Space>;
+
+    /// @brief Trial or test shape-function space.
+    static constexpr auto SpaceType = Space;
   };
 }
 
@@ -440,14 +449,19 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space of this family.
       using FES = P0<Math::SpatialMatrix<Scalar>, Mesh>;
+
       /// @brief CRTP or finite element base class.
       using Parent = FunctionBase<Grad>;
+
       /// @brief Cloned or referenced expression operand type.
       using OperandType = GridFunction<FES, Data>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
+
       /**
        * @brief Constructs the matrix gradient with the derivative axis last.
        * @param operand Operand expression.
@@ -455,6 +469,7 @@ namespace Rodin::Variational
       explicit Grad(const OperandType& operand)
         : m_operand(operand)
       {}
+
       /**
        * @brief Constructs the matrix gradient with the derivative axis last.
        * @param other Object to copy from.
@@ -463,6 +478,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_operand(other.m_operand)
       {}
+
       /**
        * @brief Constructs the matrix gradient with the derivative axis last.
        * @param other Object to move from.
@@ -471,6 +487,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_operand(other.m_operand)
       {}
+
       /**
        * @brief Returns the differentiated or indexed operand.
        * @returns The differentiated or indexed operand.
@@ -479,6 +496,7 @@ namespace Rodin::Variational
       {
         return m_operand.get();
       }
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -511,6 +529,7 @@ namespace Rodin::Variational
         }
         return value;
       }
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -520,6 +539,7 @@ namespace Rodin::Variational
       {
         return getValue(point.getPoint());
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -594,14 +614,19 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space of this family.
       using FES = P0<Math::SpatialMatrix<Scalar>, Mesh>;
+
       /// @brief CRTP or finite element base class.
       using Parent = ShapeFunctionBase<Grad, FES, Space>;
+
       /// @brief Cloned or referenced expression operand type.
       using OperandType = ShapeFunction<Derived, FES, Space>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
+
       /**
        * @brief Constructs the matrix gradient with the derivative axis last.
        * @param operand Operand expression.
@@ -610,6 +635,7 @@ namespace Rodin::Variational
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
+
       /**
        * @brief Constructs the matrix gradient with the derivative axis last.
        * @param other Object to copy from.
@@ -618,6 +644,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
+
       /**
        * @brief Constructs the matrix gradient with the derivative axis last.
        * @param other Object to move from.
@@ -626,6 +653,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
+
       /**
        * @brief Returns the differentiated or indexed operand.
        * @returns The differentiated or indexed operand.
@@ -634,6 +662,7 @@ namespace Rodin::Variational
       {
         return *m_operand;
       }
+
       /**
        * @brief Returns the leaf shape function used for assembly.
        * @returns The leaf shape function used for assembly.
@@ -642,6 +671,7 @@ namespace Rodin::Variational
       {
         return getOperand().getLeaf();
       }
+
       /**
        * @brief Returns the local basis count for the selected polytope.
        * @param poly Mesh entity used by this operation.
@@ -651,6 +681,7 @@ namespace Rodin::Variational
       {
         return getOperand().getDOFs(poly);
       }
+
       /**
        * @brief Returns the currently bound integration point.
        * @returns The currently bound integration point.
@@ -708,6 +739,7 @@ namespace Rodin::Variational
         }
         return *this;
       }
+
       /**
        * @brief Returns a basis value at the bound integration point.
        * @param local Index in the local numbering.
@@ -717,6 +749,7 @@ namespace Rodin::Variational
       {
         return m_basis.at(local);
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.

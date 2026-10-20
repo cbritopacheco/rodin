@@ -110,42 +110,45 @@ namespace Rodin::IO
        */
       enum class Topology
       {
-        POLYVERTEX      = 1,   ///< Single vertex (0D).
-        POLYLINE        = 2,   ///< Line segment (1D).
-        POLYGON         = 3,   ///< General polygon (2D).
-        TRIANGLE        = 4,   ///< Triangle (2D, 3 vertices).
-        QUADRILATERAL   = 5,   ///< Quadrilateral (2D, 4 vertices).
-        TETRAHEDRON     = 6,   ///< Tetrahedron (3D, 4 vertices).
-        PYRAMID         = 7,   ///< Pyramid (3D, 5 vertices).
-        WEDGE           = 8,   ///< Wedge / triangular prism (3D, 6 vertices).
-        HEXAHEDRON      = 9,   ///< Hexahedron (3D, 8 vertices).
+        POLYVERTEX = 1,   ///< Single vertex (0D).
+        POLYLINE = 2,   ///< Line segment (1D).
+        POLYGON = 3,   ///< General polygon (2D).
+        TRIANGLE = 4,   ///< Triangle (2D, 3 vertices).
+        QUADRILATERAL = 5,   ///< Quadrilateral (2D, 4 vertices).
+        TETRAHEDRON = 6,   ///< Tetrahedron (3D, 4 vertices).
+        PYRAMID = 7,   ///< Pyramid (3D, 5 vertices).
+        WEDGE = 8,   ///< Wedge / triangular prism (3D, 6 vertices).
+        HEXAHEDRON = 9,   ///< Hexahedron (3D, 8 vertices).
 
-        POLYHEDRON      = 16,  ///< General polyhedron (3D).
+        POLYHEDRON = 16,  ///< General polyhedron (3D).
 
-        EDGE_3          = 34,  ///< Quadratic edge (3 nodes).
+        EDGE_3 = 34,  ///< Quadratic edge (3 nodes).
         QUADRILATERAL_9 = 35,  ///< Biquadratic quadrilateral (9 nodes).
-        TRIANGLE_6      = 36,  ///< Quadratic triangle (6 nodes).
+        TRIANGLE_6 = 36,  ///< Quadratic triangle (6 nodes).
         QUADRILATERAL_8 = 37,  ///< Serendipity quadrilateral (8 nodes).
-        TETRAHEDRON_10  = 38,  ///< Quadratic tetrahedron (10 nodes).
-        PYRAMID_13      = 39,  ///< Quadratic pyramid (13 nodes).
-        WEDGE_15        = 40,  ///< Quadratic wedge (15 nodes).
-        WEDGE_18        = 41,  ///< Biquadratic wedge (18 nodes).
+        TETRAHEDRON_10 = 38,  ///< Quadratic tetrahedron (10 nodes).
+        PYRAMID_13 = 39,  ///< Quadratic pyramid (13 nodes).
+        WEDGE_15 = 40,  ///< Quadratic wedge (15 nodes).
+        WEDGE_18 = 41,  ///< Biquadratic wedge (18 nodes).
 
-        HEXAHEDRON_20   = 48,  ///< Serendipity hexahedron (20 nodes).
-        HEXAHEDRON_24   = 49,  ///< Biquadratic hexahedron (24 nodes).
-        HEXAHEDRON_27   = 50   ///< Triquadratic hexahedron (27 nodes).
+        HEXAHEDRON_20 = 48,  ///< Serendipity hexahedron (20 nodes).
+        HEXAHEDRON_24 = 49,  ///< Biquadratic hexahedron (24 nodes).
+        HEXAHEDRON_27 = 50   ///< Triquadratic hexahedron (27 nodes).
       };
 
       /// @brief XML element names used in the XDMF 3 document format.
       struct Keyword
       {
-        static constexpr const char* Xdmf      = "Xdmf";       ///< Root element.
-        static constexpr const char* Domain    = "Domain";      ///< Domain container.
-        static constexpr const char* Grid      = "Grid";        ///< Grid element (uniform or collection).
-        static constexpr const char* Topology  = "Topology";    ///< Topology element.
-        static constexpr const char* Geometry  = "Geometry";    ///< Geometry element.
-        static constexpr const char* Attribute = "Attribute";   ///< Attribute element (field data).
-        static constexpr const char* DataItem  = "DataItem";    ///< DataItem element (HDF5 reference).
+        static constexpr const char* Xdmf = "Xdmf";       ///< Root element.
+        static constexpr const char* Domain = "Domain";      ///< Domain container.
+        static constexpr const char* Grid =
+          "Grid";        ///< Grid element (uniform or collection).
+        static constexpr const char* Topology = "Topology";    ///< Topology element.
+        static constexpr const char* Geometry = "Geometry";    ///< Geometry element.
+        static constexpr const char* Attribute =
+          "Attribute";   ///< Attribute element (field data).
+        static constexpr const char* DataItem =
+          "DataItem";    ///< DataItem element (HDF5 reference).
       };
 
       /**
@@ -153,22 +156,28 @@ namespace Rodin::IO
        * @param[in] geometry  Rodin polytope geometry type.
        * @returns The XDMF Topology value, or empty if the type is unsupported.
        */
-      static inline
-      Optional<Topology> getTopology(Geometry::Polytope::Type geometry)
+      static inline Optional<Topology> getTopology(Geometry::Polytope::Type geometry)
       {
         using PT = Geometry::Polytope::Type;
 
         switch (geometry)
         {
-          case PT::Point:         return Topology::POLYVERTEX;
-          case PT::Segment:       return Topology::POLYLINE;
-          case PT::Triangle:      return Topology::TRIANGLE;
-          case PT::Quadrilateral: return Topology::QUADRILATERAL;
-          case PT::Tetrahedron:   return Topology::TETRAHEDRON;
+          case PT::Point:
+            return Topology::POLYVERTEX;
+          case PT::Segment:
+            return Topology::POLYLINE;
+          case PT::Triangle:
+            return Topology::TRIANGLE;
+          case PT::Quadrilateral:
+            return Topology::QUADRILATERAL;
+          case PT::Tetrahedron:
+            return Topology::TETRAHEDRON;
           case PT::Pyramid:
             return Topology::PYRAMID;
-          case PT::Wedge:         return Topology::WEDGE;
-          case PT::Hexahedron:    return Topology::HEXAHEDRON;
+          case PT::Wedge:
+            return Topology::WEDGE;
+          case PT::Hexahedron:
+            return Topology::HEXAHEDRON;
         }
 
         return {};
@@ -179,22 +188,28 @@ namespace Rodin::IO
        * @param[in] gt  XDMF topology type code.
        * @returns The Rodin Polytope::Type, or empty if the type is unsupported.
        */
-      static inline
-      Optional<Geometry::Polytope::Type> getGeometry(Topology gt)
+      static inline Optional<Geometry::Polytope::Type> getGeometry(Topology gt)
       {
         using PT = Geometry::Polytope::Type;
 
         switch (gt)
         {
-          case Topology::POLYVERTEX:      return PT::Point;
-          case Topology::POLYLINE:        return PT::Segment;
-          case Topology::TRIANGLE:        return PT::Triangle;
-          case Topology::QUADRILATERAL:   return PT::Quadrilateral;
-          case Topology::TETRAHEDRON:     return PT::Tetrahedron;
+          case Topology::POLYVERTEX:
+            return PT::Point;
+          case Topology::POLYLINE:
+            return PT::Segment;
+          case Topology::TRIANGLE:
+            return PT::Triangle;
+          case Topology::QUADRILATERAL:
+            return PT::Quadrilateral;
+          case Topology::TETRAHEDRON:
+            return PT::Tetrahedron;
           case Topology::PYRAMID:
             return PT::Pyramid;
-          case Topology::WEDGE:           return PT::Wedge;
-          case Topology::HEXAHEDRON:      return PT::Hexahedron;
+          case Topology::WEDGE:
+            return PT::Wedge;
+          case Topology::HEXAHEDRON:
+            return PT::Hexahedron;
 
           case Topology::EDGE_3:
           case Topology::QUADRILATERAL_9:
@@ -276,11 +291,15 @@ namespace Rodin::IO
        */
       struct FilePatterns
       {
-        std::string xdmf              = "{stem}.xdmf";                    ///< XDMF XML output filename pattern.
-        std::string staticMesh        = "{stem}.{grid}.mesh.h5";          ///< Static mesh HDF5 filename pattern.
-        std::string transientMesh     = "{stem}.{grid}.mesh.{index}.h5";  ///< Transient mesh HDF5 filename pattern.
-        std::string staticAttribute   = "{stem}.{grid}.{name}.h5";        ///< Static attribute HDF5 filename pattern.
-        std::string attribute         = "{stem}.{grid}.{name}.{index}.h5"; ///< Transient attribute HDF5 filename pattern.
+        std::string xdmf = "{stem}.xdmf"; ///< XDMF XML output filename pattern.
+        std::string staticMesh =
+          "{stem}.{grid}.mesh.h5"; ///< Static mesh HDF5 filename pattern.
+        std::string transientMesh =
+          "{stem}.{grid}.mesh.{index}.h5"; ///< Transient mesh HDF5 filename pattern.
+        std::string staticAttribute =
+          "{stem}.{grid}.{name}.h5"; ///< Static attribute HDF5 filename pattern.
+        std::string attribute =
+          "{stem}.{grid}.{name}.{index}.h5"; ///< Transient attribute HDF5 filename pattern.
       };
 
       /**
@@ -290,7 +309,8 @@ namespace Rodin::IO
        */
       struct GridOptions
       {
-        MeshPolicy meshPolicy = MeshPolicy::Static;  ///< Mesh export policy for this grid.
+        MeshPolicy meshPolicy =
+          MeshPolicy::Static; ///< Mesh export policy for this grid.
         bool exportMeshAttribute = true; ///< Export the cell-centered mesh attribute.
         Optional<FilePatterns>
           patterns; ///< Per-grid file pattern overrides (empty = use writer defaults).
@@ -312,6 +332,7 @@ namespace Rodin::IO
            * @param other Object to copy from.
            */
           Grid(const Grid& other) = default;
+
           /**
            * @brief Copy assignment operator.
            * @returns Reference to this object after the operation.
@@ -360,10 +381,8 @@ namespace Rodin::IO
            * Use the overload taking an explicit name string to override.
            */
           template <class GridFunctionType>
-          Grid& add(
-              const GridFunctionType& gf,
-              Center center = Center::Node,
-              AttributePolicy policy = AttributePolicy::Transient);
+          Grid& add(const GridFunctionType& gf, Center center = Center::Node,
+            AttributePolicy policy = AttributePolicy::Transient);
 
           /**
            * @brief Registers a grid function attribute with an explicit name.
@@ -375,11 +394,9 @@ namespace Rodin::IO
            * @returns Reference to `*this` for method chaining.
            */
           template <class GridFunctionType>
-          Grid& add(
-              const std::string& name,
-              const GridFunctionType& gf,
-              Center center = Center::Node,
-              AttributePolicy policy = AttributePolicy::Transient);
+          Grid& add(const std::string& name, const GridFunctionType& gf,
+            Center center = Center::Node,
+            AttributePolicy policy = AttributePolicy::Transient);
 
           /**
            * @brief Tests whether a mesh has been set on this grid.
@@ -431,8 +448,7 @@ namespace Rodin::IO
        * // produces: output/simulation.xdmf, output/simulation.*.h5, ...
        * ```
        */
-      explicit
-      XDMF(const boost::filesystem::path& stem);
+      explicit XDMF(const boost::filesystem::path& stem);
 
 #ifdef RODIN_USE_MPI
       /**
@@ -461,9 +477,7 @@ namespace Rodin::IO
        * xdmf.close();
        * ```
        */
-      XDMF(MPI_Comm comm,
-           const boost::filesystem::path& stem,
-           size_t rootRank = 0);
+      XDMF(MPI_Comm comm, const boost::filesystem::path& stem, size_t rootRank = 0);
 #endif
       /**
        * @brief Disables copying or moving this object.
@@ -471,16 +485,19 @@ namespace Rodin::IO
        */
 
       XDMF(const XDMF& other) = delete; ///< Non-copyable.
+
       /**
        * @brief Assigns the state of another object.
        * @param other Object to copy from.
        */
       XDMF& operator=(const XDMF& other) = delete; ///< Non-copyable.
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       XDMF(XDMF&& other) = default; ///< Move constructible.
+
       /**
        * @brief Move assignment.
        * @param other Writer to move from.
@@ -568,10 +585,8 @@ namespace Rodin::IO
        * @returns Reference to `*this` for method chaining.
        */
       template <class GridFunctionType>
-      XDMF& add(
-          const GridFunctionType& gf,
-          Center center = Center::Node,
-          AttributePolicy policy = AttributePolicy::Transient);
+      XDMF& add(const GridFunctionType& gf, Center center = Center::Node,
+        AttributePolicy policy = AttributePolicy::Transient);
 
       /**
        * @brief Adds a grid function attribute with an explicit name to the
@@ -584,11 +599,9 @@ namespace Rodin::IO
        * @returns Reference to `*this` for method chaining.
        */
       template <class GridFunctionType>
-      XDMF& add(
-          const std::string& name,
-          const GridFunctionType& gf,
-          Center center = Center::Node,
-          AttributePolicy policy = AttributePolicy::Transient);
+      XDMF& add(const std::string& name, const GridFunctionType& gf,
+        Center center = Center::Node,
+        AttributePolicy policy = AttributePolicy::Transient);
 
       /**
        * @brief Writes one temporal snapshot for all configured grids.
@@ -668,49 +681,51 @@ namespace Rodin::IO
       /// @brief Internal record for one registered attribute.
       struct AttributeRecord
       {
-        std::string name;                           ///< Attribute display name.
-        Center center = Center::Node;               ///< Data centering.
+        std::string name; ///< Attribute display name.
+        Center center = Center::Node; ///< Data centering.
         size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
         size_t columns = 0; ///< Matrix columns.
-        size_t dimension = 1;                       ///< Vector dimension of the attribute.
+        size_t dimension = 1; ///< Vector dimension of the attribute.
         AttributePolicy policy = AttributePolicy::Transient; ///< Export policy.
-        bool staticWritten = false;                 ///< Whether the static HDF5 file has been exported.
-        boost::filesystem::path staticFile;         ///< Path to the static attribute file (relative).
-        std::function<void(const boost::filesystem::path&, Center)> write;  ///< Save callback.
+        bool staticWritten = false; ///< Whether the static HDF5 file has been exported.
+        boost::filesystem::path
+          staticFile; ///< Path to the static attribute file (relative).
+        std::function<void(const boost::filesystem::path&, Center)>
+          write; ///< Save callback.
       };
 
       /// @brief Internal record for one temporal snapshot.
       struct SnapshotRecord
       {
-          /// @brief Attribute metadata recorded for one snapshot.
-          struct AttributeRecord
-          {
-              std::string name; ///< Attribute display name.
-              Center center = Center::Node; ///< Attribute centering.
-              size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
-              size_t columns = 0; ///< Matrix columns.
-              size_t dimension = 1; ///< Attribute vector dimension.
-              boost::filesystem::path file; ///< Attribute HDF5 file path.
-              bool isStatic =
-                false; ///< True when the attribute uses a static (once-written) HDF5 file.
-          };
+        /// @brief Attribute metadata recorded for one snapshot.
+        struct AttributeRecord
+        {
+          std::string name; ///< Attribute display name.
+          Center center = Center::Node; ///< Attribute centering.
+          size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
+          size_t columns = 0; ///< Matrix columns.
+          size_t dimension = 1; ///< Attribute vector dimension.
+          boost::filesystem::path file; ///< Attribute HDF5 file path.
+          bool isStatic =
+            false; ///< True when the attribute uses a static (once-written) HDF5 file.
+        };
 
-          /// @brief Mesh-attached attribute metadata recorded for one snapshot.
-          struct MeshAttributeRecord
-          {
-              std::string name; ///< Attribute display name.
-              Center center = Center::Cell; ///< Attribute centering.
-              size_t topologicalDimension = 0; ///< Mesh topological dimension.
-          };
+        /// @brief Mesh-attached attribute metadata recorded for one snapshot.
+        struct MeshAttributeRecord
+        {
+          std::string name; ///< Attribute display name.
+          Center center = Center::Cell; ///< Attribute centering.
+          size_t topologicalDimension = 0; ///< Mesh topological dimension.
+        };
 
         /// @brief Per-rank mesh metadata cached during write().
         struct PieceMeta
         {
-            std::uint64_t vertexCount = 0; ///< Number of visualization vertices.
-            std::uint64_t cellCount = 0; ///< Number of visualization cells.
-            std::uint64_t meshDimension = 0; ///< Topological mesh dimension.
-            std::uint64_t spaceDimension = 0; ///< Spatial embedding dimension.
-            std::uint64_t topologySize = 0; ///< Number of topology entries.
+          std::uint64_t vertexCount = 0; ///< Number of visualization vertices.
+          std::uint64_t cellCount = 0; ///< Number of visualization cells.
+          std::uint64_t meshDimension = 0; ///< Topological mesh dimension.
+          std::uint64_t spaceDimension = 0; ///< Spatial embedding dimension.
+          std::uint64_t topologySize = 0; ///< Number of topology entries.
         };
 
         Real time = 0;
@@ -735,30 +750,32 @@ namespace Rodin::IO
       /// @brief Internal record for one named grid.
       struct GridRecord
       {
-        std::string name;                             ///< Grid name.
-        const Geometry::MeshBase* mesh = nullptr;     ///< Effective mesh for visualization (shard for MPI).
-        const Geometry::MeshBase* sourceMesh = nullptr; ///< Original mesh for identity checks.
-        GridOptions options;                          ///< Per-grid export options.
-        bool staticMeshWritten = false;               ///< Whether the static mesh has been exported.
-        boost::filesystem::path staticMeshFile;       ///< Path to the static mesh file.
-        std::vector<AttributeRecord> attributes;      ///< Registered attributes.
-        std::vector<SnapshotRecord> snapshots;        ///< Recorded snapshots.
+        std::string name; ///< Grid name.
+        const Geometry::MeshBase* mesh =
+          nullptr; ///< Effective mesh for visualization (shard for MPI).
+        const Geometry::MeshBase* sourceMesh =
+          nullptr; ///< Original mesh for identity checks.
+        GridOptions options; ///< Per-grid export options.
+        bool staticMeshWritten = false; ///< Whether the static mesh has been exported.
+        boost::filesystem::path staticMeshFile; ///< Path to the static mesh file.
+        std::vector<AttributeRecord> attributes; ///< Registered attributes.
+        std::vector<SnapshotRecord> snapshots; ///< Recorded snapshots.
       };
 
-      boost::filesystem::path m_stem;     ///< Output stem path.
-      FilePatterns m_patterns;            ///< Global file naming patterns.
-      size_t m_padding = 6;               ///< Zero-padding width for index expansion.
-      bool m_closed = false;              ///< Whether close() has been called.
-      size_t m_snapshotCount = 0;         ///< Total snapshots written.
-      std::vector<GridRecord> m_grids;    ///< All grids in this domain.
+      boost::filesystem::path m_stem; ///< Output stem path.
+      FilePatterns m_patterns; ///< Global file naming patterns.
+      size_t m_padding = 6; ///< Zero-padding width for index expansion.
+      bool m_closed = false; ///< Whether close() has been called.
+      size_t m_snapshotCount = 0; ///< Total snapshots written.
+      std::vector<GridRecord> m_grids; ///< All grids in this domain.
 
       // --- MPI distributed mode -----------------------------------------------
-      bool m_distributed = false;         ///< Whether the writer is in distributed mode.
-      size_t m_rank = 0;                  ///< This process's rank.
-      size_t m_numRanks = 1;              ///< Total number of ranks.
-      size_t m_rootRank = 0;              ///< Root rank that writes master XDMF XML.
+      bool m_distributed = false; ///< Whether the writer is in distributed mode.
+      size_t m_rank = 0; ///< This process's rank.
+      size_t m_numRanks = 1; ///< Total number of ranks.
+      size_t m_rootRank = 0; ///< Root rank that writes master XDMF XML.
 #ifdef RODIN_USE_MPI
-      MPI_Comm m_comm = MPI_COMM_NULL;    ///< Non-owning MPI communicator.
+      MPI_Comm m_comm = MPI_COMM_NULL; ///< Non-owning MPI communicator.
 #endif
 
       /**
@@ -768,11 +785,8 @@ namespace Rodin::IO
        * @param snap Snapshot record to read or update.
        * @param baseIndent Initial XML indentation level.
        */
-      void writeUniformGrid(
-          std::ostream& os,
-          const std::string& gridName,
-          const SnapshotRecord& snap,
-          size_t baseIndent) const;
+      void writeUniformGrid(std::ostream& os, const std::string& gridName,
+        const SnapshotRecord& snap, size_t baseIndent) const;
 
       /**
        * @brief Gathers per-rank mesh metadata into snap.pieces.
@@ -804,7 +818,8 @@ namespace Rodin::IO
 
   /// @copydoc XDMF::Grid::add(const GridFunctionType&, Center, AttributePolicy)
   template <class GridFunctionType>
-  XDMF::Grid& XDMF::Grid::add(const GridFunctionType& gf, Center center, AttributePolicy policy)
+  XDMF::Grid& XDMF::Grid::add(
+    const GridFunctionType& gf, Center center, AttributePolicy policy)
   {
     const auto name = gf.getName();
     if (!name)
@@ -818,11 +833,8 @@ namespace Rodin::IO
 
   /// @copydoc XDMF::Grid::add(const std::string&, const GridFunctionType&, Center, AttributePolicy)
   template <class GridFunctionType>
-  XDMF::Grid& XDMF::Grid::add(
-      const std::string& name,
-      const GridFunctionType& gf,
-      Center center,
-      AttributePolicy policy)
+  XDMF::Grid& XDMF::Grid::add(const std::string& name, const GridFunctionType& gf,
+    Center center, AttributePolicy policy)
   {
     auto& gr = m_owner->m_grids[m_index];
 
@@ -858,8 +870,7 @@ namespace Rodin::IO
     // vertices/cells, not over gf.getFiniteElementSpace().getMesh(), which
     // may be a distributed MPI mesh with global counts.
     const auto* visMesh = gr.mesh;
-    rec.write = [&gf, visMesh](const boost::filesystem::path& path, Center center)
-    {
+    rec.write = [&gf, visMesh](const boost::filesystem::path& path, Center center) {
       switch (center)
       {
         case Center::Node:
@@ -895,11 +906,8 @@ namespace Rodin::IO
   }
 
   template <class GridFunctionType>
-  XDMF& XDMF::add(
-      const std::string& name,
-      const GridFunctionType& gf,
-      Center center,
-      AttributePolicy policy)
+  XDMF& XDMF::add(const std::string& name, const GridFunctionType& gf, Center center,
+    AttributePolicy policy)
   {
     grid().add(name, gf, center, policy);
     return *this;

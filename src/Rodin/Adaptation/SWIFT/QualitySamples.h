@@ -133,6 +133,7 @@ namespace Rodin::Adaptation::SWIFT
     private:
       /// Equal-weight fraction protects witnesses with no predicted risk.
       static constexpr Real AdaptiveFraction = Real(0.5);
+
       /// Caps dimensionless risk, including inverted predictor witnesses.
       static constexpr Real MaximumRisk = Real(100);
       std::reference_wrapper<const Geometry::Polytope> m_cell;

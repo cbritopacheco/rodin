@@ -60,7 +60,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{1.0, 2.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -76,7 +76,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{3.14, -2.71, 1.41};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -93,7 +93,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{1.0, 2.5, 3.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -112,7 +112,7 @@ namespace Rodin::Tests::Unit
     auto x_comp = vf.x();
     auto y_comp = vf.y();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.3, 0.7}};
@@ -129,7 +129,7 @@ namespace Rodin::Tests::Unit
     auto y_comp = vf.y();
     auto z_comp = vf.z();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.1, 0.9}};
@@ -147,7 +147,7 @@ namespace Rodin::Tests::Unit
     auto comp1 = vf(1);
     auto comp2 = vf(2);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.6, 0.4}};
@@ -163,7 +163,7 @@ namespace Rodin::Tests::Unit
     VectorFunction vf{7.5, -12.3};
     VectorFunction vf_copy(vf);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 1.0}};
@@ -180,7 +180,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{42.0, 84.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{1.0, 0.0}};
@@ -199,7 +199,7 @@ namespace Rodin::Tests::Unit
     VectorFunction vf{99.9, -77.7, 55.5};
     auto copied = vf.copy();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.25, 0.75}};
@@ -218,7 +218,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_VectorFunction, TraceToBoundary)
   {
     const Attribute interior_attr = 1;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, D);
     for (auto it = mesh.getCell(); !it.end(); ++it)
@@ -240,7 +240,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{0.0, 0.0, 0.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.8, 0.2}};
@@ -252,15 +252,14 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies component callables use integration point fast path for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, ComponentCallables_UseIntegrationPointFastPath)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
     const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 5);
 
-    VectorFunction vf{
-      IntegrationPointFirstComponentCallable{},
+    VectorFunction vf{IntegrationPointFirstComponentCallable{},
       IntegrationPointSecondComponentCallable{}};
 
     const auto pointValue = vf.getValue(p);
@@ -275,7 +274,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies callable uses integration point fast path for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, Callable_UsesIntegrationPointFastPath)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);

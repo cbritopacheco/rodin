@@ -75,7 +75,8 @@ namespace Rodin::Variational
         Real psi_q;
         JacobiPolynomial<Q>::getValue(psi_q, unused, 2.0 * P + 1.0, 0.0, b);
 
-        basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        basis =
+          psi_p * psi_q * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
       }
 
       /**
@@ -120,7 +121,10 @@ namespace Rodin::Variational
         // \partialψ/\partialb
         Real dscale_db = 0.0;
         if constexpr (P > 0)
-          dscale_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+        {
+          dscale_db = P *
+            Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+        }
 
         dpsi_db = Pa * (dPb * scaleB + Pb * dscale_db);
       }
@@ -287,7 +291,8 @@ namespace Rodin::Variational
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();
@@ -473,10 +478,8 @@ namespace Rodin::Variational
        * @param c Coordinate at which the basis is evaluated.
        */
       template <size_t P, size_t Q, size_t R>
-      static constexpr void getGradient(Real& dpsi_da,
-                                        Real& dpsi_db,
-                                        Real& dpsi_dc,
-                                        Real a, Real b, Real c)
+      static constexpr void getGradient(
+        Real& dpsi_da, Real& dpsi_db, Real& dpsi_dc, Real a, Real b, Real c)
       {
         Real pA, dPA;
         JacobiPolynomial<P>::getValue(pA, dPA, 0.0, 0.0, a);
@@ -618,12 +621,8 @@ namespace Rodin::Variational
        * @param y Coordinate at which the basis is evaluated.
        * @param z Coordinate at which the basis is evaluated.
        */
-      static constexpr void getCollapsed(Real& a,
-                                         Real& b,
-                                         Real& c,
-                                         Real x,
-                                         Real y,
-                                         Real z)
+      static constexpr void getCollapsed(
+        Real& a, Real& b, Real& c, Real x, Real y, Real z)
       {
         c = 2.0 * z - 1.0;
 
@@ -701,7 +700,8 @@ namespace Rodin::Variational
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();

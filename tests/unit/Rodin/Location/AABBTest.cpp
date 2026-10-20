@@ -1079,6 +1079,7 @@ class QuadraticShear : public PolytopeTransformation
       j(1, 0) = 4 - 8 * r[0];
       j(1, 1) = 1;
     }
+
     /// Counts dependency calls without altering the fixture map.
     mutable size_t jacobianCalls = 0;
 

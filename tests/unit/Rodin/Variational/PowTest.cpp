@@ -90,7 +90,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 0.5);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -106,7 +106,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 2.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.3, 0.7}};
@@ -122,7 +122,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 3.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.8, 0.2}};
@@ -138,7 +138,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 0.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.1, 0.9}};
@@ -154,7 +154,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 1.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.6, 0.4}};
@@ -170,7 +170,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, -1.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.2, 0.8}};
@@ -183,10 +183,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Pow, RealFunction_FractionalPower)
   {
     RealFunction f(8.0);
-    auto pow_result = Pow(f, 1.0/3.0);
+    auto pow_result = Pow(f, 1.0 / 3.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.7, 0.3}};
@@ -198,7 +198,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function power operation for variational pow by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Pow, GridFunction_PowerOperation)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     P1 fes(mesh);
     GridFunction gf(fes);
 
@@ -221,11 +221,11 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Pow, ChainedPowerOperations)
   {
     RealFunction f(2.0);
-    auto pow1 = Pow(f, 2.0);  // f^2 = 4
+    auto pow1 = Pow(f, 2.0); // f^2 = 4
     auto pow2 = Pow(pow1, 0.5); // (f^2)^0.5 = f = 2
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.4, 0.6}};
@@ -241,7 +241,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 2.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.9, 0.1}};
@@ -257,7 +257,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 100.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -273,7 +273,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 10.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -289,7 +289,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 3.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.1, 0.1}};
@@ -305,7 +305,7 @@ namespace Rodin::Tests::Unit
     auto pow_result = Pow(f, 2.0);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.8, 0.8}};
@@ -320,11 +320,11 @@ namespace Rodin::Tests::Unit
     RealFunction f(3.0);
 
     // Test: (a^m)^n = a^(m*n)
-    auto pow_mn = Pow(f, 2.0 * 3.0);     // f^6
+    auto pow_mn = Pow(f, 2.0 * 3.0); // f^6
     auto pow_m_pow_n = Pow(Pow(f, 2.0), 3.0); // (f^2)^3 = f^6
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.3, 0.7}};
@@ -338,10 +338,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Pow, IntegerExponent)
   {
     RealFunction f(5.0);
-    auto pow_result = Pow(f, 4);  // Using integer exponent
+    auto pow_result = Pow(f, 4); // Using integer exponent
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.6, 0.4}};
@@ -354,10 +354,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Pow, SmallFractionalExponent)
   {
     RealFunction f(16.0);
-    auto pow_result = Pow(f, 0.25);  // Fourth root
+    auto pow_result = Pow(f, 0.25); // Fourth root
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{1.0, 0.0}};

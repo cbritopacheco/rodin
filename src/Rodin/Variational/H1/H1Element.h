@@ -1024,6 +1024,7 @@ namespace Rodin::Variational
                * @param other Object to copy from.
                */
               constexpr DerivativeFunction(const DerivativeFunction& other) = default;
+
               /**
                * @brief Evaluates into the output argument at a reference point.
                * @param out Storage for the computed result.
@@ -1085,6 +1086,7 @@ namespace Rodin::Variational
             public:
               /// @brief Type returned by the callable.
               using ReturnType = Math::SpatialMatrix<ScalarType>;
+
               /**
                * @brief Constructs the Jacobian of a local basis function.
                * @param vdim Number of components in the value range.
@@ -1134,6 +1136,7 @@ namespace Rodin::Variational
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
           };
+
           /**
            * @brief Constructs the basis function of a local degree of freedom.
            * @param vdim Number of components in the value range.
@@ -1435,14 +1438,19 @@ namespace Rodin::Variational
     public:
       /// @brief Scalar reference element for this family.
       using ScalarElement = H1Element<K, Scalar>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<ScalarElement>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief CRTP or finite element base class.
       using Parent = FiniteElementBase<H1Element<K, Math::SpatialMatrix<Scalar>>>;
+
       /// @brief Basis type of the underlying scalar element.
       using ScalarBasis = decltype(std::declval<ScalarElement>().getBasis(0));
+
       /// @brief Nodal functional type of the underlying scalar element.
       using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
 
@@ -1468,10 +1476,13 @@ namespace Rodin::Variational
 
       /// @brief Copies the element and its component extents.
       H1Element(const H1Element&) = default;
+
       /// @brief Moves the element and its component extents.
       H1Element(H1Element&&) = default;
+
       /// @brief Copies the element and its component extents.
       H1Element& operator=(const H1Element&) = default;
+
       /// @brief Moves the element and its component extents.
       H1Element& operator=(H1Element&&) = default;
 
@@ -1592,21 +1603,25 @@ namespace Rodin::Variational
       {
         return m_scalar.getCount() * m_rows * m_cols;
       }
+
       /// @brief Returns the polynomial order when it is known.
       size_t getOrder() const
       {
         return m_scalar.getOrder();
       }
+
       /// @brief Returns the number of matrix rows.
       size_t getRows() const
       {
         return m_rows;
       }
+
       /// @brief Returns the number of matrix columns.
       size_t getColumns() const
       {
         return m_cols;
       }
+
       /// @brief Returns the scalar element whose basis is replicated for matrix entries.
       const ScalarElement& getScalarElement() const
       {

@@ -85,7 +85,7 @@ namespace Rodin::FormLanguage
        */
       class Iterator
       {
-          using InternalIterator = typename std::vector<std::unique_ptr<T>>::iterator;
+        using InternalIterator = typename std::vector<std::unique_ptr<T>>::iterator;
 
         public:
           /**
@@ -100,7 +100,11 @@ namespace Rodin::FormLanguage
            * @brief Pre-increment operator.
            * @return Reference to this iterator after increment
            */
-          constexpr Iterator& operator++() { m_it++; return *this; }
+          constexpr Iterator& operator++()
+          {
+            m_it++;
+            return *this;
+          }
 
           /**
            * @brief Post-increment operator.
@@ -119,20 +123,31 @@ namespace Rodin::FormLanguage
            * @param[in] other Iterator to compare with
            * @return True if iterators point to the same element
            */
-          constexpr bool operator==(const Iterator& other) const { return m_it == other.m_it; }
+          constexpr bool operator==(const Iterator& other) const
+          {
+            return m_it == other.m_it;
+          }
 
           /**
            * @brief Inequality comparison operator.
            * @param[in] other Iterator to compare with
            * @return True if iterators point to different elements
            */
-          constexpr bool operator!=(const Iterator& other) const { return !(*this == other); }
+          constexpr bool operator!=(const Iterator& other) const
+          {
+            return !(*this == other);
+          }
 
           /**
            * @brief Dereference operator.
            * @return Reference to the element at the current position
            */
-          constexpr reference operator*() const { assert(*m_it); return static_cast<reference>(**m_it); }
+          constexpr reference operator*() const
+          {
+            assert(*m_it);
+            return static_cast<reference>(**m_it);
+          }
+
         private:
           InternalIterator m_it;
       };
@@ -145,8 +160,8 @@ namespace Rodin::FormLanguage
        */
       class ConstIterator
       {
-          using InternalConstIterator =
-            typename std::vector<std::unique_ptr<T>>::const_iterator;
+        using InternalConstIterator =
+          typename std::vector<std::unique_ptr<T>>::const_iterator;
 
         public:
           /**
@@ -161,7 +176,11 @@ namespace Rodin::FormLanguage
            * @brief Pre-increment operator.
            * @return Reference to this iterator after increment
            */
-          constexpr ConstIterator& operator++() { m_it++; return *this; }
+          constexpr ConstIterator& operator++()
+          {
+            m_it++;
+            return *this;
+          }
 
           /**
            * @brief Post-increment operator.
@@ -180,20 +199,31 @@ namespace Rodin::FormLanguage
            * @param[in] other Iterator to compare with
            * @return True if iterators point to the same element
            */
-          constexpr bool operator==(const ConstIterator& other) const { return m_it == other.m_it; }
+          constexpr bool operator==(const ConstIterator& other) const
+          {
+            return m_it == other.m_it;
+          }
 
           /**
            * @brief Inequality comparison operator.
            * @param[in] other Iterator to compare with
            * @return True if iterators point to different elements
            */
-          constexpr bool operator!=(const ConstIterator& other) const { return !(*this == other); }
+          constexpr bool operator!=(const ConstIterator& other) const
+          {
+            return !(*this == other);
+          }
 
           /**
            * @brief Dereference operator.
            * @return Const reference to the element at the current position
            */
-          constexpr const_reference operator*() const { assert(*m_it); return static_cast<const_reference>(**m_it); }
+          constexpr const_reference operator*() const
+          {
+            assert(*m_it);
+            return static_cast<const_reference>(**m_it);
+          }
+
         private:
           InternalConstIterator m_it;
       };

@@ -220,7 +220,7 @@ namespace Rodin::Tests::Unit
       Mesh<Context::Local> getMesh()
       {
         Mesh mesh;
-        mesh = mesh.UniformGrid(GetParam(), { 8, 8 });
+        mesh = mesh.UniformGrid(GetParam(), {8, 8});
         mesh.scale(1.0 / 7.0);
         mesh.getConnectivity().compute(1, 2);
         return mesh;
@@ -247,10 +247,8 @@ namespace Rodin::Tests::Unit
     auto u0 = sin(pi * F::x) * sin(pi * F::y);
 
     // Define velocity field
-    auto velocity = VectorFunction{
-      RealFunction([](const Point&) { return 0.1; }),
-      RealFunction([](const Point&) { return 0.2; })
-    };
+    auto velocity = VectorFunction{RealFunction([](const Point&) { return 0.1; }),
+      RealFunction([](const Point&) { return 0.2; })};
 
     // Test construction
     try
@@ -286,26 +284,18 @@ namespace Rodin::Tests::Unit
     auto u0 = RealFunction([](const Point&) { return 1.0; });
 
     // Test with constant velocity
-    auto constant_velocity = VectorFunction{
-      RealFunction([](const Point&) { return 1.0; }),
-      RealFunction([](const Point&) { return 0.0; })
-    };
+    auto constant_velocity =
+      VectorFunction{RealFunction([](const Point&) { return 1.0; }),
+        RealFunction([](const Point&) { return 0.0; })};
 
     // Test with variable velocity
-    auto variable_velocity = VectorFunction{
-      F::x,
-      F::y
-    };
+    auto variable_velocity = VectorFunction{F::x, F::y};
 
     // Test construction with constant velocity
-    EXPECT_NO_THROW({
-      Lagrangian lagrangian1(u, v, u0, constant_velocity);
-    });
+    EXPECT_NO_THROW({ Lagrangian lagrangian1(u, v, u0, constant_velocity); });
 
-    // Test construction with variable velocity  
-    EXPECT_NO_THROW({
-      Lagrangian lagrangian2(u, v, u0, variable_velocity);
-    });
+    // Test construction with variable velocity
+    EXPECT_NO_THROW({ Lagrangian lagrangian2(u, v, u0, variable_velocity); });
   }
 
   /**
@@ -327,10 +317,8 @@ namespace Rodin::Tests::Unit
     auto u0 = RealFunction([](const Point&) { return 1.0; });
 
     // Define simple velocity field
-    auto velocity = VectorFunction{
-      RealFunction([](const Point&) { return 0.1; }),
-      RealFunction([](const Point&) { return 0.0; })
-    };
+    auto velocity = VectorFunction{RealFunction([](const Point&) { return 0.1; }),
+      RealFunction([](const Point&) { return 0.0; })};
 
     // Create Lagrangian object
     Lagrangian lagrangian(u, v, u0, velocity);
@@ -341,7 +329,7 @@ namespace Rodin::Tests::Unit
     // EXPECT_NO_THROW({
     //   lagrangian.step(dt);
     // });
-    
+
     EXPECT_TRUE(true); // Basic construction test passes
   }
 
@@ -358,35 +346,24 @@ namespace Rodin::Tests::Unit
     TrialFunction u(vh);
     TestFunction v(vh);
 
-    auto velocity = VectorFunction{
-      RealFunction([](const Point&) { return 0.1; }),
-      RealFunction([](const Point&) { return 0.1; })
-    };
+    auto velocity = VectorFunction{RealFunction([](const Point&) { return 0.1; }),
+      RealFunction([](const Point&) { return 0.1; })};
 
     // Test with constant initial condition
     auto u0_constant = RealFunction([](const Point&) { return 2.5; });
-    EXPECT_NO_THROW({
-      Lagrangian lagrangian1(u, v, u0_constant, velocity);
-    });
+    EXPECT_NO_THROW({ Lagrangian lagrangian1(u, v, u0_constant, velocity); });
 
     // Test with polynomial initial condition
     auto u0_poly = F::x + F::y;
-    EXPECT_NO_THROW({
-      Lagrangian lagrangian2(u, v, u0_poly, velocity);
-    });
+    EXPECT_NO_THROW({ Lagrangian lagrangian2(u, v, u0_poly, velocity); });
 
     // Test with trigonometric initial condition
     auto pi = Math::Constants::pi();
     auto u0_trig = sin(pi * F::x) * cos(pi * F::y);
-    EXPECT_NO_THROW({
-      Lagrangian lagrangian3(u, v, u0_trig, velocity);
-    });
+    EXPECT_NO_THROW({ Lagrangian lagrangian3(u, v, u0_trig, velocity); });
   }
 
   /// @brief Instantiates Lagrangian Test over the Lagrangian Mesh Params parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    LagrangianMeshParams,
-    LagrangianTest,
-    ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
-  );
+  INSTANTIATE_TEST_SUITE_P(LagrangianMeshParams, LagrangianTest,
+    ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle));
 }

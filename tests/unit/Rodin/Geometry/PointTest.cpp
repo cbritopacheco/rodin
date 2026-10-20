@@ -460,7 +460,6 @@ TEST(Geometry_Point, CopyConstruction)
 
   mesh = builder.finalize();
 
-
   auto it = mesh.getCell();
   Polytope tri = *it;
 

@@ -64,16 +64,14 @@ namespace Rodin::Distance
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
         dist = [&](const Geometry::Point& p) {
-            const Real u = gf(p);
-            Variational::Grad grad(gf);
+          const Real u = gf(p);
+          Variational::Grad grad(gf);
           const auto gu = grad.getValue(p);
-            return u / Math::sqrt(u * u + gu.squaredNorm());
-          };
+          return u / Math::sqrt(u * u + gu.squaredNorm());
+        };
         return dist;
       }
   };
 }
 
 #endif
-
-

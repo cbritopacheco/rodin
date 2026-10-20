@@ -83,12 +83,14 @@ namespace Rodin::QF
    */
   class GaussLobatto final : public QuadratureFormulaBase
   {
-      /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
-      static constexpr size_t DefaultRootMaxIterations = 100;
-      /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
-      static constexpr Real DefaultRootTolerance = 1e-14;
-      /// @brief Heuristic relative perturbation for differencing the Legendre derivative; absolute at zero.
-      static constexpr Real DerivativeDifferenceStep = 1e-8;
+    /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
+    static constexpr size_t DefaultRootMaxIterations = 100;
+
+    /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
+    static constexpr Real DefaultRootTolerance = 1e-14;
+
+    /// @brief Heuristic relative perturbation for differencing the Legendre derivative; absolute at zero.
+    static constexpr Real DerivativeDifferenceStep = 1e-8;
 
     public:
       /// Parent class type
@@ -114,8 +116,14 @@ namespace Rodin::QF
        * directions. Requires @f$ \text{order} \geq 2 @f$.
        */
       GaussLobatto(Geometry::Polytope::Type g, size_t order)
-        : m_geometry(g), m_nx(order), m_ny(order), m_nz(order)
-      { assert(order >= 2); build(); }
+        : m_geometry(g),
+          m_nx(order),
+          m_ny(order),
+          m_nz(order)
+      {
+        assert(order >= 2);
+        build();
+      }
 
       /**
        * @brief Constructs Gauss-Lobatto quadrature with separate 2D orders.
@@ -127,8 +135,14 @@ namespace Rodin::QF
        * Requires @f$ nx, ny \geq 2 @f$.
        */
       GaussLobatto(Geometry::Polytope::Type g, size_t nx, size_t ny)
-        : m_geometry(g), m_nx(nx), m_ny(ny), m_nz(ny)
-      { assert(nx>=2 && ny>=2); build(); }
+        : m_geometry(g),
+          m_nx(nx),
+          m_ny(ny),
+          m_nz(ny)
+      {
+        assert(nx >= 2 && ny >= 2);
+        build();
+      }
 
       /**
        * @brief Constructs Gauss-Lobatto quadrature with separate 3D orders.
@@ -141,8 +155,14 @@ namespace Rodin::QF
        * Requires @f$ nu, nv, nw \geq 2 @f$.
        */
       GaussLobatto(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw)
-        : m_geometry(g), m_nx(nu), m_ny(nv), m_nz(nw)
-      { assert(nu>=2 && nv>=2 && nw>=2); build(); }
+        : m_geometry(g),
+          m_nx(nu),
+          m_ny(nv),
+          m_nz(nw)
+      {
+        assert(nu >= 2 && nv >= 2 && nw >= 2);
+        build();
+      }
 
       /**
        * @brief Constructs Gauss-Lobatto quadrature with default order 2.
@@ -151,8 +171,13 @@ namespace Rodin::QF
        * Uses 2 points per direction, which is the minimum for Lobatto quadrature.
        */
       GaussLobatto(Geometry::Polytope::Type g)
-        : m_geometry(g), m_nx(2), m_ny(2), m_nz(2)
-      { build(); }
+        : m_geometry(g),
+          m_nx(2),
+          m_ny(2),
+          m_nz(2)
+      {
+        build();
+      }
 
       /**
        * @brief Gets the polytope geometry of this Gauss-Lobatto rule.
@@ -173,7 +198,10 @@ namespace Rodin::QF
        * @brief Gets the number of quadrature points.
        * @return Total number of quadrature points
        */
-      size_t getSize() const override { return m_points.size(); }
+      size_t getSize() const override
+      {
+        return m_points.size();
+      }
 
       /**
        * @brief Gets the coordinates of the i-th quadrature point.
@@ -181,7 +209,9 @@ namespace Rodin::QF
        * @return Reference to the point coordinates in reference space
        */
       const Math::SpatialVector<Real>& getPoint(size_t i) const override
-      { return m_points[i]; }
+      {
+        return m_points[i];
+      }
 
       /**
        * @brief Gets the weight of the i-th quadrature point.
@@ -189,14 +219,18 @@ namespace Rodin::QF
        * @return Weight @f$ w_i @f$ associated with the point
        */
       Real getWeight(size_t i) const override
-      { return m_weights.coeff(i); }
+      {
+        return m_weights.coeff(i);
+      }
 
       /**
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GaussLobatto instance
        */
       GaussLobatto* copy() const noexcept
-      { return new GaussLobatto(*this); }
+      {
+        return new GaussLobatto(*this);
+      }
 
     private:
       /**
@@ -284,9 +318,10 @@ namespace Rodin::QF
         // On [-1,1], endpoints ±1, interior are roots of P'_{n-1}(x).
         std::vector<Real> xi(n), wi(n);
 
-        xi[0] = -1.0; xi[n-1] = 1.0;
+        xi[0] = -1.0;
+        xi[n - 1] = 1.0;
         // endpoints weights on [-1,1]
-        wi[0] = wi[n-1] = 2.0 / (static_cast<Real>(n)*(static_cast<Real>(n)-1.0));
+        wi[0] = wi[n - 1] = 2.0 / (static_cast<Real>(n) * (static_cast<Real>(n) - 1.0));
 
         if (n > 2)
         {
@@ -295,7 +330,7 @@ namespace Rodin::QF
           {
             // good initial guess for roots of P'_{n-1} (Chebyshev-like)
             const Real kk = static_cast<Real>(k) + 1.0;
-            Real xk = -std::cos(M_PI * kk / static_cast<Real>(n-1));
+            Real xk = -std::cos(M_PI * kk / static_cast<Real>(n - 1));
 
             // Newton on P'_{n-1}(x) = 0
             for (size_t it = 0; it < maxIt; ++it)
@@ -307,13 +342,15 @@ namespace Rodin::QF
               for (size_t j = 2; j <= mdeg; ++j)
               {
                 const Real jj = static_cast<Real>(j);
-                const Real pj = ((2*jj-1)*xk*p1 - (jj-1)*p0) / jj;
-                p0 = p1; p1 = pj;
+                const Real pj = ((2 * jj - 1) * xk * p1 - (jj - 1) * p0) / jj;
+                p0 = p1;
+                p1 = pj;
               }
-              const Real Pn1   = p1; // P_{n-1}
-              const Real Pn2   = p0; // P_{n-2}
+              const Real Pn1 = p1; // P_{n-1}
+              const Real Pn2 = p0; // P_{n-2}
               // P'_{n-1}(x) via (n-1)(x P_{n-1}-P_{n-2})/(x^2-1)
-              const Real dPn1  = (static_cast<Real>(mdeg) * (xk*Pn1 - Pn2)) / (xk*xk - 1.0);
+              const Real dPn1 =
+                (static_cast<Real>(mdeg) * (xk * Pn1 - Pn2)) / (xk * xk - 1.0);
 
               // Need derivative of P'_{n-1}: use identity for second derivative
               // P''_{n-1}(x) can be derived; practical route: differentiate recurrence numerically
@@ -330,16 +367,18 @@ namespace Rodin::QF
                 {
                   const Real jj = static_cast<Real>(j);
                   const Real pj = ((2 * jj - 1) * xkEps * p1e - (jj - 1) * p0e) / jj;
-                  p0e = p1e; p1e = pj;
+                  p0e = p1e;
+                  p1e = pj;
                 }
-                const Real Pn1e  = p1e;
-                const Real Pn2e  = p0e;
+                const Real Pn1e = p1e;
+                const Real Pn2e = p0e;
                 const Real dPn1e = (static_cast<Real>(mdeg) * (xkEps * Pn1e - Pn2e)) /
                   (xkEps * xkEps - 1.0);
                 const Real d2 = (dPn1e - dPn1) / (xkEps - xk);
                 const Real dx = dPn1 / d2;
                 xk -= dx;
-                if (std::abs(dx) < tol) break;
+                if (std::abs(dx) < tol)
+                  break;
               }
             }
 
@@ -349,22 +388,25 @@ namespace Rodin::QF
             for (size_t j = 2; j <= mdeg2; ++j)
             {
               const Real jj = static_cast<Real>(j);
-              const Real pj = ((2*jj-1)*xk*p1 - (jj-1)*p0) / jj;
-              p0 = p1; p1 = pj;
+              const Real pj = ((2 * jj - 1) * xk * p1 - (jj - 1) * p0) / jj;
+              p0 = p1;
+              p1 = pj;
             }
             const Real Pn1 = p1;
 
-            xi[k+1] = xk;
-            wi[k+1] = 2.0 / (static_cast<Real>(n)*(static_cast<Real>(n)-1.0) * Pn1*Pn1);
+            xi[k + 1] = xk;
+            wi[k + 1] =
+              2.0 / (static_cast<Real>(n) * (static_cast<Real>(n) - 1.0) * Pn1 * Pn1);
           }
         }
 
         // map to [0,1]
         x01.resize(n);
         w01.resize(n);
-        for (size_t i=0;i<n;++i) {
-          x01[i] = 0.5*(xi[i] + 1.0);
-          w01[i] = 0.5*wi[i];
+        for (size_t i = 0; i < n; ++i)
+        {
+          x01[i] = 0.5 * (xi[i] + 1.0);
+          w01[i] = 0.5 * wi[i];
         }
       }
 
@@ -437,11 +479,16 @@ namespace Rodin::QF
       {
         std::vector<Real> x, w;
         gll1dUnit(n, x, w);
-        m_points.clear(); m_points.reserve(n); m_weights.resize(n);
-        for (size_t i=0;i<n;++i){
-          Math::SpatialVector<Real> p; p.resize(1); p[0]=x[i];
+        m_points.clear();
+        m_points.reserve(n);
+        m_weights.resize(n);
+        for (size_t i = 0; i < n; ++i)
+        {
+          Math::SpatialVector<Real> p;
+          p.resize(1);
+          p[0] = x[i];
           m_points.push_back(std::move(p));
-          m_weights[i]=w[i]; // length 1
+          m_weights[i] = w[i]; // length 1
         }
       }
 
@@ -456,18 +503,24 @@ namespace Rodin::QF
        */
       void buildQuad(size_t nx, size_t ny)
       {
-        std::vector<Real> x,wx,y,wy;
+        std::vector<Real> x, wx, y, wy;
         gll1dUnit(nx, x, wx);
         gll1dUnit(ny, y, wy);
-        const size_t N = nx*ny;
-        m_points.clear(); m_points.reserve(N); m_weights.resize(N);
-        size_t k=0;
-        for(size_t j=0;j<ny;++j)
+        const size_t N = nx * ny;
+        m_points.clear();
+        m_points.reserve(N);
+        m_weights.resize(N);
+        size_t k = 0;
+        for (size_t j = 0; j < ny; ++j)
         {
-          for(size_t i=0;i<nx;++i){
-            Math::SpatialVector<Real> p; p.resize(2); p[0]=x[i]; p[1]=y[j];
+          for (size_t i = 0; i < nx; ++i)
+          {
+            Math::SpatialVector<Real> p;
+            p.resize(2);
+            p[0] = x[i];
+            p[1] = y[j];
             m_points.push_back(std::move(p));
-            m_weights[k++] = wx[i]*wy[j]; // area 1
+            m_weights[k++] = wx[i] * wy[j]; // area 1
           }
         }
       }
@@ -488,18 +541,24 @@ namespace Rodin::QF
       void buildTri(size_t nu, size_t nv)
       {
         // The Duffy Jacobian (1-u) is carried by the Jacobi weights.
-        std::vector<Real> u,wu,v,wv;
+        std::vector<Real> u, wu, v, wv;
         gjl1dUnit(nu, 1, u, wu);
         gll1dUnit(nv, v, wv);
-        const size_t N = nu*nv;
-        m_points.clear(); m_points.reserve(N); m_weights.resize(N);
-        size_t k=0;
-        for(size_t j=0;j<nv;++j)
+        const size_t N = nu * nv;
+        m_points.clear();
+        m_points.reserve(N);
+        m_weights.resize(N);
+        size_t k = 0;
+        for (size_t j = 0; j < nv; ++j)
         {
-          for(size_t i=0;i<nu;++i){
+          for (size_t i = 0; i < nu; ++i)
+          {
             const Real r = u[i];
             const Real s = (1.0 - u[i]) * v[j];
-            Math::SpatialVector<Real> p; p.resize(2); p[0]=r; p[1]=s;
+            Math::SpatialVector<Real> p;
+            p.resize(2);
+            p[0] = r;
+            p[1] = s;
             m_points.push_back(std::move(p));
             m_weights[k++] = wu[i] * wv[j];
           }
@@ -523,22 +582,29 @@ namespace Rodin::QF
       void buildTet(size_t nu, size_t nv, size_t nw)
       {
         // The Duffy Jacobian (1-u)^2(1-v) is carried by the Jacobi weights.
-        std::vector<Real> u,wu,v,wv,w,ww;
+        std::vector<Real> u, wu, v, wv, w, ww;
         gjl1dUnit(nu, 2, u, wu);
         gjl1dUnit(nv, 1, v, wv);
         gll1dUnit(nw, w, ww);
-        const size_t N = nu*nv*nw;
-        m_points.clear(); m_points.reserve(N); m_weights.resize(N);
-        size_t k=0;
-        for(size_t kk=0; kk<nw; ++kk)
+        const size_t N = nu * nv * nw;
+        m_points.clear();
+        m_points.reserve(N);
+        m_weights.resize(N);
+        size_t k = 0;
+        for (size_t kk = 0; kk < nw; ++kk)
         {
-          for(size_t j=0; j<nv; ++j)
+          for (size_t j = 0; j < nv; ++j)
           {
-            for(size_t i=0; i<nu; ++i){
+            for (size_t i = 0; i < nu; ++i)
+            {
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];
               const Real t = (1.0 - u[i]) * (1.0 - v[j]) * w[kk];
-              Math::SpatialVector<Real> p; p.resize(3); p[0]=r; p[1]=s; p[2]=t;
+              Math::SpatialVector<Real> p;
+              p.resize(3);
+              p[0] = r;
+              p[1] = s;
+              p[2] = t;
               m_points.push_back(std::move(p));
               m_weights[k++] = wu[i] * wv[j] * ww[kk];
             }
@@ -560,22 +626,29 @@ namespace Rodin::QF
       void buildWedge(size_t ntri, size_t nz)
       {
         // Jacobi--Lobatto triangle times Lobatto segment.
-        std::vector<Real> u,wu,v,wv,z,wz;
+        std::vector<Real> u, wu, v, wv, z, wz;
         gjl1dUnit(ntri, 1, u, wu);
         gll1dUnit(ntri, v, wv);
         gll1dUnit(nz, z, wz);
-        const size_t N = ntri*ntri*nz;
-        m_points.clear(); m_points.reserve(N); m_weights.resize(N);
-        size_t k=0;
-        for(size_t kk=0; kk<nz; ++kk)
+        const size_t N = ntri * ntri * nz;
+        m_points.clear();
+        m_points.reserve(N);
+        m_weights.resize(N);
+        size_t k = 0;
+        for (size_t kk = 0; kk < nz; ++kk)
         {
-          for(size_t j=0; j<ntri; ++j)
+          for (size_t j = 0; j < ntri; ++j)
           {
-            for(size_t i=0; i<ntri; ++i){
+            for (size_t i = 0; i < ntri; ++i)
+            {
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];
               const Real t = z[kk];
-              Math::SpatialVector<Real> p; p.resize(3); p[0]=r; p[1]=s; p[2]=t;
+              Math::SpatialVector<Real> p;
+              p.resize(3);
+              p[0] = r;
+              p[1] = s;
+              p[2] = t;
               m_points.push_back(std::move(p));
               m_weights[k++] = wu[i] * wv[j] * wz[kk];
             }

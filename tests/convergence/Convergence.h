@@ -92,8 +92,8 @@ namespace Rodin::Tests::Convergence
     public:
       struct Sample
       {
-          Real parameter;
-          ErrorNorms error;
+        Real parameter;
+        ErrorNorms error;
       };
 
       ErrorHistory& append(Real parameter, const ErrorNorms& error)
@@ -176,8 +176,8 @@ namespace Rodin::Tests::Convergence
     public:
       struct Sample
       {
-          Real parameter;
-          Real error;
+        Real parameter;
+        Real error;
       };
 
       NormHistory& append(Real parameter, Real error)

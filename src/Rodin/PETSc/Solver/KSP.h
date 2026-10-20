@@ -58,25 +58,32 @@ namespace Rodin::Solver
    * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::Solver::GMRES<PETSc::Math::LinearSystem></a>
    * @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::Solver::SNES</a>
    */
-  class KSP
-    : public LinearSolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
+  class KSP : public LinearSolverBase<PETSc::Math::LinearSystem>,
+              public PETSc::Object<::KSP>
   {
     public:
       /// @brief Handle type for the raw PETSc @c KSP context pointer.
       using HandleType = ::KSP;
+
       /// @brief Scalar type (`PetscScalar`) used for residual norms and tolerances.
-      using ScalarType   = PetscScalar;
+      using ScalarType = PetscScalar;
+
       /// @brief PETSc matrix type (@c Mat) for the system operator and preconditioner.
       using OperatorType = ::Mat;
+
       /// @brief PETSc vector type (@c Vec) for the right-hand side and solution.
-      using VectorType   = ::Vec;
+      using VectorType = ::Vec;
+
       /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
+
       /// @brief Base problem type that provides the linear system to solve.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class providing the generic `LinearSolverBase` interface.
       using Parent = LinearSolverBase<LinearSystemType>;
       using Parent::solve;
+
       /**
        * @brief Construct and create the PETSc KSP object.
        *
@@ -102,12 +109,15 @@ namespace Rodin::Solver
 
       /// @brief Default relative residual tolerance.
       static constexpr PetscReal DEFAULT_RTOL = 1e-10;
+
       /// @brief Default absolute residual tolerance.
       static constexpr PetscReal DEFAULT_ABSTOL = 1e-50;
+
       /// @brief Default divergence tolerance.
       static constexpr PetscReal DEFAULT_DTOL = 1e5;
+
       /// @brief Default maximum number of Krylov iterations.
-      static constexpr PetscInt  DEFAULT_MAXIT = 100000;
+      static constexpr PetscInt DEFAULT_MAXIT = 100000;
 
       /**
        * @brief Solve @f$ Ax = b @f$, allocating @f$ x @f$ if null.
@@ -136,10 +146,8 @@ namespace Rodin::Solver
        * @param maxIt  Maximum number of iterations.
        * @returns Reference to `*this`.
        */
-      KSP& setTolerances(PetscReal rtol,
-                         PetscReal abstol,
-                         PetscReal dtol,
-                         PetscInt  maxIt) noexcept;
+      KSP& setTolerances(
+        PetscReal rtol, PetscReal abstol, PetscReal dtol, PetscInt maxIt) noexcept;
 
       /**
        * @brief Returns the iteration count from the most recent solve.
@@ -189,12 +197,12 @@ namespace Rodin::Solver
       }
 
     private:
-      HandleType   m_ksp;  ///< Underlying PETSc KSP context.
-      ::KSPType    m_type; ///< Requested KSP algorithm type.
-      PetscReal    m_rtol, ///< Relative convergence tolerance.
-                   m_abstol, ///< Absolute convergence tolerance.
-                   m_dtol; ///< Divergence tolerance.
-      PetscInt     m_maxIt; ///< Maximum iteration count.
+      HandleType m_ksp; ///< Underlying PETSc KSP context.
+      ::KSPType m_type; ///< Requested KSP algorithm type.
+      PetscReal m_rtol, ///< Relative convergence tolerance.
+        m_abstol, ///< Absolute convergence tolerance.
+        m_dtol; ///< Divergence tolerance.
+      PetscInt m_maxIt; ///< Maximum iteration count.
       Optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
       Optional<std::string> m_prefix; ///< Optional prefix for PETSc options.
   };

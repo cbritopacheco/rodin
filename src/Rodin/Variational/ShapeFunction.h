@@ -39,23 +39,24 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    using DerivedType = Derived;
 
     /// @brief Finite element space type.
-      using FESType = FES;
+    using FESType = FES;
+
     /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-      using ResultType =
-        typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+    using ResultType =
+      typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-      using RangeType =
-        typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+    using RangeType =
+      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
   /**
@@ -67,23 +68,24 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    using DerivedType = Derived;
 
     /// @brief Finite element space type.
-      using FESType = FES;
+    using FESType = FES;
+
     /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-      using ResultType = typename ResultOf<Variational::ShapeFunctionBase<
-        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<
+      Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-      using RangeType = typename RangeOf<Variational::ShapeFunctionBase<
-        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<
+      Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 
@@ -111,7 +113,7 @@ namespace Rodin::Variational
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
     /// @brief Whether the trait holds.
-      static constexpr Boolean Value = true;
+    static constexpr Boolean Value = true;
   };
 
   /**
@@ -130,7 +132,7 @@ namespace Rodin::Variational
   struct IsTestFunction<TestFunction<FES>>
   {
     /// @brief Whether the trait holds.
-      static constexpr Boolean Value = true;
+    static constexpr Boolean Value = true;
   };
 
   /**
@@ -169,9 +171,7 @@ namespace Rodin::Variational
    *
    * @see TrialFunction, TestFunction
    */
-  template <
-    class Derived,
-    class FES = typename FormLanguage::Traits<Derived>::FESType,
+  template <class Derived, class FES = typename FormLanguage::Traits<Derived>::FESType,
     ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::SpaceType>
   class ShapeFunctionBase : public FormLanguage::Base
   {
@@ -183,19 +183,16 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar type from the finite element space
-      using ScalarType =
-        typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Parent class type
-      using Parent =
-        FormLanguage::Base;
+      using Parent = FormLanguage::Base;
 
       /**
        * @brief Constructs a shape function in the given finite element space.
        * @param[in] fes Finite element space
        */
-      constexpr
-      ShapeFunctionBase(const FES& fes)
+      constexpr ShapeFunctionBase(const FES& fes)
         : m_fes(fes)
       {}
 
@@ -203,8 +200,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Shape function to copy
        */
-      constexpr
-      ShapeFunctionBase(const ShapeFunctionBase& other)
+      constexpr ShapeFunctionBase(const ShapeFunctionBase& other)
         : Parent(other),
           m_fes(other.m_fes)
       {}
@@ -213,8 +209,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Shape function to move
        */
-      constexpr
-      ShapeFunctionBase(ShapeFunctionBase&& other)
+      constexpr ShapeFunctionBase(ShapeFunctionBase&& other)
         : Parent(std::move(other)),
           m_fes(std::move(other.m_fes))
       {}
@@ -223,8 +218,7 @@ namespace Rodin::Variational
        * @brief Indicates whether the shape function is part of a trial or test space.
        * @returns The space type (TrialSpace or TestSpace)
        */
-      constexpr
-      ShapeFunctionSpaceType getSpaceType() const
+      constexpr ShapeFunctionSpaceType getSpaceType() const
       {
         return Space;
       }
@@ -260,8 +254,7 @@ namespace Rodin::Variational
        * @brief Gets the transpose of a matrix-valued shape function.
        * @returns Transpose expression
        */
-      constexpr
-      auto T() const
+      constexpr auto T() const
       {
         return Transpose(*this);
       }
@@ -271,8 +264,7 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in the Derived class.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
@@ -283,8 +275,7 @@ namespace Rodin::Variational
        * @returns Number of degrees of freedom
        * @note CRTP function to be overriden in the Derived class.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
+      constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return static_cast<const Derived&>(*this).getDOFs(polytope);
       }
@@ -294,8 +285,7 @@ namespace Rodin::Variational
        * @returns Reference to the point
        * @note CRTP function to be overriden in the Derived class.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         return static_cast<const Derived&>(*this).getIntegrationPoint();
       }
@@ -326,8 +316,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      Derived& setIntegrationPoint(const IntegrationPoint& ip)
+      constexpr Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
@@ -349,8 +338,7 @@ namespace Rodin::Variational
        * @returns Expression representing the basis function
        * @note CRTP function to be overriden in the Derived class.
        */
-      constexpr
-      decltype(auto) getBasis(size_t local) const
+      constexpr decltype(auto) getBasis(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
       }
@@ -362,8 +350,7 @@ namespace Rodin::Variational
        *
        * This is a synonym for getBasis(size_t).
        */
-      constexpr
-      decltype(auto) operator()(size_t local) const
+      constexpr decltype(auto) operator()(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
       }
@@ -372,8 +359,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space to which the shape function belongs.
        * @returns Const reference to the finite element space
        */
-      constexpr
-      const FES& getFiniteElementSpace() const
+      constexpr const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
@@ -411,8 +397,7 @@ namespace Rodin::Variational
        * @param poly Polytope on which the order is queried.
        * @return Polynomial order bound, or std::nullopt if not polynomial.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
       }

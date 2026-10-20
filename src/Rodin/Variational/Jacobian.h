@@ -87,8 +87,8 @@ namespace Rodin::Variational
    */
   template <class FES, class Data, class Derived>
   class JacobianBase<GridFunction<FES, Data>, Derived>
-    : public MatrixFunctionBase<
-        typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES, Data>, Derived>>
+    : public MatrixFunctionBase<typename FormLanguage::Traits<FES>::ScalarType,
+        JacobianBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       /// @brief Finite element space type.
@@ -107,8 +107,7 @@ namespace Rodin::Variational
       using OperandType = GridFunction<FESType, Data>;
 
       /// @brief Parent class type.
-      using Parent =
-        MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
+      using Parent = MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
 
       /**
        * @brief Constructs the Jacobian of a P1 grid function.
@@ -146,8 +145,7 @@ namespace Rodin::Variational
        * For a vector function @f$ \mathbf{u}: \mathbb{R}^d \to \mathbb{R}^m @f$,
        * the Jacobian has @f$ m @f$ rows.
        */
-      constexpr
-      size_t getRows() const
+      constexpr size_t getRows() const
       {
         return getOperand().getFiniteElementSpace().getVectorDimension();
       }
@@ -159,8 +157,7 @@ namespace Rodin::Variational
        * For a vector function @f$ \mathbf{u}: \mathbb{R}^d \to \mathbb{R}^m @f$,
        * the Jacobian has @f$ d @f$ columns.
        */
-      constexpr
-      size_t getColumns() const
+      constexpr size_t getColumns() const
       {
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
@@ -246,8 +243,7 @@ namespace Rodin::Variational
        * @brief Gets the operand grid function.
        * @return Reference to the vector-valued grid function
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -257,8 +253,7 @@ namespace Rodin::Variational
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
-      constexpr
-      void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
+      constexpr void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
@@ -272,10 +267,10 @@ namespace Rodin::Variational
        * @param out Storage for the computed result.
        * @param ip Integration point at which the expression is evaluated.
        */
-      constexpr
-      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      constexpr void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, SpatialMatrixType& r, const IntegrationPoint& q) { f.interpolate(r, q); })
+        if constexpr (requires(const Derived& f, SpatialMatrixType& r,
+                        const IntegrationPoint& q) { f.interpolate(r, q); })
           static_cast<const Derived&>(*this).interpolate(out, ip);
         else
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
@@ -286,8 +281,8 @@ namespace Rodin::Variational
        * @param polytope Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(polytope);
       }
@@ -313,26 +308,32 @@ namespace Rodin::FormLanguage
     requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
   struct Traits<Variational::Jacobian<Variational::GridFunction<FES, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = typename Traits<FES>::ScalarType;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialTensor<ScalarType>;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = typename Traits<FES>::ScalarType;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialTensor<ScalarType>;
   };
+
   /// @brief Type traits for the matrix or tensor expression specialization.
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
     requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
   struct Traits<Variational::Jacobian<Variational::ShapeFunction<Derived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = typename Traits<FES>::ScalarType;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialTensor<ScalarType>;
-      /// @brief Trial or test shape-function space.
-      static constexpr auto SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = typename Traits<FES>::ScalarType;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialTensor<ScalarType>;
+
+    /// @brief Trial or test shape-function space.
+    static constexpr auto SpaceType = Space;
   };
 }
 namespace Rodin::Variational
@@ -350,12 +351,16 @@ namespace Rodin::Variational
     public:
       /// @brief CRTP or finite element base class.
       using Parent = FunctionBase<Jacobian>;
+
       /// @brief Cloned or referenced expression operand type.
       using OperandType = GridFunction<FES, Data>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
+
       /**
        * @brief Constructs a rank-three matrix Jacobian.
        * @param operand Operand expression.
@@ -363,6 +368,7 @@ namespace Rodin::Variational
       Jacobian(const OperandType& operand)
         : m_gradient(operand)
       {}
+
       /**
        * @brief Constructs a rank-three matrix Jacobian.
        * @param other Object to copy from.
@@ -371,6 +377,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
+
       /**
        * @brief Constructs a rank-three matrix Jacobian.
        * @param other Object to move from.
@@ -379,6 +386,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
+
       /**
        * @brief Returns the differentiated or indexed operand.
        * @returns The differentiated or indexed operand.
@@ -387,6 +395,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getOperand();
       }
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -400,6 +409,7 @@ namespace Rodin::Variational
         const auto gradient = gradientExpression.getValue(point);
         return gradient;
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -431,12 +441,16 @@ namespace Rodin::Variational
     public:
       /// @brief CRTP or finite element base class.
       using Parent = ShapeFunctionBase<Jacobian, FES, Space>;
+
       /// @brief Cloned or referenced expression operand type.
       using OperandType = ShapeFunction<Derived, FES, Space>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
+
       /**
        * @brief Constructs a rank-three matrix Jacobian.
        * @param operand Operand expression.
@@ -445,6 +459,7 @@ namespace Rodin::Variational
         : Parent(operand.getFiniteElementSpace()),
           m_gradient(operand)
       {}
+
       /**
        * @brief Constructs a rank-three matrix Jacobian.
        * @param other Object to copy from.
@@ -453,6 +468,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
+
       /**
        * @brief Constructs a rank-three matrix Jacobian.
        * @param other Object to move from.
@@ -461,6 +477,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
+
       /**
        * @brief Returns the differentiated or indexed operand.
        * @returns The differentiated or indexed operand.
@@ -469,6 +486,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getOperand();
       }
+
       /**
        * @brief Returns the leaf shape function used for assembly.
        * @returns The leaf shape function used for assembly.
@@ -477,6 +495,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getLeaf();
       }
+
       /**
        * @brief Returns the local basis count for the selected polytope.
        * @param poly Mesh entity used by this operation.
@@ -486,6 +505,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getDOFs(poly);
       }
+
       /**
        * @brief Returns the currently bound integration point.
        * @returns The currently bound integration point.
@@ -516,6 +536,7 @@ namespace Rodin::Variational
         m_gradient.setIntegrationPoint(point);
         return *this;
       }
+
       /**
        * @brief Returns a basis value at the bound integration point.
        * @param local Index in the local numbering.
@@ -526,6 +547,7 @@ namespace Rodin::Variational
         const auto gradient = m_gradient.getBasis(local);
         return gradient;
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -543,6 +565,7 @@ namespace Rodin::Variational
     private:
       Grad<OperandType> m_gradient;
   };
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param operand Operand expression.
@@ -551,6 +574,7 @@ namespace Rodin::Variational
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
   Jacobian(const GridFunction<FES, Data>& operand) -> Jacobian<GridFunction<FES, Data>>;
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param operand Operand expression.

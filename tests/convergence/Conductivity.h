@@ -56,6 +56,7 @@ namespace Rodin::Tests::Convergence
           return data.getSolution(p.getPhysicalCoordinates());
         });
       }
+
       /** Analytic extension at arbitrary physical coordinates, including lifts. */
       Real getSolution(const Math::SpatialPoint& p) const
       {
@@ -90,6 +91,7 @@ namespace Rodin::Tests::Convergence
             return data.getGradient(p.getPhysicalCoordinates());
           });
       }
+
       /** Physical gradient of the same extension; no mesh point is fabricated. */
       Math::SpatialVector<Real> getGradient(const Math::SpatialPoint& p) const
       {

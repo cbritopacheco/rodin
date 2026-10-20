@@ -66,6 +66,7 @@ namespace Rodin::Examples::Heart
 
       /// @brief Copy constructor.
       GradedYeoh(const GradedYeoh&) = default;
+
       /// @brief Move constructor.
       GradedYeoh(GradedYeoh&&) = default;
 

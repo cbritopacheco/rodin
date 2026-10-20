@@ -67,6 +67,7 @@ namespace Rodin::Tests::Benchmarks
 
     for (auto _ : st)
       poisson.assemble();
+
     /// @endcond
   }
 
@@ -88,6 +89,7 @@ namespace Rodin::Tests::Benchmarks
 
     for (auto _ : st)
       poisson.assemble();
+
     /// @endcond
   }
 }

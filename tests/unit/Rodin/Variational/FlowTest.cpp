@@ -26,7 +26,7 @@ namespace Rodin::Tests::Unit
       Mesh<Context::Local> getMesh()
       {
         Mesh mesh;
-        mesh = mesh.UniformGrid(GetParam(), { 8, 8 });
+        mesh = mesh.UniformGrid(GetParam(), {8, 8});
         mesh.scale(1.0 / 7.0);
         mesh.getConnectivity().compute(1, 2);
         return mesh;
@@ -45,10 +45,8 @@ namespace Rodin::Tests::Unit
     P1 vh(mesh);
 
     // Define constant velocity field: v = (0.1, 0.2)
-    auto velocity = VectorFunction{
-      RealFunction([](const Point&) { return 0.1; }),
-      RealFunction([](const Point&) { return 0.2; })
-    };
+    auto velocity = VectorFunction{RealFunction([](const Point&) { return 0.1; }),
+      RealFunction([](const Point&) { return 0.2; })};
 
     // Define the time step for advection
     Real dt = 0.1;
@@ -58,7 +56,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(vh);
 
     // Test that we can create points with the correct coordinate format
-    Math::SpatialVector<Real> coords{{ 0.5, 0.5 }};
+    Math::SpatialVector<Real> coords{{0.5, 0.5}};
     EXPECT_EQ(coords.size(), 2);
     EXPECT_NEAR(coords[0], 0.5, 1e-10);
     EXPECT_NEAR(coords[1], 0.5, 1e-10);
@@ -67,7 +65,7 @@ namespace Rodin::Tests::Unit
     auto polytope = mesh.getPolytope(2, 0);
     EXPECT_TRUE(polytope != mesh.getPolytope(2).end());
 
-    // Create the test point 
+    // Create the test point
     Geometry::Point testPoint(*polytope, coords);
 
     // Test velocity evaluation
@@ -87,25 +85,18 @@ namespace Rodin::Tests::Unit
     Mesh mesh = this->getMesh();
 
     // Test constant velocity field
-    auto constant_velocity = VectorFunction{
-      RealFunction([](const Point&) { return 1.0; }),
-      RealFunction([](const Point&) { return 0.5; })
-    };
+    auto constant_velocity =
+      VectorFunction{RealFunction([](const Point&) { return 1.0; }),
+        RealFunction([](const Point&) { return 0.5; })};
 
     // Test rotational velocity field: v = (-y, x)
-    auto rotational_velocity = VectorFunction{
-      -F::y,
-      F::x
-    };
+    auto rotational_velocity = VectorFunction{-F::y, F::x};
 
     // Test linear shear velocity field: v = (y, 0)
-    auto shear_velocity = VectorFunction{
-      F::y,
-      Zero()
-    };
+    auto shear_velocity = VectorFunction{F::y, Zero()};
 
     // Create a test point
-    Math::SpatialVector<Real> coords{{ 0.3, 0.4 }};
+    Math::SpatialVector<Real> coords{{0.3, 0.4}};
     auto polytope_iter = mesh.getPolytope(2, 0);
     Geometry::Point testPoint(*polytope_iter, coords);
 
@@ -147,7 +138,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(polytope != mesh.getPolytope(2).end());
 
     // Test coordinate creation and point construction
-    Math::SpatialVector<Real> coords{{ 0.25, 0.75 }};
+    Math::SpatialVector<Real> coords{{0.25, 0.75}};
     Geometry::Point testPoint(*polytope, coords);
 
     // Verify physical coordinates are reasonable (within [0,1]x[0,1])
@@ -159,11 +150,8 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates Flow Test over the Flow Mesh Params parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    FlowMeshParams,
-    FlowTest,
-    ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
-  );
+  INSTANTIATE_TEST_SUITE_P(FlowMeshParams, FlowTest,
+    ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle));
 }
 
 TEST(Rodin_Variational_Flow, ConstantCharacteristicCrossesCellsInBothDirections)

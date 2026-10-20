@@ -21,7 +21,7 @@ using namespace Rodin::Variational;
 /// @brief Verifies construction for variational boundary normal by checking exact expected values.
 TEST(Rodin_Variational_BoundaryNormal, Construction)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   BoundaryNormal n(mesh);
 
   EXPECT_EQ(n.getDimension(), mesh.getSpaceDimension());
@@ -30,7 +30,7 @@ TEST(Rodin_Variational_BoundaryNormal, Construction)
 /// @brief Verifies copy for variational boundary normal by checking exact expected values, copy semantics.
 TEST(Rodin_Variational_BoundaryNormal, Copy)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   BoundaryNormal n(mesh);
   auto copy = n;
 
@@ -40,7 +40,7 @@ TEST(Rodin_Variational_BoundaryNormal, Copy)
 /// @brief Verifies get order for variational boundary normal by checking exact expected values, true predicates.
 TEST(Rodin_Variational_BoundaryNormal, GetOrder)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
 
   BoundaryNormal n(mesh);
@@ -53,7 +53,7 @@ TEST(Rodin_Variational_BoundaryNormal, GetOrder)
 TEST(Rodin_Variational_BoundaryNormal, UnitNormalOnBoundary)
 {
   // Create a simple mesh and check normal at a boundary face
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   mesh.getConnectivity().compute(1, 2);
 
   BoundaryNormal n(mesh);
@@ -67,7 +67,7 @@ TEST(Rodin_Variational_BoundaryNormal, UnitNormalOnBoundary)
     if (mesh.isBoundary(polytope.getIndex()))
     {
       // Create a point on this boundary face
-      const Math::Vector<Real> rc{{ 0.5 }};
+      const Math::Vector<Real> rc{{0.5}};
       Point p(polytope, rc);
 
       auto val = n.getValue(p);

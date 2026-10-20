@@ -35,16 +35,20 @@ namespace Rodin::FormLanguage
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Number, Mesh>>
   {
-      /// @brief Mesh type.
-      using MeshType = Mesh;
-      /// @brief Scalar value type.
-      using ScalarType = Number;
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
-      /// @brief Execution context type.
-      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-      /// @brief Finite element type.
-      using ElementType = Variational::P0Element<RangeType>;
+    /// @brief Mesh type.
+    using MeshType = Mesh;
+
+    /// @brief Scalar value type.
+    using ScalarType = Number;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
+
+    /// @brief Execution context type.
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+
+    /// @brief Finite element type.
+    using ElementType = Variational::P0Element<RangeType>;
   };
 
   /**
@@ -54,16 +58,20 @@ namespace Rodin::FormLanguage
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Math::SpatialVector<Number>, Mesh>>
   {
-      /// @brief Mesh type.
-      using MeshType = Mesh;
-      /// @brief Scalar value type.
-      using ScalarType = Number;
-      /// @brief Range (evaluation value) type.
-      using RangeType = Math::SpatialVector<ScalarType>;
-      /// @brief Execution context type.
-      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-      /// @brief Finite element type.
-      using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
+    /// @brief Mesh type.
+    using MeshType = Mesh;
+
+    /// @brief Scalar value type.
+    using ScalarType = Number;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = Math::SpatialVector<ScalarType>;
+
+    /// @brief Execution context type.
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+
+    /// @brief Finite element type.
+    using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -152,8 +160,7 @@ namespace Rodin::Variational
 
       /// @brief Pullback of a P0 function to the reference element.
       template <class Callable>
-      class Pullback :
-        public FiniteElementSpacePullbackBase<Pullback<Callable>>
+      class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
           /// @brief Callable type evaluated on physical points.
@@ -166,7 +173,8 @@ namespace Rodin::Variational
            */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
-            : m_polytope(polytope), m_v(std::forward<Function>(v))
+            : m_polytope(polytope),
+              m_v(std::forward<Function>(v))
           {}
 
           /**
@@ -193,8 +201,7 @@ namespace Rodin::Variational
 
       /// @brief Pushforward of a P0 function to the physical element.
       template <class Callable>
-      class Pushforward :
-        public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
           /// @brief Callable type evaluated on physical points.
@@ -220,8 +227,7 @@ namespace Rodin::Variational
            * @param p Point at which the operation is evaluated.
            * @returns Value of the expression at the supplied evaluation point.
            */
-          constexpr
-          auto operator()(const Geometry::Point& p) const
+          constexpr auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
           }
@@ -275,6 +281,7 @@ namespace Rodin::Variational
        * @return Reference to this P0 space
        */
       P0& operator=(P0&& other) = default;
+
       /// @brief Assigns the scalar basis and matrix component dimensions.
       P0& operator=(const P0& other) = default;
 
@@ -382,7 +389,7 @@ namespace Rodin::Variational
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         assert(d == getMesh().getDimension());
-        (void) d;
+        (void)d;
         return m_dofs.at(i);
       }
 
@@ -395,7 +402,8 @@ namespace Rodin::Variational
        * For P0, the global DOF index equals the cell index since there
        * is one DOF per cell.
        */
-      Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
+      Index getGlobalIndex(
+        const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
         assert(d == getMesh().getDimension());
@@ -453,14 +461,19 @@ namespace Rodin::Variational
     public:
       /// Scalar type of each vector component.
       using ScalarType = Scalar;
+
       /// Vector-valued range of the space.
       using RangeType = Math::SpatialVector<Scalar>;
+
       /// Local mesh context.
       using ContextType = Context::Local;
+
       /// Mesh supporting the cellwise constant field.
       using MeshType = Geometry::Mesh<ContextType>;
+
       /// Vector constant finite element.
       using ElementType = P0Element<RangeType>;
+
       /// Common finite element space interface.
       using Parent = FiniteElementSpace<MeshType, P0<RangeType, MeshType>>;
 
@@ -560,6 +573,7 @@ namespace Rodin::Variational
        * @param other Object to copy from.
        */
       P0(const P0& other) = default;
+
       /// Moves the space while retaining its mesh reference.
       /**
        * @brief Move constructor.
@@ -665,16 +679,20 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Mesh>
   struct Traits<Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>>
   {
-      /// @brief Mesh type supplying topology and physical transformations.
-      using MeshType = Mesh;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = Scalar;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialMatrix<Scalar>;
-      /// @brief Local or distributed execution context.
-      using ContextType = typename Traits<Mesh>::ContextType;
-      /// @brief Reference finite element type.
-      using ElementType = Variational::P0Element<Math::SpatialMatrix<Scalar>>;
+    /// @brief Mesh type supplying topology and physical transformations.
+    using MeshType = Mesh;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = Scalar;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialMatrix<Scalar>;
+
+    /// @brief Local or distributed execution context.
+    using ContextType = typename Traits<Mesh>::ContextType;
+
+    /// @brief Reference finite element type.
+    using ElementType = Variational::P0Element<Math::SpatialMatrix<Scalar>>;
   };
 }
 
@@ -689,19 +707,26 @@ namespace Rodin::Variational
     public:
       /// @brief Mesh and execution context of this specialization.
       using MeshType = Geometry::Mesh<Context::Local>;
+
       /// @brief Scalar space supplying this family's DOF numbering.
       using ScalarSpace = P0<Scalar, Geometry::Mesh<Context::Local>>;
+
       /// @brief Matrix reference element for this family.
       using ElementType = P0Element<Math::SpatialMatrix<Scalar>>;
+
       /// @brief Existing finite-element-space interface.
       using Parent = FiniteElementSpace<MeshType,
         P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename ScalarSpace::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief Local or distributed execution context.
       using ContextType = typename ScalarSpace::ContextType;
+
       /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
       P0(const MeshType& mesh, size_t rows, size_t cols)
         : m_scalar(ScalarSpace(mesh)),
@@ -739,10 +764,13 @@ namespace Rodin::Variational
 
       /// @brief Copies the space and its DOF maps.
       P0(const P0&) = default;
+
       /// @brief Moves the space and its DOF maps.
       P0(P0&&) = default;
+
       /// @brief Copies the space and its DOF maps.
       P0& operator=(const P0&) = default;
+
       /// @brief Moves the space and its DOF maps.
       P0& operator=(P0&&) = default;
 
@@ -754,11 +782,13 @@ namespace Rodin::Variational
       {
         return m_rows * m_cols;
       }
+
       /// @brief Returns the number of matrix rows.
       size_t getRows() const
       {
         return m_rows;
       }
+
       /// @brief Returns the number of matrix columns.
       size_t getColumns() const
       {
@@ -768,6 +798,7 @@ namespace Rodin::Variational
       {
         return m_scalar.getMesh();
       }
+
       /// @brief Returns the scalar space supplying topology and component-independent maps.
       const ScalarSpace& getScalarSpace() const
       {

@@ -14,13 +14,14 @@
 namespace Rodin::Geometry
 {
   Connectivity<Context::Local>::Connectivity()
-    : m_maximalDimension(0), m_dimension(0)
+    : m_maximalDimension(0),
+      m_dimension(0)
   {
     m_count.resize(1, 0);
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::initialize(size_t maximalDimension)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::initialize(
+    size_t maximalDimension)
   {
     m_maximalDimension = maximalDimension;
     m_dimension = 0;
@@ -46,8 +47,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::reserve(size_t d, size_t count)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::reserve(
+    size_t d, size_t count)
   {
     assert(d < m_connectivity.size());
     m_index[d].left.reserve(count);
@@ -65,15 +66,15 @@ namespace Rodin::Geometry
     m_gcount[Geometry::Polytope::Type::Point] = count;
     for (size_t i = 0; i < count; i++)
     {
-      const auto p = m_index[0].right.insert({ Polytope::Key( {i }), i });
+      const auto p = m_index[0].right.insert({Polytope::Key({i}), i});
       assert(p.second);
       m_index[0].left.push_back(&p.first->first);
     }
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::polytope(Polytope::Type t, const Polytope::Key& in)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::polytope(
+    Polytope::Type t, const Polytope::Key& in)
   {
     Index index;
     return polytope(t, in, index);
@@ -86,7 +87,7 @@ namespace Rodin::Geometry
     const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
-    const auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
+    const auto [it, inserted] = m_index[d].right.insert({in, m_count[d]});
     index = it->second;
     if (inserted)
     {
@@ -103,8 +104,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::polytope(Polytope::Type t, Polytope::Key&& in)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::polytope(
+    Polytope::Type t, Polytope::Key&& in)
   {
     Index index;
     return polytope(t, std::move(in), index);
@@ -117,7 +118,7 @@ namespace Rodin::Geometry
     const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
-    const auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });
+    const auto [it, inserted] = m_index[d].right.insert({std::move(in), m_count[d]});
     index = it->second;
     if (inserted)
     {
@@ -140,8 +141,8 @@ namespace Rodin::Geometry
     return m_index[dim];
   }
 
-  const Optional<Index>
-  Connectivity<Context::Local>::getIndex(size_t dim, const Polytope::Key& key) const
+  const Optional<Index> Connectivity<Context::Local>::getIndex(
+    size_t dim, const Polytope::Key& key) const
   {
     const auto it = m_index[dim].right.find(key);
     if (it == m_index[dim].right.end())
@@ -158,7 +159,7 @@ namespace Rodin::Geometry
   }
 
   const IndexVector& Connectivity<Context::Local>::getIncidence(
-      const std::pair<size_t, size_t> p, Index idx) const
+    const std::pair<size_t, size_t> p, Index idx) const
   {
     const auto& [d, dp] = p;
     assert(d < m_connectivity.size());
@@ -190,15 +191,16 @@ namespace Rodin::Geometry
       return m_geometry[d][idx];
   }
 
-  const Polytope::Key& Connectivity<Context::Local>::getPolytope(size_t d, Index idx) const
+  const Polytope::Key& Connectivity<Context::Local>::getPolytope(
+    size_t d, Index idx) const
   {
     const Polytope::Key* p = m_index[d].left[idx];
     assert(p);
     return *p;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::setIncidence(const std::pair<size_t, size_t>& p, Incidence&& inc)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::setIncidence(
+    const std::pair<size_t, size_t>& p, Incidence&& inc)
   {
     const auto& [d, dp] = p;
     assert(d < m_connectivity.size());
@@ -210,18 +212,20 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>& Connectivity<Context::Local>::discover(size_t d, size_t dp)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::discover(
+    size_t d, size_t dp)
   {
     return this->compute(d, dp, Mode::Discover);
   }
 
-  Connectivity<Context::Local>& Connectivity<Context::Local>::restrict(size_t d, size_t dp)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::restrict(
+    size_t d, size_t dp)
   {
     return this->compute(d, dp, Mode::Restrict);
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::compute(size_t d, size_t dp, Mode mode)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::compute(
+    size_t d, size_t dp, Mode mode)
   {
     if (getCount(0) == 0)
       return *this;
@@ -259,8 +263,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::build(size_t d, Mode mode)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::build(size_t d, Mode mode)
   {
     const size_t D = getDimension();
     assert(d > 0);
@@ -293,8 +296,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::local(size_t i, size_t d, Mode mode)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::local(
+    size_t i, size_t d, Mode mode)
   {
     static thread_local std::vector<SubPolytope> subpolytopes;
     std::vector<Index> s;
@@ -315,7 +318,7 @@ namespace Rodin::Geometry
       {
         case Mode::Discover:
         {
-          auto insert = m_index[d].right.insert({ std::move(vertices), m_count[d] });
+          auto insert = m_index[d].right.insert({std::move(vertices), m_count[d]});
           const auto it = insert.first;
           const bool inserted = insert.second;
           const auto& arr = it->first;
@@ -355,8 +358,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::transpose(size_t d, size_t dp)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::transpose(
+    size_t d, size_t dp)
   {
     static thread_local std::vector<size_t> s_mark;
     static thread_local size_t s_epoch = 1;
@@ -406,8 +409,8 @@ namespace Rodin::Geometry
         const Index j = v[r];
         if (s_mark[j] != s_epoch)
         {
-            s_mark[j] = s_epoch;
-            v[write++] = j;
+          s_mark[j] = s_epoch;
+          v[write++] = j;
         }
       }
       v.resize(write);
@@ -417,8 +420,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::intersection(size_t d, size_t dp, size_t dpp)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::intersection(
+    size_t d, size_t dp, size_t dpp)
   {
     static thread_local std::vector<size_t> s_markJ;
     static thread_local size_t s_epochJ = 1;
@@ -436,9 +439,9 @@ namespace Rodin::Geometry
     assert(0 < m_connectivity[d].size());
     assert(0 < m_connectivity[dp].size());
 
-    const Index n_d  = m_count[d];
+    const Index n_d = m_count[d];
     const Index n_dp = m_count[dp];
-    const Index n_0  = m_count[0];
+    const Index n_0 = m_count[0];
 
     m_connectivity[d][dp].assign(n_d, {});
 
@@ -510,7 +513,7 @@ namespace Rodin::Geometry
   }
 
   void Connectivity<Context::Local>::getSubPolytopes(
-      std::vector<SubPolytope>& out, Index i, size_t dim) const
+    std::vector<SubPolytope>& out, Index i, size_t dim) const
   {
     const size_t D = getDimension();
     const auto& p = *m_index[D].left[i];
@@ -521,7 +524,7 @@ namespace Rodin::Geometry
         assert(dim == 0);
         assert(p.size() == 1);
         out.resize(1);
-        out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
+        out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
         return;
       }
       case Polytope::Type::Segment:
@@ -531,14 +534,14 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(2);
-          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
-          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
+          out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
+          out[1] = {Polytope::Type::Point, Polytope::Key({p(1)})};
         }
         else if (dim == 1)
         {
           // Local segment orientation: (0 -> 1)
           out.resize(1);
-          out[0] = { Polytope::Type::Segment, p };
+          out[0] = {Polytope::Type::Segment, p};
         }
         else
         {
@@ -554,23 +557,23 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(3);
-          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
-          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
-          out[2] = { Polytope::Type::Point, Polytope::Key({ p(2) }) };
+          out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
+          out[1] = {Polytope::Type::Point, Polytope::Key({p(1)})};
+          out[2] = {Polytope::Type::Point, Polytope::Key({p(2)})};
         }
         else if (dim == 1)
         {
           // Triangle edges in CCW loop: (0->1), (1->2), (2->0)
           out.resize(3);
-          out[0] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(1) }) };
-          out[1] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(2) }) };
-          out[2] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(0) }) };
+          out[0] = {Polytope::Type::Segment, Polytope::Key({p(0), p(1)})};
+          out[1] = {Polytope::Type::Segment, Polytope::Key({p(1), p(2)})};
+          out[2] = {Polytope::Type::Segment, Polytope::Key({p(2), p(0)})};
         }
         else if (dim == 2)
         {
           // Face orientation: (0,1,2) = reference CCW triangle
           out.resize(1);
-          out[0] = { Polytope::Type::Triangle, p };
+          out[0] = {Polytope::Type::Triangle, p};
         }
         else
         {
@@ -586,25 +589,25 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(4);
-          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
-          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
-          out[2] = { Polytope::Type::Point, Polytope::Key({ p(2) }) };
-          out[3] = { Polytope::Type::Point, Polytope::Key({ p(3) }) };
+          out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
+          out[1] = {Polytope::Type::Point, Polytope::Key({p(1)})};
+          out[2] = {Polytope::Type::Point, Polytope::Key({p(2)})};
+          out[3] = {Polytope::Type::Point, Polytope::Key({p(3)})};
         }
         else if (dim == 1)
         {
           // Quad edges in CCW loop: (0->1->2->3->0)
           out.resize(4);
-          out[0] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(1) }) };
-          out[1] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(2) }) };
-          out[2] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(3) }) };
-          out[3] = { Polytope::Type::Segment, Polytope::Key({ p(3), p(0) }) };
+          out[0] = {Polytope::Type::Segment, Polytope::Key({p(0), p(1)})};
+          out[1] = {Polytope::Type::Segment, Polytope::Key({p(1), p(2)})};
+          out[2] = {Polytope::Type::Segment, Polytope::Key({p(2), p(3)})};
+          out[3] = {Polytope::Type::Segment, Polytope::Key({p(3), p(0)})};
         }
         else if (dim == 2)
         {
           // Face orientation: (0,1,2,3) = CCW quad
           out.resize(1);
-          out[0] = { Polytope::Type::Quadrilateral, p };
+          out[0] = {Polytope::Type::Quadrilateral, p};
         }
         else
         {
@@ -620,35 +623,39 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(4);
-          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
-          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
-          out[2] = { Polytope::Type::Point, Polytope::Key({ p(2) }) };
-          out[3] = { Polytope::Type::Point, Polytope::Key({ p(3) }) };
+          out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
+          out[1] = {Polytope::Type::Point, Polytope::Key({p(1)})};
+          out[2] = {Polytope::Type::Point, Polytope::Key({p(2)})};
+          out[3] = {Polytope::Type::Point, Polytope::Key({p(3)})};
         }
         else if (dim == 1)
         {
           // Edge list: (0,1),(0,2),(0,3),(1,2),(1,3),(2,3)
           out.resize(6);
-          out[0] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(1) }) };
-          out[1] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(2) }) };
-          out[2] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(3) }) };
-          out[3] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(2) }) };
-          out[4] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(3) }) };
-          out[5] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(3) }) };
+          out[0] = {Polytope::Type::Segment, Polytope::Key({p(0), p(1)})};
+          out[1] = {Polytope::Type::Segment, Polytope::Key({p(0), p(2)})};
+          out[2] = {Polytope::Type::Segment, Polytope::Key({p(0), p(3)})};
+          out[3] = {Polytope::Type::Segment, Polytope::Key({p(1), p(2)})};
+          out[4] = {Polytope::Type::Segment, Polytope::Key({p(1), p(3)})};
+          out[5] = {Polytope::Type::Segment, Polytope::Key({p(2), p(3)})};
         }
         else if (dim == 2)
         {
           // Faces oriented to match \partial[0,1,2,3] = [1,2,3] - [0,2,3] + [0,1,3] - [0,1,2]
           out.resize(4);
-          out[0] = { Polytope::Type::Triangle, Polytope::Key({ p(1), p(2), p(3) }) }; // +[1,2,3]
-          out[1] = { Polytope::Type::Triangle, Polytope::Key({ p(0), p(3), p(2) }) }; // -[0,2,3]
-          out[2] = { Polytope::Type::Triangle, Polytope::Key({ p(0), p(1), p(3) }) }; // +[0,1,3]
-          out[3] = { Polytope::Type::Triangle, Polytope::Key({ p(0), p(2), p(1) }) }; // -[0,1,2]
+          out[0] = {
+            Polytope::Type::Triangle, Polytope::Key({p(1), p(2), p(3)})}; // +[1,2,3]
+          out[1] = {
+            Polytope::Type::Triangle, Polytope::Key({p(0), p(3), p(2)})}; // -[0,2,3]
+          out[2] = {
+            Polytope::Type::Triangle, Polytope::Key({p(0), p(1), p(3)})}; // +[0,1,3]
+          out[3] = {
+            Polytope::Type::Triangle, Polytope::Key({p(0), p(2), p(1)})}; // -[0,1,2]
         }
         else if (dim == 3)
         {
           out.resize(1);
-          out[0] = { Polytope::Type::Tetrahedron, p };
+          out[0] = {Polytope::Type::Tetrahedron, p};
         }
         else
         {
@@ -715,14 +722,14 @@ namespace Rodin::Geometry
         {
           // 8 vertices
           out.resize(8);
-          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
-          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
-          out[2] = { Polytope::Type::Point, Polytope::Key({ p(2) }) };
-          out[3] = { Polytope::Type::Point, Polytope::Key({ p(3) }) };
-          out[4] = { Polytope::Type::Point, Polytope::Key({ p(4) }) };
-          out[5] = { Polytope::Type::Point, Polytope::Key({ p(5) }) };
-          out[6] = { Polytope::Type::Point, Polytope::Key({ p(6) }) };
-          out[7] = { Polytope::Type::Point, Polytope::Key({ p(7) }) };
+          out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
+          out[1] = {Polytope::Type::Point, Polytope::Key({p(1)})};
+          out[2] = {Polytope::Type::Point, Polytope::Key({p(2)})};
+          out[3] = {Polytope::Type::Point, Polytope::Key({p(3)})};
+          out[4] = {Polytope::Type::Point, Polytope::Key({p(4)})};
+          out[5] = {Polytope::Type::Point, Polytope::Key({p(5)})};
+          out[6] = {Polytope::Type::Point, Polytope::Key({p(6)})};
+          out[7] = {Polytope::Type::Point, Polytope::Key({p(7)})};
         }
         else if (dim == 1)
         {
@@ -731,20 +738,20 @@ namespace Rodin::Geometry
           // top:    (4->5),(5->6),(6->7),(7->4)  (CCW in (x,y))
           // verts:  (0->4),(1->5),(2->6),(3->7)
           out.resize(12);
-          out[0]  = { Polytope::Type::Segment, Polytope::Key({ p(0), p(1) }) };
-          out[1]  = { Polytope::Type::Segment, Polytope::Key({ p(1), p(2) }) };
-          out[2]  = { Polytope::Type::Segment, Polytope::Key({ p(2), p(3) }) };
-          out[3]  = { Polytope::Type::Segment, Polytope::Key({ p(3), p(0) }) };
+          out[0] = {Polytope::Type::Segment, Polytope::Key({p(0), p(1)})};
+          out[1] = {Polytope::Type::Segment, Polytope::Key({p(1), p(2)})};
+          out[2] = {Polytope::Type::Segment, Polytope::Key({p(2), p(3)})};
+          out[3] = {Polytope::Type::Segment, Polytope::Key({p(3), p(0)})};
 
-          out[4]  = { Polytope::Type::Segment, Polytope::Key({ p(4), p(5) }) };
-          out[5]  = { Polytope::Type::Segment, Polytope::Key({ p(5), p(6) }) };
-          out[6]  = { Polytope::Type::Segment, Polytope::Key({ p(6), p(7) }) };
-          out[7]  = { Polytope::Type::Segment, Polytope::Key({ p(7), p(4) }) };
+          out[4] = {Polytope::Type::Segment, Polytope::Key({p(4), p(5)})};
+          out[5] = {Polytope::Type::Segment, Polytope::Key({p(5), p(6)})};
+          out[6] = {Polytope::Type::Segment, Polytope::Key({p(6), p(7)})};
+          out[7] = {Polytope::Type::Segment, Polytope::Key({p(7), p(4)})};
 
-          out[8]  = { Polytope::Type::Segment, Polytope::Key({ p(0), p(4) }) };
-          out[9]  = { Polytope::Type::Segment, Polytope::Key({ p(1), p(5) }) };
-          out[10] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(6) }) };
-          out[11] = { Polytope::Type::Segment, Polytope::Key({ p(3), p(7) }) };
+          out[8] = {Polytope::Type::Segment, Polytope::Key({p(0), p(4)})};
+          out[9] = {Polytope::Type::Segment, Polytope::Key({p(1), p(5)})};
+          out[10] = {Polytope::Type::Segment, Polytope::Key({p(2), p(6)})};
+          out[11] = {Polytope::Type::Segment, Polytope::Key({p(3), p(7)})};
         }
         else if (dim == 2)
         {
@@ -760,17 +767,23 @@ namespace Rodin::Geometry
           // side 3: (3,0,4,7) (attached to edge 3->0)
           // top:    (4,5,6,7)
           out.resize(6);
-          out[0] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(0), p(1), p(2), p(3) }) };
-          out[1] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(0), p(1), p(5), p(4) }) };
-          out[2] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(1), p(2), p(6), p(5) }) };
-          out[3] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(2), p(3), p(7), p(6) }) };
-          out[4] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(3), p(0), p(4), p(7) }) };
-          out[5] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(4), p(5), p(6), p(7) }) };
+          out[0] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(0), p(1), p(2), p(3)})};
+          out[1] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(0), p(1), p(5), p(4)})};
+          out[2] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(1), p(2), p(6), p(5)})};
+          out[3] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(2), p(3), p(7), p(6)})};
+          out[4] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(3), p(0), p(4), p(7)})};
+          out[5] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(4), p(5), p(6), p(7)})};
         }
         else if (dim == 3)
         {
           out.resize(1);
-          out[0] = { Polytope::Type::Hexahedron, p };
+          out[0] = {Polytope::Type::Hexahedron, p};
         }
         else
         {
@@ -786,12 +799,12 @@ namespace Rodin::Geometry
         if (dim == 0)
         {
           out.resize(6);
-          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
-          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
-          out[2] = { Polytope::Type::Point, Polytope::Key({ p(2) }) };
-          out[3] = { Polytope::Type::Point, Polytope::Key({ p(3) }) };
-          out[4] = { Polytope::Type::Point, Polytope::Key({ p(4) }) };
-          out[5] = { Polytope::Type::Point, Polytope::Key({ p(5) }) };
+          out[0] = {Polytope::Type::Point, Polytope::Key({p(0)})};
+          out[1] = {Polytope::Type::Point, Polytope::Key({p(1)})};
+          out[2] = {Polytope::Type::Point, Polytope::Key({p(2)})};
+          out[3] = {Polytope::Type::Point, Polytope::Key({p(3)})};
+          out[4] = {Polytope::Type::Point, Polytope::Key({p(4)})};
+          out[5] = {Polytope::Type::Point, Polytope::Key({p(5)})};
         }
         else if (dim == 1)
         {
@@ -800,15 +813,15 @@ namespace Rodin::Geometry
           // top:    (3->4),(4->5),(5->3)
           // verts:  (0->3),(1->4),(2->5)
           out.resize(9);
-          out[0] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(1) }) };
-          out[1] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(2) }) };
-          out[2] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(0) }) };
-          out[3] = { Polytope::Type::Segment, Polytope::Key({ p(3), p(4) }) };
-          out[4] = { Polytope::Type::Segment, Polytope::Key({ p(4), p(5) }) };
-          out[5] = { Polytope::Type::Segment, Polytope::Key({ p(5), p(3) }) };
-          out[6] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(3) }) };
-          out[7] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(4) }) };
-          out[8] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(5) }) };
+          out[0] = {Polytope::Type::Segment, Polytope::Key({p(0), p(1)})};
+          out[1] = {Polytope::Type::Segment, Polytope::Key({p(1), p(2)})};
+          out[2] = {Polytope::Type::Segment, Polytope::Key({p(2), p(0)})};
+          out[3] = {Polytope::Type::Segment, Polytope::Key({p(3), p(4)})};
+          out[4] = {Polytope::Type::Segment, Polytope::Key({p(4), p(5)})};
+          out[5] = {Polytope::Type::Segment, Polytope::Key({p(5), p(3)})};
+          out[6] = {Polytope::Type::Segment, Polytope::Key({p(0), p(3)})};
+          out[7] = {Polytope::Type::Segment, Polytope::Key({p(1), p(4)})};
+          out[8] = {Polytope::Type::Segment, Polytope::Key({p(2), p(5)})};
         }
         else if (dim == 2)
         {
@@ -817,16 +830,19 @@ namespace Rodin::Geometry
           // top    tri: (3,5,4) (flipped to match prism boundary orientation)
           // quads: (0,1,4,3), (1,2,5,4), (2,0,3,5)
           out.resize(5);
-          out[0] = { Polytope::Type::Triangle,      Polytope::Key({ p(0), p(1), p(2) }) };
-          out[1] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(0), p(1), p(4), p(3) }) };
-          out[2] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(1), p(2), p(5), p(4) }) };
-          out[3] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(2), p(0), p(3), p(5) }) };
-          out[4] = { Polytope::Type::Triangle,      Polytope::Key({ p(3), p(5), p(4) }) };
+          out[0] = {Polytope::Type::Triangle, Polytope::Key({p(0), p(1), p(2)})};
+          out[1] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(0), p(1), p(4), p(3)})};
+          out[2] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(1), p(2), p(5), p(4)})};
+          out[3] = {
+            Polytope::Type::Quadrilateral, Polytope::Key({p(2), p(0), p(3), p(5)})};
+          out[4] = {Polytope::Type::Triangle, Polytope::Key({p(3), p(5), p(4)})};
         }
         else if (dim == 3)
         {
           out.resize(1);
-          out[0] = { Polytope::Type::Wedge, p };
+          out[0] = {Polytope::Type::Wedge, p};
         }
         else
         {
@@ -840,8 +856,7 @@ namespace Rodin::Geometry
     out = {};
   }
 
-  Connectivity<Context::Local>&
-  Connectivity<Context::Local>::clear(size_t d, size_t dp)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::clear(size_t d, size_t dp)
   {
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
@@ -850,7 +865,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Connectivity<Context::Local>& Connectivity<Context::Local>::setDirty(size_t d, size_t dp, bool dirty)
+  Connectivity<Context::Local>& Connectivity<Context::Local>::setDirty(
+    size_t d, size_t dp, bool dirty)
   {
     if (d >= m_dirty.size() || dp >= m_dirty[d].size())
     {
@@ -878,4 +894,5 @@ namespace Rodin::Geometry
     return m_maximalDimension;
   }
 }
+
 /// @endcond

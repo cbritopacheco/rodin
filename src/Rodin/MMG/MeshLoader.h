@@ -27,7 +27,7 @@ namespace Rodin::MMG
    */
   class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Local>
   {
-   public:
+    public:
       /// Base MEDIT loader type.
       using Parent = IO::MeshLoader<IO::FileFormat::MEDIT, Context::Local>;
 
@@ -53,7 +53,7 @@ namespace Rodin::MMG
       MMG::Mesh& getObject() override
       {
         return m_mesh.get();
-     }
+      }
 
     private:
       /**

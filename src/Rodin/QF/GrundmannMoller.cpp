@@ -28,7 +28,8 @@ namespace Rodin::QF
    */
   boost::multi_array<size_t, 2> GrundmannMoller::initSizes()
   {
-    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
+    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1]
+                                       [RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
     boost::multi_array<size_t, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
@@ -48,7 +49,8 @@ namespace Rodin::QF
    */
   boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::initWeights()
   {
-    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
+    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1]
+                                       [RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
     boost::multi_array<Math::Vector<Real>, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
@@ -114,9 +116,11 @@ namespace Rodin::QF
    * of simplex dimension @f$ n @f$ and parameter @f$ s @f$. The points
    * are located in barycentric coordinates within the reference simplex.
    */
-  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::initPoints()
+  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>
+  GrundmannMoller::initPoints()
   {
-    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1][RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
+    const auto extents = boost::extents[RODIN_MAXIMAL_SPACE_DIMENSION + 1]
+                                       [RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1];
     boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> res(extents);
     for (size_t n = 0; n <= RODIN_MAXIMAL_SPACE_DIMENSION; n++)
     {
@@ -124,7 +128,7 @@ namespace Rodin::QF
       if (n == 0)
       {
         for (size_t s = 0; s <= RODIN_QF_GRUNDMANNMOLLER_MAX_S; s++)
-          res[0][s] = { Math::SpatialVector<Real>{ 0 } };
+          res[0][s] = {Math::SpatialVector<Real>{0}};
         continue;
       }
 

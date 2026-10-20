@@ -168,9 +168,7 @@ TEST_F(LinearSystemTest, DenseMatrixEliminate)
   ls.getVector().resize(3);
 
   // Set up matrix and vector
-  ls.getOperator() << 2, 1, 0,
-                       1, 3, 1,
-                       0, 1, 2;
+  ls.getOperator() << 2, 1, 0, 1, 3, 1, 0, 1, 2;
 
   ls.getVector() << 1, 2, 3;
 
@@ -211,7 +209,7 @@ TEST_F(LinearSystemTest, ComplexLinearSystem)
   x.resize(2);
   b.resize(2);
 
-  Complex i(0, 1);  // imaginary unit
+  Complex i(0, 1); // imaginary unit
   A(0, 0) = Complex(1, 0);
   A(0, 1) = i;
   A(1, 0) = -i;
@@ -373,10 +371,7 @@ TEST_F(LinearSystemTest, MultipleDOFElimination)
   ls.getVector().resize(4);
   ls.getSolution().resize(4);
 
-  ls.getOperator() << 4, 1, 0, 0,
-                       1, 4, 1, 0,
-                       0, 1, 4, 1,
-                       0, 0, 1, 4;
+  ls.getOperator() << 4, 1, 0, 0, 1, 4, 1, 0, 0, 1, 4, 1, 0, 0, 1, 4;
   ls.getVector() << 1, 2, 3, 4;
 
   // Eliminate DOFs 0 and 3 simultaneously
@@ -453,9 +448,7 @@ TEST_F(LinearSystemTest, DenseEliminateThenSolve)
   ls.getVector().resize(3);
   ls.getSolution().resize(3);
 
-  ls.getOperator() << 2, -1, 0,
-                       -1, 2, -1,
-                        0, -1, 2;
+  ls.getOperator() << 2, -1, 0, -1, 2, -1, 0, -1, 2;
   ls.getVector() << 0, 1, 0;
 
   // Eliminate DOFs 0 and 2 with value 0

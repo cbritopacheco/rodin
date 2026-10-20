@@ -127,9 +127,7 @@ namespace Rodin::IO
    * const char* name = toCharString(FileFormat::MFEM);  // Returns "MFEM"
    * ```
    */
-  inline
-  constexpr
-  const char* toCharString(FileFormat fmt)
+  inline constexpr const char* toCharString(FileFormat fmt)
   {
     switch (fmt)
     {
@@ -158,8 +156,7 @@ namespace Rodin::IO
    * std::cout << FileFormat::MEDIT;  // Outputs "MEDIT"
    * ```
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, FileFormat fmt)
+  inline std::ostream& operator<<(std::ostream& os, FileFormat fmt)
   {
     if (const auto* name = toCharString(fmt))
       os << name;

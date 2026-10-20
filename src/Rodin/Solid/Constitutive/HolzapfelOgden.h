@@ -45,47 +45,63 @@ namespace Rodin::Solid
       /// @brief Material parameters for the Holzapfel-Ogden law.
       struct Parameters
       {
-          /// @brief Isochoric first-invariant coefficient.
-          Real mu1 = 0.0;
-          /// @brief Isochoric second-invariant coefficient.
-          Real mu2 = 0.0;
-          /// @brief Exponential first-invariant scale.
-          Real C0 = 0.0;
-          /// @brief Exponential first-invariant stiffness.
-          Real C1 = 0.0;
-          /// @brief Fiber exponential scale.
-          Real C2 = 0.0;
-          /// @brief Fiber exponential stiffness.
-          Real C3 = 0.0;
-          /// @brief Volumetric penalty coefficient.
-          Real kappa = 0.0;
+        /// @brief Isochoric first-invariant coefficient.
+        Real mu1 = 0.0;
+
+        /// @brief Isochoric second-invariant coefficient.
+        Real mu2 = 0.0;
+
+        /// @brief Exponential first-invariant scale.
+        Real C0 = 0.0;
+
+        /// @brief Exponential first-invariant stiffness.
+        Real C1 = 0.0;
+
+        /// @brief Fiber exponential scale.
+        Real C2 = 0.0;
+
+        /// @brief Fiber exponential stiffness.
+        Real C3 = 0.0;
+
+        /// @brief Volumetric penalty coefficient.
+        Real kappa = 0.0;
       };
 
       /// @brief Cached invariant values and fiber direction.
       struct Cache
       {
-          /// @brief First invariant of the right Cauchy-Green tensor.
-          Real I1 = 0.0;
-          /// @brief Second invariant of the right Cauchy-Green tensor.
-          Real I2 = 0.0;
-          /// @brief Third invariant of the right Cauchy-Green tensor.
-          Real I3 = 1.0;
-          /// @brief Fiber invariant.
-          Real I4 = 1.0;
-          /// @brief Jacobian determinant.
-          Real J = 1.0;
-          /// @brief Cached @f$I_3^{-1/3}@f$.
-          Real I3m13 = 1.0;
-          /// @brief Cached @f$I_3^{-2/3}@f$.
-          Real I3m23 = 1.0;
-          /// @brief Isochoric first invariant.
-          Real I1bar = 0.0;
-          /// @brief Isochoric second invariant.
-          Real I2bar = 0.0;
-          /// @brief Isochoric fiber invariant.
-          Real I4bar = 1.0;
-          /// @brief Reference fiber direction.
-          Math::SpatialVector<Real> direction;
+        /// @brief First invariant of the right Cauchy-Green tensor.
+        Real I1 = 0.0;
+
+        /// @brief Second invariant of the right Cauchy-Green tensor.
+        Real I2 = 0.0;
+
+        /// @brief Third invariant of the right Cauchy-Green tensor.
+        Real I3 = 1.0;
+
+        /// @brief Fiber invariant.
+        Real I4 = 1.0;
+
+        /// @brief Jacobian determinant.
+        Real J = 1.0;
+
+        /// @brief Cached @f$I_3^{-1/3}@f$.
+        Real I3m13 = 1.0;
+
+        /// @brief Cached @f$I_3^{-2/3}@f$.
+        Real I3m23 = 1.0;
+
+        /// @brief Isochoric first invariant.
+        Real I1bar = 0.0;
+
+        /// @brief Isochoric second invariant.
+        Real I2bar = 0.0;
+
+        /// @brief Isochoric fiber invariant.
+        Real I4bar = 1.0;
+
+        /// @brief Reference fiber direction.
+        Math::SpatialVector<Real> direction;
       };
 
       /**
@@ -195,6 +211,7 @@ namespace Rodin::Solid
       {
         return x * x;
       }
+
       /**
        * @brief Updates the material cache from the kinematic state.
        * @param cache Constitutive cache used or updated by the evaluation.
@@ -218,6 +235,7 @@ namespace Rodin::Solid
         cache.I4 = direction.dot(C * direction);
         cache.I4bar = cache.I4 * cache.I3m13;
       }
+
       /**
        * @brief Accumulates the cached first Piola-Kirchhoff stress.
        * @param P First Piola-Kirchhoff stress accumulator.

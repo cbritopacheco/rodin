@@ -75,7 +75,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
        */
       Mesh<Context::Local> getMesh()
       {
-        auto mesh = Mesh<Context::Local>::UniformGrid(GetParam(), { M, M });
+        auto mesh = Mesh<Context::Local>::UniformGrid(GetParam(), {M, M});
         mesh.scale(1.0 / static_cast<Real>(M - 1));
         const size_t D = mesh.getDimension();
         mesh.getConnectivity().compute(D, D);
@@ -143,16 +143,13 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
 
   // Resolution aliases.
   /// @brief Helper used by the tests to PET Sc Manufactured Poisson 16 x 16.
-  using PETSc_Manufactured_Poisson_16x16 =
-    PETSc_Manufactured_Poisson<16>;
+  using PETSc_Manufactured_Poisson_16x16 = PETSc_Manufactured_Poisson<16>;
 
   /// @brief Helper used by the tests to PET Sc Manufactured Poisson 32 x 32.
-  using PETSc_Manufactured_Poisson_32x32 =
-    PETSc_Manufactured_Poisson<32>;
+  using PETSc_Manufactured_Poisson_32x32 = PETSc_Manufactured_Poisson<32>;
 
   /// @brief Helper used by the tests to PET Sc Manufactured Poisson 64 x 64.
-  using PETSc_Manufactured_Poisson_64x64 =
-    PETSc_Manufactured_Poisson<64>;
+  using PETSc_Manufactured_Poisson_64x64 = PETSc_Manufactured_Poisson<64>;
 
   // =========================================================================
   // P1-exact test — zero truncation error
@@ -179,12 +176,10 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     auto f = Zero<PetscScalar>(); // -Δ(affine) = 0
 
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, solution);
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, solution);
 
     PETSc::Solver::CG solver(poisson);
     solver.setTolerances(1e-12, 1e-14, 1e5, 1000);
@@ -258,7 +253,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     auto f = this->amplitude() * (2 * pi * pi * sin(pi * F::x) * sin(pi * F::y));
 
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     Problem poisson(u, v);
     poisson =
@@ -289,7 +284,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     auto f = this->amplitude() * (2 * pi * pi * sin(pi * F::x) * sin(pi * F::y));
 
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     Problem poisson(u, v);
     poisson =
@@ -325,7 +320,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     auto f = this->amplitude() * (2 * F::y * (1 - F::y) + 2 * F::x * (1 - F::x));
 
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     Problem poisson(u, v);
     poisson =
@@ -365,12 +360,10 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     auto f = 2 * pi * pi * solution;
 
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, solution);
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, solution);
 
     PETSc::Solver::CG solver(poisson);
     solver.solve();
@@ -400,7 +393,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     auto f = this->amplitude() * (2 * pi * pi * sin(pi * F::x) * sin(pi * F::y));
 
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     Problem poisson(u, v);
     poisson =
@@ -472,35 +465,29 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
 
   struct PolytopeNameGenerator
   {
-    std::string operator()(
-        const ::testing::TestParamInfo<Polytope::Type>& info) const
+    std::string operator()(const ::testing::TestParamInfo<Polytope::Type>& info) const
     {
       switch (info.param)
       {
-        case Polytope::Type::Triangle:      return "Triangle";
-        case Polytope::Type::Quadrilateral: return "Quadrilateral";
-        default:                            return "Unknown";
+        case Polytope::Type::Triangle:
+          return "Triangle";
+        case Polytope::Type::Quadrilateral:
+          return "Quadrilateral";
+        default:
+          return "Unknown";
       }
     }
   };
 
   /// @brief Instantiates PET Sc Manufactured Poisson 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      MeshParams16x16,
-      PETSc_Manufactured_Poisson_16x16,
-      ::testing::Values(
-          Polytope::Type::Triangle,
-          Polytope::Type::Quadrilateral),
-      PolytopeNameGenerator());
+  INSTANTIATE_TEST_SUITE_P(MeshParams16x16, PETSc_Manufactured_Poisson_16x16,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral),
+    PolytopeNameGenerator());
 
   /// @brief Instantiates PET Sc Manufactured Poisson 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      MeshParams32x32,
-      PETSc_Manufactured_Poisson_32x32,
-      ::testing::Values(
-          Polytope::Type::Triangle,
-          Polytope::Type::Quadrilateral),
-      PolytopeNameGenerator());
+  INSTANTIATE_TEST_SUITE_P(MeshParams32x32, PETSc_Manufactured_Poisson_32x32,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral),
+    PolytopeNameGenerator());
 }
 
 // ---------------------------------------------------------------------------
@@ -509,8 +496,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
 /// @brief Initializes the parallel test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
-  [[maybe_unused]] PetscErrorCode ierr =
-    PetscInitialize(&argc, &argv, nullptr, nullptr);
+  [[maybe_unused]] PetscErrorCode ierr = PetscInitialize(&argc, &argv, nullptr, nullptr);
   assert(ierr == PETSC_SUCCESS);
 
   ::testing::InitGoogleTest(&argc, argv);

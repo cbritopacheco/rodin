@@ -88,8 +88,7 @@ namespace Rodin::Variational
        * @brief Constructs an average operator for the given function.
        * @param[in] op Function to average across interfaces
        */
-      constexpr
-      Average(const OperandType& op)
+      constexpr Average(const OperandType& op)
         : m_operand(op.copy())
       {}
 
@@ -97,8 +96,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Average operator to copy
        */
-      constexpr
-      Average(const Average& other)
+      constexpr Average(const Average& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
@@ -107,8 +105,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Average operator to move
        */
-      constexpr
-      Average(Average&& other)
+      constexpr Average(Average&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
@@ -117,8 +114,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns Const reference to the operand
        */
-      constexpr
-      const auto& getOperand() const
+      constexpr const auto& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -137,7 +133,8 @@ namespace Rodin::Variational
         const auto& face = p.getPolytope();
         const size_t d = face.getDimension();
         const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+        const auto& inc =
+          mesh.getConnectivity().getIncidence({d, d + 1}, face.getIndex());
         assert(inc.size() == 2);
         const Index idx1 = *inc.begin();
         const Index idx2 = *std::next(inc.begin());
@@ -167,7 +164,8 @@ namespace Rodin::Variational
         const auto& face = p.getPolytope();
         const size_t d = face.getDimension();
         const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+        const auto& inc =
+          mesh.getConnectivity().getIncidence({d, d + 1}, face.getIndex());
         assert(inc.size() == 2);
         const Index idx1 = *inc.begin();
         const Index idx2 = *std::next(inc.begin());
@@ -194,8 +192,7 @@ namespace Rodin::Variational
        * @param p Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }
@@ -240,7 +237,8 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   class Average<ShapeFunctionBase<NestedDerived, FES, Space>> final
-    : public ShapeFunctionBase<Average<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
+    : public ShapeFunctionBase<Average<ShapeFunctionBase<NestedDerived, FES, Space>>, FES,
+        Space>
   {
     public:
       /// @brief Finite element space type.
@@ -256,8 +254,7 @@ namespace Rodin::Variational
        * @brief Constructs the average of a shape function.
        * @param[in] op Shape function to average
        */
-      constexpr
-      Average(const OperandType& op)
+      constexpr Average(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_operand(op.copy()),
           m_ip(nullptr)
@@ -267,8 +264,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Average(const Average& other)
+      constexpr Average(const Average& other)
         : Parent(other),
           m_operand(other.m_operand->copy()),
           m_ip(nullptr)
@@ -278,8 +274,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Average(Average&& other)
+      constexpr Average(Average&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand)),
           m_ip(std::exchange(other.m_ip, nullptr))
@@ -289,8 +284,7 @@ namespace Rodin::Variational
        * @brief Gets the underlying shape function.
        * @returns Reference to the operand
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -300,8 +294,7 @@ namespace Rodin::Variational
        * @brief Gets the leaf (underlying trial/test function).
        * @returns Reference to the leaf function
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -311,8 +304,7 @@ namespace Rodin::Variational
        * @param[in] element Mesh polytope
        * @returns Number of DOFs
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -366,7 +358,8 @@ namespace Rodin::Variational
         const auto& face = p.getPolytope();
         const size_t d = face.getDimension();
         const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex());
+        const auto& inc =
+          mesh.getConnectivity().getIncidence({d, d + 1}, face.getIndex());
         assert(inc.size() == 2);
         const Index idx1 = *inc.begin();
         const Index idx2 = *std::next(inc.begin());
@@ -394,8 +387,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space.
        * @returns Reference to the FE space
        */
-      constexpr
-      const FES& getFiniteElementSpace() const
+      constexpr const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
@@ -405,8 +397,7 @@ namespace Rodin::Variational
        * @param p Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }

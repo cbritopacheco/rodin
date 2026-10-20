@@ -146,7 +146,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies shape function construction for variational grad.
   TEST(Rodin_Variational_Grad, ShapeFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -161,7 +161,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function construction for variational grad by checking exact expected values.
   TEST(Rodin_Variational_Grad, GridFunction_Construction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
 
@@ -174,12 +174,13 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function linear function for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, GridFunction_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
 
     // Project a linear function: f(x,y) = 3x + 4y
-    RealFunction linear_func([](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -200,7 +201,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function constant function for variational grad by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Grad, GridFunction_ConstantFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
 
@@ -222,7 +223,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy for variational grad by checking copy semantics.
   TEST(Rodin_Variational_Grad, Copy)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = RealFunction(1.0);
@@ -238,7 +239,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies usage in bilinear form for variational grad by checking false predicates, form assembly.
   TEST(Rodin_Variational_Grad, UsageInBilinearForm)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -262,7 +263,7 @@ namespace Rodin::Tests::Unit
   {
     // Test with 3D mesh (if supported by the current configuration)
     // For now, test with 2D to ensure compatibility
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
 
@@ -274,15 +275,14 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function quadratic function for variational grad by checking grid-function projection.
   TEST(Rodin_Variational_Grad, GridFunction_QuadraticFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
 
     // Project a quadratic function: f(x,y) = x^2 + y^2
     // Note: P1 elements can't represent this exactly, but we can test the approximation
-    RealFunction quadratic_func([](const Geometry::Point& p) { 
-      return p.x() * p.x() + p.y() * p.y(); 
-    });
+    RealFunction quadratic_func(
+      [](const Geometry::Point& p) { return p.x() * p.x() + p.y() * p.y(); });
     gf.project(quadratic_func);
 
     auto grad_gf = Grad(gf);
@@ -302,12 +302,13 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies multiple evaluations for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, MultipleEvaluations)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
 
     // Project a linear function: f(x,y) = x + 2y
-    RealFunction linear_func([](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -316,14 +317,9 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
 
-    std::vector<Math::Vector<Real>> test_coords =
-    {
-      Math::Vector<Real>{{ 0.0, 0.0 }},
-      Math::Vector<Real>{{ 1.0, 0.0 }},
-      Math::Vector<Real>{{ 0.0, 1.0 }},
-      Math::Vector<Real>{{ 0.5, 0.5 }},
-      Math::Vector<Real>{{ 0.25, 0.75 }}
-    };
+    std::vector<Math::Vector<Real>> test_coords = {Math::Vector<Real>{{0.0, 0.0}},
+      Math::Vector<Real>{{1.0, 0.0}}, Math::Vector<Real>{{0.0, 1.0}},
+      Math::Vector<Real>{{0.5, 0.5}}, Math::Vector<Real>{{0.25, 0.75}}};
 
     for (const auto& rc : test_coords)
     {
@@ -375,7 +371,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates linear function for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, RandomCoordinates_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -384,9 +380,8 @@ namespace Rodin::Tests::Unit
 
     // Project a linear function: f(x,y) = 2x + 3y
     // Gradient should be constant: [2, 3]
-    RealFunction linear_func([](const Geometry::Point& p) {
-      return 2.0 * p.x() + 3.0 * p.y();
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 2.0 * p.x() + 3.0 * p.y(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -401,7 +396,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -417,7 +413,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates zero gradient for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, RandomCoordinates_ZeroGradient)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -426,9 +422,7 @@ namespace Rodin::Tests::Unit
 
     // Project a constant function: f(x,y) = 5.0
     // Gradient should be zero: [0, 0]
-    RealFunction constant_func([](const Geometry::Point& p) {
-      return 5.0;
-    });
+    RealFunction constant_func([](const Geometry::Point& p) { return 5.0; });
     gf.project(constant_func);
 
     auto grad_gf = Grad(gf);
@@ -443,7 +437,8 @@ namespace Rodin::Tests::Unit
 
       Real x = gen();
       Real y = gen();
-      if (x + y > 1.0) {
+      if (x + y > 1.0)
+      {
         x = 1.0 - x;
         y = 1.0 - y;
       }
@@ -459,7 +454,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies random coordinates tetrahedron linear function for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, RandomCoordinates_Tetrahedron_LinearFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -469,9 +464,8 @@ namespace Rodin::Tests::Unit
 
     // Project a linear function: f(x,y,z) = 2x + 3y - z
     // Gradient should be constant: [2, 3, -1]
-    RealFunction linear_func([](const Geometry::Point& p) {
-      return 2.0 * p.x() + 3.0 * p.y() - p.z();
-    });
+    RealFunction linear_func(
+      [](const Geometry::Point& p) { return 2.0 * p.x() + 3.0 * p.y() - p.z(); });
     gf.project(linear_func);
 
     auto grad_gf = Grad(gf);
@@ -489,7 +483,8 @@ namespace Rodin::Tests::Unit
       Real r2 = gen();
       Real r3 = gen();
       Real sum = r1 + r2 + r3;
-      if (sum > 1.0) {
+      if (sum > 1.0)
+      {
         r1 /= sum;
         r2 /= sum;
         r3 /= sum;

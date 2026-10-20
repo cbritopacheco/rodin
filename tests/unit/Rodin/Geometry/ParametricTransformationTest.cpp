@@ -265,55 +265,55 @@ namespace Rodin::Tests::Unit
     template <size_t K>
     struct CountedElement
     {
-        using RangeType = Real;
-        using Element = Variational::RealH1Element<K>;
-        Element element;
+      using RangeType = Real;
+      using Element = Variational::RealH1Element<K>;
+      Element element;
+      size_t* evaluations;
+
+      auto getGeometry() const
+      {
+        return element.getGeometry();
+      }
+      size_t getCount() const
+      {
+        return element.getCount();
+      }
+      size_t getOrder() const
+      {
+        return element.getOrder();
+      }
+
+      struct Basis
+      {
+        typename Element::BasisFunction basis;
         size_t* evaluations;
-
-        auto getGeometry() const
+        Real operator()(const Math::SpatialPoint& r) const
         {
-          return element.getGeometry();
+          return basis(r);
         }
-        size_t getCount() const
+        template <size_t Order>
+        struct Derivative
         {
-          return element.getCount();
-        }
-        size_t getOrder() const
-        {
-          return element.getOrder();
-        }
-
-        struct Basis
-        {
-            typename Element::BasisFunction basis;
-            size_t* evaluations;
-            Real operator()(const Math::SpatialPoint& r) const
-            {
-              return basis(r);
-            }
-            template <size_t Order>
-            struct Derivative
-            {
-                typename Element::BasisFunction::template DerivativeFunction<Order>
-                  derivative;
-                size_t* evaluations;
-                Real operator()(const Math::SpatialPoint& r) const
-                {
-                  ++*evaluations;
-                  return derivative(r);
-                }
-            };
-            template <size_t Order>
-            auto getDerivative(size_t axis) const
-            {
-              return Derivative<Order>{
-                basis.template getDerivative<Order>(axis), evaluations};
-            }
+          typename Element::BasisFunction::template DerivativeFunction<Order>
+            derivative;
+          size_t* evaluations;
+          Real operator()(const Math::SpatialPoint& r) const
+          {
+            ++*evaluations;
+            return derivative(r);
+          }
         };
-        Basis getBasis(size_t local) const
+        template <size_t Order>
+        auto getDerivative(size_t axis) const
         {
-          return {element.getBasis(local), evaluations};
+          return Derivative<Order>{
+            basis.template getDerivative<Order>(axis), evaluations};
         }
+      };
+      Basis getBasis(size_t local) const
+      {
+        return {element.getBasis(local), evaluations};
+      }
     };
 
     template <size_t K>
@@ -511,6 +511,7 @@ namespace Rodin::Tests::Unit
             : m_point(point),
               m_reads(0)
           {}
+
           /**
            * @brief Copies the point with a new logical formula identity.
            * @param other Formula whose point is copied.
@@ -520,6 +521,7 @@ namespace Rodin::Tests::Unit
               m_point(other.m_point),
               m_reads(0)
           {}
+
           /**
            * @brief Assigns a point and invalidates the old logical identity.
            * @param other Formula whose point is copied.
@@ -532,6 +534,7 @@ namespace Rodin::Tests::Unit
             m_reads = 0;
             return *this;
           }
+
           /**
            * @brief Returns the single reference sample.
            * @returns The formula size, one.
@@ -540,6 +543,7 @@ namespace Rodin::Tests::Unit
           {
             return 1;
           }
+
           /**
            * @brief Returns the dummy unit weight used by the cache probe.
            * @param i Sample index; unused because this probe does not integrate.
@@ -549,6 +553,7 @@ namespace Rodin::Tests::Unit
           {
             return 1;
           }
+
           /**
            * @brief Reads and counts the single reference sample.
            * @param i Sample index, which must be zero.
@@ -560,6 +565,7 @@ namespace Rodin::Tests::Unit
             ++m_reads;
             return m_point;
           }
+
           /**
            * @brief Returns the number of reference-point reads.
            * @returns Number of calls to getPoint().
@@ -568,6 +574,7 @@ namespace Rodin::Tests::Unit
           {
             return m_reads;
           }
+
           /**
            * @brief Copies the observed formula polymorphically.
            * @returns A newly owned formula copy.
@@ -668,7 +675,7 @@ namespace Rodin::Tests::Unit
         }
       };
 
-    /**
+      /**
        * @brief Certifies bounded pointwise metadata access and exact evaluation.
        *
        * The basis count is invariant during one map evaluation. Each operation
@@ -677,7 +684,7 @@ namespace Rodin::Tests::Unit
        * admissible physical embedding, including zero-dimensional points.
        *
        * @param geometry Reference polytope type.
-     */
+       */
       template <class Element>
       void checkPointwiseCount(Polytope::Type geometry)
       {
@@ -737,17 +744,17 @@ namespace Rodin::Tests::Unit
       }
 
       /**
-   * @brief Certifies lazy coordinates and reference-sample ownership.
-   *
-   * ## Invariants
-   *
-   * Logical reference reuse must perform no direct basis reads. A missing
-   * table must evaluate the owned reference sample, never a surviving
-   * formula pointer or a table slot reused for another formula. Both paths
-   * preserve the scalar accumulation order exactly.
-   *
-   * @param geometry Positive-dimensional reference geometry.
-   */
+       * @brief Certifies lazy coordinates and reference-sample ownership.
+       *
+       * ## Invariants
+       *
+       * Logical reference reuse must perform no direct basis reads. A missing
+       * table must evaluate the owned reference sample, never a surviving
+       * formula pointer or a table slot reused for another formula. Both paths
+       * preserve the scalar accumulation order exactly.
+       *
+       * @param geometry Positive-dimensional reference geometry.
+       */
       template <class Element = Variational::RealH1Element<2>>
       void checkLazyCoordinates(Polytope::Type geometry)
       {
@@ -807,14 +814,14 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(tableReads, 2);
         static_cast<void>(pending.getPhysicalCoordinates());
         EXPECT_EQ(tableReads, 2);
-    // Assignment at the same address establishes a new logical sample.
+        // Assignment at the same address establishes a new logical sample.
         formula = &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{1});
         ASSERT_NE(formula, original);
         map.jacobian(matrices, *formula);
         formula = nullptr;
         sameCoordinates(moved.getPhysicalCoordinates());
         EXPECT_EQ(basisReads, 0);
-    // A computed copy owns its physical coordinates and performs no lookup.
+        // A computed copy owns its physical coordinates and performs no lookup.
         Point computedCopy(moved);
         const auto reads = tableReads;
         sameCoordinates(computedCopy.getPhysicalCoordinates());
@@ -845,7 +852,7 @@ namespace Rodin::Tests::Unit
         sameCoordinates(threadCoordinates);
         EXPECT_EQ(basisReads, basisBefore + 2 * element.getCount());
 
-    // Rebinding discards provenance even when the reference sample is equal.
+        // Rebinding discards provenance even when the reference sample is equal.
         const auto lookupBefore = tableReads;
         pending.setPolytope(otherCell);
         const auto& rebound = pending.getPhysicalCoordinates();
@@ -854,7 +861,7 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(tableReads, lookupBefore);
       }
 
-  /**
+      /**
        * @brief Certifies reference-only reuse and formula lifetime invalidation.
        * @param geometry Reference polytope type.
        */
@@ -1343,9 +1350,9 @@ namespace Rodin::Tests::Unit
   }
 
   /**
- * @brief Verifies lazy reference reuse, eviction, lifetimes and thread
- * transfer.
- */
+   * @brief Verifies lazy reference reuse, eviction, lifetimes and thread
+   * transfer.
+   */
   TEST_F(QuadratureTransformationTest, LazyCoordinatesOwnReferenceSamples)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,

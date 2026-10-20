@@ -34,8 +34,7 @@ namespace Rodin::Math
    * @return Absolute value @f$ |x| @f$
    */
   template <class T>
-  constexpr
-  auto abs(const T& x)
+  constexpr auto abs(const T& x)
   {
     return x < static_cast<T>(0.0) ? -x : x;
   }
@@ -63,8 +62,7 @@ namespace Rodin::Math
    * @return @f$ e^x @f$
    */
   template <class T>
-  constexpr
-  auto exp(const T& x)
+  constexpr auto exp(const T& x)
   {
     return std::exp(x);
   }
@@ -77,8 +75,7 @@ namespace Rodin::Math
    * @param[in] x Complex number
    * @return Complex conjugate @f$ \bar{x} @f$
    */
-  constexpr
-  Complex conj(const Complex& x)
+  constexpr Complex conj(const Complex& x)
   {
     return std::conj(x);
   }
@@ -93,8 +90,7 @@ namespace Rodin::Math
    * @return Conjugate matrix
    */
   template <class T>
-  constexpr
-  auto conj(const Eigen::MatrixBase<T>& x)
+  constexpr auto conj(const Eigen::MatrixBase<T>& x)
   {
     return x.conjugate().eval();
   }
@@ -107,8 +103,7 @@ namespace Rodin::Math
    * @param[in] x Real number
    * @return @f$ x @f$
    */
-  constexpr
-  Real conj(const Real& x)
+  constexpr Real conj(const Real& x)
   {
     return x;
   }
@@ -124,8 +119,7 @@ namespace Rodin::Math
    * @return @f$ \text{base}^2 @f$
    */
   template <class Base>
-  constexpr
-  auto pow2(const Base& base)
+  constexpr auto pow2(const Base& base)
   {
     return base * base;
   }
@@ -195,8 +189,7 @@ namespace Rodin::Math
    * @return @f$ x^y @f$
    */
   template <class Base, class Exponent>
-  constexpr
-  auto pow(const Base& base, const Exponent& exponent)
+  constexpr auto pow(const Base& base, const Exponent& exponent)
   {
     return std::pow(base, exponent);
   }
@@ -211,8 +204,7 @@ namespace Rodin::Math
    * @return @f$ \sqrt{x} @f$
    */
   template <class T>
-  constexpr
-  auto sqrt(const T& x)
+  constexpr auto sqrt(const T& x)
   {
     return std::sqrt(x);
   }
@@ -228,8 +220,7 @@ namespace Rodin::Math
    * @return True if @f$ x @f$ is NaN, false otherwise
    */
   template <class T>
-  constexpr
-  Boolean isNaN(const T& x)
+  constexpr Boolean isNaN(const T& x)
   {
     return std::isnan(x);
   }
@@ -242,9 +233,7 @@ namespace Rodin::Math
    * @param[in] x Complex number to check
    * @return True if real or imaginary part is NaN, false otherwise
    */
-  inline
-  constexpr
-  Boolean isNaN(const Complex& x)
+  inline constexpr Boolean isNaN(const Complex& x)
   {
     return std::isnan(x.real()) || std::isnan(x.imag());
   }
@@ -260,8 +249,7 @@ namespace Rodin::Math
    * @return True if @f$ x @f$ is @f$ +\infty @f$ or @f$ -\infty @f$, false otherwise
    */
   template <class T>
-  constexpr
-  Boolean isInf(const T& x)
+  constexpr Boolean isInf(const T& x)
   {
     return std::isinf(x);
   }
@@ -276,8 +264,7 @@ namespace Rodin::Math
    * @return @f$ \cos(x) @f$
    */
   template <class T>
-  constexpr
-  auto cos(const T& x)
+  constexpr auto cos(const T& x)
   {
     return std::cos(x);
   }
@@ -292,8 +279,7 @@ namespace Rodin::Math
    * @return @f$ \cosh(x) @f$
    */
   template <class T>
-  constexpr
-  auto cosh(const T& x)
+  constexpr auto cosh(const T& x)
   {
     return std::cosh(x);
   }
@@ -308,8 +294,7 @@ namespace Rodin::Math
    * @return @f$ \sin(x) @f$
    */
   template <class T>
-  constexpr
-  auto sin(const T& x)
+  constexpr auto sin(const T& x)
   {
     return std::sin(x);
   }
@@ -324,8 +309,7 @@ namespace Rodin::Math
    * @return @f$ \sinh(x) @f$
    */
   template <class T>
-  constexpr
-  auto sinh(const T& x)
+  constexpr auto sinh(const T& x)
   {
     return std::sinh(x);
   }
@@ -340,10 +324,9 @@ namespace Rodin::Math
    * @return @f$ \tan(x) @f$
    */
   template <class T>
-  constexpr
-  auto tan(const T& x)
+  constexpr auto tan(const T& x)
   {
-   return std::tan(x);
+    return std::tan(x);
   }
 
   /**
@@ -363,8 +346,7 @@ namespace Rodin::Math
    * @return Sign of @f$ x @f$: -1, 0, or +1
    */
   template <typename T>
-  constexpr
-  T sgn(const T& x)
+  constexpr T sgn(const T& x)
   {
     return (T(0) < x) - (x < T(0));
   }
@@ -382,8 +364,7 @@ namespace Rodin::Math
    * @pre @f$ 0 \leq k \leq n @f$
    */
   template <class T>
-  constexpr
-  T binom(const T& n, const T& k)
+  constexpr T binom(const T& n, const T& k)
   {
     assert(T(0) <= n);
     assert(T(0) <= k);
@@ -408,8 +389,7 @@ namespace Rodin::Math
    * @pre @f$ n \geq 0 @f$
    */
   template <class T>
-  constexpr
-  T factorial(const T& n)
+  constexpr T factorial(const T& n)
   {
     assert(T(0) <= n);
     T res(1);
@@ -431,15 +411,14 @@ namespace Rodin::Math
    * @pre @f$ 0 \leq k \leq n @f$
    */
   template <class T>
-  constexpr
-  T permutation(const T& n, const T& k)
+  constexpr T permutation(const T& n, const T& k)
   {
     assert(T(0) <= n);
     assert(T(0) <= k);
     assert(k <= n);
     T res(1);
     for (T i = 0; i < k; i++)
-        res *= (n - i);
+      res *= (n - i);
     return res;
   }
 
@@ -453,12 +432,12 @@ namespace Rodin::Math
    * @return Quiet NaN value of type T
    */
   template <class T>
-  constexpr
-  auto nan()
+  constexpr auto nan()
   {
     if constexpr (std::is_same_v<T, Complex>)
     {
-      return Complex(std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::quiet_NaN());
+      return Complex(
+        std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::quiet_NaN());
     }
     else
     {
@@ -479,8 +458,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} + \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto sum(const LHS& lhs, const RHS& rhs)
+  constexpr auto sum(const LHS& lhs, const RHS& rhs)
   {
     return lhs + rhs;
   }
@@ -496,8 +474,7 @@ namespace Rodin::Math
    * @return @f$ -\text{op} @f$
    */
   template <class Operand>
-  constexpr
-  auto minus(const Operand& op)
+  constexpr auto minus(const Operand& op)
   {
     return -op;
   }
@@ -515,8 +492,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} - \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto minus(const LHS& lhs, const RHS& rhs)
+  constexpr auto minus(const LHS& lhs, const RHS& rhs)
   {
     return lhs - rhs;
   }
@@ -534,8 +510,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} \times \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto mult(const LHS& lhs, const RHS& rhs)
+  constexpr auto mult(const LHS& lhs, const RHS& rhs)
   {
     return lhs * rhs;
   }
@@ -553,8 +528,7 @@ namespace Rodin::Math
    * @return @f$ \text{lhs} / \text{rhs} @f$
    */
   template <class LHS, class RHS>
-  constexpr
-  auto division(const LHS& lhs, const RHS& rhs)
+  constexpr auto division(const LHS& lhs, const RHS& rhs)
   {
     return lhs / rhs;
   }
@@ -569,9 +543,7 @@ namespace Rodin::Math
    * @param[in] rhs Right-hand side operand
    * @return @f$ \text{lhs} \times \text{rhs} @f$
    */
-  inline
-  constexpr
-  Real dot(const Real& lhs, const Real& rhs)
+  inline constexpr Real dot(const Real& lhs, const Real& rhs)
   {
     return lhs * rhs;
   }
@@ -586,9 +558,7 @@ namespace Rodin::Math
    * @param[in] rhs Right-hand side complex number
    * @return @f$ \text{lhs} \times \overline{\text{rhs}} @f$
    */
-  inline
-  constexpr
-  Complex dot(const Complex& lhs, const Complex& rhs)
+  inline constexpr Complex dot(const Complex& lhs, const Complex& rhs)
   {
     return lhs * conj(rhs);
   }
@@ -609,8 +579,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  constexpr auto dot(
+    const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     assert(lhs.rows() == rhs.rows());
     assert(lhs.cols() == rhs.cols());
@@ -677,8 +647,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSScalar>
-  constexpr
-  auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
+  constexpr auto dot(
+    const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
   {
     assert(lhs.rows() == rhs.rows());
     assert(lhs.cols() == rhs.cols());
@@ -698,8 +668,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSDerived, class RHSScalar>
-  constexpr
-  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
+  constexpr auto dot(
+    const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
   {
     return dot(lhs, rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
   }
@@ -714,8 +684,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSDerived>
-  constexpr
-  auto dot(const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  constexpr auto dot(
+    const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     return dot(lhs.getData().head(static_cast<Eigen::Index>(lhs.size())), rhs);
   }
@@ -730,8 +700,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSDerived, class RHSScalar>
-  constexpr
-  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
+  constexpr auto dot(
+    const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
   {
     const auto rows = static_cast<Eigen::Index>(rhs.rows());
     const auto cols = static_cast<Eigen::Index>(rhs.cols());
@@ -748,8 +718,8 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSDerived>
-  constexpr
-  auto dot(const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  constexpr auto dot(
+    const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     const auto rows = static_cast<Eigen::Index>(lhs.rows());
     const auto cols = static_cast<Eigen::Index>(lhs.cols());
@@ -766,8 +736,7 @@ namespace Rodin::Math
    * @return @f$ \ln(x) @f$
    */
   template <class T>
-  constexpr
-  auto log(const T& x)
+  constexpr auto log(const T& x)
   {
     return std::log(x);
   }
@@ -782,8 +751,7 @@ namespace Rodin::Math
    * @return @f$ \log_2(x) @f$
    */
   template <class T>
-  constexpr
-  auto log2(const T& x)
+  constexpr auto log2(const T& x)
   {
     return std::log2(x);
   }
@@ -798,8 +766,7 @@ namespace Rodin::Math
    * @return @f$ \log_{10}(x) @f$
    */
   template <class T>
-  constexpr
-  auto log10(const T& x)
+  constexpr auto log10(const T& x)
   {
     return std::log10(x);
   }
@@ -814,8 +781,7 @@ namespace Rodin::Math
    * @return @f$ \arccos(x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto acos(const T& x)
+  constexpr auto acos(const T& x)
   {
     return std::acos(x);
   }
@@ -830,8 +796,7 @@ namespace Rodin::Math
    * @return @f$ \arcsin(x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto asin(const T& x)
+  constexpr auto asin(const T& x)
   {
     return std::asin(x);
   }
@@ -846,8 +811,7 @@ namespace Rodin::Math
    * @return @f$ \arctan(x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto atan(const T& x)
+  constexpr auto atan(const T& x)
   {
     return std::atan(x);
   }
@@ -864,8 +828,7 @@ namespace Rodin::Math
    * @return @f$ \text{atan2}(y, x) @f$ in radians
    */
   template <class T>
-  constexpr
-  auto atan2(const T& y, const T& x)
+  constexpr auto atan2(const T& y, const T& x)
   {
     return std::atan2(y, x);
   }
@@ -880,8 +843,7 @@ namespace Rodin::Math
    * @return @f$ \tanh(x) @f$
    */
   template <class T>
-  constexpr
-  auto tanh(const T& x)
+  constexpr auto tanh(const T& x)
   {
     return std::tanh(x);
   }
@@ -895,8 +857,7 @@ namespace Rodin::Math
    * @return The smaller of @f$ a @f$ and @f$ b @f$
    */
   template <class T>
-  constexpr
-  auto min(const T& a, const T& b)
+  constexpr auto min(const T& a, const T& b)
   {
     return (a < b) ? a : b;
   }
@@ -910,8 +871,7 @@ namespace Rodin::Math
    * @return The larger of @f$ a @f$ and @f$ b @f$
    */
   template <class T>
-  constexpr
-  auto max(const T& a, const T& b)
+  constexpr auto max(const T& a, const T& b)
   {
     return (a > b) ? a : b;
   }
@@ -930,11 +890,11 @@ namespace Rodin::Math
    * @return Clamped value in @f$ [\text{lo}, \text{hi}] @f$
    */
   template <class T>
-  constexpr
-  auto clamp(const T& x, const T& lo, const T& hi)
+  constexpr auto clamp(const T& x, const T& lo, const T& hi)
   {
     return min(max(x, lo), hi);
   }
+
   /**
    * @brief Frobenius contraction of spatial tensors, conjugating the RHS.
    * @returns Scalar Frobenius contraction of the operands.

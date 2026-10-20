@@ -72,98 +72,98 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHSDerived>
   struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = Real;
+    /// @brief Scalar value type.
+    using ScalarType = Real;
 
-      /// @brief Left-hand side operand type.
-      using LHSType = LHS;
+    /// @brief Left-hand side operand type.
+    using LHSType = LHS;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
 
-      /// @brief Cell kernel type.
-      using KernelType = LHSType;
+    /// @brief Cell kernel type.
+    using KernelType = LHSType;
 
-      /// @brief Operand type.
-      using OperandType = RHSType;
+    /// @brief Operand type.
+    using OperandType = RHSType;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = std::conditional_t<
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = std::conditional_t<
       // If
-        std::is_same_v<RHSRangeType, ScalarType>,
+      std::is_same_v<RHSRangeType, ScalarType>,
       // Then
-        ScalarType,
+      ScalarType,
       // Else
-        std::conditional_t<
+      std::conditional_t<
         // If
-          FormLanguage::IsVectorRange<RHSRangeType>::Value,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
-          Math::Matrix<ScalarType>,
+        Math::Matrix<ScalarType>,
         // Else
-          void>>;
+        void>>;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = RHSRangeType;
+    /// @brief Range (evaluation value) type.
+    using RangeType = RHSRangeType;
   };
 
   /**
    * @ingroup TraitsSpecializations
    * @brief Traits for Potential.
    */
-  template <class LHS, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Potential<
-      LHS,
-      Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
+  template <class LHS, class RHSDerived, class FES,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Potential<LHS,
+    Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
 
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Left-hand side operand type.
-      using LHSType = LHS;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Right-hand side operand type.
-      using RHSType =
-        Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>,
-          FES, Space>;
+    /// @brief Left-hand side operand type.
+    using LHSType = LHS;
 
-      /// @brief Cell kernel type.
-      using KernelType = LHS;
+    /// @brief Right-hand side operand type.
+    using RHSType =
+      Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>,
+        FES, Space>;
 
-      /// @brief Operand type.
-      using OperandType = RHSType;
+    /// @brief Cell kernel type.
+    using KernelType = LHS;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Operand type.
+    using OperandType = RHSType;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename decltype([] {
-        if constexpr (std::is_same_v<RHSRangeType, ScalarType> ||
-          std::is_invocable_v<const KernelType&, const Geometry::Point&,
-            const Geometry::Point&>)
-          return std::type_identity<ScalarType>{};
-        else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value &&
-          std::is_invocable_v<const KernelType&, Math::SpatialTensor<ScalarType, 4>&,
-            const Geometry::Point&, const Geometry::Point&>)
-          return std::type_identity<Math::SpatialTensor<ScalarType, 4>>{};
-        else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value)
-          return std::type_identity<Math::SpatialMatrix<ScalarType>>{};
-        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
-          return std::type_identity<Math::Matrix<ScalarType>>{};
-        else
-          return std::type_identity<void>{};
-      }())::type;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = RHSRangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename decltype([] {
+      if constexpr (std::is_same_v<RHSRangeType, ScalarType> ||
+        std::is_invocable_v<const KernelType&, const Geometry::Point&,
+          const Geometry::Point&>)
+        return std::type_identity<ScalarType>{};
+      else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value &&
+        std::is_invocable_v<const KernelType&, Math::SpatialTensor<ScalarType, 4>&,
+          const Geometry::Point&, const Geometry::Point&>)
+        return std::type_identity<Math::SpatialTensor<ScalarType, 4>>{};
+      else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value)
+        return std::type_identity<Math::SpatialMatrix<ScalarType>>{};
+      else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
+        return std::type_identity<Math::Matrix<ScalarType>>{};
+      else
+        return std::type_identity<void>{};
+    }())::type;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = RHSRangeType;
   };
 }
 
@@ -208,8 +208,7 @@ namespace Rodin::Variational
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
       /// @brief Range type of the left-hand side operand.
-      using LHSRangeType =
-        std::conditional_t<
+      using LHSRangeType = std::conditional_t<
         // If
         std::is_same_v<RHSRangeType, ScalarType>,
         // Then
@@ -232,7 +231,8 @@ namespace Rodin::Variational
        * @param u Operand expression.
        */
       Potential(const KernelType& kernel, const OperandType& u)
-        : m_kernel(kernel), m_u(u.copy())
+        : m_kernel(kernel),
+          m_u(u.copy())
       {}
 
       /**
@@ -297,7 +297,8 @@ namespace Rodin::Variational
             {
               const auto& y = quadrature.getPoint(i);
               const IntegrationPoint ip(quadrature, i);
-              res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand.getValue(ip);
+              res +=
+                qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand.getValue(ip);
             }
           }
           return res;
@@ -399,10 +400,9 @@ namespace Rodin::Variational
    *  are the basis functions.
    */
   template <class LHS, class RHSDerived, class FES, ShapeFunctionSpaceType SpaceType>
-  class Potential<
-    LHS,
-    ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, SpaceType>> final
-      : public FormLanguage::Base
+  class Potential<LHS,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, SpaceType>>
+    final : public FormLanguage::Base
   {
     public:
       /// @brief Parent class type.
@@ -410,6 +410,7 @@ namespace Rodin::Variational
 
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
@@ -423,7 +424,8 @@ namespace Rodin::Variational
       using KernelType = LHS;
 
       /// @brief Right-hand side operand type.
-      using RHSType = ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, Space>;
+      using RHSType =
+        ShapeFunctionBase<ShapeFunction<RHSDerived, FES, SpaceType>, FES, Space>;
 
       /// @brief Operand type.
       using OperandType = RHSType;
@@ -440,7 +442,8 @@ namespace Rodin::Variational
        * @param u Operand expression.
        */
       Potential(const KernelType& kernel, const OperandType& u)
-        : m_kernel(kernel), m_u(u)
+        : m_kernel(kernel),
+          m_u(u)
       {}
 
       /**
@@ -449,7 +452,8 @@ namespace Rodin::Variational
        */
       Potential(const Potential& other)
         : Parent(other),
-          m_kernel(other.m_kernel), m_u(other.m_u)
+          m_kernel(other.m_kernel),
+          m_u(other.m_u)
       {}
 
       /**
@@ -458,7 +462,8 @@ namespace Rodin::Variational
        */
       Potential(Potential&& other)
         : Parent(std::move(other)),
-          m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
+          m_kernel(std::move(other.m_kernel)),
+          m_u(std::move(other.m_u))
       {}
 
       /**
@@ -512,22 +517,22 @@ namespace Rodin::Variational
                          FESType, SpaceType>>;
 
   /// @brief Integral of a potential tested against a shape function.
-  template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
   class Integral<
-    Dot<
-      Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>> final
-    : public QuadratureRule<
-        Dot<
-          Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+    Dot<Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+    final : public QuadratureRule<
+              Dot<Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+                ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
       /// @brief Cell kernel type.
       using KernelType = Kernel;
 
       /// @brief Left-hand side operand type.
-      using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+      using LHSType =
+        Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
       /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
@@ -542,11 +547,9 @@ namespace Rodin::Variational
       using IntegrandType = Dot<LHSType, RHSType>;
 
       /// @brief Parent class type.
-      using Parent =
-        QuadratureRule<
-          Dot<
-            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+      using Parent = QuadratureRule<
+        Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
       /**
        * @brief Constructs the expression from its left and right operands.

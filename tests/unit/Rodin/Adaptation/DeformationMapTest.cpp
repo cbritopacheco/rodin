@@ -25,14 +25,14 @@ namespace Rodin::Tests::Unit
   {
     struct CountingLocator
     {
-        Location::AABB<LocalMesh> locator;
-        mutable std::size_t calls = 0;
+      Location::AABB<LocalMesh> locator;
+      mutable std::size_t calls = 0;
 
-        Optional<Point> locate(std::size_t dimension, const Math::SpatialPoint& x) const
-        {
-          ++calls;
-          return locator.locate(dimension, x);
-        }
+      Optional<Point> locate(std::size_t dimension, const Math::SpatialPoint& x) const
+      {
+        ++calls;
+        return locator.locate(dimension, x);
+      }
     };
 
     template <std::size_t Dimension, std::size_t Order>

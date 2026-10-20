@@ -79,17 +79,22 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief State finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
@@ -340,21 +345,28 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
+
       /// @brief Current pressure state type.
       using PressureStateType = PressureType;
 
       /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
+
       /// @brief Pressure state finite element space type.
       using PressureFESType = typename FormLanguage::Traits<PressureStateType>::FESType;
 
@@ -627,15 +639,19 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
       /// @brief Pressure test function type.
       using TestType = TestPressFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Pressure test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 

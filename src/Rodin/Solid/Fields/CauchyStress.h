@@ -41,7 +41,7 @@ namespace Rodin::Solid
    * law.getCache(cache, state);
    *
    * CauchyStress<NeoHookean> cauchy(law);
-    * Math::SpatialMatrix<Real> sigma;
+   * Math::SpatialMatrix<Real> sigma;
    * cauchy.getCauchyStress(sigma, cache, state);
    * @endcode
    *
@@ -53,6 +53,7 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Cache type used by the constitutive law.
       using CacheType = typename LawType::Cache;
 
@@ -69,6 +70,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       CauchyStress(const CauchyStress& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -81,10 +83,8 @@ namespace Rodin::Solid
        * @param[in] cache Precomputed law cache
        * @param[in] cp Constitutive point
        */
-      void getCauchyStress(
-          Math::SpatialMatrix<Real>& sigma,
-          const CacheType& cache,
-          const ConstitutivePoint& cp) const
+      void getCauchyStress(Math::SpatialMatrix<Real>& sigma, const CacheType& cache,
+        const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
         Math::SpatialMatrix<Real> P;
@@ -98,7 +98,10 @@ namespace Rodin::Solid
        * @brief Gets the constitutive law.
        * @returns The constitutive law.
        */
-      const LawType& getLaw() const { return m_law; }
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       const LawType& m_law;

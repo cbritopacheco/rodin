@@ -39,15 +39,15 @@ namespace
     switch (type)
     {
       case Polytope::Type::Segment:
-        return LocalMesh::UniformGrid(type, { 11 });
+        return LocalMesh::UniformGrid(type, {11});
       case Polytope::Type::Triangle:
       case Polytope::Type::Quadrilateral:
-        return LocalMesh::UniformGrid(type, { 4, 4 });
+        return LocalMesh::UniformGrid(type, {4, 4});
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Pyramid:
       case Polytope::Type::Wedge:
-        return LocalMesh::UniformGrid(type, { 3, 3, 3 });
+        return LocalMesh::UniformGrid(type, {3, 3, 3});
       default:
         ADD_FAILURE() << "Unsupported polytope type for makeMesh";
         return Geometry::Mesh<Context::Local>();
@@ -58,15 +58,22 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Segment:       return "Segment1D";
-      case Polytope::Type::Triangle:      return "Triangle2D";
-      case Polytope::Type::Quadrilateral: return "Quad2D";
-      case Polytope::Type::Tetrahedron:   return "Tet3D";
-      case Polytope::Type::Hexahedron:    return "Hex3D";
+      case Polytope::Type::Segment:
+        return "Segment1D";
+      case Polytope::Type::Triangle:
+        return "Triangle2D";
+      case Polytope::Type::Quadrilateral:
+        return "Quad2D";
+      case Polytope::Type::Tetrahedron:
+        return "Tet3D";
+      case Polytope::Type::Hexahedron:
+        return "Hex3D";
       case Polytope::Type::Pyramid:
         return "Pyramid3D";
-      case Polytope::Type::Wedge:         return "Wedge3D";
-      default:                            return "Unknown";
+      case Polytope::Type::Wedge:
+        return "Wedge3D";
+      default:
+        return "Unknown";
     }
   }
 
@@ -79,8 +86,8 @@ namespace
 
   boost::filesystem::path rankTempPath(const std::string& stem)
   {
-    return boost::filesystem::temp_directory_path()
-      / (stem + "_r" + std::to_string(worldRank()));
+    return boost::filesystem::temp_directory_path() /
+      (stem + "_r" + std::to_string(worldRank()));
   }
 
   /// @brief MPI HDF5 stream overloads reject operations requiring a file path.
@@ -213,7 +220,8 @@ namespace
   }
 
   // Parameterized test fixture
-  class MPIMeshHDF5 : public ::testing::TestWithParam<Polytope::Type> {};
+  class MPIMeshHDF5 : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   // --- MPI Mesh HDF5 round-trip via MeshPrinter/MeshLoader -------------------
 
@@ -222,7 +230,7 @@ namespace
   {
     const auto type = GetParam();
     const auto meshFile =
-        rankTempPath("rodin_mpi_hdf5_rt_" + polytopeLabel(type) + ".h5");
+      rankTempPath("rodin_mpi_hdf5_rt_" + polytopeLabel(type) + ".h5");
 
     // Build a local mesh and wrap it in an MPI mesh (single-rank MPI)
     auto localMesh = makeMesh(type);
@@ -265,7 +273,7 @@ namespace
   {
     const auto type = GetParam();
     const auto meshFile =
-        rankTempPath("rodin_mpi_hdf5_noxdmf_" + polytopeLabel(type) + ".h5");
+      rankTempPath("rodin_mpi_hdf5_noxdmf_" + polytopeLabel(type) + ".h5");
 
     auto localMesh = makeMesh(type);
     MeshPrinter<FileFormat::HDF5, Context::Local> printer(localMesh);
@@ -292,7 +300,7 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        rankTempPath("rodin_mpi_xdmf_topo_" + polytopeLabel(type));
+      rankTempPath("rodin_mpi_xdmf_topo_" + polytopeLabel(type));
     boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
@@ -334,7 +342,7 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        rankTempPath("rodin_mpi_xdmf_wc_" + polytopeLabel(type));
+      rankTempPath("rodin_mpi_xdmf_wc_" + polytopeLabel(type));
     boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
@@ -387,95 +395,99 @@ namespace
 
     // -- Write phase: create a file with the shard layout -------------------
     {
-      const auto file = HDF5::File(
-          H5Fcreate(testFile.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        HDF5::File(H5Fcreate(testFile.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       ASSERT_TRUE(file);
 
       // Create the group hierarchy for dimension 0
       {
-        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::Shard,
-                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = HDF5::Group(H5Gcreate2(
+          file.get(), HDF5::Path::Shard, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardState,
-                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = HDF5::Group(H5Gcreate2(
+          file.get(), HDF5::Path::ShardState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
         const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardPolytopeMap,
-                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardOwner,
-                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = HDF5::Group(H5Gcreate2(
+          file.get(), HDF5::Path::ShardOwner, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardHalo,
-                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = HDF5::Group(H5Gcreate2(
+          file.get(), HDF5::Path::ShardHalo, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
 
       // /Shard/Flags/0 — ownership flags (U8)
       {
-        std::vector<HDF5::U8> flags = { 1, 1, 2, 0 };
+        std::vector<HDF5::U8> flags = {1, 1, 2, 0};
         HDF5::writeVectorDataset(file.get(), HDF5::shardStatePath(0), flags);
       }
 
       // /Shard/PolytopeMap/0
       {
-        const auto g = HDF5::Group(
-            H5Gcreate2(file.get(), HDF5::shardPolytopeMapGroupPath(0).c_str(),
-                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g =
+          HDF5::Group(H5Gcreate2(file.get(), HDF5::shardPolytopeMapGroupPath(0).c_str(),
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        std::vector<HDF5::U64> left = { 10, 20, 30, 40 };
+        std::vector<HDF5::U64> left = {10, 20, 30, 40};
         HDF5::writeVectorDataset(file.get(), HDF5::shardPolytopeMapLeftPath(0), left);
       }
       {
         const auto g = HDF5::Group(
-            H5Gcreate2(file.get(), HDF5::shardPolytopeMapRightGroupPath(0).c_str(),
-                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          H5Gcreate2(file.get(), HDF5::shardPolytopeMapRightGroupPath(0).c_str(),
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        std::vector<HDF5::U64> keys = { 10, 20, 30, 40 };
-        std::vector<HDF5::U64> vals = { 0, 1, 2, 3 };
-        HDF5::writeVectorDataset(file.get(), HDF5::shardPolytopeMapRightGroupPath(0) + "/Keys", keys);
-        HDF5::writeVectorDataset(file.get(), HDF5::shardPolytopeMapRightGroupPath(0) + "/Values", vals);
+        std::vector<HDF5::U64> keys = {10, 20, 30, 40};
+        std::vector<HDF5::U64> vals = {0, 1, 2, 3};
+        HDF5::writeVectorDataset(
+          file.get(), HDF5::shardPolytopeMapRightGroupPath(0) + "/Keys", keys);
+        HDF5::writeVectorDataset(
+          file.get(), HDF5::shardPolytopeMapRightGroupPath(0) + "/Values", vals);
       }
 
       // /Shard/Owner/0
       {
-        const auto g = HDF5::Group(
-            H5Gcreate2(file.get(), HDF5::shardOwnerGroupPath(0).c_str(),
-                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = HDF5::Group(H5Gcreate2(file.get(),
+          HDF5::shardOwnerGroupPath(0).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        std::vector<HDF5::U64> keys = { 2 };
-        std::vector<HDF5::U64> vals = { 3 };
-        HDF5::writeVectorDataset(file.get(), HDF5::shardOwnerGroupPath(0) + "/Keys", keys);
-        HDF5::writeVectorDataset(file.get(), HDF5::shardOwnerGroupPath(0) + "/Values", vals);
+        std::vector<HDF5::U64> keys = {2};
+        std::vector<HDF5::U64> vals = {3};
+        HDF5::writeVectorDataset(
+          file.get(), HDF5::shardOwnerGroupPath(0) + "/Keys", keys);
+        HDF5::writeVectorDataset(
+          file.get(), HDF5::shardOwnerGroupPath(0) + "/Values", vals);
       }
 
       // /Shard/Halo/0  (CSR: keys=[0,1], offsets=[0,1,3], indices=[1,2,3])
       {
-        const auto g = HDF5::Group(
-            H5Gcreate2(file.get(), HDF5::shardHaloGroupPath(0).c_str(),
-                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = HDF5::Group(H5Gcreate2(file.get(),
+          HDF5::shardHaloGroupPath(0).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
       {
-        std::vector<HDF5::U64> keys    = { 0, 1 };
-        std::vector<HDF5::U64> offsets  = { 0, 1, 3 };
-        std::vector<HDF5::U64> indices  = { 1, 2, 3 };
+        std::vector<HDF5::U64> keys = {0, 1};
+        std::vector<HDF5::U64> offsets = {0, 1, 3};
+        std::vector<HDF5::U64> indices = {1, 2, 3};
         HDF5::writeVectorDataset(file.get(), HDF5::shardHaloGroupPath(0) + "/Keys", keys);
-        HDF5::writeVectorDataset(file.get(), HDF5::shardHaloGroupPath(0) + "/Offsets", offsets);
-        HDF5::writeVectorDataset(file.get(), HDF5::shardHaloGroupPath(0) + "/Indices", indices);
+        HDF5::writeVectorDataset(
+          file.get(), HDF5::shardHaloGroupPath(0) + "/Offsets", offsets);
+        HDF5::writeVectorDataset(
+          file.get(), HDF5::shardHaloGroupPath(0) + "/Indices", indices);
       }
     }
 
@@ -508,7 +520,8 @@ namespace
 
       // Verify data round-trip for polytope map left
       {
-        auto left = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(0));
+        auto left =
+          HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(0));
         ASSERT_EQ(left.size(), 4u);
         EXPECT_EQ(left[0], 10u);
         EXPECT_EQ(left[3], 40u);
@@ -516,9 +529,12 @@ namespace
 
       // Verify halo CSR structure
       {
-        auto keys    = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Keys");
-        auto offsets = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Offsets");
-        auto indices = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Indices");
+        auto keys =
+          HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Keys");
+        auto offsets = HDF5::readVectorDataset<HDF5::U64>(
+          h5, HDF5::shardHaloGroupPath(0) + "/Offsets");
+        auto indices = HDF5::readVectorDataset<HDF5::U64>(
+          h5, HDF5::shardHaloGroupPath(0) + "/Indices");
         ASSERT_EQ(keys.size(), 2u);
         ASSERT_EQ(offsets.size(), 3u);
         ASSERT_EQ(indices.size(), 3u);
@@ -568,14 +584,15 @@ namespace
    * Tests the distributed XDMF code path using MPI_COMM_SELF
    * (1 rank, exercises the collective logic without multi-process setup).
    */
-  class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type> {};
+  class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   /// @brief Verifies file per rank visualization for MPI distributed XDMF by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIDistributedXDMF, FilePerRankVisualization)
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        rankTempPath("rodin_mpi_dist_xdmf_" + polytopeLabel(type));
+      rankTempPath("rodin_mpi_dist_xdmf_" + polytopeLabel(type));
     boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "sim";
@@ -627,7 +644,7 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        rankTempPath("rodin_mpi_dist_xdmf_attr_" + polytopeLabel(type));
+      rankTempPath("rodin_mpi_dist_xdmf_attr_" + polytopeLabel(type));
     boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "field";

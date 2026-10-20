@@ -25,20 +25,20 @@ namespace Rodin::Tests::Unit
     using namespace Geometry;
     struct Gradient
     {
-        bool zero = false;
-        Math::SpatialMatrix<Real> getValue(const Variational::IntegrationPoint& ip) const
+      bool zero = false;
+      Math::SpatialMatrix<Real> getValue(const Variational::IntegrationPoint& ip) const
+      {
+        const auto dim = ip.getPoint().getPolytope().getDimension();
+        Math::SpatialMatrix<Real> gradient(dim, dim);
+        gradient.setZero();
+        if (!zero)
         {
-          const auto dim = ip.getPoint().getPolytope().getDimension();
-          Math::SpatialMatrix<Real> gradient(dim, dim);
-          gradient.setZero();
-          if (!zero)
-          {
-            gradient(0, 0) = Real(-1.5) * ip.getPoint().getReferenceCoordinates()(0);
-            if (dim > 1)
-              gradient(0, 1) = Real(3) * ip.getPoint().getReferenceCoordinates()(1);
-          }
-          return gradient;
+          gradient(0, 0) = Real(-1.5) * ip.getPoint().getReferenceCoordinates()(0);
+          if (dim > 1)
+            gradient(0, 1) = Real(3) * ip.getPoint().getReferenceCoordinates()(1);
         }
+        return gradient;
+      }
     };
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,

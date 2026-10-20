@@ -57,8 +57,10 @@ namespace Rodin::Assembly
     public:
       /// @brief Parent assembly interface.
       using Parent = AssemblyBase<::Mat, Form>;
+
       /// @brief Form supplying spaces, region and kernel.
       using InputType = typename Parent::InputType;
+
       /**
        * @brief Assembles or reassembles the named operator.
        * @param out Matrix receiving cell contributions; created when null.
@@ -120,6 +122,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
       }
+
       /**
        * @brief Copies the assembler.
        * @returns New assembler owned by the caller.
@@ -146,17 +149,19 @@ namespace Rodin::Assembly
       /// @brief Scalar type of the DOF coefficients (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       static_assert(
-        std::is_same_v<ScalarType, PetscScalar>,
-        "FES::ScalarType must be PetscScalar"
-      );
+        std::is_same_v<ScalarType, PetscScalar>, "FES::ScalarType must be PetscScalar");
+
       /// @brief PETSc vector type (@c Vec).
-      using VectorType     = ::Vec;
+      using VectorType = ::Vec;
+
       /// @brief Linear form type being assembled.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
+
       /// @brief Parent assembly base class.
-      using Parent         = AssemblyBase<VectorType, LinearFormType>;
+      using Parent = AssemblyBase<VectorType, LinearFormType>;
+
       /// @brief Input data type for the assembly pipeline.
-      using InputType      = typename Parent::InputType;
+      using InputType = typename Parent::InputType;
 
       /**
        * @brief Assembles the linear form into a distributed PETSc vector.
@@ -223,7 +228,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
 
-        (void) ierr;
+        (void)ierr;
       }
 
       /**
@@ -251,26 +256,28 @@ namespace Rodin::Assembly
    */
   template <class Solution, class TrialFES, class TestFES>
   class MPI<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
-    : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
+    : public AssemblyBase<::Mat,
+        Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
       /// @brief Scalar type resulting from the dot product of trial and test scalars.
       using DotType =
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
-      static_assert(
-        std::is_same_v<DotType, PetscScalar>,
-        "DotType must be PetscScalar"
-      );
+      static_assert(std::is_same_v<DotType, PetscScalar>, "DotType must be PetscScalar");
+
       /// @brief PETSc matrix type (@c Mat).
-      using OperatorType     = ::Mat;
+      using OperatorType = ::Mat;
+
       /// @brief Bilinear form type being assembled.
-      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+
       /// @brief Parent assembly base class.
-      using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
+      using Parent = AssemblyBase<OperatorType, BilinearFormType>;
+
       /// @brief Input data type for the assembly pipeline.
-      using InputType        = typename Parent::InputType;
+      using InputType = typename Parent::InputType;
 
       /**
        * @brief Assembles the bilinear form into a distributed PETSc matrix.
@@ -282,7 +289,7 @@ namespace Rodin::Assembly
         assert(res);
 
         const auto& trialFES = input.getTrialFES();
-        const auto& testFES  = input.getTestFES();
+        const auto& testFES = input.getTestFES();
         assert(trialFES.getMesh() == testFES.getMesh());
         const auto& mesh = trialFES.getMesh();
         const auto& shard = mesh.getShard();
@@ -402,7 +409,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
 
-        (void) ierr;
+        (void)ierr;
       }
 
       /**
@@ -427,32 +434,38 @@ namespace Rodin::Assembly
    */
   // MPI assembly for single-variable Problem (PETSc)
   template <class U, class V>
-  class MPI<
-      Rodin::PETSc::Math::LinearSystem,
-      Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>> final
-    : public AssemblyBase<
-        Rodin::PETSc::Math::LinearSystem,
-        Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
+  class MPI<Rodin::PETSc::Math::LinearSystem,
+    Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
+    final : public AssemblyBase<Rodin::PETSc::Math::LinearSystem,
+              Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
   {
     public:
       /// @brief PETSc linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+
       /// @brief Problem type being assembled.
-      using ProblemType      = Rodin::Variational::Problem<LinearSystemType, U, V>;
+      using ProblemType = Rodin::Variational::Problem<LinearSystemType, U, V>;
+
       /// @brief Parent assembly base class.
-      using Parent           = AssemblyBase<LinearSystemType, ProblemType>;
+      using Parent = AssemblyBase<LinearSystemType, ProblemType>;
+
       /// @brief Input data type for the assembly pipeline.
-      using InputType        = typename Parent::InputType;
+      using InputType = typename Parent::InputType;
 
       /// @brief PETSc matrix type (@c Mat) for the system operator.
-      using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      using OperatorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+
       /// @brief PETSc vector type (@c Vec) for the RHS and solution.
-      using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      using VectorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType; // ::Vec
 
       /// @brief Finite element space type for the trial function.
-      using TrialFESType  = typename Rodin::FormLanguage::Traits<U>::FESType;
+      using TrialFESType = typename Rodin::FormLanguage::Traits<U>::FESType;
+
       /// @brief Mesh type for the trial finite element space.
       using TrialMeshType = typename Rodin::FormLanguage::Traits<TrialFESType>::MeshType;
+
       /// @brief Context type (Local or MPI) for the trial mesh.
       using MeshContextType =
         typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
@@ -494,6 +507,7 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+
       /**
        * @brief Assembles the requested operator and vector contributions.
        * @param axb Linear system receiving the assembled operator and vector.
@@ -503,8 +517,7 @@ namespace Rodin::Assembly
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
-        static_assert(
-          std::is_same_v<MeshContextType, Rodin::Context::MPI>,
+        static_assert(std::is_same_v<MeshContextType, Rodin::Context::MPI>,
           "PETSc MPI assembly should only be used with MPI mesh context.");
 
         const bool doMatrix = mode != AssemblyMode::RHS;
@@ -518,10 +531,10 @@ namespace Rodin::Assembly
         const auto& v = input.getTestFunction();
 
         const auto& trialFES = u.getFiniteElementSpace();
-        const auto& testFES  = v.getFiniteElementSpace();
+        const auto& testFES = v.getFiniteElementSpace();
         assert(trialFES.getMesh() == testFES.getMesh());
 
-        const auto& mesh  = trialFES.getMesh();
+        const auto& mesh = trialFES.getMesh();
         const auto& shard = mesh.getShard();
 
         const size_t globalCols = trialFES.getSize();
@@ -1062,7 +1075,7 @@ namespace Rodin::Assembly
           }
         }
 
-        (void) ierr;
+        (void)ierr;
       }
 
     public:
@@ -1076,7 +1089,6 @@ namespace Rodin::Assembly
       }
   };
 
-
   /**
    * @brief MPI-parallel assembly of a multi-variable PETSc problem.
    *
@@ -1089,29 +1101,34 @@ namespace Rodin::Assembly
    * @tparam Us  Additional trial/test function types.
    */
   // MPI assembly for multi-variable Problem (PETSc)
-  template <class U1, class U2, class U3, class ... Us>
-  class MPI<
-      Rodin::PETSc::Math::LinearSystem,
-      Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>> final
-    : public AssemblyBase<
-        Rodin::PETSc::Math::LinearSystem,
+  template <class U1, class U2, class U3, class... Us>
+  class MPI<Rodin::PETSc::Math::LinearSystem,
+    Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>>
+    final
+    : public AssemblyBase<Rodin::PETSc::Math::LinearSystem,
         Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>>
   {
     public:
       /// @brief PETSc linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+
       /// @brief Multi-field problem type being assembled.
       using ProblemType =
         Rodin::Variational::Problem<LinearSystemType, U1, U2, U3, Us...>;
+
       /// @brief Parent assembly base class.
-      using Parent    = AssemblyBase<LinearSystemType, ProblemType>;
+      using Parent = AssemblyBase<LinearSystemType, ProblemType>;
+
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
       /// @brief PETSc matrix type (@c Mat) for the block system operator.
-      using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      using OperatorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+
       /// @brief PETSc vector type (@c Vec) for the block RHS and solution.
-      using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      using VectorType =
+        typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType; // ::Vec
 
       /**
        * @brief Assembles the full multi-field distributed PETSc linear system.
@@ -1150,6 +1167,7 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+
       /**
        * @brief Assembles the requested operator and vector contributions.
        * @param axb Linear system receiving the assembled operator and vector.
@@ -1164,37 +1182,39 @@ namespace Rodin::Assembly
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;
 
-        auto& pb            = input.getProblemBody();
-        auto& us            = input.getTrialFunctions();
-        auto& vs            = input.getTestFunctions();
+        auto& pb = input.getProblemBody();
+        auto& us = input.getTrialFunctions();
+        auto& vs = input.getTestFunctions();
         const auto& trialOffsets = input.getTrialOffsets();
-        const auto& testOffsets  = input.getTestOffsets();
-        auto& trialUUIDMap  = input.getTrialUUIDMap();
-        auto& testUUIDMap   = input.getTestUUIDMap();
+        const auto& testOffsets = input.getTestOffsets();
+        auto& trialUUIDMap = input.getTrialUUIDMap();
+        auto& testUUIDMap = input.getTestUUIDMap();
 
         const size_t ncols = input.getTotalTrialSize();
         const size_t nrows = input.getTotalTestSize();
 
-        using FirstTrialMeshType =
-          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        using FirstTrialMeshType = std::decay_t<
+          decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
         using MeshContextType =
           typename Rodin::FormLanguage::Traits<FirstTrialMeshType>::ContextType;
 
-        static_assert(
-          std::is_same_v<MeshContextType, Rodin::Context::MPI>,
+        static_assert(std::is_same_v<MeshContextType, Rodin::Context::MPI>,
           "PETSc MPI assembly should only be used with MPI mesh context.");
 
         // Mesh + shard
-        const auto& mesh = [&]() -> const auto&
-        {
+        const auto& mesh = [&]() -> const auto& {
           const void* addr = nullptr;
-          us.apply([&](const auto& uref)
-          {
+          us.apply([&](const auto& uref) {
             if (!addr)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+            {
+              addr =
+                static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+            }
           });
           assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
+          return *static_cast<const std::decay_t<
+            decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(
+            addr);
         }();
 
         const auto& shard = mesh.getShard();
@@ -1208,26 +1228,22 @@ namespace Rodin::Assembly
         // Layout: localRows/localCols computed as sum of owned sizes per block.
 
         // Helpers (same as your sequential)
-        const auto findTrialBlock = [&](const auto& uuid) -> size_t
-        {
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t {
           auto it = trialUUIDMap.left.find(uuid);
           assert(it != trialUUIDMap.left.end());
           return it->second;
         };
 
-        const auto findTestBlock = [&](const auto& uuid) -> size_t
-        {
+        const auto findTestBlock = [&](const auto& uuid) -> size_t {
           auto it = testUUIDMap.left.find(uuid);
           assert(it != testUUIDMap.left.end());
           return it->second;
         };
 
-        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
-        {
+        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto& {
           const size_t k = findTrialBlock(uuid);
           const Variational::FiniteElementSpaceBase* addr = nullptr;
-          us.iapply([&](size_t i, const auto& uref)
-          {
+          us.iapply([&](size_t i, const auto& uref) {
             if (i == k)
               addr = &uref.get().getFiniteElementSpace();
           });
@@ -1235,12 +1251,10 @@ namespace Rodin::Assembly
           return *addr;
         };
 
-        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
-        {
+        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto& {
           const size_t k = findTestBlock(uuid);
           const Variational::FiniteElementSpaceBase* addr = nullptr;
-          vs.iapply([&](size_t i, const auto& vref)
-          {
+          vs.iapply([&](size_t i, const auto& vref) {
             if (i == k)
               addr = &vref.get().getFiniteElementSpace();
           });
@@ -1250,16 +1264,14 @@ namespace Rodin::Assembly
 
         // Compute localRows/localCols as sum of owned sizes of each block on this rank
         size_t localRows = 0;
-        vs.iapply([&](size_t /*i*/, const auto& vref)
-        {
+        vs.iapply([&](size_t /*i*/, const auto& vref) {
           size_t rb, re;
           vref.get().getFiniteElementSpace().getOwnershipRange(rb, re);
           localRows += (re - rb);
         });
 
         size_t localCols = 0;
-        us.iapply([&](size_t /*i*/, const auto& uref)
-        {
+        us.iapply([&](size_t /*i*/, const auto& uref) {
           size_t cb, ce;
           uref.get().getFiniteElementSpace().getOwnershipRange(cb, ce);
           localCols += (ce - cb);
@@ -1842,7 +1854,7 @@ namespace Rodin::Assembly
           (void)ierr;
         }
 
-        (void) ierr;
+        (void)ierr;
       }
 
     public:

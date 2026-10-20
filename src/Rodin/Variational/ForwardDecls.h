@@ -69,10 +69,11 @@ namespace Rodin::Variational
   };
 
   /// @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
-  static constexpr const ShapeFunctionSpaceType TrialSpace = ShapeFunctionSpaceType::Trial;
+  static constexpr const ShapeFunctionSpaceType TrialSpace =
+    ShapeFunctionSpaceType::Trial;
 
   /// @brief Shorthand variable for ShapeFunctionSpaceType::Test.
-  static constexpr const ShapeFunctionSpaceType TestSpace  = ShapeFunctionSpaceType::Test;
+  static constexpr const ShapeFunctionSpaceType TestSpace = ShapeFunctionSpaceType::Test;
 
   /**
    * @brief Base class for shape function objects.
@@ -119,7 +120,7 @@ namespace Rodin::Variational
   template <class Derived>
   class FunctionBase;
 
-  template <class ... Values>
+  template <class... Values>
   class Function;
 
   /// @brief Base class for objects representing boolean functions.
@@ -149,7 +150,7 @@ namespace Rodin::Variational
   template <class Scalar, class Derived>
   class ScalarFunctionBase;
 
-  template <class ... Values>
+  template <class... Values>
   class ScalarFunction;
 
   /// @brief Base class for real-valued functions defined on a mesh.
@@ -162,7 +163,7 @@ namespace Rodin::Variational
    *
    * @see RealFunctionSpecializations
    */
-  template <class ... Values>
+  template <class... Values>
   class RealFunction;
 
   /// @brief Base class for scalar-valued functions defined on a mesh.
@@ -175,7 +176,7 @@ namespace Rodin::Variational
    *
    * @see ComplexFunctionSpecializations
    */
-  template <class ... Values>
+  template <class... Values>
   class ComplexFunction;
 
   /**
@@ -193,7 +194,7 @@ namespace Rodin::Variational
    *
    * @see VectorFunctionSpecializations
    */
-  template <class ... Values>
+  template <class... Values>
   class VectorFunction;
 
   /// @brief Base class for matrix-valued functions defined on a mesh.
@@ -359,7 +360,7 @@ namespace Rodin::Variational
   template <class StrictType>
   class FunctionBaseCopy;
 
-  template <class ... Args>
+  template <class... Args>
   class Zero;
 
   template <class Operand>
@@ -392,7 +393,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Sqrt;
 
-  template <class ... Args>
+  template <class... Args>
   class Component;
 
   /**
@@ -793,10 +794,10 @@ namespace Rodin::Variational
   template <class Kernel, class Operand>
   class Potential;
 
-  template <class ... Args>
+  template <class... Args>
   class Max;
 
-  template <class ... Args>
+  template <class... Args>
   class Min;
 
   /**
@@ -1087,7 +1088,7 @@ namespace Rodin::Variational
   template <class Operand, class Value>
   class DirichletBC;
 
-  template <class Operand, class ... Parameters>
+  template <class Operand, class... Parameters>
   class PeriodicBC;
 
   /**
@@ -1109,19 +1110,15 @@ namespace Rodin::Variational
    *
    * @see ProblemSpecializations
    */
-  template <class ... Parameters>
+  template <class... Parameters>
   class Problem;
 
   /// @brief Base class for variational problem objects.
   template <class LinearSystem>
   class ProblemBase;
 
-  template <
-    class Operand,
-    class VectorField,
-    class Step,
-    class BoundaryPolicy
-  > class Flow;
+  template <class Operand, class VectorField, class Step, class BoundaryPolicy>
+  class Flow;
 }
 
 #endif

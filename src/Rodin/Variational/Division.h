@@ -22,25 +22,26 @@ namespace Rodin::FormLanguage
    * space, the shape function space, the left-hand side operand, the right-hand side
    * operand and the range type.
    */
-  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  template <class LHSDerived, class RHSDerived, class FES,
+    Variational::ShapeFunctionSpaceType Space>
   struct Traits<
-    Variational::Division<
-      Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+    Variational::Division<Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::FunctionBase<RHSDerived>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::FunctionBase<RHSDerived>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::FunctionBase<RHSDerived>;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = typename FormLanguage::Traits<LHSType>::RangeType;
   };
 }
 
@@ -95,7 +96,8 @@ namespace Rodin::Variational
        * @param rhs Denominator function @f$ g @f$
        */
       Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+        : m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {}
 
       /**
@@ -104,7 +106,8 @@ namespace Rodin::Variational
        */
       Division(const Division& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       /**
@@ -113,7 +116,8 @@ namespace Rodin::Variational
        */
       Division(Division&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
       /**
@@ -121,8 +125,8 @@ namespace Rodin::Variational
        * @param args Arguments specifying the trace
        * @returns Reference to this object
        */
-      template <class ... Args>
-      Division& traceOf(const Args& ... args)
+      template <class... Args>
+      Division& traceOf(const Args&... args)
       {
         m_lhs->traceOf(args...);
         m_rhs->traceOf(args...);
@@ -133,8 +137,7 @@ namespace Rodin::Variational
        * @brief Gets the numerator function.
        * @returns Reference to numerator function @f$ f @f$
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -144,8 +147,7 @@ namespace Rodin::Variational
        * @brief Gets the denominator function.
        * @returns Reference to denominator function @f$ g @f$
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -157,8 +159,7 @@ namespace Rodin::Variational
        * @returns Value @f$ \frac{f(x)}{g(x)} @f$ at point @f$ x @f$
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -193,6 +194,7 @@ namespace Rodin::Variational
       std::unique_ptr<FunctionBase<LHSDerived>> m_lhs;
       std::unique_ptr<FunctionBase<RHSDerived>> m_rhs;
   };
+
   /**
    * @brief Deduction guide for Division.
    * @param lhs Left operand.
@@ -209,8 +211,7 @@ namespace Rodin::Variational
    * @returns Division object representing @f$ \frac{f}{g} @f$
    */
   template <class LHSDerived, class RHSDerived>
-  auto
-  operator/(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
+  auto operator/(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Division(lhs, rhs);
   }
@@ -222,10 +223,9 @@ namespace Rodin::Variational
    * @returns Division object representing @f$ \frac{f}{c} @f$
    */
   template <class LHSDerived, class Number,
-    typename = std::enable_if_t<
-      std::is_arithmetic_v<Number>, Division<LHSDerived, RealFunction<Number>>>>
-  auto
-  operator/(const FunctionBase<LHSDerived>& lhs, Number rhs)
+    typename = std::enable_if_t<std::is_arithmetic_v<Number>,
+      Division<LHSDerived, RealFunction<Number>>>>
+  auto operator/(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return Division(lhs, RealFunction(rhs));
   }
@@ -237,36 +237,36 @@ namespace Rodin::Variational
    * @returns Division object representing @f$ \frac{c}{g} @f$
    */
   template <class Number, class RHSDerived,
-    typename = std::enable_if_t<
-      std::is_arithmetic_v<Number>, Division<RHSDerived, RealFunction<Number>>>>
-  auto
-  operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
+    typename = std::enable_if_t<std::is_arithmetic_v<Number>,
+      Division<RHSDerived, RealFunction<Number>>>>
+  auto operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Division(RealFunction(lhs), rhs);
   }
 
   /// @brief Quotient of a shape function.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  class Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
+  class Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>
+    final
     : public ShapeFunctionBase<
         Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>,
-        FES,
-        Space>
+        FES, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, FES, Space>;
+
       /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
       /// @brief Parent class type.
-      using Parent =
-        ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
+      using Parent = ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
 
       /**
        * @brief Constructs the expression from its left and right operands.
@@ -430,6 +430,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
       /// @brief Function value at the current quadrature binding.
       typename RHSType::Cache m_cache;
   };
@@ -451,9 +452,8 @@ namespace Rodin::Variational
    * @returns Quotient of the operands.
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  auto operator/(
-      const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
-      const FunctionBase<RHSDerived>& rhs)
+  auto operator/(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
   {
     return Division(lhs, rhs);
   }

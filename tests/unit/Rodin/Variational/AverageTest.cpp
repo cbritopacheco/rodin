@@ -19,7 +19,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Average, ConstantFunction_AverageEqualsConstant)
   {
     // Average of a constant function across any face should equal the constant
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     RealFunction f(42.0);
     auto avg_f = Average(f);
 
@@ -33,7 +33,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Average, ConstantVectorFunction_AverageEqualsConstant)
   {
     // Average of a constant vector function should equal the same vector
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     VectorFunction f{3.0, 7.0};
     auto avg_f = Average(f);
 
@@ -49,7 +49,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Average, GridFunction_ContinuousFunction_AverageEqualsValue)
   {
     // Average of a continuous P1 grid function should equal the function value
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     RealFunction f(5.0);
@@ -69,7 +69,7 @@ namespace Rodin::Tests::Unit
     auto avg_f = Average(f);
     auto avg_copy = avg_f;
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
@@ -83,7 +83,7 @@ namespace Rodin::Tests::Unit
     auto avg_f = Average(f);
     auto avg_moved = std::move(avg_f);
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
@@ -97,7 +97,7 @@ namespace Rodin::Tests::Unit
     auto avg_f = Average(f);
     std::unique_ptr<decltype(avg_f)> copy(avg_f.copy());
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
@@ -108,7 +108,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Average, JumpAndAverage_Consistency)
   {
     // For a constant function, Jump=0 and Average=constant
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     RealFunction f(10.0);
     auto avg_f = Average(f);
     auto jump_f = Jump(f);

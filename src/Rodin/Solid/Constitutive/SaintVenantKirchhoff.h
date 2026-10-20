@@ -54,7 +54,8 @@ namespace Rodin::Solid
       struct Cache
       {
         Math::SpatialMatrix<Real> E;  ///< Green-Lagrange strain @f$ \mathbf{E} @f$
-        Math::SpatialMatrix<Real> S;  ///< Second Piola-Kirchhoff stress @f$ \mathbf{S} @f$
+        Math::SpatialMatrix<Real>
+          S;  ///< Second Piola-Kirchhoff stress @f$ \mathbf{S} @f$
         Real trE;              ///< @f$ \operatorname{tr}(\mathbf{E}) @f$
       };
 
@@ -73,6 +74,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       SaintVenantKirchhoff(const SaintVenantKirchhoff& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -83,13 +85,19 @@ namespace Rodin::Solid
        * @brief Gets the first Lamé parameter.
        * @returns The first Lamé parameter.
        */
-      Real getLameFirstParameter() const { return m_lambda; }
+      Real getLameFirstParameter() const
+      {
+        return m_lambda;
+      }
 
       /**
        * @brief Gets the shear modulus.
        * @returns The shear modulus.
        */
-      Real getShearModulus() const { return m_mu; }
+      Real getShearModulus() const
+      {
+        return m_mu;
+      }
 
       /**
        * @brief Populates the Green-Lagrange strain and stress cache.
@@ -122,8 +130,7 @@ namespace Rodin::Solid
       Real getStrainEnergyDensity(
         const Cache& cache, [[maybe_unused]] const ConstitutivePoint& cp) const
       {
-        return 0.5 * m_lambda * cache.trE * cache.trE
-             + m_mu * cache.E.dot(cache.E);
+        return 0.5 * m_lambda * cache.trE * cache.trE + m_mu * cache.E.dot(cache.E);
       }
 
       /**
@@ -132,10 +139,8 @@ namespace Rodin::Solid
        * @param cache Constitutive invariant cache populated by getCache().
        * @param cp Constitutive evaluation point.
        */
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const ConstitutivePoint& cp) const
       {
         // P = F S
         P = cp.getKinematicState().getDeformationGradient() * cache.S;
@@ -148,11 +153,8 @@ namespace Rodin::Solid
        * @param cp Constitutive evaluation point.
        * @param dF Increment of the deformation gradient.
        */
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
+        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
         const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
@@ -162,7 +164,8 @@ namespace Rodin::Solid
         I.setIdentity();
 
         // dE = 0.5 (dF^T F + F^T dF)
-        const Math::SpatialMatrix<Real> dE = 0.5 * (dF.transpose() * F + F.transpose() * dF);
+        const Math::SpatialMatrix<Real> dE =
+          0.5 * (dF.transpose() * F + F.transpose() * dF);
 
         // dS = lambda tr(dE) I + 2 mu dE
         const Math::SpatialMatrix<Real> dS = m_lambda * dE.trace() * I + 2.0 * m_mu * dE;

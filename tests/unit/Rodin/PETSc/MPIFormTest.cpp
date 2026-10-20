@@ -28,14 +28,14 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static boost::mpi::environment*  g_env = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
   Mesh<Context::Local> makeShardableMesh()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {5, 5});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D, D);
     mesh.getConnectivity().compute(D, 0);

@@ -132,8 +132,8 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsNamedForm : std::false_type
   {
-      /// @brief False for types that are not named forms.
-      static constexpr bool Value = false;
+    /// @brief False for types that are not named forms.
+    static constexpr bool Value = false;
   };
 }
 

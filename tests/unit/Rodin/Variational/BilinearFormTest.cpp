@@ -18,7 +18,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies sanity test build for variational real P1 bilinear form by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_BilinearForm, SanityTest_Build)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -30,7 +30,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy constructor for variational real P1 bilinear form by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Real_P1_BilinearForm, CopyConstructor)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -43,7 +43,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies move constructor for variational real P1 bilinear form by checking exact expected values, move semantics.
   TEST(Rodin_Variational_Real_P1_BilinearForm, MoveConstructor)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -56,7 +56,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies assignment for variational real P1 bilinear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_BilinearForm, Assignment)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -68,7 +68,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies addition assignment for variational real P1 bilinear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_BilinearForm, AdditionAssignment)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -80,7 +80,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies subtraction assignment for variational real P1 bilinear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_BilinearForm, SubtractionAssignment)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -92,7 +92,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies assemble and get operator for variational real P1 bilinear form by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Real_P1_BilinearForm, AssembleAndGetOperator)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -110,7 +110,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy for variational real P1 bilinear form by checking copy semantics.
   TEST(Rodin_Variational_Real_P1_BilinearForm, Copy)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -125,7 +125,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Vector_P1_BilinearForm, SanityTest_Build)
   {
     constexpr size_t vdim = 2;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -138,7 +138,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Vector_P1_BilinearForm, ElasticityIntegrator)
   {
     constexpr size_t vdim = 2;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -154,7 +154,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies mass matrix for variational real P1 bilinear form by checking form assembly.
   TEST(Rodin_Variational_Real_P1_BilinearForm, MassMatrix)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);

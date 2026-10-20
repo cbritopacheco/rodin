@@ -93,8 +93,7 @@ namespace Rodin::Geometry
        * @param[in] other SubMesh to compare with
        * @returns True if this is the same object (pointer equality)
        */
-      constexpr
-      bool operator==(const SubMeshBase& other) const
+      constexpr bool operator==(const SubMeshBase& other) const
       {
         return this == &other;
       }
@@ -224,8 +223,7 @@ namespace Rodin::Geometry
        * @brief Constructs a submesh with a parent.
        * @param[in] parent Reference to the parent mesh
        */
-      explicit
-      SubMesh(std::reference_wrapper<const Mesh<Context>> parent);
+      explicit SubMesh(std::reference_wrapper<const Mesh<Context>> parent);
 
       /**
        * @brief Copy constructor.
@@ -318,8 +316,8 @@ namespace Rodin::Geometry
 
     private:
       std::reference_wrapper<const Mesh<Context>> m_parent;  ///< Parent mesh reference
-      std::vector<PolytopeMap> m_s2ps;                      ///< Index mappings per dimension
-      Deque<Ancestor> m_ancestors;                           ///< Ancestor mesh chain
+      std::vector<PolytopeMap> m_s2ps; ///< Index mappings per dimension
+      Deque<Ancestor> m_ancestors; ///< Ancestor mesh chain
   };
 }
 

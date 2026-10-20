@@ -41,8 +41,10 @@ namespace Rodin::Assembly
     public:
       /// Scalar field type of the constrained space.
       using Scalar = typename FES::ScalarType;
+
       /// Rank identifier in the mesh communicator.
       using Rank = int;
+
       /// Whether the space has globally supported constant DOFs.
       static constexpr bool Global = std::is_same_v<FES,
         Variational::P0g<typename FES::RangeType, typename FES::MeshType>>;

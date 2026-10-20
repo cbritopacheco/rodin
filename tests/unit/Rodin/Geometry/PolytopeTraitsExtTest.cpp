@@ -116,7 +116,7 @@ namespace Rodin::Tests::Unit
     Polytope::Traits traits(Polytope::Type::Point);
     const auto& c = traits.getCentroid();
     // Point centroid should be at the origin or the single vertex
-    EXPECT_EQ(c.size(), 0);  // 0-dimensional
+    EXPECT_EQ(c.size(), 0); // 0-dimensional
   }
 
   /// @brief Verifies segment centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
