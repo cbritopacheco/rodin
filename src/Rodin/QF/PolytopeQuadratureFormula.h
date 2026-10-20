@@ -76,7 +76,7 @@ namespace Rodin::QF
        * @param g Polytope geometry type.
        * @return Reference to a cached quadrature formula.
        */
-      static const QuadratureFormulaBase& get(size_t order, Geometry::Polytope::Type g);
+      static const QuadratureFormula& get(size_t order, Geometry::Polytope::Type g);
 
       /**
        * @brief Builds a quadrature formula for a polytope geometry.
@@ -111,12 +111,17 @@ namespace Rodin::QF
       PolytopeQuadratureFormula(size_t order, Geometry::Polytope::Type g);
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies ownership of the immutable generated samples.
+       *
+       * Copies preserve the existing numerical samples without regenerating
+       * the rule or requiring a polymorphic clone operation. Ownership is
+       * shared only at the formula level, never at individual mapped points.
+       *
        * @param other PolytopeQuadratureFormula to copy from
        */
       PolytopeQuadratureFormula(const PolytopeQuadratureFormula& other)
         : Parent(other),
-          m_qf(other.m_qf->copy()),
+          m_qf(other.m_qf),
           m_order(other.m_order),
           m_geometry(other.m_geometry)
       {}
@@ -174,13 +179,13 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new PolytopeQuadratureFormula instance
        */
-      inline PolytopeQuadratureFormula* copy() const noexcept override
+      inline PolytopeQuadratureFormula* copy() const noexcept
       {
         return new PolytopeQuadratureFormula(*this);
       }
 
     private:
-      std::unique_ptr<const QuadratureFormulaBase>
+      std::shared_ptr<const QuadratureFormulaBase>
         m_qf; ///< Underlying quadrature formula
       const size_t m_order; ///< Polynomial degree of exactness
       const Geometry::Polytope::Type m_geometry; ///< Polytope geometry type

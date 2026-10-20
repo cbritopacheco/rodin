@@ -82,25 +82,25 @@ namespace Rodin::Tests::Unit
           using TestTables =
             ReferenceTabulationCache<H1Element<TestDegree, Scalar>, Scalar>;
           const auto& bound = QF::PolytopeQuadratureFormula::get(0, geometry);
-          std::vector<std::unique_ptr<const QF::QuadratureFormulaBase>> eviction;
+          std::vector<const QF::QuadratureFormula*> eviction;
           for (size_t i = 0; i < EvictionRules; ++i)
           {
-            eviction.emplace_back(QF::PolytopeQuadratureFormula::build(0, geometry));
+            eviction.emplace_back(&QF::PolytopeQuadratureFormula::get(i + 1, geometry));
             trialElement.getTabulation(*eviction.back());
             testElement.getTabulation(*eviction.back());
           }
-          ASSERT_FALSE(TrialTables::find(trialElement, bound.getCacheIdentity()));
-          ASSERT_FALSE(TestTables::find(testElement, bound.getCacheIdentity()));
+          ASSERT_FALSE(TrialTables::find(trialElement, bound));
+          ASSERT_FALSE(TestTables::find(testElement, bound));
           auto mass = Integral(u, v);
           mass.setOrder(0);
           mass.setPolytope(cell);
-          ASSERT_FALSE(TrialTables::find(trialElement, bound.getCacheIdentity()));
-          ASSERT_FALSE(TestTables::find(testElement, bound.getCacheIdentity()));
+          ASSERT_FALSE(TrialTables::find(trialElement, bound));
+          ASSERT_FALSE(TestTables::find(testElement, bound));
           auto stiffness = Integral(Jacobian(u), Jacobian(v));
           stiffness.setOrder(0);
           stiffness.setPolytope(cell);
-          ASSERT_FALSE(TrialTables::find(trialElement, bound.getCacheIdentity()));
-          ASSERT_FALSE(TestTables::find(testElement, bound.getCacheIdentity()));
+          ASSERT_FALSE(TrialTables::find(trialElement, bound));
+          ASSERT_FALSE(TestTables::find(testElement, bound));
         }
       }
   };

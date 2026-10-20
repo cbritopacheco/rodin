@@ -219,7 +219,7 @@ namespace Rodin::Geometry
        * @param[in] qf Reference formula identifying the element tabulation.
        */
       void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-        const QF::QuadratureFormulaBase& qf) const override
+        const QF::QuadratureFormula& qf) const override
       {
         if constexpr (requires { m_fe.getTabulation(qf); })
         {
@@ -313,15 +313,15 @@ namespace Rodin::Geometry
        *
        * @param[out] pc Physical coordinates.
        * @param rc Owned reference sample coordinates.
-       * @param identity Formula lifetime/assignment identity.
+       * @param formula Persistent immutable reference formula.
        * @param qp Logical sample index established by point construction.
        */
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
-        size_t identity, size_t qp) const override
+        const QF::QuadratureFormula& formula, size_t qp) const override
       {
-        if constexpr (requires { m_fe.findTabulation(identity); })
+        if constexpr (requires { m_fe.findTabulation(formula); })
         {
-          if (const auto found = m_fe.findTabulation(identity))
+          if (const auto found = m_fe.findTabulation(formula))
           {
             const auto& table = found->get();
             assert(table.getCount() == m_fe.getCount());

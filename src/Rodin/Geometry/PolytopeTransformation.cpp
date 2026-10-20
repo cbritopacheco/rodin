@@ -17,14 +17,14 @@
 namespace Rodin::Geometry
 {
   void PolytopeTransformation::transform(Math::SpatialPoint& pc,
-    const Math::SpatialPoint& rc, [[maybe_unused]] size_t identity,
+    const Math::SpatialPoint& rc, [[maybe_unused]] const QF::QuadratureFormula& formula,
     [[maybe_unused]] size_t qp) const
   {
     transform(pc, rc);
   }
 
   void PolytopeTransformation::jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-    const QF::QuadratureFormulaBase& qf) const
+    const QF::QuadratureFormula& qf) const
   {
     jacobians.resize(qf.getSize());
     for (size_t qp = 0; qp < jacobians.size(); ++qp)

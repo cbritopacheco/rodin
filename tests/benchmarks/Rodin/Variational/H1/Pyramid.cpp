@@ -81,7 +81,7 @@ namespace Rodin::Tests::Benchmarks
           operation == PyramidOperation::BernsteinDerivative;
         const bool derivative = operation == PyramidOperation::BernsteinDerivative ||
           operation == PyramidOperation::ModalDerivative;
-        const QF::QuadratureFormulaBase* formula = nullptr;
+        const QF::QuadratureFormula* formula = nullptr;
         if (!metadata)
         {
           formula = &QF::PolytopeQuadratureFormula::get(

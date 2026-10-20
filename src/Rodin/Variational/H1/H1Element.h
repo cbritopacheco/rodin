@@ -372,26 +372,26 @@ namespace Rodin::Variational
        * @brief Tabulates the basis on a quadrature formula.
        *
        * Thread-local entries are identified by the reference geometry and the
-       * quadrature formula's logical lifetime and assignment identity. Reusing
-       * formula storage does not reuse tabulation of its previous contents.
+       * persistent quadrature formula's address. Its immutable samples remain
+       * valid until process termination.
        *
        * @returns The tabulation for the current formula contents.
        * @param qf Quadrature formula defining the evaluation points.
        */
-      const Tabulation& getTabulation(const QF::QuadratureFormulaBase& qf) const;
+      const Tabulation& getTabulation(const QF::QuadratureFormula& qf) const;
 
       /**
-       * @brief Borrows an existing reference table by logical formula identity.
+       * @brief Borrows an existing reference table for a persistent formula.
        *
        * This lookup neither creates a table nor dereferences a formula. An
        * absent or evicted table, including on another thread, returns no value.
        * The borrowed result must not escape the immediate evaluation call.
        *
-       * @param identity Formula lifetime/assignment identity.
+       * @param formula Persistent formula defining the samples.
        * @returns The matching table in this thread, or no value.
        */
       Optional<std::reference_wrapper<const Tabulation>> findTabulation(
-        size_t identity) const;
+        const QF::QuadratureFormula& formula) const;
 
       /**
        * @brief Builds the high-order stable nodes for the element geometry.

@@ -123,11 +123,11 @@ namespace Rodin::Tests::Benchmarks
           {d, 0}, new ParametricTransformation(controls, element));
         const auto cell = *mesh.getPolytope(d, 0);
         const auto& transformation = cell.getTransformation();
-        const Formula formula = [&]() {
+        const QF::QuadratureFormula& formula = [&]() -> const QF::QuadratureFormula& {
           if constexpr (std::is_same_v<Formula, QF::GaussLegendre>)
-            return Formula(geometry, state.range(1));
+            return QF::QuadratureFormula::get<Formula>(geometry, size_t(state.range(1)));
           else
-            return Formula(state.range(1), geometry);
+            return QF::QuadratureFormula::get<Formula>(size_t(state.range(1)), geometry);
         }();
         std::vector<Math::SpatialMatrix<Real>> reference(formula.getSize()), result;
         for (size_t qp = 0; qp < formula.getSize(); ++qp)

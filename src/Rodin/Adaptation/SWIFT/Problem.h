@@ -1747,7 +1747,7 @@ namespace Rodin::Adaptation::SWIFT
        * @returns The cached surface or volume quadrature formula.
        */
       template <class FES>
-      const QF::QuadratureFormulaBase& getQuadrature(
+      const QF::QuadratureFormula& getQuadrature(
         const Geometry::Polytope& polytope, const FES& fes) const
       {
         const auto& fe =
@@ -1771,7 +1771,7 @@ namespace Rodin::Adaptation::SWIFT
        * @returns The cached geometric-response quadrature formula.
        */
       template <class FES>
-      const QF::QuadratureFormulaBase& getGeometricValidationQuadrature(
+      const QF::QuadratureFormula& getGeometricValidationQuadrature(
         const Geometry::Polytope& polytope, const FES& fes) const
       {
         const auto& fe =

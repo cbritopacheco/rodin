@@ -109,8 +109,7 @@ namespace Rodin::Tests::Unit
     {
       const auto& covering = SWIFT::QualityCovering::get(geometry, subdivisions);
       EXPECT_EQ(&covering, &SWIFT::QualityCovering::get(geometry, subdivisions));
-      EXPECT_NE(covering.getCacheIdentity(),
-        SWIFT::QualityCovering::get(geometry, subdivisions + 1).getCacheIdentity());
+      EXPECT_NE(&covering, &SWIFT::QualityCovering::get(geometry, subdivisions + 1));
       ASSERT_EQ(covering.getSize(), count);
       const Real shift =
         geometry == G::Tetrahedron ? Real(1) / (2 * std::sqrt(Real(2))) : Real(0.5);
@@ -166,7 +165,8 @@ namespace Rodin::Tests::Unit
           ? m == 1 ? Real(1) / std::sqrt(Real(6))
                    : std::sqrt(Real(3)) / (2 * m + 3 / std::sqrt(Real(2)))
           : std::sqrt(Real(dimension)) / (2 * (m + 1));
-        EXPECT_DOUBLE_EQ(covering.getCoveringRadius(), expected);
+        EXPECT_DOUBLE_EQ(
+          SWIFT::QualityCovering(geometry, m).getCoveringRadius(), expected);
         const auto distance = [&](const Math::SpatialVector<Real>& point) {
           Real nearest = std::numeric_limits<Real>::infinity();
           for (size_t q = 0; q < covering.getSize(); ++q)

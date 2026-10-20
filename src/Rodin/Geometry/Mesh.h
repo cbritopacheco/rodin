@@ -722,7 +722,7 @@ namespace Rodin::Geometry
        * @param qf Quadrature formula defining the evaluation points.
        */
       virtual const PolytopeQuadrature& getQuadrature(
-          size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const = 0;
+        size_t dimension, Index idx, const QF::QuadratureFormula& qf) const = 0;
 
       /**
        * @brief Gets geometry type of a polytope.
@@ -1795,8 +1795,8 @@ namespace Rodin::Geometry
        */
       virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
-      virtual const PolytopeQuadrature&
-      getQuadrature(size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const override;
+      virtual const PolytopeQuadrature& getQuadrature(
+        size_t dimension, Index idx, const QF::QuadratureFormula& qf) const override;
 
       /// @brief Serializes the mesh (for boost::serialization).
       template<class Archive>

@@ -147,7 +147,7 @@ namespace Rodin::Tests::Unit
        * @brief Copies the observed formula polymorphically.
        * @returns A newly owned copy with fresh observations and logical identity.
        */
-      ConstructionFormula* copy() const noexcept override
+      ConstructionFormula* copy() const noexcept
       {
         return new ConstructionFormula(*this);
       }
@@ -213,33 +213,22 @@ namespace Rodin::Tests::Unit
             SCOPED_TRACE(::testing::Message()
               << "embedding=" << embedding << ", order=" << order << ", warm=" << warm
               << ", empty=" << empty);
-            ConstructionFormula formula(GetParam(), order, empty);
-            const size_t expectedSize = empty ? 0 : formula.getPayload().getSize();
-            const size_t identity = formula.getCacheIdentity();
+            ConstructionFormula generator(GetParam(), order, empty);
+            const auto& formula =
+              QF::QuadratureFormula::get<ConstructionFormula>(GetParam(), order, empty);
+            const size_t expectedSize = empty ? 0 : generator.getPayload().getSize();
             if (warm)
               element.getTabulation(formula);
-            formula.resetObservations();
             const PolytopeQuadrature quadrature(cell, formula);
-            size_t sizeQueryBudget = size_t(1) + !warm;
-#ifndef NDEBUG
-            sizeQueryBudget += expectedSize + 1;
-#endif
-            EXPECT_LE(formula.getSizeQueries(), sizeQueryBudget);
-            EXPECT_EQ(formula.getWeightQueries(), 0u);
-            EXPECT_EQ(formula.getCacheIdentity(), identity);
-            EXPECT_EQ(quadrature.getQuadratureFormulaIdentity(), identity);
+            EXPECT_EQ(&quadrature.getQuadratureFormula(), &formula);
             ASSERT_EQ(quadrature.getSize(), expectedSize);
-            const auto& visits = formula.getSampleVisits();
-            ASSERT_EQ(visits.size(), expectedSize * (warm ? 1 : 2));
-            for (size_t read = 0; read < visits.size(); ++read)
-              EXPECT_EQ(visits[read], read % expectedSize);
             std::vector<Math::SpatialMatrix<Real>> jacobians;
             cell.getTransformation().jacobian(jacobians, formula);
             ASSERT_EQ(jacobians.size(), expectedSize);
             for (size_t qp = 0; qp < expectedSize; ++qp)
             {
               const auto& actual = quadrature.getPoint(qp).getReferenceCoordinates();
-              const auto& expected = formula.getPayload().getPoint(qp);
+              const auto& expected = generator.getPayload().getPoint(qp);
               ASSERT_EQ(actual.size(), dimension);
               ASSERT_EQ(actual.size(), expected.size());
               for (size_t j = 0; j < dimension; ++j)

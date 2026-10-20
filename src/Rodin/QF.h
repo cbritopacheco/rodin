@@ -20,7 +20,7 @@
  * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
  * and @f$ w_i @f$ are associated weights.
  *
- * @see <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html">Rodin::QF::QuadratureFormulaBase</a>
+ * @see Rodin::QF::QuadratureFormula
  * @see <a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html">Rodin::QF::GaussLegendre</a>
  * @see <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html">Rodin::QF::GrundmannMoller</a>
  * @see <a href="class_rodin_1_1_q_f_1_1_centroid.html">Rodin::QF::Centroid</a>

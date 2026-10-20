@@ -216,7 +216,7 @@ namespace Rodin::Tests::Benchmarks
       LocalMesh m_mesh;
       Space m_space;
       Field m_field;
-      const QF::QuadratureFormulaBase& m_qf;
+      const QF::QuadratureFormula& m_qf;
       std::vector<Point> m_points;
       Real m_expectedSum = 0;
       Real m_firstExpected = 0;

@@ -697,8 +697,8 @@ namespace Rodin::Geometry
        * @param[in] qf Quadrature formula.
        * @return Cached quadrature associated with the polytope and formula.
        */
-      virtual const PolytopeQuadrature&
-      getQuadrature(size_t dimension, Index localIdx, const QF::QuadratureFormulaBase& qf) const override;
+      virtual const PolytopeQuadrature& getQuadrature(
+        size_t dimension, Index localIdx, const QF::QuadratureFormula& qf) const override;
 
       /**
        * @brief Sets the transformation associated with a local polytope.

@@ -231,7 +231,8 @@ sample, not proof that the supplied point has that formula's reference
 coordinates. Construct from `IntegrationPoint(polytopeQuadrature, index)` to
 establish reference association with an owned mapped sample. Reference tables
 and coordinate-dependent reuse use `getReferenceQuadratureFormula()`; it
-returns null after formula assignment or for an unproven binding. The ordinary
+returns null for an unproven binding. Published formulas are immutable and
+retained until process termination. The ordinary
 formula accessor remains available for sampling provenance and coefficient
 snapshots. Remapping into another cell must not promote origin metadata into
 reference association. Grid-function derivatives on facets retain the existing

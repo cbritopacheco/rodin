@@ -113,7 +113,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new Centroid instance (caller takes ownership)
        */
-      Centroid* copy() const noexcept override
+      Centroid* copy() const noexcept
       {
         return new Centroid(*this);
       }

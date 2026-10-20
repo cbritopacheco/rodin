@@ -762,17 +762,17 @@ namespace Rodin::Tests::Unit
     gf.project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
 
     const Polytope cell(mesh.getDimension(), 0, mesh);
-    Optional<QF::PolytopeQuadratureFormula> qf;
-    const QF::QuadratureFormulaBase* previousFormula = nullptr;
+    const QF::QuadratureFormula* qf = nullptr;
+    const QF::QuadratureFormula* previousFormula = nullptr;
     Math::SpatialPoint previousCoordinates;
     for (size_t order : {1, 2, 1})
     {
-      qf.emplace(order, cell.getGeometry());
+      qf = &QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
       const PolytopeQuadrature quadrature(cell, *qf);
       const Point& point = quadrature.getPoint(0);
       if (previousFormula)
       {
-        ASSERT_EQ(&*qf, previousFormula);
+        ASSERT_NE(qf, previousFormula);
         ASSERT_GT((point.getReferenceCoordinates() - previousCoordinates).norm(), 1e-12);
       }
       const Real expected = point.x() + 10 * point.y();
@@ -834,18 +834,18 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Reassigning a live formula invalidates cached values at the same sample index.
-  TEST(Rodin_Variational_GridFunction, AssignedQuadratureUsesNewCoordinates)
+  /// @brief Selecting another published formula refreshes cached values at the same sample index.
+  TEST(Rodin_Variational_GridFunction, ChangedQuadratureUsesNewCoordinates)
   {
     LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf.project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
     const Polytope cell(mesh.getDimension(), 0, mesh);
-    QF::GaussLegendre qf(cell.getGeometry(), 1);
     for (size_t order : {1, 2, 1})
     {
-      qf = QF::GaussLegendre(cell.getGeometry(), order);
+      const auto& qf =
+        QF::QuadratureFormula::get<QF::GaussLegendre>(cell.getGeometry(), order);
       const PolytopeQuadrature quadrature(cell, qf);
       const Point& point = quadrature.getPoint(0);
       for (size_t repeat = 0; repeat < 2; ++repeat)

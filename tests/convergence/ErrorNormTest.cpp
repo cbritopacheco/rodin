@@ -25,7 +25,7 @@ namespace Rodin::Tests::Convergence
         {}
 
         const Geometry::PolytopeQuadrature& getQuadrature(
-          size_t d, Index i, const QF::QuadratureFormulaBase& qf) const override
+          size_t d, Index i, const QF::QuadratureFormula& qf) const override
         {
           ++requests;
           return Geometry::LocalMesh::getQuadrature(d, i, qf);

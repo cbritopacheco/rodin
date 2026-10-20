@@ -77,8 +77,8 @@ namespace Rodin::QF
    * ## Architecture
    *
    * Constructors own their nodes and weights. @ref get returns immutable
-   * canonical rules keyed by geometry and point count, retaining their identity
-   * for mapped quadrature caches. A thread-local hot cache avoids repeated
+   * published formulas keyed by geometry and point count. Their permanent
+   * addresses select mapped quadrature caches. A thread-local hot cache avoids repeated
    * locking; a process-wide pool owns the rules until program termination.
    */
   class GaussLobatto final : public QuadratureFormulaBase
@@ -103,7 +103,7 @@ namespace Rodin::QF
        * The argument is a point count, not polynomial degree. Exactness is
        * @f$2\,\mathrm{count}-3@f$ for positive-dimensional geometries.
        */
-      static const GaussLobatto& get(Geometry::Polytope::Type g, size_t count);
+      static const QuadratureFormula& get(Geometry::Polytope::Type g, size_t count);
 
       /**
        * @brief Constructs Gauss-Lobatto quadrature with uniform order.
@@ -189,7 +189,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GaussLobatto instance
        */
-      GaussLobatto* copy() const noexcept override
+      GaussLobatto* copy() const noexcept
       { return new GaussLobatto(*this); }
 
     private:

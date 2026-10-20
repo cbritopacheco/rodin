@@ -165,8 +165,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GrundmannMoller instance
        */
-      inline
-      GrundmannMoller* copy() const noexcept override
+      inline GrundmannMoller* copy() const noexcept
       {
         return new GrundmannMoller(*this);
       }

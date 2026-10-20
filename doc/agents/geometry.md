@@ -58,7 +58,7 @@ compare coordinate/key sets in tests.
   changed geometry requires fresh points/quadrature and a new binding.
   Native P1 derivatives retain constant affine-simplex results only within
   that binding. Direct point evaluation without a matching explicit cell
-  binding prepares fresh physical data. Formula identities remain separate
+  binding prepares fresh physical data. Persistent formula addresses remain separate
   and continue to protect reference tabulation and sample provenance.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
@@ -66,13 +66,12 @@ compare coordinate/key sets in tests.
   Construction evaluates the cell's quadrature Jacobians in one bulk
   transformation call and stores them in the points' existing owned caches.
   Parametric P1 and H1 geometry borrow their reference tables only during this
-  call; neither points nor transformations retain a table or formula pointer.
+  call; neither points nor transformations retain borrowed table storage.
   Physical coordinates and derived metric quantities remain lazy. Mapped points
-  own their reference coordinates and retain only the formula's logical identity
+  own their reference coordinates and retain only the persistent formula pointer
   and sample index until physical evaluation. A parametric map may immediately
-  borrow an existing thread-local basis table by that identity; an absent or
-  evicted table uses direct evaluation at the owned reference point. Formula
-  destruction, assignment, cache eviction and transfer to another thread do not
+  borrow an existing thread-local basis table by that formula; an absent or
+  evicted table uses direct evaluation at the owned reference point. Mapped-owner destruction, cache eviction and transfer to another thread do not
   invalidate the owned sample. Rebinding clears provenance and geometric caches.
   Variational rules own only their bound polytope's mapped points. The explicit
   mesh cache is retained for callers requiring borrowed quadratures whose

@@ -135,7 +135,7 @@ namespace Rodin::Adaptation::SWIFT
       static constexpr Real MaximumRisk = Real(100);
       std::reference_wrapper<const Geometry::Polytope> m_cell;
       std::reference_wrapper<const Parameters> m_parameters;
-      std::reference_wrapper<const QualityCovering> m_formula;
+      std::reference_wrapper<const QF::QuadratureFormula> m_formula;
   };
 }
 

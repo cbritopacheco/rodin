@@ -275,7 +275,7 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (Family == BasisFamily::H1)
           {
             const H1Element<K, Scalar> element(geometry);
-            return bool(element.findTabulation(formula.getCacheIdentity()));
+            return bool(element.findTabulation(formula));
           }
           else
             return false;

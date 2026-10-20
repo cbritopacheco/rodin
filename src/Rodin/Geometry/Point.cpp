@@ -42,10 +42,9 @@ namespace Rodin::Geometry
   }
 
   PointBase::PointBase(const Math::SpatialMatrix<Real>& jacobian,
-    const Polytope& polytope, const QF::QuadratureFormulaBase& qf, size_t qp)
+    const Polytope& polytope, const QF::QuadratureFormula& qf, size_t qp)
     : m_polytope(polytope),
-      m_pc(std::in_place_type<Optional<ReferenceSample>>, std::in_place,
-        qf.getCacheIdentity(), qp),
+      m_pc(std::in_place_type<Optional<ReferenceSample>>, std::in_place, qf, qp),
       m_jacobian(jacobian)
   {
     assert(qp < qf.getSize());
@@ -126,7 +125,7 @@ namespace Rodin::Geometry
     if (sample)
     {
       transformation.transform(
-        pc, getReferenceCoordinates(), sample->identity, sample->index);
+        pc, getReferenceCoordinates(), *sample->formula, sample->index);
     }
     else
       transformation.transform(pc, getReferenceCoordinates());
@@ -388,7 +387,7 @@ namespace Rodin::Geometry
   {}
 
   Point::Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
-    const QF::QuadratureFormulaBase& qf, size_t qp)
+    const QF::QuadratureFormula& qf, size_t qp)
     : PointBase(jacobian, polytope, qf, qp),
       m_rc(qf.getPoint(qp))
   {}

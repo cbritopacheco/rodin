@@ -89,7 +89,11 @@ namespace Rodin::QF
         return m_geometry;
       }
 
-      WitherdenVincent* copy() const noexcept override
+      /**
+       * @brief Copies the concrete formula without regenerating its samples.
+       * @returns A new formula owned by the caller.
+       */
+      WitherdenVincent* copy() const noexcept
       {
         return new WitherdenVincent(*this);
       }

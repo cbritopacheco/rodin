@@ -502,6 +502,11 @@ namespace Rodin::Tests::Unit
            * @brief Constructs an observed one-point formula.
            * @param point Reference coordinate returned by the formula.
            */
+          ObservedFormula(Polytope::Type geometry, size_t sample)
+            : ObservedFormula(sample ? Polytope::Traits(geometry).getVertex(0)
+                                     : Polytope::Traits(geometry).getCentroid())
+          {}
+
           explicit ObservedFormula(const Math::SpatialPoint& point)
             : m_point(point),
               m_reads(0)
@@ -567,7 +572,7 @@ namespace Rodin::Tests::Unit
            * @brief Copies the observed formula polymorphically.
            * @returns A newly owned formula copy.
            */
-          ObservedFormula* copy() const noexcept override
+          ObservedFormula* copy() const noexcept
           {
             return new ObservedFormula(*this);
           }
@@ -645,7 +650,7 @@ namespace Rodin::Tests::Unit
          * @param formula Formula defining the reference sample set.
          * @returns The underlying element tabulation.
          */
-        const auto& getTabulation(const QF::QuadratureFormulaBase& formula) const
+        const auto& getTabulation(const QF::QuadratureFormula& formula) const
         {
           ++*tableReads;
           return element.getTabulation(formula);
@@ -656,10 +661,10 @@ namespace Rodin::Tests::Unit
          * @param identity Logical formula identity, including zero.
          * @returns Borrowed table when present on this thread.
          */
-        auto findTabulation(size_t identity) const
+        auto findTabulation(const QF::QuadratureFormula& formula) const
         {
           ++*tableReads;
-          return element.findTabulation(identity);
+          return element.findTabulation(formula);
         }
       };
 
@@ -775,12 +780,12 @@ namespace Rodin::Tests::Unit
         Math::SpatialPoint expected;
         baseline.transform(expected, reference);
         ASSERT_GT(expected.squaredNorm(), 0);
-        Optional<ObservedFormula> formula;
-        formula.emplace(reference);
+        const QF::QuadratureFormula* formula =
+          &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{0});
         std::vector<Math::SpatialMatrix<Real>> matrices;
         map.jacobian(matrices, *formula);
-        const auto identity = formula->getCacheIdentity();
-        ASSERT_TRUE(element.element.findTabulation(identity));
+        const auto* original = formula;
+        ASSERT_TRUE(element.element.findTabulation(*formula));
         Point pending(matrices[0], cell, *formula, 0);
         Point retained(pending);
         Point moved(std::move(retained));
@@ -803,10 +808,10 @@ namespace Rodin::Tests::Unit
         static_cast<void>(pending.getPhysicalCoordinates());
         EXPECT_EQ(tableReads, 2);
     // Assignment at the same address establishes a new logical sample.
-        *formula = ObservedFormula(Polytope::Traits(geometry).getVertex(0));
-        ASSERT_NE(formula->getCacheIdentity(), identity);
+        formula = &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{1});
+        ASSERT_NE(formula, original);
         map.jacobian(matrices, *formula);
-        formula.reset();
+        formula = nullptr;
         sameCoordinates(moved.getPhysicalCoordinates());
         EXPECT_EQ(basisReads, 0);
     // A computed copy owns its physical coordinates and performs no lookup.
@@ -815,21 +820,20 @@ namespace Rodin::Tests::Unit
         sameCoordinates(computedCopy.getPhysicalCoordinates());
         EXPECT_EQ(tableReads, reads);
 
-        formula.emplace(reference);
+        formula = &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{0});
         map.jacobian(matrices, *formula);
         Point evicted(matrices[0], cell, *formula, 0);
         Point transferred(evicted);
-        const auto evictedIdentity = formula->getCacheIdentity();
-        formula.reset();
-    // Nine distinct insertions exceed the existing eight-entry cache.
-        std::vector<std::unique_ptr<ObservedFormula>> replacements;
+        const auto* evictedFormula = formula;
+        formula = nullptr;
+        // Nine distinct insertions exceed the existing eight-entry cache.
         for (size_t i = 0; i < 9; ++i)
         {
-          replacements.emplace_back(
-            std::make_unique<ObservedFormula>(Polytope::Traits(geometry).getVertex(0)));
-          static_cast<void>(element.element.getTabulation(*replacements.back()));
+          const auto& replacement =
+            QF::QuadratureFormula::get<ObservedFormula>(geometry, i + 2);
+          static_cast<void>(element.element.getTabulation(replacement));
         }
-        ASSERT_FALSE(element.element.findTabulation(evictedIdentity));
+        ASSERT_FALSE(element.element.findTabulation(*evictedFormula));
         const auto basisBefore = basisReads;
         sameCoordinates(evicted.getPhysicalCoordinates());
         EXPECT_EQ(basisReads, basisBefore + element.getCount());
@@ -872,10 +876,10 @@ namespace Rodin::Tests::Unit
           }
         }
         ParametricTransformation firstMap(first, element), secondMap(second, element);
-        Optional<ObservedFormula> formula;
-        formula.emplace(centroid);
-        const auto* address = &*formula;
-        const auto initialIdentity = formula->getCacheIdentity();
+        const QF::QuadratureFormula* formula =
+          &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{0});
+
+        const auto* initial = formula;
         std::vector<Math::SpatialMatrix<Real>> firstMatrices, secondMatrices;
         const size_t countBefore = countReads;
         firstMap.jacobian(firstMatrices, *formula);
@@ -885,9 +889,9 @@ namespace Rodin::Tests::Unit
 #else
         EXPECT_EQ(countReads, countBefore + 1);
 #endif
-        ASSERT_EQ(formula->getReads(), 1);
+
         secondMap.jacobian(secondMatrices, *formula);
-        EXPECT_EQ(formula->getReads(), 1);
+
         EXPECT_EQ(tableReads, 2);
         EXPECT_EQ(basisReads, 0);
         for (size_t j = 0; j < 3; ++j)
@@ -895,18 +899,18 @@ namespace Rodin::Tests::Unit
           for (size_t i = 0; i < traits.getDimension(); ++i)
             EXPECT_EQ(secondMatrices[0](j, i), 2 * firstMatrices[0](j, i));
         }
-        *formula = ObservedFormula(vertex);
-        ASSERT_EQ(&*formula, address);
-        ASSERT_NE(formula->getCacheIdentity(), initialIdentity);
+        formula = &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{1});
+        ASSERT_NE(formula, nullptr);
+        ASSERT_NE(formula, initial);
         firstMap.jacobian(firstMatrices, *formula);
-        EXPECT_EQ(formula->getReads(), 1);
+
         const auto assignedMatrices = firstMatrices;
-        const auto assignedIdentity = formula->getCacheIdentity();
-        formula.emplace(centroid);
-        ASSERT_EQ(&*formula, address);
-        ASSERT_NE(formula->getCacheIdentity(), assignedIdentity);
+        const auto* assigned = formula;
+        formula = &QF::QuadratureFormula::get<ObservedFormula>(geometry, size_t{0});
+        ASSERT_NE(formula, nullptr);
+        ASSERT_NE(formula, assigned);
         firstMap.jacobian(firstMatrices, *formula);
-        EXPECT_EQ(formula->getReads(), 1);
+
         EXPECT_EQ(tableReads, 4);
         EXPECT_EQ(basisReads, 0);
         ParametricTransformation baseline(first, element.element);
@@ -998,7 +1002,7 @@ namespace Rodin::Tests::Unit
            * @param[in] formula Reference quadrature formula.
            */
           void jacobian(std::vector<Math::SpatialMatrix<Real>>& matrices,
-            const QF::QuadratureFormulaBase& formula) const override
+            const QF::QuadratureFormula& formula) const override
           {
             ++*m_bulk;
             m_map.jacobian(matrices, formula);
@@ -1053,7 +1057,7 @@ namespace Rodin::Tests::Unit
         Optional<Point> retained;
         Math::SpatialPoint reference;
         {
-          QF::PolytopeQuadratureFormula formula(8, geometry);
+          const auto& formula = QF::PolytopeQuadratureFormula::get(8, geometry);
           reference = formula.getPoint(0);
           PolytopeQuadrature quadrature(cells[0], formula);
           EXPECT_EQ(bulkReads, 1);

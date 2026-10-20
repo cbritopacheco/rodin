@@ -275,7 +275,7 @@ namespace
     Math::Vector<Scalar> moments = Math::Vector<Scalar>::Zero(scalar.getSize());
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
-      const QF::Centroid formula(cell->getGeometry());
+      const auto& formula = QF::QuadratureFormula::get<QF::Centroid>(cell->getGeometry());
       const Point point(*cell, formula.getPoint(0));
       const auto& fe = scalar.getFiniteElement(cell->getDimension(), cell->getIndex());
       const auto& dofs = scalar.getDOFs(cell->getDimension(), cell->getIndex());

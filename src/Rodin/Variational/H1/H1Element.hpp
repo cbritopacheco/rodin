@@ -548,14 +548,14 @@ namespace Rodin::Variational
 
   template <size_t K, class Scalar>
   Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
-  H1Element<K, Scalar>::findTabulation(size_t identity) const
+  H1Element<K, Scalar>::findTabulation(const QF::QuadratureFormula& formula) const
   {
-    return ReferenceTabulationCache<H1Element<K, Scalar>, Scalar>::find(*this, identity);
+    return ReferenceTabulationCache<H1Element<K, Scalar>, Scalar>::find(*this, formula);
   }
 
   template <size_t K, class Scalar>
   const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
-    const QF::QuadratureFormulaBase& qf) const
+    const QF::QuadratureFormula& qf) const
   {
     return ReferenceTabulationCache<H1Element<K, Scalar>, Scalar>::get(*this, qf);
   }

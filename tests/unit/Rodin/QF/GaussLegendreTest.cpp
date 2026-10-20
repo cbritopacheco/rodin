@@ -370,40 +370,27 @@ TEST_F(GaussLegendreTest, EdgeCases)
   EXPECT_DOUBLE_EQ(gl_min.getWeight(0), 1.0);
 }
 
-/// @brief Copies and moves receive identities distinct from their source.
-TEST_F(GaussLegendreTest, CacheIdentityDistinguishesCopiesAndMoves)
+/// @brief Copies and moves preserve owned numerical samples.
+TEST_F(GaussLegendreTest, CopiesAndMovesPreserveSamples)
 {
   GaussLegendre original(Polytope::Type::Segment, 2);
-  const size_t originalIdentity = original.getCacheIdentity();
   GaussLegendre copied(original);
-  const size_t copiedIdentity = copied.getCacheIdentity();
-  EXPECT_NE(copiedIdentity, originalIdentity);
   GaussLegendre moved(std::move(copied));
-  EXPECT_NE(moved.getCacheIdentity(), copiedIdentity);
-  EXPECT_NE(moved.getCacheIdentity(), originalIdentity);
-  EXPECT_NE(copied.getCacheIdentity(), copiedIdentity);
-  EXPECT_NE(copied.getCacheIdentity(), moved.getCacheIdentity());
-  EXPECT_EQ(original.getCacheIdentity(), originalIdentity);
   EXPECT_EQ(moved.getPoint(0)(0), original.getPoint(0)(0));
 }
 
-/// @brief Replacing rule contents changes its cache identity at the same address.
-TEST_F(GaussLegendreTest, AssignmentInvalidatesCacheIdentity)
+/// @brief Assignment replaces the owned sample collection.
+TEST_F(GaussLegendreTest, AssignmentReplacesSamples)
 {
   GaussLegendre destination(Polytope::Type::Segment, 1);
   GaussLegendre source(Polytope::Type::Segment, 2);
-  const size_t previousIdentity = destination.getCacheIdentity();
-  const size_t sourceIdentity = source.getCacheIdentity();
   destination = source;
-  EXPECT_NE(destination.getCacheIdentity(), previousIdentity);
-  EXPECT_NE(destination.getCacheIdentity(), sourceIdentity);
-  EXPECT_EQ(source.getCacheIdentity(), sourceIdentity);
   EXPECT_EQ(destination.getSize(), source.getSize());
   EXPECT_EQ(destination.getPoint(0)(0), source.getPoint(0)(0));
 }
 
-/// @brief Move assignment renews both rules because both node collections may change.
-TEST_F(GaussLegendreTest, MoveAssignmentInvalidatesBothCacheIdentities)
+/// @brief Move assignment preserves the destination samples on all reference cells.
+TEST_F(GaussLegendreTest, MoveAssignmentPreservesSamples)
 {
   for (const auto geometry :
     {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -414,13 +401,7 @@ TEST_F(GaussLegendreTest, MoveAssignmentInvalidatesBothCacheIdentities)
     GaussLegendre source(geometry, 2);
     const GaussLegendre expected(source);
     GaussLegendre destination(Polytope::Type::Segment, 1);
-    const auto sourceIdentity = source.getCacheIdentity();
-    const auto destinationIdentity = destination.getCacheIdentity();
     destination = std::move(source);
-    EXPECT_NE(source.getCacheIdentity(), sourceIdentity);
-    EXPECT_NE(destination.getCacheIdentity(), destinationIdentity);
-    EXPECT_NE(destination.getCacheIdentity(), sourceIdentity);
-    EXPECT_NE(destination.getCacheIdentity(), source.getCacheIdentity());
     ASSERT_EQ(destination.getSize(), expected.getSize());
     EXPECT_EQ(destination.getGeometry(), geometry);
     for (size_t qp = 0; qp < expected.getSize(); ++qp)
@@ -431,62 +412,4 @@ TEST_F(GaussLegendreTest, MoveAssignmentInvalidatesBothCacheIdentities)
         EXPECT_EQ(destination.getPoint(qp)(j), expected.getPoint(qp)(j));
     }
   }
-}
-
-/// @brief Self-move may change the node collection and must retire its old identity.
-TEST_F(GaussLegendreTest, SelfMoveAssignmentInvalidatesCacheIdentity)
-{
-  GaussLegendre formula(Polytope::Type::Segment, 2);
-  const auto identity = formula.getCacheIdentity();
-  auto& alias = formula;
-  formula = std::move(alias);
-  EXPECT_NE(formula.getCacheIdentity(), identity);
-}
-
-/**
- * @brief Construction and both move kinds reserve distinct versions concurrently.
- *
- * Four independent producers retain every identity observed before and after
- * transfers. Sixteen construction/assignment cycles per producer exercise
- * repeated reservations; these counts bound the unit workload, not a timing
- * threshold. After joining, exact set insertion must reject no identity.
- * Moved-from payloads are never queried and no ordering of identities is assumed.
- */
-TEST_F(GaussLegendreTest, ConcurrentMoveVersionsRemainDistinct)
-{
-  constexpr size_t ProducerCount = 4;
-  constexpr size_t CyclesPerProducer = 16;
-  constexpr size_t VersionsPerCycle = 6;
-  std::array<IndexVector, ProducerCount> identities;
-  std::array<std::thread, ProducerCount> producers;
-  for (size_t producer = 0; producer < ProducerCount; ++producer)
-  {
-    producers[producer] = std::thread([&, producer] {
-      auto& versions = identities[producer];
-      versions.reserve(CyclesPerProducer * VersionsPerCycle);
-      for (size_t cycle = 0; cycle < CyclesPerProducer; ++cycle)
-      {
-        GaussLegendre source(Polytope::Type::Point, 1);
-        versions.push_back(source.getCacheIdentity());
-        GaussLegendre destination(std::move(source));
-        versions.push_back(source.getCacheIdentity());
-        versions.push_back(destination.getCacheIdentity());
-        GaussLegendre assigned(Polytope::Type::Point, 1);
-        versions.push_back(assigned.getCacheIdentity());
-        assigned = std::move(destination);
-        versions.push_back(destination.getCacheIdentity());
-        versions.push_back(assigned.getCacheIdentity());
-      }
-    });
-  }
-  for (auto& producer : producers)
-    producer.join();
-  IndexSet versions;
-  for (const auto& observed : identities)
-  {
-    ASSERT_EQ(observed.size(), CyclesPerProducer * VersionsPerCycle);
-    for (const auto identity : observed)
-      EXPECT_TRUE(versions.insert(identity).second);
-  }
-  EXPECT_EQ(versions.size(), ProducerCount * CyclesPerProducer * VersionsPerCycle);
 }

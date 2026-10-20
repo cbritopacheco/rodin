@@ -40,7 +40,7 @@ namespace Rodin::Tests::Unit
         {}
 
         const PolytopeQuadrature& getQuadrature(
-          size_t d, Index i, const QF::QuadratureFormulaBase& qf) const override
+          size_t d, Index i, const QF::QuadratureFormula& qf) const override
         {
           ++requests;
           return LocalMesh::getQuadrature(d, i, qf);
@@ -438,25 +438,11 @@ namespace Rodin::Tests::Unit
           TestFunction u(space);
           const auto cell = space.getMesh().getCell(0);
           const auto exercise = [&](auto& cached, auto makeFresh) {
-            Optional<QF::GaussLegendre> formula;
-            formula.emplace(cell->getGeometry(), 1);
-            const auto* address = &*formula;
-            size_t identity = formula->getCacheIdentity();
             for (size_t transition = 0; transition < 4; ++transition)
             {
-              if (transition == 1)
-                formula.emplace(cell->getGeometry(), 4);
-              else if (transition == 2)
-                *formula = QF::GaussLegendre(cell->getGeometry(), 1);
-              else if (transition == 3)
-                formula.emplace(cell->getGeometry(), 4);
-              ASSERT_EQ(&*formula, address);
-              if (transition > 0)
-              {
-                ASSERT_NE(formula->getCacheIdentity(), identity);
-              }
-              identity = formula->getCacheIdentity();
-              const PolytopeQuadrature points(*cell, *formula);
+              const auto& formula = QF::QuadratureFormula::get<QF::GaussLegendre>(
+                cell->getGeometry(), transition % 2 ? size_t{4} : size_t{1});
+              const PolytopeQuadrature points(*cell, formula);
               const IntegrationPoint ip(points, 0);
               TestFunction freshUnknown(space);
               decltype(auto) fresh = makeFresh(freshUnknown);

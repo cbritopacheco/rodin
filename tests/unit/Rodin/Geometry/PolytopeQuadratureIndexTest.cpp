@@ -44,12 +44,53 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Supplies equal centroid samples under distinct factory keys for index tests.
+  class IndexedCentroid final : public QF::QuadratureFormulaBase
+  {
+    public:
+      /**
+       * @param geometry Reference-cell geometry.
+       * @param tag Distinguishes numerically identical inputs to the tested index.
+       */
+      IndexedCentroid(Polytope::Type geometry, [[maybe_unused]] size_t tag)
+        : m_formula(geometry)
+      {}
+
+      /// @returns One centroid sample.
+      size_t getSize() const override
+      {
+        return m_formula.getSize();
+      }
+
+      /**
+       * @param index Sample index.
+       * @returns Reference measure.
+       */
+      Real getWeight(size_t index) const override
+      {
+        return m_formula.getWeight(index);
+      }
+
+      /**
+       * @param index Sample index.
+       * @returns Reference centroid.
+       */
+      const Math::SpatialPoint& getPoint(size_t index) const override
+      {
+        return m_formula.getPoint(index);
+      }
+
+    private:
+      QF::Centroid m_formula;
+  };
+
   /// @brief Rejected point indices preserve the mapped point and reference formula.
   TEST(Geometry_PolytopeQuadrature, CheckedPointBoundsUseMemberContext)
   {
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
-    const QF::Centroid formula(Polytope::Type::Triangle);
+    const auto& formula =
+      QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     const PolytopeQuadrature quadrature(polytope, formula);
     ASSERT_EQ(quadrature.getSize(), 1u);
     const auto* stored = &quadrature.getPoint(0);
@@ -94,42 +135,35 @@ namespace Rodin::Tests::Unit
       ? LocalMesh::Builder().initialize(3).nodes(1).vertex({0, 0, 0}).finalize()
       : Convergence::UniformGrid(GetParam()).makeMesh(3);
     const auto cell = *mesh.getCell();
-    Optional<QF::GaussLegendre> formula;
-    formula.emplace(GetParam(), 2);
-    const auto* address = &*formula;
     std::vector<const PolytopeQuadrature*> retained;
+    std::vector<const QF::QuadratureFormula*> formulas;
     std::vector<Math::SpatialPoint> coordinates;
-    std::vector<size_t> identities;
     for (size_t version = 0; version < 20; ++version)
     {
-      if (version == 1)
-        *formula = QF::GaussLegendre(GetParam(), 3);
-      else if (version > 1)
-        formula.emplace(GetParam(), version % 2 + 2);
-      ASSERT_EQ(&*formula, address);
-      const auto& quadrature = cell.getQuadrature(*formula);
-      EXPECT_EQ(&quadrature, &cell.getQuadrature(*formula));
-      EXPECT_EQ(quadrature.getQuadratureFormulaIdentity(), formula->getCacheIdentity());
-      ASSERT_EQ(quadrature.getSize(), formula->getSize());
+      const auto& formula =
+        QF::QuadratureFormula::get<QF::GaussLegendre>(GetParam(), version + 2);
+      const auto& quadrature = cell.getQuadrature(formula);
+      EXPECT_EQ(&quadrature, &cell.getQuadrature(formula));
+      EXPECT_EQ(&quadrature.getQuadratureFormula(), &formula);
+      ASSERT_EQ(quadrature.getSize(), formula.getSize());
       for (size_t q = 0; q < quadrature.getSize(); ++q)
       {
-        const auto& actual = quadrature.getPoint(q).getReferenceCoordinates();
-        const auto& expected = formula->getPoint(q);
-        ASSERT_EQ(actual.size(), expected.size());
-        for (size_t j = 0; j < actual.size(); ++j)
-          EXPECT_EQ(actual(j), expected(j));
+        EXPECT_EQ(
+          (quadrature.getPoint(q).getReferenceCoordinates() - formula.getPoint(q)).norm(),
+          0);
       }
       for (const auto* previous : retained)
         EXPECT_NE(&quadrature, previous);
       retained.push_back(&quadrature);
-      coordinates.push_back(formula->getPoint(0));
-      identities.push_back(formula->getCacheIdentity());
+      formulas.push_back(&formula);
+      coordinates.push_back(formula.getPoint(0));
       for (size_t old = 0; old < retained.size(); ++old)
       {
-        EXPECT_EQ(retained[old]->getQuadratureFormulaIdentity(), identities[old]);
-        const auto& point = retained[old]->getPoint(0).getReferenceCoordinates();
-        for (size_t j = 0; j < point.size(); ++j)
-          EXPECT_EQ(point(j), coordinates[old](j));
+        EXPECT_EQ(&retained[old]->getQuadratureFormula(), formulas[old]);
+        EXPECT_EQ(
+          (retained[old]->getPoint(0).getReferenceCoordinates() - coordinates[old])
+            .norm(),
+          0);
       }
     }
   }
@@ -146,7 +180,7 @@ namespace Rodin::Tests::Unit
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
 
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());
@@ -173,7 +207,7 @@ namespace Rodin::Tests::Unit
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
 
-    QF::Centroid qf1(Polytope::Type::Triangle);
+    const auto& qf1 = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     const auto& qf2 = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
@@ -209,7 +243,7 @@ namespace Rodin::Tests::Unit
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
 
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());
@@ -237,7 +271,7 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PolytopeQuadratureIndex, MeshMoveConstructorDropsStaleEntries)
   {
     auto mesh = makeTriangleMesh();
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
 
     mesh.getQuadrature(2, 0, qf);
 
@@ -252,7 +286,7 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PolytopeQuadratureIndex, MeshMoveAssignmentDropsStaleEntries)
   {
     auto mesh = makeTriangleMesh();
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
 
     mesh.getQuadrature(2, 0, qf);
 
@@ -270,7 +304,7 @@ namespace Rodin::Tests::Unit
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
 
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());
@@ -293,7 +327,7 @@ namespace Rodin::Tests::Unit
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
 
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());
@@ -321,13 +355,13 @@ namespace Rodin::Tests::Unit
     index.initialize(mesh.getDimension());
     index.resize(2, mesh.getPolytopeCount(2));
 
-    std::vector<std::unique_ptr<QF::Centroid>> quadratureFormulas;
+    std::vector<const QF::QuadratureFormula*> quadratureFormulas;
     quadratureFormulas.reserve(kMaxQuadraturesPerPolytope + 1);
 
     for (size_t i = 0; i < kMaxQuadraturesPerPolytope + 1; ++i)
     {
-      quadratureFormulas.emplace_back(
-        std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
+      quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
+        Polytope::Type::Triangle, quadratureFormulas.size()));
 
       EXPECT_NO_THROW(
         index.get(
@@ -353,7 +387,7 @@ namespace Rodin::Tests::Unit
     index.initialize(mesh.getDimension());
     index.resize(2, mesh.getPolytopeCount(2));
 
-    std::vector<std::unique_ptr<QF::Centroid>> quadratureFormulas;
+    std::vector<const QF::QuadratureFormula*> quadratureFormulas;
     quadratureFormulas.reserve(kMaxQuadraturesPerPolytope + 1);
 
     size_t factoryCalls = 0;
@@ -361,8 +395,8 @@ namespace Rodin::Tests::Unit
     // Fill the slot with distinct formula identities.
     for (size_t i = 0; i < kMaxQuadraturesPerPolytope; ++i)
     {
-      quadratureFormulas.emplace_back(
-        std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
+      quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
+        Polytope::Type::Triangle, quadratureFormulas.size()));
 
       index.get(
         {2, 0},
@@ -380,8 +414,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope);
 
     // Insert one more distinct formula.
-    quadratureFormulas.emplace_back(
-      std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
+    quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
+      Polytope::Type::Triangle, quadratureFormulas.size()));
 
     index.get(
       {2, 0},
@@ -423,15 +457,15 @@ namespace Rodin::Tests::Unit
     index.initialize(mesh.getDimension());
     index.resize(2, mesh.getPolytopeCount(2));
 
-    std::vector<std::unique_ptr<QF::Centroid>> quadratureFormulas;
+    std::vector<const QF::QuadratureFormula*> quadratureFormulas;
     quadratureFormulas.reserve(kMaxQuadraturesPerPolytope + 1);
 
     size_t factoryCalls = 0;
 
     for (size_t i = 0; i < kMaxQuadraturesPerPolytope + 1; ++i)
     {
-      quadratureFormulas.emplace_back(
-        std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
+      quadratureFormulas.emplace_back(&QF::QuadratureFormula::get<IndexedCentroid>(
+        Polytope::Type::Triangle, quadratureFormulas.size()));
 
       index.get(
         {2, 0},
@@ -489,10 +523,13 @@ namespace Rodin::Tests::Unit
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());
 
-    std::array<std::unique_ptr<QF::Centroid>, formulaCount> formulas;
+    std::array<const QF::QuadratureFormula*, formulaCount> formulas;
     std::array<std::atomic<size_t>, formulaCount> factoryCalls{};
-    for (auto& formula : formulas)
-      formula = std::make_unique<QF::Centroid>(Polytope::Type::Triangle);
+    for (size_t i = 0; i < formulas.size(); ++i)
+    {
+      formulas[i] =
+        &QF::QuadratureFormula::get<IndexedCentroid>(Polytope::Type::Triangle, i);
+    }
 
     std::vector<std::thread> threads;
     threads.reserve(formulaCount);
@@ -506,7 +543,7 @@ namespace Rodin::Tests::Unit
               ++factoryCalls[i];
               return std::make_unique<PolytopeQuadrature>(polytope, *formulas[i]);
             });
-          EXPECT_EQ(&quadrature.getQuadratureFormula(), formulas[i].get());
+          EXPECT_EQ(&quadrature.getQuadratureFormula(), formulas[i]);
         }
       });
     }

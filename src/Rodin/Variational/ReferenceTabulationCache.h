@@ -35,18 +35,16 @@ namespace Rodin::Variational
    * ## Architecture
    *
    * The bounded thread-local store is distinct for each element/scalar type.
-   * Logical formula identity and reference geometry identify an entry, never
-   * approximate coordinate equality. Assignment or reconstruction changes a
-   * formula's identity; moving nodes also retires the source's previous identity.
-   * Lookup by identity neither dereferences the formula
-   * nor creates an entry. Borrowed tables are valid only until a subsequent
-   * insertion evicts their slot; callers must consume them immediately.
+   * Persistent formula address and reference geometry identify an entry.
+   * Published formulas own immutable samples until process termination.
+   * Borrowed tables are valid only until a subsequent insertion evicts their
+   * slot; callers must consume them immediately.
    * Arbitrary coefficient callbacks can insert tables even when their returned
    * mathematical value is constant. Evaluate such callbacks before borrowing
    * each table, and finish consuming it before invoking another callback.
    * Eviction and cross-thread misses permit direct pointwise evaluation.
    * Cells share reference data, not geometry-dependent matrices.
-   * Both public lookup operations use the same identity search. Construction
+   * Both public lookup operations use the same formula search. Construction
    * is a separate stage: it retires an evicted key before changing storage and
    * publishes the new key only after the element has filled the complete table.
    * A request obtains its thread-local cache once and shares that reference
@@ -71,12 +69,12 @@ namespace Rodin::Variational
     private:
       struct Entry
       {
-        Optional<size_t> identity;
+        Optional<const QF::QuadratureFormula*> formula;
         Geometry::Polytope::Type geometry;
         Table table;
 
         Entry()
-          : identity(),
+          : formula(),
             geometry(Geometry::Polytope::Type::Point),
             table()
         {}
@@ -109,33 +107,31 @@ namespace Rodin::Variational
       /**
        * @brief Borrows an existing table without evaluating a formula.
        * @param element Element specifying the reference geometry.
-       * @param identity Logical formula lifetime/assignment identity.
+       * @param formula Persistent formula defining the samples.
        * @returns A matching table in this thread, or no value.
        */
       static Optional<std::reference_wrapper<const Table>> find(
-        const Element& element, size_t identity)
+        const Element& element, const QF::QuadratureFormula& formula)
       {
-        return find(getCache(), element, identity);
+        return find(getCache(), element, formula);
       }
 
       /**
        * @brief Gets or constructs the reference table for a formula's contents.
        *
-       * A matching logical identity and reference geometry identify immutable
-       * samples. Hits do not query the formula's size or coordinates. The sample
-       * count and coordinates are read only while constructing a missing table.
-       * Formula nodes must remain fixed between identity changes, as required
-       * by @ref Rodin::QF::QuadratureFormulaBase::getCacheIdentity.
+       * A matching formula address and reference geometry identify immutable
+       * samples. Hits do not query the formula's size or coordinates. Samples
+       * are read only while constructing a missing table.
        *
        * @param element Element providing scalar basis values and derivatives.
        * @param formula Formula defining the reference samples.
        * @returns A borrowed table, consumed before another insertion can evict it.
        */
       static const Table& get(
-        const Element& element, const QF::QuadratureFormulaBase& formula)
+        const Element& element, const QF::QuadratureFormula& formula)
       {
         auto& cache = getCache();
-        if (const auto existing = find(cache, element, formula.getCacheIdentity()))
+        if (const auto existing = find(cache, element, formula))
           return existing->get();
         return insert(cache, element, formula);
       }
@@ -145,25 +141,26 @@ namespace Rodin::Variational
        * @brief Searches one already obtained cache without evaluating samples.
        * @param cache This thread's existing reference-table store.
        * @param element Element specifying the reference geometry.
-       * @param identity Logical formula state-version identity.
+       * @param formula Persistent formula defining the samples.
        * @returns A matching table or no value, without changing the store.
        */
       static Optional<std::reference_wrapper<const Table>> find(
-        const Cache& cache, const Element& element, size_t identity)
+        const Cache& cache, const Element& element, const QF::QuadratureFormula& formula)
       {
         for (const auto& entry : cache.entries)
         {
-          if (entry.identity == identity && entry.geometry == element.getGeometry())
+          if (entry.formula == std::addressof(formula) &&
+            entry.geometry == element.getGeometry())
             return std::cref(entry.table);
         }
         return {};
       }
 
       /**
-       * @brief Constructs and publishes a table after an identity lookup misses.
+       * @brief Constructs and publishes a table after a formula lookup misses.
        *
        * Eviction retires the
-       * previous identity before resizing or filling, so an interrupted fill
+       * previous formula association before resizing or filling, so an interrupted fill
        * cannot publish partial data under either key. The round-robin policy
        * and element-owned arithmetic are unchanged.
        *
@@ -173,13 +170,13 @@ namespace Rodin::Variational
        * @returns A newly filled table borrowed until its slot is evicted.
        */
       static const Table& insert(
-        Cache& cache, const Element& element, const QF::QuadratureFormulaBase& formula)
+        Cache& cache, const Element& element, const QF::QuadratureFormula& formula)
       {
-        const auto identity = formula.getCacheIdentity();
+        const auto* pointer = std::addressof(formula);
         const auto geometry = element.getGeometry();
         auto& entry = cache.entries[cache.next];
         cache.next = (cache.next + 1) % cache.entries.size();
-        entry.identity.reset();
+        entry.formula.reset();
         auto& table = entry.table;
         if constexpr (requires { element.tabulate(table, formula); })
           element.tabulate(table, formula);
@@ -190,7 +187,7 @@ namespace Rodin::Variational
           fill(element, table, formula);
         }
         entry.geometry = geometry;
-        entry.identity = identity;
+        entry.formula = pointer;
         return table;
       }
 

@@ -88,7 +88,11 @@ namespace Rodin::QF
         return m_geometry;
       }
 
-      TensorProduct* copy() const noexcept override
+      /**
+       * @brief Copies the concrete formula without regenerating its samples.
+       * @returns A new formula owned by the caller.
+       */
+      TensorProduct* copy() const noexcept
       {
         return new TensorProduct(*this);
       }

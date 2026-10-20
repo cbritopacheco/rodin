@@ -83,3 +83,8 @@ gtest_discover_tests(RodinQuadratureFuzzTest PROPERTIES LABELS unit)
 add_executable(RodinPublishedRuleTest PublishedRuleTest.cpp)
 target_link_libraries(RodinPublishedRuleTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinPublishedRuleTest PROPERTIES LABELS unit)
+
+add_executable(RodinQuadratureFormulaTest QuadratureFormulaTest.cpp)
+target_link_libraries(RodinQuadratureFormulaTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::QF Rodin::Variational Rodin::Geometry)
+gtest_discover_tests(RodinQuadratureFormulaTest PROPERTIES LABELS unit)

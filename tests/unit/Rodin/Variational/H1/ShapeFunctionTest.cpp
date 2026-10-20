@@ -86,7 +86,8 @@ namespace Rodin::Tests::Unit
             space.getFiniteElement(cell.getDimension(), cell.getIndex());
           const auto& scalar = element.getScalarElement();
           const size_t components = rows * columns;
-          QF::GaussLegendre mutableFormula(geometry, 2);
+          const auto& mutableFormula =
+            QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{2});
           const PolytopeQuadrature savedSamples(cell, mutableFormula);
           TrialFunction original(space);
           const auto check = [&](auto& unknown) {
@@ -137,12 +138,13 @@ namespace Rodin::Tests::Unit
 
           cursor = IntegrationPoint(savedSamples, 0);
           check(original);
-          mutableFormula = QF::GaussLegendre(geometry, 4);
-          ASSERT_EQ(cursor.getReferenceQuadratureFormula(), nullptr);
-          check(original);
-          const PolytopeQuadrature rebuiltSamples(cell, mutableFormula);
-          cursor = IntegrationPoint(rebuiltSamples, rebuiltSamples.getSize() - 1);
           ASSERT_EQ(cursor.getReferenceQuadratureFormula(), &mutableFormula);
+          check(original);
+          const auto& replacement =
+            QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{4});
+          const PolytopeQuadrature rebuiltSamples(cell, replacement);
+          cursor = IntegrationPoint(rebuiltSamples, rebuiltSamples.getSize() - 1);
+          ASSERT_EQ(cursor.getReferenceQuadratureFormula(), &replacement);
           check(original);
           cursor = IntegrationPoint(firstSamples, 0);
           check(original);
@@ -180,8 +182,9 @@ namespace Rodin::Tests::Unit
       H1<Order::value, Matrix> space(Order{}, mesh, 2, 3);
       const auto& scalar =
         space.getFiniteElement(cell.getDimension(), cell.getIndex()).getScalarElement();
-      QF::GaussLegendre formula(geometry, 4);
-      const auto identity = formula.getCacheIdentity();
+      const auto& formula =
+        QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{4});
+      const auto& identity = formula;
       const PolytopeQuadrature samples(cell, formula);
       IntegrationPoint cursor(samples, 0);
       const auto check = [&](auto& unknown) {
@@ -230,7 +233,8 @@ namespace Rodin::Tests::Unit
 
       for (size_t i = 0; i < EvictionWorkingSet; ++i)
       {
-        const QF::GaussLegendre other(geometry, 4);
+        const auto& other =
+          QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, i + 5);
         scalar.getTabulation(other);
       }
       ASSERT_FALSE(scalar.findTabulation(identity));

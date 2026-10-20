@@ -112,23 +112,23 @@ namespace Rodin::Variational
        * Tensor-product, wedge and rational pyramid basis formulas are retained;
        * no H1 basis or coefficient-order conversion is performed.
        *
-       * @param formula Reference samples with a logical lifetime/assignment identity.
+       * @param formula Persistent immutable reference samples.
        * @returns A table borrowed until a later insertion evicts its slot.
        */
-      const Tabulation& getTabulation(const QF::QuadratureFormulaBase& formula) const
+      const Tabulation& getTabulation(const QF::QuadratureFormula& formula) const
       {
         return ReferenceTabulationCache<P1Element<Scalar>, Scalar>::get(*this, formula);
       }
 
       /**
        * @brief Borrows an existing table without reading its source formula.
-       * @param identity Logical formula lifetime/assignment identity.
+       * @param formula Persistent formula defining the samples.
        * @returns The matching table on this thread, or no value after eviction.
        */
       Optional<std::reference_wrapper<const Tabulation>> findTabulation(
-        size_t identity) const
+        const QF::QuadratureFormula& formula) const
       {
-        return ReferenceTabulationCache<P1Element<Scalar>, Scalar>::find(*this, identity);
+        return ReferenceTabulationCache<P1Element<Scalar>, Scalar>::find(*this, formula);
       }
 
       /// @brief Represents a linear form of a P1 scalar element.

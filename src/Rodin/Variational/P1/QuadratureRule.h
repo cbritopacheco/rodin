@@ -247,7 +247,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -522,7 +522,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -891,7 +891,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      const QF::QuadratureFormulaBase* m_qf = nullptr;
+      const QF::QuadratureFormula* m_qf = nullptr;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       Math::Matrix<ScalarType> m_matrix;
@@ -1281,7 +1281,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -1579,7 +1579,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -1989,7 +1989,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -2272,7 +2272,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -2551,7 +2551,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -2840,7 +2840,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -3194,7 +3194,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -3530,7 +3530,7 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -3940,7 +3940,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
@@ -4278,7 +4278,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;

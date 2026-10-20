@@ -29,7 +29,7 @@ namespace Rodin::Variational
    * Construction from @ref Geometry::PolytopeQuadrature and a logical index
    * establishes reference association through owned samples, without coordinate
    * comparisons. @ref getReferenceQuadratureFormula returns that formula only
-   * while its lifetime/assignment identity matches the quadrature's snapshot.
+   * when construction established this reference association.
    * Direct point/formula/index construction records provenance only. Reference
    * tabulation and coordinate-sensitive reuse must use the reference accessor;
    * an absent association selects the supplied point's reference coordinates.
@@ -50,7 +50,7 @@ namespace Rodin::Variational
         : m_p(p),
           m_qf(nullptr),
           m_qp(0),
-          m_referenceIdentity(std::nullopt)
+          m_reference(false)
       {}
 
       /**
@@ -62,11 +62,11 @@ namespace Rodin::Variational
        * @param[in] qp Quadrature sample index in @p qf
        */
       IntegrationPoint(
-        const Geometry::Point& p, const QF::QuadratureFormulaBase* qf, size_t qp)
+        const Geometry::Point& p, const QF::QuadratureFormula* qf, size_t qp)
         : m_p(p),
           m_qf(qf),
           m_qp(qp),
-          m_referenceIdentity(std::nullopt)
+          m_reference(false)
       {}
 
       /**
@@ -74,8 +74,7 @@ namespace Rodin::Variational
        *
        * No reference to the quadrature container is retained. The point and
        * formula must outlive this binding, including after a container move.
-       * Formula reassignment disables reference reuse without changing the
-       * owned point or its originating metadata. Geometry changes still require
+       * The formula is immutable and retained until process termination. Geometry changes require
        * normal mapped-point reconstruction and rebinding.
        *
        * @param quadrature Owner of the mapped point and its reference association.
@@ -85,7 +84,7 @@ namespace Rodin::Variational
         : m_p(quadrature.getPoint(qp)),
           m_qf(&quadrature.getQuadratureFormula()),
           m_qp(qp),
-          m_referenceIdentity(quadrature.getQuadratureFormulaIdentity())
+          m_reference(true)
       {}
 
       /// @returns Underlying geometric point context.
@@ -98,7 +97,7 @@ namespace Rodin::Variational
        * @returns Non-owning pointer to the quadrature formula, or @c nullptr
        * when this integration point is not in a quadrature context.
        */
-      const QF::QuadratureFormulaBase* getQuadratureFormula() const
+      const QF::QuadratureFormula* getQuadratureFormula() const
       {
         return m_qf;
       }
@@ -106,16 +105,14 @@ namespace Rodin::Variational
       /**
        * @brief Returns the logically certified reference formula, when available.
        *
-       * The comparison uses formula lifetime/assignment identity, never point
-       * coordinates. Reads are local and non-collective and create no identity.
+       * Reference association is established by construction, without coordinate
+       * comparisons. Reads are local and non-collective.
        *
        * @returns Formula authorizing reference tabulation, or @c nullptr.
        */
-      const QF::QuadratureFormulaBase* getReferenceQuadratureFormula() const noexcept
+      const QF::QuadratureFormula* getReferenceQuadratureFormula() const noexcept
       {
-        return m_referenceIdentity && *m_referenceIdentity == m_qf->getCacheIdentity()
-          ? m_qf
-          : nullptr;
+        return m_reference ? m_qf : nullptr;
       }
 
       /**
@@ -129,9 +126,9 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Point> m_p;
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       size_t m_qp;
-      Optional<size_t> m_referenceIdentity;
+      bool m_reference;
   };
 }
 

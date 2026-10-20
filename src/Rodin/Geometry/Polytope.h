@@ -614,7 +614,7 @@ namespace Rodin::Geometry
        * @param[in] qf Quadrature formula
        * @returns Cached quadrature for this polytope.
        */
-      const PolytopeQuadrature& getQuadrature(const QF::QuadratureFormulaBase& qf) const;
+      const PolytopeQuadrature& getQuadrature(const QF::QuadratureFormula& qf) const;
 
     private:
       size_t m_dimension;

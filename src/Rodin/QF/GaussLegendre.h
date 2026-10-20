@@ -243,7 +243,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GaussLegendre instance
        */
-      GaussLegendre* copy() const noexcept override
+      GaussLegendre* copy() const noexcept
       {
         return new GaussLegendre(*this);
       }

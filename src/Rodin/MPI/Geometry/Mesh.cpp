@@ -472,7 +472,7 @@ namespace Rodin::Geometry
 
   const PolytopeQuadrature&
   MPIMesh::getQuadrature(
-      size_t dimension, Index localIdx, const QF::QuadratureFormulaBase& qf) const
+    size_t dimension, Index localIdx, const QF::QuadratureFormula& qf) const
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));

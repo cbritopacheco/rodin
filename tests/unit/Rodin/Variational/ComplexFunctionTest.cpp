@@ -223,7 +223,7 @@ TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
   const Math::Vector<Real> rc{{ 0.25, 0.25 }};
   Point p(*it, rc);
-  QF::Centroid qf(Polytope::Type::Triangle);
+  const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   IntegrationPoint ip(p, &qf, 3);
 
   ComplexFunction f(IntegrationPointComplexCallable{});
@@ -241,7 +241,7 @@ TEST(Rodin_Variational_ComplexFunction, RealAndImagParts_UseIntegrationPointFast
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
   const Math::Vector<Real> rc{{ 0.25, 0.25 }};
   Point p(*it, rc);
-  QF::Centroid qf(Polytope::Type::Triangle);
+  const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   IntegrationPoint ip(p, &qf, 4);
 
   RealFunction re(IntegrationPointRealPartCallable{});
@@ -259,7 +259,7 @@ TEST(Rodin_Variational_ComplexFunction, PolymorphicConstantCopiesOwnTraceMetadat
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   const auto cell = *mesh.getCell();
-  QF::Centroid qf(Polytope::Type::Triangle);
+  const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   const Point point(cell, qf.getPoint(0));
   const IntegrationPoint ip(point, &qf, 0);
   const FlatSet<Attribute> selected{Attribute(7), Attribute(11)};
@@ -287,7 +287,7 @@ TEST(Rodin_Variational_ComplexFunction, PolymorphicCallablePairOutlivesSource)
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   const auto cell = *mesh.getCell();
-  QF::Centroid qf(Polytope::Type::Triangle);
+  const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   const Point point(cell, qf.getPoint(0));
   const IntegrationPoint ip(point, &qf, 0);
   struct Part
@@ -321,7 +321,7 @@ TEST(Rodin_Variational_ComplexFunction, NestedWrapperOwnsAndDispatchesThroughIts
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   const auto cell = *mesh.getCell();
-  QF::Centroid rule(Polytope::Type::Triangle);
+  const auto& rule = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
   const Point point(cell, rule.getPoint(0));
   const IntegrationPoint ip(point, &rule, 0);
   const auto check = [&]<class Derived>(const FunctionBase<Derived>& nested,

@@ -67,10 +67,10 @@ namespace Rodin::Geometry
    *
    * ## Architecture
    *
-   * Unevaluated physical coordinates optionally carry the logical identity and
+   * Unevaluated physical coordinates optionally carry the persistent formula and
    * index of an owned reference sample. Evaluation replaces this state with
-   * owned physical coordinates. Neither state borrows a formula or reference
-   * table. A missing thread-local reference table uses direct evaluation;
+   * owned physical coordinates. The formula remains valid until process
+   * termination; no reference table is borrowed. A missing table uses direct evaluation;
    * rebinding clears both the provenance and the geometric caches.
    *
    * # Thread Safety
@@ -314,7 +314,7 @@ namespace Rodin::Geometry
        * @brief Constructs lazy coordinates with owned quadrature-sample provenance.
        *
        * The derived point must own the reference coordinates of sample @p qp.
-       * Only the formula identity and index are retained, never the formula.
+       * Only a persistent formula pointer and index are retained; no table is borrowed.
        *
        * @param jacobian Geometric Jacobian evaluated at the sample.
        * @param polytope Polytope whose map defines the point.
@@ -322,24 +322,24 @@ namespace Rodin::Geometry
        * @param qp Sample index in the formula.
        */
       PointBase(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
-        const QF::QuadratureFormulaBase& qf, size_t qp);
+        const QF::QuadratureFormula& qf, size_t qp);
 
     private:
       /// @brief Logical provenance of an owned reference sample.
       struct ReferenceSample
       {
-          /**
-           * @brief Records the logical formula identity and sample index.
-           * @param identity Formula lifetime/assignment identity.
-           * @param index Reference sample index.
-           */
-          ReferenceSample(size_t identity, size_t index)
-            : identity(identity),
-              index(index)
-          {}
+        /**
+         * @brief Records the persistent formula and sample index.
+         * @param formula Persistent immutable reference formula.
+         * @param index Reference sample index.
+         */
+        ReferenceSample(const QF::QuadratureFormula& formula, size_t index)
+          : formula(&formula),
+            index(index)
+        {}
 
-          size_t identity; ///< Formula lifetime/assignment identity.
-          size_t index; ///< Logical reference-sample index.
+        const QF::QuadratureFormula* formula; ///< Persistent reference formula.
+        size_t index; ///< Logical reference-sample index.
       };
 
       // The unevaluated state either has logical sample provenance or requests
@@ -438,7 +438,7 @@ namespace Rodin::Geometry
        * @param qp Sample index in the formula.
        */
       Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
-        const QF::QuadratureFormulaBase& qf, size_t qp);
+        const QF::QuadratureFormula& qf, size_t qp);
 
       /**
        * @brief Copy constructor.

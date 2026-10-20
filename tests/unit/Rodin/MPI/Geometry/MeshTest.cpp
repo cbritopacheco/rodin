@@ -546,7 +546,7 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksReplacementTransformationWithEmptyR
 {
   auto mesh = distribute(Polytope::Type::Segment);
   const Variational::RealH1Element<2> element(Polytope::Type::Segment);
-  const QF::Centroid rule(Polytope::Type::Segment);
+  const auto& rule = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Segment);
   // The quadratic map fixes both endpoints and has positive derivative on [0, 1].
   constexpr Real curvature = 0.25;
   constexpr Real tolerance = 1e-12;

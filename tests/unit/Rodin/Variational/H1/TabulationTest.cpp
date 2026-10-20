@@ -32,6 +32,24 @@ namespace Rodin::Tests::Unit
        * @brief Owns a collection of reference samples.
        * @param points Interior and boundary points to tabulate.
        */
+      H1SampleFormula(Geometry::Polytope::Type geometry, size_t tag)
+      {
+        if (tag == 0)
+        {
+          const Geometry::Polytope::Traits traits(geometry);
+          m_points.push_back(traits.getCentroid());
+          for (size_t a = 0; a < traits.getVertexCount(); ++a)
+            m_points.push_back(traits.getVertex(a));
+          const auto& interior = QF::PolytopeQuadratureFormula::get(8, geometry);
+          for (size_t q = 0; q < interior.getSize(); ++q)
+            m_points.push_back(interior.getPoint(q));
+        }
+        else if (tag < 100)
+        {
+          m_points.push_back(Math::SpatialPoint{Real(tag) / 128, 0.125, 0.25});
+        }
+      }
+
       explicit H1SampleFormula(std::vector<Math::SpatialPoint> points)
         : m_points(std::move(points))
       {}
@@ -82,7 +100,7 @@ namespace Rodin::Tests::Unit
        * @brief Copies the owned samples with independent identity.
        * @returns An owned copy.
        */
-      H1SampleFormula* copy() const noexcept override
+      H1SampleFormula* copy() const noexcept
       {
         return new H1SampleFormula(*this);
       }
@@ -126,13 +144,8 @@ namespace Rodin::Tests::Unit
       Element element(geometry);
       const Geometry::Polytope::Traits traits(geometry);
       const size_t count = element.getCount(), dim = traits.getDimension();
-      std::vector<Math::SpatialPoint> samples{traits.getCentroid()};
-      for (size_t a = 0; a < traits.getVertexCount(); ++a)
-        samples.push_back(traits.getVertex(a));
-      const QF::PolytopeQuadratureFormula interior(8, geometry);
-      for (size_t qp = 0; qp < interior.getSize(); ++qp)
-        samples.push_back(interior.getPoint(qp));
-      const H1SampleFormula formula(std::move(samples));
+      const auto& formula =
+        QF::QuadratureFormula::get<H1SampleFormula>(geometry, size_t{0});
       const auto& table = element.getTabulation(formula);
       ASSERT_EQ(table.getSize(), formula.getSize());
       ASSERT_EQ(table.getCount(), count);
@@ -191,7 +204,8 @@ namespace Rodin::Tests::Unit
         coefficients[a] = element.getLinearForm(a)(polynomial);
       for (const size_t order : {2u, 4u, 8u})
       {
-        const QF::PolytopeQuadratureFormula formula(order, geometry);
+        const auto& formula =
+          QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(order, geometry);
         const auto& table = element.getTabulation(formula);
         for (size_t qp = 0; qp < formula.getSize(); ++qp)
         {
@@ -234,7 +248,8 @@ namespace Rodin::Tests::Unit
         Math::SpatialPoint{0, 0.25, 0.75}, Math::SpatialPoint{0.25, 0.25, 0.5},
         Math::SpatialPoint{0, 0, 1 - gap}, Math::SpatialPoint{gap / 4, gap / 4, 1 - gap},
         Math::SpatialPoint{gap / 4, 0.5 - gap, 0.5}});
-    const auto& table = element.getTabulation(formula);
+    typename Element::Tabulation table;
+    element.tabulate(table, formula);
     for (size_t qp = 0; qp < formula.getSize(); ++qp)
     {
       SCOPED_TRACE(qp);
@@ -265,20 +280,16 @@ namespace Rodin::Tests::Unit
     {
       SCOPED_TRACE(int(geometry));
       const Element element(geometry);
-      QF::GaussLegendre source(geometry, 2);
+      const auto& source =
+        QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{2});
       const auto saved = element.getTabulation(source);
-      const auto identity = source.getCacheIdentity();
-      QF::GaussLegendre destination(std::move(source));
-      EXPECT_NE(source.getCacheIdentity(), identity);
-      EXPECT_NE(destination.getCacheIdentity(), identity);
-      const auto& fromSource = element.getTabulation(source);
-      EXPECT_EQ(fromSource.getSize(), source.getSize());
-      EXPECT_EQ(fromSource.getCount(), element.getCount());
-      EXPECT_EQ(
-        fromSource.getDimension(), Geometry::Polytope::Traits(geometry).getDimension());
-      const auto& fromDestination = element.getTabulation(destination);
+      QF::GaussLegendre local(geometry, 2);
+      QF::GaussLegendre destination(std::move(local));
+      typename Element::Tabulation fromDestination;
+      element.tabulate(fromDestination, destination);
       EXPECT_EQ(fromDestination.getValues(), saved.getValues());
       EXPECT_EQ(fromDestination.getDerivatives(), saved.getDerivatives());
+      EXPECT_EQ(element.getTabulation(source).getValues(), saved.getValues());
     }
   }
 
@@ -290,38 +301,38 @@ namespace Rodin::Tests::Unit
     {
       SCOPED_TRACE(int(geometry));
       const Element element(geometry);
-      H1SampleFormula formula({Math::SpatialPoint{0.125, 0.125, 0.25}});
+      const auto& formula =
+        QF::QuadratureFormula::get<H1SampleFormula>(geometry, size_t{16});
       const auto saved = element.getTabulation(formula);
-      const auto originalIdentity = formula.getCacheIdentity();
+      const auto& originalFormula = formula;
       constexpr size_t CacheCapacity = 8; // The store's documented capacity.
       constexpr size_t FormulaCount = CacheCapacity + 1;
-      std::vector<H1SampleFormula> replacements;
-      replacements.reserve(FormulaCount);
       for (size_t i = 0; i < FormulaCount; ++i)
       {
-        replacements.emplace_back(
-          std::vector<Math::SpatialPoint>{{Real(i + 1) / 64, 0.125, 0.25}});
-        element.getTabulation(replacements.back());
+        const auto& replacement =
+          QF::QuadratureFormula::get<H1SampleFormula>(geometry, i + 32);
+        element.getTabulation(replacement);
       }
-      EXPECT_FALSE(element.findTabulation(originalIdentity));
+      EXPECT_FALSE(element.findTabulation(originalFormula));
       const auto& rebuilt = element.getTabulation(formula);
       EXPECT_EQ(rebuilt.getValues(), saved.getValues());
       EXPECT_EQ(rebuilt.getDerivatives(), saved.getDerivatives());
-      formula = replacements.front();
-      EXPECT_NE(formula.getCacheIdentity(), originalIdentity);
-      EXPECT_FALSE(element.findTabulation(formula.getCacheIdentity()));
-      const auto& assigned = element.getTabulation(formula);
+      const auto& replacement =
+        QF::QuadratureFormula::get<H1SampleFormula>(geometry, size_t{48});
+      EXPECT_FALSE(element.findTabulation(replacement));
+      const auto& assigned = element.getTabulation(replacement);
       for (size_t a = 0; a < element.getCount(); ++a)
       {
         const auto& basis = element.getBasis(a);
-        EXPECT_EQ(assigned.getBasis(0, a), basis(formula.getPoint(0)));
+        EXPECT_EQ(assigned.getBasis(0, a), basis(replacement.getPoint(0)));
         for (size_t i = 0; i < 3; ++i)
         {
           EXPECT_EQ(assigned.template getDerivative<1>(0, a, i),
-            basis.template getDerivative<1>(i)(formula.getPoint(0)));
+            basis.template getDerivative<1>(i)(replacement.getPoint(0)));
         }
       }
-      const H1SampleFormula empty({});
+      const auto& empty =
+        QF::QuadratureFormula::get<H1SampleFormula>(geometry, size_t{100});
       const auto& emptyTable = element.getTabulation(empty);
       EXPECT_EQ(emptyTable.getSize(), 0u);
       EXPECT_EQ(emptyTable.getCount(), element.getCount());

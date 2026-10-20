@@ -187,7 +187,8 @@ namespace
         auto gradient = Grad(scalarField);
         auto jacobian = Jacobian(vectorField);
         auto divergence = Div(vectorField);
-        const QF::PolytopeQuadratureFormula formula(4, geometry);
+        const auto& formula =
+          QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(size_t{4}, geometry);
         size_t checked = 0;
         for (auto cell = retained.getCell(); cell; ++cell)
         {

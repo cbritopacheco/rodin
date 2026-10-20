@@ -75,7 +75,8 @@ namespace
             for (size_t j = 0; j < embedding; ++j)
               controls(j, local) = physical[j];
           }
-          const QF::PolytopeQuadratureFormula formula(4, geometry);
+          const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
+            size_t{4}, geometry);
           constexpr Real CoordinateTolerance = 1e-11;
           auto inspect = [&](const PolytopeTransformation& chart) {
             EXPECT_EQ(chart.getOrder(), element.getOrder());

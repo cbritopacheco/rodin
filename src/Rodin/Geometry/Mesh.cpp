@@ -414,7 +414,7 @@ namespace Rodin::Geometry
 
   const PolytopeQuadrature&
   Mesh<Context::Local>::getQuadrature(
-      size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const
+    size_t dimension, Index idx, const QF::QuadratureFormula& qf) const
   {
     const size_t count = this->getPolytopeCount(dimension);
     return m_quadratures.get(

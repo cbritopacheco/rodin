@@ -423,7 +423,7 @@ namespace Rodin::Variational
 
     private:
       const IntegrationPoint* m_ip = nullptr;
-      const QF::QuadratureFormulaBase* m_qf = nullptr;
+      const QF::QuadratureFormula* m_qf = nullptr;
       size_t m_qp = 0;
       Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
       std::vector<RangeType> m_basis;

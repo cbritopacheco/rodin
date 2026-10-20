@@ -104,7 +104,7 @@ namespace Rodin::Tests
       Integrand m_integrand;
       Math::Matrix<Scalar> m_matrix;
       Optional<Geometry::PolytopeQuadrature> m_quadrature;
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
   };

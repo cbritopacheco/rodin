@@ -240,7 +240,7 @@ namespace Rodin::Variational
        * @brief Gets the quadrature formula currently used.
        * @returns Quadrature formula reference
        */
-      const QF::QuadratureFormulaBase& getQuadratureFormula() const
+      const QF::QuadratureFormula& getQuadratureFormula() const
       {
         assert(m_qf);
         return *m_qf;
@@ -249,7 +249,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;                  ///< Integrand
       const Geometry::Polytope* m_polytope;                        ///< Bound polytope
-      const QF::QuadratureFormulaBase* m_qf;                       ///< Reference quadrature formula
+      const QF::QuadratureFormula* m_qf; ///< Reference quadrature formula
       std::unique_ptr<Geometry::PolytopeQuadrature>
         m_quadrature; ///< Mapped geometric quadrature
       Optional<ScalarType> m_value;                                ///< Cached value
@@ -698,8 +698,8 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
-      const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
+      std::unique_ptr<IntegrandType> m_integrand; ///< Integrand expression
+      const QF::QuadratureFormula* m_qf; ///< Reference quadrature formula
       std::unique_ptr<Geometry::PolytopeQuadrature>
         m_quadrature; ///< Mapped geometric quadrature
       std::unique_ptr<IntegrationPoint>
@@ -926,8 +926,8 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
-      const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
+      std::unique_ptr<IntegrandType> m_integrand; ///< Integrand expression
+      const QF::QuadratureFormula* m_qf; ///< Reference quadrature formula
       std::unique_ptr<Geometry::PolytopeQuadrature>
         m_quadrature; ///< Mapped geometric quadrature
       std::unique_ptr<IntegrationPoint>

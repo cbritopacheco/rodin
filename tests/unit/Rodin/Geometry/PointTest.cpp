@@ -146,9 +146,10 @@ TEST(Geometry_Point, LazyPhysicalMapMatchesEveryDirectSample)
         for (const size_t order : {8u, 16u, 18u})
         {
           SCOPED_TRACE(order);
-          const QF::PolytopeQuadratureFormula formula(order, geometry);
+          const auto& formula =
+            QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(order, geometry);
           const PolytopeQuadrature quadrature(cell, formula);
-          ASSERT_TRUE(element.findTabulation(formula.getCacheIdentity()));
+          ASSERT_TRUE(element.findTabulation(formula));
           for (size_t qp = 0; qp < formula.getSize(); ++qp)
           {
             SCOPED_TRACE(qp);
@@ -206,17 +207,18 @@ TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
       mesh.setPolytopeTransformation(
         {0, 0}, new ParametricTransformation(controls, element));
       Optional<Point> retained;
-      size_t identity = 0;
+      const QF::QuadratureFormula* formulaPointer = nullptr;
       {
-        QF::PolytopeQuadratureFormula formula(8, Polytope::Type::Point);
-        identity = formula.getCacheIdentity();
+        const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
+          size_t{8}, Polytope::Type::Point);
+        formulaPointer = &formula;
         const PolytopeQuadrature quadrature(vertex, formula);
         ASSERT_EQ(quadrature.getSize(), 1);
         const auto& sample = quadrature.getPoint(0);
         EXPECT_EQ(sample.getReferenceCoordinates().size(), 0);
         EXPECT_EQ(sample.getJacobian().rows(), physicalDimension);
         EXPECT_EQ(sample.getJacobian().cols(), 0);
-        ASSERT_TRUE(element.findTabulation(identity));
+        ASSERT_TRUE(element.findTabulation(*formulaPointer));
         retained.emplace(sample);
         for (size_t j = 0; j < physicalDimension; ++j)
           EXPECT_EQ(sample.getPhysicalCoordinates()(j), controls(j, 0));
@@ -224,10 +226,12 @@ TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
       // Nine distinct insertions exceed the eight-entry reference cache.
       for (size_t i = 0; i < 9; ++i)
       {
-        QF::PolytopeQuadratureFormula replacement(8, Polytope::Type::Point);
+        const auto& replacement =
+          QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
+            i + 20, Polytope::Type::Point);
         static_cast<void>(element.getTabulation(replacement));
       }
-      ASSERT_FALSE(element.findTabulation(identity));
+      ASSERT_FALSE(element.findTabulation(*formulaPointer));
       const auto& coordinates = retained->getPhysicalCoordinates();
       ASSERT_EQ(coordinates.size(), physicalDimension);
       for (size_t j = 0; j < physicalDimension; ++j)
@@ -262,14 +266,16 @@ TEST(Geometry_Point, ReferenceTableLookupUsesIdentityAndGeometry)
     const auto otherGeometry =
       geometry == Polytope::Type::Point ? Polytope::Type::Segment : Polytope::Type::Point;
     Variational::H1Element<K, Scalar> other(otherGeometry);
-    QF::PolytopeQuadratureFormula formula(0, geometry);
-    QF::PolytopeQuadratureFormula absent(0, geometry);
+    const auto& formula =
+      QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(size_t{0}, geometry);
+    const auto& absent =
+      QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(size_t{101}, geometry);
     const auto& expected = element.getTabulation(formula);
-    const auto found = element.findTabulation(formula.getCacheIdentity());
+    const auto found = element.findTabulation(formula);
     ASSERT_TRUE(found);
     EXPECT_EQ(&found->get(), &expected);
-    EXPECT_FALSE(element.findTabulation(absent.getCacheIdentity()));
-    EXPECT_FALSE(other.findTabulation(formula.getCacheIdentity()));
+    EXPECT_FALSE(element.findTabulation(absent));
+    EXPECT_FALSE(other.findTabulation(formula));
   };
   for (const auto geometry :
     {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,

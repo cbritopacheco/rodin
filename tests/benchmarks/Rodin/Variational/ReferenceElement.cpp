@@ -23,6 +23,7 @@
 #include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/Variational/H1/H1Element.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "../QF/RepeatedFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -89,11 +90,13 @@ namespace Rodin::Tests::Benchmarks
     Element element(geometry);
     const size_t ndof = element.getCount();
     const size_t dim = Geometry::Polytope::Traits(geometry).getDimension();
-    std::vector<QF::PolytopeQuadratureFormula> formulas;
+    std::vector<const QF::QuadratureFormula*> formulas;
+    const auto& source =
+      QF::PolytopeQuadratureFormula::get(size_t(state.range(0)), geometry);
     formulas.reserve(FormulaCount);
     for (size_t i = 0; i < FormulaCount; ++i)
-      formulas.emplace_back(state.range(0), geometry);
-    const auto& formula = formulas.front();
+      formulas.push_back(&QF::QuadratureFormula::get<RepeatedFormula>(source, i));
+    const auto& formula = *formulas.front();
     const size_t nqp = formula.getSize();
     using BasisResult = decltype(element.getBasis(size_t(0)));
     using Basis = std::remove_cvref_t<BasisResult>;
@@ -220,18 +223,18 @@ namespace Rodin::Tests::Benchmarks
       sweep();
     }
     for (const auto& qf : formulas)
-      Store::get(element, qf);
-    const QF::QuadratureFormulaBase* lookupFormula = &formula;
+      Store::get(element, *qf);
+    const QF::QuadratureFormula* lookupFormula = &formula;
     if (operation == ReferenceOperation::WarmTablePosition)
     {
       using Resident =
-        std::pair<const typename Store::Table*, const QF::QuadratureFormulaBase*>;
+        std::pair<const typename Store::Table*, const QF::QuadratureFormula*>;
       std::vector<Resident> residents;
       residents.reserve(FormulaCount - 1);
       for (const auto& qf : formulas)
       {
-        if (const auto table = Store::find(element, qf.getCacheIdentity()))
-          residents.emplace_back(&table->get(), &qf);
+        if (const auto table = Store::find(element, *qf))
+          residents.emplace_back(&table->get(), qf);
       }
       const size_t requested = state.range(1);
       if (residents.size() != FormulaCount - 1 || requested == 0 ||
@@ -251,7 +254,7 @@ namespace Rodin::Tests::Benchmarks
       size_t resident = 0, position = 1;
       for (const auto& qf : formulas)
       {
-        if (const auto table = Store::find(element, qf.getCacheIdentity()))
+        if (const auto table = Store::find(element, *qf))
         {
           ++resident;
           position += std::less<const typename Store::Table*>{}(&table->get(), selected);
@@ -276,12 +279,12 @@ namespace Rodin::Tests::Benchmarks
     {
       for (const auto& qf : formulas)
       {
-        if (Store::find(element, qf.getCacheIdentity()))
+        if (Store::find(element, *qf))
         {
           fail("Cache-miss protocol unexpectedly found a resident table");
           return;
         }
-        const auto& table = Store::get(element, qf);
+        const auto& table = Store::get(element, *qf);
         if (table.getValues() != expected.getValues() ||
           table.getDerivatives() != expected.getDerivatives())
         {
@@ -300,7 +303,7 @@ namespace Rodin::Tests::Benchmarks
       }
       else if (operation == ReferenceOperation::CapacityWarmMiss)
       {
-        const auto& table = Store::get(element, formulas[next]);
+        const auto& table = Store::get(element, *formulas[next]);
         benchmark::DoNotOptimize(table.getValues().data());
         next = (next + 1) % FormulaCount;
       }

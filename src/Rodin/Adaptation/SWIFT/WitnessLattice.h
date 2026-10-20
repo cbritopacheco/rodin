@@ -36,19 +36,10 @@ namespace Rodin::Adaptation::SWIFT
        * @param subdivisions Positive number of subdivisions per reference edge.
        * @returns Cached generating lattice for this geometry and subdivision count.
        */
-      static const WitnessLattice& get(
+      static const QF::QuadratureFormula& get(
         Geometry::Polytope::Type geometry, size_t subdivisions)
       {
-        assert(subdivisions > 0);
-        using Key = std::pair<Geometry::Polytope::Type, size_t>;
-        static std::mutex mutex;
-        static std::map<Key, std::unique_ptr<WitnessLattice>> cache;
-        const std::lock_guard lock(mutex);
-        const Key key{geometry, subdivisions};
-        auto& formula = cache[key];
-        if (!formula)
-          formula.reset(new WitnessLattice(geometry, subdivisions));
-        return *formula;
+        return QF::QuadratureFormula::get<WitnessLattice>(geometry, subdivisions);
       }
 
       /**
@@ -81,15 +72,14 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Copies the witness set with a fresh cache identity.
+       * @brief Copies the owned witness samples.
        * @returns Newly allocated copy owned by the caller.
        */
-      WitnessLattice* copy() const noexcept override
+      WitnessLattice* copy() const noexcept
       {
         return new WitnessLattice(*this);
       }
 
-    private:
       /**
        * @brief Constructs a complete uniform reference lattice.
        * @param geometry Reference-cell geometry.
@@ -97,6 +87,7 @@ namespace Rodin::Adaptation::SWIFT
        */
       WitnessLattice(Geometry::Polytope::Type geometry, size_t m)
       {
+        assert(m > 0);
         using G = Geometry::Polytope::Type;
         const size_t dimension = Geometry::Polytope::Traits(geometry).getDimension();
         Real volume = 1;
@@ -146,6 +137,7 @@ namespace Rodin::Adaptation::SWIFT
         m_weight = volume / m_points.size();
       }
 
+    private:
       std::vector<Math::SpatialVector<Real>> m_points;
       Real m_weight;
   };

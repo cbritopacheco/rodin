@@ -306,12 +306,9 @@ namespace Rodin::Variational
         struct QuadraturePointKey
         {
             /// @brief Quadrature formula the cached tabulation belongs to.
-          const QF::QuadratureFormulaBase* formula;
+          const QF::QuadratureFormula* formula;
 
-            /// @brief Logical lifetime and assignment identity of the formula.
-          size_t formulaIdentity;
-
-            /// @brief Index of the quadrature point.
+          /// @brief Index of the quadrature point.
           size_t index;
 
             /// @brief Whether the key holds a cached entry.
@@ -320,7 +317,7 @@ namespace Rodin::Variational
             /// @brief Constructs an invalid quadrature cache key.
           QuadraturePointKey()
             : formula(nullptr),
-              formulaIdentity(0),
+
               index(0),
                 valid(false)
             {}
@@ -343,8 +340,7 @@ namespace Rodin::Variational
             {
               if (!valid || !o.valid)
                 return false;
-            return formula == o.formula && formulaIdentity == o.formulaIdentity &&
-              index == o.index;
+            return formula == o.formula && index == o.index;
             }
 
           /// @brief Resets the key, invalidating the cached entry.
@@ -352,7 +348,7 @@ namespace Rodin::Variational
             {
               valid = false;
             formula = nullptr;
-            formulaIdentity = 0;
+
             index = 0;
             }
         };
@@ -525,7 +521,7 @@ namespace Rodin::Variational
         if (needsQp)
         {
           quadraturePointKey.formula = qf;
-          quadraturePointKey.formulaIdentity = qf ? qf->getCacheIdentity() : 0;
+
           quadraturePointKey.index = qf ? ip.getIndex() : 0;
           quadraturePointKey.valid = true;
         }

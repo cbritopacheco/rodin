@@ -14,6 +14,7 @@
 #include <vector>
 #include "Rodin/Variational/H1.h"
 #include "../../../../convergence/Convergence.h"
+#include "../../QF/RepeatedFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -127,13 +128,13 @@ namespace Rodin::Tests::Benchmarks
         const auto cell = *mesh.getCell();
         const H1Element<K, Scalar> scalar(geometry);
         const auto& prototype = QF::PolytopeQuadratureFormula::get(order, geometry);
-        std::vector<std::unique_ptr<const QF::QuadratureFormulaBase>> formulas;
+        std::vector<const QF::QuadratureFormula*> formulas;
         std::vector<std::unique_ptr<PolytopeQuadrature>> quadratures;
         formulas.reserve(identities);
         quadratures.reserve(identities);
         for (size_t i = 0; i < identities; ++i)
         {
-          formulas.emplace_back(prototype.copy());
+          formulas.push_back(&QF::QuadratureFormula::get<RepeatedFormula>(prototype, i));
           quadratures.emplace_back(
             std::make_unique<PolytopeQuadrature>(cell, *formulas.back()));
         }
@@ -157,9 +158,9 @@ namespace Rodin::Tests::Benchmarks
         {
           for (size_t j = 0; j < i; ++j)
           {
-            if (formulas[i]->getCacheIdentity() == formulas[j]->getCacheIdentity())
+            if (formulas[i] == formulas[j])
             {
-              fail("Formula copies did not receive distinct logical identities");
+              fail("Repeated formulas did not receive distinct addresses");
               return;
             }
           }
@@ -177,13 +178,13 @@ namespace Rodin::Tests::Benchmarks
           for (size_t qp = 0; qp < samples; ++qp)
           {
             const size_t sample = whole ? qp : singleSample;
-            cursor = associated ? IntegrationPoint(quadrature, sample)
-                                : IntegrationPoint(quadrature.getPoint(sample),
-                                    formulas[identity].get(), 0);
+            cursor = associated
+              ? IntegrationPoint(quadrature, sample)
+              : IntegrationPoint(quadrature.getPoint(sample), formulas[identity], 0);
             if constexpr (Check)
             {
               if (cursor.getReferenceQuadratureFormula() !=
-                (associated ? formulas[identity].get() : nullptr))
+                (associated ? formulas[identity] : nullptr))
                 return false;
             }
             leaf.setIntegrationPoint(cursor);
@@ -252,7 +253,7 @@ namespace Rodin::Tests::Benchmarks
             return;
           }
           for (const auto& formula : formulas)
-            retained += bool(scalar.findTabulation(formula->getCacheIdentity()));
+            retained += bool(scalar.findTabulation(*formula));
           if (churn && retained == identities)
           {
             fail("All churn identities are retained; review the cache-size protocol");
@@ -285,7 +286,7 @@ namespace Rodin::Tests::Benchmarks
         }
         size_t afterTables = 0;
         for (const auto& formula : formulas)
-          afterTables += bool(scalar.findTabulation(formula->getCacheIdentity()));
+          afterTables += bool(scalar.findTabulation(*formula));
         state.counters["dimension"] = mesh.getDimension();
         state.counters["ambient_dimension"] = mesh.getSpaceDimension();
         state.counters["degree"] = K;

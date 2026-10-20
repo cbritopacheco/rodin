@@ -33,7 +33,7 @@ namespace
           m_reference(reference)
       {}
       OwnedReferencePoint(const Math::SpatialMatrix<Real>& jacobian, const Polytope& cell,
-        const QF::QuadratureFormulaBase& formula)
+        const QF::QuadratureFormula& formula)
         : PointBase(jacobian, cell, formula, 0),
           m_reference(formula.getPoint(0))
       {}
@@ -98,7 +98,7 @@ TEST(Geometry_CacheGrowth, PointBaseExtensionOwnsSamplesAndRebinds)
             jacobian(row, column) = row == column ? Real(2) : Real(row >= dimension);
         }
         seeded.emplace(jacobian, first, reference);
-        const QF::Centroid formula(geometry);
+        const auto& formula = QF::QuadratureFormula::get<QF::Centroid>(geometry);
         sampled.emplace(jacobian, first, formula);
         jacobian.setZero();
       }
@@ -145,9 +145,11 @@ TEST(Geometry_CacheGrowth, PointBaseExtensionOwnsSamplesAndRebinds)
 TEST(Geometry_CacheGrowth, QuadratureSlotsAndDimensionBuckets)
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {5});
-  const QF::Centroid centroid(Polytope::Type::Segment);
-  const QF::PolytopeQuadratureFormula gaussian(3, Polytope::Type::Segment);
-  const std::array<const QF::QuadratureFormulaBase*, 2> formulas{&centroid, &gaussian};
+  const auto& centroid =
+    QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Segment);
+  const auto& gaussian = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
+    size_t{3}, Polytope::Type::Segment);
+  const std::array<const QF::QuadratureFormula*, 2> formulas{&centroid, &gaussian};
   std::array<const PolytopeQuadrature*, 2> retained;
   PolytopeQuadratureIndex index;
   index.initialize(1);

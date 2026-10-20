@@ -71,16 +71,15 @@ namespace Rodin::Tests::Unit
         const auto cell = *mesh.getCell();
         const auto& bound =
           QF::PolytopeQuadratureFormula::get(BoundOrder, Polytope::Type::Segment);
-        std::vector<std::unique_ptr<const QF::QuadratureFormulaBase>> nested;
+        std::vector<const QF::QuadratureFormula*> nested;
         for (size_t i = 0; i < NestedRules; ++i)
         {
-          nested.emplace_back(
-            QF::PolytopeQuadratureFormula::build(NestedOrder, Polytope::Type::Segment));
+          nested.emplace_back(&QF::PolytopeQuadratureFormula::get(
+            NestedOrder + i, Polytope::Type::Segment));
           ASSERT_GT(nested.back()->getSize(), bound.getSize());
           for (size_t previous = 0; previous < i; ++previous)
           {
-            ASSERT_NE(
-              nested[previous]->getCacheIdentity(), nested.back()->getCacheIdentity());
+            ASSERT_NE(nested[previous], nested.back());
           }
         }
         const H1Element<2, Scalar> element(Polytope::Type::Segment);

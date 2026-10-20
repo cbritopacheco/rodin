@@ -175,7 +175,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 7);
 
     RealFunction f(IntegrationPointRealCallable{});
@@ -191,7 +191,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 8);
 
     auto f = abs(-RealFunction(IntegrationPointRealCallable{})) + 1.0;
@@ -208,7 +208,7 @@ namespace Rodin::Tests::Unit
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const auto cell = *mesh.getCell();
-    const QF::Centroid rule(Polytope::Type::Triangle);
+    const auto& rule = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     const Point point(cell, rule.getPoint(0));
     const IntegrationPoint ip(point, &rule, 0);
     const auto clone = []<class Derived>(const FunctionBase<Derived>& operand) {

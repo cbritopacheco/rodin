@@ -405,7 +405,7 @@ namespace Rodin::Variational
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
 
-      const QF::QuadratureFormulaBase* m_qf;                     ///< Quadrature formula
+      const QF::QuadratureFormula* m_qf;                     ///< Quadrature formula
       const Geometry::PolytopeQuadrature* m_quadrature; ///< Cached quadrature points
 
       Math::Matrix<ScalarType> m_matrix; ///< Local stiffness matrix

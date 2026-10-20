@@ -16,6 +16,7 @@
 #include "Rodin/Variational/H1/H1Element.h"
 #include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "../QF/RepeatedFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -145,26 +146,29 @@ namespace Rodin::Tests::Benchmarks
         }
         mesh.setPolytopeTransformation(
           {d, 0}, new ParametricTransformation(controls, element));
-        const Formula formula = [&]() {
+        const QF::QuadratureFormula& formula = [&]() -> const QF::QuadratureFormula& {
           if constexpr (std::is_same_v<Formula, QF::GaussLegendre>)
-            return Formula(geometry, state.range(1));
+            return QF::QuadratureFormula::get<Formula>(geometry, size_t(state.range(1)));
           else
-            return Formula(state.range(1), geometry);
+            return QF::QuadratureFormula::get<Formula>(size_t(state.range(1)), geometry);
         }();
         const bool referenceMiss =
           operation == PointOperation::ConstructionAndMetricsReferenceMiss;
         const bool bulk = operation == PointOperation::BulkJacobian;
         const bool metrics =
           operation == PointOperation::ConstructionAndMetrics || referenceMiss;
-        std::vector<Formula> versions;
+        std::vector<std::reference_wrapper<const QF::QuadratureFormula>> versions;
         if (referenceMiss)
         {
           versions.reserve(ReferenceVersions);
           for (size_t i = 0; i < ReferenceVersions; ++i)
-            versions.emplace_back(formula);
+          {
+            versions.emplace_back(
+              QF::QuadratureFormula::get<RepeatedFormula>(formula, i));
+          }
         }
         size_t nextVersion = 0;
-        const QF::QuadratureFormulaBase* activeFormula = &formula;
+        const QF::QuadratureFormula* activeFormula = &formula;
         std::vector<Point> points;
         for (size_t qp = 0; qp < formula.getSize(); ++qp)
           points.emplace_back(cell, formula.getPoint(qp));
@@ -268,7 +272,7 @@ namespace Rodin::Tests::Benchmarks
           }
           else if (construction)
           {
-            activeFormula = referenceMiss ? &versions[nextVersion] : &formula;
+            activeFormula = referenceMiss ? &versions[nextVersion].get() : &formula;
             mapped.emplace(cell, *activeFormula);
             if (referenceMiss)
               nextVersion = (nextVersion + 1) % versions.size();
@@ -332,8 +336,7 @@ namespace Rodin::Tests::Benchmarks
           {
             if (!mapped || mapped->getSize() != formula.getSize())
               return false;
-            if (mapped->getQuadratureFormulaIdentity() !=
-              activeFormula->getCacheIdentity())
+            if (&mapped->getQuadratureFormula() != activeFormula)
               return false;
             for (size_t qp = 0; qp < mapped->getSize(); ++qp)
             {
@@ -380,15 +383,15 @@ namespace Rodin::Tests::Benchmarks
         if (referenceMiss)
         {
           for (const auto& version : versions)
-            element.getTabulation(version);
+            element.getTabulation(version.get());
           for (const auto& version : versions)
           {
-            if (element.findTabulation(version.getCacheIdentity()))
+            if (element.findTabulation(version.get()))
             {
               fail("Reference-miss protocol found a resident table before rebuilding");
               return;
             }
-            element.getTabulation(version);
+            element.getTabulation(version.get());
           }
           nextVersion = 0;
         }
@@ -400,8 +403,7 @@ namespace Rodin::Tests::Benchmarks
         }
         if (!valid())
           fail("Timed geometric operation changed analytic values");
-        if (referenceMiss &&
-          element.findTabulation(versions[nextVersion].getCacheIdentity()))
+        if (referenceMiss && element.findTabulation(versions[nextVersion].get()))
           fail("Reference-miss cycle unexpectedly retained the next table");
         state.counters["reference_dimension"] = d;
         state.counters["cells"] = 1;

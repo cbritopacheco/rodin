@@ -56,7 +56,7 @@ TEST_P(GaussLobattoTest, ExactPolynomialMoments)
   }
 }
 
-TEST_P(GaussLobattoTest, DirectCachePreservesRulesAndIdentity)
+TEST_P(GaussLobattoTest, DirectCachePreservesRulesAndAddress)
 {
   for (size_t degree = 0; degree <= 20; ++degree)
   {
@@ -84,15 +84,13 @@ TEST(GaussLobatto, CacheSurvivesHotEvictionAndConcurrentAccess)
 {
   const auto geometry = Geometry::Polytope::Type::Triangle;
   const auto* first = &QF::GaussLobatto::get(geometry, 3);
-  const auto identity = first->getCacheIdentity();
   for (size_t count = 4; count <= 20; ++count)
     QF::GaussLobatto::get(geometry, count);
   EXPECT_EQ(first, &QF::GaussLobatto::get(geometry, 3));
-  EXPECT_EQ(identity, first->getCacheIdentity());
   EXPECT_NE(first, &QF::GaussLobatto::get(geometry, 4));
   EXPECT_NE(first, &QF::GaussLobatto::get(Geometry::Polytope::Type::Tetrahedron, 3));
 
-  std::array<const QF::GaussLobatto*, 4> rules{};
+  std::array<const QF::QuadratureFormula*, 4> rules{};
   std::array<std::thread, 4> threads;
   for (size_t i = 0; i < threads.size(); ++i)
   {

@@ -91,7 +91,11 @@ namespace Rodin::QF
         return m_geometry;
       }
 
-      XiaoGimbutas* copy() const noexcept override
+      /**
+       * @brief Copies the concrete formula without regenerating its samples.
+       * @returns A new formula owned by the caller.
+       */
+      XiaoGimbutas* copy() const noexcept
       {
         return new XiaoGimbutas(*this);
       }

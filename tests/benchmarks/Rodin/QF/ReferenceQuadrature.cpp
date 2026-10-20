@@ -260,9 +260,7 @@ namespace Rodin::Tests::Benchmarks
           std::array<Optional<Quadrature::PolytopeQuadratureFormula>, 2> rules;
           rules[0].emplace(expected);
           size_t active = 0;
-          size_t sourceIdentity = rules[active]->getCacheIdentity();
           const auto move = [&] {
-            sourceIdentity = rules[active]->getCacheIdentity();
             const size_t destination = 1 - active;
             rules[destination].emplace(std::move(*rules[active]));
             rules[active].reset();
@@ -270,7 +268,6 @@ namespace Rodin::Tests::Benchmarks
           };
           const auto unchanged = [&] {
             if (!rules[active] || rules[1 - active] ||
-              rules[active]->getCacheIdentity() == sourceIdentity ||
               rules[active]->getGeometry() != geometry ||
               rules[active]->getSize() != expected.getSize())
               return false;
@@ -307,10 +304,12 @@ namespace Rodin::Tests::Benchmarks
         }
         else
         {
+          const Quadrature::PolytopeQuadratureFormula prototype(order, geometry);
           const auto construct = [&] {
             return operation == ReferenceQuadratureOperation::Build
               ? Quadrature::PolytopeQuadratureFormula::build(order, geometry)
-              : std::unique_ptr<const Quadrature::QuadratureFormulaBase>(source->copy());
+              : std::unique_ptr<const Quadrature::QuadratureFormulaBase>(
+                  prototype.copy());
           };
           const auto control = construct();
           if (!valid(*control, geometry) || control->getSize() != source->getSize())

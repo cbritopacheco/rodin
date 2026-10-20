@@ -1057,8 +1057,7 @@ namespace Rodin::Geometry
     return this->getMesh().getGeometry(getDimension(), getIndex());
   }
 
-  const PolytopeQuadrature&
-  Polytope::getQuadrature(const QF::QuadratureFormulaBase& qf) const
+  const PolytopeQuadrature& Polytope::getQuadrature(const QF::QuadratureFormula& qf) const
   {
     return m_mesh.get().getQuadrature(getDimension(), getIndex(), qf);
   }

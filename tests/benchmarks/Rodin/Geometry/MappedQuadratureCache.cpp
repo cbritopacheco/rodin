@@ -15,6 +15,7 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/QF/GaussLegendre.h"
 #include "convergence/Convergence.h"
+#include "../QF/RepeatedFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -52,20 +53,22 @@ namespace Rodin::Tests::Benchmarks
     const size_t held = mesh.getCellCount();
     const size_t visited = sweep ? held : 1;
     const size_t formulaCount = state.range(1);
-    std::vector<std::unique_ptr<QF::GaussLegendre>> formulas;
+    std::vector<const QF::QuadratureFormula*> formulas;
+    const auto& source =
+      QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{2});
     for (size_t i = 0; i < formulaCount; ++i)
-      formulas.push_back(std::make_unique<QF::GaussLegendre>(geometry, 2));
+      formulas.push_back(&QF::QuadratureFormula::get<RepeatedFormula>(source, i));
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
       for (const auto& formula : formulas)
       {
         // Warm every transformation once; duplicate rules need one first-cell
         // oracle each, not twenty identical numerical checks on every cell.
-        if (cell->getIndex() != 0 && formula.get() != formulas.front().get())
+        if (cell->getIndex() != 0 && formula != formulas.front())
           continue;
         const Geometry::PolytopeQuadrature warm(*cell, *formula);
         if (warm.getSize() != formula->getSize() ||
-          warm.getQuadratureFormulaIdentity() != formula->getCacheIdentity())
+          &warm.getQuadratureFormula() != formula)
         {
           mappedQuadratureCacheFailed = true;
           state.SkipWithError("Cold quadrature oracle has incorrect formula association");
@@ -155,10 +158,12 @@ namespace Rodin::Tests::Benchmarks
     benchmark::State& state, Geometry::Polytope::Type geometry, size_t operation)
   {
     auto mesh = Convergence::UniformGrid(geometry).makeMesh(3);
-    std::vector<std::unique_ptr<QF::GaussLegendre>> formulas;
+    std::vector<const QF::QuadratureFormula*> formulas;
+    const auto& source =
+      QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{2});
     const size_t formulaCount = operation == 2 ? 20 : 1;
     for (size_t i = 0; i < formulaCount; ++i)
-      formulas.push_back(std::make_unique<QF::GaussLegendre>(geometry, 2));
+      formulas.push_back(&QF::QuadratureFormula::get<RepeatedFormula>(source, i));
     const size_t cellCount = operation == 1 ? mesh.getCellCount() : 1;
     for (size_t cell = 0; cell < cellCount; ++cell)
     {
@@ -166,7 +171,7 @@ namespace Rodin::Tests::Benchmarks
       {
         const auto& quadrature = mesh.getQuadrature(mesh.getDimension(), cell, *formula);
         if (quadrature.getSize() != formula->getSize() ||
-          quadrature.getQuadratureFormulaIdentity() != formula->getCacheIdentity())
+          &quadrature.getQuadratureFormula() != formula)
         {
           mappedQuadratureCacheFailed = true;
           state.SkipWithError("Mapped quadrature has incorrect formula association");

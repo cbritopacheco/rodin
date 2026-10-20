@@ -177,7 +177,7 @@ namespace Rodin::Tests::Unit
     deformation.setPolytope(cell).setIntegrationPoint(cellPoint);
     EXPECT_EQ(
       (deformation.getPoint().getPhysicalCoordinates() - source.getPhysicalCoordinates())
-                .norm(),
+        .norm(),
       0);
     const Point vertexSource(vertex, Math::SpatialPoint(0));
     const IntegrationPoint vertexPoint(vertexSource);
@@ -235,7 +235,8 @@ namespace Rodin::Tests::Unit
       });
       CellLocator locator(mesh);
       DeformationMap deformation(zero, locator);
-      QF::GaussLegendre formula(geometry, 2);
+      const auto& formula =
+        QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{2});
       const PolytopeQuadrature first(cell, formula);
       const IntegrationPoint original(first, 0);
       EXPECT_THROW(deformation.getPoint(), Alert::Exception);
@@ -243,8 +244,9 @@ namespace Rodin::Tests::Unit
       deformation.getPoint();
       deformation.getPoint();
       EXPECT_EQ(locator.calls, 1);
-      formula = QF::GaussLegendre(geometry, 4);
-      const PolytopeQuadrature second(cell, formula);
+      const auto& replacement =
+        QF::QuadratureFormula::get<QF::GaussLegendre>(geometry, size_t{4});
+      const PolytopeQuadrature second(cell, replacement);
       const IntegrationPoint reassigned(second, 0);
       const auto secondPhysical =
         deformation.setIntegrationPoint(reassigned).getPoint().getPhysicalCoordinates();
@@ -252,7 +254,7 @@ namespace Rodin::Tests::Unit
       for (size_t j = 0; j < dimension; ++j)
         EXPECT_EQ(secondPhysical(j), reassigned.getPoint().getPhysicalCoordinates()(j));
       mesh.scale(2);
-      const PolytopeQuadrature third(cell, formula);
+      const PolytopeQuadrature third(cell, replacement);
       const IntegrationPoint rescaled(third, 0);
       const auto thirdPhysical =
         deformation.setIntegrationPoint(rescaled).getPoint().getPhysicalCoordinates();

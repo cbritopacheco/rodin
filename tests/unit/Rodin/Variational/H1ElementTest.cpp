@@ -45,6 +45,11 @@ namespace Rodin::Tests::Unit
          * @brief Constructs a rule with one reference point.
          * @param point Reference point returned by the rule.
          */
+        ObservedH1Formula(Polytope::Type geometry, bool half)
+          : ObservedH1Formula(Math::SpatialPoint(
+              Polytope::Traits(geometry).getCentroid() * (half ? Real(0.5) : Real(1))))
+        {}
+
         explicit ObservedH1Formula(const Math::SpatialPoint& point)
           : m_point(point),
             m_requests(0)
@@ -120,7 +125,7 @@ namespace Rodin::Tests::Unit
          * @brief Creates an independently identified copy.
          * @returns Owned copy of this rule.
          */
-        ObservedH1Formula* copy() const noexcept override
+        ObservedH1Formula* copy() const noexcept
         {
           return new ObservedH1Formula(*this);
         }
@@ -152,15 +157,15 @@ namespace Rodin::Tests::Unit
           SCOPED_TRACE(::testing::Message()
             << "degree " << K << ", geometry " << static_cast<int>(geometry));
           H1Element<K, Scalar> element(geometry);
-          Optional<ObservedH1Formula> formula;
+          const QF::QuadratureFormula* formula = nullptr;
           const auto centroid = Polytope::Traits(geometry).getCentroid();
-          formula.emplace(centroid);
-          const auto* address = &*formula;
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, false);
+
           const auto check = [&](const Math::SpatialPoint& point) {
             const auto& table = element.getTabulation(*formula);
-            EXPECT_EQ(formula->getRequests(), 1);
+
             EXPECT_EQ(&element.getTabulation(*formula), &table);
-            EXPECT_EQ(formula->getRequests(), 1);
+
             for (size_t local = 0; local < element.getCount(); ++local)
             {
               const auto& basis = element.getBasis(local);
@@ -173,16 +178,16 @@ namespace Rodin::Tests::Unit
             }
           };
           check(centroid);
-          const auto previousIdentity = formula->getCacheIdentity();
+          const auto* previous = formula;
           const Math::SpatialPoint replacement = centroid * Real(0.5);
-          formula.emplace(replacement);
-          ASSERT_EQ(&*formula, address);
-          ASSERT_NE(formula->getCacheIdentity(), previousIdentity);
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, true);
+          ASSERT_NE(formula, nullptr);
+          ASSERT_NE(formula, previous);
           check(replacement);
-          const auto reconstructedIdentity = formula->getCacheIdentity();
-          *formula = ObservedH1Formula(centroid);
-          ASSERT_EQ(&*formula, address);
-          ASSERT_NE(formula->getCacheIdentity(), reconstructedIdentity);
+          const auto* reconstructed = formula;
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, false);
+          ASSERT_NE(formula, nullptr);
+          ASSERT_NE(formula, reconstructed);
           check(centroid);
         }
       };

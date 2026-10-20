@@ -296,7 +296,8 @@ TEST(Geometry_MetadataLifecycle, EmbeddedCachedJacobiansOwnMetricAndReferenceDat
     std::unique_ptr<Point> retained;
     Math::SpatialPoint sample;
     {
-      QF::PolytopeQuadratureFormula formula(3, cell->getGeometry());
+      const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
+        size_t{3}, cell->getGeometry());
       sample = formula.getPoint(0);
       const Point original(jacobian, *cell, formula, 0);
       Point copied(original);

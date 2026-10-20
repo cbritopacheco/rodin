@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
 
 #include <string>
 #include <limits>
@@ -112,7 +113,8 @@ TEST(QuadratureExactnessTest, PointRulesHaveUnitMassAndEmptyCoordinates)
     SCOPED_TRACE(order);
     const auto owned = PolytopeQuadratureFormula::build(order, Polytope::Type::Point);
     const auto& canonical = PolytopeQuadratureFormula::get(order, Polytope::Type::Point);
-    for (const auto* rule : {owned.get(), &canonical})
+    for (const auto* rule :
+      std::array<const QuadratureFormulaBase*, 2>{owned.get(), &canonical})
     {
       ASSERT_EQ(rule->getSize(), 1u);
       EXPECT_EQ(rule->getWeight(0), Real(1));
@@ -507,16 +509,12 @@ namespace
   template <class Rule>
   void checkQuadratureOwnership(Rule original, Polytope::Type geometry, size_t degree)
   {
-    const size_t originalIdentity = original.getCacheIdentity();
     auto copied = original;
-    EXPECT_NE(copied.getCacheIdentity(), originalIdentity);
     auto moved = std::move(copied);
     std::unique_ptr<QuadratureFormulaBase> clone;
     {
       const Rule temporary = original;
       clone.reset(temporary.copy());
-      EXPECT_NE(clone->getCacheIdentity(), temporary.getCacheIdentity());
-      EXPECT_NE(clone->getCacheIdentity(), originalIdentity);
     }
     auto verify = [&](const QuadratureFormulaBase& rule) {
       ASSERT_GT(rule.getSize(), 0u);
@@ -557,7 +555,7 @@ TEST(QuadratureOwnership, GrundmannMollerSimplices)
     checkQuadratureOwnership(GrundmannMoller(2, geometry), geometry, 5);
 }
 
-/// @brief Gaussian copied rules preserve exact moments and independent cache identities.
+/// @brief Gaussian copied rules preserve exact moments and own their samples.
 TEST(QuadratureOwnership, GaussLegendreAllGeometries)
 {
   for (const auto geometry : Polytope::Types)

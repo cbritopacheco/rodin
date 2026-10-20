@@ -211,7 +211,7 @@ namespace Rodin::Geometry
        * @param[in] qf Reference quadrature formula defining the points.
        */
       virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-        const QF::QuadratureFormulaBase& qf) const;
+        const QF::QuadratureFormula& qf) const;
 
       /**
        * @brief Computes the reference coordinates from physical coordinates.
@@ -252,16 +252,16 @@ namespace Rodin::Geometry
        * @brief Maps an owned reference sample using available reference data.
        *
        * The caller must establish that @p rc is the sample at @p qp in the
-       * formula identified by @p identity. Cache misses retain direct pointwise evaluation. The logical
-       * identity is a value, not a borrowed formula or table pointer.
+       * persistent @p formula. Cache misses retain direct pointwise evaluation.
+       * No reference-table storage is retained by the point.
        *
        * @param[out] pc Physical coordinates.
        * @param rc Owned reference coordinates of the sample.
-       * @param identity Formula lifetime/assignment identity.
+       * @param formula Persistent immutable reference formula.
        * @param qp Logical reference-sample index.
        */
       virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
-        size_t identity, size_t qp) const;
+        const QF::QuadratureFormula& formula, size_t qp) const;
 
     private:
       size_t m_rdim; ///< Reference dimension @f$ k @f$

@@ -371,7 +371,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const KernelType> m_kernel;
       std::unique_ptr<OperandType> m_u;
-      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
+      const QF::QuadratureFormula* m_qf = nullptr;
   };
 
   /**

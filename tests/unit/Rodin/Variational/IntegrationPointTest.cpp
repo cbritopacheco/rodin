@@ -222,7 +222,8 @@ namespace Rodin::Tests::Unit
   {
     auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
     const auto cell = *mesh.getCell();
-    QF::GaussLegendre formula(cell.getGeometry(), 2);
+    const auto& formula =
+      QF::QuadratureFormula::get<QF::GaussLegendre>(cell.getGeometry(), size_t{2});
     PolytopeQuadrature points(cell, formula);
     const IntegrationPoint original(points, 0);
     IntegrationPoint copied(original);
@@ -250,12 +251,13 @@ namespace Rodin::Tests::Unit
     auto transferred = std::move(points);
     EXPECT_EQ(IntegrationPoint(transferred, 0).getReferenceQuadratureFormula(), &formula);
     EXPECT_EQ(&original.getPoint(), &transferred.getPoint(0));
-    formula = QF::GaussLegendre(cell.getGeometry(), 4);
-    EXPECT_EQ(original.getReferenceQuadratureFormula(), nullptr);
-    EXPECT_EQ(moved.getReferenceQuadratureFormula(), nullptr);
-    EXPECT_EQ(IntegrationPoint(transferred, 0).getReferenceQuadratureFormula(), nullptr);
-    const PolytopeQuadrature rebuilt(cell, formula);
-    EXPECT_EQ(IntegrationPoint(rebuilt, 0).getReferenceQuadratureFormula(), &formula);
+    const auto& replacement =
+      QF::QuadratureFormula::get<QF::GaussLegendre>(cell.getGeometry(), size_t{4});
+    EXPECT_EQ(original.getReferenceQuadratureFormula(), &formula);
+    EXPECT_EQ(moved.getReferenceQuadratureFormula(), &formula);
+    EXPECT_EQ(IntegrationPoint(transferred, 0).getReferenceQuadratureFormula(), &formula);
+    const PolytopeQuadrature rebuilt(cell, replacement);
+    EXPECT_EQ(IntegrationPoint(rebuilt, 0).getReferenceQuadratureFormula(), &replacement);
     EXPECT_THROW(IntegrationPoint(rebuilt, rebuilt.getSize()), Alert::Exception);
   }
 

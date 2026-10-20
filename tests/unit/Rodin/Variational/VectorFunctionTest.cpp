@@ -256,7 +256,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 5);
 
     VectorFunction vf{
@@ -279,7 +279,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 6);
 
     VectorFunction vf(size_t{2}, IntegrationPointVectorCallable{});
