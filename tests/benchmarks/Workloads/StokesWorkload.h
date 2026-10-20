@@ -80,11 +80,15 @@ namespace Rodin::Tests::Benchmarks
         gaugeMean.setOrder(QuadratureOrder);
         body.setOrder(QuadratureOrder);
         if (omitPressure)
+        {
           problem = diffusion + divergence + gaugePressure + gaugeMean - body +
             DirichletBC(u, data.getVelocity());
+        }
         else
+        {
           problem = diffusion - momentum + divergence + gaugePressure + gaugeMean - body +
             DirichletBC(u, data.getVelocity());
+        }
       }
 
       /**

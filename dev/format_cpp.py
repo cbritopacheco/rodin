@@ -2,10 +2,10 @@
 """Canonical C++ formatting: clang-format plus house indentation and spacing.
 
 clang-format 18's IndentAccessModifiers indents access labels by two spaces
-and members by four, but also indents plain struct members by four. The house
-style requires two spaces in structs without explicit access sections. This
-pass removes that single extra level, including in nested declarations; it
-never changes tokens or string-literal contents. Use this entry point rather
+and members by four, but also indents implicit-access members by four. The house
+style requires two spaces before the first explicit access section, including
+throughout plain records. This pass removes that extra level, including in
+nested declarations; it never changes tokens or string-literal contents. Use this entry point rather
 than raw clang-format when formatting Rodin C++ files.
 
 Standalone documentation following a declaration or definition is separated
@@ -21,8 +21,8 @@ import sys
 from style_lint import CPP_TOKENS
 
 
-def plain_struct_indentation(text):
-    """Remove one clang-format indentation level inside each plain struct."""
+def record_indentation(text):
+    """Remove the extra level in each record's initial implicit access section."""
     matches = list(CPP_TOKENS.finditer(text))
     tokens = [(m.group("token") or m.group(), m.start(), m.end())
               for m in matches
@@ -53,7 +53,7 @@ def plain_struct_indentation(text):
 
     shifts = [0] * len(lines)
     for i, (value, _, _) in enumerate(tokens):
-        if value != "struct" or (i and tokens[i - 1][0] == "enum"):
+        if value not in ("class", "struct") or (i and tokens[i - 1][0] == "enum"):
             continue
         j = i + 1
         angle = 0
@@ -87,21 +87,20 @@ def plain_struct_indentation(text):
                 if end is None:
                     break
                 k = j + 1
-                explicit = False
+                section_end = end
                 while k < end:
                     if (tokens[k][0] in ("public", "protected", "private")
                             and tokens[k + 1][0] == ":"):
-                        explicit = True
+                        section_end = k
                         break
                     if tokens[k][0] in ("(", "[", "{") and k in pairs:
                         k = pairs[k] + 1
                     else:
                         k += 1
-                if not explicit:
-                    first = text.count("\n", 0, tokens[j][1]) + 1
-                    last = text.count("\n", 0, tokens[end][1])
-                    for line in range(first, last):
-                        shifts[line] += 2
+                first = text.count("\n", 0, tokens[j][1]) + 1
+                last = text.count("\n", 0, tokens[section_end][1])
+                for line in range(first, last):
+                    shifts[line] += 2
                 break
             j += 1
 
@@ -173,7 +172,7 @@ def format_source(binary, path, content):
     result = subprocess.run(
         [binary, "--style=file", f"--assume-filename={path}"],
         input=content, capture_output=True, text=True, check=True)
-    return documentation_spacing(plain_struct_indentation(result.stdout))
+    return documentation_spacing(record_indentation(result.stdout))
 
 
 def main():

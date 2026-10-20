@@ -77,11 +77,15 @@ namespace Rodin::Tests::Benchmarks
         using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
         auto space = [&]() {
           if constexpr (Elasticity)
+          {
             return H1<Degree, Range, decltype(mesh)>(
               std::integral_constant<size_t, Degree>{}, mesh, dim);
+          }
           else
+          {
             return H1<Degree, Range, decltype(mesh)>(
               std::integral_constant<size_t, Degree>{}, mesh);
+          }
         }();
         PETSc::Variational::TrialFunction u(space);
         PETSc::Variational::TestFunction v(space);
@@ -111,9 +115,11 @@ namespace Rodin::Tests::Benchmarks
             std::isfinite(std::abs(energy)) && std::abs(energy / expected - 1) < 1e-9 &&
             norm < 1e-12 * std::max(Real(1), baselineNorm);
           if (!ok)
+          {
             std::cerr << "rank=" << comm.rank() << " energy=" << energy
                       << " expected=" << expected << " difference=" << norm
                       << " baseline_norm=" << baselineNorm << '\n';
+          }
           if constexpr (Distributed)
             ok = boost::mpi::all_reduce(comm, ok, std::logical_and<bool>());
           return ok;
@@ -134,8 +140,10 @@ namespace Rodin::Tests::Benchmarks
           const auto stop = std::chrono::steady_clock::now();
           double elapsed = std::chrono::duration<double>(stop - start).count();
           if constexpr (Distributed)
+          {
             elapsed =
               boost::mpi::all_reduce(comm, elapsed, boost::mpi::maximum<double>());
+          }
           state.SetIterationTime(elapsed);
         }
         if (!valid())
@@ -266,8 +274,10 @@ int main(int argc, char** argv)
     if (!distributed && world.size() != 1)
       result = 1;
     if (result != 0 && world.rank() == 0)
+    {
       std::cerr << "Local mode requires one rank; random interleaving and adaptive "
                    "warmup are unsupported.\n";
+    }
     if (result == 0)
     {
       using namespace Rodin::Tests::Benchmarks;

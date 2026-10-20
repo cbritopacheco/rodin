@@ -67,8 +67,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
         for (auto referenceCell = m_reference.getCell(); referenceCell; ++referenceCell)
         {
           if constexpr (requires { m_reference.getShard(); })
+          {
             if (!m_reference.getShard().isOwned(m_dimension, referenceCell->getIndex()))
               continue;
+          }
           const auto cell = m_mesh.getCell(referenceCell->getIndex());
           EXPECT_EQ(cell->getGeometry(), referenceCell->getGeometry());
           const auto vertices = cell->getVertices();
@@ -184,8 +186,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_GEOMETRY_APPROXIMATION_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       size_t m_dimension;

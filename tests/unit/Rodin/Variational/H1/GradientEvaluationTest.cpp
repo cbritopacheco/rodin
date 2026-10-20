@@ -84,11 +84,15 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(modalGradients, both);
         };
         if (geometry == Geometry::Polytope::Type::Tetrahedron)
+        {
           checkModalOutputs
             .template operator()<DubinerTetrahedron<K>, FeketeTetrahedron<K>::Count>();
+        }
         else if (geometry == Geometry::Polytope::Type::Pyramid)
+        {
           checkModalOutputs
             .template operator()<PyramidModal<K>, PyramidIndex<K>::Count>();
+        }
         using Values = typename H1Element<K, Scalar>::Values;
         using Gradients = typename H1Element<K, Scalar>::Gradients;
         const size_t count = element.getCount();

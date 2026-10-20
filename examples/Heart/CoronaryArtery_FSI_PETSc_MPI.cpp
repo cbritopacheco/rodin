@@ -573,8 +573,10 @@ namespace
       else if (mode == "oseen")
         cfg.flowMode = FlowMode::Oseen;
       else
+      {
         throw std::runtime_error(
           "Invalid -coronary_flow_mode. Expected newton or oseen.");
+      }
     }
 
     PetscReal dt = cfg.dt;
@@ -606,8 +608,10 @@ int main(int argc, char** argv)
   const bool isRoot = comm.rank() == RootRank;
 
   if (isRoot)
+  {
     std::cout << "Starting CoronaryArtery_FSI_PETSc_MPI on " << comm.size()
               << " processes." << std::endl;
+  }
 
   try
   {
@@ -1135,8 +1139,10 @@ int main(int argc, char** argv)
       if (!snes.converged())
       {
         if (isRoot)
+        {
           std::cerr << "SNES failed at step " << step << " after "
                     << snes.getIterationNumber() << " iterations.\n";
+        }
         break;
       }
 

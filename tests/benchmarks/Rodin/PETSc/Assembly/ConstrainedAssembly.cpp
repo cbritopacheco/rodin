@@ -115,9 +115,11 @@ namespace Rodin::Tests::Benchmarks
             loadNorm / denominator < 1e-11 &&
             matrixNorm < 1e-11 * std::max(Real(1), Real(baselineNorm));
           if (!ok)
+          {
             std::cerr << "rank=" << comm.rank() << " patch=" << patchNorm
                       << " sensitivity=" << sensitivity << " load=" << loadNorm
                       << " matrix=" << matrixNorm << " rhs=" << rhsNorm << '\n';
+          }
           if constexpr (Distributed)
             ok = boost::mpi::all_reduce(comm, ok, std::logical_and<bool>());
           return ok;
@@ -138,8 +140,10 @@ namespace Rodin::Tests::Benchmarks
           const auto stop = std::chrono::steady_clock::now();
           double elapsed = std::chrono::duration<double>(stop - start).count();
           if constexpr (Distributed)
+          {
             elapsed =
               boost::mpi::all_reduce(comm, elapsed, boost::mpi::maximum<double>());
+          }
           state.SetIterationTime(elapsed);
         }
         bool ok = valid();

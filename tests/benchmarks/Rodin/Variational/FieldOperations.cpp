@@ -127,12 +127,14 @@ namespace Rodin::Tests::Benchmarks
         };
         const auto field = [&]() {
           if constexpr (Vector)
+          {
             return VectorFunction(dim, [dim, scalar](const Geometry::Point& p) {
               Range value(dim);
               for (size_t j = 0; j < dim; ++j)
                 value(j) = Real(j + 1) * scalar(p);
               return value;
             });
+          }
           else if constexpr (std::is_same_v<Scalar, Complex>)
             return ComplexFunction(scalar);
           else

@@ -47,18 +47,24 @@ namespace
       }();
       const auto first = [] {
         if constexpr (std::is_same_v<Scalar, Complex>)
+        {
           return ComplexFunction(
             [](const Point& point) { return Scalar(1 + point.x()); });
+        }
         else
           return RealFunction([](const Point& point) { return Scalar(1 + point.x()); });
       }();
       const auto second = [] {
         if constexpr (std::is_same_v<Scalar, Complex>)
+        {
           return ComplexFunction(
             [](const Point& point) { return Scalar(3 + 2 * point.x()); });
+        }
         else
+        {
           return RealFunction(
             [](const Point& point) { return Scalar(3 + 2 * point.x()); });
+        }
       }();
       GridFunction trialField(space), testField(space);
       trialField = first;

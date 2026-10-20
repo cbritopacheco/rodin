@@ -41,8 +41,10 @@ namespace
     auto f = RealFunction([&](const Point& point) {
       Real value = 2;
       if (expensive)
+      {
         for (size_t i = 1; i <= 64; ++i)
           value += std::sin(point.x() + Real(i) / 10) / Real(i + 1);
+      }
       return value;
     });
     // Test-side weighting deliberately exercises the generic rule. The

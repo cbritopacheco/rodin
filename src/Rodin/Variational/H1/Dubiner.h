@@ -418,8 +418,10 @@ namespace Rodin::Variational
               if constexpr (HasValues)
                 getBasis<P, Q, R>(modal[mode][0], a, b, c);
               if constexpr (HasGradients)
+              {
                 getReferenceGradientFromCollapsed<P, Q, R>(
                   modal[mode][1], modal[mode][2], modal[mode][3], a, b, c, s1, s2);
+              }
               ++mode;
             });
           });
@@ -496,17 +498,21 @@ namespace Rodin::Variational
         // \partialψ / \partialb
         Real dscaleBDb = 0.0;
         if constexpr (P > 0)
+        {
           dscaleBDb = P *
             Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+        }
 
         dpsi_db = pA * (dPB * scaleB + pB * dscaleBDb) * pC * scaleC;
 
         // \partialψ / \partialc
         Real dscaleCDc = 0.0;
         if constexpr (P + Q > 0)
+        {
           dscaleCDc = (P + Q) *
             Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q - 1>{}) *
             (-0.5);
+        }
 
         dpsi_dc = pA * pB * (dPC * scaleC + pC * dscaleCDc) * scaleB;
       }

@@ -58,8 +58,10 @@ namespace
       }();
       auto vectorSpace = [&] {
         if constexpr (Quadratic)
+        {
           return H1<2, Math::SpatialVector<Scalar>>(
             std::integral_constant<size_t, 2>{}, mesh, dimension);
+        }
         else
           return P1<Math::SpatialVector<Scalar>>(mesh, dimension);
       }();

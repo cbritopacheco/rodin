@@ -437,8 +437,10 @@ namespace Rodin::Variational
       {
         if (rows == 0 || columns == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           columns > RODIN_MAXIMAL_SPACE_DIMENSION)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Invalid spatial matrix coefficient dimensions." << Alert::Raise;
+        }
       }
       /**
        * @brief Constructs a constant or callable matrix coefficient, or copies its value.
@@ -471,8 +473,10 @@ namespace Rodin::Variational
       {
         const auto result = m_function(point);
         if (result.rows() != m_rows || result.cols() != m_columns)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Matrix coefficient returned incompatible dimensions." << Alert::Raise;
+        }
         return RangeType(result);
       }
       /**

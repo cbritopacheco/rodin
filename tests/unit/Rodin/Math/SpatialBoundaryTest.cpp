@@ -48,8 +48,10 @@ namespace
             }
           }
           if (array)
+          {
             EXPECT_EQ(
               &(values = values.getData().topLeftCorner(rows, columns).array()), &values);
+          }
           else
             EXPECT_EQ(&(values = values.getData().topLeftCorner(rows, columns)), &values);
           ASSERT_EQ(values.rows(), rows);

@@ -99,6 +99,7 @@ namespace
     std::vector<bool> partitionVertex(parent.getVertexCount(), false);
     std::vector<FlatSet<int>> holders(parent.getVertexCount());
     if (d > 0)
+    {
       for (auto cell = parent.getCell(); cell; ++cell)
       {
         const int owner = static_cast<int>(cell->getIndex() % comm.size());
@@ -109,6 +110,7 @@ namespace
           holders[v].insert(owner);
         }
       }
+    }
     Shard::Builder builder;
     builder.initialize(parent);
     for (auto cell = parent.getPolytope(d); cell; ++cell)
@@ -119,6 +121,7 @@ namespace
       if (!owned && !overlap)
         continue;
       if (d > 0)
+      {
         for (Index v : cell->getVertices())
         {
           const auto vState = vertexOwner[v] == comm.rank() ? Shard::State::Owned
@@ -130,22 +133,27 @@ namespace
           if (vState != Shard::State::Owned)
             builder.setOwner(0, local, vertexOwner[v]);
           else
+          {
             for (int r = 0; r < comm.size(); ++r)
             {
               if (r != comm.rank() && (overlap || holders[v].contains(r)))
                 builder.halo(0, local, r);
             }
+          }
         }
+      }
       const auto [local, inserted] = builder.include(
         {d, cell->getIndex()}, owned ? Shard::State::Owned : Shard::State::Ghost);
       if (!owned)
         builder.setOwner(d, local, owner);
       else if (overlap)
+      {
         for (int r = 0; r < comm.size(); ++r)
         {
           if (r != comm.rank())
             builder.halo(d, local, r);
         }
+      }
     }
     auto localShard = builder.finalize();
     if (d == 0)

@@ -118,8 +118,10 @@ namespace Rodin::Tests::Convergence
         {
           Problem problem(u, v);
           if (m_condition == Condition::Neumann)
+          {
             problem = stiffness - load - natural.over(NaturalAttribute) +
               DirichletBC(u, exact).on(DirichletAttribute);
+          }
           else
           {
             auto mass = BoundaryIntegral(u, v);

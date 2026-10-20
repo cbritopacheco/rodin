@@ -54,16 +54,22 @@ namespace Rodin::Geometry::Euclidean
           m_coefficients{}
       {
         if (direction.size() != Dimension || direction.cols() != 1)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Line requires a direction with " << Dimension << " coordinates"
             << Alert::Raise;
+        }
         m_direction = direction.template cast<T>();
         if (!(m_direction.array() != T(0)).any())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Line requires a nonzero direction" << Alert::Raise;
+        }
         if constexpr (Dimension == 2)
+        {
           m_coefficients = {-m_direction[1], m_direction[0],
             -m_direction[1] * origin[0] + m_direction[0] * origin[1]};
+        }
       }
 
       /// @brief Constructs a supporting line. @param segment Nondegenerate segment.
@@ -79,8 +85,10 @@ namespace Rodin::Geometry::Euclidean
           m_coefficients{a, b, c}
       {
         if (a == T(0) && b == T(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Line requires a nonzero normal" << Alert::Raise;
+        }
         if (std::abs(a) >= std::abs(b))
           m_origin[0] = c / a;
         else
@@ -95,8 +103,10 @@ namespace Rodin::Geometry::Euclidean
           m_coefficients{}
       {
         if (coefficients.size() != 3)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Line requires three coefficients" << Alert::Raise;
+        }
         auto it = coefficients.begin();
         const T a = *it++, b = *it++, c = *it;
         *this = Line(a, b, c);

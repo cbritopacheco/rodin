@@ -375,8 +375,10 @@ namespace Rodin::Tests::Convergence
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
+          }
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
@@ -390,8 +392,10 @@ namespace Rodin::Tests::Convergence
         }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { mesh.getShard(); })
+        {
           squared = boost::mpi::all_reduce(
             mesh.getContext().getCommunicator(), squared, std::plus<Real>());
+        }
 #endif
         return std::sqrt(squared);
       }
@@ -438,8 +442,10 @@ namespace Rodin::Tests::Convergence
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
+          }
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
@@ -458,8 +464,10 @@ namespace Rodin::Tests::Convergence
         }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { mesh.getShard(); })
+        {
           squared = boost::mpi::all_reduce(
             mesh.getContext().getCommunicator(), squared, std::plus<Real>());
+        }
 #endif
         return std::sqrt(squared);
       }
@@ -476,8 +484,10 @@ namespace Rodin::Tests::Convergence
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
+          }
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);

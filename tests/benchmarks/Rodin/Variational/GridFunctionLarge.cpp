@@ -52,12 +52,14 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (!Vector)
             return RealFunction([this](const Point& p) { return analytic(p); });
           else
+          {
             return VectorFunction(dimension, [this](const Point& p) {
               Range value(m_dimension);
               for (size_t d = 0; d < m_dimension; ++d)
                 value(d) = (d + 1) * analytic(p);
               return value;
             });
+          }
         }();
         m_field.project(fn);
         m_points.reserve(m_mesh.getCellCount() * m_qf.getSize());
@@ -84,11 +86,13 @@ namespace Rodin::Tests::Benchmarks
             if constexpr (!Vector)
               m_setupError = std::max(m_setupError, std::abs(value - analytic(p)));
             else
+            {
               for (size_t d = 0; d < m_dimension; ++d)
               {
                 m_setupError =
                   std::max(m_setupError, std::abs(value(d) - (d + 1) * analytic(p)));
               }
+            }
           }
         }
       }
@@ -226,8 +230,10 @@ namespace Rodin::Tests::Benchmarks
     static std::array<std::unique_ptr<LargeInterpolationData<Order, Vector>>, 2> data;
     const size_t index = state.range(0) - 2;
     if (!data[index])
+    {
       data[index] =
         std::make_unique<LargeInterpolationData<Order, Vector>>(state.range(0));
+    }
     data[index]->run(state);
   }
 

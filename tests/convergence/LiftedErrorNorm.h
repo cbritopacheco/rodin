@@ -78,8 +78,10 @@ namespace Rodin::Tests::Convergence
         for (auto cell = reference.getCell(); cell; ++cell)
         {
           if constexpr (requires { reference.getShard(); })
+          {
             if (!reference.getShard().isOwned(dim, cell->getIndex()))
               continue;
+          }
           const auto mapped = represented.getCell(cell->getIndex());
           assert(mapped->getGeometry() == cell->getGeometry());
           [[maybe_unused]] const auto vertices = cell->getVertices(),
@@ -135,11 +137,13 @@ namespace Rodin::Tests::Convergence
         }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { reference.getShard(); })
+        {
           for (Real& value : squared)
           {
             value = boost::mpi::all_reduce(
               reference.getContext().getCommunicator(), value, std::plus<Real>());
           }
+        }
 #endif
         return {{std::sqrt(squared[0]), std::sqrt(squared[1])},
           {std::sqrt(squared[2]), std::sqrt(squared[3])},

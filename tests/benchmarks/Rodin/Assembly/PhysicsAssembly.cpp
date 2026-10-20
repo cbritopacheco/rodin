@@ -52,11 +52,15 @@ namespace Rodin::Tests::Benchmarks
         using Range = std::conditional_t<Elasticity, Math::SpatialVector<Real>, Real>;
         auto space = [&]() {
           if constexpr (Elasticity)
+          {
             return H1<Degree, Range, LocalMesh>(
               std::integral_constant<size_t, Degree>{}, mesh, dim);
+          }
           else
+          {
             return H1<Degree, Range, LocalMesh>(
               std::integral_constant<size_t, Degree>{}, mesh);
+          }
         }();
         TrialFunction u(space);
         TestFunction v(space);

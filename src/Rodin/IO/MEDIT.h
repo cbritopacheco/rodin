@@ -428,8 +428,10 @@ namespace Rodin::IO::MEDIT
         const bool r = [&]()
         {
           if (m_sdim == 0)
+          {
             return boost::spirit::x3::phrase_parse(
               begin, end, uint_[getAttribute], space);
+          }
           const auto p =
             double_[getX] >> repeat(m_sdim - 1)[double_[getX]] >> uint_[getAttribute];
           return boost::spirit::x3::phrase_parse(begin, end, p, space);
@@ -878,8 +880,10 @@ namespace Rodin::IO
           if (version)
             m_version = *version;
           else
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Failed to parse version number of mesh." << Alert::Raise;
+          }
         }
       }
 
@@ -900,13 +904,17 @@ namespace Rodin::IO
           if (dimension)
             m_spaceDimension = *dimension;
           else
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Failed to parse dimension of mesh." << Alert::Raise;
+          }
         }
         if (m_spaceDimension !=
           this->getObject().getFiniteElementSpace().getMesh().getSpaceDimension())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "MEDIT dimension does not match the finite element mesh." << Alert::Raise;
+        }
       }
 
       /**
@@ -939,9 +947,11 @@ namespace Rodin::IO
         }
 
         if (static_cast<size_t>(*size) != mesh.getVertexCount())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "MEDIT vertex count does not match the finite element mesh."
             << Alert::Raise;
+        }
 
         line = skipEmptyLines(is);
         size_t solCount = 0, solutionType = 0;
@@ -962,9 +972,11 @@ namespace Rodin::IO
         }
 
         if (solCount != 1)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "MEDIT requires exactly one scalar or vector vertex field."
             << Alert::Raise;
+        }
 
         const size_t vdim = fes.getVectorDimension();
         if ((solutionType == MEDIT::SolutionType::Real && vdim != 1) ||
@@ -988,9 +1000,11 @@ namespace Rodin::IO
           for (size_t d = 0; d < vdim; ++d)
           {
             if (!(is >> values[dofs[d]]))
+            {
               Alert::MemberFunctionException(*this, __func__)
                 << "Invalid MEDIT coefficient at vertex " << i << ", component " << d
                 << "." << Alert::Raise;
+            }
           }
         }
         gf.setData(values);
@@ -1113,9 +1127,11 @@ namespace Rodin::IO
           os << '\n';
         }
         else
+        {
           os << 1 << " "
              << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
              << '\n';
+        }
 
         this->printData(os);
 

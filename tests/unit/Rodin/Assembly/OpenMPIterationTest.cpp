@@ -53,8 +53,10 @@ namespace Rodin::Tests::Unit
         if (cells)
           EXPECT_EQ(vertices[1], i + 1);
         else
+        {
           EXPECT_EQ(mesh.getVertexCoordinates(iterator->getVertices()[0])(0),
             static_cast<Real>(i));
+        }
       }
       EXPECT_EQ(selected, cells ? 3u : region == Region::Faces ? 4u : 2u);
     }

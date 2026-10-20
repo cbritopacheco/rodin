@@ -91,11 +91,13 @@ namespace Rodin::Tests::Benchmarks
         const size_t dimension = Polytope::Traits(geometry).getDimension();
         auto mesh = [&]() {
           if (dimension == 0)
+          {
             return LocalMesh::Builder()
               .initialize(3)
               .nodes(1)
               .vertex({0, 0, 0})
               .finalize();
+          }
           return LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
         }();
         for (size_t d = 1; d <= dimension; ++d)
@@ -108,11 +110,15 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (Shape == NamedMassShape::Scalar)
             return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
           else if constexpr (Shape == NamedMassShape::Vector)
+          {
             return H1<K, Math::SpatialVector<Scalar>>(
               std::integral_constant<size_t, K>{}, mesh, rows);
+          }
           else
+          {
             return H1<K, Math::SpatialMatrix<Scalar>>(
               std::integral_constant<size_t, K>{}, mesh, rows, columns);
+          }
         }();
         H1<K, Scalar> scalarSpace(std::integral_constant<size_t, K>{}, mesh);
         TrialFunction u(space);

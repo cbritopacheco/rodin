@@ -354,9 +354,11 @@ namespace Rodin::Variational
         RangeType value(gradient.getDimension(0));
         value.setZero();
         if (gradient.getDimension(1) != gradient.getDimension(2))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
+        }
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
         {
           for (size_t k = 0; k < gradient.getDimension(2); ++k)
@@ -491,9 +493,11 @@ namespace Rodin::Variational
         RangeType value(gradient.getDimension(0));
         value.setZero();
         if (gradient.getDimension(1) != gradient.getDimension(2))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
+        }
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
         {
           for (size_t k = 0; k < gradient.getDimension(2); ++k)

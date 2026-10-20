@@ -26,12 +26,15 @@ Use two spaces per indentation level, including declarations, method bodies
 and their documentation. Members and documentation following `public:`,
 `protected:` or `private:` must be indented two spaces beyond the access label;
 they must not be aligned with it. Access labels are indented two spaces beyond
-the enclosing record's brace, while plain structs without explicit access
-sections retain one two-space member level. Nested records follow the same rule.
+the enclosing record's brace. Members before the first explicit access label
+retain one two-space level inside the record, including assertions and friends.
+Plain records without access labels use this same two-space member level.
+Nested records follow the same rule.
 
 The repository formatter expresses this with `IndentWidth: 2`,
 `IndentAccessModifiers: true`. Since clang-format also adds an unwanted extra
-level in plain structs, `dev/format_cpp.py` removes that level after formatting.
+level in implicit access sections, `dev/format_cpp.py` removes that level after
+formatting.
 Use this canonical entry point rather than raw clang-format. The CI changed-line
 check uses the same operation. Keep the configuration and
 `dev/test_format_config.py` regressions consistent; do not use
@@ -49,6 +52,14 @@ This also separates individually documented aliases and data members. Keep
 the documentation attached to its own declaration, and do not insert blank
 lines within one documentation block. The canonical formatter enforces this
 spacing through the existing changed-line CI check.
+
+## Control-flow braces
+
+A `for`, `if`, or `else` body spanning multiple physical lines requires Allman
+braces, even when it contains only one statement. Only the body's line count
+matters; a wrapped condition or loop header does not require a one-line body
+to be braced. Conventional `else if` chains retain their usual layout, with
+each branch body checked independently. `dev/style_lint.py` enforces this rule.
 
 ## Const correctness
 

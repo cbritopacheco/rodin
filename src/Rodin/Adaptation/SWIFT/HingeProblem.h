@@ -96,8 +96,10 @@ namespace Rodin::Adaptation::SWIFT
         matrix.makeCompressed();
         system.getVector() -= matrix * m_state->getData();
         if (m_centering.size() != 0)
+        {
           system.getVector() +=
             m_centering * (m_centering.transpose() * m_state->getData());
+        }
         m_assemblySeconds =
           std::chrono::duration<Real>(std::chrono::steady_clock::now() - start).count();
         return *this;

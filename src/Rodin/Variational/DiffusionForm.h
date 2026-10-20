@@ -188,8 +188,10 @@ namespace Rodin::Variational
             if constexpr (HasCoefficient)
             {
               if (const auto k = m_coefficient->getOrder(polytope))
+              {
                 order =
                   *k + (kTrial == 0 ? 0 : kTrial - 1) + (kTest == 0 ? 0 : kTest - 1);
+              }
             }
             const auto& qf =
               QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
@@ -217,8 +219,10 @@ namespace Rodin::Variational
                 for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
                 {
                   if constexpr (requires { trialFE.getBasis(tr).getGradient(); })
+                  {
                     trialGradients.emplace_back(
                       trialFE.getBasis(tr).getGradient()(reference));
+                  }
                   else
                   {
                     // Constant-space bases expose directional derivatives,
@@ -234,8 +238,10 @@ namespace Rodin::Variational
                 for (size_t te = 0; te < testFE.getCount(); ++te)
                 {
                   if constexpr (requires { testFE.getBasis(te).getGradient(); })
+                  {
                     testGradients.emplace_back(
                       testFE.getBasis(te).getGradient()(reference));
+                  }
                   else
                   {
                     auto& gradient = testGradients.emplace_back(reference.size());
@@ -457,11 +463,15 @@ namespace Rodin::Variational
       Kernel getKernel() const
       {
         if constexpr (HasCoefficient)
+        {
           return Kernel(getTrialFunction().getFiniteElementSpace(),
             getTestFunction().getFiniteElementSpace(), *m_coefficient);
+        }
         else
+        {
           return Kernel(getTrialFunction().getFiniteElementSpace(),
             getTestFunction().getFiniteElementSpace());
+        }
       }
 
       DiffusionForm* copy() const noexcept override

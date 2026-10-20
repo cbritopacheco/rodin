@@ -108,11 +108,13 @@ namespace Rodin::Tests::Benchmarks
         const size_t components = rows * columns, order = state.range(2);
         auto mesh = [&]() {
           if (geometry == Polytope::Type::Point)
+          {
             return LocalMesh::Builder()
               .initialize(3)
               .nodes(1)
               .vertex({0, 0, 0})
               .finalize();
+          }
           return Convergence::UniformGrid(geometry).makeMesh(2);
         }();
         for (size_t d = 1; d <= mesh.getDimension(); ++d)

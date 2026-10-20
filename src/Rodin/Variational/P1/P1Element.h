@@ -1517,8 +1517,10 @@ namespace Rodin::Variational
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SpatialMatrix ranges require 1 to 3 rows and columns." << Alert::Raise;
+        }
       }
 
       /// @brief Copies the element and its component extents.
@@ -1613,9 +1615,11 @@ namespace Rodin::Variational
             return m_form([&](const Math::SpatialPoint& point) -> ScalarType {
               const auto value = function(point);
               if (value.rows() != m_rows || value.cols() != m_cols)
+              {
                 Alert::MemberFunctionException(*this, __func__)
                   << "Matrix value does not match the finite element range."
                   << Alert::Raise;
+              }
               return value(m_component / m_cols, m_component % m_cols);
             });
           }

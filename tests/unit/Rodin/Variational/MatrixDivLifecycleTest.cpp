@@ -42,11 +42,13 @@ namespace
         {
           result(row, col) = factor * Real(1 + row + col);
           if (!constant)
+          {
             for (size_t k = 0; k < dimension; ++k)
             {
               result(row, col) += factor * Real((row + 1) * (col + 2) * (k + 1)) *
                 point.getPhysicalCoordinates()[k];
             }
+          }
         }
       }
       return result;
@@ -88,8 +90,10 @@ namespace
       {
         Real derivativeSum = 0;
         if (!constant)
+        {
           for (size_t k = 0; k < dimension; ++k)
             derivativeSum += Real((row + 1) * (k + 2) * (k + 1));
+        }
         const Scalar expected = factor * derivativeSum;
         EXPECT_NEAR(Math::abs(evaluated[row] - expected), 0, 1e-11);
         EXPECT_NEAR(Math::abs(reconstructed[row] - expected), 0, 1e-11);

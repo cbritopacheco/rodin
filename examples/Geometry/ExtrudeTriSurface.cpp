@@ -151,8 +151,10 @@ namespace
         else if (value == "z")
           options.zDirection = true;
         else
+        {
           Alert::Exception() << "Invalid --direction: " << value
                              << ". Expected normal or z." << Alert::Raise;
+        }
       }
       else if (arg == "--input-format" || arg.rfind("--input-format=", 0) == 0)
       {
@@ -273,8 +275,10 @@ namespace
     for (Index v = 0; v < static_cast<Index>(normals.size()); ++v)
     {
       if (normals[v].norm() == 0)
+      {
         Alert::Exception() << "Vertex " << v << " has no usable incident normal."
                            << Alert::Raise;
+      }
       normals[v] /= normals[v].norm();
     }
     return normals;

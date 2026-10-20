@@ -195,9 +195,11 @@ namespace Rodin::Variational
           const auto& rc = p.getReferenceCoordinates();
 
           if (static_cast<size_t>(rc.size()) < d)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Reference gradient evaluation requires " << d
               << " coordinate components, got " << rc.size() << "." << Alert::Raise;
+          }
           const auto entity = std::pair{d, i};
           const auto geometry = fe.getGeometry();
           if (geometry == Geometry::Polytope::Type::Tetrahedron ||
@@ -639,8 +641,10 @@ namespace Rodin::Variational
           if (auto included = mesh.inclusion(point))
             return getDerivativePoint(*included);
           if (mesh.isSubMesh())
+          {
             if (auto restricted = mesh.asSubMesh().restriction(point))
               return getDerivativePoint(*restricted);
+          }
           Alert::MemberFunctionException(*this, __func__)
             << "Derivative point is outside the finite element mesh." << Alert::Raise;
         }

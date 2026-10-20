@@ -49,13 +49,13 @@ namespace Rodin::Hilbert
 
     /// Linear system type for the regularized problem
     using LinearSystemType =
-        Math::LinearSystem<Math::SparseMatrix<ScalarType>, Math::Vector<ScalarType>>;
+      Math::LinearSystem<Math::SparseMatrix<ScalarType>, Math::Vector<ScalarType>>;
 
     /// Solver type (Conjugate Gradient)
     using SolverType = Solver::CG<LinearSystemType>;
 
     static_assert(std::is_same_v<FESRange, Real> ||
-        std::is_same_v<FESRange, Math::SpatialVector<Real>>);
+      std::is_same_v<FESRange, Math::SpatialVector<Real>>);
 
     public:
       /**
@@ -92,14 +92,18 @@ namespace Rodin::Hilbert
       {
         auto body = [&]() {
         if constexpr (std::is_same_v<FESRange, Real>)
+          {
             return Variational::Integral(m_alpha * m_alpha * Variational::Grad(m_trial),
                      Variational::Grad(m_test)) +
               Variational::Integral(m_trial, m_test) - lf;
+          }
         else
+          {
             return Variational::Integral(
                      m_alpha * m_alpha * Variational::Jacobian(m_trial),
                      Variational::Jacobian(m_test)) +
               Variational::Integral(m_trial, m_test) - lf;
+          }
         }();
         body.getDBCs() = m_pb.getBody().getDBCs();
         m_pb = body;

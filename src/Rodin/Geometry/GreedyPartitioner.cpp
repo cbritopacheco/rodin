@@ -23,8 +23,10 @@ namespace Rodin::Geometry
   void GreedyPartitioner::partition(size_t numPartitions, size_t d)
   {
     if (numPartitions == 0)
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "The number of partitions must be positive." << Alert::Raise;
+    }
     m_count = numPartitions;
     const auto& mesh = getMesh();
     const auto& conn = mesh.getConnectivity();

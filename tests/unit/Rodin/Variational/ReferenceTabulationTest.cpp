@@ -240,8 +240,10 @@ namespace Rodin::Tests::Unit
           }
         }
         if (m_fail)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Deliberately interrupted reference-table publication" << Alert::Raise;
+        }
       }
 
     private:

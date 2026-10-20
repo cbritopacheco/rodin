@@ -622,10 +622,12 @@ int main(int argc, char** argv)
                 << (0.2 / std::max(vPredicted, 1e-12) * cfg.inletPressureMean)
                 << " Pa for v=0.2 m/s." << Alert::Raise;
   if (0.5 * cfg.rho * vPredicted > boundaryZ)
+  {
     Alert::Warning() << "[inlet] Z is below the inflow kinetic flux scale "
                      << "(rho v / 2 = " << (0.5 * cfg.rho * vPredicted)
                      << "); the run may still diverge. Raise "
                      << "boundaryImpedanceFraction." << Alert::Raise;
+  }
 
   const auto uNormal = Dot(u, normal) * normal;
   const auto uTangential = u - uNormal;
@@ -973,9 +975,11 @@ int main(int argc, char** argv)
                 << totalSteps << " total); flow every step, "
                 << "species from cycle " << (cfg.flowCycles + 1) << " on" << Alert::Raise;
   if (cfg.flowCycles < 2)
+  {
     Alert::Warning() << "[run] fewer than two warm-up cycles: the wall-shear "
                      << "indices that arm the source carry the start-up "
                      << "transient" << Alert::Raise;
+  }
 
   Real t = 0.0;
   Real uSpeed = 0.0;      // max|u| of the current step: guard and progress line
@@ -1031,9 +1035,11 @@ int main(int argc, char** argv)
         KSPGetConvergedReason(flowKSP.getHandle(), &reason);
         KSPGetIterationNumber(flowKSP.getHandle(), &its);
         if (reason < 0)
+        {
           Alert::Warning() << "[flow] step " << step << " KSP DIVERGED ("
                            << static_cast<int>(reason) << ") after " << its << " its"
                            << Alert::Raise;
+        }
         else if (step == 0)
           Alert::Info() << "[chk] first flow solve ok, KSP its=" << its << Alert::Raise;
       }
@@ -1159,8 +1165,10 @@ int main(int argc, char** argv)
       // chaining several does not concatenate -- build the variable tail first.
       std::ostringstream tail;
       if (species)
+      {
         tail << "  |  washout R=" << residual << " tau=" << clearance
              << " s  Fn/Fg0=" << (fnCur.max() / fg0);
+      }
       else
         tail << "  |  (warm-up)";
 

@@ -83,8 +83,10 @@ namespace Rodin::Tests::Benchmarks
           operation == PyramidOperation::ModalDerivative;
         const QF::QuadratureFormulaBase* formula = nullptr;
         if (!metadata)
+        {
           formula = &QF::PolytopeQuadratureFormula::get(
             state.range(0), Geometry::Polytope::Type::Pyramid);
+        }
         const size_t nqp = formula ? formula->getSize() : 0;
         std::vector<std::array<size_t, 3>> modes;
         std::vector<size_t> modeIndices;
@@ -119,8 +121,10 @@ namespace Rodin::Tests::Benchmarks
           if (i > 0)
             value += pascal[n][i] * Real(i) * std::pow(x, i - 1) * std::pow(1 - x, n - i);
           if (i < n)
+          {
             value -=
               pascal[n][i] * Real(n - i) * std::pow(x, i) * std::pow(1 - x, n - i - 1);
+          }
           return value;
         };
         std::vector<Real> expected;

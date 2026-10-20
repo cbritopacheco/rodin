@@ -42,11 +42,15 @@ namespace Rodin::Tests::Unit::NewtonSolverTestHelpers
       void solve(DenseLinearSystem& system) override
       {
         if (m_nonfinite)
+        {
           system.getSolution() =
             Math::Vector<Real>::Constant(1, std::numeric_limits<Real>::quiet_NaN());
+        }
         else
+        {
           system.getSolution() =
             system.getOperator().fullPivLu().solve(system.getVector());
+        }
       }
 
       DenseLinearSolver* copy() const noexcept override

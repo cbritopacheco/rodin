@@ -48,13 +48,17 @@ namespace Rodin::Scotch
   {
     constexpr size_t MaxScotchCount = std::numeric_limits<SCOTCH_Num>::max();
     if (numPartitions == 0 || numPartitions > MaxScotchCount)
+    {
       Exception(
         "Partition count is outside Scotch's positive integer range", *this, __func__)
         .raise();
+    }
     const auto& mesh = getMesh();
     if (d > mesh.getDimension())
+    {
       Exception("Partition dimension exceeds the mesh dimension", *this, __func__)
         .raise();
+    }
     const auto& conn = mesh.getConnectivity();
     const size_t n = conn.getCount(d);
     if (n == 0)
@@ -76,8 +80,10 @@ namespace Rodin::Scotch
         if (neighbor != i)
         {
           if (edgetab.size() == MaxScotchCount)
+          {
             Exception("Edge count exceeds Scotch's integer range", *this, __func__)
               .raise();
+          }
           edgetab.push_back(static_cast<SCOTCH_Num>(neighbor));
         }
       }
@@ -112,9 +118,11 @@ namespace Rodin::Scotch
   size_t Partitioner::getPartition(Index index) const
   {
     if (index >= m_partition.size())
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "Partition assignment index " << index << " is outside assignment count "
         << m_partition.size() << '.' << Alert::Raise;
+    }
     return m_partition[index];
   }
 }

@@ -1960,11 +1960,15 @@ namespace Rodin::IO
                                << Alert::Raise;
           }
           if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+          {
             HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values, nv,
               gf.getRows(), gf.getColumns());
+          }
           else
+          {
             HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
               static_cast<hsize_t>(nv), static_cast<hsize_t>(vdim));
+          }
         }
         return;
       }
@@ -2004,11 +2008,15 @@ namespace Rodin::IO
         }
 
         if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+        {
           HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values, nv,
             gf.getRows(), gf.getColumns());
+        }
         else
+        {
           HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
             static_cast<hsize_t>(nv), static_cast<hsize_t>(vdim));
+        }
       }
     }
 
@@ -2153,11 +2161,15 @@ namespace Rodin::IO
                              << Alert::Raise;
         }
         if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+        {
           HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values, nc,
             gf.getRows(), gf.getColumns());
+        }
         else
+        {
           HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
             static_cast<hsize_t>(nc), static_cast<hsize_t>(vdim));
+        }
       }
     }
   }
@@ -2985,8 +2997,10 @@ namespace Rodin::IO
           const auto cols =
             HDF5::readScalarDataset<HDF5::U64>(file.get(), "/GridFunction/Meta/Columns");
           if (rows != gf.getRows() || cols != gf.getColumns())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "HDF5 matrix range shape mismatch." << Alert::Raise;
+          }
         }
         std::vector<HDF5::F64> imaginary(values.size(), 0);
         if (H5Lexists(file.get(), "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
@@ -2994,8 +3008,10 @@ namespace Rodin::IO
           imaginary = HDF5::readVectorDataset<HDF5::F64>(
             file.get(), "/GridFunction/Values/ImaginaryData");
           if (imaginary.size() != values.size())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Invalid imaginary field data size." << Alert::Raise;
+          }
         }
         auto& data = gf.getData();
         for (size_t i = 0; i < values.size(); ++i)
@@ -3005,9 +3021,11 @@ namespace Rodin::IO
           else
           {
             if (imaginary[i] != 0)
+            {
               Alert::MemberFunctionException(*this, __func__)
                 << "Complex field cannot be loaded into real coefficients."
                 << Alert::Raise;
+            }
             data[i] = values[i];
           }
         }

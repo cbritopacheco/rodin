@@ -1250,8 +1250,10 @@ namespace Rodin::Variational
             if constexpr (Operands::CoefficientOnLeft)
               return static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
             else
+            {
               return static_cast<ScalarType>(m_qf->getWeight(qp)) *
                 static_cast<ScalarType>(p.getDistortion());
+            }
           }();
 
           const CoefficientRangeType coefficientValue = coeff.getValue(ip);

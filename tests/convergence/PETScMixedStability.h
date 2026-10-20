@@ -137,9 +137,11 @@ namespace Rodin::Tests::Convergence
         if (ranks == 1)
           ASSERT_EQ(MatDuplicate(source, MAT_COPY_VALUES, &complete), PETSC_SUCCESS);
         else
+        {
           ASSERT_EQ(MatCreateRedundantMatrix(
                       source, ranks, MPI_COMM_NULL, MAT_INITIAL_MATRIX, &complete),
             PETSC_SUCCESS);
+        }
         PetscInt rows = 0, columns = 0;
         EXPECT_EQ(MatGetSize(complete, &rows, &columns), PETSC_SUCCESS);
         PetscInt first = 0, last = 0;

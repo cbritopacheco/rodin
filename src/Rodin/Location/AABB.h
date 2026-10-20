@@ -121,14 +121,18 @@ namespace Rodin::Location
           if (candidates[d].empty())
             continue;
           if (d > mesh.getDimension())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "AABB candidate dimension exceeds the mesh dimension." << Alert::Raise;
+          }
           auto sorted = candidates[d];
           std::sort(sorted.begin(), sorted.end());
           if (sorted.back() >= mesh.getPolytopeCount(d) ||
             std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "AABB candidate indices must be distinct and in range." << Alert::Raise;
+          }
         }
         if (candidates.size() > m_index.size())
           m_index = std::vector<DimensionIndex>(candidates.size());
@@ -176,8 +180,10 @@ namespace Rodin::Location
       AABB& setTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "AABB physical tolerance must be finite and nonnegative." << Alert::Raise;
+        }
         m_tolerance = tolerance;
         invalidate();
         return *this;
@@ -200,8 +206,10 @@ namespace Rodin::Location
       AABB& setReferenceTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "AABB reference tolerance must be finite and nonnegative." << Alert::Raise;
+        }
         m_referenceTolerance = tolerance;
         return *this;
       }
@@ -527,8 +535,10 @@ namespace Rodin::Location
         const size_t sdim = mesh.getSpaceDimension();
         const std::vector<Index>* selected = nullptr;
         if constexpr (Restricted)
+        {
           selected =
             dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr;
+        }
         const size_t count = Restricted ? (selected ? selected->size() : 0)
                                         : mesh.getPolytopeCount(dimension);
         const bool projectionsEnabled =
@@ -1455,9 +1465,11 @@ namespace Rodin::Location
           else if (seed % SeedsPerVertex == 1)
             rc = traits.getVertex((seed - 1) / SeedsPerVertex);
           else
+          {
             rc = SeedCentroidWeight *
               (traits.getCentroid() +
                 traits.getVertex((seed - SeedsPerVertex) / SeedsPerVertex));
+          }
           transformation.transform(mapped, rc);
           if (!isFinite(mapped))
             continue;

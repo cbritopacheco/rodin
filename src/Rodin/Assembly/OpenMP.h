@@ -1289,8 +1289,10 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
+              {
                 localRhs.emplace_back(
                   r.index, -Math::conj(r.coefficient) * val * colValue);
+              }
               for (const auto& c : constraints.expand(col))
               {
                 localT.emplace_back(
@@ -1611,8 +1613,10 @@ namespace Rodin::Assembly
                       for (const auto& r : constraints.expand(I))
                       {
                         if (colValue != ScalarType(0))
+                        {
                           localRhs[static_cast<size_t>(r.index)] -=
                             Math::conj(r.coefficient) * val * colValue;
+                        }
                         for (const auto& c : constraints.expand(J))
                         {
                           Alocal(r.index, c.index) +=
@@ -1691,8 +1695,10 @@ namespace Rodin::Assembly
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
+                          {
                             localRhs[static_cast<size_t>(r.index)] -=
                               Math::conj(r.coefficient) * val * colValue;
+                          }
                           for (const auto& c : constraints.expand(J))
                           {
                             Alocal(r.index, c.index) +=
@@ -2113,8 +2119,10 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != ScalarType(0))
+            {
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
                 r.index, -Math::conj(r.coefficient) * val * colValue);
+            }
             for (const auto& c : constraints.expand(col))
             {
               tchunks[static_cast<size_t>(tid)].emplace_back(
@@ -2197,8 +2205,10 @@ namespace Rodin::Assembly
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
+                          {
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
                               r.index, -Math::conj(r.coefficient) * val * colValue);
+                          }
                           for (const auto& c : constraints.expand(J))
                           {
                             (*Alocal)(r.index, c.index) +=
@@ -2306,8 +2316,10 @@ namespace Rodin::Assembly
                           for (const auto& r : constraints.expand(I))
                           {
                             if (colValue != ScalarType(0))
+                            {
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
                                 r.index, -Math::conj(r.coefficient) * val * colValue);
+                            }
                             for (const auto& c : constraints.expand(J))
                             {
                               (*Alocal)(r.index, c.index) +=

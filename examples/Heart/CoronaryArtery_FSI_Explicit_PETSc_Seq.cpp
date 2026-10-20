@@ -957,8 +957,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_coupling_iterations",
       &couplingIterations, &couplingIterationsSet);
     if (couplingIterationsSet)
+    {
       cfg.couplingIterations =
         static_cast<size_t>(std::max<PetscInt>(1, couplingIterations));
+    }
 
     PetscReal couplingRelaxation = cfg.couplingRelaxation;
     PetscBool couplingRelaxationSet = PETSC_FALSE;
@@ -1002,8 +1004,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_prestress_ramp_steps",
       &prestressRampSteps, &prestressRampStepsSet);
     if (prestressRampStepsSet)
+    {
       cfg.prestressRampSteps =
         static_cast<size_t>(std::max<PetscInt>(0, prestressRampSteps));
+    }
 
     PetscReal vmsScale = cfg.vmsScale;
     PetscBool vmsScaleSet = PETSC_FALSE;
@@ -1431,8 +1435,10 @@ int main(int argc, char** argv)
       std::error_code ec;
       std::filesystem::create_directories(cfg.resultsDir, ec);
       if (ec && isRoot)
+      {
         std::cerr << "Warning: could not create results directory '" << cfg.resultsDir
                   << "': " << ec.message() << '\n';
+      }
     }
 
     Model::Input modelInput = makeModelInput();
@@ -1457,8 +1463,10 @@ int main(int argc, char** argv)
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
       BoundarySolid::FSIRing, BoundarySolid::Inlet, BoundarySolid::Outlets);
     if (isRoot)
+    {
       std::cout << "FSI ring band: fluid=" << fluidRingFaces
                 << " face(s), solid=" << solidRingFaces << " face(s)\n";
+    }
 
     std::vector<Math::SpatialPoint> referenceVertices;
     saveReferenceVertices(meshFluid, referenceVertices);
@@ -1633,11 +1641,13 @@ int main(int argc, char** argv)
         g.Rp = std::pow(8.0 * mu0 * g.Lp / (PI * Rp), 0.25);
         wk[tag].C = cfg.rcrTau / Rd; // uniform tau = Rd*C
         if (isRoot)
+        {
           Alert::Info() << "  [calib] outlet " << tag
                         << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
                         << "  Q=" << (Qi * 6.0e7) << " mL/min" << "  Rd=" << Rd
                         << "  C=" << wk[tag].C << "  tau=" << (Rd * wk[tag].C) << " s"
                         << Alert::Raise;
+        }
       }
     }
 
@@ -1694,9 +1704,11 @@ int main(int argc, char** argv)
       ? cfg.robinAlpha
       : cfg.robinGamma * std::sqrt(cfg.solidDensity * solidYoungEquiv);
     if (isRoot)
+    {
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
                     << "  (gamma * sqrt(rho_s E_eq), gamma = " << cfg.robinGamma
                     << ", E_eq = " << solidYoungEquiv << " Pa)" << Alert::Raise;
+    }
     const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
 
     const auto& cy = cfg.viscosity;
@@ -2391,15 +2403,19 @@ int main(int argc, char** argv)
         if (!snesPre.converged())
         {
           if (isRoot)
+          {
             std::cerr << "Prestress SNES failed at increment " << k << " / "
                       << cfg.prestressSteps << "; continuing with the last "
                       << "converged (partial) prestress state.\n";
+          }
           break;
         }
       }
       if (isRoot)
+      {
         Alert::Info() << "Prestressed wall to " << prestressPressure << " Pa in "
                       << cfg.prestressSteps << " increment(s)" << Alert::Raise;
+      }
 
       // Commit the prestressed state as the dynamic initial condition (zero
       // velocity / acceleration are already set) and lift the fluid mesh.
@@ -2589,9 +2605,11 @@ int main(int argc, char** argv)
           if (!snes.converged())
           {
             if (isRoot)
+            {
               std::cerr << "Solid SNES failed at step " << step << " (coupling iterate "
                         << couple << ") after " << snes.getIterationNumber()
                         << " iterations.\n";
+            }
             stepFailed = true;
             break;
           }
@@ -2654,11 +2672,13 @@ int main(int argc, char** argv)
             if (!std::isfinite(static_cast<Real>(aleNorm)))
             {
               if (isRoot)
+              {
                 std::cerr << "ALE lift non-finite at step " << step
                           << " (coupling iterate " << couple
                           << "): the fluid mesh is tangling -- reduce the "
                           << "imposed interface displacement (e.g. "
                           << "-coronary_heart_disp_scale) or the time step.\n";
+              }
               stepFailed = true;
               break;
             }
@@ -2790,12 +2810,14 @@ int main(int argc, char** argv)
         VecMin(pCur.getData(), PETSC_NULLPTR, &pMin);
         VecMax(pCur.getData(), PETSC_NULLPTR, &pMax);
         if (isRoot)
+        {
           Alert::Info() << "  [diag] p in [" << pMin << ", " << pMax << "] Pa"
                         << "  mass(qIn+qOut) = " << (qIn + qOutSum)
                         << "  E_iface = " << eInterface << " W"
                         << "  | coupling: iters = " << couplesDone << "/"
                         << cfg.couplingIterations << "  interface change = " << lastRel
                         << Alert::Raise;
+        }
       }
 
       // RCR / Windkessel update from the converged interface flux.

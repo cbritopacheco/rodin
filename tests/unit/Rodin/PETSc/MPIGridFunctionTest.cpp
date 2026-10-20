@@ -159,11 +159,13 @@ namespace
         }
       }
       if (filter == 0)
+      {
         for (Index dof = 0; dof < fes.getSize(); ++dof)
         {
           if (source[dof] != none)
             aliasExpected[dof] = PetscScalar(-14);
         }
+      }
 
       field = PetscScalar(-7);
       if (fes.getShard().getSize() > 0)

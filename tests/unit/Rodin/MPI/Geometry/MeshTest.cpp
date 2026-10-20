@@ -79,11 +79,13 @@ namespace
       local.getConnectivity().compute(dimension, 0);
       local.getConnectivity().compute(dimension, dimension);
       if (completeIncidences)
+      {
         for (size_t d = 0; d <= dimension; ++d)
         {
           for (size_t dp = 0; dp <= dimension; ++dp)
             local.getConnectivity().compute(d, dp);
         }
+      }
       EmptyRootPartitioner partitioner(local);
       partitioner.partition(world->size(), dimension);
       sharder.shard(partitioner);
@@ -522,12 +524,14 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
             if (phase == 1)
               EXPECT_EQ(&mesh.setVertexCoordinates(vertex, Real(2) * coordinates), &mesh);
             else
+            {
               for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
               {
                 EXPECT_EQ(&mesh.setVertexCoordinates(
                             vertex, Real(2) * coordinates[coordinate], coordinate),
                   &mesh);
               }
+            }
           }
         }
         for (size_t coordinate = 0; coordinate < dimension; ++coordinate)

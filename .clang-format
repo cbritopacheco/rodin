@@ -21,14 +21,14 @@ UseTab: Never
 ContinuationIndentWidth: 2
 NamespaceIndentation: All
 # Access labels are inset by two spaces; their members by four spaces.
-# clang-format also adds four spaces in plain structs. dev/format_cpp.py removes
-# that extra level in structs without explicit access sections.
+# Implicit-access members use two spaces inside the record. dev/format_cpp.py
+# removes clang-format's extra level before the first explicit access section.
 IndentAccessModifiers: true
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 # Braces: Allman everywhere; empty bodies "{}" stay together on their own line.
-# A for body may omit braces only if the whole body statement occupies one
+# A for/if/else body may omit braces only if its whole statement occupies one
 # physical line. style_lint.py enforces this; clang-format does not insert braces.
 BreakBeforeBraces: Custom
 BraceWrapping:

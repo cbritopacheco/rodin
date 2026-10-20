@@ -80,8 +80,10 @@ TYPED_TEST(ConstraintContracts, AffineFlatteningAndIndependentCopies)
   const auto [alpha, beta, expectedCoefficient, expectedOffset, expectedFirst,
     expectedSecond] = [] {
     if constexpr (std::is_same_v<Scalar, Complex>)
+    {
       return std::array<Scalar, 6>{Scalar(2, 1), Scalar(-0.5, 0.5), Scalar(-1.5, 0.5),
         Scalar(5.5, -3.5), Scalar(31, -27), Scalar(2, 21)};
+    }
     else
       return std::array<Scalar, 6>{2, -0.5, -1, 2.5, 17, -4.5};
   }();

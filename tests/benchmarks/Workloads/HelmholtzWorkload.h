@@ -80,8 +80,10 @@ namespace Rodin::Tests::Benchmarks
         mass.setOrder(QuadratureOrder);
         load.setOrder(QuadratureOrder);
         if constexpr (Reference)
+        {
           problem = ReferenceIntegral(diffusion) + ReferenceIntegral(mass) - load +
             DirichletBC(u, exact);
+        }
         else
           problem = diffusion + mass - load + DirichletBC(u, exact);
         u.getSolution() = exact;

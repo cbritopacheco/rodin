@@ -139,8 +139,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
             return P1(m_mesh, dim);
           else
 #endif
+          {
             return H1<K, Math::SpatialVector<Real>, Mesh<ContextType>>(
               std::integral_constant<size_t, K>{}, m_mesh, dim);
+          }
         }();
 #ifdef RODIN_CURVED_ELASTICITY_PETSC
         PETSc::Variational::TrialFunction u(space);
@@ -219,11 +221,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
             u.getSolution(), data, SineMap(), integrationOrder, observe);
 #ifdef RODIN_USE_MPI
           if constexpr (requires { m_mesh.getShard(); })
+          {
             for (Real& value : squared)
             {
               value = boost::mpi::all_reduce(
                 m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
             }
+          }
 #endif
           for (size_t i = 0; i < lifted->strain.size(); ++i)
           {
@@ -266,8 +270,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_CURVED_ELASTICITY_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       Mesh<ContextType> m_mesh;

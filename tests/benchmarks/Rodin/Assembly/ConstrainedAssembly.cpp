@@ -52,11 +52,13 @@ namespace Rodin::Tests::Benchmarks
           const Math::Vector<Scalar> wrong = exact.array() + Scalar(1);
           const Real sensitivity = (matrix * wrong - rhs).norm() / denominator;
           if (!std::isfinite(residual) || residual >= 1e-10)
+          {
             std::cerr << "patch=" << residual << " sensitivity=" << sensitivity
                       << " matrix_difference="
                       << (matrix - reference.getOperator()).norm()
                       << " load_difference=" << (rhs - reference.getVector()).norm()
                       << '\n';
+          }
           return std::isfinite(residual) && residual < 1e-10 && sensitivity > 1e-4 &&
             (matrix - reference.getOperator()).norm() <
             1e-11 * std::max(Real(1), reference.getOperator().norm()) &&

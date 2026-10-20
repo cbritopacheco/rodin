@@ -213,8 +213,10 @@ namespace Rodin::Geometry
         continue;
       const auto halo = halos.find(local);
       if (halo != halos.end())
+      {
         for (Index rank : halo->second)
           outgoing.at(static_cast<int>(rank)).push_back(global);
+      }
     }
     exchange(21);
     for (const auto& [rank, indices] : incoming)

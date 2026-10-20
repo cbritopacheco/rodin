@@ -103,8 +103,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_CURVED_NONLINEAR_POISSON_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       Mesh<ContextType> m_mesh;

@@ -701,10 +701,12 @@ namespace Rodin::Examples::Heart
       static int failures = 0;
       ++failures;
       if (failures <= 20)
+      {
         std::cerr << "Warning: coronary outlet solve did not converge "
                   << "(failure " << failures
                   << (failures == 20 ? ", further ones suppressed" : "")
                   << "). Keeping previous state.\n";
+      }
       ptm = ptmOld;
     }
 
@@ -754,14 +756,18 @@ namespace Rodin::Examples::Heart
     if (tau < cfg.tRampStart)
       return 0.0;
     if (tau < cfg.tRampEnd)
+    {
       return cfg.positiveValue *
         ss((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
+    }
     if (tau < cfg.tPlateauEnd)
       return cfg.positiveValue;
     if (tau < cfg.tRelaxEnd)
+    {
       return cfg.positiveValue +
         (cfg.negativeValue - cfg.positiveValue) *
         ss((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
+    }
     if (tau < cfg.tNegativeEnd)
       return cfg.negativeValue;
 
@@ -1126,6 +1132,7 @@ namespace Rodin::Examples::Heart
         const Real tau = bc.C * bc.Rv;
 
         if (isRoot())
+        {
           Alert::Info() << "  [calib] outlet " << tag << "  rp=" << (rEq[tag] * 1e3)
                         << " mm"
                         << "  A=" << bc.area << " m^2"
@@ -1143,6 +1150,7 @@ namespace Rodin::Examples::Heart
                         << "  pc0/pout0=" << bc.pc << "/" << bc.pout
                         << " Pa (par=" << par0 << ", pim=" << pimRest << ")"
                         << Alert::Raise;
+        }
       }
 
       if (isRoot())
@@ -1202,11 +1210,13 @@ namespace Rodin::Examples::Heart
                       << "  T_v/T_ref=" << (Tv / Tref) << Alert::Raise;
 
         if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref || Tv > 2.0 * Tref)
+        {
           Alert::Warning()
             << "  [calib] el tiempo de transito derivado se aparta mas de 2x "
             << "de la referencia: el calibre, la velocidad y el reparto de "
             << "presion no son mutuamente consistentes con un solo tramo "
             << "efectivo por rama." << Alert::Raise;
+        }
       }
     }
     else

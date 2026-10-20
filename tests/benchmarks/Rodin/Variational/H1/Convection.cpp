@@ -67,11 +67,13 @@ namespace Rodin::Tests::Benchmarks
         const size_t dimension = Polytope::Traits(geometry).getDimension();
         auto mesh = [&]() {
           if (dimension == 0)
+          {
             return LocalMesh::Builder()
               .initialize(3)
               .nodes(1)
               .vertex({0, 0, 0})
               .finalize();
+          }
           return LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
         }();
         for (size_t d = 1; d <= dimension; ++d)

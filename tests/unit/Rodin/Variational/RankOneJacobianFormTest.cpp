@@ -186,8 +186,10 @@ namespace Rodin::Tests::Unit
         const auto cell = *mesh.getCell();
         auto space = [&] {
           if constexpr (HighOrder)
+          {
             return H1<2, Math::SpatialVector<Scalar>>(
               std::integral_constant<size_t, 2>{}, mesh, Components);
+          }
           else
             return P1<Math::SpatialVector<Scalar>>(mesh, Components);
         }();

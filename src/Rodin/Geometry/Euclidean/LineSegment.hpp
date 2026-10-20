@@ -29,8 +29,10 @@ namespace Rodin::Geometry::Euclidean
       m_end(end)
   {
     if (start == end)
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "LineSegment requires distinct endpoints" << Alert::Raise;
+    }
   }
 
   template <size_t Dimension, class T>
@@ -84,8 +86,10 @@ namespace Rodin::Geometry::Euclidean
     const Point<Dimension, T>& start)
   {
     if (start == m_end)
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "LineSegment requires distinct endpoints" << Alert::Raise;
+    }
     m_start = start;
     return *this;
   }
@@ -95,8 +99,10 @@ namespace Rodin::Geometry::Euclidean
     const Point<Dimension, T>& end)
   {
     if (end == m_start)
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "LineSegment requires distinct endpoints" << Alert::Raise;
+    }
     m_end = end;
     return *this;
   }

@@ -47,8 +47,10 @@ namespace Rodin::Tests::Benchmarks
     TestFunction v(space);
     auto integral = [&]() {
       if constexpr (Vector && Family < 2)
+      {
         return Integral(
           0.5 * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
+      }
       else
         return Integral(1.25 * (u + u), v - 0.25 * v);
     }();

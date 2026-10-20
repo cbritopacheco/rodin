@@ -98,11 +98,13 @@ namespace Rodin::Tests::Benchmarks
         const size_t dimension = Polytope::Traits(geometry).getDimension();
         auto mesh = [&]() {
           if (dimension == 0)
+          {
             return LocalMesh::Builder()
               .initialize(3)
               .nodes(1)
               .vertex({0, 0, 0})
               .finalize();
+          }
           return LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
         }();
         for (size_t d = 1; d <= dimension; ++d)
@@ -115,11 +117,15 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (Range == MassRange::Scalar)
             return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
           else if constexpr (Range == MassRange::Vector)
+          {
             return H1<K, Math::SpatialVector<Scalar>>(
               std::integral_constant<size_t, K>{}, mesh, rows);
+          }
           else
+          {
             return H1<K, Math::SpatialMatrix<Scalar>>(
               std::integral_constant<size_t, K>{}, mesh, rows, cols);
+          }
         }();
         H1<K, Scalar> scalarSpace(std::integral_constant<size_t, K>{}, mesh);
         TrialFunction u(space);
@@ -129,15 +135,19 @@ namespace Rodin::Tests::Benchmarks
         Real scale = 1;
         const auto coefficient = [&]() {
           if constexpr (std::is_same_v<Scalar, Complex>)
+          {
             return ComplexFunction([&](const Point& point) {
               const Real x = point.getDimension() == 0 ? Real(0) : point.x();
               return scale * Complex(Real(2) + x, Real(0.5));
             });
+          }
           else
+          {
             return RealFunction([&](const Point& point) {
               const Real x = point.getDimension() == 0 ? Real(0) : point.x();
               return scale * (Real(2) + x);
             });
+          }
         }();
         auto integral = [&]() {
           if constexpr (Weighted && Right)

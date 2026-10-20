@@ -81,8 +81,10 @@ namespace Rodin::Tests::Benchmarks
         const auto cell = *mesh.getCell();
         const size_t d = cell.getDimension();
         if constexpr (IdentityMap)
+        {
           mesh.setPolytopeTransformation(
             {d, cell.getIndex()}, new Geometry::IdentityTransformation(d));
+        }
         const auto space = [&]() {
           if constexpr (NativeP1 && Operation == PhysicalDerivative::Gradient)
             return P1<Scalar>(mesh);
@@ -91,8 +93,10 @@ namespace Rodin::Tests::Benchmarks
           else if constexpr (Operation == PhysicalDerivative::Gradient)
             return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
           else
+          {
             return H1<K, Math::SpatialVector<Scalar>>(
               std::integral_constant<size_t, K>{}, mesh, d);
+          }
         }();
         TrialFunction u(space);
         auto gradient = [&]() {

@@ -178,9 +178,11 @@ namespace Rodin::Geometry
       const Point& getPoint(size_t i) const
       {
         if (i >= m_ps.size())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Quadrature point index " << i << " is outside rule size " << m_ps.size()
             << '.' << Alert::Raise;
+        }
         return m_ps[i];
       }
 

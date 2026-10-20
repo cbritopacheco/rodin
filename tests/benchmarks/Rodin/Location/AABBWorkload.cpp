@@ -391,8 +391,10 @@ int main(int argc, char** argv)
             const std::string key = std::to_string(degree) + "/" +
               std::to_string(static_cast<int>(distortion)) + "/" + std::to_string(size);
             if (scenario.empty() || scenario == key)
+            {
               run(type, name, size, degree, distortion, seconds,
                 warpDegree == 0 ? degree : warpDegree);
+            }
           }
         }
       }

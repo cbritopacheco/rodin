@@ -297,6 +297,7 @@ namespace Rodin::Tests::Unit
         };
         const auto data = [&] {
           if constexpr (matrix)
+          {
             return MatrixFunction(size_t{2}, size_t{3}, [scalar](const Point& point) {
               Math::SpatialMatrix<Scalar> value(2, 3);
               for (size_t row = 0; row < 2; ++row)
@@ -306,19 +307,26 @@ namespace Rodin::Tests::Unit
               }
               return value;
             });
+          }
           else if constexpr (vector)
+          {
             return VectorFunction(size_t{3}, [scalar](const Point& point) {
               Math::SpatialVector<Scalar> value(3);
               for (size_t component = 0; component < 3; ++component)
                 value(component) = scalar(point, component);
               return value;
             });
+          }
           else if constexpr (std::is_same_v<Scalar, Complex>)
+          {
             return ComplexFunction(
               [scalar](const Point& point) { return scalar(point, 0); });
+          }
           else
+          {
             return RealFunction(
               [scalar](const Point& point) { return scalar(point, 0); });
+          }
         }();
         source.project(data);
         oracle.project(data);

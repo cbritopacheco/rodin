@@ -527,8 +527,10 @@ namespace Rodin::Math
       ScalarType dot(const SpatialMatrix& other) const noexcept
       {
         if constexpr (std::is_same_v<ScalarType, Complex>)
+        {
           return Math::dot(m_data.topLeftCorner(m_rows, m_cols),
             other.getData().topLeftCorner(other.rows(), other.cols()));
+        }
         assert(m_rows == other.m_rows);
         assert(m_cols == other.m_cols);
 

@@ -152,9 +152,11 @@ namespace Rodin::Solid
           !std::isfinite(e) || !std::isfinite(previousExtension) ||
           !std::isfinite(extension) || !std::isfinite(activation) ||
           !std::isfinite(strainFactor) || 1 + extension + previousExtension <= 0)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Active fields require finite data, positive gamma and time step, "
             << "and positive midpoint stretch." << Alert::Raise;
+        }
         const Real delta = extension - previousExtension;
         const Real sign = delta > 0 ? Real(1) : (delta < 0 ? Real(-1) : Real(0));
         const Real alpha = m_parameters.destructionRate;

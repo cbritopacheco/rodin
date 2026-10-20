@@ -2084,14 +2084,18 @@ namespace Rodin::IO
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         std::istringstream first(line);
         if (!(first >> tmp[0]))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Invalid first MFEM coefficient." << Alert::Raise;
+        }
         for (size_t i = 1; i < n; ++i)
         {
           if (!(is >> tmp[i]))
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Expected " << n << " MFEM coefficients; invalid or missing value at "
               << i << "." << Alert::Raise;
+          }
         }
 
         // Convert from MFEM file ordering -> Rodin internal (block-by-component):
@@ -3939,14 +3943,18 @@ namespace Rodin::IO
         if (!(dimensionLine >> keyword >> vdim) || keyword != "VDim:" ||
           vdim != components || !(orderingLine >> keyword >> ordering) ||
           keyword != "Ordering:" || ordering > 1)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Invalid MFEM matrix field header." << Alert::Raise;
+        }
         std::vector<Scalar> values(scalar.getSize() * components);
         for (auto& value : values)
         {
           if (!(is >> value))
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Truncated MFEM matrix data." << Alert::Raise;
+          }
         }
         for (size_t c = 0; c < components; ++c)
         {

@@ -147,8 +147,10 @@ namespace Rodin::Examples
             2, separator == std::string::npos ? std::string::npos : separator - 2);
           const auto option = options.find(name);
           if (option == options.end())
-            Alert::Exception() << "Unknown reconstruction option: " << argument
+        {
+          Alert::Exception() << "Unknown reconstruction option: " << argument
                                << Alert::Raise;
+        }
           std::string value;
           if (separator != std::string::npos)
             value = argument.substr(separator + 1);
@@ -176,8 +178,10 @@ namespace Rodin::Examples
                 input >> std::noskipws >> parsed;
                 if (!input || input.peek() != std::char_traits<char>::eof() ||
                   !std::isfinite(parsed))
-                  Alert::Exception() << "Invalid numeric value for --" << name << ": "
+              {
+                Alert::Exception() << "Invalid numeric value for --" << name << ": "
                                      << value << Alert::Raise;
+              }
                 *destination = parsed;
               }
               else
@@ -188,8 +192,10 @@ namespace Rodin::Examples
                 if (result.ec != std::errc{} ||
                   result.ptr != value.data() + value.size() ||
                   !std::isfinite(static_cast<Real>(parsed)))
-                  Alert::Exception() << "Invalid numeric value for --" << name << ": "
+              {
+                Alert::Exception() << "Invalid numeric value for --" << name << ": "
                                      << value << Alert::Raise;
+              }
                 *destination = parsed;
               }
             },
@@ -216,9 +222,11 @@ namespace Rodin::Examples
         }
         if (lobes < 0 || (dimension == 2 && lobes != std::floor(lobes)) ||
           amplitude < 0 || !(radius > amplitude))
-          Alert::Exception()
+      {
+        Alert::Exception()
             << "Expected nonnegative lobes/amp, R0 > amp, and integer lobes in 2D."
             << Alert::Raise;
+      }
         if (solver == "cg")
           p.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::CG;
         else if (solver == "sparse-lu")

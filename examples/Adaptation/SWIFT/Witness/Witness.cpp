@@ -242,9 +242,11 @@ namespace Examples
         }
         const Coverage initialCoverage = evaluate(initial);
         if (!std::isfinite(initialCoverage.radius))
+        {
           Alert::Exception() << "Input witnesses must be distinct, finite and inside the "
                                 "reference geometry."
                              << Alert::Raise;
+        }
         Points best = initial;
         Real bestRadius = initialCoverage.radius;
         boost::json::array history;
@@ -307,12 +309,16 @@ namespace Examples
         }
         const Coverage finalCoverage = evaluate(best);
         if (!std::isfinite(finalCoverage.radius))
+        {
           Alert::Exception() << "Final Voronoi geometry is numerically unresolved."
                              << Alert::Raise;
+        }
         const Real lowerBound = sampledRadius(best, grid(2 * resolution));
         if (lowerBound > finalCoverage.radius + GeometryTolerance)
+        {
           Alert::Exception() << "Independent lattice check exceeds the Voronoi radius."
                              << Alert::Raise;
+        }
         const Real seconds = std::chrono::duration<Real>(Clock::now() - start).count();
         boost::json::array edges;
         for (size_t i = 0; i < m_vertices.size(); ++i)
@@ -377,8 +383,10 @@ namespace Examples
         {
           const auto& coordinates = value.as_array();
           if (coordinates.size() != m_coordinates)
+          {
             Alert::Exception() << "Incorrect witness coordinate dimension."
                                << Alert::Raise;
+          }
           Point point(m_coordinates);
           for (size_t axis = 0; axis < m_coordinates; ++axis)
             point(axis) = boost::json::value_to<Real>(coordinates[axis]);
@@ -581,8 +589,10 @@ int main(int argc, char** argv)
       }
     }
     if (!options.subdivisions || !options.resolution)
+    {
       Alert::Exception() << "Subdivisions and resolution must be positive."
                          << Alert::Raise;
+    }
     boost::json::value input;
     if (!options.evaluate.empty())
     {
@@ -618,8 +628,10 @@ int main(int argc, char** argv)
       found = true;
     }
     if (!found)
+    {
       Alert::Exception() << "Unknown reference geometry: " << options.geometry
                          << Alert::Raise;
+    }
     if (options.geometry == "all")
       output = std::move(all);
     const std::filesystem::path path = options.output.empty()

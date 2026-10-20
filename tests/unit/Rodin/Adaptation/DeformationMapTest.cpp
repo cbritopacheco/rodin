@@ -206,8 +206,10 @@ namespace Rodin::Tests::Unit
       {
         ++calls;
         if (fail)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Locator failure." << Alert::Raise;
+        }
         const auto cell = mesh.getPolytope(dimension, 0);
         Math::SpatialPoint reference;
         cell->getTransformation().inverse(reference, physical);

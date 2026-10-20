@@ -84,8 +84,10 @@ namespace Rodin::Math
         for (auto extent : extents)
         {
           if (extent > MaxSize)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "SpatialTensor extent exceeds spatial capacity." << Alert::Raise;
+          }
         }
         m_extents = extents;
         m_size = 1;
@@ -109,9 +111,11 @@ namespace Rodin::Math
       size_t getDimension(size_t axis) const
       {
         if (axis >= Rank)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Tensor axis " << axis << " is outside rank " << Rank << '.'
             << Alert::Raise;
+        }
         return m_extents[axis];
       }
       /**

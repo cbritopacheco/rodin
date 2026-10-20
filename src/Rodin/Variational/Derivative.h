@@ -585,9 +585,11 @@ namespace Rodin::Variational
         gradientExpression.traceOf(this->getTraceDomain());
         const auto gradient = gradientExpression.getValue(point);
         if (m_direction >= gradient.getDimension(2))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Partial derivative direction exceeds the spatial dimension."
             << Alert::Raise;
+        }
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
         for (size_t row = 0; row < value.rows(); ++row)
         {
@@ -726,9 +728,11 @@ namespace Rodin::Variational
       {
         const auto gradient = m_gradient.getBasis(local);
         if (m_direction >= gradient.getDimension(2))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Partial derivative direction exceeds the spatial dimension."
             << Alert::Raise;
+        }
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
         for (size_t row = 0; row < value.rows(); ++row)
         {

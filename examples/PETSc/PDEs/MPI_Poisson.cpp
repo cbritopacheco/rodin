@@ -141,9 +141,12 @@ int main(int argc, char** argv)
     auto t1 = std::chrono::high_resolution_clock::now();
 
     if (world.rank() == ROOT_RANK)
-      Alert::Success() << "Assembled linear system in "
+    {
+      Alert::Success()
+        << "Assembled linear system in "
                 << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
                 << " ms." << Alert::Raise;
+    }
 
     if (world.rank() == ROOT_RANK)
       Alert::Info() << "Solving linear system..." << Alert::Raise;
@@ -153,9 +156,12 @@ int main(int argc, char** argv)
     t1 = std::chrono::high_resolution_clock::now();
 
     if (world.rank() == ROOT_RANK)
-      Alert::Success() << "Solved linear system in "
+    {
+      Alert::Success()
+        << "Solved linear system in "
                 << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
                 << " ms." << Alert::Raise;
+    }
 
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
 

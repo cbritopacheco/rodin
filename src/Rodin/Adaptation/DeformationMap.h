@@ -84,8 +84,10 @@ namespace Rodin::Adaptation
       const Geometry::Point& getMovedPoint() const
       {
         if (!m_moved)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "No moved point is bound." << Alert::Raise;
+        }
         return *m_moved;
       }
 
@@ -119,6 +121,10 @@ namespace Rodin::Adaptation
 
       /**
        * @brief Evaluates and owns a fresh moved point outside a binding.
+       *
+       * The locator resolves the displaced physical coordinates. If location
+       * fails, the point is inverse-mapped in the source cell or an adjacent
+       * volume cell for a source facet.
        * @param ip Source integration point.
        * @returns Located moved point, replaced by the next evaluation.
        */
@@ -126,8 +132,41 @@ namespace Rodin::Adaptation
       {
         invalidate();
         const auto& point = ip.getPoint();
-        m_moved.emplace(makeMovedPoint(
-          point, point.getPhysicalCoordinates() + getDisplacementValue(point, ip)));
+        const Math::SpatialPoint physical =
+          point.getPhysicalCoordinates() + getDisplacementValue(point, ip);
+        const auto& sourcePolytope = point.getPolytope();
+        const auto& mesh = sourcePolytope.getMesh();
+        const std::size_t dimension = mesh.getDimension();
+        if (auto located = m_locator.get().locate(dimension, physical))
+        {
+          m_moved.emplace(std::move(*located));
+          return *m_moved;
+        }
+
+        Index cell;
+        if (sourcePolytope.getDimension() == dimension)
+          cell = sourcePolytope.getIndex();
+        else
+        {
+          if (sourcePolytope.getDimension() + 1 != dimension)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Deformation fallback requires a source cell or facet." << Alert::Raise;
+          }
+          const auto& adjacent = mesh.getConnectivity()
+                                   .getIncidence(dimension - 1, dimension)
+                                   .at(sourcePolytope.getIndex());
+          if (adjacent.empty())
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Deformation map source face has no adjacent cell." << Alert::Raise;
+          }
+          cell = *adjacent.begin();
+        }
+
+        Math::SpatialPoint reference;
+        mesh.getPolytopeTransformation(dimension, cell).inverse(reference, physical);
+        m_moved.emplace(*mesh.getPolytope(dimension, cell), reference, physical);
         return *m_moved;
       }
 
@@ -138,43 +177,6 @@ namespace Rodin::Adaptation
       }
 
     private:
-      /**
-       * @brief Resolves a point at moved physical coordinates.
-       * @param source Source point retaining the reference cell and coordinates.
-       * @param physical Moved physical coordinates.
-       * @returns Located moved point, or an inverse-mapped point in the source volume cell or an adjacent volume cell when location fails.
-       */
-      Geometry::Point makeMovedPoint(
-        const Geometry::Point& source, const Math::SpatialVector<Real>& physical) const
-      {
-        const auto& sourcePolytope = source.getPolytope();
-        const auto& mesh = sourcePolytope.getMesh();
-        const std::size_t dimension = mesh.getDimension();
-        if (auto located = m_locator.get().locate(dimension, physical))
-          return std::move(*located);
-
-        Index cell;
-        if (sourcePolytope.getDimension() == dimension)
-          cell = sourcePolytope.getIndex();
-        else
-        {
-          if (sourcePolytope.getDimension() + 1 != dimension)
-            Alert::MemberFunctionException(*this, __func__)
-              << "Deformation fallback requires a source cell or facet." << Alert::Raise;
-          const auto& adjacent = mesh.getConnectivity()
-                                   .getIncidence(dimension - 1, dimension)
-                                   .at(sourcePolytope.getIndex());
-          if (adjacent.empty())
-            Alert::MemberFunctionException(*this, __func__)
-              << "Deformation map source face has no adjacent cell." << Alert::Raise;
-          cell = *adjacent.begin();
-        }
-
-        Math::SpatialPoint reference;
-        mesh.getPolytopeTransformation(dimension, cell).inverse(reference, physical);
-        return Geometry::Point(*mesh.getPolytope(dimension, cell), reference, physical);
-      }
-
       std::reference_wrapper<const Displacement> m_u;
       std::reference_wrapper<const LocatorType> m_locator;
       Optional<Geometry::Point> m_moved;

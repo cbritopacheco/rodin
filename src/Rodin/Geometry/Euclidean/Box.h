@@ -39,8 +39,10 @@ namespace Rodin::Geometry::Euclidean
         for (size_t i = 0; i < Dimension; ++i)
         {
           if (!(lower[i] <= upper[i]))
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Box requires ordered bounds in coordinate " << i << Alert::Raise;
+          }
         }
       }
 
@@ -100,8 +102,10 @@ namespace Rodin::Geometry::Euclidean
       T extent(size_t coordinate) const
       {
         if (coordinate >= Dimension)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Box coordinate is outside its dimension" << Alert::Raise;
+        }
         return m_upper[coordinate] - m_lower[coordinate];
       }
 

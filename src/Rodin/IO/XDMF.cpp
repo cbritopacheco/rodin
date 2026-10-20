@@ -188,8 +188,10 @@ namespace Rodin::IO
       m_index(index)
   {
     if (index >= owner.m_grids.size())
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "XDMF grid index " << index << " is not registered." << Alert::Raise;
+    }
   }
 
   std::string_view XDMF::Grid::getName() const noexcept

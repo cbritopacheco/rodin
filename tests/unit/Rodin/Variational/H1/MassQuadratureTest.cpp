@@ -69,11 +69,13 @@ namespace Rodin::Tests::Unit
           const size_t dimension = Polytope::Traits(geometry).getDimension();
           auto mesh = [&]() {
             if (dimension == 0)
+            {
               return LocalMesh::Builder()
                 .initialize(3)
                 .nodes(1)
                 .vertex({0, 0, 0})
                 .finalize();
+            }
             return LocalMesh::UniformGrid(
               geometry, Array<size_t>::Constant(dimension, 2));
           }();
@@ -209,11 +211,13 @@ namespace Rodin::Tests::Unit
           const size_t dimension = Polytope::Traits(geometry).getDimension();
           auto mesh = [&]() {
             if (dimension == 0)
+            {
               return LocalMesh::Builder()
                 .initialize(3)
                 .nodes(1)
                 .vertex({0, 0, 0})
                 .finalize();
+            }
             return LocalMesh::UniformGrid(
               geometry, Array<size_t>::Constant(dimension, 2));
           }();
@@ -232,15 +236,19 @@ namespace Rodin::Tests::Unit
           Real scale = 1;
           const auto coefficient = [&]() {
             if constexpr (std::is_same_v<Scalar, Complex>)
+            {
               return ComplexFunction([&](const Point& point) {
                 const Real x = point.getDimension() == 0 ? Real(0) : point.x();
                 return scale * Complex(Real(2) + x, Real(0.5));
               });
+            }
             else
+            {
               return RealFunction([&](const Point& point) {
                 const Real x = point.getDimension() == 0 ? Real(0) : point.x();
                 return scale * (Real(2) + x);
               });
+            }
           }();
           const auto checkRange = [&](auto& trial, auto& test, size_t components) {
             SCOPED_TRACE(components);

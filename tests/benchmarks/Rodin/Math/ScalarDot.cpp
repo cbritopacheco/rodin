@@ -139,8 +139,10 @@ namespace Rodin::Tests::Benchmarks
             {
               const Scalar product = [&]() {
                 if constexpr (Fixed)
+                {
                   return Math::dot(Eigen::Map<const FixedVector>(&lhs[b]),
                     Eigen::Map<const FixedVector>(&rhs[a]));
+                }
                 else
                   return Math::dot(lhs[b], rhs[a]);
               }();

@@ -116,8 +116,10 @@ namespace Rodin::Geometry
       noexcept(std::is_nothrow_copy_assignable<T>::value)
     {
       if (this != &other)
-        for (size_t i = 0; i < Count; ++i)
+        {
+          for (size_t i = 0; i < Count; ++i)
           *ptr(i) = *other.ptr(i);
+        }
       return *this;
     }
 
@@ -130,8 +132,10 @@ namespace Rodin::Geometry
       noexcept(std::is_nothrow_move_assignable<T>::value)
     {
       if (this != &other)
-        for (size_t i = 0; i < Count; ++i)
+        {
+          for (size_t i = 0; i < Count; ++i)
           *ptr(i) = std::move(*other.ptr(i));
+        }
       return *this;
     }
 

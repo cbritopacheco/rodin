@@ -429,11 +429,15 @@ namespace Rodin::Variational
       Kernel getKernel() const
       {
         if constexpr (HasCoefficient)
+        {
           return Kernel(getTrialFunction().getFiniteElementSpace(),
             getTestFunction().getFiniteElementSpace(), *m_coefficient);
+        }
         else
+        {
           return Kernel(getTrialFunction().getFiniteElementSpace(),
             getTestFunction().getFiniteElementSpace());
+        }
       }
 
       MassForm* copy() const noexcept override

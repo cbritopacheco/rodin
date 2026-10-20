@@ -329,8 +329,10 @@ namespace Rodin::Adaptation::SWIFT
             if (m_parameters.linear.solver == Parameters::LinearSolver::MUMPS)
             {
               if (!m_mumps)
+              {
                 m_mumps =
                   std::make_unique<Solver::MUMPS<LinearSystemType>>(this->getProblem());
+              }
               m_mumps->setSymmetric(Solver::MUMPS<LinearSystemType>::Symmetry::General)
                 .setMaxThreads(m_parameters.linear.threads);
               return solveDirect(*m_mumps, "MUMPS");
@@ -358,9 +360,11 @@ namespace Rodin::Adaptation::SWIFT
             error <= m_parameters.convergence.tolerance.linearRelative;
           axb.getSolution() = solution;
           if (m_parameters.trace && (!ok || !solution.allFinite()))
+          {
             std::cout << "        cg failure: ok=" << ok << "  it=" << iterations
                       << "  max_it=" << maxIterations << "  err=" << error
                       << "  finite=" << solution.allFinite() << '\n';
+          }
           return ok && solution.allFinite();
         }
         else

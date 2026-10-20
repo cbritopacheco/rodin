@@ -166,8 +166,10 @@ namespace Rodin::Tests::Benchmarks
           for (size_t j = 0; j < contracted; ++j)
           {
             if constexpr (Rank == 4)
+            {
               expected +=
                 entry(lhs, i * contracted + j) * rhs(j / rhs.cols(), j % rhs.cols());
+            }
             else
               expected += entry(lhs, i * contracted + j) * rhs[j];
           }
@@ -243,19 +245,23 @@ namespace Rodin::Tests::Benchmarks
           else if constexpr (Rank == 2)
             benchmark->Args({0, 0})->ArgsProduct({{1, 2, 3}, {1, 2, 3}});
           else if constexpr (Rank == 3)
+          {
             benchmark->Args({0, 0, 0})
               ->Args({1, 1, 1})
               ->Args({2, 2, 2})
               ->Args({3, 3, 3})
               ->Args({2, 3, 2})
               ->Args({3, 2, 3});
+          }
           else
+          {
             benchmark->Args({0, 0, 0, 0})
               ->Args({1, 1, 1, 1})
               ->Args({2, 2, 2, 2})
               ->Args({3, 3, 3, 3})
               ->Args({2, 3, 3, 2})
               ->Args({3, 2, 2, 3});
+          }
         };
         shape(benchmark::RegisterBenchmark(
           (name + "/Construct").c_str(), &arithmetic<Op::Construct>));
@@ -270,8 +276,10 @@ namespace Rodin::Tests::Benchmarks
         if constexpr (Rank >= 2)
           shape(benchmark::RegisterBenchmark((name + "/Contract").c_str(), &contraction));
         if constexpr (Rank == 2)
+        {
           benchmark::RegisterBenchmark((name + "/MatMat").c_str(), &matrixProduct)
             ->ArgsProduct({{1, 2, 3}, {1, 2, 3}, {1, 2, 3}});
+        }
       }
   };
 

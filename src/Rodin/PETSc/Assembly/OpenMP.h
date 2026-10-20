@@ -897,8 +897,10 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != PetscScalar(0))
+            {
               localRhs.emplace_back(static_cast<PetscInt>(r.index),
                 -Math::conj(r.coefficient) * val * colValue);
+            }
             if (doMatrix)
             {
               for (const auto& c : constraints.expand(col))
@@ -1758,8 +1760,10 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != PetscScalar(0))
+            {
               localRhs.emplace_back(static_cast<PetscInt>(r.index),
                 -Math::conj(r.coefficient) * val * colValue);
+            }
             for (const auto& c : constraints.expand(col))
             {
               local.emplace_back(static_cast<PetscInt>(r.index),

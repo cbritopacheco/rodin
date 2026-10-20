@@ -41,8 +41,10 @@ TYPED_TEST(GridFunctionRegionInterpolation, SelectiveFacesAndInterfaces)
       if constexpr (std::is_same_v<Range, Scalar>)
         return factor * (2 + 3 * point.x() + 5 * point.y());
       else
+      {
         return Range{factor * (2 + 3 * point.x() + 5 * point.y()),
           factor * (-1 + 7 * point.x() - 2 * point.y())};
+      }
     };
     const Range initial = [&]() -> Range {
       if constexpr (std::is_same_v<Range, Scalar>)

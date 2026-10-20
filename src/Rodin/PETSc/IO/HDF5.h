@@ -198,8 +198,10 @@ namespace Rodin::IO
         const auto values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
         std::vector<double> imaginary(values.size(), 0);
         if (H5Lexists(file, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
+        {
           imaginary =
             Internal::readVectorDouble(file, "/GridFunction/Values/ImaginaryData");
+        }
         if (imaginary.size() != values.size())
         {
           H5Fclose(file);
@@ -239,8 +241,10 @@ namespace Rodin::IO
             PetscCMPLX(values[static_cast<size_t>(i)], imaginary[static_cast<size_t>(i)]);
 #else
           if (imaginary[static_cast<size_t>(i)] != 0)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Complex HDF5 coefficients require complex PETSc." << Alert::Raise;
+          }
           localValues[static_cast<size_t>(i)] = values[static_cast<size_t>(i)];
 #endif
         }

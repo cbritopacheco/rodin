@@ -70,8 +70,10 @@ namespace Rodin::Assembly
           for (auto cell = mesh.getCell(); cell; ++cell)
           {
             if (shard.isOwned(dim, cell->getIndex()))
+            {
               for (Index dof : fes.getDOFs(dim, cell->getIndex()))
                 required.insert(dof);
+            }
           }
         }
 
@@ -84,8 +86,10 @@ namespace Rodin::Assembly
         {
           const Index i = face->getIndex();
           if constexpr (Global)
+          {
             if (!shard.isOwned(dim - 1, i))
               continue;
+          }
           if (attributes.empty())
           {
             if (!shard.isBoundary(i))
@@ -100,8 +104,10 @@ namespace Rodin::Assembly
           {
             const Index global = dofs[local];
             if constexpr (!Global)
+            {
               if (required.find(global) == required.end())
                 continue;
+            }
             const auto found = candidates.find(global);
             if (found == candidates.end() || source < found->second.first)
               candidates[global] = {source, {i, local}};

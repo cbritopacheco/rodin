@@ -208,16 +208,20 @@ namespace Rodin::Tests::Benchmarks
         }();
         Scalar alpha = 1;
         if constexpr (std::is_same_v<Scalar, Complex>)
+        {
           if (reaction)
             alpha = Scalar(1, 0.5);
+        }
         auto field = [&]() {
           if constexpr (Vector)
+          {
             return VectorFunction(dim, [dim, phase](const Geometry::Point&) {
               Math::SpatialVector<Scalar> value(static_cast<std::uint8_t>(dim));
               for (size_t j = 0; j < dim; ++j)
                 value(j) = Scalar(j + 1) * phase;
               return value;
             });
+          }
           else if constexpr (std::is_same_v<Scalar, Complex>)
             return ComplexFunction(phase);
           else
@@ -227,8 +231,10 @@ namespace Rodin::Tests::Benchmarks
           const auto evaluate = [dim, reaction, alpha, &scale](const Geometry::Point& p) {
             Real rho = 1;
             if (reaction)
+            {
               for (size_t j = 0; j < dim; ++j)
                 rho += p(j);
+            }
             return scale * alpha * rho;
           };
           if constexpr (std::is_same_v<Scalar, Complex>)

@@ -729,8 +729,10 @@ namespace Rodin::Adaptation::SWIFT
       Problem& operator+=(const Variational::DirichletBCBase<Real>& condition)
       {
         if (condition.getOperand().getUUID() != m_trialUUID)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT boundary conditions must use its trial function." << Alert::Raise;
+        }
         m_boundaryConditions.add(condition);
         return *this;
       }
@@ -744,12 +746,16 @@ namespace Rodin::Adaptation::SWIFT
       {
 #ifndef RODIN_USE_MUMPS
         if (parameters.linear.solver == Parameters::LinearSolver::MUMPS)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT MUMPS solves require RODIN_USE_MUMPS." << Alert::Raise;
+        }
 #endif
         if (!std::isfinite(parameters.model.fit) || !(parameters.model.fit > Real(0)))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires a finite positive fitting weight." << Alert::Raise;
+        }
         for (const Real value :
           {parameters.model.hinge.jacobian, parameters.model.hinge.distortion,
             parameters.model.distribution.deviatoric,
@@ -760,9 +766,11 @@ namespace Rodin::Adaptation::SWIFT
             parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
         {
           if (!std::isfinite(value) || value < Real(0))
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "SWIFT weights and tolerances must be finite and nonnegative."
               << Alert::Raise;
+          }
         }
         if (!std::isfinite(parameters.convergence.tolerance.innerRelative) ||
           !(parameters.convergence.tolerance.innerRelative > Real(0)) ||
@@ -772,14 +780,18 @@ namespace Rodin::Adaptation::SWIFT
             parameters.globalization.armijo < Real(1)) ||
           parameters.convergence.iterations.inner == 0 ||
           parameters.convergence.iterations.stagnation == 0)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires valid residual tolerances, budgets and line search."
             << Alert::Raise;
+        }
         if (!std::isfinite(parameters.globalization.maxStepOverH) ||
           parameters.globalization.maxStepOverH < Real(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Directional Newton requires a finite nonnegative step/h bound."
             << Alert::Raise;
+        }
         if (!(parameters.model.qualityGuard > Real(0) &&
               parameters.model.qualityGuard < Real(1)) ||
           !(parameters.model.jacobian > Real(0) && parameters.model.jacobian < Real(1)) ||
@@ -787,10 +799,12 @@ namespace Rodin::Adaptation::SWIFT
           !std::isfinite(parameters.model.distortion) ||
           !std::isfinite(parameters.convergence.tolerance.geometric) ||
           parameters.convergence.tolerance.geometric < Real(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires 0 < guard,jacobian < 1, finite distortion > 1 and "
                "nonnegative penalty/fit tolerance."
             << Alert::Raise;
+        }
         m_parameters = parameters;
         return *this;
       }
@@ -839,8 +853,10 @@ namespace Rodin::Adaptation::SWIFT
         Report rep;
         const Real h = p.model.h;
         if (!std::isfinite(h) || !(h > Real(0)))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires a finite positive reference mesh size." << Alert::Raise;
+        }
         assembleBoundaryConditions();
         const Real acceptedJacobianFloor = p.model.jacobian;
         const Real stepTol = p.convergence.tolerance.step;
@@ -889,8 +905,10 @@ namespace Rodin::Adaptation::SWIFT
           : geometricScale;
         if (!std::isfinite(geometricScale) || !(geometricScale > Real(0)) ||
           !std::isfinite(geometricTarget) || !(geometricTarget > Real(0)))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires a finite positive geometric target." << Alert::Raise;
+        }
         rep.geometricSupTarget = geometricTarget;
         const auto robustScale = getRobustScale(mesh, fes, phi, grad, interfaceFacets, h);
         if (!(robustScale.gradientScale > Real(0)) ||
@@ -1199,10 +1217,12 @@ namespace Rodin::Adaptation::SWIFT
               rep.innerConverged = innerConverged;
               rep.innerRelativeCorrection = Real(0);
               if (p.trace)
+              {
                 std::cout << "        hinge skip: outer=" << rep.iterations
                           << "  reason=inactive-hinges  residual=" << rep.innerResidual
                           << "  rel=" << rep.innerRelativeResidual
                           << "  converged=" << innerConverged << '\n';
+              }
               if (innerConverged)
                 ++rep.inactiveHingeSkips;
             }
@@ -1261,10 +1281,12 @@ namespace Rodin::Adaptation::SWIFT
                 if (!solveOk)
                 {
                   if (p.trace)
+                  {
                     std::cout << "        hinge inner=" << (newtonReport.iterations + 1)
                               << "  outer=" << rep.iterations << "  linear_ok=0"
                               << "  cg_it=" << linearIterations
                               << "  cg_err=" << linearError << std::endl;
+                  }
                   rep.reason = Report::Reason::LinearFailure;
                   return typename Newton::StepResult{false, false, Real(0)};
                 }
@@ -1341,10 +1363,12 @@ namespace Rodin::Adaptation::SWIFT
                   if (!meritAccepted)
                   {
                     if (p.trace)
+                    {
                       std::cout << "        hinge inner=" << (newtonReport.iterations + 1)
                                 << "  outer=" << rep.iterations << "  linear_ok=1"
                                 << "  merit_ok=0  converged=0  cg_it=" << linearIterations
                                 << "  cg_err=" << linearError << std::endl;
+                    }
                     rep.reason = Report::Reason::InnerLineSearchFailure;
                     solveOk = false;
                     return typename Newton::StepResult{false, false, Real(0)};
@@ -1463,6 +1487,7 @@ namespace Rodin::Adaptation::SWIFT
                           << "  energy_checked=" << (jOK && qOK)
                           << "  e_ok=" << (jOK && qOK && eOK) << std::endl;
                 if (p.traceQualityWitness)
+                {
                   std::cout << "      swift quality witness: outer=" << rep.iterations
                             << "  alpha=" << alpha << "  cell=" << adm.qualityCell
                             << "  current_q=" << adm.qualityCurrent
@@ -1473,6 +1498,7 @@ namespace Rodin::Adaptation::SWIFT
                             << adm.maxQ - adm.qualityCurrent - adm.qualityLinearChange
                             << "  current_margin="
                             << p.model.distortion - adm.qualityCurrent << std::endl;
+                }
                 std::cout.precision(precision);
               }
               if (jOK && qOK && eOK)
@@ -1552,6 +1578,7 @@ namespace Rodin::Adaptation::SWIFT
             break;
           }
           if (p.trace)
+          {
             std::cout << "      swift it=" << std::setw(3) << rep.iterations
                       << "  E=" << std::scientific << std::setprecision(3) << eNow
                       << "  residualRMS=" << surf.residualRMS << "  residualRMS/(hG)="
@@ -1574,6 +1601,7 @@ namespace Rodin::Adaptation::SWIFT
                       << "  rejQ=" << rep.distortionRejections
                       << "  rejE=" << rep.energyRejections << "  min_j=" << rep.minJ
                       << "  max_j=" << rep.maxJ << "  max_Q=" << rep.maxQRel << '\n';
+          }
 
           if (geometricTargetReached)
           {
@@ -2021,12 +2049,14 @@ namespace Rodin::Adaptation::SWIFT
                   auto& witness = witnesses[static_cast<size_t>(i)];
                   const Real actual = deformation.getRelativeDistortion();
                   if (actual > witness.actual)
+                  {
                     witness = {actual, currentDeformation.getRelativeDistortion(),
                       currentDeformation.getRelativeDistortionAction(increment),
                       Real(0.5) *
                         currentDeformation.getRelativeDistortionSecondAction(
                           increment, increment),
                       cellIndex};
+                  }
                 }
               }
             });
@@ -2380,13 +2410,17 @@ namespace Rodin::Adaptation::SWIFT
             std::get_if<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
               &condition.getDOFs());
           if (!values)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "SWIFT supports homogeneous value conditions only." << Alert::Raise;
+          }
           for (const auto& [dof, value] : *values)
           {
             if (value != Real(0))
+            {
               Alert::MemberFunctionException(*this, __func__)
                 << "SWIFT boundary increments must be zero." << Alert::Raise;
+            }
             m_fixedIncrementDOFs[dof] = Real(0);
           }
         }

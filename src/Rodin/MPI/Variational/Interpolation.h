@@ -92,8 +92,10 @@ namespace Rodin::Variational
                         P0<typename FES::RangeType, typename FES::MeshType>>)
         {
           if (region != Geometry::Region::Cells)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "P0 interpolation requires the cell region." << Alert::Raise;
+          }
         }
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
@@ -111,8 +113,10 @@ namespace Rodin::Variational
         {
           const Index local = entity->getIndex();
           if constexpr (Global)
+          {
             if (!shard.isOwned(m_dimension, local))
               continue;
+          }
           if (region == Geometry::Region::Boundary && !shard.isBoundary(local))
             continue;
           if (region == Geometry::Region::Interface && !shard.isInterface(local))
@@ -126,8 +130,10 @@ namespace Rodin::Variational
           {
             const Index global = dofs[ordinal];
             if constexpr (!Global)
+            {
               if (global < begin || global >= end)
                 continue;
+            }
             const auto found = candidates.find(global);
             if (found == candidates.end() || source < found->second.first)
               candidates[global] = {source, {local, ordinal}};

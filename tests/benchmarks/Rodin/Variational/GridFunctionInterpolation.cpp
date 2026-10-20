@@ -66,12 +66,14 @@ namespace Rodin::Tests::Benchmarks
       if constexpr (!Vector)
         return RealFunction(scalar);
       else
+      {
         return VectorFunction(dimension, [&](const Point& p) {
           Math::SpatialVector<Real> value(dimension);
           for (size_t d = 0; d < dimension; ++d)
             value(d) = (d + 1) * scalar(p);
           return value;
         });
+      }
     }();
     gf.project(fn);
     source0.project(fn);

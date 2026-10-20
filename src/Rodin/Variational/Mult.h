@@ -80,9 +80,11 @@ namespace Rodin::FormLanguage
       using TensorProductRange = typename decltype([] {
         if constexpr (FormLanguage::IsTensorRange<LHSRangeType>::Value &&
           requires(const LHSRangeType& lhs, const RHSRangeType& rhs) { lhs* rhs; })
-          return std::type_identity<
+      {
+        return std::type_identity<
             typename FormLanguage::RangeOf<decltype(std::declval<const LHSRangeType&>() *
               std::declval<const RHSRangeType&>())>::Type>{};
+      }
         else
           return std::type_identity<void>{};
       }())::type;

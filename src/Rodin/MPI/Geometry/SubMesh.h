@@ -230,9 +230,11 @@ namespace Rodin::Geometry
       const PolytopeMap& getPolytopeMap(size_t d) const override
       {
         if (d >= m_s2ps.size())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Polytope map dimension " << d << " is outside map count " << m_s2ps.size()
             << '.' << Alert::Raise;
+        }
         return m_s2ps[d];
       }
 

@@ -49,10 +49,10 @@ namespace Rodin::Geometry
   template <class FE>
   class ParametricTransformation final : public PolytopeTransformation
   {
-      static_assert(std::is_same_v<typename FE::RangeType, Real>,
-        "Type of finite element must be scalar valued.");
+    static_assert(std::is_same_v<typename FE::RangeType, Real>,
+      "Type of finite element must be scalar valued.");
 
-      friend class boost::serialization::access;
+    friend class boost::serialization::access;
 
     public:
       /// @brief Parent class type.
@@ -264,8 +264,10 @@ namespace Rodin::Geometry
             }
           };
           if (rdim == 3 && pdim == 3)
+          {
             contract(
               std::integral_constant<size_t, 3>{}, std::integral_constant<size_t, 3>{});
+          }
           else
             contract(rdim, pdim);
         }

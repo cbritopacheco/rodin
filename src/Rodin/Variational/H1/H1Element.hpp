@@ -284,8 +284,10 @@ namespace Rodin::Variational
 
         const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
         if (deriv == 0)
+        {
           return BernsteinPyramid<K>::getDerivative(n, i, a) *
             BernsteinPyramid<K>::getBasis(n, j, b) * Bz / q;
+        }
         const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
         const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
         if (deriv == 1)
@@ -449,12 +451,12 @@ namespace Rodin::Variational
   template <Geometry::Polytope::Type ReferenceGeometry>
   class H1Element<K, Scalar>::Evaluation
   {
-      static_assert(
-        ReferenceGeometry == G::Tetrahedron || ReferenceGeometry == G::Pyramid);
-      using Modal = std::conditional_t<ReferenceGeometry == G::Tetrahedron,
-        DubinerTetrahedron<K>, PyramidModal<K>>;
-      using Vandermonde = std::conditional_t<ReferenceGeometry == G::Tetrahedron,
-        VandermondeTetrahedron<K>, VandermondePyramid<K>>;
+    static_assert(
+      ReferenceGeometry == G::Tetrahedron || ReferenceGeometry == G::Pyramid);
+    using Modal = std::conditional_t<ReferenceGeometry == G::Tetrahedron,
+      DubinerTetrahedron<K>, PyramidModal<K>>;
+    using Vandermonde = std::conditional_t<ReferenceGeometry == G::Tetrahedron,
+      VandermondeTetrahedron<K>, VandermondePyramid<K>>;
 
     public:
       /**
@@ -466,9 +468,11 @@ namespace Rodin::Variational
         : m_inverse(Vandermonde::getInverse())
       {
         if (point.size() < 3)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Reference gradient evaluation requires three coordinate components."
             << Alert::Raise;
+        }
         // The value column is unused here, but initialized so copies own fully
         // initialized rows without zeroing derivatives that tabulation overwrites.
         for (auto& row : m_modal)
@@ -497,9 +501,11 @@ namespace Rodin::Variational
       Math::SpatialVector<Scalar> getGradient(size_t local) const
       {
         if (local >= getCount())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Basis index " << local << " is outside the reference evaluation."
             << Alert::Raise;
+        }
         Real dx = 0;
         Real dy = 0;
         Real dz = 0;
@@ -531,10 +537,12 @@ namespace Rodin::Variational
     const Math::SpatialPoint& point) const -> Evaluation<ReferenceGeometry>
   {
     if (this->getGeometry() != ReferenceGeometry || point.size() < 3)
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "Reference gradient evaluation requires a matching geometry and three "
            "coordinates."
         << Alert::Raise;
+    }
     return Evaluation<ReferenceGeometry>(point);
   }
 
@@ -600,15 +608,19 @@ namespace Rodin::Variational
       Geometry::Polytope::Traits(this->getGeometry()).getDimension();
     const size_t count = this->getCount();
     if (static_cast<size_t>(point.size()) < dimension)
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "Reference tabulation requires " << dimension << " coordinate components, got "
         << point.size() << "." << Alert::Raise;
+    }
     if ((HasValues && values.data.size() != count) ||
       (HasGradients &&
         (gradients.dimension != dimension || gradients.data.size() != count * dimension)))
+    {
       Alert::MemberFunctionException(*this, __func__)
         << "Reference tabulation output does not match the basis count and dimension."
         << Alert::Raise;
+    }
 
     const auto contract = [&]<class Modal, class Vandermonde, size_t Count>() {
       typename Modal::Tabulation modal;
@@ -692,9 +704,11 @@ namespace Rodin::Variational
       {
         const auto& point = formula.getPoint(qp);
         if (static_cast<size_t>(point.size()) < table.getDimension())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Reference tabulation requires " << table.getDimension()
             << " coordinate components, got " << point.size() << "." << Alert::Raise;
+        }
         for (size_t local = 0; local < table.getCount(); ++local)
         {
           const auto& basis = bases[local].get();
@@ -734,11 +748,15 @@ namespace Rodin::Variational
         }
       };
     if (this->getGeometry() == Geometry::Polytope::Type::Tetrahedron)
+    {
       tabulate.template operator()<DubinerTetrahedron<K>, VandermondeTetrahedron<K>, Real,
         FeketeTetrahedron<K>::Count>();
+    }
     else
+    {
       tabulate.template operator()<PyramidModal<K>, VandermondePyramid<K>, Scalar,
         PyramidIndex<K>::Count>();
+    }
   }
 
   template <size_t K, class Scalar>

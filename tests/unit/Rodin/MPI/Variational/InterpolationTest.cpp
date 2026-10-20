@@ -152,6 +152,7 @@ namespace
     using Record = std::pair<Index, std::pair<Index, Scalar>>;
     std::vector<Record> records;
     if (region == Geometry::Region::Cells || dimension > 0)
+    {
       for (auto entity = mesh.getPolytope(sourceDimension); entity; ++entity)
       {
         const Index local = entity->getIndex();
@@ -171,6 +172,7 @@ namespace
             {dofs[ordinal], {source, element.getLinearForm(ordinal)(pullback)}});
         }
       }
+    }
     std::vector<std::vector<Record>> gathered;
     boost::mpi::all_gather(comm, records, gathered);
     IndexMap<std::pair<Index, Scalar>> expected;

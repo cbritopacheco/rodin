@@ -57,8 +57,10 @@ namespace Rodin::Tests::Benchmarks
           const RealFunction gamma([dim, conductivity](const Geometry::Point& p) {
             Real value = 1;
             if (conductivity)
+            {
               for (size_t j = 0; j < dim; ++j)
                 value += p(j);
+            }
             return value;
           });
           auto diffusion = Integral(gamma * Grad(u), Grad(v));

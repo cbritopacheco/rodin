@@ -259,8 +259,10 @@ TEST(Geometry_MetadataLifecycle, EmbeddedCachedJacobiansOwnMetricAndReferenceDat
     if (dimension == 1)
       builder.vertex({3, 5, 9}).polytope(Polytope::Type::Segment, {0, 1});
     else
+    {
       builder.vertex({3, 2, 4}).vertex({1, 5, 5}).polytope(
         Polytope::Type::Triangle, {0, 1, 2});
+    }
     auto mesh = builder.finalize();
     const auto cell = mesh.getCell();
     Math::SpatialMatrix<Real> jacobian(3, dimension), inverse(dimension, 3);

@@ -135,11 +135,13 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (Original)
             return original(lhs, rhs);
           else if constexpr (KnownColumns && Columns != Eigen::Dynamic)
+          {
             return Math::dot(
               lhs.getData().template topLeftCorner<Eigen::Dynamic, Columns>(
                 lhs.rows(), lhs.cols()),
               rhs.getData().template topLeftCorner<Eigen::Dynamic, Columns>(
                 rhs.rows(), rhs.cols()));
+          }
           else
             return Math::dot(lhs, rhs);
         };
@@ -319,8 +321,10 @@ namespace Rodin::Tests::Benchmarks
               }
             }
             else
+            {
               registration->Args(
                 {static_cast<int64_t>(rows), static_cast<int64_t>(columns), 1});
+            }
           }
         }
         registration->UseRealTime();

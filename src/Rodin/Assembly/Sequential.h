@@ -1039,8 +1039,10 @@ namespace Rodin::Assembly
             const void* addr = nullptr;
             us.apply([&](const auto& uref) {
               if (!addr)
-                addr =
+            {
+              addr =
                   static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+            }
             });
             assert(addr);
             return *static_cast<const std::decay_t<
@@ -1376,12 +1378,14 @@ namespace Rodin::Assembly
                 {
                   const auto val = op(i, j);
                   if (val != ScalarType(0))
-                    matrixEntry(
+                {
+                  matrixEntry(
                       static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j, val);
                 }
               }
             }
           }
+        }
 
           // ------------------------------------------------------------
           // Preassembled linear forms (with block offsets)

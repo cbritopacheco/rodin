@@ -126,8 +126,10 @@ namespace
             if constexpr (Threaded)
               form.assemble();
             else
+            {
               sequential.execute(form.getOperator(),
                 {fes, fes, form.getLocalIntegrators(), form.getGlobalIntegrators()});
+            }
             benchmark::DoNotOptimize(form.getOperator().valuePtr());
           }
           else if constexpr (Stage == 1)
@@ -165,9 +167,11 @@ namespace
         benchmark::ClobberMemory();
       }
       if constexpr (Stage == 0)
+      {
         if ((form.getOperator() - reference).norm() >
           1e-12 * std::max(Real(1), reference.norm()))
           state.SkipWithError("Timed assembly differs from sequential reference.");
+      }
     };
     if (state.range(2))
       run(H1(std::integral_constant<size_t, K>{}, mesh), 9);

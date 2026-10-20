@@ -595,9 +595,11 @@ namespace Rodin::Assembly
           assert(reduceError == MPI_SUCCESS);
           (void)reduceError;
           if (globalIdentifications)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Targeted assembly is not implemented for identification DirichletBCs."
               << Alert::Raise;
+          }
         }
 
         // ------------------------
@@ -1331,9 +1333,11 @@ namespace Rodin::Assembly
           assert(reduceError == MPI_SUCCESS);
           (void)reduceError;
           if (globalIdentifications)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Targeted assembly is not implemented for identification DirichletBCs."
               << Alert::Raise;
+          }
         }
 
         // ------------------------

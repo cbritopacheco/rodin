@@ -73,8 +73,10 @@ namespace Rodin::Tests::Unit
       Real getWeight(size_t i) const override
       {
         if (m_empty)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "An empty construction formula has no weights" << Alert::Raise;
+        }
         ++m_weightQueries;
         return m_formula.getWeight(i);
       }
@@ -87,8 +89,10 @@ namespace Rodin::Tests::Unit
       const Math::SpatialPoint& getPoint(size_t i) const override
       {
         if (m_empty)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "An empty construction formula has no points" << Alert::Raise;
+        }
         m_sampleVisits.push_back(i);
         return m_formula.getPoint(i);
       }

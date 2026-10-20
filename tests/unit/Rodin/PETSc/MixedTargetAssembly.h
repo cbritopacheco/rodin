@@ -77,9 +77,11 @@ namespace Rodin::Tests::Unit
         return Scalar(0.25);
     }();
     if constexpr (Affine)
+    {
       body.getDBCs().add(DirichletBC(
         u, coefficient * p, boundaryValue(Scalar(1) + Scalar(2) * coefficient))
                            .on(11));
+    }
     else
       body.getDBCs().add(DirichletBC(u, boundaryValue(1)).on(11));
     body.getDBCs().add(DirichletBC(p, boundaryValue(-2)).on(12));

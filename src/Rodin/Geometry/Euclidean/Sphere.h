@@ -33,8 +33,10 @@ namespace Rodin::Geometry::Euclidean
           m_radius(radius)
       {
         if constexpr (Dimension == 0)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Sphere requires a positive ambient dimension" << Alert::Raise;
+        }
         else
           setRadius(radius);
       }
@@ -67,8 +69,10 @@ namespace Rodin::Geometry::Euclidean
       Sphere& setRadius(T radius)
       {
         if (!(radius > T(0)))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Sphere requires a positive radius" << Alert::Raise;
+        }
         m_radius = radius;
         return *this;
       }
@@ -85,13 +89,17 @@ namespace Rodin::Geometry::Euclidean
       Point<Dimension, T> pointAt(const Eigen::MatrixBase<Derived>& direction) const
       {
         if (direction.size() != Dimension || direction.cols() != 1)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Sphere requires a direction with " << Dimension << " coordinates"
             << Alert::Raise;
+        }
         const Vector radial = direction.template cast<T>();
         if (!(radial.array() != T(0)).any())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Sphere requires a nonzero direction" << Alert::Raise;
+        }
         if constexpr (Dimension == 1)
         {
           return Point<Dimension, T>(

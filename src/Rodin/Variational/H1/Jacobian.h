@@ -312,9 +312,11 @@ namespace Rodin::Variational
         out.setZero();
 
         if (static_cast<size_t>(rc.size()) < d)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Reference gradient evaluation requires " << d
             << " coordinate components, got " << rc.size() << "." << Alert::Raise;
+        }
         const auto accumulate = [&](size_t alpha, const auto& gradient) {
           for (size_t j = 0; j < d; ++j)
             ref(j) = gradient(j);

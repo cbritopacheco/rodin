@@ -145,8 +145,10 @@ namespace Rodin::Variational
         constexpr size_t Maximum = std::numeric_limits<size_t>::max();
         if ((count && samples > Maximum / count) ||
           (dimension && samples * count > Maximum / dimension))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Reference tabulation extents overflow the storage size." << Alert::Raise;
+        }
         const size_t values = samples * count;
         const size_t derivatives = values * dimension;
         // Reserve both arrays before changing extents, retaining reusable capacity.

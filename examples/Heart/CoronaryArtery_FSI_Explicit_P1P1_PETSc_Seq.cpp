@@ -411,9 +411,11 @@ namespace
     if (tau < tPlateauEnd)
       return positiveValue;
     if (tau < tRelaxEnd)
+    {
       return positiveValue +
         (negativeValue - positiveValue) *
         ss((tau - tPlateauEnd) / (tRelaxEnd - tPlateauEnd));
+    }
     if (tau < tNegativeEnd)
       return negativeValue;
     return negativeValue * (1.0 - ss((tau - tNegativeEnd) / (T - tNegativeEnd)));
@@ -927,8 +929,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_coupling_iterations",
       &couplingIterations, &couplingIterationsSet);
     if (couplingIterationsSet)
+    {
       cfg.couplingIterations =
         static_cast<size_t>(std::max<PetscInt>(1, couplingIterations));
+    }
 
     PetscReal couplingTolerance = cfg.couplingTolerance;
     PetscBool couplingToleranceSet = PETSC_FALSE;
@@ -956,8 +960,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_prestress_ramp_steps",
       &prestressRampSteps, &prestressRampStepsSet);
     if (prestressRampStepsSet)
+    {
       cfg.prestressRampSteps =
         static_cast<size_t>(std::max<PetscInt>(0, prestressRampSteps));
+    }
 
     PetscReal vmsScale = cfg.vmsScale;
     PetscBool vmsScaleSet = PETSC_FALSE;
@@ -1459,8 +1465,10 @@ int main(int argc, char** argv)
       std::error_code ec;
       std::filesystem::create_directories(cfg.resultsDir, ec);
       if (ec && isRoot)
+      {
         std::cerr << "Warning: could not create results directory '" << cfg.resultsDir
                   << "': " << ec.message() << '\n';
+      }
     }
 
     Model::Input modelInput = makeModelInput();
@@ -1498,8 +1506,10 @@ int main(int argc, char** argv)
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
       BoundarySolid::FSIRing, BoundarySolid::Inlet, solidInletOnly);
     if (isRoot)
+    {
       std::cout << "FSI ring band: fluid=" << fluidRingFaces
                 << " face(s), solid=" << solidRingFaces << " face(s)\n";
+    }
 
     std::vector<Math::SpatialPoint> referenceVertices;
     saveReferenceVertices(meshFluid, referenceVertices);
@@ -1754,6 +1764,7 @@ int main(int argc, char** argv)
         bc.muV = phiV0;
 
         if (isRoot)
+        {
           Alert::Info() << "  [calib] outlet " << tag << "  A=" << bc.area << " m^2"
                         << "  Q=" << (Qi * 6.0e7) << " mL/min"
                         << "  Ra=" << bc.Ra << "  Rv=" << bc.Rv << " Pa s/m^3"
@@ -1762,6 +1773,7 @@ int main(int argc, char** argv)
                         << "  ptm0=" << ptmRest << "  pc0/pout0=" << bc.pc << "/"
                         << bc.pout << " Pa (par=" << par0 << ", pim=" << pimRest << ")"
                         << Alert::Raise;
+        }
       }
 
       if (isRoot)
@@ -1777,10 +1789,12 @@ int main(int argc, char** argv)
 
         const Real Tref = cfg.referenceTransitTime;
         if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref || Tv > 2.0 * Tref)
+        {
           Alert::Warning()
             << "  [calib] el tiempo de transito derivado se aparta mas de 2x "
             << "de la referencia: calibre, velocidad y reparto de presion no "
             << "son consistentes con un solo tramo efectivo por rama." << Alert::Raise;
+        }
       }
     }
     else
@@ -1849,9 +1863,11 @@ int main(int argc, char** argv)
       ? cfg.robinAlpha
       : cfg.robinGamma * std::sqrt(cfg.solidDensity * solidYoungEquiv);
     if (isRoot)
+    {
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
                     << "  (gamma * sqrt(rho_s E_eq), gamma = " << cfg.robinGamma
                     << ", E_eq = " << solidYoungEquiv << " Pa)" << Alert::Raise;
+    }
     const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
 
     const auto& cy = cfg.viscosity;
@@ -2513,11 +2529,13 @@ int main(int argc, char** argv)
     Solver::KSP(thickness).solve();
     xi.setData(xiT.getSolution().getData());
     if (isRoot)
+    {
       Alert::Info() << "  [grade] transmural xi solved; multipliers"
                     << "  intima=" << cfg.gradeIntima << "  media=" << cfg.gradeMedia
                     << "  adventitia=" << cfg.gradeAdventitia
                     << "  (transition half-width " << cfg.gradeTransitionWidth << ")"
                     << Alert::Raise;
+    }
 
     xdmf_laplacian.add("xi", xi);
     xdmf_laplacian.write().flush();
@@ -2579,15 +2597,19 @@ int main(int argc, char** argv)
         if (!snesPre.converged())
         {
           if (isRoot)
+          {
             std::cerr << "Prestress SNES failed at increment " << k << " / "
                       << cfg.prestressSteps << "; continuing with the last "
                       << "converged (partial) prestress state.\n";
+          }
           break;
         }
       }
       if (isRoot)
+      {
         Alert::Info() << "Prestressed wall to " << prestressPressure << " Pa in "
                       << cfg.prestressSteps << " increment(s)" << Alert::Raise;
+      }
 
       // Commit the prestressed state as the dynamic initial condition (zero
       // velocity / acceleration are already set) and lift the fluid mesh.
@@ -2719,9 +2741,11 @@ int main(int argc, char** argv)
           if (!snes.converged())
           {
             if (isRoot)
+            {
               std::cerr << "Solid SNES failed at step " << step << " (coupling iterate "
                         << couple << ") after " << snes.getIterationNumber()
                         << " iterations.\n";
+            }
             stepFailed = true;
             break;
           }
@@ -2773,11 +2797,13 @@ int main(int argc, char** argv)
             if (!std::isfinite(static_cast<Real>(aleNorm)))
             {
               if (isRoot)
+              {
                 std::cerr << "ALE lift non-finite at step " << step
                           << " (coupling iterate " << couple
                           << "): the fluid mesh is tangling -- reduce the "
                           << "imposed interface displacement (e.g. "
                           << "-coronary_heart_disp_scale) or the time step.\n";
+              }
               stepFailed = true;
               break;
             }
@@ -2949,6 +2975,7 @@ int main(int argc, char** argv)
         VecMin(pCur.getData(), PETSC_NULLPTR, &pMin);
         VecMax(pCur.getData(), PETSC_NULLPTR, &pMax);
         if (isRoot)
+        {
           Alert::Info() << "  [diag] p in [" << pMin << ", " << pMax << "] Pa"
                         << "  mass(qIn+qOut) = " << (qIn + qOutSum)
                         << "  E_iface = " << eInterface << " W"
@@ -2956,6 +2983,7 @@ int main(int argc, char** argv)
                         << "  | coupling: iters = " << couplesDone << "/"
                         << cfg.couplingIterations << "  interface change = " << lastRel
                         << Alert::Raise;
+        }
       }
 
       // R-mu outlet update from the converged interface flux: advances p_tm

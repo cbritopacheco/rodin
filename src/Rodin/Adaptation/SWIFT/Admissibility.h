@@ -54,8 +54,10 @@ namespace Rodin::Adaptation::SWIFT
     const std::size_t dim = mesh.getDimension();
     const std::size_t vdim = fes.getVectorDimension();
     if (dim != vdim)
+    {
       Alert::Exception() << "SWIFT displacement dimension must equal mesh dimension."
                          << Alert::Raise;
+    }
 
     auto gradU = Jacobian(u);
     Parameters parameters;

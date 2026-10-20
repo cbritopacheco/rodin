@@ -31,13 +31,17 @@ namespace Rodin::Geometry::Euclidean
           m_normal(Vector::Zero())
       {
         if (normal.size() != Dimension || normal.cols() != 1)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Hyperplane requires a normal with " << Dimension << " coordinates"
             << Alert::Raise;
+        }
         m_normal = normal.template cast<T>();
         if (!(m_normal.array() != T(0)).any())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Hyperplane requires a nonzero normal" << Alert::Raise;
+        }
       }
 
       /// @brief Gets the ambient dimension. @returns Coordinate count.

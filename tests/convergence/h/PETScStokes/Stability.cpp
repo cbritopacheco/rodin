@@ -151,9 +151,11 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
           }
 #ifdef RODIN_USE_MPI
           else
+          {
             return DistributedUniformGrid(
               Context::MPI(*environment, *world), this->GetParam())
               .makeMesh(n, initialize);
+          }
 #endif
         }();
         report("mesh");

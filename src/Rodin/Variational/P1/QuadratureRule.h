@@ -1240,8 +1240,10 @@ namespace Rodin::Variational
                   assert(
                     cmv.rows() == trialfes.getRows() && cmv.cols() == trialfes.getRows());
                   if (cb % cols == ca % cols)
+                  {
                     m_matrix(ib, ia) +=
                       wdet * phi_te * cmv(cb / cols, ca / cols) * phi_tr;
+                  }
                 }
                 else
                   m_matrix(ib, ia) += wdet * phi_te * cmv(cb, ca) * phi_tr;

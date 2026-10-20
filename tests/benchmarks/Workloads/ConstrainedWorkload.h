@@ -59,8 +59,10 @@ namespace Rodin::Tests::Benchmarks
         RealFunction gamma([dim, physics, &operatorScale](const Geometry::Point& p) {
           Real value = 1;
           if (physics != 0)
+          {
             for (size_t j = 0; j < dim; ++j)
               value += p(j);
+          }
           return operatorScale * value;
         });
         const auto source = [dim, physics, &operatorScale, &boundaryScale](
@@ -98,8 +100,10 @@ namespace Rodin::Tests::Benchmarks
         if constexpr (Reference)
         {
           if (physics == 2)
+          {
             problem = ReferenceIntegral(diffusion) + ReferenceIntegral(reaction) - load +
               DirichletBC(u, exact);
+          }
           else
             problem = ReferenceIntegral(diffusion) - load + DirichletBC(u, exact);
         }

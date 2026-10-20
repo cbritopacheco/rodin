@@ -111,6 +111,7 @@ namespace Rodin::Tests::Benchmarks
         };
         const auto source = [&]() {
           if constexpr (Vector)
+          {
             return VectorFunction(dim, [&](const Geometry::Point& point) {
               Range value(dim);
               const Scalar scalar = scalarValue(point);
@@ -118,6 +119,7 @@ namespace Rodin::Tests::Benchmarks
                 value(c) = Scalar(c + 1) * scalar;
               return value;
             });
+          }
           else if constexpr (std::is_same_v<Scalar, Complex>)
             return ComplexFunction(scalarValue);
           else

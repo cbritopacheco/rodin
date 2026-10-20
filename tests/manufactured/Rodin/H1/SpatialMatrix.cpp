@@ -25,8 +25,10 @@ namespace
         {
           value(r, c) = 1 + 7 * r + c;
           if (diffusion)
+          {
             for (size_t k = 0; k < p.getCoordinates().size(); ++k)
               value(r, c) += (r + c + k + 1) * p.getCoordinates()[k];
+          }
         }
       }
       return value;

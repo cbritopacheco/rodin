@@ -823,8 +823,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_coupling_iterations",
       &couplingIterations, &couplingIterationsSet);
     if (couplingIterationsSet)
+    {
       cfg.couplingIterations =
         static_cast<size_t>(std::max<PetscInt>(1, couplingIterations));
+    }
 
     PetscReal couplingRelaxation = cfg.couplingRelaxation;
     PetscBool couplingRelaxationSet = PETSC_FALSE;
@@ -1139,6 +1141,7 @@ int main(int argc, char** argv)
     // value exchange, e.g. an Allgather'd centroid->value buffer) is added, run
     // this case on a SINGLE MPI rank.
     if (comm.size() > 1)
+    {
       throw std::runtime_error(
         "CoronaryArtery_FSI_Explicit: the fluid<->solid interface coupling is "
         "not yet distributed and requires a single MPI rank. Run with "
@@ -1146,6 +1149,7 @@ int main(int argc, char** argv)
         "rank). Multi-rank support needs a global interface map plus "
         "cross-rank interface value exchange -- see the notes above "
         "buildInterfaceMap.");
+    }
 
     Model::Input modelInput = makeModelInput();
     Model model(modelInput);
@@ -1172,8 +1176,10 @@ int main(int argc, char** argv)
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
       BoundarySolid::FSIRing, BoundarySolid::Inlet, BoundarySolid::Outlets);
     if (isRoot)
+    {
       std::cout << "FSI ring band: fluid=" << fluidRingFaces
                 << " face(s), solid=" << solidRingFaces << " face(s)\n";
+    }
 
     std::vector<Math::SpatialPoint> referenceVertices;
     saveReferenceVertices(meshFluid, referenceVertices);
@@ -1345,9 +1351,11 @@ int main(int argc, char** argv)
       ? cfg.robinAlpha
       : cfg.robinGamma * std::sqrt(cfg.solidDensity * cfg.solidYoungModulus);
     if (isRoot)
+    {
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
                     << "  (gamma * sqrt(rho_s E), gamma = " << cfg.robinGamma << ")"
                     << Alert::Raise;
+    }
     const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
 
     const auto& cy = cfg.viscosity;
@@ -1755,15 +1763,19 @@ int main(int argc, char** argv)
         if (!snesPre.converged())
         {
           if (isRoot)
+          {
             std::cerr << "Prestress SNES failed at increment " << k << " / "
                       << cfg.prestressSteps << "; continuing with the last "
                       << "converged (partial) prestress state.\n";
+          }
           break;
         }
       }
       if (isRoot)
+      {
         Alert::Info() << "Prestressed wall to " << prestressPressure << " Pa in "
                       << cfg.prestressSteps << " increment(s)" << Alert::Raise;
+      }
 
       // Commit the prestressed state as the dynamic initial condition (zero
       // velocity / acceleration are already set) and lift the fluid mesh.
@@ -1877,9 +1889,11 @@ int main(int argc, char** argv)
           if (!snes.converged())
           {
             if (isRoot)
+            {
               std::cerr << "Solid SNES failed at step " << step << " (coupling iterate "
                         << couple << ") after " << snes.getIterationNumber()
                         << " iterations.\n";
+            }
             stepFailed = true;
             break;
           }
@@ -1906,9 +1920,11 @@ int main(int argc, char** argv)
             VecDot(aitkenResPrev.getData(), rdiff.getData(), &num);
             VecDot(rdiff.getData(), rdiff.getData(), &den);
             if (den > 0.0)
+            {
               aitkenOmega = std::min(Real(1.0),
                 std::max(Real(0.05),
                   -aitkenOmega * static_cast<Real>(num) / static_cast<Real>(den)));
+            }
           }
           aitkenResPrev.setData(delta.getData());
           delta *= aitkenOmega;

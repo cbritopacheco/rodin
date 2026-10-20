@@ -268,9 +268,11 @@ namespace Rodin::FormLanguage
       constexpr reference at(size_t i)
       {
         if (i >= m_list.size())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Element index " << i << " is outside list size " << m_list.size() << '.'
             << Alert::Raise;
+        }
         return *m_list[i];
       }
 
@@ -283,9 +285,11 @@ namespace Rodin::FormLanguage
       constexpr const_reference at(size_t i) const
       {
         if (i >= m_list.size())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Element index " << i << " is outside list size " << m_list.size() << '.'
             << Alert::Raise;
+        }
         return *m_list[i];
       }
 

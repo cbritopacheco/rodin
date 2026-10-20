@@ -104,6 +104,40 @@ struct Table
 };
 """)
 
+    def test_implicit_class_members_before_first_access_section(self):
+        self.check_format("""namespace Example
+{
+  template <class FE>
+  class ParametricTransformation final : public Base
+  {
+    static_assert(FE::IsScalar, "Scalar finite element required.");
+
+    friend class Serialization;
+
+    public:
+      void run();
+
+    private:
+      int m_value;
+  };
+}
+""")
+
+    def test_plain_class_and_nested_implicit_members(self):
+        self.check_format("""class Outer
+{
+  class Inner
+  {
+    static_assert(true);
+
+    public:
+      int value;
+  };
+
+  int value;
+};
+""")
+
     def test_plain_struct_and_method_body(self):
         self.check_format("""namespace Example
 {

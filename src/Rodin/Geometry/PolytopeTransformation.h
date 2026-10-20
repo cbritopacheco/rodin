@@ -72,7 +72,7 @@ namespace Rodin::Geometry
    */
   class PolytopeTransformation : public Copyable
   {
-      friend class boost::serialization::access;
+    friend class boost::serialization::access;
 
     public:
       /**

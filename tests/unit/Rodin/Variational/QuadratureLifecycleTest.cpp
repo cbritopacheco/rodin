@@ -77,13 +77,17 @@ namespace
     }();
     const auto scalarFunction = [&] {
       if constexpr (std::is_same_v<Scalar, Complex>)
+      {
         return ComplexFunction([factor, dimension](const Point& p) {
           return factor * (1 + p.x() + (dimension == 2 ? 2 * p.y() : 0));
         });
+      }
       else
+      {
         return RealFunction([factor, dimension](const Point& p) {
           return factor * (1 + p.x() + (dimension == 2 ? 2 * p.y() : 0));
         });
+      }
     }();
     const auto vectorFunction =
       VectorFunction(dimension, [factor, dimension](const Point& p) {

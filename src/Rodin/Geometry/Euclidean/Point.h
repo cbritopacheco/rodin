@@ -97,8 +97,10 @@ namespace Rodin::Geometry::Euclidean
       {
         require(coordinates.size());
         if (coordinates.cols() != 1)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Point requires a column vector" << Alert::Raise;
+        }
         const Vector owned = coordinates.template cast<T>();
         m_coordinates = owned;
         return *this;
@@ -264,9 +266,11 @@ namespace Rodin::Geometry::Euclidean
       void require(size_t size) const
       {
         if (size != Dimension)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Point requires " << Dimension << " coordinates; received " << size
             << Alert::Raise;
+        }
       }
 
       Vector m_coordinates;

@@ -267,6 +267,7 @@ namespace Rodin::Tests::Unit
       mesh.getConnectivity().compute(1, 0);
       mesh.getConnectivity().compute(1, 2);
       if constexpr (Order > 1)
+      {
         for (std::size_t from = 1; from <= 2; ++from)
         {
           for (std::size_t to = 0; to <= 2; ++to)
@@ -275,6 +276,7 @@ namespace Rodin::Tests::Unit
               mesh.getConnectivity().compute(from, to);
           }
         }
+      }
 
       std::vector<Index> interfaceFacets;
       for (auto face = mesh.getFace(); face; ++face)

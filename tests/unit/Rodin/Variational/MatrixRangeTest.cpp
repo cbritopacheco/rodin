@@ -268,8 +268,10 @@ TEST(MatrixRange, ReferenceElementMatrixGuardsAndRecovery)
           for (size_t column = 0; column < 3; ++column)
           {
             if constexpr (std::is_same_v<Scalar, Complex>)
+            {
               value(row, column) =
                 Complex(1 + 7 * row + column, Real(-5) - Real(2 * row) + Real(column));
+            }
             else
               value(row, column) = Real(1 + 7 * row + column);
           }
@@ -576,11 +578,13 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
           {
             value(row, col) = 1 + row + col;
             if (!constant)
+            {
               for (size_t k = 0; k < dimension; ++k)
               {
                 value(row, col) +=
                   (row + 1) * (col + 2) * (k + 1) * point.getPhysicalCoordinates()(k);
               }
+            }
           }
         }
         return value;

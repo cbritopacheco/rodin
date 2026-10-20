@@ -72,8 +72,10 @@ namespace Examples
         {
           m_fallback = true;
           if (!support())
+          {
             throw std::runtime_error(
               "Smallest enclosing ball support is numerically unresolved.");
+          }
         }
         m_center = Point(origin + scale * m_center);
       }

@@ -141,12 +141,14 @@ namespace Rodin::Tests::Benchmarks
             actionError < 1e-11 * std::max(Real(1), loadNorm) &&
             loadError < 1e-11 * std::max(Real(1), loadNorm);
           if (!ok)
+          {
             std::cerr << "rank=" << comm.rank() << " energy=" << energy
                       << " geometry_valid=" << geometryValid
                       << " expected=" << scale * expected
                       << " matrix_error=" << matrixError
                       << " action_error=" << actionError << " load_error=" << loadError
                       << '\n';
+          }
           if constexpr (Distributed)
             ok = boost::mpi::all_reduce(comm, ok, std::logical_and<bool>());
           return ok;
@@ -172,8 +174,10 @@ namespace Rodin::Tests::Benchmarks
           const auto stop = std::chrono::steady_clock::now();
           double elapsed = std::chrono::duration<double>(stop - start).count();
           if constexpr (Distributed)
+          {
             elapsed =
               boost::mpi::all_reduce(comm, elapsed, boost::mpi::maximum<double>());
+          }
           state.SetIterationTime(elapsed);
         }
         if (!valid())
@@ -299,8 +303,10 @@ int main(int argc, char** argv)
     if (!distributed && world.size() != 1)
       result = 1;
     if (result != 0 && world.rank() == 0)
+    {
       std::cerr << "Local mode requires one rank; random interleaving and adaptive "
                    "warmup are unsupported.\n";
+    }
     if (result == 0)
     {
       if (distributed)

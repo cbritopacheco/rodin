@@ -103,8 +103,10 @@ namespace Rodin::Tests::Convergence
         bW.setOrder(m_order);
         Problem problem(u, w, v, z);
         if (m_boundary == Boundary::Dirichlet)
+        {
           problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW + DirichletBC(u, exactU) +
             DirichletBC(w, exactW);
+        }
         else
         {
           const BoundaryNormal normal(mesh);
@@ -115,8 +117,10 @@ namespace Rodin::Tests::Convergence
                 coefficient = Real(component + 1)](const Geometry::Point& point) {
                 const auto derivative = gradient(point);
                 if (dim == 1)
+                {
                   return coefficient * (point(0) < Real(0.5) ? Real(-1) : Real(1)) *
                     derivative(0);
+                }
                 const auto outward = normal(point);
                 Real value = 0;
                 for (size_t j = 0; j < dim; ++j)
@@ -137,11 +141,13 @@ namespace Rodin::Tests::Convergence
           if (m_boundary == Boundary::PureNeumann)
             problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW - fluxU - fluxW;
           else
+          {
             problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW +
               robinU.over(NaturalAttribute) + robinW.over(NaturalAttribute) -
               fluxU.over(NaturalAttribute) - fluxW.over(NaturalAttribute) +
               DirichletBC(u, exactU).on(DirichletAttribute) +
               DirichletBC(w, exactW).on(DirichletAttribute);
+          }
         }
         PETSc::Solver::CG solver(problem);
         solver.setTolerances(

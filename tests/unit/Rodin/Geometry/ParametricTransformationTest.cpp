@@ -336,8 +336,10 @@ namespace Rodin::Tests::Unit
         // A Point has a zero-dimensional reference domain. Its centroid is
         // the sole reference point; getVertex(0) has one stored coordinate.
         if (traits.getDimension() > 0)
+        {
           for (size_t v = 0; v < traits.getVertexCount(); ++v)
             references.push_back(traits.getVertex(v));
+        }
         for (const auto& reference : references)
         {
           ASSERT_EQ(static_cast<size_t>(reference.size()), traits.getDimension());

@@ -100,8 +100,10 @@ namespace Rodin::Adaptation::SWIFT
           m_problem(m_trial, m_test)
       {
         if (mesh.getSpaceDimension() != mesh.getDimension())
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "SWIFT::Adapt requires a full-dimensional mesh." << Alert::Raise;
+        }
         for (auto cell = mesh.getCell(); !cell.end(); ++cell)
         {
           const auto geometry = cell->getGeometry();
@@ -110,9 +112,11 @@ namespace Rodin::Adaptation::SWIFT
                 geometry != Geometry::Polytope::Type::Tetrahedron) ||
             mesh.getPolytopeTransformation(mesh.getDimension(), cell->getIndex())
                 .getOrder() != 1)
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "SWIFT::Adapt requires affine simplicial geometry. "
               << "Use SWIFT::Problem for curved geometry." << Alert::Raise;
+          }
         }
       }
 

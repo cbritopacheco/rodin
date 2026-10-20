@@ -124,8 +124,10 @@ namespace Rodin::Geometry
     Math::SpatialPoint pc;
     const auto& transformation = getPolytope().getTransformation();
     if (sample)
+    {
       transformation.transform(
         pc, getReferenceCoordinates(), sample->identity, sample->index);
+    }
     else
       transformation.transform(pc, getReferenceCoordinates());
     return m_pc.emplace<Math::SpatialPoint>(std::move(pc));

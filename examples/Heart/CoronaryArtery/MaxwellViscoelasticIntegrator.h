@@ -112,13 +112,17 @@ namespace Rodin::Examples::Heart
         const size_t vdim = fes.getVectorDimension();
 
         if (vdim != d)
+        {
           throw std::runtime_error(
             "MaxwellHistoryLinearIntegrator expects a vector test space whose "
             "dimension matches the cell dimension.");
+        }
         if (nte != fe.getCount())
+        {
           throw std::runtime_error(
             "MaxwellHistoryLinearIntegrator expects element-local DOFs to match "
             "the finite-element basis count.");
+        }
 
         const size_t pvOrder = getFunctionOrder(m_pv, polytope, size_t(0));
         const size_t qOrder = pvOrder + derivativeOrder(fe.getOrder());
@@ -143,9 +147,11 @@ namespace Rodin::Examples::Heart
           // P_v at this point, flattened row-major: pv[c*d + j] = (P_v)_{c j}.
           const auto pv = m_pv.getValue(ip);
           if (pv.size() != d * d)
+          {
             throw std::runtime_error(
               "MaxwellHistoryLinearIntegrator expects the stored tensor field to "
               "have vdim = d*d.");
+          }
 
           for (size_t b = 0; b < nte; ++b)
           {

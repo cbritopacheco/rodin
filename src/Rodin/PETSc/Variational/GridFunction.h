@@ -419,8 +419,10 @@ namespace Rodin::Variational
           m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
       {
         if (other.m_write.acquired)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Complete source coefficient writes before copying." << Alert::Raise;
+        }
         PetscErrorCode ierr = VecDuplicate(other.m_data, &m_data);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecCopy(other.m_data, m_data);
@@ -1279,8 +1281,10 @@ namespace Rodin::Variational
       const GridFunction& acquire() const
       {
         if (m_write.acquired)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Complete pending coefficient writes before const access." << Alert::Raise;
+        }
         if (m_readAcquired.load(std::memory_order_acquire))
           return *this;
 
@@ -1477,9 +1481,11 @@ namespace Rodin::Variational
       const GridFunction& sync() const
       {
         if (m_write.acquired)
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "Pending writes require sync() on the mutable grid function."
             << Alert::Raise;
+        }
         this->flush();
         return *this;
       }

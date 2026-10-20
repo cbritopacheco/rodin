@@ -117,9 +117,11 @@ namespace Rodin::Solid
             !cp.has<Tags::PreviousActiveGamma>() || !cp.has<Tags::PreviousActiveBeta>() ||
             !cp.has<Tags::ElectricalActivation>() || !cp.has<Tags::ActiveExtension>() ||
             !cp.has<Tags::ActiveGamma>() || !cp.has<Tags::ActiveBeta>())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "Dynamic contraction requires independent active fields."
               << Alert::Raise;
+          }
           typename ActiveLaw::State oldState;
           oldState.gamma = cp.get<Tags::PreviousActiveGamma>();
           oldState.beta = cp.get<Tags::PreviousActiveBeta>();

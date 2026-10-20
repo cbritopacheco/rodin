@@ -677,8 +677,10 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
               allOwned.at(owner).end());
             bool shared = false;
             if (dp < d)
+            {
               for (Index cell : sub.getConnectivity().getIncidence({dp, d}, i))
                 shared |= sub.getShard().isOwned(d, cell);
+            }
             EXPECT_EQ(sub.getShard().getState(dp)[i],
               shared ? Shard::State::Shared : Shard::State::Ghost);
           }

@@ -35,8 +35,10 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
     using Attributes = PETScLinearElasticityProblem<1, LocalMesh>;
     const auto initialize = [mixed](LocalMesh& mesh) {
       if (mixed)
+      {
         UnitBoxBoundary::labelCoordinatePartition(mesh, 0, Attributes::DirichletAttribute,
           Attributes::TractionAttribute, Attributes::TractionAttribute);
+      }
     };
     if constexpr (std::is_same_v<ContextType, Context::Local>)
     {
@@ -80,8 +82,10 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
         std::array<size_t, 3> levels =
           K == 1 ? std::array<size_t, 3>{5, 9, 17} : std::array<size_t, 3>{3, 5, 9};
         if constexpr (K == 1)
+        {
           if (geometry == Polytope::Type::Tetrahedron)
             levels = {9, 17, 33};
+        }
         FieldConvergence<1> history;
         for (size_t n : levels)
         {

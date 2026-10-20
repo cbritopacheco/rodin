@@ -165,8 +165,10 @@ namespace Rodin::Tests::Benchmarks
     const auto affine = [&](const Math::SpatialPoint& point) -> Scalar {
       Scalar value = 1;
       if constexpr (!Constant)
+      {
         for (size_t i = 0; i < dim; ++i)
           value += Scalar(i + 1) * point(i);
+      }
       return phase * value;
     };
     std::vector<Scalar> coefficients(ndof);
