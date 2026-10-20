@@ -20,7 +20,7 @@ namespace Rodin::Adaptation
    *
    * ## Architecture
    *
-   * A point binding locates the moved point once and owns that result for all
+   * A point binding locates the deformed point once and owns that result for all
    * subsequent basis requests in the binding. Cell binding or invalidation
    * releases it. Direct point evaluation always locates afresh. Neither the
    * integration point nor a transformation-state token is retained. Geometry,
@@ -55,7 +55,7 @@ namespace Rodin::Adaptation
       {}
 
       /**
-       * @brief Starts a fresh cell binding, releasing the previous moved point.
+       * @brief Starts a fresh cell binding, releasing the previous deformed point.
        * @param polytope Source entity for the next evaluation pass.
        * @returns This unbound point evaluator.
        */
@@ -66,27 +66,68 @@ namespace Rodin::Adaptation
       }
 
       /**
-       * @brief Locates and owns the moved point for a fresh point binding.
+       * @brief Locates and owns the deformed point for a fresh point binding.
+       *
+       * The locator resolves the displaced physical coordinates. If location
+       * fails, the point is inverse-mapped in the source cell or an adjacent
+       * volume cell for a source facet. Every bind evaluates afresh, including
+       * repeated binds at an unchanged integration point.
        * @param ip Source integration point; no reference to it is retained.
-       * @returns This evaluator with an owned moved-point result.
+       * @returns This evaluator with an owned deformed-point result.
        */
       DeformationMap& setIntegrationPoint(const Variational::IntegrationPoint& ip)
       {
-        getMovedPoint(ip);
+        invalidate();
+        const auto& point = ip.getPoint();
+        const Math::SpatialPoint physical =
+          point.getPhysicalCoordinates() + getDisplacementValue(point, ip);
+        const auto& sourcePolytope = point.getPolytope();
+        const auto& mesh = sourcePolytope.getMesh();
+        const std::size_t dimension = mesh.getDimension();
+        if (auto located = m_locator.get().locate(dimension, physical))
+        {
+          m_moved.emplace(std::move(*located));
+          return *this;
+        }
+
+        Index cell;
+        if (sourcePolytope.getDimension() == dimension)
+          cell = sourcePolytope.getIndex();
+        else
+        {
+          if (sourcePolytope.getDimension() + 1 != dimension)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Deformation fallback requires a source cell or facet." << Alert::Raise;
+          }
+          const auto& adjacent = mesh.getConnectivity()
+                                   .getIncidence(dimension - 1, dimension)
+                                   .at(sourcePolytope.getIndex());
+          if (adjacent.empty())
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Deformation map source face has no adjacent cell." << Alert::Raise;
+          }
+          cell = *adjacent.begin();
+        }
+
+        Math::SpatialPoint reference;
+        mesh.getPolytopeTransformation(dimension, cell).inverse(reference, physical);
+        m_moved.emplace(*mesh.getPolytope(dimension, cell), reference, physical);
         return *this;
       }
 
       /**
-       * @brief Gets the moved point prepared by the current point binding.
+       * @brief Gets the deformed point prepared by the current point binding.
        * @returns The owned point, valid until rebinding or invalidation.
        * @throws Alert::Exception If no point is bound.
        */
-      const Geometry::Point& getMovedPoint() const
+      const Geometry::Point& getPoint() const
       {
         if (!m_moved)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "No moved point is bound." << Alert::Raise;
+            << "No deformed point is bound." << Alert::Raise;
         }
         return *m_moved;
       }
@@ -117,57 +158,6 @@ namespace Rodin::Adaptation
         for (std::size_t r = 0; r < static_cast<std::size_t>(displacement.size()); ++r)
           displacement(static_cast<Eigen::Index>(r)) = uq(r);
         return displacement;
-      }
-
-      /**
-       * @brief Evaluates and owns a fresh moved point outside a binding.
-       *
-       * The locator resolves the displaced physical coordinates. If location
-       * fails, the point is inverse-mapped in the source cell or an adjacent
-       * volume cell for a source facet.
-       * @param ip Source integration point.
-       * @returns Located moved point, replaced by the next evaluation.
-       */
-      const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip)
-      {
-        invalidate();
-        const auto& point = ip.getPoint();
-        const Math::SpatialPoint physical =
-          point.getPhysicalCoordinates() + getDisplacementValue(point, ip);
-        const auto& sourcePolytope = point.getPolytope();
-        const auto& mesh = sourcePolytope.getMesh();
-        const std::size_t dimension = mesh.getDimension();
-        if (auto located = m_locator.get().locate(dimension, physical))
-        {
-          m_moved.emplace(std::move(*located));
-          return *m_moved;
-        }
-
-        Index cell;
-        if (sourcePolytope.getDimension() == dimension)
-          cell = sourcePolytope.getIndex();
-        else
-        {
-          if (sourcePolytope.getDimension() + 1 != dimension)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Deformation fallback requires a source cell or facet." << Alert::Raise;
-          }
-          const auto& adjacent = mesh.getConnectivity()
-                                   .getIncidence(dimension - 1, dimension)
-                                   .at(sourcePolytope.getIndex());
-          if (adjacent.empty())
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Deformation map source face has no adjacent cell." << Alert::Raise;
-          }
-          cell = *adjacent.begin();
-        }
-
-        Math::SpatialPoint reference;
-        mesh.getPolytopeTransformation(dimension, cell).inverse(reference, physical);
-        m_moved.emplace(*mesh.getPolytope(dimension, cell), reference, physical);
-        return *m_moved;
       }
 
       /// @brief Drops the cached point, forcing the next request to relocate.

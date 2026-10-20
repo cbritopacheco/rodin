@@ -83,12 +83,15 @@ namespace Rodin::Hilbert
 
       /**
        * @brief Applies the extension operator to a differential form.
+       *
+       * Replaces the retained formulation and solves into the owned trial
+       * function. This operation updates the extension's working state.
        * @tparam Differential Type of the differential form
        * @param lf Linear functional to extend
        * @return Solution of the regularized extension problem
        */
       template <class Differential>
-      auto operator()(const Differential& lf) const
+      auto operator()(const Differential& lf)
       {
         auto body = [&]() {
         if constexpr (std::is_same_v<FESRange, Real>)
@@ -170,11 +173,11 @@ namespace Rodin::Hilbert
 
     private:
       std::reference_wrapper<const FES> m_fes;    ///< Reference to finite element space
-      mutable Variational::TrialFunction<Solution, FES>
+      Variational::TrialFunction<Solution, FES>
         m_trial;  ///< Trial function for the formulation
       Variational::TestFunction<FES> m_test;   ///< Test function for the formulation
-      mutable Variational::Problem<LinearSystemType,
-        Variational::TrialFunction<Solution, FES>, Variational::TestFunction<FES>>
+      Variational::Problem<LinearSystemType, Variational::TrialFunction<Solution, FES>,
+        Variational::TestFunction<FES>>
         m_pb; ///< Underlying variational problem
       Real m_alpha;        ///< Regularization parameter @f$ \alpha @f$
   };

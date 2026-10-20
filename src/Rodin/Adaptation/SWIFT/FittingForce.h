@@ -47,7 +47,8 @@ namespace Rodin::Adaptation::SWIFT
         std::size_t dimension)
         : m_phi(phi.copy()),
           m_grad(grad.copy()),
-          m_deformation(current, locator),
+          m_current(current),
+          m_locator(locator),
           m_loss(loss),
           m_normalization(normalization),
           m_dimension(dimension)
@@ -61,7 +62,8 @@ namespace Rodin::Adaptation::SWIFT
         : Parent(other),
           m_phi(other.m_phi->copy()),
           m_grad(other.m_grad->copy()),
-          m_deformation(other.m_deformation),
+          m_current(other.m_current),
+          m_locator(other.m_locator),
           m_loss(other.m_loss),
           m_normalization(other.m_normalization),
           m_dimension(other.m_dimension)
@@ -69,12 +71,16 @@ namespace Rodin::Adaptation::SWIFT
 
       /**
        * @brief Evaluates the coefficient at a point.
+       *
+       * Point preparation belongs to this evaluation. The coefficient retains
+       * only read-only dependencies, with one location per evaluation.
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
-        const ResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss);
+        DeformationMap deformation(m_current.get(), m_locator.get());
+        const ResidualState state(*m_phi, *m_grad, deformation, ip, m_loss);
         return (-m_normalization * state.getWeight() * state.getResidual()) *
           state.getGradient();
       }
@@ -111,7 +117,8 @@ namespace Rodin::Adaptation::SWIFT
     private:
       std::unique_ptr<PhiType> m_phi;
       std::unique_ptr<GradType> m_grad;
-      mutable DeformationMap<Displacement, LocatorType> m_deformation;
+      std::reference_wrapper<const Displacement> m_current;
+      std::reference_wrapper<const LocatorType> m_locator;
       Loss m_loss;
       Real m_normalization;
       std::size_t m_dimension;

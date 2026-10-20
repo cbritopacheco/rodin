@@ -30,12 +30,15 @@ namespace Rodin::Tests::Manufactured
     EXPECT_EQ(&extension.getProblem(), &std::as_const(extension).getProblem());
     const auto exact =
       RealFunction([](const Point& p) { return 1 + 2 * p(0) - 3 * p(1); });
+    const auto load = Integral(exact, extension.getTestFunction());
+    using Extension = decltype(extension);
+    static_assert(std::is_invocable_v<Extension&, decltype(load)>);
+    static_assert(!std::is_invocable_v<const Extension&, decltype(load)>);
     extension += DirichletBC(extension.getTrialFunction(), exact);
     for (const Real alpha : {Real(0.2), Real(0.7)})
     {
       extension.setAlpha(alpha);
-      const auto field =
-        std::as_const(extension)(Integral(exact, extension.getTestFunction()));
+      const auto field = extension(Integral(exact, extension.getTestFunction()));
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
         const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());

@@ -104,7 +104,7 @@ namespace Rodin::Adaptation
 
       /**
        * @brief The Jacobian @f$j=\det F@f$, computed once and cached.
-       * @returns Derivative evaluated at the supplied point.
+       * @returns Determinant of the deformation gradient.
        */
       Real getJacobian() const
       {

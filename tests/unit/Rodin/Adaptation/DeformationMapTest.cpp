@@ -80,7 +80,9 @@ namespace Rodin::Tests::Unit
         const auto expected = Math::SpatialPoint(
           (Real(1) + expansion) * ip.getPoint().getPhysicalCoordinates());
         EXPECT_LT(
-          (deformation.getMovedPoint(ip).getPhysicalCoordinates() - expected).norm(),
+          (deformation.setIntegrationPoint(ip).getPoint().getPhysicalCoordinates() -
+            expected)
+            .norm(),
           Tolerance);
       };
 
@@ -106,13 +108,12 @@ namespace Rodin::Tests::Unit
       const std::size_t beforeRepeat = locator.calls;
       const auto expectedFirst =
         Math::SpatialPoint((Real(1) + Expansion) * first.getPhysicalCoordinates());
-      EXPECT_LT(
-        (deformation.getMovedPoint().getPhysicalCoordinates() - expectedFirst).norm(),
+      EXPECT_LT((deformation.getPoint().getPhysicalCoordinates() - expectedFirst).norm(),
         Tolerance);
-      deformation.getMovedPoint();
+      deformation.getPoint();
       EXPECT_EQ(locator.calls, beforeRepeat);
       const auto copy = deformation;
-      EXPECT_THROW(copy.getMovedPoint(), Alert::Exception);
+      EXPECT_THROW(copy.getPoint(), Alert::Exception);
       check(indexedSecond, Expansion);
       EXPECT_EQ(locator.calls, beforeRepeat + 1);
 
@@ -174,14 +175,14 @@ namespace Rodin::Tests::Unit
     const Point source(cell, Math::SpatialPoint{Real(0.25), Real(0.25)});
     const IntegrationPoint cellPoint(source);
     deformation.setPolytope(cell).setIntegrationPoint(cellPoint);
-    EXPECT_EQ((deformation.getMovedPoint().getPhysicalCoordinates() -
-                source.getPhysicalCoordinates())
+    EXPECT_EQ(
+      (deformation.getPoint().getPhysicalCoordinates() - source.getPhysicalCoordinates())
                 .norm(),
       0);
     const Point vertexSource(vertex, Math::SpatialPoint(0));
     const IntegrationPoint vertexPoint(vertexSource);
     EXPECT_THROW(deformation.setIntegrationPoint(vertexPoint), Alert::Exception);
-    EXPECT_THROW(deformation.getMovedPoint(), Alert::Exception);
+    EXPECT_THROW(deformation.getPoint(), Alert::Exception);
   }
 
   /**
@@ -237,16 +238,16 @@ namespace Rodin::Tests::Unit
       QF::GaussLegendre formula(geometry, 2);
       const PolytopeQuadrature first(cell, formula);
       const IntegrationPoint original(first, 0);
-      EXPECT_THROW(deformation.getMovedPoint(), Alert::Exception);
+      EXPECT_THROW(deformation.getPoint(), Alert::Exception);
       deformation.setPolytope(cell).setIntegrationPoint(original);
-      deformation.getMovedPoint();
-      deformation.getMovedPoint();
+      deformation.getPoint();
+      deformation.getPoint();
       EXPECT_EQ(locator.calls, 1);
       formula = QF::GaussLegendre(geometry, 4);
       const PolytopeQuadrature second(cell, formula);
       const IntegrationPoint reassigned(second, 0);
       const auto secondPhysical =
-        deformation.getMovedPoint(reassigned).getPhysicalCoordinates();
+        deformation.setIntegrationPoint(reassigned).getPoint().getPhysicalCoordinates();
       EXPECT_EQ(locator.calls, 2);
       for (size_t j = 0; j < dimension; ++j)
         EXPECT_EQ(secondPhysical(j), reassigned.getPoint().getPhysicalCoordinates()(j));
@@ -254,24 +255,25 @@ namespace Rodin::Tests::Unit
       const PolytopeQuadrature third(cell, formula);
       const IntegrationPoint rescaled(third, 0);
       const auto thirdPhysical =
-        deformation.getMovedPoint(rescaled).getPhysicalCoordinates();
+        deformation.setIntegrationPoint(rescaled).getPoint().getPhysicalCoordinates();
       EXPECT_EQ(locator.calls, 3);
       for (size_t j = 0; j < dimension; ++j)
         EXPECT_EQ(thirdPhysical(j), rescaled.getPoint().getPhysicalCoordinates()(j));
       for (const size_t sample : {size_t(0), size_t(1), size_t(0)})
       {
         const IntegrationPoint unproven(third.getPoint(sample), &formula, 0);
-        const auto actual = deformation.getMovedPoint(unproven).getPhysicalCoordinates();
+        const auto actual =
+          deformation.setIntegrationPoint(unproven).getPoint().getPhysicalCoordinates();
         for (size_t j = 0; j < dimension; ++j)
           EXPECT_EQ(actual(j), unproven.getPoint().getPhysicalCoordinates()(j));
       }
       EXPECT_EQ(locator.calls, 6);
       locator.fail = true;
       EXPECT_THROW(deformation.setIntegrationPoint(rescaled), Alert::Exception);
-      EXPECT_THROW(deformation.getMovedPoint(), Alert::Exception);
+      EXPECT_THROW(deformation.getPoint(), Alert::Exception);
       locator.fail = false;
       EXPECT_NO_THROW(deformation.setIntegrationPoint(rescaled));
-      EXPECT_NO_THROW(deformation.getMovedPoint());
+      EXPECT_NO_THROW(deformation.getPoint());
     }
   }
 }

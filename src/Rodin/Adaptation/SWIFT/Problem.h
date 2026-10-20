@@ -2129,7 +2129,7 @@ namespace Rodin::Adaptation::SWIFT
             const auto& src = quad.getPoint(q);
             const Variational::IntegrationPoint ip(quad, q);
             const Real w = qf.getWeight(q) * src.getDistortion();
-            const Real r = phi.getValue(deformation.getMovedPoint(ip));
+            const Real r = phi.getValue(deformation.setIntegrationPoint(ip).getPoint());
             facetState.totalLen += w;
             facetState.energy += w * normalization * loss.getValue(r);
             accumulation.squaredResidual += w * r * r;
@@ -2226,7 +2226,8 @@ namespace Rodin::Adaptation::SWIFT
             {
               const Geometry::Point point(*face, traits.getVertex(vertex));
               const auto& moved =
-                deformation.getMovedPoint(Variational::IntegrationPoint(point));
+                deformation.setIntegrationPoint(Variational::IntegrationPoint(point))
+                  .getPoint();
               const Real norm = grad.getValue(moved).norm();
               const Real distance = std::abs(phi.getValue(moved)) / norm;
               if (!(norm > gradientFloor) || !std::isfinite(norm) ||
@@ -2286,7 +2287,8 @@ namespace Rodin::Adaptation::SWIFT
                 mappedMeasure = fittedNormal.norm();
               }
 
-              const Geometry::Point movedPoint = deformation.getMovedPoint(ip);
+              const Geometry::Point movedPoint =
+                deformation.setIntegrationPoint(ip).getPoint();
               const SpatialVec targetGradient = grad.getValue(movedPoint);
               const Real gradientNorm = targetGradient.norm();
               const Real fittedNormalNorm = fittedNormal.norm();

@@ -108,3 +108,8 @@ add_executable(RodinAdaptationSWIFTLinearSolverTest SWIFTLinearSolverTest.cpp)
 target_link_libraries(RodinAdaptationSWIFTLinearSolverTest PRIVATE
   GTest::gtest_main Rodin::Adaptation)
 gtest_discover_tests(RodinAdaptationSWIFTLinearSolverTest PROPERTIES LABELS unit)
+
+add_executable(RodinAdaptationSWIFTFittingCoefficientTest SWIFTFittingCoefficientTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTFittingCoefficientTest
+  PRIVATE GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationSWIFTFittingCoefficientTest PROPERTIES LABELS unit)
