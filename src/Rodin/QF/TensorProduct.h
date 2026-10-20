@@ -56,6 +56,12 @@ namespace Rodin::QF
         append(pair, third);
       }
 
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_weights.data(), 1};
+      }
+
       /**
        * @brief Copies a tensor-product quadrature formula.
        * @param other Object to copy from.

@@ -59,11 +59,13 @@ namespace Rodin::Adaptation::SWIFT
         const auto& cell = m_cell.get();
         const auto& formula = m_formula.get();
         const auto& quadrature = cell.getQuadrature(formula);
+        // Covering base weights are uniform and fixed throughout evaluation.
+        const Real weight = formula.getWeight(0);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);
           evaluate(Variational::IntegrationPoint(point, &formula, q),
-            formula.getWeight(q) * point.getDistortion());
+            weight * point.getDistortion());
         }
       }
 

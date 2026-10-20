@@ -29,6 +29,12 @@ namespace Rodin::Tests::Benchmarks
         : m_formula(formula)
       {}
 
+      /// @returns Borrowed arrays from the persistent source formula.
+      Optional<Samples> getSamples() const override
+      {
+        return m_formula.get().getSamples();
+      }
+
       /// @returns Source sample count.
       size_t getSize() const override
       {

@@ -14,6 +14,8 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GaussLegendre.h"
+#include "Rodin/QF/GrundmannMoller.h"
+#include "Rodin/Adaptation/SWIFT/QualityCovering.h"
 #include "Rodin/QF/GaussLobatto.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/QF/TensorProduct.h"
@@ -54,8 +56,10 @@ namespace
     public:
       inline static std::atomic<size_t> constructions{0};
       inline static std::atomic<size_t> reads{0};
+      inline static std::atomic<size_t> destructions{0};
+      inline static std::atomic<const Math::SpatialPoint*> point{nullptr};
       inline static std::atomic<bool> fail{false};
-      inline static std::atomic<bool> failSample{false};
+      inline static std::atomic<bool> failSize{false};
       inline static std::atomic<size_t> nextTag{1000};
       inline static std::barrier<>* gate = nullptr;
 
@@ -73,12 +77,26 @@ namespace
           Alert::MemberFunctionException(*this, __func__)
             << "Interrupted test formula generation." << Alert::Raise;
         }
+        point = &m_point;
+      }
+
+      FactoryFormula(const FactoryFormula&) = delete;
+      FactoryFormula(FactoryFormula&&) = delete;
+
+      ~FactoryFormula() override
+      {
+        ++destructions;
       }
 
       /// @returns One sample, recording the generator read.
       size_t getSize() const override
       {
         ++reads;
+        if (failSize.load())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Interrupted test formula publication." << Alert::Raise;
+        }
         return 1;
       }
 
@@ -99,17 +117,69 @@ namespace
       const Math::SpatialPoint& getPoint([[maybe_unused]] size_t index) const override
       {
         ++reads;
-        if (failSample.load())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Interrupted test sample materialization." << Alert::Raise;
-        }
         return m_point;
       }
 
     private:
       Math::SpatialPoint m_point;
   };
+
+  /// @brief Strided sample storage whose pointwise accessors record dispatch.
+  class SampleViewFormula final : public QF::QuadratureFormulaBase
+  {
+    public:
+      inline static size_t reads = 0;
+      inline static size_t destructions = 0;
+      inline static bool fail = false;
+      inline static const Math::SpatialPoint* points = nullptr;
+
+      explicit SampleViewFormula([[maybe_unused]] size_t tag)
+        : m_points{Math::SpatialPoint{Real(0.25)}, Math::SpatialPoint{Real(0.75)}},
+          m_weights{Real(0.25), Real(-100), Real(0.75), Real(-200)}
+      {
+        points = m_points.data();
+      }
+
+      SampleViewFormula(const SampleViewFormula&) = delete;
+      SampleViewFormula(SampleViewFormula&&) = delete;
+
+      ~SampleViewFormula() override
+      {
+        ++destructions;
+      }
+
+      size_t getSize() const override
+      {
+        return m_points.size();
+      }
+
+      Real getWeight(size_t index) const override
+      {
+        ++reads;
+        return m_weights[2 * index];
+      }
+
+      const Math::SpatialPoint& getPoint(size_t index) const override
+      {
+        ++reads;
+        return m_points[index];
+      }
+
+      Optional<Samples> getSamples() const override
+      {
+        if (fail)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Interrupted sample-view publication." << Alert::Raise;
+        }
+        return Samples{m_points, m_weights.data(), 2};
+      }
+
+    private:
+      std::array<Math::SpatialPoint, 2> m_points;
+      std::array<Real, 4> m_weights;
+  };
+
 }
 
 /// @brief Equivalent argument qualifications and family factories share publication.
@@ -188,14 +258,17 @@ TEST(QuadratureFormula, RetriesFailedConstruction)
   EXPECT_EQ(formula.getPoint(0)(0), Real(tag) / 1024);
 }
 
-/// @brief Warm factory and table accesses never query the destroyed generator.
-TEST(QuadratureFormula, PublishedSamplesAreIndependentOfGenerator)
+/// @brief Publication retains the concrete sample storage without copying or moving it.
+TEST(QuadratureFormula, PublicationRetainsConcreteSamples)
 {
+  const size_t destroyed = FactoryFormula::destructions.load();
   const auto& formula = QF::QuadratureFormula::get<FactoryFormula>(size_t{101});
-  const size_t reads = FactoryFormula::reads.load();
+  EXPECT_EQ(&formula.getPoint(0), FactoryFormula::point.load());
+  EXPECT_EQ(FactoryFormula::destructions.load(), destroyed);
   const size_t constructions = FactoryFormula::constructions.load();
   Variational::RealP1Element element(G::Segment);
   const auto& table = element.getTabulation(formula);
+  const size_t reads = FactoryFormula::reads.load();
   EXPECT_EQ(&table, &element.getTabulation(formula));
   EXPECT_EQ(&formula, &QF::QuadratureFormula::get<FactoryFormula>(size_t{101}));
   EXPECT_EQ(FactoryFormula::reads.load(), reads);
@@ -211,6 +284,7 @@ TEST(QuadratureFormula, ConcurrentPublicationSurvivesThreadExit)
   std::barrier start(ThreadCount);
   std::barrier publication(ThreadCount);
   const size_t before = FactoryFormula::constructions.load();
+  const size_t destroyed = FactoryFormula::destructions.load();
   FactoryFormula::gate = &publication;
   std::array<const QF::QuadratureFormula*, ThreadCount> formulas{};
   std::array<std::thread, ThreadCount> threads;
@@ -225,6 +299,7 @@ TEST(QuadratureFormula, ConcurrentPublicationSurvivesThreadExit)
     thread.join();
   FactoryFormula::gate = nullptr;
   EXPECT_EQ(FactoryFormula::constructions.load(), before + ThreadCount);
+  EXPECT_EQ(FactoryFormula::destructions.load(), destroyed + ThreadCount - 1);
   ASSERT_NE(formulas[0], nullptr);
   for (const auto* formula : formulas)
   {
@@ -234,16 +309,19 @@ TEST(QuadratureFormula, ConcurrentPublicationSurvivesThreadExit)
   EXPECT_EQ(formulas[0], &QF::QuadratureFormula::get<FactoryFormula>(tag));
 }
 
-/// @brief Interrupted sample materialization leaves no partially published object.
-TEST(QuadratureFormula, RetriesFailedMaterialization)
+/// @brief Interrupted publication destroys its candidate and allows a later retry.
+TEST(QuadratureFormula, RetriesFailedPublication)
 {
   const size_t tag = FactoryFormula::nextTag.fetch_add(1);
   const size_t before = FactoryFormula::constructions.load();
-  FactoryFormula::failSample = true;
+  const size_t destroyed = FactoryFormula::destructions.load();
+  FactoryFormula::failSize = true;
   EXPECT_THROW(QF::QuadratureFormula::get<FactoryFormula>(tag), Alert::Exception);
-  FactoryFormula::failSample = false;
+  EXPECT_EQ(FactoryFormula::destructions.load(), destroyed + 1);
+  FactoryFormula::failSize = false;
   const auto& formula = QF::QuadratureFormula::get<FactoryFormula>(tag);
   EXPECT_EQ(FactoryFormula::constructions.load(), before + 2);
+  EXPECT_EQ(FactoryFormula::destructions.load(), destroyed + 1);
   EXPECT_EQ(formula.getPoint(0)(0), Real(tag) / 1024);
 }
 
@@ -269,5 +347,66 @@ TEST(QuadratureFormula, DispatcherCopiesRetainExistingSamples)
   {
     EXPECT_EQ(copy->getWeight(q), weights[q]);
     EXPECT_EQ((copy->getPoint(q) - points[q]).norm(), 0);
+  }
+}
+
+/// @brief Retained strided views avoid both sample copies and pointwise dispatch.
+TEST(QuadratureFormula, SampleViewsAvoidCopyAndDispatch)
+{
+  SampleViewFormula::fail = true;
+  EXPECT_THROW(
+    QF::QuadratureFormula::get<SampleViewFormula>(size_t{1}), Alert::Exception);
+  EXPECT_EQ(SampleViewFormula::destructions, 1);
+  SampleViewFormula::fail = false;
+  const auto& formula = QF::QuadratureFormula::get<SampleViewFormula>(size_t{1});
+  const auto samples = formula.getSamples();
+  ASSERT_TRUE(samples);
+  EXPECT_EQ(samples->points.data(), SampleViewFormula::points);
+  ASSERT_EQ(formula.getSize(), 2);
+  EXPECT_EQ(&formula.getPoint(0), SampleViewFormula::points);
+  EXPECT_EQ(formula.getPoint(0)(0), Real(0.25));
+  EXPECT_EQ(formula.getPoint(1)(0), Real(0.75));
+  EXPECT_EQ(formula.getWeight(0), Real(0.25));
+  EXPECT_EQ(formula.getWeight(1), Real(0.75));
+  Variational::RealP1Element element(G::Segment);
+  const auto& table = element.getTabulation(formula);
+  EXPECT_EQ(table.getBasis(0, 1), Real(0.25));
+  EXPECT_EQ(table.getBasis(1, 1), Real(0.75));
+  EXPECT_EQ(SampleViewFormula::reads, 0);
+  EXPECT_EQ(SampleViewFormula::destructions, 1);
+}
+
+/// @brief Uniform, interleaved and contiguous views preserve every concrete family.
+TEST(QuadratureFormula, SampleViewsPreserveConcreteFamilies)
+{
+  const auto verify = [](const QF::QuadratureFormulaBase& source,
+                        const QF::QuadratureFormula& published) {
+    ASSERT_TRUE(source.getSamples());
+    ASSERT_TRUE(published.getSamples());
+    ASSERT_EQ(published.getSize(), source.getSize());
+    for (size_t index = 0; index < source.getSize(); ++index)
+    {
+      EXPECT_EQ(published.getWeight(index), source.getWeight(index));
+      EXPECT_EQ((published.getPoint(index) - source.getPoint(index)).norm(), 0);
+    }
+  };
+  for (auto geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
+         G::Tetrahedron, G::Pyramid, G::Hexahedron, G::Wedge})
+  {
+    const QF::Centroid centroid(geometry);
+    verify(centroid, QF::QuadratureFormula::get<QF::Centroid>(geometry));
+    const QF::PolytopeQuadratureFormula dispatcher(4, geometry);
+    verify(dispatcher, QF::PolytopeQuadratureFormula::get(4, geometry));
+    const QF::GaussLobatto lobatto(geometry, 3);
+    verify(lobatto, QF::GaussLobatto::get(geometry, 3));
+    const Adaptation::SWIFT::WitnessLattice lattice(geometry, 2);
+    verify(lattice, Adaptation::SWIFT::WitnessLattice::get(geometry, 2));
+    const Adaptation::SWIFT::QualityCovering covering(geometry, 2);
+    verify(covering, Adaptation::SWIFT::QualityCovering::get(geometry, 2));
+  }
+  for (auto geometry : {G::Segment, G::Triangle, G::Tetrahedron})
+  {
+    const QF::GrundmannMoller formula(2, geometry);
+    verify(formula, QF::QuadratureFormula::get<QF::GrundmannMoller>(size_t{2}, geometry));
   }
 }

@@ -146,6 +146,12 @@ namespace Rodin::QF
         return m_geometry;
       }
 
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return m_qf->getSamples();
+      }
+
       /**
        * @brief Gets the number of quadrature points.
        * @return Total number of quadrature points in the underlying formula

@@ -42,6 +42,12 @@ namespace Rodin::Adaptation::SWIFT
         return QF::QuadratureFormula::get<WitnessLattice>(geometry, subdivisions);
       }
 
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, &m_weight, 0};
+      }
+
       /**
        * @brief Gets the number of distinct witnesses.
        * @returns Number of generating lattice points.

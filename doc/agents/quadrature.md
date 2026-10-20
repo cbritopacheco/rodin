@@ -123,8 +123,13 @@ backend-independent and introduce no MPI collective.
 
 Persistent APIs accept only `const QuadratureFormula&`, a final noncopyable,
 nonmovable value-access implementation. `QuadratureFormula::get<Family>(args...)`
-constructs the family outside its mutex, materializes owned immutable samples,
-and publishes one object under a tuple key. Each family/key-type instantiation
+constructs the concrete family and its read-only interface together in one
+pool allocation outside its mutex, without copying reference samples, and
+publishes that record under a tuple key. Optional `getSamples()` views expose
+contiguous points and weights with a scalar stride (zero for uniform weights).
+Publication retains these views to avoid pointwise virtual dispatch; families
+without views retain ordinary pointwise access. Grundmann–Möller tables are
+retained throughout static destruction because published rules borrow them. Each family/key-type instantiation
 has its own shared FlatMap pool retained throughout static destruction. Integer
 and enum arguments are values; published-formula arguments use a private
 `Reference` containing a typed `pointer` and total pointer ordering. There are

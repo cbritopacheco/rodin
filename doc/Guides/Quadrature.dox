@@ -45,7 +45,14 @@
   total pointer ordering internally. A bounded thread-local lookup avoids
   repeated locking. Construction occurs outside the pool mutex; insertion
   publishes one immutable object even when several threads miss concurrently.
-  Generators must be determined by their arguments and safe to construct
+  Each pool entry constructs its concrete family and published interface in one
+  allocation. The interface reads the retained rule directly; no second point
+  or weight array is created. Optional read-only sample views provide direct
+  point access and strided weight access, including uniform weights, without
+  per-sample virtual dispatch. Pointwise-only families remain supported.
+  Generators must own their samples or borrow only
+  storage with process lifetime, must not retain caller-owned constructor
+  arguments, and must be determined by their arguments and safe to construct
   concurrently. Counts and orders should be passed as size_t.
 
   @ref Rodin::QF::PolytopeQuadratureFormula selects a family from geometry and

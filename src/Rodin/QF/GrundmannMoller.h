@@ -141,6 +141,12 @@ namespace Rodin::QF
         return m_geometry;
       }
 
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{s_points[m_n][m_s], s_weights[m_n][m_s].data(), 1};
+      }
+
       /**
        * @brief Gets the number of quadrature points.
        * @return Total number of quadrature points
@@ -190,13 +196,14 @@ namespace Rodin::QF
 
     private:
       /// Static table: number of points for each [s][n] combination
-      static boost::multi_array<size_t, 2> s_sizes;
+      static const boost::multi_array<size_t, 2>& s_sizes;
 
       /// Static table: quadrature weights for each [s][n] combination
-      static boost::multi_array<Math::Vector<Real>, 2> s_weights;
+      static const boost::multi_array<Math::Vector<Real>, 2>& s_weights;
 
       /// Static table: quadrature points for each [s][n] combination
-      static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> s_points;
+      static const boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>&
+        s_points;
 
       const Geometry::Polytope::Type m_geometry; ///< Simplex geometry type
       const size_t m_s;     ///< Parameter @f$ s @f$ determining degree @f$ 2s+1 @f$

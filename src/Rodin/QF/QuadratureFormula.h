@@ -17,6 +17,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <span>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -49,6 +50,19 @@ namespace Rodin::QF
   class QuadratureFormulaBase
   {
     public:
+      /// @brief Read-only sample arrays borrowed from a concrete formula.
+      struct Samples
+      {
+        /// @brief Contiguous reference coordinates in sample order.
+        std::span<const Math::SpatialVector<Real>> points;
+
+        /// @brief First weight, retained by the formula or immutable static storage.
+        const Real* weights;
+
+        /// @brief Scalar spacing between weights; zero repeats one uniform weight.
+        size_t weightStride;
+      };
+
       /// @brief Destroys the formula through its value-access interface.
       virtual ~QuadratureFormulaBase() = default;
 
@@ -66,6 +80,16 @@ namespace Rodin::QF
        * @returns Coordinates borrowed until the formula is changed or destroyed.
        */
       virtual const Math::SpatialVector<Real>& getPoint(size_t index) const = 0;
+
+      /**
+       * @brief Borrows sample arrays when the concrete representation permits it.
+       * @returns Array views valid until this formula is changed or destroyed,
+       * or no value for formulas providing only pointwise access.
+       */
+      virtual Optional<Samples> getSamples() const
+      {
+        return {};
+      }
   };
 
   /**
@@ -85,13 +109,22 @@ namespace Rodin::QF
    * generators may request other formulas. Concurrent misses may construct
    * duplicate candidates, but publish only one. Pools retain their entries until
    * process termination, including throughout static destruction. All published
-   * samples are owned and immutable; reading them requires no lock.
+   * concrete rules own their immutable samples; reading them requires no lock.
    *
    * Constructor arguments must determine all generated samples. Generators must
-   * not depend on unsynchronized mutable state or cyclic factory requests.
+   * own their samples or borrow storage with process lifetime, and must not retain
+   * caller-owned constructor arguments. They must not depend on unsynchronized
+   * mutable state or cyclic factory requests.
    */
   class QuadratureFormula final : public QuadratureFormulaBase
   {
+    /**
+     * @brief One allocation owning the concrete rule and its published interface.
+     * @tparam Formula Concrete formula constructed in place.
+     */
+    template <class Formula>
+    struct Storage;
+
     /// @brief Borrowed persistent formula in a constructor-argument tuple.
     struct Reference
     {
@@ -116,16 +149,17 @@ namespace Rodin::QF
 
     /**
      * @brief Shared owning storage protected by its mutex.
+     * @tparam Formula Concrete formula retained by each entry.
      * @tparam Key Owned constructor-argument tuple.
      */
-    template <class Key>
+    template <class Formula, class Key>
     struct Pool
     {
       /// @brief Protects all accesses to the owning map.
       std::mutex mutex;
 
       /// @brief Published formulas, never erased or replaced.
-      FlatMap<Key, std::unique_ptr<const QuadratureFormula>> formulas;
+      FlatMap<Key, std::unique_ptr<const Storage<Formula>>> formulas;
     };
 
     /**
@@ -182,13 +216,13 @@ namespace Rodin::QF
        */
       QuadratureFormula& operator=(QuadratureFormula&& other) = delete;
 
-      /// @brief Destroys the owned reference samples.
+      /// @brief Destroys the published interface; its pool owns the concrete rule.
       ~QuadratureFormula() override = default;
 
       /// @returns Number of immutable reference samples.
       size_t getSize() const override
       {
-        return m_points.size();
+        return m_size;
       }
 
       /**
@@ -197,8 +231,10 @@ namespace Rodin::QF
        */
       Real getWeight(size_t index) const override
       {
-        assert(index < m_weights.size());
-        return m_weights[index];
+        assert(index < m_size);
+        if (m_samples)
+          return m_samples->weights[index * m_samples->weightStride];
+        return m_formula.get().getWeight(index);
       }
 
       /**
@@ -207,8 +243,16 @@ namespace Rodin::QF
        */
       const Math::SpatialVector<Real>& getPoint(size_t index) const override
       {
-        assert(index < m_points.size());
-        return m_points[index];
+        assert(index < m_size);
+        if (m_samples)
+          return m_samples->points[index];
+        return m_formula.get().getPoint(index);
+      }
+
+      /// @returns The retained rule's sample views, when available.
+      Optional<Samples> getSamples() const override
+      {
+        return m_samples;
       }
 
       /**
@@ -257,22 +301,21 @@ namespace Rodin::QF
           const std::lock_guard lock(pool.mutex);
           const auto found = pool.formulas.find(key);
           if (found != pool.formulas.end())
-            pointer = found->second.get();
+            pointer = &found->second->formula;
         }
         if (!pointer)
         {
-          Formula generated(std::forward<Args>(args)...);
           auto candidate =
-            std::unique_ptr<const QuadratureFormula>(new QuadratureFormula(generated));
+            std::make_unique<const Storage<Formula>>(std::forward<Args>(args)...);
           {
             const std::lock_guard lock(pool.mutex);
             const auto found = pool.formulas.find(key);
             if (found != pool.formulas.end())
-              pointer = found->second.get();
+              pointer = &found->second->formula;
             else
             {
               const auto inserted = pool.formulas.emplace(key, std::move(candidate));
-              pointer = inserted.first->second.get();
+              pointer = &inserted.first->second->formula;
             }
           }
         }
@@ -284,19 +327,16 @@ namespace Rodin::QF
 
     private:
       /**
-       * @brief Owns all generated samples before publishing the formula.
-       * @param formula Generator borrowed only during construction.
+       * @brief Publishes the concrete rule owned by the same pool entry.
+       * @param formula Immutable concrete rule retained with this interface.
        */
       explicit QuadratureFormula(const QuadratureFormulaBase& formula)
+        : m_formula(formula),
+          m_size(formula.getSize()),
+          m_samples(formula.getSamples())
       {
-        const size_t count = formula.getSize();
-        m_points.reserve(count);
-        m_weights.reserve(count);
-        for (size_t index = 0; index < count; ++index)
-        {
-          m_points.push_back(formula.getPoint(index));
-          m_weights.push_back(formula.getWeight(index));
-        }
+        assert(!m_samples || m_samples->points.size() == m_size);
+        assert(!m_samples || !m_size || m_samples->weights);
       }
 
       /**
@@ -305,9 +345,9 @@ namespace Rodin::QF
        * @returns Shared pool retained throughout static destruction.
        */
       template <class Formula, class Key>
-      static Pool<Key>& getPool()
+      static Pool<Formula, Key>& getPool()
       {
-        static auto* const pool = new Pool<Key>;
+        static auto* const pool = new Pool<Formula, Key>;
         return *pool;
       }
 
@@ -323,11 +363,35 @@ namespace Rodin::QF
         return lookup;
       }
 
-      /// @brief Owned reference coordinates in sample order.
-      std::vector<Math::SpatialVector<Real>> m_points;
+      /// @brief Concrete rule owned by the same permanent pool entry.
+      std::reference_wrapper<const QuadratureFormulaBase> m_formula;
 
-      /// @brief Owned reference weights in sample order.
-      std::vector<Real> m_weights;
+      /// @brief Sample count fixed when the interface is constructed.
+      size_t m_size;
+
+      /// @brief Borrowed arrays avoiding pointwise dispatch when available.
+      Optional<Samples> m_samples;
+  };
+
+  template <class Formula>
+  struct QuadratureFormula::Storage
+  {
+    /**
+     * @brief Constructs the concrete rule before publishing its interface.
+     * @tparam Args Constructor argument types.
+     * @param args Arguments forwarded directly to the concrete rule.
+     */
+    template <class... Args>
+    explicit Storage(Args&&... args)
+      : generator(std::forward<Args>(args)...),
+        formula(generator)
+    {}
+
+    /// @brief Immutable concrete rule owning its reference samples.
+    const Formula generator;
+
+    /// @brief Published interface borrowing this entry's concrete rule.
+    const QuadratureFormula formula;
   };
 }
 

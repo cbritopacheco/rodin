@@ -59,6 +59,12 @@ namespace Rodin::QF
        */
       XiaoGimbutas(size_t degree, Geometry::Polytope::Type g);
 
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_data + m_dimension, m_dimension + 1};
+      }
+
       /**
        * @brief Copies a tabulated quadrature formula.
        * @param other Object to copy from.

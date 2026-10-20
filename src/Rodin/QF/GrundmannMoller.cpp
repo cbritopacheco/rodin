@@ -168,11 +168,17 @@ namespace Rodin::QF
     return res;
   }
 
-  boost::multi_array<size_t, 2> GrundmannMoller::s_sizes = GrundmannMoller::initSizes();
+  // Published formulas may borrow these tables throughout static destruction.
+  const boost::multi_array<size_t, 2>& GrundmannMoller::s_sizes =
+    *new boost::multi_array<size_t, 2>(GrundmannMoller::initSizes());
 
-  boost::multi_array<Math::Vector<Real>, 2> GrundmannMoller::s_weights = GrundmannMoller::initWeights();
+  const boost::multi_array<Math::Vector<Real>, 2>& GrundmannMoller::s_weights =
+    *new boost::multi_array<Math::Vector<Real>, 2>(GrundmannMoller::initWeights());
 
-  boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::s_points = GrundmannMoller::initPoints();
+  const boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>&
+    GrundmannMoller::s_points =
+      *new boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>(
+        GrundmannMoller::initPoints());
 
   GrundmannMoller::GrundmannMoller(size_t s, Geometry::Polytope::Type geom)
     : m_geometry(geom),

@@ -163,6 +163,12 @@ namespace Rodin::QF
         return m_geometry;
       }
 
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_weights.data(), 1};
+      }
+
       /**
        * @brief Gets the number of quadrature points.
        * @return Total number of quadrature points
