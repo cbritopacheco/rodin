@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <array>
 #include <type_traits>
 
 #include "Rodin/Variational.h"
@@ -140,6 +141,156 @@ namespace Rodin::Tests::Unit
         }
       }
     }
+  }
+
+  namespace
+  {
+    /**
+     * @brief Checks all ambient columns of embedded rank-one Jacobian forms.
+     *
+     * Basis derivatives and the rectangular inverse Jacobian independently
+     * form the physical Frobenius contractions. Axis-aligned and oblique
+     * segments and a surface in three dimensions expose omitted columns.
+     * Shared and distinct coefficients exercise both contraction branches.
+     *
+     * @tparam Scalar Real or complex field scalar.
+     * @tparam HighOrder Selects degree-two H1 rather than P1.
+     */
+    template <class Scalar, bool HighOrder>
+    void checkEmbeddedRankOne()
+    {
+      constexpr size_t Components = 3;
+      constexpr size_t Order = 6;
+      const std::array<Math::SpatialPoint, 4> endpoints = {Math::SpatialPoint{1, 0, 0},
+        Math::SpatialPoint{0, 1, 0}, Math::SpatialPoint{0, 0, 1},
+        Math::SpatialPoint{1, 2, 3}};
+      for (size_t fixture = 0; fixture <= endpoints.size(); ++fixture)
+      {
+        SCOPED_TRACE(fixture);
+        const bool surface = fixture == endpoints.size();
+        auto builder = LocalMesh::Builder();
+        builder.initialize(3).nodes(surface ? 3 : 2).vertex({0, 0, 0});
+        if (surface)
+          builder.vertex({0, 1, 0}).vertex({0, 0, 1});
+        else
+          builder.vertex(endpoints[fixture]);
+        const auto geometry =
+          surface ? Polytope::Type::Triangle : Polytope::Type::Segment;
+        auto mesh = surface ? builder.polytope(geometry, {0, 1, 2}).finalize()
+                            : builder.polytope(geometry, {0, 1}).finalize();
+        if (surface)
+        {
+          mesh.getConnectivity().compute(2, 1);
+          mesh.getConnectivity().compute(1, 0);
+        }
+        const auto cell = *mesh.getCell();
+        auto space = [&] {
+          if constexpr (HighOrder)
+            return H1<2, Math::SpatialVector<Scalar>>(
+              std::integral_constant<size_t, 2>{}, mesh, Components);
+          else
+            return P1<Math::SpatialVector<Scalar>>(mesh, Components);
+        }();
+        TrialFunction u(space);
+        TestFunction v(space);
+        Math::SpatialMatrix<Scalar> first(Components, 3), second(Components, 3);
+        for (size_t component = 0; component < Components; ++component)
+        {
+          for (size_t axis = 0; axis < 3; ++axis)
+          {
+            first(component, axis) = Scalar(1 + component + axis);
+            second(component, axis) = Scalar(2 + 2 * component - Real(axis));
+            if constexpr (std::is_same_v<Scalar, Complex>)
+            {
+              first(component, axis) += Scalar(0, Real(component + 1) / 2);
+              second(component, axis) -= Scalar(0, Real(axis + 1) / 4);
+            }
+          }
+        }
+        const auto callable = [](const Math::SpatialMatrix<Scalar>& value) {
+          return [value](const Geometry::Point&) { return value; };
+        };
+        const auto A = MatrixFunction(Components, 3, callable(first));
+        const auto B = MatrixFunction(Components, 3, callable(second));
+        const auto& formula = QF::PolytopeQuadratureFormula::get(Order, geometry);
+        const Geometry::PolytopeQuadrature quadrature(cell, formula);
+        const auto& element =
+          space.getFiniteElement(cell.getDimension(), cell.getIndex());
+        const auto check = [&](auto& integral, bool shared) {
+          integral.setOrder(Order);
+          integral.setPolytope(cell);
+          Real expectedSquaredNorm = 0;
+          for (size_t test = 0; test < element.getCount(); ++test)
+          {
+            for (size_t trial = 0; trial < element.getCount(); ++trial)
+            {
+              Scalar expected = 0;
+              for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+              {
+                const auto& point = quadrature.getPoint(qp);
+                const auto& reference = point.getReferenceCoordinates();
+                const auto trialReference =
+                  element.getBasis(trial).getJacobian()(reference);
+                const auto testReference =
+                  element.getBasis(test).getJacobian()(reference);
+                const auto inverse = point.getJacobianInverse();
+                Scalar trialAction = 0, testAction = 0;
+                for (size_t component = 0; component < Components; ++component)
+                {
+                  for (size_t axis = 0; axis < 3; ++axis)
+                  {
+                    for (size_t r = 0; r < cell.getDimension(); ++r)
+                    {
+                      trialAction += first(component, axis) *
+                        trialReference(component, r) * inverse(r, axis);
+                      testAction += (shared ? first : second)(component, axis) *
+                        testReference(component, r) * inverse(r, axis);
+                    }
+                  }
+                }
+                expected += formula.getWeight(qp) * point.getDistortion() * trialAction *
+                  Math::conj(testAction);
+              }
+              expectedSquaredNorm += std::norm(expected);
+              EXPECT_NEAR(std::abs(integral.integrate(trial, test) - expected), 0,
+                Real(1e-11) * (Real(1) + std::abs(expected)));
+            }
+          }
+          EXPECT_GT(expectedSquaredNorm, 0);
+        };
+        auto shared = Integral(Dot(Dot(A, Jacobian(u)), Dot(A, Jacobian(v))));
+        check(shared, true);
+        const auto distinctIntegrand = Dot(Dot(A, Jacobian(u)), Dot(B, Jacobian(v)));
+        using Rule = QuadratureRule<std::decay_t<decltype(distinctIntegrand)>>;
+        static_assert(Rule::IsRankOneJacobianForm);
+        auto distinct = Integral(distinctIntegrand);
+        check(distinct, false);
+      }
+    }
+  }
+
+  /// @brief P1 rank-one forms retain ambient directions on embedded cells.
+  TEST(Rodin_Variational_RankOneJacobianForm, EmbeddedP1Real)
+  {
+    checkEmbeddedRankOne<Real, false>();
+  }
+
+  /// @brief Complex P1 rank-one forms retain ambient directions and test conjugation.
+  TEST(Rodin_Variational_RankOneJacobianForm, EmbeddedP1Complex)
+  {
+    checkEmbeddedRankOne<Complex, false>();
+  }
+
+  /// @brief H1 rank-one forms retain ambient directions on embedded cells.
+  TEST(Rodin_Variational_RankOneJacobianForm, EmbeddedH1Real)
+  {
+    checkEmbeddedRankOne<Real, true>();
+  }
+
+  /// @brief Complex H1 rank-one forms retain ambient directions and test conjugation.
+  TEST(Rodin_Variational_RankOneJacobianForm, EmbeddedH1Complex)
+  {
+    checkEmbeddedRankOne<Complex, true>();
   }
 
   /**

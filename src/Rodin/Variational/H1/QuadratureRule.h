@@ -1632,6 +1632,8 @@ namespace Rodin::Variational
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
+        if (d == 0)
+          return *this;
         ScalarType* A_data = m_mat.data();
 
         static thread_local std::vector<Math::SpatialVector<ScalarType>> Gtr;
@@ -4234,6 +4236,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
 
         const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index idx = polytope.getIndex();
         const auto& integrand = *m_integrand;
         const auto& lhs = integrand.getLHS();
@@ -4303,7 +4306,7 @@ namespace Rodin::Variational
             {
               const size_t local = node * trialVdim + component;
               ScalarType action = 0;
-              for (size_t j = 0; j < d; ++j)
+              for (size_t j = 0; j < spaceDimension; ++j)
               {
                 ScalarType physicalDerivative = 0;
                 for (size_t r = 0; r < d; ++r)
@@ -4329,7 +4332,7 @@ namespace Rodin::Variational
               {
                 const size_t local = node * testVdim + component;
                 ScalarType action = 0;
-                for (size_t j = 0; j < d; ++j)
+                for (size_t j = 0; j < spaceDimension; ++j)
                 {
                   ScalarType physicalDerivative = 0;
                   for (size_t r = 0; r < d; ++r)

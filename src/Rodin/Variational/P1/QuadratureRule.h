@@ -3442,6 +3442,7 @@ namespace Rodin::Variational
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
           const auto& Jinv = p.getJacobianInverse();
+          const size_t spaceDimension = Jinv.cols();
 
           // Hoisted: one coefficient evaluation for each side of the basis-pair loop.
           const auto A = trialCoefficient.getValue(ip);
@@ -3452,7 +3453,7 @@ namespace Rodin::Variational
             const auto& Jref = m_trialRefJac[tr];
             for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
             {
-              for (size_t j = 0; j < d; ++j)
+              for (size_t j = 0; j < spaceDimension; ++j)
               {
                 ScalarType physicalDerivative = 0;
                 for (size_t r = 0; r < d; ++r)
@@ -3475,7 +3476,7 @@ namespace Rodin::Variational
               const auto& Jref = m_testRefJac[te];
               for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
               {
-                for (size_t j = 0; j < d; ++j)
+                for (size_t j = 0; j < spaceDimension; ++j)
                 {
                   ScalarType physicalDerivative = 0;
                   for (size_t r = 0; r < d; ++r)
