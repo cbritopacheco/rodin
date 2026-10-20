@@ -108,6 +108,13 @@ points than optimized tables.
 - `GrundmannMoller` remains an explicitly selectable simplex family. It is not
   a default because its weights are signed above degree one.
 - `PolytopeQuadratureFormula::build` constructs an owned formula.
+- Dispatcher construction uses the same family-selection implementation with
+  `make_shared`, combining the concrete generator and its ownership control block.
+  The public `build` operation retains unique ownership. With available FlatMap
+  capacity, publishing a one-point rule needs two allocations: the permanent
+  record and the shared generator. Other rules may also allocate sample arrays.
+  Cold dispatcher construction stays out of line where supported to avoid
+  adding register saves to the thread-local factory lookup.
 - `PolytopeQuadratureFormula::get` returns a canonical formula from a
   process-wide pool. An eight-entry thread-local cache serves repeated hot-path
   lookups without locking; cache misses enter the locked canonical pool.

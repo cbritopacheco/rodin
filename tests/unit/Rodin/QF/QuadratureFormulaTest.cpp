@@ -350,6 +350,43 @@ TEST(QuadratureFormula, DispatcherCopiesRetainExistingSamples)
   }
 }
 
+/// @brief Unique and shared construction retain identical rules across dispatch boundaries.
+TEST(QuadratureFormula, OwnedAndPublishedDispatchAgree)
+{
+  const auto build = &QF::PolytopeQuadratureFormula::build;
+  for (const auto geometry : Geometry::Polytope::Types)
+  {
+    for (const size_t order : {0u, 1u, 2u, 10u, 11u, 15u, 16u, 50u, 51u})
+    {
+      SCOPED_TRACE(static_cast<size_t>(geometry));
+      SCOPED_TRACE(order);
+      const auto owned = build(order, geometry);
+      std::unique_ptr<QF::PolytopeQuadratureFormula> copy;
+      {
+        const QF::PolytopeQuadratureFormula source(order, geometry);
+        copy.reset(source.copy());
+        EXPECT_EQ(&copy->getPoint(0), &source.getPoint(0));
+      }
+      const auto& published = QF::PolytopeQuadratureFormula::get(order, geometry);
+      ASSERT_EQ(owned->getSize(), published.getSize());
+      ASSERT_EQ(copy->getSize(), published.getSize());
+      for (size_t q = 0; q < published.getSize(); ++q)
+      {
+        EXPECT_EQ(owned->getWeight(q), published.getWeight(q));
+        EXPECT_EQ(copy->getWeight(q), published.getWeight(q));
+        const auto& point = published.getPoint(q);
+        ASSERT_EQ(owned->getPoint(q).size(), point.size());
+        ASSERT_EQ(copy->getPoint(q).size(), point.size());
+        for (size_t d = 0; d < point.size(); ++d)
+        {
+          EXPECT_EQ(owned->getPoint(q)(d), point(d));
+          EXPECT_EQ(copy->getPoint(q)(d), point(d));
+        }
+      }
+    }
+  }
+}
+
 /// @brief Retained strided views avoid both sample copies and pointwise dispatch.
 TEST(QuadratureFormula, SampleViewsAvoidCopyAndDispatch)
 {

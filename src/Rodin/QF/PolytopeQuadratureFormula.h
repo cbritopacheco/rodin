@@ -107,7 +107,13 @@ namespace Rodin::QF
        *
        * Automatically selects and constructs an appropriate quadrature
        * formula that is exact for all polynomials of degree up to @p order.
+       * Construction remains out of line where supported, keeping cold
+       * generator allocation from enlarging the hot factory lookup's
+       * register-save frame.
        */
+#if __has_cpp_attribute(gnu::noinline)
+      [[gnu::noinline]]
+#endif
       PolytopeQuadratureFormula(size_t order, Geometry::Polytope::Type g);
 
       /**
@@ -191,6 +197,16 @@ namespace Rodin::QF
       }
 
     private:
+      /**
+       * @brief Constructs the selected family with the requested ownership.
+       * @tparam Pointer Unique or shared pointer to const @ref QuadratureFormulaBase.
+       * @param order Desired polynomial degree of exactness.
+       * @param g Reference geometry type.
+       * @returns Ownership of the selected concrete quadrature formula.
+       */
+      template <class Pointer>
+      static Pointer buildFormula(size_t order, Geometry::Polytope::Type g);
+
       std::shared_ptr<const QuadratureFormulaBase>
         m_qf; ///< Underlying quadrature formula
       const size_t m_order; ///< Polynomial degree of exactness
