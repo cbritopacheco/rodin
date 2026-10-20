@@ -60,6 +60,8 @@
 
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
+#include <boost/mpi/collectives.hpp>
+#include <boost/mpi/operations.hpp>
 
 #include <petscsys.h>
 #include <petscvec.h>
@@ -1310,6 +1312,39 @@ namespace Rodin::Examples::ViscoelasticFluids
                     << " vertices=" << vertexCount << " velocity DOFs=" << velocityDOFs
                     << " pressure DOFs=" << pressureDOFs << " psi DOFs=" << stressDOFs
                     << Alert::Raise;
+
+    // Partition quality: owned cells per rank. The internal partitioner is
+    // much worse than Scotch (RODIN_USE_SCOTCH): the slowest rank sets the
+    // pace of assembly and solve.
+    {
+      const auto& comm = m_mesh.getContext().getCommunicator();
+      const auto& shard = m_mesh.getShard();
+      const size_t D = shard.getDimension();
+      size_t owned = 0, ghost = 0;
+      for (Index i = 0; i < shard.getCellCount(); ++i)
+        (shard.isOwned(D, i) ? owned : ghost) += 1;
+      size_t minOwned = 0, maxOwned = 0, sumOwned = 0, maxGhost = 0;
+      boost::mpi::all_reduce(comm, owned, minOwned, boost::mpi::minimum<size_t>());
+      boost::mpi::all_reduce(comm, owned, maxOwned, boost::mpi::maximum<size_t>());
+      boost::mpi::all_reduce(comm, owned, sumOwned, std::plus<size_t>());
+      boost::mpi::all_reduce(comm, ghost, maxGhost, boost::mpi::maximum<size_t>());
+      const Real mean = static_cast<Real>(sumOwned) / static_cast<Real>(comm.size());
+      const Real imbalance = mean > 0.0 ? static_cast<Real>(maxOwned) / mean : 1.0;
+#ifdef RODIN_USE_SCOTCH
+      const char* partitioner = "Scotch";
+#else
+      const char* partitioner = "BalancedCompact (built without Scotch, RODIN_USE_SCOTCH=OFF)";
+#endif
+      if (isRoot())
+      {
+        Alert::Info() << "[partition] " << partitioner << ", " << comm.size() << " ranks: owned cells min/mean/max = "
+                      << minOwned << "/" << static_cast<size_t>(mean) << "/" << maxOwned
+                      << " (max/mean = " << imbalance << "), ghost cells max = " << maxGhost << Alert::Raise;
+        if (comm.size() > 1 && imbalance > 1.2)
+          Alert::Warning() << "[partition] the largest shard has " << imbalance
+                           << " times the mean: rebuild Rodin with -DRODIN_USE_SCOTCH=ON" << Alert::Raise;
+      }
+    }
   }
 
   ArterialLesion3DViscousLogImplicit::~ArterialLesion3DViscousLogImplicit() = default;

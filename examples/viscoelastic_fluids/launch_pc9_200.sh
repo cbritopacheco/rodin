@@ -42,6 +42,15 @@
 #     SOLVER3D=lulag (MUMPS LU lagged under GMRES; gmres = ASM/ILU, less memory)
 #     BUILD=build-gcc12  OUT=$HOME/Results/pc9_200  LAMBDA_R=4.83
 #     SKIP_VERIF=0 SKIP_3D=0 SKIP_AXI=0     (1 leaves that phase out)
+#
+#  Partition: the drivers partition with Scotch only when Rodin is built with
+#  -DRODIN_USE_SCOTCH=ON; the internal partitioner (BalancedCompact) gives far
+#  worse shards and the slowest rank sets the pace. start therefore refuses a
+#  build without Scotch, and before queuing anything it starts the 3D driver on
+#  S75_pipe_inter with NP3D ranks just long enough to read its [partition] line
+#  (owned cells min/mean/max per rank) and stops if max/mean > MAX_IMBALANCE
+#  (1.15). ALLOW_NO_SCOTCH=1 / MAX_IMBALANCE=... override. The [partition]
+#  line of every case is in its run.log; status prints them.
 #  Logs: $OUT/logs/<job>.log, the queue in $OUT/logs/queue.log
 #  Results: $OUT/verification/..., $OUT/3D/Re<Re>_Wo<Wo>[_waveform_cca]/<geo>/<fluid>/,
 #           $OUT/Re<Re>_Wo<Wo>[_waveform_cca]/<geo>/<fluid>/ (axisymmetric)
@@ -167,6 +176,11 @@ if [[ "$WHAT" == status ]]; then
     printf '   %-50s step %s/%s  cycle %s  newtonIts %s  retries %s  %s\n' "${d#$OUT/}" "$done_" "$total" \
       "$(csvcol "$d/case.csv" cycle)" "$(csvcol "$d/case.csv" newtonIts)" "$(csvcol "$d/case.csv" retries)" "$eta"
   done
+  echo "== partitions of the running cases:"
+  find "$OUT" -name run.log -mmin -15 2> /dev/null | sort | while read -r f; do
+    p=$(grep -a -m1 '\[partition\]' "$f" | sed 's/\x1b\[[0-9;]*m//g; s/.*\[partition\] //')
+    printf '   %-50s %s\n' "$(dirname "${f#$OUT/}")" "${p:--}"
+  done
   echo "== finished: $(find "$OUT" -name DONE 2> /dev/null | wc -l)   failed:"
   find "$OUT" -name FAILED 2> /dev/null | sed "s|$OUT/|   |; s|/FAILED||"
   exit 0
@@ -258,6 +272,14 @@ for x in "$EXE" "$EXE3D"; do
   [[ -x "$x" ]] || { echo "missing executable $x"; exit 1; }
 done
 grep -aq -- "psi_rb" "$EXE3D" || { echo "$EXE3D has no psi_rb formulation: wrong sources?"; exit 1; }
+if ! grep -q '^RODIN_USE_SCOTCH:BOOL=ON' "$REPO/$BUILD/CMakeCache.txt" 2> /dev/null; then
+  echo "$BUILD is configured without Scotch (RODIN_USE_SCOTCH is not ON): the drivers would use the"
+  echo "internal partitioner, much slower. Reconfigure and rebuild:"
+  echo "   cmake -S $REPO -B $REPO/$BUILD -DRODIN_USE_SCOTCH=ON [-DSCOTCH_DIR=<scotch prefix>]"
+  echo "(or ALLOW_NO_SCOTCH=1 to run anyway)"
+  [[ "${ALLOW_NO_SCOTCH:-0}" == 1 ]] || exit 1
+fi
+grep -aq -- "\[partition\]" "$EXE3D" || { echo "$EXE3D does not report its partition: wrong sources?"; exit 1; }
 "$PYTHON" -c "import numpy, h5py" 2> /dev/null || { echo "$PYTHON has no numpy/h5py (set PYTHON=...)"; exit 1; }
 
 need=()
@@ -283,6 +305,36 @@ if (( busy > 0 )) && [[ "${FORCE:-0}" != 1 ]]; then
   echo "$busy solver processes are already running (other runs?). Stop them first, or FORCE=1"
   echo "(the queue counts only its own jobs against CORES=$CORES)."
   exit 1
+fi
+
+# Partition check: the 3D driver on the 3D mesh with NP3D ranks, stopped as
+# soon as it has printed its [partition] line.
+if [[ "${SKIP_3D:-0}" != 1 && "${SKIP_PARTITION_CHECK:-0}" != 1 ]]; then
+  echo "== partition check: 3D driver, S75_pipe_inter, $NP3D ranks ..."
+  PC="$LOG/partition_check"; mkdir -p "$PC"
+  ( cd "$PC" && exec ${MPIRUN:-mpirun} -n "$NP3D" "$EXE3D" -al_mesh "$MESH/S75_pipe_inter.mesh" \
+      -al_xdmf case -al_csv case.csv -al_cycles 1 -al_steps_per_cycle 10 ) > "$PC/run.log" 2>&1 < /dev/null &
+  pcpid=$!
+  for _ in $(seq 1 120); do
+    grep -aq '\[partition\]' "$PC/run.log" && break
+    kill -0 "$pcpid" 2> /dev/null || break
+    sleep 5
+  done
+  # SIGTERM to mpirun ends its ranks.
+  kill -TERM "$pcpid" 2> /dev/null
+  for _ in $(seq 1 20); do kill -0 "$pcpid" 2> /dev/null || break; sleep 1; done
+  kill -KILL "$pcpid" 2> /dev/null; wait "$pcpid" 2> /dev/null
+  line=$(grep -a '\[partition\]' "$PC/run.log" | head -1 | sed 's/\x1b\[[0-9;]*m//g')
+  if [[ -z "$line" ]]; then
+    echo "no [partition] line from the driver, see $PC/run.log:"; tail -5 "$PC/run.log"; exit 1
+  fi
+  echo "   $line"
+  ratio=$(printf '%s' "$line" | sed -n 's/.*max\/mean = \([0-9.eE+-]*\).*/\1/p')
+  if ! awk -v r="$ratio" -v m="${MAX_IMBALANCE:-1.15}" 'BEGIN{exit !(r != "" && r <= m)}'; then
+    echo "partition imbalance max/mean = ${ratio:-?} > ${MAX_IMBALANCE:-1.15}: fix the partitioner first"
+    echo "(MAX_IMBALANCE=... or SKIP_PARTITION_CHECK=1 to go on anyway)"
+    exit 1
+  fi
 fi
 
 bash "$0" plan | tail -1
