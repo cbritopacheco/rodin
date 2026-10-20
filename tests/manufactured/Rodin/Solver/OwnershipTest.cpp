@@ -53,9 +53,14 @@ namespace
     std::unique_ptr<Algorithm> survivor;
     {
       Algorithm original(problem);
-      original.setTolerance(SolverTolerance)
-        .setMaxIterations(IterationLimit)
-        .setRestart(RestartDimension);
+      const auto configure = [&](auto& solver) {
+        solver.setTolerance(SolverTolerance).setMaxIterations(IterationLimit);
+        if constexpr (requires { solver.setS(size_t(2)); })
+          solver.setS(2);
+        else
+          solver.setRestart(RestartDimension);
+      };
+      configure(original);
       Algorithm copied(original);
       Algorithm moved(std::move(copied));
       survivor.reset(moved.copy());

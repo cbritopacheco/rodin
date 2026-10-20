@@ -1,4 +1,4 @@
-foreach(algorithm CG BiCGSTAB GMRES DGMRES LDLT HouseholderQR PartialPivLU
+foreach(algorithm CG BiCGSTAB GMRES DGMRES IDRS LDLT HouseholderQR PartialPivLU
     SimplicialLDLT SimplicialLLT SparseQR)
   set(target Rodin${algorithm}OwnershipTest)
   add_executable(${target} OwnershipTest.cpp)
@@ -7,13 +7,13 @@ foreach(algorithm CG BiCGSTAB GMRES DGMRES LDLT HouseholderQR PartialPivLU
   target_compile_definitions(${target} PRIVATE
     RODIN_TEST_SOLVER=${algorithm}
     RODIN_TEST_SOLVER_HEADER="Rodin/Solver/${algorithm}.h")
-  if(algorithm MATCHES "^(CG|GMRES|DGMRES|LDLT|HouseholderQR|PartialPivLU)$")
+  if(algorithm MATCHES "^(CG|GMRES|DGMRES|IDRS|LDLT|HouseholderQR|PartialPivLU)$")
     target_compile_definitions(${target} PRIVATE RODIN_TEST_DENSE)
   endif()
-  if(algorithm MATCHES "^(CG|BiCGSTAB|GMRES|DGMRES|SimplicialLDLT|SimplicialLLT|SparseQR)$")
+  if(algorithm MATCHES "^(CG|BiCGSTAB|GMRES|DGMRES|IDRS|SimplicialLDLT|SimplicialLLT|SparseQR)$")
     target_compile_definitions(${target} PRIVATE RODIN_TEST_SPARSE)
   endif()
-  if(algorithm MATCHES "^(GMRES|DGMRES)$")
+  if(algorithm MATCHES "^(GMRES|DGMRES|IDRS)$")
     target_compile_definitions(${target} PRIVATE RODIN_TEST_KRYLOV_CONFIGURATION)
   endif()
   gtest_discover_tests(${target} TEST_PREFIX "${algorithm}."

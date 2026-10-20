@@ -1,6 +1,6 @@
 add_subdirectory(NewtonSolver)
 
-foreach(algorithm GMRES DGMRES)
+foreach(algorithm GMRES DGMRES IDRS)
   set(target RodinManufactured${algorithm}OwnershipTest)
   add_executable(${target} OwnershipTest.cpp)
   target_link_libraries(${target} PRIVATE

@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 #include <type_traits>
+#include <cstdlib>
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Geometry/Mesh.h"
@@ -84,6 +85,15 @@ namespace
         candidate.setRestart(RestartDimension);
       if constexpr (requires { candidate.setEigenv(DeflationVectorCount); })
         candidate.setEigenv(DeflationVectorCount);
+      if constexpr (requires { candidate.setS(size_t(1)); })
+      {
+        // Keep the random shadow space reproducible. A stricter solve tolerance
+        // also enforces the absolute solution bound for the largest phase load.
+        constexpr Real ShadowSolverTolerance = Real(1e-13);
+        constexpr unsigned ShadowSeed = 1729;
+        candidate.setTolerance(ShadowSolverTolerance).setS(1);
+        std::srand(ShadowSeed);
+      }
       candidate.solve(system);
       if constexpr (requires { candidate.success(); })
       {
@@ -171,9 +181,18 @@ namespace
       reference.setTolerance(tolerance);
       if (configuration != 3)
         reference.setMaxIterations(budget);
-      reference.set_restart(Restart);
+      constexpr size_t ShadowSpace = 2;
+      // IDR(s) chooses a random shadow space. Reset its seed for each independent
+      // solve so the reference comparison isolates ownership and configuration.
+      constexpr unsigned ShadowSeed = 1729;
+      if constexpr (requires { reference.setS(ShadowSpace); })
+        reference.setS(configuration == 2 ? ShadowSpace : 1);
+      else
+        reference.set_restart(Restart);
       if constexpr (requires { reference.setEigenv(deflation); })
         reference.setEigenv(deflation);
+      if constexpr (requires { reference.setS(ShadowSpace); })
+        std::srand(ShadowSeed);
       reference.compute(system.getOperator());
       const Math::Vector<Scalar> zero = Math::Vector<Scalar>::Zero(Size);
       const Math::Vector<Scalar> expected =
@@ -183,6 +202,8 @@ namespace
         SCOPED_TRACE(ownership);
         EXPECT_EQ(&solver.getProblem(), &problem);
         system.getSolution() = zero;
+        if constexpr (requires { solver.setS(ShadowSpace); })
+          std::srand(ShadowSeed);
         solver.solve(system);
         EXPECT_EQ(solver.success(), expectedSuccess);
         EXPECT_LT((system.getSolution() - expected).norm(), 1e-11);
@@ -194,7 +215,11 @@ namespace
       std::unique_ptr<Algorithm> clone;
       {
         Algorithm original(problem);
-        original.setTolerance(tolerance).setRestart(Restart);
+        original.setTolerance(tolerance);
+        if constexpr (requires { original.setS(ShadowSpace); })
+          original.setS(configuration == 2 ? ShadowSpace : 1);
+        else
+          original.setRestart(Restart);
         if (configuration != 3)
           original.setMaxIterations(budget);
         if constexpr (requires { original.setEigenv(deflation); })

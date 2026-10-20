@@ -114,7 +114,12 @@ namespace Rodin::Solver
        */
       IDRS(const IDRS& other)
         : Parent(other)
-      {}
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /**
        * @brief Move constructor.
