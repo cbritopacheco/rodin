@@ -516,27 +516,32 @@ namespace
         system.getOperator() = original;
       system.getVector() = rhs;
       system.getSolution() = Vector<Scalar>::Constant(Size, Scalar(-7));
-      IndexMap<std::pair<IndexArray, Vector<Real>>> constraints;
+      IndexMap<std::pair<IndexArray, Vector<Scalar>>> constraints;
       EXPECT_EQ(&system.merge(constraints, offset), &system);
       EXPECT_EQ((Matrix<Scalar>(system.getOperator()) - original).norm(), 0);
       EXPECT_EQ((system.getVector() - rhs).norm(), 0);
       IndexArray children(2);
       children << 1, 2;
-      Vector<Real> coefficients(2);
-      coefficients << 0.25, -0.5;
+      Vector<Scalar> coefficients(2);
+      coefficients << Scalar(0.25), Scalar(-0.5);
+      if constexpr (std::is_same_v<Scalar, Complex>)
+      {
+        coefficients[0] += Scalar(0, 0.5);
+        coefficients[1] -= Scalar(0, 0.25);
+      }
       constraints.emplace(0, std::pair{children, coefficients});
 
       const Index parent = static_cast<Index>(offset);
       Matrix<Scalar> transform = Matrix<Scalar>::Identity(Size, Size);
       transform.row(parent).setZero();
-      transform(parent, parent + 1) = Scalar(0.25);
-      transform(parent, parent + 2) = Scalar(-0.5);
+      transform(parent, parent + 1) = coefficients[0];
+      transform(parent, parent + 2) = coefficients[1];
       Matrix<Scalar> expected = transform.adjoint() * original * transform;
       Vector<Scalar> expectedRHS = transform.adjoint() * rhs;
       expected.row(parent).setZero();
       expected(parent, parent) = Scalar(1);
-      expected(parent, parent + 1) = Scalar(-0.25);
-      expected(parent, parent + 2) = Scalar(0.5);
+      expected(parent, parent + 1) = -coefficients[0];
+      expected(parent, parent + 2) = -coefficients[1];
       const Vector<Scalar> expectedSolution = expected.fullPivLu().solve(expectedRHS);
 
       EXPECT_EQ(&system.merge(constraints, offset), &system);
@@ -546,12 +551,48 @@ namespace
       const Vector<Scalar> solution = actual.fullPivLu().solve(system.getVector());
       EXPECT_LT((solution - expectedSolution).norm(), 1e-12);
       EXPECT_LT((transform.adjoint() * (original * solution - rhs)).norm(), 1e-12);
-      EXPECT_LT(std::abs(solution(parent) - Scalar(0.25) * solution(parent + 1) +
-                  Scalar(0.5) * solution(parent + 2)),
+      EXPECT_LT(std::abs(solution(parent) - coefficients[0] * solution(parent + 1) -
+                  coefficients[1] * solution(parent + 2)),
         1e-12);
       EXPECT_EQ(
         (system.getSolution() - Vector<Scalar>::Constant(Size, Scalar(-7))).norm(), 0);
     }
+  }
+
+  /// @brief Unit-modulus identifications preserve a unique identity-system solution.
+  TYPED_TEST(LinearSystemMergeTest, PhaseConstraintPreservesUniqueSolution)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    const Scalar phase = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(0, 1);
+      else
+        return Scalar(-1);
+    }();
+    LinearSystem<Operator, Vector<Scalar>> system;
+    const Matrix<Scalar> identity = Matrix<Scalar>::Identity(2, 2);
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      system.getOperator() = identity.sparseView();
+    else
+      system.getOperator() = identity;
+    Vector<Scalar> exact(2);
+    exact << phase, Scalar(1);
+    system.getVector() = exact;
+    IndexArray children(1);
+    children << 1;
+    Vector<Scalar> coefficients(1);
+    coefficients << phase;
+    IndexMap<std::pair<IndexArray, Vector<Scalar>>> constraints;
+    constraints.emplace(0, std::pair{children, coefficients});
+    system.merge(constraints);
+    const Matrix<Scalar> actual = system.getOperator();
+    EXPECT_EQ(actual(1, 1), Scalar(2));
+    EXPECT_EQ(system.getVector()[1], Scalar(2));
+    const auto factorization = actual.fullPivLu();
+    ASSERT_EQ(factorization.rank(), 2);
+    const Vector<Scalar> solution = factorization.solve(system.getVector());
+    EXPECT_LT((solution - exact).norm(), 1e-13);
   }
 
   /// @brief Copies own all three arrays and moves retain their values for dense and sparse scalar types.

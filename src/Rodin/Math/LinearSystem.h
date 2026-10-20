@@ -8,6 +8,7 @@
 #define RODIN_MATH_LINEARSYSTEM_H
 
 #include "Rodin/Array.h"
+#include "Rodin/Math/Common.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
@@ -358,6 +359,9 @@ namespace Rodin::Math
        *
        * Eliminates dependent DOFs by expressing them as linear combinations
        * of independent DOFs, modifying both the operator and RHS vector.
+       * Column substitution uses the coefficients directly; restriction of
+       * rows and the load uses their conjugates, giving the transformation
+       * @f$T^*AT@f$ and @f$T^*b@f$ before restoring constraint rows.
        *
        * @tparam DOFScalar Scalar type for DOF values
        * @param[in] dofs Map from DOF index to (dependent indices, coefficients) pairs
@@ -462,7 +466,7 @@ namespace Rodin::Math
             for (size_t i = 0; i < count; i++)
             {
               const MatrixScalar coeff = coeffs.coeff(i);
-              childrenLookup[i][col] += coeff * value;
+              childrenLookup[i][col] += Math::conj(coeff) * value;
             }
           }
 
@@ -478,7 +482,7 @@ namespace Rodin::Math
           {
             const MatrixScalar coeff = coeffs.coeff(i);
             const Index child = children.coeff(i) + static_cast<Index>(offset);
-            mass.coeffRef(child) += coeff * mass.coeff(parent);
+            mass.coeffRef(child) += Math::conj(coeff) * mass.coeff(parent);
           }
           mass.coeffRef(parent) = 0;
         }
@@ -704,6 +708,9 @@ namespace Rodin::Math
        *
        * Eliminates dependent DOFs by expressing them as linear combinations
        * of independent DOFs, modifying both the operator and RHS vector.
+       * Column substitution uses the coefficients directly; restriction of
+       * rows and the load uses their conjugates, giving the transformation
+       * @f$T^*AT@f$ and @f$T^*b@f$ before restoring constraint rows.
        *
        * @tparam DOFScalar Scalar type for DOF values
        * @param[in] dofs Map from DOF index to (dependent indices, coefficients) pairs
@@ -806,7 +813,7 @@ namespace Rodin::Math
             for (size_t i = 0; i < count; i++)
             {
               const DOFScalar coeff = coeffs.coeff(i);
-              childrenLookup[i][col] += coeff * value;
+              childrenLookup[i][col] += Math::conj(coeff) * value;
             }
           }
 
@@ -822,7 +829,7 @@ namespace Rodin::Math
           {
             const DOFScalar coeff = coeffs.coeff(i);
             const Index child = children.coeff(i) + static_cast<Index>(offset);
-            mass.coeffRef(child) += coeff * mass.coeff(parent);
+            mass.coeffRef(child) += Math::conj(coeff) * mass.coeff(parent);
           }
           mass.coeffRef(parent) = 0;
         }
