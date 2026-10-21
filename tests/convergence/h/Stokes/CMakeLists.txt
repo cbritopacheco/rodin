@@ -32,21 +32,28 @@ foreach(geometry Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
       "--gtest_filter=AllGeometries/StokesStabilityTest.*/${geometry}-*P4P3*")
   set_tests_properties(RodinConvergenceHStokesStability_${geometry}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
-  foreach(group Rates Controls)
-    set(_case P4P3PressureSpectrumAcrossRefinementLevels)
-    if (group STREQUAL "Controls")
-      set(_case P4P3MissingDivergenceRejected)
-    endif()
-    set(_test RodinConvergenceHStokesStability_P4P3_${group}_${geometry})
-    add_test(NAME ${_test}
-      COMMAND $<TARGET_FILE:RodinConvergenceHStokesStability>
-        "--gtest_filter=AllGeometries/StokesStabilityTest.${_case}/${geometry}")
-    set(_timeout 1800)
-    # The complete P4/P3 pyramid spectral hierarchy exceeded 30 minutes.
-    # One hour is an execution allowance, not a measured upper bound.
-    if (geometry STREQUAL "Pyramid" AND group STREQUAL "Rates")
-      set(_timeout 3600)
-    endif()
-    set_tests_properties(${_test} PROPERTIES LABELS "convergence;slow" TIMEOUT ${_timeout})
+  # Keep each independent curvature/resolution spectrum comparison in its own
+  # process. Each case still compares both quadrature orders and retains all
+  # six members of the P4/P3 hierarchy.
+  foreach(mapping Affine Curved)
+    foreach(resolution 3 4 5)
+      set(_test RodinConvergenceHStokesStability_P4P3_Rates_${mapping}N${resolution}_${geometry})
+      add_test(NAME ${_test}
+        COMMAND $<TARGET_FILE:RodinConvergenceHStokesStability>
+          "--gtest_filter=AllGeometries/StokesStabilityTest.P4P3PressureSpectrum${mapping}N${resolution}/${geometry}")
+      set(_spectrum_timeout 3600)
+      if(geometry STREQUAL "Pyramid" AND resolution EQUAL 5)
+        # CI measured about 1900 seconds for one quadrature order. Retain
+        # both orders, including their independent QR/SVD diagnostics.
+        set(_spectrum_timeout 10800)
+      endif()
+      set_tests_properties(${_test} PROPERTIES
+        LABELS "convergence;slow" TIMEOUT ${_spectrum_timeout})
+    endforeach()
   endforeach()
+  set(_test RodinConvergenceHStokesStability_P4P3_Controls_${geometry})
+  add_test(NAME ${_test}
+    COMMAND $<TARGET_FILE:RodinConvergenceHStokesStability>
+      "--gtest_filter=AllGeometries/StokesStabilityTest.P4P3MissingDivergenceRejected/${geometry}")
+  set_tests_properties(${_test} PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
 endforeach()

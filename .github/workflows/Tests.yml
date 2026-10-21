@@ -191,7 +191,7 @@ jobs:
     needs:
       - Plan
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.suite == 'baseline' && 90 || 180 }}
+    timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || (matrix.group == 'convergence/hp/NonlinearPoisson' || matrix.group == 'convergence/p/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
       fail-fast: false
       matrix:
@@ -424,7 +424,7 @@ jobs:
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, suite=${{ matrix.suite }})
   ConvergenceBaseline:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.suite == 'baseline' && 90 || 180 }}
+    timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || (matrix.group == 'convergence/hp/NonlinearPoisson' || matrix.group == 'convergence/p/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.native_convergence) }}
@@ -539,33 +539,103 @@ jobs:
         include:
           - multithreaded: 'ON'
             np: '1'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '1'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'ON'
             np: '2'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '2'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'ON'
             np: '3'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '3'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'ON'
             np: '4'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '4'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'ON'
             np: '8'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '8'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'OFF'
             np: '1'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '1'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'OFF'
             np: '2'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '2'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'OFF'
             np: '3'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '3'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'OFF'
             np: '4'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '4'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'OFF'
             np: '8'
+            partition: standard
+            geometry: '(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '8'
+            partition: pyramid
+            geometry: 'Pyramid'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
     env:
       OMP_NUM_THREADS: 2
@@ -606,7 +676,7 @@ jobs:
               /bin/sh -c 'printf "MPI rank=%s " "$OMPI_COMM_WORLD_RANK"; grep "^Cpus_allowed_list:" /proc/self/status'
           fi
       - name: Run native MPI restriction rank partition
-        run: ctest --test-dir build/tests -R '^RodinMPIH1SubMeshRestrictionTest_.*_np${{ matrix.np }}$' --no-tests=error --output-on-failure -j 1
+        run: ctest --test-dir build/tests -R '^RodinMPIH1SubMeshRestrictionTest_${{ matrix.geometry }}_.*_np${{ matrix.np }}$' --no-tests=error --output-on-failure -j 1
       - name: Publish independent production coverage
         id: coverage_record
         uses: ./.github/actions/coverage
@@ -615,12 +685,12 @@ jobs:
           definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
           artifact_name: ci-target-${{ github.job }}-${{ strategy.job-index }}
 
-    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, np=${{ matrix.np }})
+    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, np=${{ matrix.np }}, partition=${{ matrix.partition }})
   PETScConvergence:
     needs:
       - Plan
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ (startsWith(matrix.suite, 'nonlinear_boundary') || startsWith(matrix.suite, 'pressure_')) && 240 || 120 }}
+    timeout-minutes: ${{ startsWith(matrix.suite, 'pressure_') && 360 || startsWith(matrix.suite, 'nonlinear_boundary') && 240 || 120 }}
     strategy:
       fail-fast: false
       matrix:
@@ -865,13 +935,13 @@ jobs:
           utility_pattern=''
           if [ "${{ matrix.context }}" = local ]; then
             if [ "${{ matrix.suite }}" = pressure_light ]; then utility_pattern='|Utility'; fi
-            pattern="^RodinConvergenceHPETScStokesStability_((P4P3_(Rates|Controls)_)?${geometry_pattern}${utility_pattern})$"
+            pattern="^RodinConvergenceHPETScStokesStability_((P4P3_(Rates_(Affine|Curved)N[345]|Controls)_)?${geometry_pattern}${utility_pattern})$"
           else
             rank="${{ matrix.context }}"
             rank="${rank#np}"
             case "$rank" in 1|2|3|4) ;; *) exit 1 ;; esac
             if [ "${{ matrix.suite }}" = pressure_light ]; then utility_pattern="|Utility_np${rank}"; fi
-            pattern="^RodinConvergenceHPETScMPIStokesStability_((P4P3_)?np${rank}_((Rates|Controls)_)?${geometry_pattern}${utility_pattern})$"
+            pattern="^RodinConvergenceHPETScMPIStokesStability_((P4P3_)?np${rank}_((Rates_(Affine|Curved)N[345]|Controls)_)?${geometry_pattern}${utility_pattern})$"
           fi
           # Record existing placement without changing binding or thread policy.
           lscpu
@@ -1637,7 +1707,7 @@ jobs:
     needs:
       - Plan
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:

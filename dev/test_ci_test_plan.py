@@ -3,6 +3,7 @@
 import importlib.util
 import itertools
 from pathlib import Path
+import re
 import sys
 import unittest
 
@@ -81,17 +82,91 @@ class TestPlanTest(unittest.TestCase):
         self.assertEqual(job["env"]["OMPI_MCA_mpi_yield_when_idle"], "1")
         self.assertTrue(any(s.get("name") == "Record native MPI CPU placement" for s in job["steps"]))
         geometries = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Hexahedron", "Wedge"]
-        expected = {f"RodinMPIH1SubMeshRestrictionTest_{geometry}_K{degree}_{mapping}_np{rank}"
-                    for geometry, degree, mapping, rank in itertools.product(
-                        geometries, range(1, 7), ["Affine", "Curved"], [1, 2, 3, 4, 8])}
+        expected = {f"RodinMPIH1SubMeshRestrictionTest_{geometry}_K{degree}_{mapping}_{value_range}_np{rank}"
+                    for geometry, degree, mapping, value_range, rank in itertools.product(
+                        geometries, range(1, 7), ["Affine", "Curved"],
+                        ["RealScalar", "ComplexScalar", "RealVector", "ComplexVector", "RealMatrix", "ComplexMatrix"],
+                        [1, 2, 3, 4, 8])}
         for mt in ["ON", "OFF"]:
             selected = []
             partitions = [r for r in rows if r["multithreaded"] == mt]
             self.assertEqual({r["np"] for r in partitions}, {"1", "2", "3", "4", "8"})
             for row in partitions:
-                pattern = command.split("-R '", 1)[1].split("'", 1)[0].replace("${{ matrix.np }}", row["np"])
+                pattern = command.split("-R '", 1)[1].split("'", 1)[0].replace("${{ matrix.np }}", row["np"]).replace("${{ matrix.geometry }}", row["geometry"])
                 selected.extend(name for name in expected if re.fullmatch(pattern, name))
-            self.assertEqual(len(selected), 420)
+            self.assertEqual(len(selected), 2520)
+            self.assertEqual(set(selected), expected)
+
+    def test_curved_nonlinear_registration_covers_each_case_once(self):
+        import re
+        from ci_tests import ROOT
+        directory = ROOT / "tests/convergence/isoparametric/NonlinearPoisson"
+        source = (directory / "NonlinearPoisson.cpp").read_text()
+        expected = {f"{suite}.{case}" for suite, case in
+                    re.findall(r"TEST_P\(Local(Test|Q[13]Test), (\w+)\)", source)}
+        registration = (directory / "CMakeLists.txt").read_text()
+        block = registration.split("set(_RODIN_CURVED_NONLINEAR_POISSON_CASES", 1)[1].split(")", 1)[0]
+        cases = block.split()
+        self.assertEqual(len(cases), 24)
+        self.assertEqual(len(cases), len(set(cases)))
+        self.assertEqual(set(cases), expected)
+        self.assertIn("${suite}${entry}/${geometry}", registration)
+
+    def test_stokes_split_preserves_both_orders_at_every_hierarchy_point(self):
+        from ci_tests import ROOT
+        for directory, suites in [("Stokes", ["StokesStabilityTest"]),
+                                  ("PETScStokes", ["LocalStabilityTest", "MPIStabilityTest"])]:
+            source = (ROOT / f"tests/convergence/h/{directory}/Stability.cpp").read_text()
+            for mapping in ["Affine", "Curved"]:
+                for resolution in [3, 4, 5]:
+                    for suite in suites:
+                        self.assertEqual(source.count(f"TEST_P({suite}, P4P3PressureSpectrum{mapping}N{resolution})"), 1)
+                    self.assertEqual(source.count(f"checkHigherOrderHierarchy<4>({resolution}, {str(mapping == 'Curved').lower()});"), len(suites))
+            self.assertIn("i == 0 ? AssemblyOrder : RefinedOrder", source)
+
+    def test_degree_nonlinear_registration_covers_every_independent_case(self):
+        from ci_tests import ROOT
+        directory = ROOT / "tests/convergence/p/NonlinearPoisson"
+        expected = set(re.findall(r"TEST_P\(NonlinearPoissonPTest, (\w+)\)",
+                                  (directory / "NonlinearPoisson.cpp").read_text()))
+        registration = (directory / "CMakeLists.txt").read_text()
+        cases = registration.split("foreach(case", 1)[1].split(")", 1)[0].split()
+        self.assertEqual(len(cases), len(set(cases)))
+        self.assertEqual(set(cases), expected)
+
+    def test_petsc_pressure_partitions_select_every_split_case_once(self):
+        import yaml
+        from ci_tests import ROOT
+        workflow = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())
+        job = workflow["jobs"]["PETScConvergence"]
+        command = next(step["run"] for step in job["steps"]
+                       if "geometry_pattern" in step.get("run", ""))
+        patterns = re.findall(r'pattern="([^"\n]+StokesStability_[^"\n]+)"', command)
+        self.assertEqual(len(patterns), 2)
+        geometries = ["Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Hexahedron", "Wedge"]
+        points = [f"Rates_{mapping}N{n}" for mapping in ["Affine", "Curved"] for n in [3, 4, 5]] + ["Controls"]
+        expected = set()
+        for rank in [None, 1, 2, 3, 4]:
+            prefix = "RodinConvergenceHPETSc" + ("MPI" if rank else "") + "StokesStability_"
+            middle = f"np{rank}_" if rank else ""
+            expected.update(prefix + middle + geometry for geometry in geometries)
+            expected.update(prefix + "P4P3_" + middle + point + "_" + geometry
+                            for point in points for geometry in geometries)
+            expected.add(prefix + "Utility" + (f"_np{rank}" if rank else ""))
+        rows = job["strategy"]["matrix"]["include"]
+        for mt in ["ON", "OFF"]:
+            selected = []
+            for row in rows:
+                if row["multithreaded"] != mt or not row["suite"].startswith("pressure_"):
+                    continue
+                local = row["context"] == "local"
+                geometry = {"pressure_light": "(Triangle|Quadrilateral|Hexahedron|Wedge)",
+                            "pressure_tetrahedron": "Tetrahedron", "pressure_pyramid": "Pyramid"}[row["suite"]]
+                rank = row["context"].removeprefix("np")
+                utility = ("|Utility" + ("" if local else "_np" + rank)) if row["suite"] == "pressure_light" else ""
+                pattern = patterns[0 if local else 1].replace("${geometry_pattern}", geometry).replace("${utility_pattern}", utility).replace("${rank}", rank)
+                selected.extend(name for name in expected if re.fullmatch(pattern, name))
+            self.assertEqual(len(selected), len(expected))
             self.assertEqual(set(selected), expected)
 
 

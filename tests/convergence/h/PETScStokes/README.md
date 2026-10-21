@@ -219,12 +219,13 @@ rank-local Shard operations. Each blocked velocity workspace is bounded by
 by the shared oracle; these individual admission policies do not bound total
 process memory. Sparse-input collection and the blocked oracle are verification
 operations, not a scalable solver benchmark.
-The registrations retain slow labels and 1800-second execution budgets,
-except the $P_4/P_3$ pyramid hierarchy, which receives 3600 seconds.
-The native route exceeded the earlier half-hour limit; local and
-rank-zero PETSc verification use the same independent spectral oracle.
-This allowance is not a measured upper runtime bound or a relaxation of
-the numerical criteria.
+Each of the six $P_4/P_3$ curvature/resolution points has a separate slow
+registration in both local and MPI contexts. Each case retains both quadrature
+orders and the independent spectral diagnostics. Its watchdog is 3600 seconds,
+except the largest pyramid point, which receives 10800 seconds; controls and
+lower-order registrations retain 1800 seconds. Pressure-spectrum CI jobs have
+six-hour execution allowances. These allowances are not measured upper runtime
+bounds or changes to the numerical criteria.
 The finite matrix does not establish a mesh-uniform inf-sup theorem;
 the pyramid/wedge stability argument remains a separate unresolved item.
 

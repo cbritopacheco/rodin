@@ -252,9 +252,10 @@ and requires an exactly zero spectrum. Pressure constants are interpolated
 in the actual degree-three basis. This is implemented coverage with
 numerical certification pending, not a mesh-uniform stability claim.
 
-The complete hierarchy and its missing-divergence control have separate
-slow registrations. The pyramid hierarchy has a 3600-second watchdog;
-all other hierarchies and controls retain 1800 seconds. The existing
+Each of the six curvature/resolution points has a separate slow registration,
+retaining both quadrature orders and every spectral consistency check. These
+cases have 3600-second watchdogs, except the $n=5$ pyramid cases, which receive
+10800 seconds. Missing-divergence controls retain 1800 seconds. The existing
 $P_2/P_1$ and $P_3/P_2$ geometry registrations exclude these new cases,
 so every compiled case is selected once. No refinement level or algebraic
 consistency budget is relaxed by the process partition.
@@ -263,14 +264,13 @@ CI runs this target separately from the baseline h/p/hp workload. Light
 geometries (triangle, quadrilateral, hexahedron and wedge), tetrahedron,
 and pyramid form three serial partitions per thread configuration.
 Algebraic utility and workspace checks belong to the light partition.
-Each job has a 180-minute build/execution budget; per-registration
+Pyramid jobs have a 360-minute build/execution budget; other jobs retain
+180 minutes. Per-registration
 watchdogs remain in force. The observed tetrahedral
 $P_4/P_3$ hierarchy took approximately sixteen minutes locally. This
 measurement motivates partitioning but is not a phase timing or a
 performance regression threshold. Complete numerical certification of
-the higher-order matrix remains pending. The native pyramid hierarchy
-exceeded its earlier 1800-second limit without a reported numerical
-assertion failure or memory stop. A later stack sample was inside the
-independent pressure-sized singular-value calculation. The one-hour
-allowance is an execution policy, not an established completed runtime
-or a change to the spectral acceptance criteria.
+the higher-order matrix remains pending. CI measured approximately 1900
+seconds for one quadrature-order evaluation at the largest pyramid point.
+The three-hour allowance retains the pair of independent evaluations;
+it is an execution policy, not a measured upper runtime bound.

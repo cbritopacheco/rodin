@@ -8,6 +8,44 @@ add_test(NAME RodinConvergenceHPETScStokesStability_Utility
 set_tests_properties(RodinConvergenceHPETScStokesStability_Utility
   PROPERTIES LABELS "convergence;petsc" TIMEOUT 60)
 rodin_suppress_external_mpi_lsan_for_test(RodinConvergenceHPETScStokesStability_Utility)
+
+# Independent hierarchy points retain both quadrature orders and all spectral
+# diagnostics. The same partition is used by local and distributed contexts.
+function(rodin_add_petsc_stokes_pressure_cases geometry rank)
+  set(_prefix RodinConvergenceHPETScStokesStability_P4P3)
+  set(_suite LocalStabilityTest)
+  set(_labels "convergence;petsc;slow")
+  set(_command $<TARGET_FILE:RodinConvergenceHPETScStokesStability>)
+  if(rank)
+    set(_prefix RodinConvergenceHPETScMPIStokesStability_P4P3_np${rank})
+    set(_suite MPIStabilityTest)
+    set(_labels "convergence;petsc;distributed;slow")
+    list(PREPEND _command ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${rank}
+      ${_RODIN_MPI_OVERSUBSCRIBE_FLAG})
+  endif()
+  foreach(point AffineN3 AffineN4 AffineN5 CurvedN3 CurvedN4 CurvedN5 Controls)
+    set(_group Rates_${point})
+    set(_case P4P3PressureSpectrum${point})
+    set(_timeout 3600)
+    if(point STREQUAL "Controls")
+      set(_group Controls)
+      set(_case P4P3MissingDivergenceRejected)
+      set(_timeout 1800)
+    elseif(geometry STREQUAL "Pyramid" AND point MATCHES "N5$")
+      # Two independent order evaluations exceed the former one-hour total.
+      set(_timeout 10800)
+    endif()
+    set(_test ${_prefix}_${_group}_${geometry})
+    add_test(NAME ${_test} COMMAND ${_command}
+      "--gtest_filter=AllGeometries/${_suite}.${_case}/${geometry}")
+    set_tests_properties(${_test} PROPERTIES LABELS "${_labels}" TIMEOUT ${_timeout})
+    if(rank)
+      set_tests_properties(${_test} PROPERTIES PROCESSORS ${rank})
+    endif()
+    rodin_suppress_external_mpi_lsan_for_test(${_test})
+  endforeach()
+endfunction()
+
 foreach(geometry Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
   set(_stability_test RodinConvergenceHPETScStokesStability_${geometry})
   add_test(NAME ${_stability_test}
@@ -16,23 +54,7 @@ foreach(geometry Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
   set_tests_properties(${_stability_test}
     PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
   rodin_suppress_external_mpi_lsan_for_test(${_stability_test})
-  foreach(group Rates Controls)
-    set(_case P4P3PressureSpectrumAcrossRefinementLevels)
-    if (group STREQUAL "Controls")
-      set(_case P4P3MissingDivergenceRejected)
-    endif()
-    set(_test RodinConvergenceHPETScStokesStability_P4P3_${group}_${geometry})
-    add_test(NAME ${_test}
-      COMMAND $<TARGET_FILE:RodinConvergenceHPETScStokesStability>
-        "--gtest_filter=AllGeometries/LocalStabilityTest.${_case}/${geometry}")
-    set(_timeout 1800)
-    # Rank-zero and local verification use the same independent spectral oracle.
-    if (geometry STREQUAL "Pyramid" AND group STREQUAL "Rates")
-      set(_timeout 3600)
-    endif()
-    set_tests_properties(${_test} PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT ${_timeout})
-    rodin_suppress_external_mpi_lsan_for_test(${_test})
-  endforeach()
+  rodin_add_petsc_stokes_pressure_cases(${geometry} 0)
 endforeach()
 rodin_add_petsc_refinement(RodinConvergenceHPETScStokesBoundary Traction.cpp
   GEOMETRIES Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge
@@ -82,25 +104,7 @@ if (RODIN_USE_MPI)
       set_tests_properties(${_stability_test} PROPERTIES
         LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
       rodin_suppress_external_mpi_lsan_for_test(${_stability_test})
-      foreach(group Rates Controls)
-        set(_case P4P3PressureSpectrumAcrossRefinementLevels)
-        if (group STREQUAL "Controls")
-          set(_case P4P3MissingDivergenceRejected)
-        endif()
-        set(_test RodinConvergenceHPETScMPIStokesStability_P4P3_np${np}_${group}_${geometry})
-        add_test(NAME ${_test}
-          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinConvergenceHPETScStokesStability>
-            "--gtest_filter=AllGeometries/MPIStabilityTest.${_case}/${geometry}")
-        set(_timeout 1800)
-        if (geometry STREQUAL "Pyramid" AND group STREQUAL "Rates")
-          set(_timeout 3600)
-        endif()
-        set_tests_properties(${_test} PROPERTIES
-          LABELS "convergence;petsc;distributed;slow" TIMEOUT ${_timeout} PROCESSORS ${np})
-        rodin_suppress_external_mpi_lsan_for_test(${_test})
-      endforeach()
+      rodin_add_petsc_stokes_pressure_cases(${geometry} ${np})
       add_test(NAME RodinConvergenceHPETScMPIStokes_np${np}_${geometry}
         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
           ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}

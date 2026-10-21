@@ -201,7 +201,20 @@ namespace
 
 namespace Rodin::Tests::Unit
 {
-  using H1RestrictionCase = std::tuple<Polytope::Type, size_t, bool>;
+  enum class H1RestrictionRange
+  {
+    RealScalar,
+    ComplexScalar,
+    RealVector,
+    ComplexVector,
+    RealMatrix,
+    ComplexMatrix
+  };
+
+  constexpr const char* RestrictionRanges[] = {"RealScalar", "ComplexScalar",
+    "RealVector", "ComplexVector", "RealMatrix", "ComplexMatrix"};
+
+  using H1RestrictionCase = std::tuple<Polytope::Type, size_t, bool, H1RestrictionRange>;
 
   /// @brief One geometry, degree and curvature mode of the complete restriction matrix.
   class MPISubMeshH1Restriction : public ::testing::TestWithParam<H1RestrictionCase>
@@ -226,7 +239,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(MPISubMeshH1Restriction, PolynomialRestriction)
   {
-    const auto [geometry, degree, curved] = GetParam();
+    const auto [geometry, degree, curved, selectedRange] = GetParam();
     const auto& world = *g_world;
     Context::MPI context(*g_env, world);
     constexpr Real PolynomialTolerance = 1e-10;
@@ -459,12 +472,27 @@ namespace Rodin::Tests::Unit
         }
       };
       const auto order = [&]<size_t K>() {
-        range.template operator()<K, Real>();
-        range.template operator()<K, Complex>();
-        range.template operator()<K, Math::SpatialVector<Real>>();
-        range.template operator()<K, Math::SpatialVector<Complex>>();
-        range.template operator()<K, Math::SpatialMatrix<Real>>();
-        range.template operator()<K, Math::SpatialMatrix<Complex>>();
+        switch (selectedRange)
+        {
+          case H1RestrictionRange::RealScalar:
+            range.template operator()<K, Real>();
+            break;
+          case H1RestrictionRange::ComplexScalar:
+            range.template operator()<K, Complex>();
+            break;
+          case H1RestrictionRange::RealVector:
+            range.template operator()<K, Math::SpatialVector<Real>>();
+            break;
+          case H1RestrictionRange::ComplexVector:
+            range.template operator()<K, Math::SpatialVector<Complex>>();
+            break;
+          case H1RestrictionRange::RealMatrix:
+            range.template operator()<K, Math::SpatialMatrix<Real>>();
+            break;
+          case H1RestrictionRange::ComplexMatrix:
+            range.template operator()<K, Math::SpatialMatrix<Complex>>();
+            break;
+        }
       };
       switch (degree)
       {
@@ -513,13 +541,17 @@ namespace Rodin::Tests::Unit
       ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge),
-      ::testing::Range(size_t(1), size_t(7)), ::testing::Bool()),
+      ::testing::Range(size_t(1), size_t(7)), ::testing::Bool(),
+      ::testing::Values(H1RestrictionRange::RealScalar, H1RestrictionRange::ComplexScalar,
+        H1RestrictionRange::RealVector, H1RestrictionRange::ComplexVector,
+        H1RestrictionRange::RealMatrix, H1RestrictionRange::ComplexMatrix)),
     [](const ::testing::TestParamInfo<H1RestrictionCase>& info) {
       const auto geometry = std::get<0>(info.param);
       const auto degree = std::get<1>(info.param);
       const bool curved = std::get<2>(info.param);
       return std::string(polytopeName(geometry)) + "_K" + std::to_string(degree) +
-        (curved ? "_Curved" : "_Affine");
+        (curved ? "_Curved_" : "_Affine_") +
+        RestrictionRanges[static_cast<size_t>(std::get<3>(info.param))];
     });
 
   /// @brief Verifies empty ranks construct P0 P1 H1 triangle boundary for MPI sub mesh sparse selection by checking exact expected values, MPI behavior.

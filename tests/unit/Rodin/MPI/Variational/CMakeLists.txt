@@ -102,39 +102,25 @@ foreach(np 1 2 3 4)
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIP0gTest_np${np})
 endforeach()
 
-# Preserve the complete restriction matrix while giving each geometry, degree
-# and curvature case its own watchdog. Every entry retains all six ranges and
-# full, boundary, sparse and nested submeshes. Eight ranks retain empty holders.
+# Each value range has its own watchdog; every entry retains full, boundary,
+# sparse and nested submeshes. Eight ranks retain empty holders.
 foreach(np 1 2 3 4 8)
   foreach(geometry Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
     foreach(degree RANGE 1 6)
       foreach(curvature Affine Curved)
-        set(restriction_case "${geometry}_K${degree}_${curvature}")
-        set(restriction_test "RodinMPIH1SubMeshRestrictionTest_${restriction_case}_np${np}")
-        add_test(NAME ${restriction_test}
-          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
-            "--gtest_filter=AllGeometriesAndOrders/MPISubMeshH1Restriction.PolynomialRestriction/${restriction_case}")
-        set_tests_properties(${restriction_test} PROPERTIES
-          LABELS "unit;distributed;slow" TIMEOUT 1200 PROCESSORS ${np})
-        rodin_suppress_external_mpi_lsan_for_test(${restriction_test})
+        foreach(range RealScalar ComplexScalar RealVector ComplexVector RealMatrix ComplexMatrix)
+          set(restriction_case "${geometry}_K${degree}_${curvature}_${range}")
+          set(restriction_test "RodinMPIH1SubMeshRestrictionTest_${restriction_case}_np${np}")
+          add_test(NAME ${restriction_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
+              "--gtest_filter=AllGeometriesAndOrders/MPISubMeshH1Restriction.PolynomialRestriction/${restriction_case}")
+          set_tests_properties(${restriction_test} PROPERTIES
+            LABELS "unit;distributed;slow" TIMEOUT 1200 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${restriction_test})
+        endforeach()
       endforeach()
     endforeach()
   endforeach()
-endforeach()
-
-add_executable(RodinMPIMatrixRangeTest MatrixRangeTest.cpp)
-target_link_libraries(RodinMPIMatrixRangeTest
-  PUBLIC GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
-if(RODIN_USE_PETSC)
-  target_link_libraries(RodinMPIMatrixRangeTest PUBLIC Rodin::PETSc)
-  target_compile_definitions(RodinMPIMatrixRangeTest PRIVATE RODIN_TEST_WITH_PETSC)
-endif()
-foreach(np 1 2 3 4)
-  add_test(NAME RodinMPIMatrixRangeTest_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinMPIMatrixRangeTest>)
-  set_tests_properties(RodinMPIMatrixRangeTest_np${np} PROPERTIES LABELS "unit;distributed")
-  rodin_suppress_external_mpi_lsan_for_test(RodinMPIMatrixRangeTest_np${np})
 endforeach()
