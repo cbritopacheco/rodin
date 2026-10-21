@@ -76,3 +76,21 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(reference->value, 42);
   }
 }
+
+/// @brief A const wrapper preserves the referent's own constness and identity.
+TEST(OptionalReference, ConstWrapperDereference)
+{
+  using namespace Rodin;
+  Integer value = 7;
+  const Utility::OptionalReference<Integer> reference(value);
+  static_assert(std::is_same_v<decltype(*reference), Integer&>);
+  EXPECT_EQ(&*reference, &value);
+  EXPECT_EQ(reference.operator->(), &value);
+  *reference = 9;
+  EXPECT_EQ(value, 9);
+  const Integer immutable = 11;
+  const Utility::OptionalReference<const Integer> constReference(immutable);
+  static_assert(std::is_same_v<decltype(*constReference), const Integer&>);
+  EXPECT_EQ(&*constReference, &immutable);
+  EXPECT_EQ(constReference.operator->(), &immutable);
+}

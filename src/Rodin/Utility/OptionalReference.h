@@ -55,7 +55,7 @@ namespace Rodin::Utility
        * @brief Pointer access operator.
        * @return Pointer to the referenced object.
        */
-      T* operator->()
+      T* operator->() const
       {
         return &(this->Parent::operator*().get());
       }
@@ -64,7 +64,7 @@ namespace Rodin::Utility
        * @brief Dereference operator.
        * @return Reference to the referenced object.
        */
-      T& operator*()
+      T& operator*() const
       {
         return this->Parent::operator*().get();
       }
