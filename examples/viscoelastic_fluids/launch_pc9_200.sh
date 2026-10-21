@@ -272,7 +272,7 @@ for x in "$EXE" "$EXE3D"; do
   [[ -x "$x" ]] || { echo "missing executable $x"; exit 1; }
 done
 grep -aq -- "psi_rb" "$EXE3D" || { echo "$EXE3D has no psi_rb formulation: wrong sources?"; exit 1; }
-if ! grep -q '^RODIN_USE_SCOTCH:BOOL=ON' "$REPO/$BUILD/CMakeCache.txt" 2> /dev/null; then
+if ! grep -qiE '^RODIN_USE_SCOTCH:BOOL=(ON|YES|TRUE|Y|1)$' "$REPO/$BUILD/CMakeCache.txt" 2> /dev/null; then
   echo "$BUILD is configured without Scotch (RODIN_USE_SCOTCH is not ON): the drivers would use the"
   echo "internal partitioner, much slower. Reconfigure and rebuild:"
   echo "   cmake -S $REPO -B $REPO/$BUILD -DRODIN_USE_SCOTCH=ON [-DSCOTCH_DIR=<scotch prefix>]"
