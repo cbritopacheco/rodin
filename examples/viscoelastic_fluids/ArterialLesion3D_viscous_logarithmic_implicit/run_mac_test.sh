@@ -67,6 +67,13 @@ if ! grep -qiE '^RODIN_USE_SCOTCH:BOOL=(ON|YES|TRUE|Y|1)$' "$REPO/$BUILD/CMakeCa
   echo "         (cmake -S $REPO -B $REPO/$BUILD -DRODIN_USE_SCOTCH=ON)"
 fi
 if [[ "${SKIP_BUILD:-0}" != 1 ]]; then
+  # A build configured on another branch has no target for this driver:
+  # re-run CMake on the current sources first.
+  if ! cmake --build "$REPO/$BUILD" --target help 2> /dev/null | grep -q ArterialLesion3D_viscous_logarithmic_implicit; then
+    echo "== re-running CMake in $BUILD (it was configured without viscoelastic_fluids) ..."
+    cmake -S "$REPO" -B "$REPO/$BUILD" > "$REPO/$BUILD/mac_test_cmake.log" 2>&1 \
+      || { echo "CMAKE FAILED, see $REPO/$BUILD/mac_test_cmake.log"; tail -20 "$REPO/$BUILD/mac_test_cmake.log"; exit 1; }
+  fi
   echo "== building the 3D driver (~6 GB of RAM per compiler process; -j 2) ..."
   cmake --build "$REPO/$BUILD" -j 2 --target ArterialLesion3D_viscous_logarithmic_implicit \
     > "$REPO/$BUILD/mac_test_build.log" 2>&1 \
