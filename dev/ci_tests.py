@@ -146,7 +146,8 @@ def selected_targets(build, group, exclude="", profile="", baseline=False):
                     (profile != "unit" or target["owner"].startswith("tests/unit/"))):
                 # Retain test TUs from the old all build which no execution lane
                 # compiles. Optional Unit does not have the baseline Slow lane.
-                profiles = [profile] if profile == "unit" else ["coverage", "slow"]
+                profiles = (["unit"] if profile == "unit" else
+                            ["manufactured"] if profile == "manufactured" else ["unit", "manufactured", "slow"])
                 keep = not any(p in requirements[target["target"]] for p in profiles)
         else:
             keep = target["kind"] == "test" and (execution_group(group_for(target)) == group or group_for(target) == group or
@@ -380,9 +381,11 @@ def selected(profile, test):
     raise ValueError("Unknown execution profile: " + profile)
 
 
-def run_group(build, group, profile):
+def run_group(build, group, profile, backend=None):
     stage, report = prepare(build, group, profile)
-    chosen = [test for test in report["tests"] if selected(profile, test)]
+    chosen = [test for test in report["tests"] if selected(profile, test) and
+              not (backend == "baseline" and profile == "unit" and
+                   "slow" in properties(test).get("LABELS", []))]
     inventory = {"group": group, "profile": profile, "registered": len(report["tests"]),
                  "selected": chosen, "targets": selected_targets(build, group, profile=profile)}
     (build / "ci-selection.json").write_text(json.dumps(inventory, indent=2))
@@ -417,8 +420,9 @@ def run_group(build, group, profile):
     return outcome
 
 
-def configure(build, group, profile, build_type, multithreaded, asan, ubsan):
-    coverage = profile != "manufactured" and asan == "OFF" and ubsan == "OFF"
+def configure(build, group, profile, build_type, multithreaded, asan, ubsan, backend=None):
+    backend = backend or {"unit": "optional", "manufactured": "default"}.get(profile, "baseline")
+    coverage = asan == "OFF" and ubsan == "OFF"
     options = {
         "CMAKE_BUILD_TYPE": build_type,
         "RODIN_USE_MPI": "ON", "RODIN_USE_PETSC": "ON",
@@ -438,13 +442,13 @@ def configure(build, group, profile, build_type, multithreaded, asan, ubsan):
     if profile == "convergence-baseline":
         options.update({"RODIN_USE_MPI": "OFF", "RODIN_USE_PETSC": "OFF",
                         "RODIN_BUILD_UNIT_TESTS": "OFF", "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
-                        "RODIN_BUILD_CONVERGENCE_TESTS": "ON", "RODIN_CODE_COVERAGE": "OFF"})
-    if profile == "unit":
+                        "RODIN_BUILD_CONVERGENCE_TESTS": "ON", "RODIN_CODE_COVERAGE": "ON"})
+    if backend == "optional":
         options.update({"CMAKE_PREFIX_PATH": os.environ["SUITESPARSE_PREFIX"],
                         "RODIN_USE_MUMPS": "OFF" if asan == "ON" else "ON",
                         "RODIN_USE_CHOLMOD": "ON", "RODIN_USE_PARU": "ON",
                         "RODIN_USE_SPQR": "ON", "RODIN_USE_UMFPACK": "ON"})
-    elif profile in ["slow", "coverage"]:
+    elif backend == "baseline":
         options.update({"RODIN_USE_SCOTCH": "ON", "RODIN_USE_UMFPACK": "ON",
                         "RODIN_USE_CHOLMOD": "ON", "RODIN_USE_SPQR": "ON"})
     subprocess.run(["cmake", "-S", str(ROOT), "-B", str(build)] +
@@ -457,6 +461,7 @@ def main():
     parser.add_argument("--build", type=Path, default=Path("build"))
     parser.add_argument("--group", required=True)
     parser.add_argument("--profile", choices=["unit", "manufactured", "slow", "coverage", "convergence-baseline"], default="unit")
+    parser.add_argument("--backend", choices=["optional", "default", "baseline"])
     parser.add_argument("--build-type", default="Release")
     parser.add_argument("--multithreaded", choices=["ON", "OFF"], default="ON")
     parser.add_argument("--asan", choices=["ON", "OFF"], default="OFF")
@@ -468,7 +473,7 @@ def main():
     build = args.build.resolve()
     if args.operation == "configure":
         configure(build, args.group, args.profile, args.build_type,
-                  args.multithreaded, args.asan, args.ubsan)
+                  args.multithreaded, args.asan, args.ubsan, args.backend)
         return 0
     if args.operation == "build":
         subprocess.run(["cmake", "--build", str(build), "--target", "RodinTestManifest"], check=True)
@@ -486,7 +491,7 @@ def main():
         _, report = prepare(build, args.group, args.profile)
         print(json.dumps(report, indent=2))
         return 0
-    return run_group(build, args.group, args.profile)
+    return run_group(build, args.group, args.profile, args.backend)
 
 
 if __name__ == "__main__":

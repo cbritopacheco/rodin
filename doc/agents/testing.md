@@ -152,12 +152,24 @@ selection, and runs CTest serially. Each distributed invocation keeps its
 registered MPI rank count. Build-time and discovery-only runtime profiles are
 redirected outside the measured coverage directory.
 
-Coverage producers upload production-only LCOV independently as they finish.
+Unsanitized Unit, Manufactured and Slow lanes upload production-only LCOV
+independently as they finish. Native/MPI/PETSc convergence and restriction lanes
+also capture and upload their own reports; sanitizer and installation checks do
+not contribute coverage. There is no separate coverage test execution lane.
+The former Coverage backend configuration is retained under ordinary Unit and
+Manufactured jobs as `Backends / Baseline`; their slow tests run only in Slow.
+Original optional-backend Unit and default-backend Manufactured configurations
+remain intact. Compilation contexts distinguish backend, optimization and
+threading; final line coverage is their union, never an average of percentages.
+
+`dev/ci_test_plan.py` reads the explicit workflow matrices with pinned PyYAML
+(provisioned by preflight) to inventory every targeted coverage partition.
 Zero-hit baseline jobs retain previously compiled test/template instantiations
 and production libraries even when those targets are absent from a runtime
 selection. Tests and benchmarks supply execution hits, never denominator
 entries. `Tests / Coverage / Finalize` requires every current-commit producer,
-successful uploads, and the complete original compilation inventory before
+successful uploads, report digests, and the complete configuration-specific
+compilation inventory before
 triggering Codecov notifications and enforcing the 95% production line floor.
 It neither rebuilds nor reruns tests. Missing producers cannot be replaced by
 carryforward coverage. The local guard tests run serially in `Tests / CMake / CI`.

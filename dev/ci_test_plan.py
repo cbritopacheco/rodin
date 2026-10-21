@@ -49,8 +49,9 @@ def native_convergence_groups(root=ROOT):
 
 
 def entry(profile, group, build_type="Release", multithreaded="ON",
-          asan="OFF", ubsan="OFF", baseline=False):
-    coordinates = [profile, group, build_type, multithreaded, asan, ubsan, str(baseline)]
+          asan="OFF", ubsan="OFF", baseline=False, backend=None):
+    backend = backend or {"unit": "optional", "manufactured": "default"}.get(profile, "baseline")
+    coordinates = [profile, group, build_type, multithreaded, asan, ubsan, str(baseline), backend]
     identity = hashlib.sha256(json.dumps(coordinates).encode()).hexdigest()[:20]
     path = display_group(group)
     if baseline:
@@ -59,7 +60,9 @@ def entry(profile, group, build_type="Release", multithreaded="ON",
         path += " / Slow"
     elif profile == "coverage":
         path = "Coverage / " + path
-    return {"profile": profile, "group": group, "build_type": build_type,
+    if backend == "baseline" and profile in ["unit", "manufactured"] and not baseline:
+        path += " / Backends / Baseline"
+    return {"profile": profile, "backend": backend, "group": group, "build_type": build_type,
             "multithreaded": multithreaded, "asan": asan, "ubsan": ubsan,
             "baseline": baseline, "name": path, "id": identity}
 
@@ -69,19 +72,26 @@ def plan(root=ROOT):
     unit["cmake/ThirdPartyIsolation"] = False
     manufactured = groups("manufactured", root)
     matrices = {name: [] for name in ["unit_1", "unit_2", "unit_3", "manufactured_1",
-                                     "manufactured_2", "slow", "coverage", "baseline"]}
+                                     "manufactured_2", "slow", "baseline"]}
     for suite, candidates, count in [("unit", unit, 3), ("manufactured", manufactured, 2)]:
         for index, group in enumerate(candidates):
             key = suite + "_" + str(index % count + 1)
             for build_type, mt, asan, ubsan in itertools.product(
                     ["Debug", "Release"], ["ON", "OFF"], ["ON", "OFF"], ["ON", "OFF"]):
                 matrices[key].append(entry(suite, group, build_type, mt, asan, ubsan))
+    # Preserve the former Coverage backend configuration in ordinary lanes.
+    # Slow tests already execute in this configuration and are not rerun here.
+    for suite, candidates, count in [("unit", unit, 3), ("manufactured", manufactured, 2)]:
+        for index, group in enumerate(candidates):
+            if group.startswith("cmake/"):
+                continue
+            for mt in ["ON", "OFF"]:
+                matrices[suite + "_" + str(index % count + 1)].append(
+                    entry(suite, group, multithreaded=mt, backend="baseline"))
     for group, slow in {**unit, **manufactured}.items():
         for mt in ["ON", "OFF"]:
             if slow:
                 matrices["slow"].append(entry("slow", group, multithreaded=mt))
-            # This replaces, rather than removes, the original Coverage test work.
-            matrices["coverage"].append(entry("coverage", group, multithreaded=mt))
     # Optional-backend Unit used to compile manufactured TUs without running
     # them. Retain their zero-hit instantiations once per instrumented profile.
     for group in manufactured:
@@ -89,13 +99,29 @@ def plan(root=ROOT):
             matrices["baseline"].append(entry("unit", group, build_type, mt, baseline=True))
     # The default all build also compiled production libraries even when no test
     # links one. Preserve that compilation inventory in bounded baseline jobs.
-    for profile, build_types in [("unit", ["Debug", "Release"]), ("coverage", ["Release"])]:
+    for profile, build_types in [("unit", ["Debug", "Release"]), ("coverage", ["Release"]),
+                                 ("manufactured", ["Debug", "Release"])]:
         for build_type, mt in itertools.product(build_types, ["ON", "OFF"]):
             matrices["baseline"].append(entry(profile, "src/Rodin", build_type, mt, baseline=True))
     for key, rows in matrices.items():
         if not rows or len(rows) > 256:
             raise ValueError(f"{key} has {len(rows)} jobs; adjust the named family bands (limit 256)")
     return matrices
+
+
+def targeted_plan(native):
+    """Read concrete execution matrices so added partitions cannot escape the gate."""
+    import yaml
+    workflow = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())
+    result = []
+    for job, definition in workflow["jobs"].items():
+        if not any(step.get("id") == "coverage_record" for step in definition.get("steps", [])):
+            continue
+        matrix = definition["strategy"]["matrix"]
+        rows = native if job == "ConvergenceBaseline" else matrix["include"]
+        for row in rows:
+            result.append({"job": job, "matrix": row})
+    return result
 
 
 def main():
@@ -107,6 +133,8 @@ def main():
     native = [{"multithreaded": mt, "suite": "baseline", "group": group,
                "path": display_group(group)} for group in native_convergence_groups() for mt in ["ON", "OFF"]]
     args.output.with_name("ci-convergence-plan.json").write_text(json.dumps(native, indent=2) + "\n")
+    args.output.with_name("ci-coverage-targets.json").write_text(
+        json.dumps(targeted_plan(native), indent=2) + "\n")
     if len(native) > 256:
         raise ValueError("Native convergence exceeds the matrix limit; split by refinement family")
     if os.environ.get("GITHUB_OUTPUT"):

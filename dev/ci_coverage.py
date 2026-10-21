@@ -42,8 +42,8 @@ def record(args):
 
 
 def compilation_context(definition):
-    profile = "baseline" if definition["profile"] in ["slow", "coverage"] else definition["profile"]
-    return profile, definition["build_type"], definition["multithreaded"], definition["asan"], definition["ubsan"]
+    backend = definition.get("backend", {"unit": "optional", "manufactured": "default"}.get(definition["profile"], "baseline"))
+    return backend, definition["build_type"], definition["multithreaded"], definition["asan"], definition["ubsan"]
 
 
 def verify_receipts(plan, folder, commit):
@@ -69,7 +69,10 @@ def verify_receipts(plan, folder, commit):
             selection = json.loads(selection_path.read_text())
             if selection["group"] != definition["group"] or selection["profile"] != definition["profile"]:
                 raise ValueError("Wrong invocation manifest: " + identity)
-        if receipt["coverage_expected"]:
+        coverage_expected = definition["asan"] == "OFF" and definition["ubsan"] == "OFF" and bool(receipt["compiled"])
+        if receipt["coverage_expected"] != coverage_expected:
+            raise ValueError("Incorrect coverage eligibility: " + identity)
+        if coverage_expected:
             report = path.parent / "RodinCoverage.info"
             if not (receipt["uploaded"] and receipt["report_exists"] and receipt["capture"] == "success"
                     and report.is_file() and hashlib.sha256(report.read_bytes()).hexdigest() == receipt["report_sha256"]):
@@ -82,12 +85,51 @@ def verify_receipts(plan, folder, commit):
     missing = expected.keys() - received.keys()
     if missing:
         raise ValueError("Missing producer records: " + ", ".join(sorted(missing)))
-    if len(inventory) != 6:
-        raise ValueError("Expected four optional-backend and two baseline compilation inventories")
+    expected_contexts = {compilation_context(d) for d in expected.values()
+                         if d["baseline"] and d["group"] == "src/Rodin"}
+    if set(inventory) != expected_contexts:
+        raise ValueError("Missing configuration compilation inventories")
     for context, required in inventory.items():
         absent = required - built.get(context, set())
         if absent:
             raise ValueError("Missing initial-coverage compilation targets for " + str(context) + ": " + str(sorted(absent)))
+    return received
+
+
+def target_identity(definition):
+    return hashlib.sha256(json.dumps(definition, sort_keys=True).encode()).hexdigest()
+
+
+def record_target(args):
+    definition = json.loads(os.environ["CI_TARGET_DEFINITION"])
+    report = args.build / "RodinCoverage.info"
+    args.output.mkdir(parents=True, exist_ok=True)
+    # This step follows successful test, capture and upload steps in the job.
+    receipt = {"definition": definition, "commit": os.environ["GITHUB_SHA"],
+               "report_sha256": hashlib.sha256(report.read_bytes()).hexdigest()}
+    (args.output / "target-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    for name in ["RodinCoverage.info", "coverage-audit.json"]:
+        (args.output / name).write_bytes((args.build / name).read_bytes())
+
+
+def verify_target_receipts(definitions, folder, commit):
+    expected = {target_identity(d): d for d in definitions}
+    if len(expected) != len(definitions):
+        raise ValueError("Duplicate targeted coverage definitions")
+    received = {}
+    for path in folder.rglob("target-receipt.json"):
+        receipt = json.loads(path.read_text())
+        identity = target_identity(receipt["definition"])
+        if identity not in expected or identity in received:
+            raise ValueError("Unexpected or duplicate targeted coverage producer")
+        if receipt["commit"] != commit:
+            raise ValueError("Stale targeted coverage producer")
+        report = path.parent / "RodinCoverage.info"
+        if not report.is_file() or hashlib.sha256(report.read_bytes()).hexdigest() != receipt["report_sha256"]:
+            raise ValueError("Missing or changed targeted coverage report")
+        received[identity] = receipt
+    if received.keys() != expected.keys():
+        raise ValueError("Missing targeted coverage producers: " + str(len(expected.keys() - received.keys())))
     return received
 
 
@@ -122,13 +164,7 @@ def finalize(args):
     plan = json.loads(args.plan.read_text())
     verify_receipts(plan, args.artifacts, os.environ["GITHUB_SHA"])
     reports = list(args.artifacts.rglob("RodinCoverage.info"))
-    # Legacy targeted producers retain their original artifacts and uploads.
-    # Successful job results alone cannot substitute for a missing LCOV artifact.
-    for prefix, count in [("coverage-audit-complex-h1-", 2),
-                          ("coverage-audit-petsc-", 4)]:
-        found = [p for p in args.artifacts.iterdir() if p.name.startswith(prefix)]
-        if len(found) != count or any(not (p / "RodinCoverage.info").is_file() for p in found):
-            raise ValueError("Missing targeted producer artifacts: " + prefix)
+    verify_target_receipts(json.loads(args.target_plan.read_text()), args.artifacts, os.environ["GITHUB_SHA"])
     lines = production_lines(reports)
     hit = sum(lines.values())
     rate = 100 * hit / len(lines)
@@ -140,14 +176,17 @@ def finalize(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=["record", "finalize", "threshold"])
+    parser.add_argument("operation", choices=["record", "record-target", "finalize", "threshold"])
     parser.add_argument("--build", type=Path, default=Path("build"))
     parser.add_argument("--output", type=Path, default=Path("coverage-summary.json"))
     parser.add_argument("--plan", type=Path, default=Path("ci-test-plan.json"))
+    parser.add_argument("--target-plan", type=Path, default=Path("ci-coverage-targets.json"))
     parser.add_argument("--artifacts", type=Path, default=Path("ci-artifacts"))
     args = parser.parse_args()
     if args.operation == "record":
         record(args)
+    elif args.operation == "record-target":
+        record_target(args)
     elif args.operation == "finalize":
         finalize(args)
     else:

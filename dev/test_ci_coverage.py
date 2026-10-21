@@ -80,6 +80,37 @@ class ProductionCoverageTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Missing producer"):
                 coverage.verify_receipts(plan, folder, "current")
 
+    def test_targeted_receipts_require_exact_commit_partition_and_report(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            definition = {"job": "Convergence", "matrix": {"multithreaded": "ON", "suite": "diffusion"}}
+            expected = [definition]
+            with self.assertRaisesRegex(ValueError, "Missing targeted"):
+                coverage.verify_target_receipts(expected, folder, "current")
+            report = folder / "RodinCoverage.info"
+            report.write_text("SF:src/Rodin/Math/Foo.h\nDA:1,1\nend_of_record\n")
+            receipt = {"definition": definition, "commit": "current",
+                       "report_sha256": hashlib.sha256(report.read_bytes()).hexdigest()}
+            path = folder / "target-receipt.json"
+            path.write_text(json.dumps(receipt))
+            self.assertEqual(len(coverage.verify_target_receipts(expected, folder, "current")), 1)
+            with self.assertRaisesRegex(ValueError, "Stale targeted"):
+                coverage.verify_target_receipts(expected, folder, "other")
+            with self.assertRaisesRegex(ValueError, "Unexpected"):
+                coverage.verify_target_receipts([{**definition, "matrix": {"multithreaded": "OFF"}}], folder, "current")
+            report.write_text("changed")
+            with self.assertRaisesRegex(ValueError, "changed targeted"):
+                coverage.verify_target_receipts(expected, folder, "current")
+
+    def test_backend_context_combines_execution_lanes_without_combining_build_variants(self):
+        definition = {"profile": "unit", "backend": "baseline", "build_type": "Release",
+                      "multithreaded": "ON", "asan": "OFF", "ubsan": "OFF"}
+        self.assertEqual(coverage.compilation_context(definition),
+                         coverage.compilation_context({**definition, "profile": "manufactured"}))
+        for field, value in [("backend", "optional"), ("multithreaded", "OFF"), ("build_type", "Debug")]:
+            self.assertNotEqual(coverage.compilation_context(definition),
+                                coverage.compilation_context({**definition, field: value}))
+
 
 if __name__ == "__main__":
     unittest.main()

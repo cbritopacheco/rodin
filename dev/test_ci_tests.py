@@ -50,6 +50,31 @@ class ExecutionProfilesTest(unittest.TestCase):
         self.assertTrue(ci.selected("coverage", test("manufactured-mpi", "manufactured", "distributed")))
         self.assertFalse(ci.selected("manufactured", test("slow", "manufactured", "slow")))
 
+    def test_configuration_coverage_eligibility_and_backend_contract(self):
+        import itertools
+        for profile in ["unit", "manufactured", "slow"]:
+            for build_type, mt, asan, ubsan in itertools.product(
+                    ["Debug", "Release"], ["ON", "OFF"], ["ON", "OFF"], ["ON", "OFF"]):
+                with patch.dict(os.environ, {"SUITESPARSE_PREFIX": "/tmp/suitesparse"}), \
+                        patch.object(ci.subprocess, "run") as run:
+                    ci.configure(Path("build"), "unit/Rodin/Math", profile, build_type, mt, asan, ubsan)
+                    options = dict(a[2:].split("=", 1) for a in run.call_args.args[0] if a.startswith("-D"))
+                self.assertEqual(options["RODIN_CODE_COVERAGE"], "ON" if asan == ubsan == "OFF" else "OFF")
+                self.assertEqual(options["CMAKE_BUILD_TYPE"], build_type)
+                self.assertEqual(options["RODIN_MULTITHREADED"], mt)
+                if profile == "unit":
+                    self.assertEqual(options["RODIN_USE_PARU"], "ON")
+                    self.assertEqual(options["RODIN_USE_MUMPS"], "OFF" if asan == "ON" else "ON")
+                if profile == "slow":
+                    self.assertEqual(options["RODIN_USE_SCOTCH"], "ON")
+        for profile in ["unit", "manufactured"]:
+            with patch.object(ci.subprocess, "run") as run:
+                ci.configure(Path("build"), "unit/Rodin/Math", profile, "Release", "ON", "OFF", "OFF", "baseline")
+                options = dict(a[2:].split("=", 1) for a in run.call_args.args[0] if a.startswith("-D"))
+            for option in ["RODIN_USE_SCOTCH", "RODIN_USE_UMFPACK", "RODIN_USE_CHOLMOD", "RODIN_USE_SPQR"]:
+                self.assertEqual(options[option], "ON")
+            self.assertNotIn("RODIN_USE_PARU", options)
+
 
 class ScopedCTestTest(unittest.TestCase):
     def test_unbuilt_discovery_and_invocation_preservation(self):

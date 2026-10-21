@@ -6,6 +6,9 @@ name: Tests / Group
       profile:
         type: string
         required: true
+      backend:
+        type: string
+        required: true
       group:
         type: string
         required: true
@@ -37,16 +40,16 @@ permissions:
   contents: read
 jobs:
   Run:
-    name: gcc-14, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
+    name: gcc-14, ${{ inputs.backend }}, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
-      MAKEFLAGS: ${{ inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '-j1' || '-j2'
+      MAKEFLAGS: ${{ inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '-j1' || '-j2'
         }}
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 1
       GCOV: gcov-14
-      RODIN_COVERAGE: ${{ inputs.profile != 'manufactured' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && 'ON' || 'OFF' }}
+      RODIN_COVERAGE: ${{ inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && 'ON' || 'OFF' }}
       SUITESPARSE_VERSION: 7.14.1
       SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
     steps:
@@ -94,9 +97,9 @@ jobs:
         with:
           path: ${{ env.SUITESPARSE_PREFIX }}
           key: suitesparse-${{ env.SUITESPARSE_VERSION }}-${{ runner.os }}-gcc-14
-        if: inputs.profile == 'unit'
+        if: inputs.backend == 'optional'
       - name: Build SuiteSparse
-        if: inputs.profile == 'unit' && steps.suitesparse.outputs.cache-hit != 'true'
+        if: inputs.backend == 'optional' && steps.suitesparse.outputs.cache-hit != 'true'
         run: |
           curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
           cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
@@ -112,12 +115,13 @@ jobs:
         env:
           GROUP: ${{ inputs.group }}
           PROFILE: ${{ inputs.profile }}
+          BACKEND: ${{ inputs.backend }}
           BUILD_TYPE: ${{ inputs.build_type }}
           MULTITHREADED: ${{ inputs.multithreaded }}
           ASAN: ${{ inputs.asan }}
           UBSAN: ${{ inputs.ubsan }}
         run: |
-          python3 dev/ci_tests.py configure --group "$GROUP" --profile "$PROFILE" \
+          python3 dev/ci_tests.py configure --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND" \
             --build-type "$BUILD_TYPE" --multithreaded "$MULTITHREADED" --asan "$ASAN" --ubsan "$UBSAN"
       - name: Build selected targets
         id: build
@@ -126,7 +130,7 @@ jobs:
           GROUP: ${{ inputs.group }}
           PROFILE: ${{ inputs.profile }}
           BASELINE: ${{ inputs.baseline }}
-          PARALLEL: ${{ inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '1' ||
+          PARALLEL: ${{ inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '1' ||
             '2' }}
         run: |
           args=()
@@ -145,7 +149,8 @@ jobs:
         env:
           GROUP: ${{ inputs.group }}
           PROFILE: ${{ inputs.profile }}
-        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE"
+          BACKEND: ${{ inputs.backend }}
+        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND"
       - name: Capture production coverage
         id: capture
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.build.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}
@@ -169,7 +174,7 @@ jobs:
           plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ inputs.baseline && 'baseline' || inputs.profile }}
-          name: ${{ inputs.name }} (${{ inputs.build_type }}, MT=${{ inputs.multithreaded }}, ASan=${{ inputs.asan }}, UBSan=${{ inputs.ubsan }})
+          name: ${{ inputs.name }} (${{ inputs.backend }}, ${{ inputs.build_type }}, MT=${{ inputs.multithreaded }}, ASan=${{ inputs.asan }}, UBSan=${{ inputs.ubsan }})
           root_dir: ${{ github.workspace }}
           use_pypi: true
           fail_ci_if_error: true
