@@ -1,29 +1,37 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  run_mac_test.sh -- the hardest 3D case on a laptop (macOS or Linux):
-#  S75, fluid R (the gsPTT blood model), Re 600, Wo 5.5, sinusoidal inflow
-#  A = 0.5, BDF2, psi_rb, on the layer-refined coarse mesh S75_pipe_layersc
-#  (121k tetrahedra, 37% of inter, the throat wall and the jet shear layer
-#  at the h of inter).
+#  run_mac_test.sh -- the hardest 3D case on a laptop (macOS or Linux), as an
+#  A/B test of the stabilisation: S75, fluid R (the gsPTT blood model),
+#  Re 600, Wo 5.5, sinusoidal inflow A = 0.5, BDF2, dynamic subscales.
 #
 #     cd ~/rodin && bash examples/viscoelastic_fluids/ArterialLesion3D_viscous_logarithmic_implicit/run_mac_test.sh
 #
-#  It builds the 3D driver (SKIP_BUILD=1 to skip), checks that the build has
-#  Scotch, then runs in the background and prints how to follow it. At the
-#  end (or when it stops on an error) locate_blowup.py writes where |sigma|,
-#  |u| and psi were extreme in the last outputs to blowup.txt.
+#  Variants (VARIANTS, run at the same time, the cores shared among them):
+#     new     psi_rb, stress subscale residual without d_t psi_h (default)
+#     old     psi_rb with d_t psi_h in it (-al_subscale_time_residual 1): the
+#             former scheme, which blew up at t = 0.14 s on layersc
+#     nodiv   new without the div sigma subscale u3 (-al_stress_div_scale 0)
+#     exp     the exp form (Moreno et al.), without d_t E_h in its subscale
+#     expold  the exp form as before (-al_subscale_time_residual 1)
+#     psi     the former term-by-term psi form
+#  The flow peaks at t = T/2 = 0.128 s and the former failures came after it,
+#  in the deceleration: one cycle (CYCLES=1, the ramp cycle) is enough.
+#
+#  It builds the 3D driver (SKIP_BUILD=1 to skip; re-runs CMake if the build
+#  has no target for it), checks Scotch, runs in the background and, at the
+#  end, writes summary.txt (per variant: last t, max |sigma|, retries, status)
+#  and, with numpy and h5py, <variant>/blowup.txt (where |sigma|, |u| and psi
+#  were extreme in the last outputs).
 #
 #  Environment (defaults):
-#     NP       performance cores (sysctl hw.perflevel0.physicalcpu on macOS)
-#     STEPS=400 (steps per cycle: dt 2.5 times that of the campaign, a solver
-#              test, not a resolved run)   CYCLES=2 (the ramp cycle and one more)
-#     OUTPUT_EVERY=20
+#     VARIANTS="new old nodiv exp"   MESH_LEVEL=xcoarse (22k tetrahedra;
+#              layersxc 75k, layersc 121k: the throat wall and jet shear layer
+#              refined)
+#     NP       performance cores (sysctl hw.perflevel0.physicalcpu on macOS),
+#              shared among the variants (at least 1 each)
+#     STEPS=200 (steps per cycle)   CYCLES=1   OUTPUT_EVERY=5
 #     SOLVER   lulag (MUMPS LU, lagged) with >= 16 GB of RAM, else gmres
-#     VARIANT  base (psi_rb) | nodiv (psi_rb without the div sigma subscale)
-#              | psi (the former formulation)
 #     BUILD=build   OUT=$HOME/Results/mac_test   MPIRUN=mpirun
-#  The earlier 3D failures (pc9): Re 600 S75, psi, at t = 0.108 s; Re 300
-#  with the CCA waveform at t = 0.28 s (S75) and 0.59 s (A200).
 # =============================================================================
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,10 +39,11 @@ REPO="$(cd "$HERE/../../.." && pwd)"
 BUILD="${BUILD:-build}"
 OUT="${OUT:-$HOME/Results/mac_test}"
 MPIRUN="${MPIRUN:-mpirun}"
-STEPS="${STEPS:-400}"
-OUTPUT_EVERY="${OUTPUT_EVERY:-20}"
-CYCLES="${CYCLES:-2}"
-VARIANT="${VARIANT:-base}"
+STEPS="${STEPS:-200}"
+CYCLES="${CYCLES:-1}"
+OUTPUT_EVERY="${OUTPUT_EVERY:-5}"
+VARIANTS="${VARIANTS:-new old nodiv exp}"
+MESH_LEVEL="${MESH_LEVEL:-xcoarse}"
 MESHDIR="$REPO/resources/examples/viscoelastic_fluids"
 EXE="$REPO/$BUILD/examples/viscoelastic_fluids/ArterialLesion3D_viscous_logarithmic_implicit/ArterialLesion3D_viscous_logarithmic_implicit"
 PY="${PYTHON:-$(command -v python3)}"
@@ -49,16 +58,12 @@ else
   memgb=$(( $(awk '/MemTotal/ {print $2}' /proc/meminfo) / 1048576 ))
 fi
 NP="${NP:-$ncores}"
+nvar=$(echo $VARIANTS | wc -w | tr -d ' ')
+NPV=$(( NP / nvar )); (( NPV < 1 )) && NPV=1
 if [[ -z "${SOLVER:-}" ]]; then
   if (( memgb >= 16 )); then SOLVER=lulag; else SOLVER=gmres; fi
 fi
-case "$VARIANT" in
-  base)  FORM=psi_rb; EXTRA="" ;;
-  nodiv) FORM=psi_rb; EXTRA="-al_stress_div_scale 0" ;;
-  psi)   FORM=psi;    EXTRA="" ;;
-  *) echo "VARIANT must be base, nodiv or psi"; exit 1 ;;
-esac
-echo "== $(uname -s), $ncores performance cores, ${memgb} GB: NP=$NP, solver $SOLVER, variant $VARIANT ($FORM $EXTRA)"
+echo "== $(uname -s), $ncores performance cores, ${memgb} GB: variants [$VARIANTS], $NPV rank(s) each, mesh $MESH_LEVEL, solver $SOLVER"
 
 # ---- build and checks --------------------------------------------------------------
 [[ -f "$REPO/$BUILD/CMakeCache.txt" ]] || { echo "no build in $REPO/$BUILD (set BUILD=...)"; exit 1; }
@@ -80,28 +85,62 @@ if [[ "${SKIP_BUILD:-0}" != 1 ]]; then
     || { echo "BUILD FAILED, see $REPO/$BUILD/mac_test_build.log"; tail -20 "$REPO/$BUILD/mac_test_build.log"; exit 1; }
 fi
 [[ -x "$EXE" ]] || { echo "missing $EXE"; exit 1; }
-grep -aq -- "psi_rb" "$EXE" || { echo "$EXE has no psi_rb: rebuild from the current sources"; exit 1; }
-MESH="$MESHDIR/S75_pipe_layersc.mesh"
+grep -aq -- "-al_subscale_time_residual" "$EXE" || { echo "$EXE is older than the sources: rebuild (without SKIP_BUILD)"; exit 1; }
+MESH="$MESHDIR/S75_pipe_${MESH_LEVEL}.mesh"
 if [[ ! -f "$MESH" ]] || ! head -1 "$MESH" | grep -q MeshVersionFormatted; then
+  case "$MESH_LEVEL" in
+    layersc)  margs=(0.7 -setnumber layers 1) ;;
+    layersxc) margs=(0.7 -setnumber layers 1 -setnumber hb 0.3 -setnumber hwk 0.16 -setnumber Lwk 4
+                     -setnumber Lsl 3 -setnumber hwl 0.2 -setnumber hwmax 0.14 -setnumber Ld 15) ;;
+    *) echo "mesh $MESH not found"; exit 1 ;;
+  esac
   echo "== making $MESH (python gmsh) ..."
-  "$PY" "$HERE/make_lesion_mesh_3d.py" S75 0.7 "$MESH" -setnumber layers 1 || exit 1
+  "$PY" "$HERE/make_lesion_mesh_3d.py" S75 "${margs[0]}" "$MESH" "${margs[@]:1}" || exit 1
 fi
 
 # ---- run ----------------------------------------------------------------------------
-mkdir -p "$OUT"
-DIR="$OUT/Re600_Wo5.5/S75/R"
-LOG="$OUT/mac_test_$VARIANT.log"
+mkdir -p "$OUT/$MESH_LEVEL"
+PIDS=""
+for V in $VARIANTS; do
+  case "$V" in
+    new)    FORM=psi_rb; EXTRA="" ;;
+    old)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 1" ;;
+    nodiv)  FORM=psi_rb; EXTRA="-al_stress_div_scale 0" ;;
+    exp)    FORM=exp;    EXTRA="" ;;
+    expold) FORM=exp;    EXTRA="-al_subscale_time_residual 1" ;;
+    psi)    FORM=psi;    EXTRA="" ;;
+    *) echo "unknown variant $V"; exit 1 ;;
+  esac
+  rm -rf "$OUT/$MESH_LEVEL/$V"
+  (
+    env FLUIDS=R NP="$NPV" TIME_ORDER=2 MESH_LEVEL="$MESH_LEVEL" OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" \
+      CYCLES_R="$CYCLES" SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" \
+      EXE3D="$EXE" MPIRUN="$MPIRUN" OUT3D="$OUT/$MESH_LEVEL/$V" RETRY=0 bash "$HERE/run_3d.sh" 600 S75
+    d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"
+    if "$PY" -c "import numpy, h5py" 2> /dev/null && [[ -f "$d/case.xdmf" ]]; then
+      "$PY" "$HERE/locate_blowup.py" "$d" --last 8 > "$OUT/$MESH_LEVEL/$V/blowup.txt" 2>&1
+    fi
+  ) > "$OUT/$MESH_LEVEL/$V.log" 2>&1 < /dev/null &
+  PIDS="$PIDS $!"
+  echo "   started $V ($FORM $EXTRA) -> $OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"
+  sleep 2
+done
 (
-  env FLUIDS=R NP="$NP" TIME_ORDER=2 MESH_LEVEL=layersc OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" CYCLES_R="$CYCLES" \
-    SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" EXE3D="$EXE" \
-    MPIRUN="$MPIRUN" OUT3D="$OUT" bash "$HERE/run_3d.sh" 600 S75
-  if "$PY" -c "import numpy, h5py" 2> /dev/null && [[ -f "$DIR/case.xdmf" ]]; then
-    "$PY" "$HERE/locate_blowup.py" "$DIR" --last 6 > "$DIR/blowup.txt" 2>&1
-  fi
-  echo "== mac test finished: $(date)"
-) > "$LOG" 2>&1 < /dev/null &
-echo "== started (pid $!): log $LOG, case $DIR"
-echo "   follow:   tail -f $DIR/run.log | grep -E 'Step|timing|reject|Fatal|partition'"
-echo "   CSV:      $DIR/case.csv  (maxSigma, newtonIts, dt, retries per step)"
-echo "   stop:     pkill -f ArterialLesion3D_viscous_logarithmic_implicit"
-echo "   at the end: $DIR/blowup.txt (needs python3 with numpy and h5py)"
+  for p in $PIDS; do while kill -0 "$p" 2> /dev/null; do sleep 30; done; done
+  {
+    echo "variant      status  t_end      max|sigma|  max|u|   retries  Newton(max)"
+    for V in $VARIANTS; do
+      d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"
+      st=RUNNING; [[ -f "$d/DONE" ]] && st=DONE; [[ -f "$d/FAILED" ]] && st=FAILED
+      awk -F, -v v="$V" -v st="$st" 'NR == 1 { for (i = 1; i <= NF; i++) c[$i] = i; next }
+        { t = $c["t"]; s = $c["maxSigma"] + 0; u = $c["maxU"] + 0; r += $c["retries"];
+          if (s > sm) sm = s; if (u > um) um = u; if ($c["newtonIts"] + 0 > nm) nm = $c["newtonIts"] + 0 }
+        END { printf "%-12s %-7s %-10.5f %-11.4g %-8.3g %-8d %d\n", v, st, t, sm, um, r, nm }' "$d/case.csv" 2> /dev/null \
+        || echo "$V $st (no case.csv)"
+    done
+  } > "$OUT/$MESH_LEVEL/summary.txt"
+  echo "== mac test finished: $(date)" >> "$OUT/$MESH_LEVEL/summary.txt"
+) > /dev/null 2>&1 < /dev/null &
+echo "== follow:  tail -n 3 $OUT/$MESH_LEVEL/*/Re600_Wo5.5/S75/R/case.csv"
+echo "   end:     $OUT/$MESH_LEVEL/summary.txt and $OUT/$MESH_LEVEL/<variant>/blowup.txt"
+echo "   stop:    pkill -f ArterialLesion3D_viscous_logarithmic_implicit"

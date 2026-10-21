@@ -336,6 +336,11 @@ namespace Rodin::Examples::ViscoelasticFluids
         std::array<Eigen::Matrix3d, 6> M;
         Eigen::Matrix3d K;
         Eigen::Matrix3d R;
+        /// @brief The BDF part of R, k_a (E - E_hist)/dtM, and its part that
+        ///        is not linear in psi, Kt = k_a (E - E_hist - sum_m psi_m D_m)/dtM
+        ///        (Config::subscaleTimeResidual).
+        Eigen::Matrix3d rate;
+        Eigen::Matrix3d Kt;
     };
 
     Eigen::Matrix3d nonlinearMap(
@@ -686,6 +691,10 @@ namespace Rodin::Examples::ViscoelasticFluids
               // R = sum_m psi_m M_m + k_a (u . grad) Dexp[psi] + R_u[u] + K, with
               // R_u[u] = (k_a 2 - 1) eps(u) + k_a (sum_j u_j G_j - (L E + E L^T)).
               e.value.K = relax + rate - sumPsiM - ka * adv;
+              e.value.rate = rate;
+              e.value.Kt = rate;
+              for (size_t m = 0; m < 6; ++m)
+                e.value.Kt -= (ka / md.dtM) * pk[m] * e.value.D[m];
               e.have |= LogExpForm;
             }
           }
@@ -2109,6 +2118,12 @@ namespace Rodin::Examples::ViscoelasticFluids
     // that each (trial, test) pair is assembled once: chi_B - alpha3' A(chi_B).
     const auto testD = chiD + ma3 * m_alpha3Dyn * AD;
     const auto testO = chiO + ma3 * m_alpha3Dyn * AO;
+    // d_t E_h leaves the residual of the stress subscale (Config::
+    // subscaleTimeResidual off): + alpha3' <k_a (E - E_hist)/dtM, A(chi) +
+    // eps(v)>, E linearised as in the momentum, takes it back.
+    const Real cT = m_cfg.subscaleTimeResidual ? 0.0 : 1.0;
+    const auto rateTrial = (cT * ka / dtM) * m_alpha3Dyn * (dexp<D>(at, m_psiD) + dexp<O>(at, m_psiO));
+    const auto rateKnown = cT * m_alpha3Dyn * fromPoint(at, LogExpForm, [](const LogPoint& q) { return q.Kt; });
 
     // ---- Subscales of step n --------------------------------------------------
     const auto u1n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u1; });
@@ -2141,6 +2156,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       + withOrder(Integral(stressKnown, AD))
       + withOrder(Integral(stressKnown, AO))
       + withOrder(Integral(stressKnown, symV))
+      + withOrder(Integral(rateTrial, AD)) + withOrder(Integral(rateTrial, AO))
+      + withOrder(Integral(rateTrial, symV))
+      + withOrder(Integral(rateKnown, AD)) + withOrder(Integral(rateKnown, AO))
+      + withOrder(Integral(rateKnown, symV))
 
       // ---- Momentum, split OSS, dynamic subscales ------------------------------
       // u1: <u1, -rho (grad v) u^n>, u1 = alpha1' (rho u1^n/dt - rho P[(grad u) u^n])
@@ -2332,11 +2351,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       + (-1.0) * tauR * Mult(adjointJN(1, 1, wO), m_chiO);
     const auto testD = m_chiD + stabD;
     const auto testO = m_chiO + stabO;
-    // d_t psi_h leaves the residual of psi~ (Config::psiRBTimeResidual off):
+    // d_t psi_h leaves the residual of psi~ (Config::subscaleTimeResidual off):
     // cT (psi - psi_hist) is taken back from the stabilisation terms below
     // (the Petrov-Galerkin test, and sigma~ in the momentum).
-    const Real cT = m_cfg.psiRBTimeResidual ? 0.0 : 1.0 / dtM;
-    const Real hT = m_cfg.psiRBTimeResidual ? 1.0 : 0.0;   // psi_hist in R_known
+    const Real cT = m_cfg.subscaleTimeResidual ? 0.0 : 1.0 / dtM;
+    const Real hT = m_cfg.subscaleTimeResidual ? 1.0 : 0.0;   // psi_hist in R_known
     const auto crossD = (-1.0) * tauR * Mult(adjointJN(0, 1, wO), m_chiD);   // residual O, chi_D
     const auto crossO = (-1.0) * tauR * Mult(adjointJN(1, 0, wD), m_chiO);   // residual D, chi_O
     // tau' pair<C>(JN[memP psi~^n + Pi[R^n]]) = tau' sum_B A[C][B] y_B.
@@ -2578,6 +2597,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
       &m_psiOldD, &m_psiOldO, &m_psiNm1D, &m_psiNm1O };
     const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+    const Real cT = m_cfg.subscaleTimeResidual ? 0.0 : 1.0;   // d_t E_h out of R (setupFlowExp)
 
     if (m_cfg.dynamicSubscales)
     {
@@ -2585,7 +2605,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       // psi rule, with the same data as the assembled terms: u^n advects, the
       // projections are those of the step.
       const auto& pSol = m_p.getSolution();
-      auto sweep = Integral(PointwiseScalar([this, at, s, rho, memU, memS, &pSol](const Point& p) -> Real {
+      auto sweep = Integral(PointwiseScalar([this, at, s, rho, memU, memS, cT, &pSol](const Point& p) -> Real {
         const LogPoint& q = logPointAt(at, p, LogExpForm);
         const SubscaleStore::Entry& old = subscales().at(p);
         const Real a1 = m_tauK.getValue(p);
@@ -2604,7 +2624,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         e.u2 = a1 * (memU * old.u2 - (toEigen(Grad(pSol).getValue(p)) - toEigen(m_piGradP.get().getValue(p))));
         e.u3 = a1 * (memU * old.u3 + (s * divE - toEigen(m_piDivSigma.get().getValue(p))));
         const Eigen::Matrix3d piR = unpack(m_piRD.get().getValue(p), m_piRO.get().getValue(p));
-        e.sig = a3 * (memS * old.sig - (q.R - piR));
+        e.sig = a3 * (memS * old.sig - (q.R - cT * q.rate - piR));
         subscales().stage(p, e);
         return 0.0;
       }, 2), m_qFlux);
@@ -2615,7 +2635,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     }
 
     // Pi[R^{n+1}], read as Pi[R^n] by the next step.
-    const auto R = fromPoint(at, LogExpForm, [](const LogPoint& q) { return q.R; });
+    const auto R = fromPoint(at, LogExpForm, [cT](const LogPoint& q) -> Eigen::Matrix3d {
+      return q.R - cT * q.rate; });
     m_piRD.project(voigtD(R));
     m_piRO.project(voigtO(R));
   }
@@ -2642,7 +2663,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         Eigen::Matrix3d R;
         Eigen::Vector3d divE;
     };
-    const Real hT = m_cfg.psiRBTimeResidual ? 1.0 : 0.0;
+    const Real hT = m_cfg.subscaleTimeResidual ? 1.0 : 0.0;
     const auto stepPoint = [this, model, dtM, hT](const Point& p) -> StepPoint {
       const Eigen::Matrix3d psi = unpack(m_psiItD.getValue(p), m_psiItO.getValue(p));
       const auto J = Jacobian(m_uIt).getValue(p);
@@ -2656,7 +2677,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       const auto& B = voigtBasisEigen();
       const LogEig eig = logEig(psi);
       StepPoint out;
-      // d_t psi_h only with Config::psiRBTimeResidual (P^perp[d_t psi_h] = 0).
+      // d_t psi_h only with Config::subscaleTimeResidual (P^perp[d_t psi_h] = 0).
       out.R = (hT / dtM) * (psi - unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p))) +
         nonlinearMap(psi, L, model);
       out.divE.setZero();
@@ -3572,9 +3593,8 @@ namespace Rodin::Examples::ViscoelasticFluids
                     << " steps and at every cycle boundary" << Alert::Raise;
       Alert::Info() << "[run] formulation " << m_cfg.formulation << ", "
                     << (m_cfg.dynamicSubscales ? "dynamic" : "quasi-static") << " subscales"
-                    << (m_cfg.formulation == "psi_rb"
-                          ? (m_cfg.psiRBTimeResidual ? ", d_t psi_h in R(psi~)" : ", R(psi~) without d_t psi_h")
-                          : "")
+                    << (m_cfg.formulation == "psi" ? ""
+                          : (m_cfg.subscaleTimeResidual ? ", d_t of the FE field in the stress subscale residual" : ", stress subscale residual without d_t of the FE field"))
                     << "; Newton on (u, p, psi) with the momentum convection at u* (BDF extrapolation);"
                     << " the PC is an LU of an earlier Jacobian, GMRES solves the current one" << Alert::Raise;
       if (m_cfg.adaptiveTimeStep)
@@ -3828,7 +3848,7 @@ int main(int argc, char** argv)
       getReal("-al_c4", cfg.c4);
       getBool("-al_dynamic_subscales", cfg.dynamicSubscales);
       getBool("-al_adjoint_reaction", cfg.adjointReaction);
-      getBool("-al_psi_rb_time_residual", cfg.psiRBTimeResidual);
+      getBool("-al_subscale_time_residual", cfg.subscaleTimeResidual);
 
       getReal("-al_diameter", cfg.diameter);
       getReal("-al_rho", cfg.rho);

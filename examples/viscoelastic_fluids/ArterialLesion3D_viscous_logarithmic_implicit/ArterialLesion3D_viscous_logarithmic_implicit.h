@@ -23,7 +23,7 @@
  *      N = -Dexp^{-1}[L E + E L^T - c eps(u)] + (f/lambda)(I - exp(-psi)),
  *    BDF on psi, with the OSS of its full residual: a log-conformation
  *    subscale psi~, (d_t + 1/tau) psi~ = -P^perp[R_psi - d_t psi_h] (the BDF
- *    derivative of psi_h is in the FE space; Config::psiRBTimeResidual), tau = (lambda/(2
+ *    derivative of psi_h is in the FE space; Config::subscaleTimeResidual), tau = (lambda/(2
  *    eta_p)) alpha3, entering as <psi~, -(u^n.grad) chi> (optionally + JN^*[chi],
  *    JN = dN/dpsi; Config::adjointReaction) and, through sigma~ =
  *    (eta_p/lambda0) Dexp[psi~], as <sigma~, eps(v)> in the momentum (the u-psi
@@ -329,9 +329,15 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        was rejected to t = 0.115 s. In the sPTT pipe both give the
           ///        same errors.
           bool adjointReaction = false;
-          /// @brief "psi_rb": keep d_t psi_h (BDF) in the residual that drives
-          ///        psi~ (off, default: R_psi without it, as in the OSS, where
-          ///        P^perp[d_t psi_h] = 0). With it, psi~^{n+1} contains
+          /// @brief "psi_rb" and "exp": keep d_t of the FE field (BDF) in the
+          ///        residual that drives the stress subscale (off, default:
+          ///        without it, as in the OSS, where P^perp[d_t psi_h] = 0, and
+          ///        as in the term-by-term form of Castillo, Moreno, Baiges,
+          ///        Codina, ACME). "exp": s~ = alpha3' (memS s~^n - R + Pi), R ~
+          ///        k_a (E - E_hist)/dtM, alpha3' -> 2 eta_p dt/lambda where
+          ///        alpha3 >> that: the stress s (E - I) + s~ seen by the
+          ///        momentum responds to E^{n+1} with s (1 - dt/dtM), -s/2 in
+          ///        BDF2. "psi_rb": With it, psi~^{n+1} contains
           ///        -(tau'/dtM) psi_h^{n+1}, tau' = (1/dt + 1/tau)^-1 (BDF1 in
           ///        the subscale) and dtM = 2 dt/3 (BDF2): the stress seen by
           ///        the momentum, s Dexp[psi_h + psi~], responds to psi_h^{n+1}
@@ -339,7 +345,7 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        dt (slow flow, flow reversal, and everywhere as dt -> 0):
           ///        the u-psi coupling changes sign. The S75 Re 600 test grew
           ///        at ~8000 1/s from t = 0.135 s (deceleration) whatever dt.
-          bool psiRBTimeResidual = false;
+          bool subscaleTimeResidual = false;
           /// @brief "sptt", "gsptt" or "cy" (file header).
           std::string fluid = "sptt";
           CarreauYasuda carreauYasuda;
