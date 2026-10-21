@@ -30,6 +30,21 @@ set_tests_properties(RodinPETScIOMFEMIOTest PROPERTIES LABELS "unit;petsc" TIMEO
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScIOMFEMIOTest)
 
 if (RODIN_USE_MPI)
+  add_executable(RodinPETScIOHDF5MPIIOTest HDF5MPIIOTest.cpp)
+  target_link_libraries(RodinPETScIOHDF5MPIIOTest PRIVATE
+    GTest::gtest Rodin::Geometry Rodin::Variational Rodin::IO Rodin::MPI Rodin::PETSc)
+  foreach(np 1 2 3)
+    add_test(NAME RodinPETScIOHDF5MPIIOTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+        $<TARGET_FILE:RodinPETScIOHDF5MPIIOTest>)
+    set_tests_properties(RodinPETScIOHDF5MPIIOTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScIOHDF5MPIIOTest_np${np})
+  endforeach()
+endif()
+
+if (RODIN_USE_MPI)
   add_executable(RodinPETScIOMFEMMPIIOTest MFEMMPIIOTest.cpp)
   target_link_libraries(RodinPETScIOMFEMMPIIOTest PRIVATE
     GTest::gtest Rodin::Geometry Rodin::Variational Rodin::IO Rodin::MPI Rodin::PETSc)

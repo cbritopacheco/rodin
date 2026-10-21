@@ -79,28 +79,13 @@ namespace Rodin::IO
      */
     inline std::vector<double> readVectorDouble(hid_t file, const char* path)
     {
-      const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
-      assert(ds >= 0);
-      const auto space = H5Dget_space(ds);
-      assert(space >= 0);
-      hsize_t dims[1] = {0};
-      const auto ndims = H5Sget_simple_extent_ndims(space);
-      assert(ndims == 1);
-      (void)ndims;
-      const auto dimStatus = H5Sget_simple_extent_dims(space, dims, nullptr);
-      assert(dimStatus >= 0);
-      (void)dimStatus;
-      std::vector<double> v(static_cast<size_t>(dims[0]));
-      if (!v.empty())
+      const auto shape = HDF5::readDatasetShape(file, path);
+      if (shape.size() != 1)
       {
-        const auto readStatus =
-          H5Dread(ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
-        assert(readStatus >= 0);
-        (void)readStatus;
+        Alert::Exception() << "Expected one-dimensional HDF5 coefficient dataset: "
+                           << path << Alert::Raise;
       }
-      H5Sclose(space);
-      H5Dclose(ds);
-      return v;
+      return HDF5::readVectorDataset<HDF5::F64>(file, path);
     }
 
     /**
@@ -111,15 +96,7 @@ namespace Rodin::IO
      */
     inline unsigned long long readScalarULL(hid_t file, const char* path)
     {
-      const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
-      assert(ds >= 0);
-      unsigned long long value = 0;
-      const auto readStatus =
-        H5Dread(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
-      assert(readStatus >= 0);
-      (void)readStatus;
-      H5Dclose(ds);
-      return value;
+      return HDF5::readScalarDataset<HDF5::U64>(file, path);
     }
 
   }
@@ -186,6 +163,7 @@ namespace Rodin::IO
       void load(const boost::filesystem::path& filename) override
       {
         auto& gf = this->getObject();
+        gf.sync();
         auto& vec = gf.getData();
 
         PetscInt rb = 0, re = 0;
@@ -193,7 +171,9 @@ namespace Rodin::IO
         assert(ierr == PETSC_SUCCESS);
         const PetscInt localN = re - rb;
 
-        const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+        auto fileOwner =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file = fileOwner.get();
         if (file < 0)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -201,6 +181,15 @@ namespace Rodin::IO
         }
 
         const auto values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
+        const auto size = Internal::readScalarULL(file, "/GridFunction/Meta/Size");
+        const auto dimension =
+          Internal::readScalarULL(file, "/GridFunction/Meta/Dimension");
+        if (size != values.size() || dimension != gf.getDimension())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "HDF5 coefficient metadata does not match the destination field."
+            << Alert::Raise;
+        }
         std::vector<double> imaginary(values.size(), 0);
         if (H5Lexists(file, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
         {
@@ -209,14 +198,12 @@ namespace Rodin::IO
         }
         if (imaginary.size() != values.size())
         {
-          H5Fclose(file);
           Alert::MemberFunctionException(*this, __func__)
             << "Incompatible HDF5 imaginary coefficient count." << Alert::Raise;
         }
 
         if (static_cast<PetscInt>(values.size()) != localN)
         {
-          H5Fclose(file);
           Alert::MemberFunctionException(*this, __func__)
             << "Local DOF count mismatch: file has " << values.size()
             << ", local Vec portion has " << localN << "." << Alert::Raise;
@@ -229,12 +216,11 @@ namespace Rodin::IO
           const auto cols = Internal::readScalarULL(file, "/GridFunction/Meta/Columns");
           if (rows != gf.getRows() || cols != gf.getColumns())
           {
-            H5Fclose(file);
             Alert::MemberFunctionException(*this, __func__)
               << "HDF5 matrix range shape mismatch." << Alert::Raise;
           }
         }
-        H5Fclose(file);
+        fileOwner.reset();
 
         std::vector<PetscInt> indices(static_cast<size_t>(localN));
         std::iota(indices.begin(), indices.end(), rb);
@@ -263,6 +249,14 @@ namespace Rodin::IO
 
         ierr = VecAssemblyEnd(vec);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<typename ObjectType::FESMeshContextType,
+                        Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(vec, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(vec, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
       }
   };
 

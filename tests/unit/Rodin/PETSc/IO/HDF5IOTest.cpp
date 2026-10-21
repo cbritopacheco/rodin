@@ -253,7 +253,8 @@ namespace
         return m_path;
       }
 
-      void replaceDataset(const char* name, const std::vector<double>& values)
+      void replaceDataset(const char* name, const std::vector<double>& values,
+        std::vector<hsize_t> shape = {})
       {
         const auto file = H5Fopen(path().c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
         ASSERT_GE(file, 0);
@@ -261,8 +262,9 @@ namespace
         {
           ASSERT_GE(H5Ldelete(file, name, H5P_DEFAULT), 0);
         }
-        const hsize_t count = values.size();
-        const auto space = H5Screate_simple(1, &count, nullptr);
+        if (shape.empty())
+          shape = {values.size()};
+        const auto space = H5Screate_simple(shape.size(), shape.data(), nullptr);
         ASSERT_GE(space, 0);
         const auto dataset = H5Dcreate2(
           file, name, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -449,6 +451,31 @@ namespace
     check(scalar);
     check(vector);
     check(matrix);
+  }
+
+  /// @brief Invalid ranks and nonscalar metadata reject before touching coefficients.
+  TEST_F(PETScHDF5Contracts, MalformedDatasetShapesPreserveDestination)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialMatrix<PetscScalar>> space(mesh, 2, 3);
+    GridFunction<decltype(space), ::Vec> field(space), loaded(space);
+    fillCoefficients(field);
+    ASSERT_EQ(VecSet(loaded.getData(), PetscScalar(7)), PETSC_SUCCESS);
+    const auto handles = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
+    for (const char* name : {"/GridFunction/Values/Data", "/GridFunction/Meta/Size",
+           "/GridFunction/Meta/Dimension", "/GridFunction/Meta/Rows",
+           "/GridFunction/Meta/Columns"})
+    {
+      SCOPED_TRACE(name);
+      field.save(path(), FileFormat::HDF5);
+      if (std::string(name) == "/GridFunction/Values/Data")
+        replaceDataset(name, {1, 2, 3, 4}, {2, 2});
+      else
+        replaceDataset(name, {1, 2});
+      EXPECT_THROW(loaded.load(path(), FileFormat::HDF5), Alert::Exception);
+      expectCoefficients(loaded, true);
+      EXPECT_EQ(H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL), handles);
+    }
   }
 
   struct PETScPolytopeNameGenerator

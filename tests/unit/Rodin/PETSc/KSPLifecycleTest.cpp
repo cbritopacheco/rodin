@@ -240,6 +240,32 @@ TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
   ASSERT_EQ(PetscFree(subsolvers), PETSC_SUCCESS);
 }
 
+/// @brief Reusing a solver clears obsolete prefixes and PREONLY-incompatible guesses.
+TYPED_TEST(KSPLifecycle, ReconfigurationClearsStoredPETScState)
+{
+  TypeParam solver(this->m_problem);
+  this->configure(solver);
+  auto& system = this->m_problem.getLinearSystem();
+  solver.solve(system);
+  solver.setType(KSPPREONLY).setPrefix({});
+  ASSERT_EQ(VecSet(system.getSolution(), 123), PETSC_SUCCESS);
+  solver.solve(system);
+  PetscBool nonzero = PETSC_TRUE;
+  ASSERT_EQ(KSPGetInitialGuessNonzero(solver.getHandle(), &nonzero), PETSC_SUCCESS);
+  EXPECT_EQ(nonzero, PETSC_FALSE);
+  const char* prefix = nullptr;
+  ASSERT_EQ(KSPGetOptionsPrefix(solver.getHandle(), &prefix), PETSC_SUCCESS);
+  EXPECT_TRUE(prefix == nullptr || prefix[0] == '\0');
+  PetscReal norm = 0;
+  ASSERT_EQ(VecNorm(system.getSolution(), NORM_2, &norm), PETSC_SUCCESS);
+  EXPECT_TRUE(std::isfinite(norm));
+  EXPECT_LT(norm, 123);
+  solver.setType(KSPGMRES);
+  solver.solve(system);
+  ASSERT_EQ(KSPGetInitialGuessNonzero(solver.getHandle(), &nonzero), PETSC_SUCCESS);
+  EXPECT_EQ(nonzero, PETSC_TRUE);
+}
+
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, nullptr, nullptr);

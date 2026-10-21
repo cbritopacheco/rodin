@@ -107,11 +107,8 @@ namespace Rodin::Solver
       assert(ierr == PETSC_SUCCESS);
     }
 
-    if (m_prefix)
-    {
-      ierr = KSPSetOptionsPrefix(m_ksp, m_prefix->c_str());
-      assert(ierr == PETSC_SUCCESS);
-    }
+    ierr = KSPSetOptionsPrefix(m_ksp, m_prefix ? m_prefix->c_str() : nullptr);
+    assert(ierr == PETSC_SUCCESS);
 
     // Programmatic default, still overridable from options.
     if (m_type)
@@ -152,11 +149,9 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
 
     // PREONLY must not be used with a nonzero initial guess.
-    if (!ksptype || std::strcmp(ksptype, KSPPREONLY) != 0)
-    {
-      ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
-      assert(ierr == PETSC_SUCCESS);
-    }
+    ierr = KSPSetInitialGuessNonzero(
+      m_ksp, ksptype && std::strcmp(ksptype, KSPPREONLY) == 0 ? PETSC_FALSE : PETSC_TRUE);
+    assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);
