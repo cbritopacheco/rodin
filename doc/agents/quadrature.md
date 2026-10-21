@@ -24,7 +24,7 @@ $$
 n_p=\left\lceil\frac{p+1}{2}\right\rceil
 $$
 
-points. In integer arithmetic this is `(p + 2) / 2`.
+points. In integer arithmetic this is `p / 2 + 1`, avoiding overflow in the addition.
 
 ## Default dispatch
 
@@ -135,7 +135,7 @@ pool allocation outside its mutex, without copying reference samples, and
 publishes that record under a tuple key. Optional `getSamples()` views expose
 contiguous points and weights with a scalar stride (zero for uniform weights).
 Publication retains these views to avoid pointwise virtual dispatch; families
-without views retain ordinary pointwise access. Grundmann–Möller tables are
+without views retain ordinary pointwise access. Grundmann–Möller, Xiao–Gimbutas and Witherden–Vincent tables are
 retained throughout static destruction because published rules borrow them. Each family/key-type instantiation
 has its own shared FlatMap pool retained throughout static destruction. Integer
 and enum arguments are values; published-formula arguments use a private

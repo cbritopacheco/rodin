@@ -19,6 +19,9 @@
 #include <cassert>
 #include <cmath>
 #include <map>
+#include <limits>
+
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "QuadratureFormula.h"
 #include "GaussLegendre.h"
@@ -121,7 +124,6 @@ namespace Rodin::QF
           m_ny(order),
           m_nz(order)
       {
-        assert(order >= 2);
         build();
       }
 
@@ -140,7 +142,6 @@ namespace Rodin::QF
           m_ny(ny),
           m_nz(ny)
       {
-        assert(nx >= 2 && ny >= 2);
         build();
       }
 
@@ -160,7 +161,6 @@ namespace Rodin::QF
           m_ny(nv),
           m_nz(nw)
       {
-        assert(nu >= 2 && nv >= 2 && nw >= 2);
         build();
       }
 
@@ -418,6 +418,23 @@ namespace Rodin::QF
        */
       void build()
       {
+        // Validate before constructing factors or multiplying directional counts.
+        const size_t dimension = Geometry::Polytope::Traits(getGeometry()).getDimension();
+        const size_t counts[] = {m_nx, m_ny, m_nz};
+        const size_t capacity = std::min(m_points.max_size(),
+          static_cast<size_t>(std::numeric_limits<Eigen::Index>::max()) / sizeof(Real));
+        size_t size = 1;
+        for (size_t direction = 0; direction < std::max<size_t>(1, dimension);
+          ++direction)
+        {
+          if (counts[direction] < 2 || counts[direction] > capacity / size)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Invalid or unrepresentable directional quadrature point count."
+              << Alert::Raise;
+          }
+          size *= counts[direction];
+        }
         switch (getGeometry())
         {
           case Geometry::Polytope::Type::Point:
@@ -439,7 +456,7 @@ namespace Rodin::QF
             buildPyramid(m_nx, m_ny, m_nz);
             break;
           case Geometry::Polytope::Type::Wedge:
-            buildWedge(m_nx, m_nz);
+            buildWedge(m_nx, m_ny, m_nz);
             break;
           case Geometry::Polytope::Type::Hexahedron:
             buildHex(m_nx, m_ny, m_nz);
@@ -614,32 +631,33 @@ namespace Rodin::QF
 
       /**
        * @brief Builds Gauss-Lobatto quadrature on a wedge (prism).
-       * @param ntri Number of points for the triangular cross-section
+       * @param nx Number of points in the first collapsed triangle direction
+       * @param ny Number of points in the second collapsed triangle direction
        * @param nz Number of points in the extrusion direction
        *
        * Constructs a quadrature rule on the reference wedge by combining:
-       * - A Duffy-transformed triangular rule (using @p ntri points)
+       * - A Duffy-transformed triangular rule (using @p nx and @p ny points)
        * - A 1D Gauss-Lobatto rule in the extrusion direction (using @p nz points)
        *
        * The reference wedge has volume 1/2.
        */
-      void buildWedge(size_t ntri, size_t nz)
+      void buildWedge(size_t nx, size_t ny, size_t nz)
       {
         // Jacobi--Lobatto triangle times Lobatto segment.
         std::vector<Real> u, wu, v, wv, z, wz;
-        gjl1dUnit(ntri, 1, u, wu);
-        gll1dUnit(ntri, v, wv);
+        gjl1dUnit(nx, 1, u, wu);
+        gll1dUnit(ny, v, wv);
         gll1dUnit(nz, z, wz);
-        const size_t N = ntri * ntri * nz;
+        const size_t N = nx * ny * nz;
         m_points.clear();
         m_points.reserve(N);
         m_weights.resize(N);
         size_t k = 0;
         for (size_t kk = 0; kk < nz; ++kk)
         {
-          for (size_t j = 0; j < ntri; ++j)
+          for (size_t j = 0; j < ny; ++j)
           {
-            for (size_t i = 0; i < ntri; ++i)
+            for (size_t i = 0; i < nx; ++i)
             {
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];

@@ -44,7 +44,7 @@ namespace Rodin::QF
 
       case Geometry::Polytope::Type::Segment:
       {
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         return construct.template operator()<GaussLegendre>(g, n);
       }
 
@@ -52,13 +52,13 @@ namespace Rodin::QF
       {
         if (XiaoGimbutas::isAvailable(order, g))
           return construct.template operator()<XiaoGimbutas>(order, g);
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         return construct.template operator()<GaussLegendre>(g, n, n);
       }
 
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         const GaussLegendre line(Geometry::Polytope::Type::Segment, n);
         return construct.template operator()<TensorProduct>(g, line, line);
       }
@@ -67,20 +67,20 @@ namespace Rodin::QF
       {
         if (XiaoGimbutas::isAvailable(order, g))
           return construct.template operator()<XiaoGimbutas>(order, g);
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         return construct.template operator()<GaussLegendre>(g, n, n, n);
       }
 
       case Geometry::Polytope::Type::Wedge:
       {
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         const GaussLegendre line(Geometry::Polytope::Type::Segment, n);
         if (XiaoGimbutas::isAvailable(order, Geometry::Polytope::Type::Triangle))
         {
           const XiaoGimbutas triangle(order, Geometry::Polytope::Type::Triangle);
           return construct.template operator()<TensorProduct>(g, triangle, line);
         }
-        const size_t nt = std::max<size_t>(1, (order + 2) / 2);
+        const size_t nt = std::max<size_t>(1, order / 2 + 1);
         const GaussLegendre triangle(Geometry::Polytope::Type::Triangle, nt, nt);
         return construct.template operator()<TensorProduct>(g, triangle, line);
       }
@@ -94,13 +94,13 @@ namespace Rodin::QF
         // weight rather than being evaluated at the nodes, so the integrand in
         // the collapsed coordinates is polynomial of degree p in each
         // direction and every direction needs ceil((p + 1) / 2) points.
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         return construct.template operator()<GaussLegendre>(g, n, n, n);
       }
 
       case Geometry::Polytope::Type::Hexahedron:
       {
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const size_t n = std::max<size_t>(1, order / 2 + 1);
         const GaussLegendre line(Geometry::Polytope::Type::Segment, n);
         return construct.template operator()<TensorProduct>(g, line, line, line);
       }

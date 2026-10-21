@@ -141,7 +141,6 @@ namespace Rodin::QF
           m_ny(order),
           m_nz(order)
       {
-        assert(order >= 1);
         build();
       }
 
@@ -160,7 +159,6 @@ namespace Rodin::QF
           m_ny(ny),
           m_nz(1)
       {
-        assert(nx >= 1 && ny >= 1);
         build();
       }
 
@@ -180,7 +178,6 @@ namespace Rodin::QF
           m_ny(nv),
           m_nz(nw)
       {
-        assert(nu >= 1 && nv >= 1 && nw >= 1);
         build();
       }
 
@@ -297,10 +294,11 @@ namespace Rodin::QF
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a wedge (prism).
-       * @param ntri Number of points for the triangular cross-section
+       * @param nx Number of points in the first collapsed triangle direction
+       * @param ny Number of points in the second collapsed triangle direction
        * @param nz Number of points in the extrusion direction
        */
-      void buildWedge(size_t ntri, size_t nz);
+      void buildWedge(size_t nx, size_t ny, size_t nz);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a pyramid.

@@ -88,3 +88,13 @@ add_executable(RodinQuadratureFormulaTest QuadratureFormulaTest.cpp)
 target_link_libraries(RodinQuadratureFormulaTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::QF Rodin::Variational Rodin::Geometry)
 rodin_discover_tests(RodinQuadratureFormulaTest PROPERTIES LABELS unit)
+
+add_executable(RodinQuadratureConstructionTest QuadratureConstructionTest.cpp)
+target_link_libraries(RodinQuadratureConstructionTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::QF)
+rodin_discover_tests(RodinQuadratureConstructionTest PROPERTIES LABELS unit)
+
+add_executable(RodinQuadratureLifetimeTest QuadratureLifetimeTest.cpp)
+target_link_libraries(RodinQuadratureLifetimeTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::QF)
+rodin_discover_tests(RodinQuadratureLifetimeTest PROPERTIES LABELS unit)
