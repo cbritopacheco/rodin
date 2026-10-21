@@ -270,6 +270,14 @@ namespace Rodin::Eikonal
        * @param u Current arrival-time solution.
        * @param mesh Mesh carrying the arrival-time solution.
        * @returns Minimum candidate arrival time from the incident accepted configurations.
+       *
+       * The local simplex update minimizes linearly interpolated accepted
+       * arrival time plus travel distance over the accepted face. An interior
+       * admissible minimizer also minimizes over every boundary subset. If it
+       * is rejected, the minimizing subset may instead be a face, edge or
+       * vertex, especially on obtuse cells. All pairs and uncovered vertices
+       * are therefore considered after a rejected full-face update. At most
+       * three accepted vertices are involved, with no dynamic workspace.
        */
       Real local(Index p, const SolutionType& u, const Mesh& mesh) const
       {
@@ -311,38 +319,40 @@ namespace Rodin::Eikonal
           if (k == 0)
             continue;
 
-          if (k == 1)
+          // An admissible interior minimizer dominates its boundary subsets.
+          // Rejecting it on an obtuse stencil still requires those subsets.
+          if (D == 3 && k == 3)
           {
-            // Use improved distance computation
-            const Real d = computeEdgeDistance(p, A[0], mesh);
-            if (std::isnan(d))
-              continue;
-            assert(!std::isnan(d));
-            best = std::min(best, u[A[0]] + d / F);
-          }
-          else if (D == 1) // 1D curve mesh (possibly embedded in higher dimensions)
-          {
-            // For 1D meshes, only use single neighbor updates
-            const Real d = computeEdgeDistance(p, A[0], mesh);
-            if (!std::isnan(d))
-              best = std::min(best, u[A[0]] + d / F);
-          }
-          else if (D == 2) // 2D surface mesh (possibly embedded in 3D)
-          {
-            const Real t = surfaceTriangleUpdate(p, A[0], A[1], u, mesh, F);
-            if (!std::isnan(t))
-              best = std::min(best, t);
-          }
-          else if (D == 3) // 3D volume mesh
-          {
-            const Real t2 = volumeTetrahedronUpdate(p, A[0], A[1], u, mesh, F);
-            if (!std::isnan(t2))
-              best = std::min(best, t2);
-            if (k == 3)
+            const Real candidate =
+              volumeTetrahedronUpdate(p, A[0], A[1], A[2], u, mesh, F);
+            if (std::isfinite(candidate))
             {
-              const Real t3 = volumeTetrahedronUpdate(p, A[0], A[1], A[2], u, mesh, F);
-              if (!std::isnan(t3))
-                best = std::min(best, t3);
+              best = std::min(best, candidate);
+              continue;
+            }
+          }
+          bool covered[3] = {};
+          for (int first = 0; first < k; ++first)
+          {
+            for (int second = first + 1; second < k; ++second)
+            {
+              const Real candidate = D == 2
+                ? surfaceTriangleUpdate(p, A[first], A[second], u, mesh, F)
+                : volumeTetrahedronUpdate(p, A[first], A[second], u, mesh, F);
+              if (std::isfinite(candidate))
+              {
+                best = std::min(best, candidate);
+                covered[first] = covered[second] = true;
+              }
+            }
+          }
+          for (int neighbor = 0; neighbor < k; ++neighbor)
+          {
+            if (!covered[neighbor])
+            {
+              const Real distance = computeEdgeDistance(p, A[neighbor], mesh);
+              if (!std::isnan(distance))
+                best = std::min(best, u[A[neighbor]] + distance / F);
             }
           }
         }

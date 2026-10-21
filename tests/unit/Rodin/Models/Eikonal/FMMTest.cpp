@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 #include <cmath>
+#include <array>
+#include <algorithm>
 
 #include "Rodin/Eikonal/FMM.h"
 
@@ -15,9 +17,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  /**
-   * @brief Basic unit tests for Fast Marching Method (FMM)
-   */
+  /// @brief Basic unit tests for Fast Marching Method (FMM).
   class FMMTest : public ::testing::Test
   {
     protected:
@@ -718,5 +718,73 @@ TEST(FMMSeedRegression, CompleteInterfaceIsIndependentOfSeedOrder)
       EXPECT_DOUBLE_EQ(solution[1], 0);
       EXPECT_DOUBLE_EQ(solution[2], 1);
     }
+  }
+}
+
+/// @brief Obtuse faces retain their admissible edge candidate, including embedded meshes.
+TEST(FMMSubsets, ObtuseTriangle)
+{
+  for (const bool embedded : {false, true})
+  {
+    auto mesh = [&] {
+      if (embedded)
+      {}
+      return LocalMesh::Builder()
+        .initialize(3)
+        .nodes(3)
+        .vertex({0, 0, 0})
+        .vertex({1, 0, 0})
+        .vertex({2, 1, 1})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .finalize();
+      return LocalMesh::Builder()
+        .initialize(2)
+        .nodes(3)
+        .vertex({0, 0})
+        .vertex({1, 0})
+        .vertex({2, 1})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .finalize();
+    }();
+    mesh.getConnectivity().compute(0, 0);
+    P1<Real> space(mesh);
+    GridFunction arrival(space);
+    for (const Real speed : {Real(1), Real(2)})
+    {
+      for (const auto& seeds : {std::vector<Index>{1, 2}, std::vector<Index>{2, 1, 2}})
+      {
+        Eikonal::FMM method(arrival, [speed](const Point&) { return speed; });
+        method.seed(seeds).solve();
+        EXPECT_NEAR(arrival[0], 1 / speed, 1e-13);
+      }
+    }
+  }
+}
+
+/// @brief The minimizing tetrahedron subset may be a different pair or a lone vertex.
+TEST(FMMSubsets, TetrahedronAllNeighborOrders)
+{
+  for (const bool pair : {false, true})
+  {
+    std::array<Index, 3> order{1, 2, 3};
+    do
+    {
+      LocalMesh::Builder builder;
+      builder.initialize(3).nodes(4);
+      builder.vertex({0, 0, 0});
+      if (pair)
+        builder.vertex({2, 1, 1}).vertex({1, -1, 0}).vertex({1, 1, 0});
+      else
+        builder.vertex({1, 0, 0}).vertex({2, 1, 0}).vertex({2, 0, 1});
+      auto mesh =
+        builder.polytope(Polytope::Type::Tetrahedron, {0, order[0], order[1], order[2]})
+          .finalize();
+      mesh.getConnectivity().compute(0, 0);
+      P1<Real> space(mesh);
+      GridFunction arrival(space);
+      Eikonal::FMM method(arrival, [](const Point&) { return Real(2); });
+      method.seed(std::vector<Index>{1, 2, 3}).solve();
+      EXPECT_NEAR(arrival[0], 0.5, 2e-13);
+    } while (std::next_permutation(order.begin(), order.end()));
   }
 }
