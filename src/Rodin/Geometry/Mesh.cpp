@@ -47,6 +47,14 @@ namespace Rodin::Geometry
     {
       const size_t count = m_connectivity.getCount(d);
       m_transformations.resize(d, count);
+      for (Index index = 0; index < count; ++index)
+      {
+        if (const auto* transformation = other.m_transformations.find(d, index))
+        {
+          m_transformations.set({d, index}, count,
+            std::unique_ptr<PolytopeTransformation>(transformation->copy()));
+        }
+      }
       m_quadratures.resize(d, count);
     }
   }
@@ -777,14 +785,14 @@ namespace Rodin::Geometry
     Builder build;
     const size_t dim = Polytope::Traits(g).getDimension();
 
-    if (dimensions.size() != dim)
+    if (static_cast<size_t>(dimensions.size()) != dim)
     {
       Alert::MemberFunctionException(Mesh(), __func__)
         << "Expected " << dim << " dimensions for geometry type " << g << ", but got "
         << dimensions.size() << "." << Alert::Raise;
     }
 
-    for (size_t axis = 0; axis < dimensions.size(); ++axis)
+    for (size_t axis = 0; axis < static_cast<size_t>(dimensions.size()); ++axis)
     {
       if (dimensions.coeff(axis) < 2)
       {

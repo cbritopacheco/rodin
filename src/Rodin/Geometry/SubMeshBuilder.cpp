@@ -15,9 +15,11 @@ namespace Rodin::Geometry
     const size_t sdim = parent.getSpaceDimension();
     m_parent = parent;
     m_dimension = 0;
+    m_build = Mesh<Context>::Builder();
     m_build.initialize(sdim);
+    m_s2ps.clear();
     m_s2ps.resize(dim + 1);
-    m_sidx.resize(dim + 1, 0);
+    m_sidx.assign(dim + 1, 0);
     return *this;
   }
 

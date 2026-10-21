@@ -52,6 +52,7 @@
  *   /Attributes/{d}                   [n_d] (U64)
  *   /Transformations/{d}
  *     Kind                            [n_d] (I32)
+ *     /{entity}/Points                [control_nodes x sdim] (F64, nondefault charts)
  * ```
  *
  * ## XDMF Visualization Datasets (written by IO::XDMF via writeXDMFMesh)
@@ -92,7 +93,12 @@
 
 #include <hdf5.h>
 
+#ifndef RODIN_IO_HDF5_MAXIMUM_GEOMETRY_ORDER
+#define RODIN_IO_HDF5_MAXIMUM_GEOMETRY_ORDER 6
+#endif
+
 #include <array>
+#include <cmath>
 #include <limits>
 #include <string>
 #include <vector>
@@ -141,6 +147,39 @@ namespace Rodin::IO
 
     /// @brief Unsigned 8-bit integer type used for boolean flag datasets.
     using U8 = unsigned char;
+
+    /**
+     * @brief HDF5 representation of a concrete parametric geometry chart.
+     *
+     * Kind zero denotes vertex-derived geometry, one denotes native P1, and
+     * kind K+1 denotes real H1 degree K. Control coordinates borrow the chart.
+     * Supported H1 degrees extend through RODIN_IO_HDF5_MAXIMUM_GEOMETRY_ORDER
+     * (default six); unsupported families fail before the output file is opened.
+     */
+    struct TransformationData
+    {
+      I32 kind;
+      const Geometry::PointCloud* points;
+    };
+
+    /**
+     * @brief Obtains the persisted family and control coordinates of a chart.
+     * @param transformation Concrete geometry chart.
+     * @returns Its schema kind and borrowed control points.
+     * @throws Alert::Exception When the chart family is unsupported.
+     */
+    TransformationData getTransformationData(
+      const Geometry::PolytopeTransformation& transformation);
+
+    /**
+     * @brief Reconstructs a concrete chart from validated HDF5 control coordinates.
+     * @param kind Persisted chart-family code.
+     * @param geometry Reference polytope geometry.
+     * @param points Owned physical control coordinates.
+     * @returns The independently owned chart.
+     */
+    std::unique_ptr<Geometry::PolytopeTransformation> makeTransformation(
+      I32 kind, Geometry::Polytope::Type geometry, Geometry::PointCloud points);
 
     /**
      * @brief Sentinel value used to represent the absence of an attribute
@@ -2213,14 +2252,74 @@ namespace Rodin::IO
         const size_t sdim = static_cast<size_t>(HDF5::readScalarDataset<HDF5::U64>(
           file.get(), HDF5::Path::MeshMetaSpaceDimension));
 
+        if (sdim > Geometry::PointCloud::MaxRows)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Unsupported HDF5 mesh ambient dimension." << Alert::Raise;
+        }
         const auto vertices = this->readVertices(file.get());
+        if (vertices.rows() != sdim)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "HDF5 vertex coordinates do not match mesh ambient dimension."
+            << Alert::Raise;
+        }
         auto connectivity = this->readConnectivity(file.get());
         auto attributes = this->readAttributes(file.get(), connectivity);
 
         Geometry::PolytopeTransformationIndex transformations;
         transformations.initialize(connectivity.getMaximalDimension());
         for (size_t d = 0; d <= connectivity.getMaximalDimension(); ++d)
-          transformations.resize(d, connectivity.getCount(d));
+        {
+          const size_t count = connectivity.getCount(d);
+          transformations.resize(d, count);
+          const auto path = HDF5::transformationKindPath(d);
+          if (H5Lexists(file.get(), path.c_str(), H5P_DEFAULT) <= 0)
+            continue;
+          const auto kinds = HDF5::readVectorDataset<HDF5::I32>(file.get(), path);
+          if (kinds.size() != count)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "HDF5 transformation count does not match mesh connectivity."
+              << Alert::Raise;
+          }
+          for (size_t index = 0; index < count; ++index)
+          {
+            if (kinds[index] == 0)
+              continue;
+            const auto controlPath =
+              HDF5::transformationGroupPath(d) + "/" + std::to_string(index) + "/Points";
+            const auto [nodes, dimension] =
+              HDF5::readMatrixShape(file.get(), controlPath);
+            if (dimension != sdim ||
+              (sdim > 0 && nodes > std::numeric_limits<size_t>::max() / sdim))
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Invalid HDF5 transformation control-coordinate shape."
+                << Alert::Raise;
+            }
+            const auto values =
+              HDF5::readVectorDataset<HDF5::F64>(file.get(), controlPath);
+            Geometry::PointCloud points(sdim, nodes);
+            for (size_t node = 0; node < nodes; ++node)
+            {
+              for (size_t axis = 0; axis < sdim; ++axis)
+              {
+                const Real value = values[node * sdim + axis];
+                if (!std::isfinite(value))
+                {
+                  Alert::MemberFunctionException(*this, __func__)
+                    << "HDF5 transformation coordinates must be finite." << Alert::Raise;
+                }
+                points(axis, node) = value;
+              }
+            }
+            const auto geometry = d == 0 ? Geometry::Polytope::Type::Point
+                                         : connectivity.getGeometry(d, index);
+            transformations.set({d, index}, count,
+              HDF5::makeTransformation(kinds[index], geometry, std::move(points)));
+          }
+        }
 
         mesh = ObjectType::Build()
                  .initialize(sdim)
@@ -2249,6 +2348,11 @@ namespace Rodin::IO
             << "Invalid vertex payload size in HDF5 mesh file." << Alert::Raise;
         }
 
+        if (sdim > Geometry::PointCloud::MaxRows)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Unsupported HDF5 vertex coordinate dimension." << Alert::Raise;
+        }
         Geometry::PointCloud vertices(
           static_cast<std::uint8_t>(sdim), static_cast<size_t>(nv));
         for (size_t i = 0; i < static_cast<size_t>(nv); ++i)
@@ -2508,6 +2612,26 @@ namespace Rodin::IO
       void print(const boost::filesystem::path& filename) override
       {
         const auto& mesh = this->getObject();
+
+        const auto& charts = mesh.getPolytopeTransformationIndex();
+        for (size_t dimension = 0;
+          dimension <= mesh.getConnectivity().getMaximalDimension(); ++dimension)
+        {
+          for (size_t index = 0; index < mesh.getConnectivity().getCount(dimension);
+            ++index)
+          {
+            if (const auto* chart = charts.find(dimension, index))
+            {
+              const auto data = HDF5::getTransformationData(*chart);
+              if (data.points->rows() != mesh.getSpaceDimension())
+              {
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Transformation dimension does not match mesh ambient dimension."
+                  << Alert::Raise;
+              }
+            }
+          }
+        }
 
         const auto file = HDF5::File(
           H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
@@ -2847,6 +2971,49 @@ namespace Rodin::IO
           }
 
           std::vector<HDF5::I32> kind(connectivity.getCount(d), 0);
+          for (size_t index = 0; index < kind.size(); ++index)
+          {
+            const auto* chart = mesh.getPolytopeTransformationIndex().find(d, index);
+            if (!chart)
+              continue;
+            const auto data = HDF5::getTransformationData(*chart);
+            bool vertexDerived = data.kind == 1;
+            if (vertexDerived)
+            {
+              const auto entity = mesh.getPolytope(d, index);
+              const auto vertices = entity->getVertices();
+              vertexDerived = data.points->cols() == vertices.size();
+              for (size_t node = 0; vertexDerived && node < vertices.size(); ++node)
+              {
+                for (size_t axis = 0; axis < mesh.getSpaceDimension(); ++axis)
+                {
+                  vertexDerived = vertexDerived &&
+                    (*data.points)(axis, node) ==
+                      mesh.getVertexCoordinates(vertices[node])[axis];
+                }
+              }
+            }
+            if (vertexDerived)
+              continue;
+            kind[index] = data.kind;
+            const auto groupPath =
+              HDF5::transformationGroupPath(d) + "/" + std::to_string(index);
+            const auto chartGroup = HDF5::Group(
+              H5Gcreate2(file, groupPath.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+            if (!chartGroup)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to create HDF5 transformation group." << Alert::Raise;
+            }
+            std::vector<HDF5::F64> values(data.points->cols() * data.points->rows());
+            for (size_t node = 0; node < data.points->cols(); ++node)
+            {
+              for (size_t axis = 0; axis < data.points->rows(); ++axis)
+                values[node * data.points->rows() + axis] = (*data.points)(axis, node);
+            }
+            HDF5::writeMatrixDataset(file, groupPath + "/Points", values,
+              data.points->cols(), data.points->rows());
+          }
           HDF5::writeVectorDataset(file, HDF5::transformationKindPath(d), kind);
         }
       }

@@ -1042,9 +1042,38 @@ namespace Rodin::Geometry
 
   Real Polytope::getMeasure() const
   {
+    const size_t dimension = getDimension();
+    if (dimension == 0)
+      return 1;
+    const auto& transformation = getTransformation();
+    const size_t degree = transformation.getOrder();
+    const size_t factorDegree = transformation.getFactorOrder();
+    const Polytope::Traits traits(getGeometry());
+    if (traits.isSimplex() && factorDegree <= 1)
+      return getMeasure(0);
+    if (dimension == transformation.getPhysicalDimension())
+    {
+      if (traits.isSimplex())
+        return getMeasure(dimension * (degree - 1));
+      if (getGeometry() == Type::Quadrilateral || getGeometry() == Type::Hexahedron ||
+        getGeometry() == Type::Wedge)
+      {
+        // Tensor/collapsed-wedge determinants have directional degree at most
+        // d*k-1 (the triangular total degree is at most d*k-2).
+        return getMeasure(dimension * factorDegree - 1);
+      }
+    }
+    // Square roots on embedded maps and rational pyramid distortion do not
+    // admit a universal polynomial exactness degree. This is an accuracy
+    // policy; the explicit-order overload supports independent refinement.
+    constexpr size_t MinimumCurvedMeasureOrder = 8;
+    return getMeasure(std::max(MinimumCurvedMeasureOrder, 2 * degree + 2));
+  }
+
+  Real Polytope::getMeasure(size_t order) const
+  {
     Real res = 0;
-    const auto& qf =
-      QF::PolytopeQuadratureFormula::get(getTransformation().getOrder(), getGeometry());
+    const auto& qf = QF::PolytopeQuadratureFormula::get(order, getGeometry());
     const auto& quadrature = getQuadrature(qf);
     for (size_t i = 0; i < quadrature.getSize(); i++)
     {

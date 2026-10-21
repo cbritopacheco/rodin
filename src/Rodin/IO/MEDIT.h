@@ -8,6 +8,7 @@
 #define RODIN_IO_MEDIT_H
 
 #include <iomanip>
+#include <sstream>
 #include <unordered_map>
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -967,43 +968,24 @@ namespace Rodin::IO
         }
 
         line = skipEmptyLines(is);
-        size_t solCount = 0, solutionType = 0;
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::uint_;
-        using boost::spirit::x3::_attr;
-        const auto getSolCount = [&](auto& ctx) { solCount = _attr(ctx); };
-        const auto getSolutionType = [&](auto& ctx) { solutionType = _attr(ctx); };
-        const auto p = uint_[getSolCount] >> uint_[getSolutionType];
-        auto it = line.begin();
-        const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
-
-        if (it != line.end() || !r)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to parse solution count and vector dimension at line "
-            << m_currentLineNumber << Alert::Raise;
-        }
-
-        if (solCount != 1)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "MEDIT requires exactly one scalar or vector vertex field."
-            << Alert::Raise;
-        }
-
         const size_t vdim = fes.getVectorDimension();
-        if ((solutionType == MEDIT::SolutionType::Real && vdim != 1) ||
-          (solutionType == MEDIT::SolutionType::Vector && vdim == 1))
+        size_t solCount = 0;
+        std::istringstream descriptor(line);
+        bool valid = static_cast<bool>(descriptor >> solCount) &&
+          (solCount == 1 || solCount == vdim) && solCount > 0;
+        for (size_t field = 0; valid && field < solCount; ++field)
         {
-          Alert::MemberFunctionException(*this, __func__)
-            << "MEDIT solution type does not match finite element space vector dimension."
-            << Alert::Raise;
+          size_t type = 0;
+          valid = static_cast<bool>(descriptor >> type) &&
+            ((solCount == vdim && type == MEDIT::SolutionType::Real) ||
+              (solCount == 1 && type == MEDIT::SolutionType::Vector &&
+                vdim == mesh.getSpaceDimension()));
         }
-        if (solutionType != MEDIT::SolutionType::Real &&
-          solutionType != MEDIT::SolutionType::Vector)
+        if (!valid || !(descriptor >> std::ws).eof())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Unsupported MEDIT solution type: " << solutionType << Alert::Raise;
+            << "MEDIT solution fields do not match their declared component layout."
+            << Alert::Raise;
         }
         const size_t count = mesh.getVertexCount();
         DataType values(gf.getData().size());
@@ -1127,16 +1109,22 @@ namespace Rodin::IO
 
       void print(std::ostream& os) override
       {
-        printVersion(os);
-        printDimension(os);
-
+        if constexpr (std::is_same_v<ScalarType, Complex>)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MEDIT solution files encode real fields; complex fields require "
+            << "separate real and imaginary exports." << Alert::Raise;
+        }
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const size_t vdim = fes.getVectorDimension();
+        printVersion(os);
+        printDimension(os);
 
         os << MEDIT::Keyword::SolAtVertices << '\n' << mesh.getVertexCount() << '\n';
-        if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+        if (FormLanguage::IsMatrixRange<RangeType>::Value ||
+          (vdim > 1 && vdim != mesh.getSpaceDimension()))
         {
           os << vdim;
           for (size_t c = 0; c < vdim; ++c)

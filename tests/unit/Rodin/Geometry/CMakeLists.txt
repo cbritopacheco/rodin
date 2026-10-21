@@ -374,3 +374,13 @@ target_link_libraries(RodinGeometryCacheGrowthTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::QF)
 rodin_discover_tests(RodinGeometryCacheGrowthTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryMeshGeometryTest MeshGeometryTest.cpp)
+target_link_libraries(RodinGeometryMeshGeometryTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
+rodin_discover_tests(RodinGeometryMeshGeometryTest PROPERTIES LABELS unit TIMEOUT 30)
+
+add_executable(RodinGeometryIndexedTest GeometryIndexedTest.cpp)
+target_link_libraries(RodinGeometryIndexedTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)
+rodin_discover_tests(RodinGeometryIndexedTest PROPERTIES LABELS unit)

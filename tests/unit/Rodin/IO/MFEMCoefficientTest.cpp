@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Independent MFEM coefficient layouts and native input diagnostics. */
+/// @file @brief Independent MFEM coefficient layouts and native input diagnostics.
 #include <gtest/gtest.h>
 #include <iomanip>
 #include <limits>
@@ -89,8 +89,9 @@ namespace
           {
             for (size_t component = 0; component < components; ++component)
             {
-              const size_t index =
-                Rank == 2 ? node * components + component : node + component * nodes;
+              const size_t index = (Rank == 2 || Discontinuous)
+                ? node * components + component
+                : node + component * nodes;
               EXPECT_EQ(field.getData()[index], entry(node, component));
             }
           }
@@ -191,8 +192,8 @@ namespace
               {
                 for (size_t component = 0; component < components; ++component)
                 {
-                  EXPECT_EQ(
-                    field.getData()[node + component * nodes], entry(node, component));
+                  EXPECT_EQ(field.getData()[node * components + component],
+                    entry(node, component));
                 }
               }
             }
@@ -397,4 +398,46 @@ namespace
       EXPECT_EQ(field.getData(), before);
     }
   }
+}
+
+/// @brief Header validation and truncated H1 input preserve existing coefficient storage.
+TEST(MFEMFieldValidation, HeaderAndPayload)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  const auto check = [&]<class Space>(Space& space, const std::string& collection) {
+    using Field = GridFunction<Space, Math::Vector<Real>>;
+    Field field(space);
+    GridFunctionLoader<FileFormat::MFEM, Space, Math::Vector<Real>> loader(field);
+    const std::string header =
+      "FiniteElementSpace\nFiniteElementCollection: " + collection +
+      "\nVDim: 1\nOrdering: 0\n\n";
+    std::ostringstream coefficients;
+    for (size_t i = 0; i < space.getSize(); ++i)
+      coefficients << i + 1 << ' ';
+    const std::string valid = header + coefficients.str();
+    std::istringstream packed(valid);
+    ASSERT_NO_THROW(loader.load(packed));
+    const auto before = field.getData().eval();
+    const auto reject = [&](std::string input) {
+      std::istringstream stream(input);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(field.getData(), before);
+    };
+    reject("BadSpace\n" + valid.substr(valid.find('\n') + 1));
+    for (const auto& [from, to] :
+      std::vector<std::pair<std::string, std::string>>{{"VDim: 1", "VDim: 0"},
+        {"VDim: 1", "VDim: 2"}, {"Ordering: 0", "Ordering: 2"}, {collection, "H1_3D_P9"}})
+    {
+      std::string invalid = valid;
+      invalid.replace(invalid.find(from), from.size(), to);
+      reject(invalid);
+    }
+    reject(header + "1");
+    std::istringstream recovery(valid);
+    EXPECT_NO_THROW(loader.load(recovery));
+  };
+  P1<Real> linear(mesh);
+  H1<2, Real> quadratic(std::integral_constant<size_t, 2>{}, mesh);
+  check(linear, "H1_1D_P1");
+  check(quadratic, "H1_1D_P2");
 }

@@ -682,6 +682,7 @@ namespace Rodin::IO
       struct AttributeRecord
       {
         std::string name; ///< Attribute display name.
+        const Geometry::MeshBase* sourceMesh = nullptr; ///< Borrowed field mesh.
         Center center = Center::Node; ///< Data centering.
         size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
         size_t columns = 0; ///< Matrix columns.
@@ -701,6 +702,7 @@ namespace Rodin::IO
         struct AttributeRecord
         {
           std::string name; ///< Attribute display name.
+          const Geometry::MeshBase* sourceMesh = nullptr; ///< Borrowed field mesh.
           Center center = Center::Node; ///< Attribute centering.
           size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
           size_t columns = 0; ///< Matrix columns.
@@ -714,6 +716,7 @@ namespace Rodin::IO
         struct MeshAttributeRecord
         {
           std::string name; ///< Attribute display name.
+          const Geometry::MeshBase* sourceMesh = nullptr; ///< Borrowed field mesh.
           Center center = Center::Cell; ///< Attribute centering.
           size_t topologicalDimension = 0; ///< Mesh topological dimension.
         };
@@ -802,6 +805,15 @@ namespace Rodin::IO
   XDMF::Grid& XDMF::Grid::setMesh(const MeshType& mesh, MeshPolicy policy)
   {
     auto& gr = m_owner->m_grids[m_index];
+    for (const auto& attribute : gr.attributes)
+    {
+      if (attribute.sourceMesh != &mesh)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Registered attribute mesh does not match the requested grid mesh."
+          << Alert::Raise;
+      }
+    }
     // For distributed (MPI) meshes, store the shard for visualization
     // since the writeXDMF helpers require a local mesh. The original mesh
     // pointer is kept in sourceMesh for identity checks in add().
@@ -856,6 +868,7 @@ namespace Rodin::IO
 
     AttributeRecord rec;
     rec.name = name;
+    rec.sourceMesh = &gf.getFiniteElementSpace().getMesh();
     rec.center = center;
     rec.dimension = gf.getDimension();
     if constexpr (FormLanguage::IsMatrixRange<typename FormLanguage::Traits<
@@ -869,7 +882,13 @@ namespace Rodin::IO
     // for serial). The attribute write helpers iterate over this mesh's
     // vertices/cells, not over gf.getFiniteElementSpace().getMesh(), which
     // may be a distributed MPI mesh with global counts.
-    const auto* visMesh = gr.mesh;
+    const auto* visMesh = [&] {
+      const auto& source = gf.getFiniteElementSpace().getMesh();
+      if constexpr (requires { source.getShard(); })
+        return &source.getShard();
+      else
+        return &source;
+    }();
     rec.write = [&gf, visMesh](const boost::filesystem::path& path, Center center) {
       switch (center)
       {

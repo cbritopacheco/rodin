@@ -18,6 +18,8 @@
 #include <type_traits>
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Alert/Exception.h"
+
 #include "Polytope.h"
 
 namespace Rodin::Geometry
@@ -55,18 +57,13 @@ namespace Rodin::Geometry
     /// Number of different polytope types
     static constexpr size_t Count = Polytope::Types.size();
 
-    /// Storage type for proper alignment
-    using Storage = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
-
     friend class boost::serialization::access;
 
     public:
       /// @brief Default constructor that initializes all entries with default values.
       GeometryIndexed()
-      {
-        for (size_t i = 0; i < Count; ++i)
-          new (&m_map[i]) T();
-      }
+        : m_map{}
+      {}
 
       /**
        * @brief Constructs from an initializer list of polytope type-value pairs.
@@ -74,39 +71,24 @@ namespace Rodin::Geometry
        * @note The list must contain exactly one entry for each polytope type
        */
       GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> l)
-      {
-        assert(l.size() == Count);
-        for (const auto& [type, value] : l)
-          new (&m_map[static_cast<size_t>(type)]) T(std::move(value));
-      }
+        : GeometryIndexed(l, std::make_index_sequence<Count>{})
+      {}
 
       /**
        * @brief Copy constructor.
        * @param other GeometryIndexed object to copy from
        */
-      GeometryIndexed(const GeometryIndexed& other)
-      {
-        for (size_t i = 0; i < Count; ++i)
-          new (&m_map[i]) T(*other.ptr(i));
-      }
+      GeometryIndexed(const GeometryIndexed& other) = default;
 
       /**
        * @brief Move constructor.
        * @param other GeometryIndexed object to move from
        */
       GeometryIndexed(GeometryIndexed&& other) noexcept(
-        std::is_nothrow_move_constructible<T>::value)
-      {
-        for (size_t i = 0; i < Count; ++i)
-          new (&m_map[i]) T(std::move(*other.ptr(i)));
-      }
+        std::is_nothrow_move_constructible<T>::value) = default;
 
-      /// @brief Destructor that properly destroys all stored objects.
-      ~GeometryIndexed()
-      {
-        for (size_t i = 0; i < Count; ++i)
-          ptr(i)->~T();
-      }
+      /// @brief Destroys all retained values, including during constructor unwinding.
+      ~GeometryIndexed() = default;
 
       /**
        * @brief Copy assignment operator.
@@ -183,8 +165,49 @@ namespace Rodin::Geometry
       }
 
     private:
+      /**
+       * @brief Constructs entries in storage order with automatic exception cleanup.
+       * @param entries Complete geometry-value mapping.
+       * @param indices Compile-time storage indices.
+       */
+      template <size_t... Indices>
+      GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> entries,
+        [[maybe_unused]] std::index_sequence<Indices...> indices)
+        : m_map{getEntry(entries, Indices)...}
+      {}
+
+      /**
+       * @brief Finds a unique initializer entry for one geometry.
+       * @param entries Complete geometry-value mapping.
+       * @param index Geometry's storage index.
+       * @returns The supplied value; missing and repeated geometries raise an exception.
+       */
+      static const T& getEntry(
+        std::initializer_list<std::pair<Polytope::Type, T>> entries, size_t index)
+      {
+        const T* value = nullptr;
+        for (const auto& entry : entries)
+        {
+          if (static_cast<size_t>(entry.first) == index)
+          {
+            if (value)
+            {
+              Alert::Exception()
+                << "Repeated GeometryIndexed initializer geometry." << Alert::Raise;
+            }
+            value = &entry.second;
+          }
+        }
+        if (entries.size() != Count || !value)
+        {
+          Alert::Exception() << "Incomplete GeometryIndexed initializer mapping."
+                             << Alert::Raise;
+        }
+        return *value;
+      }
+
       /// Storage array for all polytope type mappings
-      std::array<Storage, Count> m_map;
+      std::array<T, Count> m_map;
 
       /**
        * @brief Gets a pointer to the data at the given index.
@@ -194,7 +217,7 @@ namespace Rodin::Geometry
       T* ptr(size_t i)
       {
         assert(i < Count);
-        return reinterpret_cast<T*>(&m_map[i]);
+        return &m_map[i];
       }
 
       /**
@@ -205,7 +228,7 @@ namespace Rodin::Geometry
       const T* ptr(size_t i) const
       {
         assert(i < Count);
-        return reinterpret_cast<const T*>(&m_map[i]);
+        return &m_map[i];
       }
   };
 }

@@ -479,3 +479,42 @@ TEST(XDMFGridHandle, UnregisteredIndexRaises)
   IO::XDMF writer("unregistered-grid");
   EXPECT_THROW((IO::XDMF::Grid(writer, 0)), Alert::Exception);
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Mesh compatibility is independent of attribute/mesh registration order.
+  TEST_F(XDMFTest, AttributeMeshBindingIsOrderIndependent)
+  {
+    const auto small = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    const auto large = LocalMesh::UniformGrid(Polytope::Type::Segment, {5});
+    const LocalMesh sameSizeDifferentMesh(small);
+    P1<Real> space(small);
+    GridFunction field(space);
+    field = RealFunction(7);
+    for (const bool attributeFirst : {false, true})
+    {
+      XDMF writer(m_directory / (attributeFirst ? "attribute-first" : "mesh-first"));
+      auto grid = writer.grid();
+      if (attributeFirst)
+      {
+        grid.add("value", field);
+        EXPECT_THROW(grid.setMesh(large), Alert::Exception);
+        EXPECT_THROW(grid.setMesh(sameSizeDifferentMesh), Alert::Exception);
+        EXPECT_FALSE(grid.hasMesh());
+        grid.setMesh(small);
+      }
+      else
+      {
+        grid.setMesh(large);
+        EXPECT_THROW(grid.add("value", field), Alert::Exception);
+        grid.setMesh(small).add("value", field);
+      }
+      EXPECT_THROW(grid.setMesh(large), Alert::Exception);
+      EXPECT_THROW(grid.setMesh(sameSizeDifferentMesh), Alert::Exception);
+      writer.write(0);
+      grid.clear().setMesh(large);
+      writer.write(1).close();
+      EXPECT_EQ(writer.getSnapshotCount(), 2u);
+    }
+  }
+}

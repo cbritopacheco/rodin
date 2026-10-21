@@ -558,6 +558,18 @@ namespace Rodin::Geometry
       Real getMeasure() const;
 
       /**
+       * @brief Integrates geometric measure with an explicitly selected quadrature order.
+       * @param order Reference polynomial degree requested from the quadrature dispatcher.
+       * @returns The integral of the positive geometric distortion.
+       *
+       * The default overload integrates the determinant degree on regular
+       * polynomial volume maps. Embedded and rational maps generally have
+       * nonpolynomial distortion; their default uses a conservative order
+       * policy, while this overload permits explicit accuracy studies.
+       */
+      Real getMeasure(size_t order) const;
+
+      /**
        * @brief Gets the geometric transformation for this polytope.
        * @returns Reference to the transformation @f$ x: K \rightarrow \tau @f$
        *

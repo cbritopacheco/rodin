@@ -1315,7 +1315,9 @@ namespace Rodin::Geometry
        * @f[
        *   x \mapsto x + \vec{u}(x)
        * @f]
-       * at each node @f$ x @f$ of the mesh.
+       * at each node @f$ x @f$ of the mesh. All displacements are evaluated
+       * against the original geometry before any vertex is replaced. A failed
+       * evaluation leaves the mesh coordinates unchanged.
        *
        * @tparam FunctionDerived Derived class of FunctionBase providing the
        *         displacement field
@@ -1328,15 +1330,26 @@ namespace Rodin::Geometry
       template <class FunctionDerived>
       Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
       {
-        Math::SpatialPoint pc;
-        const Polytope::Traits ts(Polytope::Type::Point);
-        for (auto it = getVertex(); !it.end(); ++it)
+        PointCloud vertices(m_sdim, getVertexCount());
+        const Polytope::Traits traits(Polytope::Type::Point);
+        for (auto vertex = getVertex(); vertex; ++vertex)
         {
-          pc = this->getVertexCoordinates(it->getIndex());
-          const Geometry::Point p(*it, ts.getVertex(0), pc);
-          for (size_t i = 0; i < m_sdim; ++i)
-            m_vertices(i, it->getIndex()) += u(p)[i];
+          const auto coordinates = getVertexCoordinates(vertex->getIndex());
+          const Geometry::Point point(*vertex, traits.getVertex(0), coordinates);
+          const auto displacement = u(point);
+          if (static_cast<size_t>(displacement.size()) != m_sdim)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Displacement dimension must match the mesh ambient dimension."
+              << Alert::Raise;
+          }
+          for (size_t coordinate = 0; coordinate < m_sdim; ++coordinate)
+          {
+            vertices(coordinate, vertex->getIndex()) =
+              coordinates[coordinate] + displacement[coordinate];
+          }
         }
+        m_vertices = std::move(vertices);
         flush();
         return *this;
       }

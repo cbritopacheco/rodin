@@ -100,3 +100,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Cla
   endforeach()
   rodin_discover_tests(RodinIOHDF5FailureTest PROPERTIES LABELS unit)
 endif()
+
+add_executable(RodinHDF5GeometryTest HDF5GeometryTest.cpp)
+target_link_libraries(RodinHDF5GeometryTest
+  PRIVATE GTest::gtest_main Rodin::IO Rodin::Geometry Rodin::Variational)
+rodin_discover_tests(RodinHDF5GeometryTest PROPERTIES LABELS unit)

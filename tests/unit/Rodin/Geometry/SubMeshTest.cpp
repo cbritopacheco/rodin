@@ -281,3 +281,34 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&smBase.getParent(), &mesh);
   }
 }
+
+/// @brief Reinitialization clears counters and maps even without completing the old build.
+TEST(SubMeshBuilder, ReuseStartsFresh)
+{
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  auto parent = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  SubMesh<Context::Local>::Builder builder;
+  for (size_t repeat = 0; repeat < 3; ++repeat)
+  {
+    builder.initialize(parent).include(2, 0);
+    if (repeat == 1)
+      builder.initialize(parent).include(2, 1);
+    const auto submesh = builder.finalize();
+    EXPECT_EQ(submesh.getCellCount(), 1u);
+    EXPECT_EQ(submesh.getVertexCount(), 3u);
+    const Index selected = repeat == 1 ? 1 : 0;
+    const auto& vertices = parent.getPolytope(2, selected)->getVertices();
+    for (auto vertex = submesh.getVertex(); vertex; ++vertex)
+    {
+      bool found = false;
+      for (const Index original : vertices)
+      {
+        found |=
+          (vertex->getCoordinates() - parent.getVertexCoordinates(original)).norm() <
+          1e-14;
+      }
+      EXPECT_TRUE(found);
+    }
+  }
+}

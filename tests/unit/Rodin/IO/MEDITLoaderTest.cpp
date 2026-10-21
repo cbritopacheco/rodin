@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Analytic vertex-field loading and transactional MEDIT input validation. */
+/// @file @brief Analytic vertex-field loading and transactional MEDIT input validation.
 #include <gtest/gtest.h>
 #include <iomanip>
 #include <limits>
@@ -253,4 +253,62 @@ TEST(MEDITLoader, H1RealMatrix)
 TEST(MEDITLoader, H1ComplexMatrix)
 {
   checkLoaderContracts<Complex, 2, true>();
+}
+
+/// @brief Nonspatial vector components are declared as independent real fields.
+TEST(MEDITInterchange, ExplicitComponentLayout)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<Math::SpatialVector<Real>> space(mesh, 3);
+  GridFunction field(space);
+  field = VectorFunction(1., 2., 3.);
+  std::ostringstream output;
+  GridFunctionPrinter<FileFormat::MEDIT, decltype(space), Math::Vector<Real>>(field)
+    .print(output);
+  std::istringstream external(output.str());
+  std::string keyword;
+  size_t version = 0, dimension = 0, vertices = 0, fields = 0;
+  ASSERT_TRUE(bool(external >> keyword >> version));
+  EXPECT_EQ(keyword, "MeshVersionFormatted");
+  ASSERT_TRUE(bool(external >> keyword >> dimension));
+  EXPECT_EQ(dimension, 2u);
+  ASSERT_TRUE(bool(external >> keyword >> vertices >> fields));
+  EXPECT_EQ(keyword, "SolAtVertices");
+  EXPECT_EQ(fields, 3u);
+  for (size_t fieldIndex = 0; fieldIndex < fields; ++fieldIndex)
+  {
+    size_t type = 0;
+    ASSERT_TRUE(bool(external >> type));
+    EXPECT_EQ(type, 1u);
+  }
+  for (size_t vertex = 0; vertex < vertices; ++vertex)
+  {
+    for (size_t component = 0; component < fields; ++component)
+    {
+      Real value = 0;
+      ASSERT_TRUE(bool(external >> value));
+      EXPECT_EQ(value, Real(component + 1));
+    }
+  }
+  GridFunction restored(space);
+  std::istringstream input(output.str());
+  GridFunctionLoader<FileFormat::MEDIT, decltype(space), Math::Vector<Real>>(restored)
+    .load(input);
+  EXPECT_EQ(restored.getData(), field.getData());
+}
+
+/// @brief Unsupported complex output is rejected before any format bytes are written.
+TEST(MEDITInterchange, RejectsComplexOutput)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<Complex> space(mesh);
+  GridFunction field(space);
+  field = ComplexFunction(Complex(1, 2));
+  std::ostringstream output;
+  output << "retained";
+  EXPECT_THROW(
+    (GridFunctionPrinter<FileFormat::MEDIT, decltype(space), Math::Vector<Complex>>(field)
+        .print(output)),
+    Alert::Exception);
+  EXPECT_EQ(output.str(), "retained");
 }

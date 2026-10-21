@@ -280,6 +280,41 @@ namespace Rodin::IO::MFEM
     Ordering ordering; ///< Data ordering (Nodes or VectorDimension)
   };
 
+  /**
+   * @brief Reads and validates the common MFEM field header.
+   * @param is Field input stream.
+   * @param lineNumber Running line counter used in diagnostics.
+   * @returns Initialized collection, component count and supported ordering.
+   */
+  inline GridFunctionHeader readGridFunctionHeader(std::istream& is, size_t& lineNumber)
+  {
+    GridFunctionHeader header{};
+    const auto line = [&] { return skipEmptyLinesAndComments(is, lineNumber); };
+    const auto fail = [&] {
+      Alert::Exception() << "Invalid MFEM field header on line " << lineNumber << "."
+                         << Alert::Raise;
+    };
+    std::string key;
+    std::istringstream space(line());
+    if (!(space >> key) || key != "FiniteElementSpace" || !(space >> std::ws).eof())
+      fail();
+    std::istringstream collection(line());
+    if (!(collection >> key >> header.fec) || key != "FiniteElementCollection:" ||
+      !(collection >> std::ws).eof())
+      fail();
+    std::istringstream dimension(line());
+    if (!(dimension >> key >> header.vdim) || key != "VDim:" || header.vdim == 0 ||
+      !(dimension >> std::ws).eof())
+      fail();
+    size_t ordering = 0;
+    std::istringstream order(line());
+    if (!(order >> key >> ordering) || key != "Ordering:" || ordering > 1 ||
+      !(order >> std::ws).eof())
+      fail();
+    header.ordering = static_cast<Ordering>(ordering);
+    return header;
+  }
+
   /// @brief Face index and vertex ordering used when emitting MFEM face DOFs.
   struct FaceOrderEntry
   {
@@ -2047,55 +2082,20 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::blank;
-        using boost::spirit::x3::uint_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
-
-        MFEM::GridFunctionHeader header;
-        const auto getFec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto getVdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto getOrdering = [&](auto& ctx) {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        auto it = line.begin();
-        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        (void)rfes;
-        assert(it == line.end() && rfes);
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pfec =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[getFec];
-        const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        (void)rfec;
-        assert(it == line.end() && rfec);
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[getVdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        (void)rvdim;
-        assert(it == line.end() && rvdim);
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pordering =
-          boost::spirit::x3::string("Ordering:") >> uint_[getOrdering];
-        const bool rordering =
-          boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
-        (void)rordering;
-        assert(it == line.end() && rordering);
+        const auto header = MFEM::readGridFunctionHeader(is, m_currentLineNumber);
 
         auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
 
         const size_t vdim = fes.getVectorDimension();
-        assert(header.vdim == vdim);
+        const std::string collection =
+          "H1_" + std::to_string(fes.getMesh().getDimension()) + "D_P1";
+        if (header.vdim != vdim || header.fec != collection)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM field collection or component count does not match its space."
+            << Alert::Raise;
+        }
 
         auto& data = gf.getData();
         const size_t n = static_cast<size_t>(data.size());
@@ -2109,14 +2109,7 @@ namespace Rodin::IO
         // Read all coefficients as they appear in the file
         std::vector<ScalarType> tmp(n);
 
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        std::istringstream first(line);
-        if (!(first >> tmp[0]))
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Invalid first MFEM coefficient." << Alert::Raise;
-        }
-        for (size_t i = 1; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
         {
           if (!(is >> tmp[i]))
           {
@@ -2222,57 +2215,13 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::blank;
-        using boost::spirit::x3::uint_;
         using boost::spirit::x3::double_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
 
         // -------------------------------------------------------------
         // 1. Parse MFEM GridFunction header
         // -------------------------------------------------------------
-        MFEM::GridFunctionHeader header;
+        const auto header = MFEM::readGridFunctionHeader(is, m_currentLineNumber);
 
-        const auto getFec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto getVdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto getOrdering = [&](auto& ctx) {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-
-        auto it = line.begin();
-        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        (void)rfes;
-        assert(rfes && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pfec =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[getFec];
-        const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        (void)rfec;
-        assert(rfec && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[getVdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        (void)rvdim;
-        assert(rvdim && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pord = boost::spirit::x3::string("Ordering:") >> uint_[getOrdering];
-        const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
-        (void)rord;
-        assert(rord && it == line.end());
-
-        // -------------------------------------------------------------
-        // 2. Read coefficient data in MFEM order and map to Rodin DOFs
-        // -------------------------------------------------------------
         auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
@@ -2282,7 +2231,14 @@ namespace Rodin::IO
         const size_t D = mesh.getDimension();
         const size_t scalarSize = fes.getSize() / vdim;
 
-        assert(header.vdim == vdim);
+        const std::string collection = "H1_" +
+          std::to_string(fes.getMesh().getDimension()) + "D_P" + std::to_string(K);
+        if (header.vdim != vdim || header.fec != collection)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM field collection or component count does not match its space."
+            << Alert::Raise;
+        }
 
         data.resize(fes.getSize());
 
@@ -2294,8 +2250,12 @@ namespace Rodin::IO
         while (mfemValues.size() < fes.getSize() && (is >> value))
           mfemValues.push_back(value);
 
-        assert(mfemValues.size() == fes.getSize() &&
-          "Mismatch in number of coefficients read");
+        if (mfemValues.size() != fes.getSize())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Expected " << fes.getSize() << " MFEM coefficients, but found "
+            << mfemValues.size() << "." << Alert::Raise;
+        }
 
         // -------------------------------------------------------------
         // 2.a Normalize MFEM ordering into component-blocked storage:
@@ -3039,61 +2999,24 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::uint_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
-
         // -------------------------------------------------------------
         // 1. Parse MFEM GridFunction header
         // -------------------------------------------------------------
-        MFEM::GridFunctionHeader header;
+        const auto header = MFEM::readGridFunctionHeader(is, m_currentLineNumber);
 
-        const auto getFec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto getVdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto getOrdering = [&](auto& ctx) {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-
-        auto it = line.begin();
-        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        (void)rfes;
-        assert(rfes && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pfec =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[getFec];
-        const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        (void)rfec;
-        assert(rfec && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[getVdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        (void)rvdim;
-        assert(rvdim && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pord = boost::spirit::x3::string("Ordering:") >> uint_[getOrdering];
-        const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
-        (void)rord;
-        assert(rord && it == line.end());
-
-        // -------------------------------------------------------------
-        // 2. Read coefficient data
-        // -------------------------------------------------------------
         auto& gf = this->getObject();
         auto& fes = gf.getFiniteElementSpace();
         auto& data = gf.getData();
 
         const size_t vdim = fes.getVectorDimension();
-        assert(header.vdim == vdim);
+        const std::string collection =
+          "L2_" + std::to_string(fes.getMesh().getDimension()) + "D_P0";
+        if (header.vdim != vdim || header.fec != collection)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM field collection or component count does not match its space."
+            << Alert::Raise;
+        }
 
         const size_t dofCount = fes.getSize();
         assert(dofCount % vdim == 0);
@@ -3122,8 +3045,7 @@ namespace Rodin::IO
           {
             for (size_t i = 0; i < scalarDofCount; ++i)
             {
-              data(static_cast<Index>(i + c * scalarDofCount)) =
-                tmp[i + c * scalarDofCount];
+              data(static_cast<Index>(i * vdim + c)) = tmp[i + c * scalarDofCount];
             }
           }
         }
@@ -3133,7 +3055,7 @@ namespace Rodin::IO
           {
             for (size_t c = 0; c < vdim; ++c)
             {
-              data(static_cast<Index>(i + c * scalarDofCount)) = tmp[c + i * vdim];
+              data(static_cast<Index>(i * vdim + c)) = tmp[c + i * vdim];
             }
           }
         }
@@ -3450,13 +3372,29 @@ namespace Rodin::IO
       void printData(std::ostream& os) override
       {
         const auto& gf = this->getObject();
-        const auto& vec = gf.getData();
-        const auto* data = vec.data();
+        const auto& fes = gf.getFiniteElementSpace();
+        using Range = typename FormLanguage::Traits<FES>::RangeType;
+        using Mesh = typename FES::MeshType;
         using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
         os << std::setprecision(std::numeric_limits<RealScalar>::max_digits10);
-        assert(vec.size() >= 0);
-        for (size_t i = 0; i < static_cast<size_t>(vec.size()); i++)
-          os << data[i] << '\n';
+        if constexpr (std::is_same_v<FES, Variational::P0<Range, Mesh>>)
+        {
+          // MFEM Ordering::Nodes blocks components; P0 stores them per cell.
+          for (size_t component = 0; component < fes.getVectorDimension(); ++component)
+          {
+            for (auto cell = fes.getMesh().getCell(); cell; ++cell)
+            {
+              const auto& dofs = fes.getDOFs(cell->getDimension(), cell->getIndex());
+              os << gf.getData()[dofs[component]] << '\n';
+            }
+          }
+        }
+        else
+        {
+          const auto& data = gf.getData();
+          for (size_t i = 0; i < static_cast<size_t>(data.size()); ++i)
+            os << data[i] << '\n';
+        }
       }
   };
 

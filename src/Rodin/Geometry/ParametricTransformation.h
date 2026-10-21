@@ -13,6 +13,9 @@
  */
 
 #include <type_traits>
+#include <limits>
+
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
@@ -273,6 +276,135 @@ namespace Rodin::Geometry
         }
         else
           Parent::jacobian(jacobians, qf);
+      }
+
+      /**
+       * @brief Inverts the finite-element geometry map at a physical point.
+       * @param[out] rc Reference coordinates, assigned after convergence.
+       * @param pc Physical point on the image of the reference element.
+       *
+       * # Architecture
+       *
+       * Affine simplices retain the direct inverse. Other parametric maps
+       * require solving @f$F(r)=p@f$; one affine correction is insufficient
+       * even for bilinear quadrilaterals. The map is assumed regular and
+       * locally injective. This operation inverts a supplied point; reference
+       * containment and mesh-wide element selection belong to the locator.
+       *
+       * # Implementation
+       *
+       * Newton corrections solve @f$J\delta=p-F(r)@f$. Embedded maps use
+       * @f$(J^T J)\delta=J^T(p-F(r))@f$. A common Jacobian scale prevents
+       * determinant overflow or underflow without changing the correction.
+       * Backtracking requires a smaller physical residual. Both physical
+       * residual and reference correction must reach roundoff-sized tolerances;
+       * a tiny element alone therefore cannot authorize an inaccurate inverse.
+       * Singular or nonconvergent maps raise a contextual exception.
+       */
+      void inverse(Math::SpatialPoint& rc, const Math::SpatialPoint& pc) const override
+      {
+        const auto norm = [](const Math::SpatialPoint& value) {
+          Real result = 0;
+          for (size_t i = 0; i < value.size(); ++i)
+            result = std::hypot(result, value[i]);
+          return result;
+        };
+        if (pc.size() != getPhysicalDimension())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Physical coordinates have an invalid extent." << Alert::Raise;
+        }
+        const Polytope::Traits traits(m_fe.getGeometry());
+        if (getReferenceDimension() > 0 && traits.isSimplex() && getFactorOrder() <= 1)
+        {
+          Parent::inverse(rc, pc);
+          return;
+        }
+
+        if (!std::isfinite(norm(pc)))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Physical coordinates must be finite." << Alert::Raise;
+        }
+
+        // Bounded local solve budgets; convergence is checked independently.
+        constexpr size_t MaximumIterations = 32;
+        constexpr size_t MaximumBacktracks = 16;
+        constexpr Real RoundoffFactor = 64;
+        const Real accuracy = RoundoffFactor * std::numeric_limits<Real>::epsilon();
+        const Real physicalTolerance = accuracy * std::max(Real(1), norm(pc));
+        Math::SpatialPoint reference = traits.getCentroid(), mapped;
+        transform(mapped, reference);
+        Math::SpatialPoint residual = pc - mapped;
+        Real residualNorm = norm(residual);
+        for (size_t iteration = 0; iteration < MaximumIterations; ++iteration)
+        {
+          if (residualNorm == 0)
+          {
+            rc = reference;
+            return;
+          }
+          if (getReferenceDimension() == 0)
+            break;
+          Math::SpatialMatrix<Real> matrix;
+          jacobian(matrix, reference);
+          Real scale = 0;
+          for (size_t i = 0; i < matrix.rows(); ++i)
+          {
+            for (size_t j = 0; j < matrix.cols(); ++j)
+              scale = std::max(scale, std::abs(matrix(i, j)));
+          }
+          if (!(scale > 0) || !std::isfinite(scale))
+            break;
+          Math::SpatialPoint rhs(residual.size());
+          for (size_t i = 0; i < matrix.rows(); ++i)
+          {
+            rhs[i] = residual[i] / scale;
+            for (size_t j = 0; j < matrix.cols(); ++j)
+              matrix(i, j) /= scale;
+          }
+          if (matrix.rows() != matrix.cols())
+          {
+            rhs = matrix.transpose() * rhs;
+            matrix = matrix.transpose() * matrix;
+          }
+          const Real determinant = matrix.determinant();
+          if (determinant == 0 || !std::isfinite(determinant))
+            break;
+          const Math::SpatialPoint step = matrix.solve(rhs);
+          const Real stepNorm = norm(step);
+          if (!std::isfinite(stepNorm))
+            break;
+          const Real referenceTolerance = accuracy * std::max(Real(1), norm(reference));
+          if (residualNorm <= physicalTolerance && stepNorm <= referenceTolerance)
+          {
+            rc = reference;
+            return;
+          }
+          Real length = 1;
+          bool accepted = false;
+          for (size_t backtrack = 0; backtrack < MaximumBacktracks; ++backtrack)
+          {
+            const Math::SpatialPoint candidate = reference + length * step;
+            transform(mapped, candidate);
+            Math::SpatialPoint candidateResidual = pc - mapped;
+            const Real candidateNorm = norm(candidateResidual);
+            if (candidateNorm < residualNorm)
+            {
+              reference = candidate;
+              residual = candidateResidual;
+              residualNorm = candidateNorm;
+              accepted = true;
+              break;
+            }
+            length *= Real(0.5);
+          }
+          if (!accepted)
+            break;
+        }
+        Alert::MemberFunctionException(*this, __func__)
+          << "Parametric inverse did not converge on a regular image point."
+          << Alert::Raise;
       }
 
       /**
