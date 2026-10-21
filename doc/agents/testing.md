@@ -158,6 +158,9 @@ also capture and upload their own reports; sanitizer and installation checks do
 not contribute coverage. There is no separate coverage test execution lane.
 The former Coverage backend configuration is retained under ordinary Unit and
 Manufactured jobs as `Backends / Baseline`; their slow tests run only in Slow.
+Native MPI H1 restriction jobs partition the complete 420-case matrix by MPI
+rank, retaining all geometries, degrees, mappings and per-test watchdogs. This
+limits each instrumented job to one rank under the existing 90-minute limit.
 Original optional-backend Unit and default-backend Manufactured configurations
 remain intact. Compilation contexts distinguish backend, optimization and
 threading; final line coverage is their union, never an average of percentages.

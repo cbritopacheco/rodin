@@ -66,6 +66,29 @@ class TestPlanTest(unittest.TestCase):
         self.assertLess(ids.index("coverage_capture"), ids.index("coverage_upload"))
         self.assertLess(ids.index("coverage_upload"), ids.index("coverage_receipt"))
 
+    def test_native_restriction_rank_partitions_preserve_every_invocation(self):
+        import re
+        import yaml
+        from ci_tests import ROOT
+        job = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]["MPIH1Restriction"]
+        rows = job["strategy"]["matrix"]["include"]
+        command = next(s["run"] for s in job["steps"] if s.get("name") == "Run native MPI restriction rank partition")
+        self.assertIn("-j 1", command)
+        self.assertEqual(job["timeout-minutes"], 90)
+        geometries = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Hexahedron", "Wedge"]
+        expected = {f"RodinMPIH1SubMeshRestrictionTest_{geometry}_K{degree}_{mapping}_np{rank}"
+                    for geometry, degree, mapping, rank in itertools.product(
+                        geometries, range(1, 7), ["Affine", "Curved"], [1, 2, 3, 4, 8])}
+        for mt in ["ON", "OFF"]:
+            selected = []
+            partitions = [r for r in rows if r["multithreaded"] == mt]
+            self.assertEqual({r["np"] for r in partitions}, {"1", "2", "3", "4", "8"})
+            for row in partitions:
+                pattern = command.split("-R '", 1)[1].split("'", 1)[0].replace("${{ matrix.np }}", row["np"])
+                selected.extend(name for name in expected if re.fullmatch(pattern, name))
+            self.assertEqual(len(selected), 420)
+            self.assertEqual(set(selected), expected)
+
 
 if __name__ == "__main__":
     unittest.main()

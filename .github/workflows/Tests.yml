@@ -538,8 +538,34 @@ jobs:
       matrix:
         include:
           - multithreaded: 'ON'
+            np: '1'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '2'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '3'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '4'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'ON'
+            np: '8'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
           - multithreaded: 'OFF'
+            np: '1'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '2'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '3'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '4'
+            path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
+          - multithreaded: 'OFF'
+            np: '8'
             path: Unit / Rodin / MPI / Variational / H1Restriction / Slow
     env:
       OMP_NUM_THREADS: 2
@@ -565,8 +591,8 @@ jobs:
         env:
           GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: cmake --build build -j 2 --target RodinMPISubMeshGridFunctionTest
-      - name: Run complete native MPI restriction matrix
-        run: ctest --test-dir build/tests -R '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$' --no-tests=error --output-on-failure -j 1
+      - name: Run native MPI restriction rank partition
+        run: ctest --test-dir build/tests -R '^RodinMPIH1SubMeshRestrictionTest_.*_np${{ matrix.np }}$' --no-tests=error --output-on-failure -j 1
       - name: Publish independent production coverage
         id: coverage_record
         uses: ./.github/actions/coverage
@@ -575,7 +601,7 @@ jobs:
           definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
           artifact_name: ci-target-${{ github.job }}-${{ strategy.job-index }}
 
-    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }})
+    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, np=${{ matrix.np }})
   PETScConvergence:
     needs:
       - Plan
