@@ -169,10 +169,15 @@ namespace Rodin::Alert
       Message(const Message& other)
         : m_os(other.m_os),
           m_prefix(other.m_prefix),
+          m_text(other.m_text),
           m_newline(other.m_newline)
       {
-        m_ss << other.m_ss.rdbuf();
-        m_styled << other.m_ss.rdbuf();
+        m_ss.copyfmt(other.m_ss);
+        m_styled.copyfmt(other.m_styled);
+        m_ss.str(other.m_ss.str());
+        m_styled.str(other.m_styled.str());
+        m_ss.seekp(0, std::ios_base::end);
+        m_styled.seekp(0, std::ios_base::end);
       }
 
       /**
@@ -193,8 +198,7 @@ namespace Rodin::Alert
        */
       const char* what() const noexcept
       {
-        s_what = m_ss.str();
-        return s_what.c_str();
+        return m_text.c_str();
       }
 
       /**
@@ -219,6 +223,7 @@ namespace Rodin::Alert
         }
         m_ss << v;
         m_styled << v;
+        m_text = m_ss.str();
         m_newline = false;
         return *this;
       }
@@ -259,7 +264,7 @@ namespace Rodin::Alert
        */
       virtual void raise() const
       {
-        m_os.get() << m_styled.rdbuf() << NewLine;
+        m_os.get() << m_styled.str() << NewLine;
       }
 
       /**
@@ -274,19 +279,15 @@ namespace Rodin::Alert
       }
 
     private:
-      /// @brief Thread-local storage for the what() string.
-      static thread_local std::string s_what;
-
       std::reference_wrapper<std::ostream> m_os;
       Prefix m_prefix;
       std::stringstream m_ss;
       std::stringstream m_styled;
+
+      /// @brief Owned unformatted payload; reading what() never allocates or changes it.
+      std::string m_text;
       bool m_newline;
   };
-
-  /// @brief Thread-local storage initialization for Message::s_what.
-  template <class Prefix>
-  thread_local std::string Message<Prefix>::s_what;
 
   /**
    * @brief Convenience message for custom Alert prefixes.

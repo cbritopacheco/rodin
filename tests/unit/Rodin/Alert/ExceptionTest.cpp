@@ -152,3 +152,29 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(output.str().find("invalid dimension 4"), std::string::npos);
   }
 }
+
+/// @brief Copying diagnostics preserves both sources and their independent output state.
+TEST_F(ExceptionTest, IndependentCopiesAndStableWhat)
+{
+  Exception original(errorStream);
+  original << "original " << std::hex << 31;
+  const char* retained = original.what();
+  Exception first(original);
+  Exception second(original);
+  first << " first " << 16;
+  second << " second " << 32;
+  EXPECT_STREQ(first.what(), "original 1f first 10");
+  EXPECT_STREQ(second.what(), "original 1f second 20");
+  EXPECT_STREQ(retained, "original 1f");
+  Exception unrelated(errorStream);
+  unrelated << std::string(2048, 'x');
+  EXPECT_EQ(std::string(unrelated.what()).size(), 2048u);
+  EXPECT_STREQ(retained, "original 1f");
+  EXPECT_STREQ(original.what(), "original 1f");
+  EXPECT_THROW(original.raise(), Exception);
+  const std::string output = errorStream.str();
+  EXPECT_THROW(original.raise(), Exception);
+  EXPECT_EQ(errorStream.str(), output + output);
+  EXPECT_NE(output.find("Error"), std::string::npos);
+  EXPECT_NE(output.find("original 1f"), std::string::npos);
+}
