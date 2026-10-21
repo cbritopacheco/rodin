@@ -4,7 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/// @file @brief Concrete geometry-family reconstruction for native HDF5 mesh files.
+/**
+ * @file HDF5.cpp
+ * @brief Concrete geometry-family reconstruction for native HDF5 mesh files.
+ */
 #include "HDF5.h"
 #include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational/H1/H1Element.h"

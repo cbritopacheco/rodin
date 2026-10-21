@@ -67,6 +67,7 @@ namespace Rodin::QF
    *
    * ## Supported Geometries
    *
+   * - Point (0D simplex, one empty coordinate tuple with unit weight)
    * - Segment (1D simplex)
    * - Triangle (2D simplex)
    * - Tetrahedron (3D simplex)
@@ -86,7 +87,7 @@ namespace Rodin::QF
       /**
        * @brief Constructs the Grundmann-Möller quadrature formula.
        * @param s Parameter determining the degree @f$ d = 2s + 1 @f$
-       * @param geom Simplex geometry (Segment, Triangle, or Tetrahedron)
+       * @param geom Simplex geometry (Point, Segment, Triangle, or Tetrahedron)
        *
        * Creates a Grundmann-Möller quadrature rule for the specified simplex
        * geometry with degree of exactness @f$ 2s + 1 @f$.

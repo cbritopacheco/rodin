@@ -94,6 +94,7 @@
 #include <hdf5.h>
 
 #ifndef RODIN_IO_HDF5_MAXIMUM_GEOMETRY_ORDER
+/// @brief Largest H1 geometry degree supported by native HDF5 reconstruction.
 #define RODIN_IO_HDF5_MAXIMUM_GEOMETRY_ORDER 6
 #endif
 
@@ -158,7 +159,10 @@ namespace Rodin::IO
      */
     struct TransformationData
     {
+      /// @brief Persisted geometry-family discriminator.
       I32 kind;
+
+      /// @brief Control coordinates borrowed from the concrete geometry chart.
       const Geometry::PointCloud* points;
     };
 
