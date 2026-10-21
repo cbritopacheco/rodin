@@ -97,7 +97,7 @@ namespace
       prescribed[column] = value;
       bool found = false;
       for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(matrix, column);
-        it; ++it)
+           it; ++it)
         found |= it.row() == static_cast<Eigen::Index>(column);
       absent += !found;
     }
@@ -122,7 +122,7 @@ namespace
     {
       for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator original(
              matrix, column);
-        original; ++original)
+           original; ++original)
       {
         const auto* rows = system.getOperator().innerIndexPtr();
         const auto* columns = system.getOperator().outerIndexPtr();
@@ -132,7 +132,7 @@ namespace
       Optional<Eigen::Index> previous;
       for (typename Math::SparseMatrix<MatrixScalar>::InnerIterator it(
              system.getOperator(), column);
-        it; ++it)
+           it; ++it)
       {
         if (previous)
         {

@@ -198,6 +198,8 @@ jobs:
       baseline: ${{ matrix.baseline }}
     secrets: inherit
   Convergence:
+    needs:
+      - Plan
     runs-on: ubuntu-latest
     timeout-minutes: ${{ matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
@@ -519,6 +521,8 @@ jobs:
     needs:
       - Plan
   MPIH1Restriction:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
@@ -555,6 +559,8 @@ jobs:
         run: ctest --test-dir build/tests -R '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$' --no-tests=error --output-on-failure -j 1
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }})
   PETScConvergence:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ (startsWith(matrix.suite, 'nonlinear_boundary') || startsWith(matrix.suite, 'pressure_')) && 240 || 120 }}
     strategy:
@@ -868,6 +874,8 @@ jobs:
           fi
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, context=${{ matrix.context }})
   PETScDegreeConvergence:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     strategy:
@@ -934,6 +942,8 @@ jobs:
           fi
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }})
   PETScCurvedConvergence:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
@@ -1132,6 +1142,8 @@ jobs:
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, geometry=${{ matrix.geometry }}, selection=${{
       matrix.selection }})
   PETScCurvedBoundaryConvergence:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.physics == 'ReactionDiffusion' && matrix.geometry == 'pyramid' && 300 || 240 }}
     strategy:
@@ -1510,6 +1522,8 @@ jobs:
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, physics=${{ matrix.physics }}, geometry=${{ matrix.geometry }}, selection=${{
       matrix.selection }})
   PETScCurvedNonlinearTetrahedronConvergence:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
@@ -1720,6 +1734,8 @@ jobs:
           esac
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, selection=${{ matrix.selection }}, partition=${{ matrix.partition }})
   PETScComplexConvergence:
+    needs:
+      - Plan
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || startsWith(matrix.suite, 'curved_helmholtz') && 180 || 120 }}
     strategy:
@@ -1898,6 +1914,8 @@ jobs:
           fail_ci_if_error: true
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }})
   PETScMatrixRanges:
+    needs:
+      - Plan
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -1981,6 +1999,8 @@ jobs:
           fail_ci_if_error: true
     name: ${{ matrix.path }} (scalar=${{ matrix.scalar }}, multithreaded=${{ matrix.multithreaded }})
   InstallationUbuntu:
+    needs:
+      - Plan
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -2032,6 +2052,8 @@ jobs:
           retention-days: 7
     name: Installation / Ubuntu (os=${{ matrix.os }}, compiler=${{ matrix.compiler }}, mpi=${{ matrix.mpi }}, petsc=${{ matrix.petsc }})
   InstallationMacOS:
+    needs:
+      - Plan
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
