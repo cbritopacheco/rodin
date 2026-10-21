@@ -71,6 +71,48 @@ namespace Rodin::Hilbert
       {}
 
       /**
+       * @brief Copies parameters, boundary conditions and the owned solution.
+       * @param other Extension to copy.
+       *
+       * The working problem is bound to this object's trial and test functions.
+       * Its formulation and linear system are rebuilt on the next application.
+       */
+      H1a(const H1a& other)
+        : m_fes(other.m_fes),
+          m_trial(other.m_trial),
+          m_test(other.m_test),
+          m_pb(m_trial, m_test),
+          m_alpha(other.m_alpha)
+      {
+        typename decltype(m_pb)::ProblemBodyType body;
+        body.getDBCs() = other.m_pb.getBody().getDBCs();
+        for (auto& condition : body.getDBCs())
+          condition.setOperand(m_trial);
+        m_pb = body;
+      }
+
+      /**
+       * @brief Moves an extension while binding its working problem to its new owner.
+       * @param other Extension to move.
+       *
+       * Boundary conditions are retained; the formulation and linear system are
+       * rebuilt on the next application, as in copy construction.
+       */
+      H1a(H1a&& other)
+        : m_fes(other.m_fes),
+          m_trial(std::move(other.m_trial)),
+          m_test(std::move(other.m_test)),
+          m_pb(m_trial, m_test),
+          m_alpha(other.m_alpha)
+      {
+        typename decltype(m_pb)::ProblemBodyType body;
+        body.getDBCs() = other.m_pb.getBody().getDBCs();
+        for (auto& condition : body.getDBCs())
+          condition.setOperand(m_trial);
+        m_pb = body;
+      }
+
+      /**
        * @brief Sets the regularization parameter @f$ \alpha @f$.
        * @param alpha Regularization length-scale parameter
        * @return Reference to this object for method chaining

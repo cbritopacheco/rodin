@@ -390,6 +390,24 @@ namespace Rodin::Variational
        * @return Pointer to a new copy
        */
       virtual DirichletBCBase* copy() const noexcept override = 0;
+
+      /**
+       * @brief Binds the constrained operand when transferring an owned problem.
+       * @param operand New trial function of the concrete boundary condition's type.
+       * @returns This boundary condition.
+       * @throws Alert::Exception If the concrete condition cannot bind this operand.
+       *
+       * Prescribed values and independently borrowed right-hand-side dependencies
+       * retain their existing ownership. Cached boundary DOFs must be reassembled.
+       */
+      virtual DirichletBCBase& setOperand(
+        [[maybe_unused]] const FormLanguage::Base& operand)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "This boundary condition does not support rebinding its operand."
+          << Alert::Raise;
+        return *this;
+      }
   };
 
   /// Alias for a list of Dirichlet boundary conditions
@@ -591,6 +609,25 @@ namespace Rodin::Variational
       const OperandType& getOperand() const override
       {
         return m_u.get();
+      }
+
+      /**
+       * @brief Binds a new constrained trial function and clears assembled DOFs.
+       * @param operand Trial function with the concrete operand type.
+       * @returns This boundary condition.
+       * @throws Alert::Exception If the operand has an incompatible type.
+       */
+      DirichletBC& setOperand(const FormLanguage::Base& operand) override
+      {
+        const auto* trial = dynamic_cast<const OperandType*>(&operand);
+        if (!trial)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Incompatible boundary condition operand type." << Alert::Raise;
+        }
+        m_u = std::cref(*trial);
+        std::visit([](auto& dofs) { dofs.clear(); }, m_dofs);
+        return *this;
       }
 
       const ValueType& getValue() const override
@@ -1116,6 +1153,25 @@ namespace Rodin::Variational
       const OperandType& getOperand() const override
       {
         return m_u.get();
+      }
+
+      /**
+       * @brief Binds a new constrained trial function and clears assembled DOFs.
+       * @param operand Trial function with the concrete operand type.
+       * @returns This boundary condition.
+       * @throws Alert::Exception If the operand has an incompatible type.
+       */
+      DirichletBC& setOperand(const FormLanguage::Base& operand) override
+      {
+        const auto* trial = dynamic_cast<const OperandType*>(&operand);
+        if (!trial)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Incompatible boundary condition operand type." << Alert::Raise;
+        }
+        m_u = std::cref(*trial);
+        std::visit([](auto& dofs) { dofs.clear(); }, m_dofs);
+        return *this;
       }
 
       /// @returns The right-hand-side shape-function expression @f$ A(v) @f$.

@@ -228,6 +228,29 @@ namespace Rodin::Variational
         return new TrialFunctionReference(*this);
       }
 
+    protected:
+      /**
+       * @brief Copies shape state while binding a new owning trial function.
+       * @param other Shape state to copy.
+       * @param owner New owner of this reference base.
+       */
+      TrialFunctionReference(const TrialFunctionReference& other,
+        const TrialFunction<Solution, FESType>& owner)
+        : Parent(other),
+          m_ref(owner)
+      {}
+
+      /**
+       * @brief Moves shape state while binding a new owning trial function.
+       * @param other Shape state to move.
+       * @param owner New owner of this reference base.
+       */
+      TrialFunctionReference(
+        TrialFunctionReference&& other, const TrialFunction<Solution, FESType>& owner)
+        : Parent(std::move(other)),
+          m_ref(owner)
+      {}
+
     private:
       std::reference_wrapper<const TrialFunction<Solution, FESType>> m_ref;
   };
@@ -313,7 +336,7 @@ namespace Rodin::Variational
        * @param[in] other Trial function to copy
        */
       constexpr TrialFunction(const TrialFunction& other)
-        : Parent(other),
+        : Parent(other, *this),
           m_gf(other.m_gf)
       {}
 
@@ -322,7 +345,7 @@ namespace Rodin::Variational
        * @param[in] other Trial function to move
        */
       constexpr TrialFunction(TrialFunction&& other)
-        : Parent(std::move(other)),
+        : Parent(std::move(other), *this),
           m_gf(std::move(other.m_gf))
       {}
 
