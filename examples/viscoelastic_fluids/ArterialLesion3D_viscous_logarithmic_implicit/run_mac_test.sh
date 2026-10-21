@@ -15,7 +15,9 @@
 #
 #  Environment (defaults):
 #     NP       performance cores (sysctl hw.perflevel0.physicalcpu on macOS)
-#     STEPS=1000 (steps per cycle)   CYCLES=2 (the ramp cycle and one more)
+#     STEPS=400 (steps per cycle: dt 2.5 times that of the campaign, a solver
+#              test, not a resolved run)   CYCLES=2 (the ramp cycle and one more)
+#     OUTPUT_EVERY=20
 #     SOLVER   lulag (MUMPS LU, lagged) with >= 16 GB of RAM, else gmres
 #     VARIANT  base (psi_rb) | nodiv (psi_rb without the div sigma subscale)
 #              | psi (the former formulation)
@@ -29,7 +31,8 @@ REPO="$(cd "$HERE/../../.." && pwd)"
 BUILD="${BUILD:-build}"
 OUT="${OUT:-$HOME/Results/mac_test}"
 MPIRUN="${MPIRUN:-mpirun}"
-STEPS="${STEPS:-1000}"
+STEPS="${STEPS:-400}"
+OUTPUT_EVERY="${OUTPUT_EVERY:-20}"
 CYCLES="${CYCLES:-2}"
 VARIANT="${VARIANT:-base}"
 MESHDIR="$REPO/resources/examples/viscoelastic_fluids"
@@ -82,7 +85,7 @@ mkdir -p "$OUT"
 DIR="$OUT/Re600_Wo5.5/S75/R"
 LOG="$OUT/mac_test_$VARIANT.log"
 (
-  env FLUIDS=R NP="$NP" TIME_ORDER=2 MESH_LEVEL=layersc OUTPUT_EVERY=50 STEPS="$STEPS" CYCLES_R="$CYCLES" \
+  env FLUIDS=R NP="$NP" TIME_ORDER=2 MESH_LEVEL=layersc OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" CYCLES_R="$CYCLES" \
     SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" EXE3D="$EXE" \
     MPIRUN="$MPIRUN" OUT3D="$OUT" bash "$HERE/run_3d.sh" 600 S75
   if "$PY" -c "import numpy, h5py" 2> /dev/null && [[ -f "$DIR/case.xdmf" ]]; then
