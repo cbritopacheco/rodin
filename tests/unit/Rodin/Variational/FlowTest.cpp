@@ -619,3 +619,52 @@ TEST(Rodin_Variational_Flow, VolumeRotationMatchesAnalyticCharacteristics)
     EXPECT_TRUE(checked);
   }
 }
+
+/// @brief A nested trace of the same type owns independent face-search storage.
+TEST(FlowTest, NestedVelocityEvaluation)
+{
+  auto line = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+  line.getConnectivity().compute(0, 1);
+  line.getConnectivity().compute(1, 0);
+  auto triangle = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({1, 0})
+                    .vertex({0, 1})
+                    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                    .finalize();
+  triangle.getConnectivity().compute(1, 2);
+  triangle.getConnectivity().compute(2, 1);
+  const auto innerCell = triangle.getCell();
+  const auto outerCell = line.getCell();
+  const Point innerPoint(*innerCell, Math::SpatialPoint{0.2, 0.2});
+  const Point outerPoint(*outerCell, Math::SpatialPoint{0.8});
+  RealFunction operand(Real(1));
+  using Velocity = std::function<Math::SpatialVector<Real>(const Point&)>;
+  Velocity innerVelocity = [](const Point&) { return Math::SpatialVector<Real>{-1, 0}; };
+  auto inner = Flow(Real(0.4), operand, innerVelocity);
+  inner.setStepSafety(1).setMaxOuterIterations(100);
+  bool nested = false;
+  size_t callbacks = 0;
+  Velocity outerVelocity = [&](const Point&) {
+    ++callbacks;
+    if (nested)
+    {
+      EXPECT_TRUE(inner.trace(innerPoint).exited());
+    }
+    return Math::SpatialVector<Real>{1};
+  };
+  auto outer = Flow(Real(0.4), operand, outerVelocity);
+  outer.setStepSafety(1).setMaxOuterIterations(100);
+  const auto control = outer.trace(outerPoint);
+  const auto controlCalls = callbacks;
+  callbacks = 0;
+  nested = true;
+  const auto result = outer.trace(outerPoint);
+  EXPECT_FALSE(result.exited());
+  EXPECT_EQ(result.getTime(), 0);
+  EXPECT_NEAR(result.getPoint().x(), 1.2, 1e-14);
+  EXPECT_EQ(result.getPoint().x(), control.getPoint().x());
+  EXPECT_EQ(callbacks, controlCalls);
+}

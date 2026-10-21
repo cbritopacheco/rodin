@@ -250,11 +250,34 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Retains a temporary dense vector for the lifetime of its expression copies.
+       * @param v Dense vector whose storage is transferred to the function.
+       *
+       * Lvalue construction continues to borrow its vector. Rvalue construction
+       * shares immutable owned storage across expression copies; evaluation uses
+       * the same direct reference in both cases.
+       */
+      VectorFunction(VectorType&& v)
+        : m_owned(std::make_shared<const VectorType>(std::move(v))),
+          m_vector(*m_owned)
+      {}
+
+      /**
+       * @brief Copies a const temporary into retained storage.
+       * @param v Temporary whose const qualification prevents moving its values.
+       */
+      VectorFunction(const VectorType&& v)
+        : m_owned(std::make_shared<const VectorType>(v)),
+          m_vector(*m_owned)
+      {}
+
+      /**
        * @brief Copy constructor.
        * @param[in] other Function to copy
        */
       VectorFunction(const VectorFunction& other)
         : Parent(other),
+          m_owned(other.m_owned),
           m_vector(other.m_vector)
       {}
 
@@ -264,6 +287,7 @@ namespace Rodin::Variational
        */
       VectorFunction(VectorFunction&& other)
         : Parent(std::move(other)),
+          m_owned(std::move(other.m_owned)),
           m_vector(std::move(other.m_vector))
       {}
 
@@ -313,6 +337,8 @@ namespace Rodin::Variational
       }
 
     private:
+      /// @brief Optional immutable owner for vectors supplied as temporaries.
+      std::shared_ptr<const VectorType> m_owned;
       std::reference_wrapper<const VectorType> m_vector;
   };
 

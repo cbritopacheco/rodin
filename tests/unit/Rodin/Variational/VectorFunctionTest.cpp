@@ -1,3 +1,7 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
@@ -309,4 +313,30 @@ TEST(VectorFunction, IntegerLiteralDimensionSelectsVectorCallable)
   const VectorFunction components(2, [](const Point&) -> Real { return 5; });
   EXPECT_EQ(components(point)[0], 2);
   EXPECT_EQ(components(point)[1], 5);
+}
+
+/// @brief Temporary constants survive expression copying while lvalues remain borrowed.
+TEST(Rodin_Variational_VectorFunction, DenseVectorOwnership)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  const Point point(*mesh.getCell(), Math::SpatialVector<Real>{0.5});
+  const auto retained = [] {
+    const VectorFunction original(Math::Vector<Real>{{2, 3, 5}});
+    return VectorFunction(original);
+  }();
+  auto moved = VectorFunction(retained);
+  const VectorFunction destination(std::move(moved));
+  const auto value = destination.getValue(point);
+  EXPECT_EQ(value[0], 2);
+  EXPECT_EQ(value[1], 3);
+  EXPECT_EQ(value[2], 5);
+  Math::Vector<Real> source{{7, 11}};
+  const VectorFunction borrowed(source);
+  source[1] = 13;
+  EXPECT_EQ(borrowed.getValue(point)[1], 13);
+  const auto immutable = []() -> const Math::Vector<Real> {
+    return Math::Vector<Real>{{17, 19}};
+  };
+  const VectorFunction constTemporary(immutable());
+  EXPECT_EQ(constTemporary.getValue(point)[1], 19);
 }

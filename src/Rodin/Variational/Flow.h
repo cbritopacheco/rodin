@@ -37,6 +37,8 @@
 #include "Rodin/Types.h"
 #include <algorithm>
 #include <cassert>
+#include <boost/container/small_vector.hpp>
+
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -392,12 +394,15 @@ namespace Rodin::Variational
           }
         };
 
-        // Reuse dynamic work buffers while keeping stack-backed points local.
+        // Each active trace owns its workspace, including during nested velocity evaluation.
         Index sCell = Index(-1);
         Math::SpatialPoint sRc{{}}, sRc1{{}}, sRcTmp{{}}, sREval{{}}, sRIn{{}};
         Math::SpatialPoint sPc{{}}, sX{{}}, sXIn{{}}, sXFace{{}};
-        static thread_local std::vector<Candidate> s_candidates;
-        static thread_local std::vector<size_t> s_faceSet;
+        // Six is the maximum facet count of the supported reference cells.
+        // Larger incidence sets retain the dynamic fallback.
+        constexpr size_t InlineFaceCount = 6;
+        boost::container::small_vector<Candidate, InlineFaceCount> candidates;
+        boost::container::small_vector<size_t, InlineFaceCount> faceSet;
 
         // Locate the starting cell and reference coordinates.
         if (poly0.getDimension() == cd)
@@ -650,8 +655,8 @@ namespace Rodin::Variational
             {
               const auto vz = vref(sRc);
 
-              s_faceSet.clear();
-              s_faceSet.reserve(faces.size());
+              faceSet.clear();
+              faceSet.reserve(faces.size());
 
               bool haveNonLast = false;
               for (size_t j = 0; j < faces.size(); ++j)
@@ -669,10 +674,10 @@ namespace Rodin::Variational
                 if (!isLast)
                   haveNonLast = true;
 
-                s_faceSet.push_back(j);
+                faceSet.push_back(j);
               }
 
-              if (s_faceSet.empty())
+              if (faceSet.empty())
                 break;
 
               auto key = [&](size_t j) -> std::tuple<Real, Real, Index> {
@@ -685,7 +690,7 @@ namespace Rodin::Variational
 
               size_t best = size_t(-1);
               bool have = false;
-              for (size_t jj : s_faceSet)
+              for (size_t jj : faceSet)
               {
                 if (haveNonLast && lastFace && jj == *lastFace)
                   continue;
@@ -852,8 +857,8 @@ namespace Rodin::Variational
 
           for (size_t subdiv = 0; subdiv <= maxSubdivisions; ++subdiv)
           {
-            s_candidates.clear();
-            s_candidates.reserve(faces.size());
+            candidates.clear();
+            candidates.reserve(faces.size());
 
             for (size_t j = 0; j < faces.size(); ++j)
             {
@@ -873,16 +878,16 @@ namespace Rodin::Variational
               if (tlin > tauCell)
                 continue;
 
-              s_candidates.push_back(Candidate{tlin, j, ndv, phi0, faces[j]});
+              candidates.push_back(Candidate{tlin, j, ndv, phi0, faces[j]});
             }
 
-            if (s_candidates.empty())
+            if (candidates.empty())
             {
               foundEvent = false;
               break;
             }
 
-            std::sort(s_candidates.begin(), s_candidates.end(),
+            std::sort(candidates.begin(), candidates.end(),
               [](const Candidate& a, const Candidate& b) {
                 if (a.tlin != b.tlin)
                   return a.tlin < b.tlin;
@@ -891,14 +896,14 @@ namespace Rodin::Variational
                 return a.fid < b.fid;
               });
 
-            const size_t ntry = std::min(faceTrials, s_candidates.size());
+            const size_t ntry = std::min(faceTrials, candidates.size());
 
             auto consider = [&](size_t begin, size_t end) {
               for (size_t k = begin; k < end; ++k)
               {
-                const auto& c = s_candidates[k];
+                const auto& c = candidates[k];
 
-                if (lastFace && c.j == *lastFace && s_candidates.size() > 1)
+                if (lastFace && c.j == *lastFace && candidates.size() > 1)
                   continue;
 
                 Real hi = Real(0);
@@ -917,7 +922,7 @@ namespace Rodin::Variational
             foundEvent = false;
             consider(0, ntry);
             if (!foundEvent)
-              consider(ntry, s_candidates.size());
+              consider(ntry, candidates.size());
 
             if (foundEvent)
               break;
