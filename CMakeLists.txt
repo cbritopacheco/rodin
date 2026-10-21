@@ -226,7 +226,7 @@ if(RODIN_CODE_COVERAGE)
   # RODIN_LCOV_FLAGS is already a cache var in CI; make list
   string(REPLACE " " ";" RODIN_LCOV_FLAGS_LIST "${RODIN_LCOV_FLAGS}")
 
-  add_custom_target(RodinCoverage
+  add_custom_target(RodinCoverageInitial
     COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
             --gcov-tool ${GCOV}
             --capture --initial
@@ -235,6 +235,11 @@ if(RODIN_CODE_COVERAGE)
             --include "${PROJECT_SOURCE_DIR}/src/Rodin/*"
             --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
             --output-file RodinCoverage.initial.info
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    VERBATIM
+  )
+
+  add_custom_target(RodinCoverage
     COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
             --gcov-tool ${GCOV}
             --capture
@@ -256,6 +261,7 @@ if(RODIN_CODE_COVERAGE)
     COMMAND ${CMAKE_COMMAND} -E rm -f RodinCoverage.base.info
             RodinCoverage.initial.info RodinCoverage.runtime.info
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS RodinCoverageInitial
     VERBATIM
   )
 endif()
@@ -377,6 +383,11 @@ endif()
 
 if (RODIN_BUILD_DOC)
   add_subdirectory(doc)
+endif()
+
+if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_MANUFACTURED_TESTS OR
+    RODIN_BUILD_CONVERGENCE_TESTS)
+  include(RodinTestManifest)
 endif()
 
 if (RODIN_FEATURE_SUMMARY)

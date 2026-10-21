@@ -8,7 +8,7 @@ target_link_libraries(RodinHeartCCMLC2014Test
   Rodin::Solver
   Rodin::Alert
 )
-gtest_discover_tests(RodinHeartCCMLC2014Test
+rodin_discover_tests(RodinHeartCCMLC2014Test
   PROPERTIES
     LABELS unit
 )

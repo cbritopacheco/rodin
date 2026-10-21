@@ -7,7 +7,7 @@ target_link_libraries(RodinManufacturedAssembly
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedAssembly
+rodin_discover_tests(RodinManufacturedAssembly
   PROPERTIES
     LABELS manufactured
 )
@@ -21,7 +21,7 @@ target_link_libraries(RodinManufacturedTargetedAssembly
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedTargetedAssembly
+rodin_discover_tests(RodinManufacturedTargetedAssembly
   PROPERTIES
     LABELS manufactured
 )
@@ -29,5 +29,5 @@ gtest_discover_tests(RodinManufacturedTargetedAssembly
 add_executable(RodinManufacturedSparseElimination SparseEliminationTest.cpp)
 target_link_libraries(RodinManufacturedSparseElimination PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
-gtest_discover_tests(RodinManufacturedSparseElimination
+rodin_discover_tests(RodinManufacturedSparseElimination
   PROPERTIES LABELS manufactured TIMEOUT 180)

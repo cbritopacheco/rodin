@@ -8,6 +8,6 @@ foreach(algorithm GMRES DGMRES IDRS)
   target_compile_definitions(${target} PRIVATE
     RODIN_TEST_SOLVER=${algorithm}
     RODIN_TEST_SOLVER_HEADER="Rodin/Solver/${algorithm}.h")
-  gtest_discover_tests(${target} TEST_PREFIX "${algorithm}."
+  rodin_discover_tests(${target} TEST_PREFIX "${algorithm}."
     DISCOVERY_MODE PRE_TEST PROPERTIES LABELS manufactured TIMEOUT 120)
 endforeach()

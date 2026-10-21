@@ -6,5 +6,5 @@ target_link_libraries(RodinConvergenceHReactionDiffusion
     RodinConvergenceH
     Rodin::Solver
 )
-gtest_discover_tests(RodinConvergenceHReactionDiffusion
+rodin_discover_tests(RodinConvergenceHReactionDiffusion
   PROPERTIES LABELS convergence)

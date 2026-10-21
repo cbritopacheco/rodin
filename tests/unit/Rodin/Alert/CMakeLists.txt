@@ -1,7 +1,7 @@
 add_executable(RodinAlertFormattingTest FormattingTest.cpp)
 target_link_libraries(RodinAlertFormattingTest
   PRIVATE GTest::gtest_main Rodin::Alert)
-gtest_discover_tests(RodinAlertFormattingTest
+rodin_discover_tests(RodinAlertFormattingTest
   PROPERTIES LABELS unit TIMEOUT 30)
 
 add_executable(RodinAlertExceptionTest ExceptionTest.cpp)
@@ -12,7 +12,7 @@ target_link_libraries(RodinAlertExceptionTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertExceptionTest
+rodin_discover_tests(RodinAlertExceptionTest
   PROPERTIES
     LABELS unit
 )
@@ -25,7 +25,7 @@ target_link_libraries(RodinAlertWarningTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertWarningTest
+rodin_discover_tests(RodinAlertWarningTest
   PROPERTIES
     LABELS unit
 )
@@ -38,7 +38,7 @@ target_link_libraries(RodinAlertInfoTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertInfoTest
+rodin_discover_tests(RodinAlertInfoTest
   PROPERTIES
     LABELS unit
 )
@@ -51,7 +51,7 @@ target_link_libraries(RodinAlertSuccessTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertSuccessTest
+rodin_discover_tests(RodinAlertSuccessTest
   PROPERTIES
     LABELS unit
 )
@@ -64,7 +64,7 @@ target_link_libraries(RodinAlertIntegrationTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertIntegrationTest
+rodin_discover_tests(RodinAlertIntegrationTest
   PROPERTIES
     LABELS unit
 )

@@ -8,7 +8,7 @@ target_link_libraries(RodinConvergencePReactionDiffusion
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergencePReactionDiffusion
+rodin_discover_tests(RodinConvergencePReactionDiffusion
   PROPERTIES
     LABELS convergence
 )

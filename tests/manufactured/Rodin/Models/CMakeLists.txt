@@ -10,7 +10,7 @@ target_link_libraries(RodinManufacturedHilbertTest
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedHilbertTest
+rodin_discover_tests(RodinManufacturedHilbertTest
   PROPERTIES
     LABELS manufactured
 )
@@ -18,21 +18,21 @@ gtest_discover_tests(RodinManufacturedHilbertTest
 add_executable(RodinManufacturedNonlocalBlockTest NonlocalBlock.cpp)
 target_link_libraries(RodinManufacturedNonlocalBlockTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
-gtest_discover_tests(RodinManufacturedNonlocalBlockTest PROPERTIES LABELS manufactured)
+rodin_discover_tests(RodinManufacturedNonlocalBlockTest PROPERTIES LABELS manufactured)
 
 add_executable(RodinManufacturedDistanceTest Distance.cpp)
 target_link_libraries(RodinManufacturedDistanceTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
-gtest_discover_tests(RodinManufacturedDistanceTest PROPERTIES LABELS manufactured)
+rodin_discover_tests(RodinManufacturedDistanceTest PROPERTIES LABELS manufactured)
 
 add_executable(RodinManufacturedDerivativeLoadTest DerivativeLoad.cpp)
 target_link_libraries(RodinManufacturedDerivativeLoadTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
-gtest_discover_tests(RodinManufacturedDerivativeLoadTest
+rodin_discover_tests(RodinManufacturedDerivativeLoadTest
   PROPERTIES LABELS manufactured TIMEOUT 300)
 
 add_executable(RodinManufacturedAffineIdentificationTest AffineIdentification.cpp)
 target_link_libraries(RodinManufacturedAffineIdentificationTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
-gtest_discover_tests(RodinManufacturedAffineIdentificationTest
+rodin_discover_tests(RodinManufacturedAffineIdentificationTest
   PROPERTIES LABELS manufactured TIMEOUT 300)

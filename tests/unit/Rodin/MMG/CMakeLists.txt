@@ -5,7 +5,7 @@ target_link_libraries(RodinMMGTest
   GTest::gtest_main
   Rodin::Rodin
   Rodin::MMG)
-gtest_discover_tests(RodinMMGTest
+rodin_discover_tests(RodinMMGTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -14,9 +14,9 @@ gtest_discover_tests(RodinMMGTest
 add_executable(RodinMMGLevelSetDiscretizerTest LevelSetDiscretizerTest.cpp)
 target_link_libraries(RodinMMGLevelSetDiscretizerTest PRIVATE
   GTest::gtest_main Rodin::Rodin Rodin::MMG)
-gtest_discover_tests(RodinMMGLevelSetDiscretizerTest
+rodin_discover_tests(RodinMMGLevelSetDiscretizerTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinMMGMeshIOTest MeshIOTest.cpp)
 target_link_libraries(RodinMMGMeshIOTest PRIVATE GTest::gtest_main Rodin::MMG)
-gtest_discover_tests(RodinMMGMeshIOTest DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)
+rodin_discover_tests(RodinMMGMeshIOTest DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)

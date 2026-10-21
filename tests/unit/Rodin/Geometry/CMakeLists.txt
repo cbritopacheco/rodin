@@ -7,7 +7,7 @@ target_link_libraries(RodinGeometryLobedSphereLevelSetTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryLobedSphereLevelSetTest
+rodin_discover_tests(RodinGeometryLobedSphereLevelSetTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -19,7 +19,7 @@ target_link_libraries(RodinGeometryConnectivityTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryConnectivityTest
+rodin_discover_tests(RodinGeometryConnectivityTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -31,7 +31,7 @@ target_link_libraries(RodinGeometryMeshTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryMeshTest
+rodin_discover_tests(RodinGeometryMeshTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -43,7 +43,7 @@ target_link_libraries(RodinGeometryParametricTransformationTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryParametricTransformationTest
+rodin_discover_tests(RodinGeometryParametricTransformationTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -55,7 +55,7 @@ target_link_libraries(RodinGeometryUniformGridTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryUniformGridTest
+rodin_discover_tests(RodinGeometryUniformGridTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -67,7 +67,7 @@ target_link_libraries(RodinGeometryRegionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryRegionTest
+rodin_discover_tests(RodinGeometryRegionTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -79,7 +79,7 @@ target_link_libraries(RodinGeometryIndexGeneratorTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIndexGeneratorTest
+rodin_discover_tests(RodinGeometryIndexGeneratorTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -91,7 +91,7 @@ target_link_libraries(RodinGeometryPolytopeTraitsTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeTraitsTest
+rodin_discover_tests(RodinGeometryPolytopeTraitsTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -103,7 +103,7 @@ target_link_libraries(RodinGeometryPolytopeTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeTest
+rodin_discover_tests(RodinGeometryPolytopeTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -115,7 +115,7 @@ target_link_libraries(RodinGeometryPointTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPointTest
+rodin_discover_tests(RodinGeometryPointTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -128,7 +128,7 @@ target_link_libraries(RodinGeometryPolytopeQuadratureIndexTest
   GTest::gtest_main
   Rodin::Geometry
   Rodin::QF)
-gtest_discover_tests(RodinGeometryPolytopeQuadratureIndexTest
+rodin_discover_tests(RodinGeometryPolytopeQuadratureIndexTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -141,7 +141,7 @@ target_link_libraries(RodinGeometryPolytopeQuadratureTest
   GTest::gtest_main
   Rodin::Geometry
   Rodin::QF)
-gtest_discover_tests(RodinGeometryPolytopeQuadratureTest
+rodin_discover_tests(RodinGeometryPolytopeQuadratureTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -154,7 +154,7 @@ target_link_libraries(RodinGeometryPolytopeTransformationIndexTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeTransformationIndexTest
+rodin_discover_tests(RodinGeometryPolytopeTransformationIndexTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -166,7 +166,7 @@ target_link_libraries(RodinGeometryShardTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryShardTest
+rodin_discover_tests(RodinGeometryShardTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -179,7 +179,7 @@ target_link_libraries(RodinGeometrySharderTest
   GTest::gtest_main
   Rodin::Geometry
   Rodin::IO)
-gtest_discover_tests(RodinGeometrySharderTest
+rodin_discover_tests(RodinGeometrySharderTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -191,7 +191,7 @@ target_link_libraries(RodinGeometryPolytopeKeyTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeKeyTest
+rodin_discover_tests(RodinGeometryPolytopeKeyTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -203,7 +203,7 @@ target_link_libraries(RodinGeometrySubMeshTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometrySubMeshTest
+rodin_discover_tests(RodinGeometrySubMeshTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -215,7 +215,7 @@ target_link_libraries(RodinGeometryMeshExtendedTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryMeshExtendedTest
+rodin_discover_tests(RodinGeometryMeshExtendedTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -227,7 +227,7 @@ target_link_libraries(RodinGeometryPolytopeTraitsExtTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeTraitsExtTest
+rodin_discover_tests(RodinGeometryPolytopeTraitsExtTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -239,7 +239,7 @@ target_link_libraries(RodinGeometryPolytopeProjectTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeProjectTest
+rodin_discover_tests(RodinGeometryPolytopeProjectTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -251,7 +251,7 @@ target_link_libraries(RodinGeometryPointCloudTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPointCloudTest
+rodin_discover_tests(RodinGeometryPointCloudTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -263,7 +263,7 @@ target_link_libraries(RodinGeometryIdentityTransformationTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIdentityTransformationTest
+rodin_discover_tests(RodinGeometryIdentityTransformationTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -275,7 +275,7 @@ target_link_libraries(RodinGeometryMeshOpsTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryMeshOpsTest
+rodin_discover_tests(RodinGeometryMeshOpsTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -287,7 +287,7 @@ target_link_libraries(RodinGeometryConnectivityExtTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryConnectivityExtTest
+rodin_discover_tests(RodinGeometryConnectivityExtTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -299,7 +299,7 @@ target_link_libraries(RodinGeometryAttributeIndexTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryAttributeIndexTest
+rodin_discover_tests(RodinGeometryAttributeIndexTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -311,7 +311,7 @@ target_link_libraries(RodinGeometryPolytopeExtTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeExtTest
+rodin_discover_tests(RodinGeometryPolytopeExtTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -323,54 +323,54 @@ target_link_libraries(RodinGeometryMinSTCutTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryMinSTCutTest
+rodin_discover_tests(RodinGeometryMinSTCutTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
 add_executable(RodinGeometryEuclideanTest EuclideanTest.cpp)
 target_link_libraries(RodinGeometryEuclideanTest GTest::gtest_main Rodin::Geometry)
-gtest_discover_tests(RodinGeometryEuclideanTest
+rodin_discover_tests(RodinGeometryEuclideanTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES LABELS unit)
 
 add_executable(RodinGeometryGreedyPartitionerTest GreedyPartitionerTest.cpp)
 target_link_libraries(RodinGeometryGreedyPartitionerTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)
-gtest_discover_tests(RodinGeometryGreedyPartitionerTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinGeometryGreedyPartitionerTest PROPERTIES LABELS unit)
 
 add_executable(RodinGeometryShardBuilderContractTest ShardBuilderContractTest.cpp)
 target_link_libraries(RodinGeometryShardBuilderContractTest
   PRIVATE GTest::gtest_main Rodin::Geometry)
-gtest_discover_tests(RodinGeometryShardBuilderContractTest
+rodin_discover_tests(RodinGeometryShardBuilderContractTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinGeometryIteratorLifecycleTest IteratorLifecycleTest.cpp)
 target_link_libraries(RodinGeometryIteratorLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIteratorLifecycleTest
+rodin_discover_tests(RodinGeometryIteratorLifecycleTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinGeometryMetadataLifecycleTest MetadataLifecycleTest.cpp)
 target_link_libraries(RodinGeometryMetadataLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::QF)
-gtest_discover_tests(RodinGeometryMetadataLifecycleTest
+rodin_discover_tests(RodinGeometryMetadataLifecycleTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinGeometrySkinLifecycleTest SkinLifecycleTest.cpp)
 target_link_libraries(RodinGeometrySkinLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Geometry)
-gtest_discover_tests(RodinGeometrySkinLifecycleTest
+rodin_discover_tests(RodinGeometrySkinLifecycleTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinGeometryChartOwnershipTest ChartOwnershipTest.cpp)
 target_link_libraries(RodinGeometryChartOwnershipTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
-gtest_discover_tests(RodinGeometryChartOwnershipTest
+rodin_discover_tests(RodinGeometryChartOwnershipTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
 
 add_executable(RodinGeometryCacheGrowthTest CacheGrowthTest.cpp)
 target_link_libraries(RodinGeometryCacheGrowthTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::QF)
-gtest_discover_tests(RodinGeometryCacheGrowthTest
+rodin_discover_tests(RodinGeometryCacheGrowthTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

@@ -5,7 +5,7 @@ target_link_libraries(RodinFMMTest
   GTest::gtest_main
   Rodin::Rodin
   Rodin::Eikonal)
-gtest_discover_tests(RodinFMMTest
+rodin_discover_tests(RodinFMMTest
   PROPERTIES
     LABELS unit
 )

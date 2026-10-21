@@ -6,7 +6,7 @@ target_link_libraries(RodinTestRandomFloatTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTestRandomFloatTest
+rodin_discover_tests(RodinTestRandomFloatTest
   PROPERTIES
     LABELS unit
 )
@@ -17,7 +17,7 @@ target_link_libraries(RodinTestRandomIntegerTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTestRandomIntegerTest
+rodin_discover_tests(RodinTestRandomIntegerTest
   PROPERTIES
     LABELS unit
 )
@@ -28,7 +28,7 @@ target_link_libraries(RodinTestExpectedResultTableTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTestExpectedResultTableTest
+rodin_discover_tests(RodinTestExpectedResultTableTest
   PROPERTIES
     LABELS unit
 )
@@ -41,7 +41,7 @@ target_link_libraries(RodinTestFDProbeTest
   Rodin::Geometry
   Rodin::Variational
   Rodin::Test)
-gtest_discover_tests(RodinTestFDProbeTest
+rodin_discover_tests(RodinTestFDProbeTest
   PROPERTIES
     LABELS unit
 )

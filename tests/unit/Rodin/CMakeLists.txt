@@ -4,7 +4,7 @@ target_link_libraries(RodinPairTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinPairTest
+rodin_discover_tests(RodinPairTest
   PROPERTIES
     LABELS unit
 )
@@ -15,7 +15,7 @@ target_link_libraries(RodinTupleTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTupleTest
+rodin_discover_tests(RodinTupleTest
   PROPERTIES
     LABELS unit
 )
@@ -26,7 +26,7 @@ target_link_libraries(RodinArrayTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinArrayTest
+rodin_discover_tests(RodinArrayTest
   PROPERTIES
     LABELS unit
 )
@@ -37,7 +37,7 @@ target_link_libraries(RodinCopyableTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinCopyableTest
+rodin_discover_tests(RodinCopyableTest
   PROPERTIES
     LABELS unit
 )
@@ -48,7 +48,7 @@ target_link_libraries(RodinMoveableTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinMoveableTest
+rodin_discover_tests(RodinMoveableTest
   PROPERTIES
     LABELS unit
 )
@@ -59,7 +59,7 @@ target_link_libraries(RodinFlatSetTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinFlatSetTest
+rodin_discover_tests(RodinFlatSetTest
   PROPERTIES
     LABELS unit
 )
@@ -70,7 +70,7 @@ target_link_libraries(RodinTypesTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTypesTest
+rodin_discover_tests(RodinTypesTest
   PROPERTIES
     LABELS unit
 )
@@ -81,7 +81,7 @@ target_link_libraries(RodinCastTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinCastTest
+rodin_discover_tests(RodinCastTest
   PROPERTIES
     LABELS unit
 )
@@ -92,7 +92,7 @@ target_link_libraries(RodinUtilityTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinUtilityTest
+rodin_discover_tests(RodinUtilityTest
   PROPERTIES
     LABELS unit
 )

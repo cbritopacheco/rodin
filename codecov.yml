@@ -1,3 +1,11 @@
+codecov:
+  require_ci_to_pass: false
+  notify:
+    # Coverage / Finalize validates all required Tests producers before calling
+    # send-notifications. Uploads may arrive incrementally without early status.
+    manual_trigger: true
+    wait_for_ci: false
+
 ignore:
   - "tests/**"
   - "src/Rodin/Test/**"

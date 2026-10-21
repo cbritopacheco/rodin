@@ -1,24 +1,24 @@
 add_executable(RodinSolidYeohTest Constitutive/YeohTest.cpp)
 target_link_libraries(RodinSolidYeohTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Solid)
-gtest_discover_tests(RodinSolidYeohTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinSolidYeohTest PROPERTIES LABELS unit)
 
 add_executable(RodinSolidFollowerPressureTest Integrators/FollowerPressureTest.cpp)
 target_link_libraries(RodinSolidFollowerPressureTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Solid Rodin::Variational)
-gtest_discover_tests(RodinSolidFollowerPressureTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinSolidFollowerPressureTest PROPERTIES LABELS unit)
 
 add_executable(RodinSolidLocalCallbacksTest Local/CallbacksTest.cpp)
 target_link_libraries(RodinSolidLocalCallbacksTest
   PRIVATE GTest::gtest_main Rodin::Solid)
-gtest_discover_tests(RodinSolidLocalCallbacksTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinSolidLocalCallbacksTest PROPERTIES LABELS unit)
 
 add_executable(RodinSolidActiveFiberLawTest Constitutive/ActiveFiberLawTest.cpp)
 target_link_libraries(RodinSolidActiveFiberLawTest
   PRIVATE GTest::gtest_main Rodin::Solid)
-gtest_discover_tests(RodinSolidActiveFiberLawTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinSolidActiveFiberLawTest PROPERTIES LABELS unit)
 
 add_executable(RodinSolidMixedInternalVirtualWorkTest Integrators/MixedInternalVirtualWorkTest.cpp)
 target_link_libraries(RodinSolidMixedInternalVirtualWorkTest
   PRIVATE GTest::gtest_main Rodin::Solid Rodin::Variational)
-gtest_discover_tests(RodinSolidMixedInternalVirtualWorkTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinSolidMixedInternalVirtualWorkTest PROPERTIES LABELS unit)

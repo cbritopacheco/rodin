@@ -1,0 +1,192 @@
+# Shared implementation for the directory-based Tests matrix.
+name: Tests / Group
+'on':
+  workflow_call:
+    inputs:
+      profile:
+        type: string
+        required: true
+      group:
+        type: string
+        required: true
+      build_type:
+        type: string
+        required: true
+      multithreaded:
+        type: string
+        required: true
+      asan:
+        type: string
+        required: true
+      ubsan:
+        type: string
+        required: true
+      id:
+        type: string
+        required: true
+      name:
+        type: string
+        required: true
+      baseline:
+        type: boolean
+        required: true
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+permissions:
+  contents: read
+jobs:
+  Run:
+    name: gcc-14, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      MAKEFLAGS: ${{ inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '-j1' || '-j2'
+        }}
+      OMP_NUM_THREADS: 2
+      CTEST_PARALLEL_LEVEL: 1
+      GCOV: gcov-14
+      RODIN_COVERAGE: ${{ inputs.profile != 'manufactured' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && 'ON' || 'OFF' }}
+      SUITESPARSE_VERSION: 7.14.1
+      SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Hydrate test resources
+        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+        if: inputs.profile == 'unit' || inputs.profile == 'manufactured'
+      - name: Preserve slow-lane execution environment
+        if: inputs.profile == 'slow'
+        run: |
+          cat >> "$GITHUB_ENV" <<'ENV'
+          OMP_WAIT_POLICY=PASSIVE
+          OPENBLAS_NUM_THREADS=1
+          OMPI_MCA_hwloc_base_binding_policy=none
+          ENV
+      - name: Setup Cpp (C++ / C)
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+      - name: Install dependencies
+        run: |
+          case "$PROFILE" in
+            unit) sudo apt-get update && sudo apt-get install -y libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libmumps-dev libmumps-headers-dev libomp-dev mpi-default-bin mpi-default-dev petsc-dev mpich lcov ;;
+            manufactured) sudo apt-get update && sudo apt-get install -y libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov ;;
+            slow) sudo apt-get update && sudo apt-get install -y libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov ;;
+            coverage) sudo apt-get update && sudo apt-get install -y gcc-14 g++-14 libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov ;;
+            *) exit 1 ;;
+          esac
+        env:
+          PROFILE: ${{ inputs.profile }}
+      - name: Restore SuiteSparse
+        id: suitesparse
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.SUITESPARSE_PREFIX }}
+          key: suitesparse-${{ env.SUITESPARSE_VERSION }}-${{ runner.os }}-gcc-14
+        if: inputs.profile == 'unit'
+      - name: Build SuiteSparse
+        if: inputs.profile == 'unit' && steps.suitesparse.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
+          cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${SUITESPARSE_PREFIX}" \
+            -DSUITESPARSE_ENABLE_PROJECTS="suitesparse_config;amd;camd;colamd;ccolamd;cholmod;umfpack;spqr;paru" \
+            -DSUITESPARSE_USE_CUDA=OFF \
+            -DSUITESPARSE_USE_FORTRAN=OFF \
+            -DSUITESPARSE_DEMOS=OFF
+          cmake --build suitesparse-build
+          cmake --install suitesparse-build
+      - name: Configure group
+        env:
+          GROUP: ${{ inputs.group }}
+          PROFILE: ${{ inputs.profile }}
+          BUILD_TYPE: ${{ inputs.build_type }}
+          MULTITHREADED: ${{ inputs.multithreaded }}
+          ASAN: ${{ inputs.asan }}
+          UBSAN: ${{ inputs.ubsan }}
+        run: |
+          python3 dev/ci_tests.py configure --group "$GROUP" --profile "$PROFILE" \
+            --build-type "$BUILD_TYPE" --multithreaded "$MULTITHREADED" --asan "$ASAN" --ubsan "$UBSAN"
+      - name: Build selected targets
+        id: build
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+          GROUP: ${{ inputs.group }}
+          PROFILE: ${{ inputs.profile }}
+          BASELINE: ${{ inputs.baseline }}
+          PARALLEL: ${{ inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '1' ||
+            '2' }}
+        run: |
+          args=()
+          if [ "$BASELINE" = true ]; then args+=(--baseline); fi
+          python3 dev/ci_tests.py build --group "$GROUP" --profile "$PROFILE" --parallel "$PARALLEL" "${args[@]}"
+          python3 - <<'PYTHON'
+          import json, os
+          from pathlib import Path
+          if json.loads(Path('build/ci-built-targets.json').read_text()):
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  output.write('has_targets=true\n')
+          PYTHON
+      - name: Run group serially
+        id: tests
+        if: ${{ !inputs.baseline }}
+        env:
+          GROUP: ${{ inputs.group }}
+          PROFILE: ${{ inputs.profile }}
+        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE"
+      - name: Capture production coverage
+        id: capture
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.build.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}
+        env:
+          BASELINE: ${{ inputs.baseline }}
+        run: |
+          if [ "$BASELINE" = true ] || ! find build -name '*.gcda' -print -quit | grep -q .; then
+            cmake --build build --target RodinCoverageInitial
+            cp build/RodinCoverage.initial.info build/RodinCoverage.info
+          else
+            cmake --build build --target RodinCoverage
+          fi
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+      - name: Upload incremental production coverage
+        id: upload
+        if: ${{ !cancelled() && steps.capture.outcome == 'success' }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          plugins: noop
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ inputs.baseline && 'baseline' || inputs.profile }}
+          name: ${{ inputs.name }} (${{ inputs.build_type }}, MT=${{ inputs.multithreaded }}, ASan=${{ inputs.asan }}, UBSan=${{ inputs.ubsan }})
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
+      - name: Record producer outcome
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          CI_TEST_DEFINITION: ${{ toJSON(inputs) }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          TEST_OUTCOME: ${{ steps.tests.outcome }}
+          CAPTURE_OUTCOME: ${{ steps.capture.outcome }}
+          COVERAGE_UPLOADED: ${{ steps.upload.outcome }}
+        run: python3 dev/ci_coverage.py record --output ci-result
+      - name: Save invocation and coverage records
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-result-${{ inputs.id }}
+          path: ci-result/
+          if-no-files-found: error

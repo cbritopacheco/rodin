@@ -7,7 +7,7 @@ target_link_libraries(RodinConvergenceHStokes
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergenceHStokes
+rodin_discover_tests(RodinConvergenceHStokes
   PROPERTIES
     LABELS convergence
 )

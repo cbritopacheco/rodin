@@ -7,7 +7,7 @@ target_link_libraries(RodinManufacturedP0P1Mixed
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedP0P1Mixed
+rodin_discover_tests(RodinManufacturedP0P1Mixed
   PROPERTIES
     LABELS manufactured
 )

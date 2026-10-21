@@ -117,10 +117,50 @@ Two rules that make the difference between coverage and theatre:
 
 ## CI (.github/workflows/)
 
-`Build.yml`, `Tests.yml` (Unit + Manufactured jobs), `Benchmarks.yml`
-(published to the benchmarks site), `Documentation.yml` (Doxygen site),
-`Installation.yml`, `StaticAnalysis.yml`, `Labeler.yml`. Branches
+`Build.yml`, `Tests.yml` (unit, manufactured, convergence, installation and
+coverage jobs), `TestGroup.yml` (the reusable directory-group runner),
+`Benchmarks.yml` (published to the benchmarks site), `Documentation.yml`
+(Doxygen site), `StaticAnalysis.yml`, `Labeler.yml`. Branches
 `master` and `develop` both gate.
+
+All test checks use the `Tests /` umbrella. Test group paths follow their
+CMake registration directories, with named component leaves for oversized
+directories. Short sibling suites share their common parent job while retaining
+their full directory labels. MPI retains its module position; `slow` remains an independent
+execution label. Compiler, optimization, threading, sanitizer, scalar and MPI
+rank configurations must survive scheduling changes. Splitting jobs does not
+justify weakening a numerical check or its timeout.
+
+`dev/ci_test_plan.py` generates the current directory matrices. The configured
+`RodinTestTargets-<configuration>.tsv` manifest, emitted by CMake, is authoritative
+for enabled executable targets. `rodin_discover_tests` forwards GoogleTest
+registrations unchanged while recording their execution profiles. Explicit
+CTest commands supply the MPI target/profile associations. New test targets
+in an existing registration directory are included automatically.
+
+Use the scoped runner to avoid discovering unbuilt sibling executables:
+
+```sh
+python3 dev/ci_tests.py build --build build --group unit/Rodin/Geometry --profile unit
+python3 dev/ci_tests.py run --build build --group unit/Rodin/Geometry --profile unit
+```
+
+The build must already be configured for the desired backend and sanitizer
+settings. The runner retains generated commands and properties, restores the
+original working directories, adds hierarchical CTest labels, verifies its
+selection, and runs CTest serially. Each distributed invocation keeps its
+registered MPI rank count. Build-time and discovery-only runtime profiles are
+redirected outside the measured coverage directory.
+
+Coverage producers upload production-only LCOV independently as they finish.
+Zero-hit baseline jobs retain previously compiled test/template instantiations
+and production libraries even when those targets are absent from a runtime
+selection. Tests and benchmarks supply execution hits, never denominator
+entries. `Tests / Coverage / Finalize` requires every current-commit producer,
+successful uploads, and the complete original compilation inventory before
+triggering Codecov notifications and enforcing the 95% production line floor.
+It neither rebuilds nor reruns tests. Missing producers cannot be replaced by
+carryforward coverage. The local guard tests run serially in `Tests / CMake / CI`.
 
 CI facts that bite:
 
