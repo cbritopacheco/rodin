@@ -121,6 +121,12 @@ namespace Rodin::Geometry::Euclidean
     const auto point = supporting.intersect(otherSupporting);
     if (point)
     {
+      // A unique supporting-line intersection at an exactly shared endpoint
+      // is already known. Preserve it instead of reclassifying a rounded solve.
+      if (m_start == other.m_start || m_start == other.m_end)
+        return m_start;
+      if (m_end == other.m_start || m_end == other.m_end)
+        return m_end;
       const auto u = m_end - m_start, v = other.m_end - other.m_start;
       const T s = u.dot(*point - m_start) / u.squaredNorm();
       const T t = v.dot(*point - other.m_start) / v.squaredNorm();

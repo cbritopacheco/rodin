@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Analytic contracts for the Euclidean primitive templates. */
+/// @file @brief Analytic contracts for the Euclidean primitive templates.
 #include <gtest/gtest.h>
 #include <string>
 #include <type_traits>
@@ -954,4 +954,44 @@ TEST(Rodin_Geometry_Euclidean, DegreeArithmeticFeedsSphereParameterization)
   const auto negative = (-(start + increment)).toRad();
   EXPECT_NEAR(circle(negative)[0], 2, 1e-12);
   EXPECT_NEAR(circle(negative)[1], 1, 1e-12);
+}
+
+/// @brief Exactly shared endpoints survive the line solve without admitting disjoint segments.
+TEST(Rodin_Geometry_Euclidean, ExactSharedEndpoints)
+{
+  const auto check = []<size_t Dimension, class Scalar>() {
+    using Point = Rodin::Geometry::Euclidean::Point<Dimension, Scalar>;
+    using Segment = Rodin::Geometry::Euclidean::LineSegment<Dimension, Scalar>;
+    Point origin, shared, end;
+    for (size_t coordinate = 0; coordinate < Dimension; ++coordinate)
+    {
+      origin[coordinate] = 0;
+      shared[coordinate] = 1;
+      end[coordinate] = Scalar(3 + coordinate);
+    }
+    const Segment first(origin, shared), second(shared, end);
+    const auto verify = [&](const Segment& lhs, const Segment& rhs) {
+      const auto point = lhs.intersect(rhs);
+      ASSERT_TRUE(point);
+      EXPECT_EQ(*point, shared);
+    };
+    verify(first, second);
+    verify(first.reverse(), second);
+    verify(first, second.reverse());
+    verify(first.reverse(), second.reverse());
+    verify(second, first);
+    verify(second.reverse(), first);
+    verify(second, first.reverse());
+    verify(second.reverse(), first.reverse());
+    EXPECT_FALSE(first.intersect(first));
+    Point beyond = shared;
+    beyond[0] += Scalar(0.01);
+    EXPECT_FALSE(first.intersect(Segment(beyond, end)));
+  };
+  check.template operator()<2, float>();
+  check.template operator()<2, double>();
+  check.template operator()<3, float>();
+  check.template operator()<3, double>();
+  check.template operator()<4, float>();
+  check.template operator()<4, double>();
 }
