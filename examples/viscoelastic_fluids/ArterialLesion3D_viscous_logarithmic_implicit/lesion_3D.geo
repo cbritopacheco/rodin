@@ -32,7 +32,18 @@ DefineConstant[
   hw     = {0.04, Name "2Mesh/2Lesion wall size hw/D"},
   hwf    = {0.10, Name "2Mesh/3Wall size elsewhere hwf/D (Stokes layer)"},
   Lw     = {8,    Name "2Mesh/4Refined wake length Lw/D"},
-  rf     = {1,    Name "2Mesh/5Refinement factor (all h divided by rf)"}
+  rf     = {1,    Name "2Mesh/5Refinement factor (all h divided by rf)"},
+  layers = {0,    Choices{0="no", 1="yes"},
+            Name "3Layers/0Refine the shear and wall layers (cheaper elsewhere)"},
+  hsl    = {0.025, Name "3Layers/1Shear layer size hsl/D (at the lesion lip)"},
+  gsl    = {0.5,  Name "3Layers/2Growth of h away from the shear layer (dh/dr)"},
+  Lsl    = {4,    Name "3Layers/3Shear layer length Lsl/D downstream of the lesion"},
+  hlw    = {0.05, Name "3Layers/4Lesion wall size hlw/D (times the throat ratio)"},
+  dlw    = {0.10, Name "3Layers/5Lesion wall layer thickness dlw/D"},
+  hwk    = {0.08, Name "3Layers/6Wake size hwk/D"},
+  Lwk    = {6,    Name "3Layers/7Wake length Lwk/D"},
+  hwl    = {0.14, Name "3Layers/8Parent wall size hwl/D (Stokes layer ~0.18 D at Wo 4)"},
+  hwmax  = {0.10, Name "3Layers/9Largest wall and outlet size hwmax/D, at any rf"}
 ];
 
 // ---- geometry parameters ---------------------------------------------------
@@ -116,8 +127,51 @@ Field[8] = Threshold; Field[8].InField = 7;
 Field[8].SizeMin = 0.4*lcwf; Field[8].SizeMax = lcb;
 Field[8].DistMin = 0;        Field[8].DistMax = 0.5*D;
 
-Field[6] = Min; Field[6].FieldsList = {2, 4, 5, 8};
-Background Field = 6;
+If (layers == 0)
+  Field[6] = Min; Field[6].FieldsList = {2, 4, 5, 8};
+  Background Field = 6;
+Else
+  // Layers: resolve where the solution has its layers, coarsen elsewhere.
+  //  - the lesion wall layer (throat wall / aneurysm wall): hlw over dlw;
+  //  - the shear layer leaving the lesion lip: the cylinder r = rsl
+  //    (the throat radius of a stenosis, the parent radius R of an
+  //    aneurysm) from the lesion to Lsl downstream, h = hsl + gsl |r - rsl|,
+  //    growing linearly downstream of Lsl and upstream of the lesion;
+  //  - a wake of size hwk up to Lw, the background hb elsewhere.
+  // An aneurysm has its shear layer across the neck (r = R, |x| <= ell),
+  // reattaching at the distal neck: no free shear layer downstream.
+  rsl = R; Lsle = 0.5; If (a < 0) rsl = R*(1 + a); Lsle = Lsl; EndIf
+  hs = hsl*D/rf;  hlwr = hlw*sc*D/rf;  hk = hwk*D/rf;
+  Field[10] = Distance;  Field[10].SurfacesList = {lesion[]};
+  Field[11] = Threshold; Field[11].InField = 10;
+  Field[11].SizeMin = hlwr; Field[11].SizeMax = lcb;
+  Field[11].DistMin = 0.25*dlw*D; Field[11].DistMax = dlw*D;
+  Field[12] = MathEval;
+  Field[12].F = Sprintf("%g + %g*Fabs(Sqrt(y*y+z*z) - %g) + 0.5*((x-%g) + Fabs(x-%g)) + 2*((%g-x) + Fabs(%g-x))",
+                        hs, gsl, rsl, L + Lsle*D, L + Lsle*D, -L, -L);
+  Field[13] = Box;
+  Field[13].VIn = hk;  Field[13].VOut = lcb;
+  Field[13].XMin = -L;          Field[13].XMax = L + Lwk*D;
+  Field[13].YMin = -rmax;       Field[13].YMax = rmax;
+  Field[13].ZMin = -rmax;       Field[13].ZMax = rmax;
+  // Parent wall and outlet disk at most hwmax: the polygonal cross-section
+  // loses ~(2 h/D)^2/6 of its area (0.7% at 0.1 D) at any rf.
+  hwlr = hwl*D/rf; If (hwlr > hwmax*D) hwlr = hwmax*D; EndIf
+  // The distance to long walls needs a fine sampling (the default leaves the
+  // walls far from the samples coarser than hwmax).
+  Field[17] = Distance;  Field[17].SurfacesList = {up[], dn[], lesion[]};
+  Field[17].Sampling = 400;
+  Field[10].Sampling = 200;
+  Field[14] = Threshold; Field[14].InField = 17;
+  Field[14].SizeMin = hwlr;     Field[14].SizeMax = lcb;
+  Field[14].DistMin = 0;        Field[14].DistMax = 0.2*D;
+  Field[15] = Distance;  Field[15].SurfacesList = {outlet[]};
+  Field[16] = Threshold; Field[16].InField = 15;
+  Field[16].SizeMin = hwlr;     Field[16].SizeMax = lcb;
+  Field[16].DistMin = 0;        Field[16].DistMax = 0.5*D;
+  Field[6] = Min; Field[6].FieldsList = {8, 11, 12, 13, 14, 16};
+  Background Field = 6;
+EndIf
 
 Mesh.MeshSizeExtendFromBoundary = 0;
 Mesh.MeshSizeFromPoints = 0;
