@@ -4,10 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief MMG mesh file-open failures retain topology and required metadata. */
+/// @file @brief MMG mesh file-open failures retain topology and required metadata.
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <string>
+#include <sstream>
+#include "Rodin/MMG/MeshLoader.h"
+#include "Rodin/MMG/MMG5.h"
 #include "Rodin/MMG/Mesh.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -83,4 +86,39 @@ TEST_F(MMGMeshIO, FileOpenFailuresPreserveStateAndPermitRecovery)
   ASSERT_TRUE(boost::filesystem::is_regular_file(valid));
   EXPECT_EQ(&mesh.load(valid, IO::FileFormat::MEDIT), &mesh);
   verifyState();
+}
+
+/// @brief Metadata indices are positive, complete and within their declared entity tables.
+TEST_F(MMGMeshIO, MetadataBoundsAndLoaderReuse)
+{
+  const std::string base = "MeshVersionFormatted 2\nDimension 2\nVertices\n3\n"
+                           "0 0 1\n1 0 1\n0 1 1\nEdges\n3\n1 2 1\n2 3 1\n3 1 1\n"
+                           "Triangles\n1\n1 2 3 1\n";
+  for (const auto* section : {"Corners", "Ridges", "RequiredVertices", "RequiredEdges",
+         "RequiredTriangles", "RequiredTetrahedra"})
+  {
+    for (const auto* token : {"0", "-1", "999999999", "1trailing"})
+    {
+      MMG::Mesh mesh;
+      MMG::MeshLoader loader(mesh);
+      std::istringstream input(base + section + "\n1\n" + token + "\nEnd\n");
+      EXPECT_THROW(loader.load(input), Alert::Exception) << section << ':' << token;
+    }
+  }
+  MMG::Mesh mesh;
+  MMG::MeshLoader loader(mesh);
+  std::istringstream tagged(base + "Corners\n1\n1\nRequiredVertices\n1\n2\nEnd\n");
+  ASSERT_NO_THROW(loader.load(tagged));
+  ASSERT_EQ(mesh.getCorners().size(), 1u);
+  ASSERT_EQ(mesh.getRequiredVertices().size(), 1u);
+  std::istringstream clean(base + "End\n");
+  ASSERT_NO_THROW(loader.load(clean));
+  EXPECT_TRUE(mesh.getCorners().empty());
+  EXPECT_TRUE(mesh.getRequiredVertices().empty());
+  EXPECT_EQ(mesh.getCellCount(), 1u);
+  EXPECT_THROW(mesh.setCorner(mesh.getVertexCount()), Alert::Exception);
+  EXPECT_THROW(
+    mesh.setRequiredEdge(mesh.getConnectivity().getCount(1)), Alert::Exception);
+  mesh.getCorners().insert(mesh.getVertexCount());
+  EXPECT_THROW(MMG::MMG5::rodinToMesh(mesh), Alert::Exception);
 }

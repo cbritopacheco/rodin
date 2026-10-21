@@ -324,18 +324,6 @@ namespace Rodin::MMG
   {
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
-    IndexSet requiredVertices;
-    IndexSet requiredEdges;
-    IndexSet requiredTriangles;
-    IndexSet requiredTetrahedra;
-    if (const auto* inputMesh = dynamic_cast<const MMG::Mesh*>(&mesh))
-    {
-      requiredVertices = inputMesh->getRequiredVertices();
-      requiredEdges = inputMesh->getRequiredEdges();
-      requiredTriangles = inputMesh->getRequiredTriangles();
-      requiredTetrahedra = inputMesh->getRequiredTetrahedra();
-    }
-
     using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG5::destroyMesh)>;
     using SolutionOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG5::destroySolution)>;
     MeshOwner meshOwner(rodinToMesh(mesh), &MMG5::destroyMesh);
@@ -394,37 +382,8 @@ namespace Rodin::MMG
     // deleteBoundaryRef(mmgMesh, 0);
 
     auto rodinMesh = meshToRodin(mmgMesh);
-    rodinMesh.getRequiredVertices().clear();
-    const size_t vertexCount = rodinMesh.getVertexCount();
-    for (const auto& idx : requiredVertices)
-    {
-      if (idx < vertexCount)
-        rodinMesh.setRequiredVertex(idx);
-    }
-    rodinMesh.getRequiredEdges().clear();
-    const size_t edgeCount =
-      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Segment);
-    for (const auto& idx : requiredEdges)
-    {
-      if (idx < edgeCount)
-        rodinMesh.setRequiredEdge(idx);
-    }
-    rodinMesh.getRequiredTriangles().clear();
-    const size_t triangleCount =
-      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Triangle);
-    for (const auto& idx : requiredTriangles)
-    {
-      if (idx < triangleCount)
-        rodinMesh.setRequiredTriangle(idx);
-    }
-    rodinMesh.getRequiredTetrahedra().clear();
-    const size_t tetrahedronCount =
-      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron);
-    for (const auto& idx : requiredTetrahedra)
-    {
-      if (idx < tetrahedronCount)
-        rodinMesh.setRequiredTetrahedron(idx);
-    }
+    // Conversion reads the remesher's output tags after entity renumbering.
+    // Input numeric indices no longer identify the same output entities.
     solutionOwner.reset();
     meshOwner.reset();
 

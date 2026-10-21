@@ -80,6 +80,8 @@ namespace Rodin::MMG
     assert(src);
     assert(dst);
 
+    // Copy capacities together with their storage and free-list entries.
+    // MMG insertion follows the copied free lists beyond the current entity count.
     // Copy all non-pointer fields
     *dst = *src;
 
@@ -90,7 +92,7 @@ namespace Rodin::MMG
     if (src->adja)
     {
       const size_t entriesPerCell = src->dim == 2 || isSurfaceMesh(src) ? 3 : 4;
-      const size_t cellCount = entriesPerCell == 3 ? src->nt : src->ne;
+      const size_t cellCount = entriesPerCell == 3 ? src->ntmax : src->nemax;
       constexpr size_t adjacencyPadding = 5;
       const size_t adjacencySize = entriesPerCell * cellCount + adjacencyPadding;
       MMG5_SAFE_CALLOC(dst->adja, adjacencySize, MMG5_int, /* No op */);
@@ -134,8 +136,8 @@ namespace Rodin::MMG
        * it should not matter because MMG code should only access memory from the
        * 1-index.
        */
-      MMG5_SAFE_CALLOC(dst->point, src->np + 1, MMG5_Point, /* No op */);
-      std::copy(src->point, src->point + src->np + 1, dst->point);
+      MMG5_SAFE_CALLOC(dst->point, src->npmax + 1, MMG5_Point, /* No op */);
+      std::copy(src->point, src->point + src->npmax + 1, dst->point);
     }
     else
       dst->point = nullptr;
@@ -143,8 +145,10 @@ namespace Rodin::MMG
     // MMG5_pxPoint : mesh->xpoint
     if (src->xpoint)
     {
-      MMG5_SAFE_CALLOC(dst->xpoint, src->xp + 1, MMG5_xPoint, /* No op */);
-      std::copy(src->xpoint, src->xpoint + src->xp + 1, dst->xpoint);
+      MMG5_SAFE_CALLOC(
+        dst->xpoint, std::max(src->xp, src->xpmax) + 1, MMG5_xPoint, /* No op */);
+      std::copy(
+        src->xpoint, src->xpoint + std::max(src->xp, src->xpmax) + 1, dst->xpoint);
     }
     else
       dst->xpoint = nullptr;
@@ -152,8 +156,8 @@ namespace Rodin::MMG
     // MMG5_pTetra : mesh->tetra
     if (src->tetra)
     {
-      MMG5_SAFE_CALLOC(dst->tetra, src->ne + 1, MMG5_Tetra, /* No op */);
-      std::copy(src->tetra, src->tetra + src->ne + 1, dst->tetra);
+      MMG5_SAFE_CALLOC(dst->tetra, src->nemax + 1, MMG5_Tetra, /* No op */);
+      std::copy(src->tetra, src->tetra + src->nemax + 1, dst->tetra);
     }
     else
       dst->tetra = nullptr;
@@ -161,8 +165,10 @@ namespace Rodin::MMG
     // MMG5_pxTetra : mesh->xtetra
     if (src->xtetra)
     {
-      MMG5_SAFE_CALLOC(dst->xtetra, src->xt + 1, MMG5_xTetra, /* No op */);
-      std::copy(src->xtetra, src->xtetra + src->xt + 1, dst->xtetra);
+      MMG5_SAFE_CALLOC(
+        dst->xtetra, std::max(src->xt, src->xtmax) + 1, MMG5_xTetra, /* No op */);
+      std::copy(
+        src->xtetra, src->xtetra + std::max(src->xt, src->xtmax) + 1, dst->xtetra);
     }
     else
       dst->xtetra = nullptr;
@@ -188,8 +194,8 @@ namespace Rodin::MMG
     // MMG5_pTria : mesh->tria
     if (src->tria)
     {
-      MMG5_SAFE_CALLOC(dst->tria, src->nt + 1, MMG5_Tria, /* No op */);
-      std::copy(src->tria, src->tria + src->nt + 1, dst->tria);
+      MMG5_SAFE_CALLOC(dst->tria, src->ntmax + 1, MMG5_Tria, /* No op */);
+      std::copy(src->tria, src->tria + src->ntmax + 1, dst->tria);
     }
     else
       dst->tria = nullptr;
@@ -206,8 +212,8 @@ namespace Rodin::MMG
     // MMG5_pEdge : mesh->edge
     if (src->edge)
     {
-      MMG5_SAFE_CALLOC(dst->edge, src->na + 1, MMG5_Edge, /* No op */);
-      std::copy(src->edge, src->edge + src->na + 1, dst->edge);
+      MMG5_SAFE_CALLOC(dst->edge, src->namax + 1, MMG5_Edge, /* No op */);
+      std::copy(src->edge, src->edge + src->namax + 1, dst->edge);
     }
     else
       dst->edge = nullptr;
@@ -323,6 +329,30 @@ namespace Rodin::MMG
     bool isSurface = src.isSurface();
     assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
     const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
+
+    if (ptr)
+    {
+      const auto validate = [&](const auto& indices, Geometry::Polytope::Type type) {
+        const size_t dimension = Geometry::Polytope::Traits(type).getDimension();
+        for (const Index index : indices)
+        {
+          if (dimension > src.getConnectivity().getMaximalDimension() ||
+            index >= src.getConnectivity().getCount(dimension) ||
+            src.getPolytope(dimension, index)->getGeometry() != type)
+          {
+            Alert::Exception() << "Invalid MMG metadata entity index " << index
+                               << " for geometry " << static_cast<size_t>(type) << "."
+                               << Alert::Raise;
+          }
+        }
+      };
+      validate(ptr->getCorners(), Geometry::Polytope::Type::Point);
+      validate(ptr->getRequiredVertices(), Geometry::Polytope::Type::Point);
+      validate(ptr->getRidges(), Geometry::Polytope::Type::Segment);
+      validate(ptr->getRequiredEdges(), Geometry::Polytope::Type::Segment);
+      validate(ptr->getRequiredTriangles(), Geometry::Polytope::Type::Triangle);
+      validate(ptr->getRequiredTetrahedra(), Geometry::Polytope::Type::Tetrahedron);
+    }
 
     MMG5_pMesh res =
       createMesh(sMeshVersionFormatted, src.getDimension(), src.getSpaceDimension());

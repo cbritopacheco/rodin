@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <iomanip>
-#include <stdexcept>
+#include <sstream>
 #include <string>
 
 #include "Rodin/Alert.h"
@@ -20,17 +20,17 @@ namespace Rodin::MMG
   {
     std::string line;
     std::getline(is, line);
-    try
+    std::istringstream entry(line);
+    Index index = 0;
+    entry >> std::ws;
+    if (entry.peek() == '-' || !(entry >> index) || index == 0 ||
+      !(entry >> std::ws).eof())
     {
-      return std::stoul(line) - 1;
+      Alert::MemberFunctionException(*this, __func__)
+        << "Invalid one-based " << std::quoted(IO::MEDIT::toCharString(keyword))
+        << " index " << std::quoted(line) << "." << Alert::Raise;
     }
-    catch (const std::logic_error& error)
-    {
-      auto diagnostic = Alert::MemberFunctionException(*this, __func__);
-      diagnostic << "Failed to parse " << std::quoted(IO::MEDIT::toCharString(keyword))
-                 << " index from " << std::quoted(line) << ": " << error.what() << '.';
-      throw diagnostic;
-    }
+    return index - 1;
   }
 
   void MeshLoader::load(std::istream& is)
@@ -42,6 +42,12 @@ namespace Rodin::MMG
     // track the geometric information (ie. edges, corners, ridges, etc.) that
     // MEDIT/MMG provides with its mesh format.
     auto& mesh = this->getObject();
+    mesh.getCorners().clear();
+    mesh.getRidges().clear();
+    mesh.getRequiredVertices().clear();
+    mesh.getRequiredEdges().clear();
+    mesh.getRequiredTriangles().clear();
+    mesh.getRequiredTetrahedra().clear();
 
     // We perform another pass on the file, seeking the geometric entities.
     const auto& pos = getPositionMap();

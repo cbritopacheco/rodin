@@ -20,3 +20,8 @@ rodin_discover_tests(RodinMMGLevelSetDiscretizerTest
 add_executable(RodinMMGMeshIOTest MeshIOTest.cpp)
 target_link_libraries(RodinMMGMeshIOTest PRIVATE GTest::gtest_main Rodin::MMG)
 rodin_discover_tests(RodinMMGMeshIOTest DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)
+
+add_executable(RodinMMG5CopyTest MMG5CopyTest.cpp)
+target_link_libraries(RodinMMG5CopyTest PRIVATE GTest::gtest_main Rodin::MMG)
+rodin_discover_tests(RodinMMG5CopyTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 30)

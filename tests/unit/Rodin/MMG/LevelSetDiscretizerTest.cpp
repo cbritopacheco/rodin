@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Unsupported MMG modes preserve their input and release native resources. */
+/// @file @brief Unsupported MMG modes preserve their input and release native resources.
 #include <gtest/gtest.h>
 #include <cmath>
 #include <string>
@@ -129,4 +129,35 @@ namespace
   INSTANTIATE_TEST_SUITE_P(Unsupported, LevelSetOptions,
     ::testing::Values(UnsupportedMode::PlanarSurface, UnsupportedMode::EmbeddedSurface,
       UnsupportedMode::EmbeddedMaterial));
+}
+
+/// @brief Required tags follow surviving entities when remeshing renumbers vertices.
+TEST(LevelSetDiscretizer, RequiredVertexSurvivesRenumbering)
+{
+  MMG::Mesh mesh(LocalMesh::UniformGrid(Polytope::Type::Triangle, {21, 21}));
+  mesh.scale(Real(1) / 20);
+  mesh.getConnectivity().compute(1, 2);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    mesh.setAttribute({2, cell->getIndex()}, 1);
+  const Index required = mesh.getVertexCount() - 1;
+  const Math::SpatialPoint target = mesh.getVertex(required)->getCoordinates();
+  mesh.setRequiredVertex(required);
+  P1<Real> space(mesh);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = RealFunction([](const Point& point) {
+    return std::hypot(point.x() - 0.5, point.y() - 0.5) - 0.25;
+  });
+  MMG::LevelSetDiscretizer discretizer;
+  discretizer.setHMin(0.15).setHMax(0.25);
+  const auto output = discretizer.discretize(levelSet);
+  bool found = false;
+  for (auto vertex = output.getVertex(); vertex; ++vertex)
+  {
+    if ((vertex->getCoordinates() - target).norm() < 1e-14)
+    {
+      EXPECT_TRUE(output.getRequiredVertices().count(vertex->getIndex()) != 0);
+      found = true;
+    }
+  }
+  EXPECT_TRUE(found);
 }
