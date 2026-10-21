@@ -161,6 +161,10 @@ Manufactured jobs as `Backends / Baseline`; their slow tests run only in Slow.
 Native MPI H1 restriction jobs partition the complete 420-case matrix by MPI
 rank, retaining all geometries, degrees, mappings and per-test watchdogs. This
 limits each instrumented job to one rank under the existing 90-minute limit.
+These jobs use passive OpenMP waiting, no Open MPI CPU binding and yielding
+inside blocking MPI calls to avoid starving compute ranks on shared runner
+CPUs. They record the runner CPU topology and rank affinity before execution;
+rank counts, thread counts and per-test watchdogs remain unchanged.
 Original optional-backend Unit and default-backend Manufactured configurations
 remain intact. Compilation contexts distinguish backend, optimization and
 threading; final line coverage is their union, never an average of percentages.

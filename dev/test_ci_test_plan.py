@@ -75,6 +75,11 @@ class TestPlanTest(unittest.TestCase):
         command = next(s["run"] for s in job["steps"] if s.get("name") == "Run native MPI restriction rank partition")
         self.assertIn("-j 1", command)
         self.assertEqual(job["timeout-minutes"], 90)
+        self.assertEqual(job["env"]["OMP_NUM_THREADS"], 2)
+        self.assertEqual(job["env"]["OMP_WAIT_POLICY"], "PASSIVE")
+        self.assertEqual(job["env"]["OMPI_MCA_hwloc_base_binding_policy"], "none")
+        self.assertEqual(job["env"]["OMPI_MCA_mpi_yield_when_idle"], "1")
+        self.assertTrue(any(s.get("name") == "Record native MPI CPU placement" for s in job["steps"]))
         geometries = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Hexahedron", "Wedge"]
         expected = {f"RodinMPIH1SubMeshRestrictionTest_{geometry}_K{degree}_{mapping}_np{rank}"
                     for geometry, degree, mapping, rank in itertools.product(

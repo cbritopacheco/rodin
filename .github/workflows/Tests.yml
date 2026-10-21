@@ -570,6 +570,9 @@ jobs:
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
+      OMP_WAIT_POLICY: PASSIVE
+      OMPI_MCA_hwloc_base_binding_policy: none
+      OMPI_MCA_mpi_yield_when_idle: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -591,6 +594,17 @@ jobs:
         env:
           GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: cmake --build build -j 2 --target RodinMPISubMeshGridFunctionTest
+      - name: Record native MPI CPU placement
+        env:
+          MPI_RANKS: ${{ matrix.np }}
+        run: |
+          lscpu
+          grep '^Cpus_allowed_list:' /proc/self/status
+          mpi_executable=$(sed -n 's/^MPIEXEC_EXECUTABLE:FILEPATH=//p' build/CMakeCache.txt)
+          if [ -n "$mpi_executable" ] && "$mpi_executable" --version | grep -Eq 'Open MPI|OpenRTE'; then
+            "$mpi_executable" -n "$MPI_RANKS" --oversubscribe --report-bindings \
+              /bin/sh -c 'printf "MPI rank=%s " "$OMPI_COMM_WORLD_RANK"; grep "^Cpus_allowed_list:" /proc/self/status'
+          fi
       - name: Run native MPI restriction rank partition
         run: ctest --test-dir build/tests -R '^RodinMPIH1SubMeshRestrictionTest_.*_np${{ matrix.np }}$' --no-tests=error --output-on-failure -j 1
       - name: Publish independent production coverage
