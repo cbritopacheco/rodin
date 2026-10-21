@@ -222,6 +222,15 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Gets the trial or test leaf used by assembly.
+       * @returns The operand's leaf.
+       */
+      constexpr const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      /**
        * @brief Returns the number of local basis functions for a polytope.
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.

@@ -25,6 +25,8 @@ set(RodinVariational_HEADERS
   Function.h
   GridFunction.h
   ShapeFunction.h
+  InterfaceShapeFunction.h
+  DOFMapping.h
   TrialFunction.h
   TestFunction.h
   IdentityMatrix.h

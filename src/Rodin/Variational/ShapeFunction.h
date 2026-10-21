@@ -17,6 +17,7 @@
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
 #include <type_traits>
+#include "Rodin/Utility/OptionalReference.h"
 
 #include "ForwardDecls.h"
 
@@ -87,6 +88,194 @@ namespace Rodin::FormLanguage
     /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
+
+  /**
+   * @brief Detects shape expressions whose basis spans two incident cells.
+   * @tparam T Expression type.
+   *
+   * This is a property of the form-language expression, not a runtime cache
+   * test. Ordinary expressions compile without interface maps or branches.
+   */
+  template <class T>
+  struct IsInterfaceShapeFunction
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value = false;
+  };
+
+  /**
+   * @brief Propagates two-cell support through a shape expression.
+   * @tparam Derived Concrete expression type.
+   * @tparam FES Finite element space.
+   * @tparam Space Trial or test grading.
+   */
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct IsInterfaceShapeFunction<Variational::ShapeFunctionBase<Derived, FES, Space>>
+    : IsInterfaceShapeFunction<Derived>
+  {};
+
+  /**
+   * @brief Propagates two-cell support through a shape expression.
+   * @tparam Derived Concrete expression type.
+   * @tparam FES Finite element space.
+   * @tparam Space Trial or test grading.
+   */
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct IsInterfaceShapeFunction<
+    Variational::Average<Variational::ShapeFunctionBase<Derived, FES, Space>>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value = true;
+  };
+
+  /**
+   * @brief Propagates two-cell support through a shape expression.
+   * @tparam Derived Concrete expression type.
+   * @tparam FES Finite element space.
+   * @tparam Space Trial or test grading.
+   */
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct IsInterfaceShapeFunction<
+    Variational::Jump<Variational::ShapeFunctionBase<Derived, FES, Space>>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value = true;
+  };
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Conjugate<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Transpose<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Trace<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::UnaryMinus<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Grad<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Div<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Jacobian<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Derivative<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Sum<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Mult<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Division<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Dot<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Propagates support through component selection.
+   * @tparam Operand Operand expression.
+   * @tparam Indices Component index types.
+   */
+  template <class Operand, class... Indices>
+  struct IsInterfaceShapeFunction<Variational::Component<Operand, Indices...>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
 }
 
 namespace Rodin::Variational
@@ -278,6 +467,21 @@ namespace Rodin::Variational
       constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return static_cast<const Derived&>(*this).getDOFs(polytope);
+      }
+
+      /**
+       * @brief Returns a bound interface numbering when the expression has one.
+       * @returns Borrowed union indices, or no override for ordinary element numbering.
+       *
+       * Interface nodes implement this CRTP operation explicitly. Ordinary
+       * nodes compile to an empty optional without dispatch or allocation.
+       */
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        if constexpr (FormLanguage::IsInterfaceShapeFunction<Derived>::Value)
+          return static_cast<const Derived&>(*this).getDOFIndices();
+        else
+          return {};
       }
 
       /**

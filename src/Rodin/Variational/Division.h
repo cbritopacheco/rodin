@@ -12,6 +12,7 @@
  * @brief Division operation for functions.
  */
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "ForwardDecls.h"
 #include "Function.h"
 
@@ -163,7 +164,10 @@ namespace Rodin::Variational
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
-        return lhs / rhs;
+        if constexpr (requires { (lhs / rhs).eval(); })
+          return (lhs / rhs).eval();
+        else
+          return lhs / rhs;
       }
 
       /**
@@ -321,6 +325,12 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getLHS().getDOFIndices();
+      }
+
       /**
        * @brief Gets the finite element space.
        * @returns The finite element space.
@@ -401,6 +411,8 @@ namespace Rodin::Variational
         }
         decltype(auto) rhs = getRHS().getValue(ip);
         if constexpr (requires { (lhs / rhs).eval(); })
+          return (lhs / rhs).eval();
+        else if constexpr (requires { (lhs / rhs).eval(); })
           return (lhs / rhs).eval();
         else
           return lhs / rhs;

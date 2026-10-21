@@ -264,7 +264,8 @@ namespace Rodin::Assembly
             }
             const auto polytope = seq.getPolytope(i);
             lfi.setPolytope(polytope);
-            const auto& dofs = input.getFES().getDOFs(d, i);
+            const auto& dofs = lfi.getTestDOFIndices() ? *lfi.getTestDOFIndices()
+                                                       : input.getFES().getDOFs(d, i);
             for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
               res(dofs(l)) += lfi.integrate(l);
           }
@@ -377,8 +378,11 @@ namespace Rodin::Assembly
             }
             const auto polytope = seq.getPolytope(p);
             bfi.setPolytope(polytope);
-            const auto& rows = input.getTestFES().getDOFs(d, p);
-            const auto& cols = input.getTrialFES().getDOFs(d, p);
+            const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                       : input.getTestFES().getDOFs(d, p);
+            const auto& cols = bfi.getTrialDOFIndices()
+              ? *bfi.getTrialDOFIndices()
+              : input.getTrialFES().getDOFs(d, p);
             for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
             {
               for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
@@ -625,8 +629,11 @@ namespace Rodin::Assembly
             }
             const auto polytope = seq.getPolytope(p);
             bfi.setPolytope(polytope);
-            const auto& rows = input.getTestFES().getDOFs(d, p);
-            const auto& cols = input.getTrialFES().getDOFs(d, p);
+            const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                       : input.getTestFES().getDOFs(d, p);
+            const auto& cols = bfi.getTrialDOFIndices()
+              ? *bfi.getTrialDOFIndices()
+              : input.getTrialFES().getDOFs(d, p);
             for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
             {
               for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
@@ -1093,6 +1100,8 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
 
         // ------------------------------------------------------------
         // Sparse-only: eliminate during assembly; Dense: accumulate
@@ -1181,8 +1190,10 @@ namespace Rodin::Assembly
                 const auto polytope = seq.getPolytope(p);
                 bfi.setPolytope(polytope);
 
-                const auto& rows = vFES.getDOFs(d, p);
-                const auto& cols = uFES.getDOFs(d, p);
+                const auto& rows =
+                  bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices() : vFES.getDOFs(d, p);
+                const auto& cols = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
+                                                            : uFES.getDOFs(d, p);
 
                 for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                 {
@@ -1315,7 +1326,8 @@ namespace Rodin::Assembly
               const auto polytope = seq.getPolytope(p);
               lfi.setPolytope(polytope);
 
-              const auto& dofs = vFES.getDOFs(d, p);
+              const auto& dofs =
+                lfi.getTestDOFIndices() ? *lfi.getTestDOFIndices() : vFES.getDOFs(d, p);
               for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
               {
                 const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
@@ -1595,6 +1607,10 @@ namespace Rodin::Assembly
       {
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;
+        // A refreshed load needs the original constrained-column contributions;
+        // the retained eliminated operator no longer contains those entries.
+        const bool liftBoundary =
+          mode == AssemblyMode::RHS && !input.getProblemBody().getDBCs().empty();
 
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -1668,6 +1684,8 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
         {
@@ -1702,6 +1720,12 @@ namespace Rodin::Assembly
         auto matrixEntry = [&](Index row, Index col, ScalarType val) {
           if (val == ScalarType(0))
             return;
+          if (!doMatrix)
+          {
+            if (!constraints.isFixed(row) && constraints.isFixed(col))
+              b.coeffRef(row) -= val * constraints.getFixedValue(col);
+            return;
+          }
 
           const ScalarType colValue = constraints.isIdentified(col)
             ? constraints.getIdentificationValue(col)
@@ -1743,7 +1767,7 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------
         // Local BFIs
         // ------------------------------------------------------------
-        if (doMatrix)
+        if (doMatrix || liftBoundary)
         {
           for (auto& bfi : pb.getLocalBFIs())
           {
@@ -1762,11 +1786,29 @@ namespace Rodin::Assembly
                   continue;
               }
 
+              if (!doMatrix && bfi.getRegion() == Geometry::Region::Cells)
+              {
+                const auto& boundaryDOFs = trialFES.getDOFs(d, p);
+                bool affected = false;
+                for (const Index column : boundaryDOFs)
+                {
+                  if (constraints.isFixed(column) &&
+                    constraints.getFixedValue(column) != ScalarType(0))
+                  {
+                    affected = true;
+                    break;
+                  }
+                }
+                if (!affected)
+                  continue;
+              }
               const auto polytope = seq.getPolytope(p);
               bfi.setPolytope(polytope);
 
-              const auto& rowsDOF = testFES.getDOFs(d, p);
-              const auto& colsDOF = trialFES.getDOFs(d, p);
+              const auto& rowsDOF = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                            : testFES.getDOFs(d, p);
+              const auto& colsDOF = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
+                                                             : trialFES.getDOFs(d, p);
 
               for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
               {
@@ -1890,7 +1932,8 @@ namespace Rodin::Assembly
 
               const auto polytope = seq.getPolytope(p);
               lfi.setPolytope(polytope);
-              const auto& dofs = testFES.getDOFs(d, p);
+              const auto& dofs = lfi.getTestDOFIndices() ? *lfi.getTestDOFIndices()
+                                                         : testFES.getDOFs(d, p);
               for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 vectorEntry(dofs[l], -static_cast<ScalarType>(lfi.integrate(l)));
             }
@@ -1996,15 +2039,16 @@ namespace Rodin::Assembly
         } // mode == Full
         else if (doMatrix)
         {
-          // LHS-only: assemble the operator; fixed rows -> identity (rows only,
-          // columns kept), mirroring the PETSc MatZeroRows targeted path.
+          // LHS-only retains the same symmetric elimination as full assembly;
+          // the existing right-hand side is not modified.
           if constexpr (IsSparse)
           {
             size_t write = 0;
             for (size_t read = 0; read < triplets.size(); ++read)
             {
               const auto& t = triplets[read];
-              if (constraints.isFixed(static_cast<Index>(t.row())))
+              if (constraints.isFixed(static_cast<Index>(t.row())) ||
+                constraints.isFixed(static_cast<Index>(t.col())))
                 continue;
               if (write != read)
                 triplets[write] = t;
@@ -2027,6 +2071,8 @@ namespace Rodin::Assembly
                 continue;
               for (size_t c = 0; c < cols; ++c)
                 A(idx, c) = ScalarType(0);
+              for (size_t r = 0; r < rows; ++r)
+                A(r, idx) = ScalarType(0);
               A(idx, idx) = ScalarType(1);
             }
           }
@@ -2290,9 +2336,6 @@ namespace Rodin::Assembly
                 mCoef.push_back(c);
               }
             }
-
-            if (mIdx.empty())
-              continue;
 
             const Index n = static_cast<Index>(mIdx.size());
             IndexArray masters(n);

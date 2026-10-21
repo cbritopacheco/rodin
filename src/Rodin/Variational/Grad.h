@@ -15,6 +15,8 @@
 #ifndef RODIN_VARIATIONAL_GRAD_H
 #define RODIN_VARIATIONAL_GRAD_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Math/SpatialVector.h"
@@ -224,11 +226,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -264,11 +274,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }

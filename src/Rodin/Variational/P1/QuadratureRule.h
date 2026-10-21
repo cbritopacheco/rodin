@@ -1891,41 +1891,25 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            Math::SpatialMatrix<ScalarType> cmv;
-            cmv = coeff.getValue(ip);
-
-            if (trialfes == testfes)
+            const Math::SpatialMatrix<ScalarType> coefficient = coeff.getValue(ip);
+            const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
+            if (coefficient.rows() != spaceDimension ||
+              coefficient.cols() != spaceDimension)
             {
-              const size_t n = trialRefGrad.size();
-              for (size_t i = 0; i < n; ++i)
-              {
-                const auto AGgi = cmv * (G * trialRefGrad[i]);
-                m_matrix(i, i) += wdet * Math::dot(AGgi, trialRefGrad[i]);
-                for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(AGgi, trialRefGrad[j]);
-              }
-
-              for (size_t i = 0; i < n; ++i)
-              {
-                for (size_t j = i + 1; j < n; ++j)
-                {
-                  m_matrix(i, j) +=
-                    wdet * Math::dot(cmv * (G * trialRefGrad[j]), trialRefGrad[i]);
-                }
-              }
+              Alert::MemberFunctionException(*this, __func__)
+                << "Diffusion tensor dimensions must match the ambient dimension."
+                << Alert::Raise;
             }
-            else
+            // For J: R^d -> R^s, physical gradients are J^{+T} grad_ref.
+            // Pull the ambient tensor back on both sides before contraction.
+            const auto pullback = Jinv * coefficient * Jinv.transpose();
+            for (size_t trial = 0; trial < trialRefGrad.size(); ++trial)
             {
-              const size_t ntr = trialRefGrad.size();
-              const size_t nte = testRefGrad.size();
-
-              for (size_t te = 0; te < nte; ++te)
+              const auto weightedGradient = pullback * trialRefGrad[trial];
+              for (size_t test = 0; test < testRefGrad.size(); ++test)
               {
-                for (size_t tr = 0; tr < ntr; ++tr)
-                {
-                  m_matrix(te, tr) +=
-                    wdet * Math::dot(cmv * (G * trialRefGrad[tr]), testRefGrad[te]);
-                }
+                m_matrix(test, trial) +=
+                  wdet * Math::dot(weightedGradient, testRefGrad[test]);
               }
             }
           }
@@ -2507,7 +2491,8 @@ namespace Rodin::Variational
           for (size_t i = 0; i < refGrad.size(); ++i)
           {
             ScalarType div = 0;
-            for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
+            for (size_t comp = 0; comp < std::min(vdim, static_cast<size_t>(Jinv.cols()));
+              ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
@@ -2800,7 +2785,8 @@ namespace Rodin::Variational
           for (size_t i = 0; i < refGrad.size(); ++i)
           {
             ScalarType div = 0;
-            for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
+            for (size_t comp = 0; comp < std::min(vdim, static_cast<size_t>(Jinv.cols()));
+              ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
@@ -3374,60 +3360,80 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
         if (recompute)
         {
-          m_set = true;
+          m_set = false;
           m_order = order;
           m_geometry = geometry;
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          // Reference-space basis Jacobians are shared by every physical cell
-          // with this geometry and quadrature rule.
-          const auto& rc = m_qf->getPoint(0);
-          m_trialRefJac.resize(trialfe.getCount());
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
+          // Affine simplex reference derivatives are constant. Tensor-product
+          // and other nonsimplex bases require their actual sample coordinates.
+          using GeometryType = Geometry::Polytope::Type;
+          const bool simplex = geometry == GeometryType::Point ||
+            geometry == GeometryType::Segment || geometry == GeometryType::Triangle ||
+            geometry == GeometryType::Tetrahedron;
+          const size_t sampleCount = simplex ? 1 : m_qf->getSize();
+          m_trialRefJac.assign(sampleCount, {});
+          m_testRefJac.assign(sampleCount, {});
+          for (size_t sample = 0; sample < sampleCount; ++sample)
           {
-            auto& J = m_trialRefJac[local];
-            J.resize(trialfes.getVectorDimension(), d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+            const auto& rc = m_qf->getPoint(sample);
+            auto& trialJacobians = m_trialRefJac[sample];
+            trialJacobians.resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
             {
-              for (size_t j = 0; j < d; ++j)
-                J(i, j) = basis.template getDerivative<1>(i, j)(rc);
-            }
-          }
-          if (trialfes == testfes)
-          {
-            m_testRefJac = m_trialRefJac;
-          }
-          else
-          {
-            m_testRefJac.resize(testfe.getCount());
-            for (size_t local = 0; local < testfe.getCount(); ++local)
-            {
-              auto& J = m_testRefJac[local];
-              J.resize(testfes.getVectorDimension(), d);
-              const auto& basis = testfe.getBasis(local);
-              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              auto& jacobian = trialJacobians[local];
+              jacobian.resize(trialfes.getVectorDimension(), d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t component = 0; component < trialfes.getVectorDimension();
+                ++component)
               {
-                for (size_t j = 0; j < d; ++j)
-                  J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+                for (size_t axis = 0; axis < d; ++axis)
+                {
+                  jacobian(component, axis) =
+                    basis.template getDerivative<1>(component, axis)(rc);
+                }
+              }
+            }
+            if (trialfes == testfes)
+              m_testRefJac[sample] = trialJacobians;
+            else
+            {
+              auto& testJacobians = m_testRefJac[sample];
+              testJacobians.resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& jacobian = testJacobians[local];
+                jacobian.resize(testfes.getVectorDimension(), d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t component = 0; component < testfes.getVectorDimension();
+                  ++component)
+                {
+                  for (size_t axis = 0; axis < d; ++axis)
+                  {
+                    jacobian(component, axis) =
+                      basis.template getDerivative<1>(component, axis)(rc);
+                  }
+                }
               }
             }
           }
+          m_set = true;
         }
 
         assert(m_qf);
         m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
         const auto& q = *m_quadrature;
 
-        const size_t ntr = m_trialRefJac.size();
-        const size_t nte = m_testRefJac.size();
+        const size_t ntr = trialfe.getCount();
+        const size_t nte = testfe.getCount();
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
 
@@ -3436,6 +3442,9 @@ namespace Rodin::Variational
 
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
+          const size_t sample = m_trialRefJac.size() == 1 ? 0 : qp;
+          const auto& trialJacobians = m_trialRefJac[sample];
+          const auto& testJacobians = m_testRefJac[sample];
           const auto& p = q.getPoint(qp);
           const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
@@ -3449,7 +3458,7 @@ namespace Rodin::Variational
           for (size_t tr = 0; tr < ntr; ++tr)
           {
             ScalarType action = 0;
-            const auto& Jref = m_trialRefJac[tr];
+            const auto& Jref = trialJacobians[tr];
             for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
             {
               for (size_t j = 0; j < spaceDimension; ++j)
@@ -3472,7 +3481,7 @@ namespace Rodin::Variational
             for (size_t te = 0; te < nte; ++te)
             {
               ScalarType action = 0;
-              const auto& Jref = m_testRefJac[te];
+              const auto& Jref = testJacobians[te];
               for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
               {
                 for (size_t j = 0; j < spaceDimension; ++j)
@@ -3533,8 +3542,8 @@ namespace Rodin::Variational
       bool m_set;
       size_t m_order;
       Optional<Geometry::Polytope::Type> m_geometry;
-      std::vector<Math::Matrix<ScalarType>> m_trialRefJac;
-      std::vector<Math::Matrix<ScalarType>> m_testRefJac;
+      std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialRefJac;
+      std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_testRefJac;
       std::vector<ScalarType> m_trialAction;
       std::vector<ScalarType> m_testAction;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_matrix;

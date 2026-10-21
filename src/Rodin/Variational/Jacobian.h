@@ -42,6 +42,9 @@
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
+#include "Rodin/Utility/OptionalReference.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Grad.h"
 #include "Rodin/Math/SpatialMatrix.h"
@@ -190,11 +193,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -230,11 +241,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -504,6 +523,12 @@ namespace Rodin::Variational
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_gradient.getDOFs(poly);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return m_gradient.getDOFIndices();
       }
 
       /**

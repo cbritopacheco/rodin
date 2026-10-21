@@ -19,6 +19,7 @@
 #ifndef RODIN_VARIATIONAL_UNARYMINUS_H
 #define RODIN_VARIATIONAL_UNARYMINUS_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
 
@@ -287,6 +288,12 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
+      }
+
       /**
        * @brief Starts a fresh cell binding and releases the previous point binding.
        * @param polytope Entity whose basis will be evaluated.
@@ -461,6 +468,7 @@ namespace Rodin::Variational
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);
+        this->setDOFIndices(m_op->getTestDOFIndices());
         return *this;
       }
 
@@ -657,6 +665,7 @@ namespace Rodin::Variational
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);
+        this->setDOFIndices(m_op->getTrialDOFIndices(), m_op->getTestDOFIndices());
         return *this;
       }
 

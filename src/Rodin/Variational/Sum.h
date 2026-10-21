@@ -12,6 +12,7 @@
 #ifndef RODIN_VARIATIONAL_SUM_H
 #define RODIN_VARIATIONAL_SUM_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/Traits.h"
@@ -20,6 +21,7 @@
 #include "Function.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
+#include "DOFMapping.h"
 
 #include "RealFunction.h"
 #include "ComplexFunction.h"
@@ -215,7 +217,10 @@ namespace Rodin::Variational
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
-        return lhs + rhs;
+        if constexpr (requires { (lhs + rhs).eval(); })
+          return (lhs + rhs).eval();
+        else
+          return lhs + rhs;
       }
 
       /**
@@ -430,10 +435,28 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr size_t getDOFs(const Geometry::Polytope& element) const
+      size_t getDOFs(const Geometry::Polytope& element) const
       {
-        assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
-        return getLHS().getDOFs(element);
+        if constexpr (FormLanguage::IsInterfaceShapeFunction<Sum>::Value)
+        {
+          auto working = *this;
+          working.setPolytope(element);
+          return working.getDOFIndices()->size();
+        }
+        else
+        {
+          assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
+          return getLHS().getDOFs(element);
+        }
+      }
+
+      /// @returns The bound union numbering for an interface expression.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        if constexpr (FormLanguage::IsInterfaceShapeFunction<Sum>::Value)
+          return m_mapping.getIndices();
+        else
+          return {};
       }
 
       /**
@@ -445,6 +468,16 @@ namespace Rodin::Variational
       {
         m_lhs->setPolytope(polytope);
         m_rhs->setPolytope(polytope);
+        if constexpr (FormLanguage::IsInterfaceShapeFunction<Sum>::Value)
+        {
+          const auto lhs = getLHS().getDOFIndices();
+          const auto rhs = getRHS().getDOFIndices();
+          const auto& fes = this->getFiniteElementSpace();
+          const auto dimension = polytope.getDimension();
+          const auto index = polytope.getIndex();
+          m_mapping.setLHS(lhs ? *lhs : fes.getDOFs(dimension, index));
+          m_mapping.setRHS(rhs ? *rhs : fes.getDOFs(dimension, index));
+        }
         return *this;
       }
 
@@ -476,9 +509,32 @@ namespace Rodin::Variational
        */
       constexpr auto getBasis(size_t local) const
       {
-        decltype(auto) lhs = getLHS().getBasis(local);
-        decltype(auto) rhs = getRHS().getBasis(local);
-        return lhs + rhs;
+        if constexpr (FormLanguage::IsInterfaceShapeFunction<Sum>::Value)
+        {
+          const auto& lhsIndex = m_mapping.getLHS(local);
+          const auto& rhsIndex = m_mapping.getRHS(local);
+          typename FormLanguage::Traits<LHSType>::RangeType lhs =
+            getLHS().getBasis(lhsIndex.value_or(0));
+          typename FormLanguage::Traits<RHSType>::RangeType rhs =
+            getRHS().getBasis(rhsIndex.value_or(0));
+          if (!lhsIndex)
+            lhs *= 0;
+          if (!rhsIndex)
+            rhs *= 0;
+          if constexpr (requires { (lhs + rhs).eval(); })
+            return (lhs + rhs).eval();
+          else
+            return lhs + rhs;
+        }
+        else
+        {
+          decltype(auto) lhs = getLHS().getBasis(local);
+          decltype(auto) rhs = getRHS().getBasis(local);
+          if constexpr (requires { (lhs + rhs).eval(); })
+            return (lhs + rhs).eval();
+          else
+            return lhs + rhs;
+        }
       }
 
       /**
@@ -512,6 +568,8 @@ namespace Rodin::Variational
       }
 
     private:
+      [[no_unique_address]] DOFMapping<FormLanguage::IsInterfaceShapeFunction<Sum>::Value>
+        m_mapping;
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
   };

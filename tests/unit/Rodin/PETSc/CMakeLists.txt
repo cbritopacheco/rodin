@@ -356,3 +356,50 @@ add_test(NAME RodinPETScRestrictedNonlocalTest
   COMMAND $<TARGET_FILE:RodinPETScRestrictedNonlocalTest>)
 set_tests_properties(RodinPETScRestrictedNonlocalTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScRestrictedNonlocalTest)
+
+if(RODIN_USE_MPI)
+  add_executable(RodinPETScMPIBoundaryRefreshTest MPIBoundaryRefreshTest.cpp)
+  target_link_libraries(RodinPETScMPIBoundaryRefreshTest PRIVATE
+    GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI Rodin::PETSc)
+  foreach(np 1 2)
+    add_test(NAME RodinPETScMPIBoundaryRefreshTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+        $<TARGET_FILE:RodinPETScMPIBoundaryRefreshTest>)
+    set_tests_properties(RodinPETScMPIBoundaryRefreshTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120)
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIBoundaryRefreshTest_np${np})
+  endforeach()
+endif()
+
+if (RODIN_USE_MPI)
+  add_executable(RodinPETScConstraintMapTest ConstraintMapTest.cpp)
+  target_link_libraries(RodinPETScConstraintMapTest PRIVATE GTest::gtest Rodin::PETSc Rodin::MPI)
+  foreach(np 1 2 3)
+    add_test(NAME RodinPETScConstraintMapTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinPETScConstraintMapTest>)
+    set_tests_properties(RodinPETScConstraintMapTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScConstraintMapTest_np${np})
+  endforeach()
+endif()
+
+add_executable(RodinPETScInterfaceShapeTest InterfaceShapeTest.cpp)
+target_link_libraries(RodinPETScInterfaceShapeTest PRIVATE GTest::gtest Rodin::PETSc)
+add_test(NAME RodinPETScInterfaceShapeTest_Local
+  COMMAND $<TARGET_FILE:RodinPETScInterfaceShapeTest> --gtest_filter=PETScInterfaceShape.Local)
+set_tests_properties(RodinPETScInterfaceShapeTest_Local PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScInterfaceShapeTest_Local)
+if(RODIN_USE_MPI)
+  target_link_libraries(RodinPETScInterfaceShapeTest PRIVATE Rodin::MPI)
+  foreach(np 1 2 3)
+    add_test(NAME RodinPETScInterfaceShapeTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinPETScInterfaceShapeTest>
+        --gtest_filter=PETScInterfaceShape.Distributed)
+    set_tests_properties(RodinPETScInterfaceShapeTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScInterfaceShapeTest_np${np})
+  endforeach()
+endif()

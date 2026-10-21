@@ -312,8 +312,12 @@ namespace Rodin::Assembly
               const auto polytope = seq.getPolytope(i);
               integrator->setPolytope(polytope);
 
-              const auto& rows = input.getTestFES().getDOFs(d, i);
-              const auto& cols = input.getTrialFES().getDOFs(d, i);
+              const auto& rows = integrator->getTestDOFIndices()
+                ? *integrator->getTestDOFIndices()
+                : input.getTestFES().getDOFs(d, i);
+              const auto& cols = integrator->getTrialDOFIndices()
+                ? *integrator->getTrialDOFIndices()
+                : input.getTrialFES().getDOFs(d, i);
               assert(rows.size() >= 0);
               for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
               {
@@ -677,8 +681,12 @@ namespace Rodin::Assembly
               const auto polytope = seq.getPolytope(i);
               lbfi->setPolytope(polytope);
 
-              const auto& rows = input.getTestFES().getDOFs(d, i);
-              const auto& cols = input.getTrialFES().getDOFs(d, i);
+              const auto& rows = lbfi->getTestDOFIndices()
+                ? *lbfi->getTestDOFIndices()
+                : input.getTestFES().getDOFs(d, i);
+              const auto& cols = lbfi->getTrialDOFIndices()
+                ? *lbfi->getTrialDOFIndices()
+                : input.getTrialFES().getDOFs(d, i);
               for (Eigen::Index r = 0; r < rows.size(); ++r)
               {
                 for (Eigen::Index c = 0; c < cols.size(); ++c)
@@ -894,7 +902,9 @@ namespace Rodin::Assembly
               const auto polytope = seq.getPolytope(i);
               integrator->setPolytope(polytope);
 
-              const auto& dofs = input.getFES().getDOFs(d, i);
+              const auto& dofs = integrator->getTestDOFIndices()
+                ? *integrator->getTestDOFIndices()
+                : input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
               for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
               {
@@ -1255,6 +1265,9 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
+
 
         if constexpr (IsSparse)
         {
@@ -1329,8 +1342,12 @@ namespace Rodin::Assembly
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& rowsDOF = testFES.getDOFs(d, p);
-                const auto& colsDOF = trialFES.getDOFs(d, p);
+                const auto& rowsDOF = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
+                const auto& colsDOF = integrator->getTrialDOFIndices()
+                  ? *integrator->getTrialDOFIndices()
+                  : trialFES.getDOFs(d, p);
 
                 for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                 {
@@ -1457,7 +1474,9 @@ namespace Rodin::Assembly
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& dofs = testFES.getDOFs(d, p);
+                const auto& dofs = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = dofs(l);
@@ -1592,8 +1611,12 @@ namespace Rodin::Assembly
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& rowsDOF = testFES.getDOFs(d, p);
-                const auto& colsDOF = trialFES.getDOFs(d, p);
+                const auto& rowsDOF = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
+                const auto& colsDOF = integrator->getTrialDOFIndices()
+                  ? *integrator->getTrialDOFIndices()
+                  : trialFES.getDOFs(d, p);
 
                 for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                 {
@@ -1781,7 +1804,9 @@ namespace Rodin::Assembly
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& dofs = testFES.getDOFs(d, p);
+                const auto& dofs = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = dofs(l);
@@ -2081,6 +2106,9 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
+
 
         // ------------------------------------------------------------------
         // Thread-local accumulators
@@ -2183,8 +2211,12 @@ namespace Rodin::Assembly
                   const auto polytope = seq.getPolytope(p);
                   integrator->setPolytope(polytope);
 
-                  const auto& rows = vFES.getDOFs(d, p);
-                  const auto& cols = uFES.getDOFs(d, p);
+                  const auto& rows = integrator->getTestDOFIndices()
+                    ? *integrator->getTestDOFIndices()
+                    : vFES.getDOFs(d, p);
+                  const auto& cols = integrator->getTrialDOFIndices()
+                    ? *integrator->getTrialDOFIndices()
+                    : uFES.getDOFs(d, p);
 
                   for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                   {
@@ -2387,7 +2419,9 @@ namespace Rodin::Assembly
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& dofs = vFES.getDOFs(d, p);
+                const auto& dofs = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : vFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs(l)));
@@ -2770,8 +2804,6 @@ namespace Rodin::Assembly
               }
             }
 
-            if (mIdx.empty())
-              continue;
             const Eigen::Index n = static_cast<Eigen::Index>(mIdx.size());
             IndexArray masters(n);
             Math::Vector<Scalar> coeffs(n);

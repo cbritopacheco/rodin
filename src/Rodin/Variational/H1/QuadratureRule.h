@@ -1153,7 +1153,6 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_cmv(std::move(other.m_cmv)),
           m_mat(std::move(other.m_mat))
       {}
 
@@ -1237,13 +1236,32 @@ namespace Rodin::Variational
 
         assert(scalarCountTr > 0 && ntr % scalarCountTr == 0);
         assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
-        const size_t vdim = ntr / scalarCountTr;
-        assert(vdim == nte / scalarCountTe);
+        const size_t trialVdim = ntr / scalarCountTr;
+        const size_t testVdim = nte / scalarCountTe;
+        const size_t vdim = trialVdim;
+        if constexpr (!FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
+        {
+          if (trialVdim != testVdim)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Scalar mass weights require equal component counts." << Alert::Raise;
+          }
+        }
+        size_t trialRows = trialVdim, testRows = testVdim, columns = 1;
         if constexpr (FormLanguage::IsMatrixRange<
                         typename FormLanguage::Traits<TrialFESType>::RangeType>::Value)
         {
-          assert(trialfes.getRows() == testfes.getRows());
-          assert(trialfes.getColumns() == testfes.getColumns());
+          trialRows = trialfes.getRows();
+          testRows = testfes.getRows();
+          columns = trialfes.getColumns();
+          if (columns != testfes.getColumns() ||
+            (!FormLanguage::IsMatrixRange<CoefficientRangeType>::Value &&
+              trialRows != testRows))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Mass carriers require matching columns and compatible row counts."
+              << Alert::Raise;
+          }
         }
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
@@ -1342,7 +1360,12 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            m_cmv = coefficientValue;
+            if (coefficientValue.rows() != testRows ||
+              coefficientValue.cols() != trialRows)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Mass weight must map trial rows to test rows." << Alert::Raise;
+            }
             for (size_t ib = 0; ib < scalarCountTe; ++ib)
             {
               const ScalarType phi_te = teTab.getBasis(qp, ib);
@@ -1352,29 +1375,27 @@ namespace Rodin::Variational
                 if constexpr (FormLanguage::IsMatrixRange<typename FormLanguage::Traits<
                                 TrialFESType>::RangeType>::Value)
                 {
-                  const size_t rows = trialfes.getRows(), cols = trialfes.getColumns();
-                  assert(m_cmv.rows() == rows && m_cmv.cols() == rows);
-                  for (size_t column = 0; column < cols; ++column)
+                  for (size_t column = 0; column < columns; ++column)
                   {
-                    for (size_t rowTest = 0; rowTest < rows; ++rowTest)
+                    for (size_t rowTest = 0; rowTest < testRows; ++rowTest)
                     {
-                      for (size_t rowTrial = 0; rowTrial < rows; ++rowTrial)
+                      for (size_t rowTrial = 0; rowTrial < trialRows; ++rowTrial)
                       {
-                        A[(ib * vdim + rowTest * cols + column) * ntr +
-                          (ia * vdim + rowTrial * cols + column)] +=
-                          basisProduct * m_cmv(rowTest, rowTrial);
+                        A[(ib * testVdim + rowTest * columns + column) * ntr +
+                          (ia * trialVdim + rowTrial * columns + column)] +=
+                          basisProduct * coefficientValue(rowTest, rowTrial);
                       }
                     }
                   }
                 }
                 else
                 {
-                  for (size_t dd = 0; dd < vdim; ++dd)
+                  for (size_t dd = 0; dd < testVdim; ++dd)
                   {
-                    for (size_t cc = 0; cc < vdim; ++cc)
+                    for (size_t cc = 0; cc < trialVdim; ++cc)
                     {
-                      A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] +=
-                        basisProduct * m_cmv(dd, cc);
+                      A[(ib * testVdim + dd) * ntr + (ia * trialVdim + cc)] +=
+                        basisProduct * coefficientValue(dd, cc);
                     }
                   }
                 }
@@ -1419,7 +1440,6 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic,
         Operands::CoefficientOnLeft ? Eigen::RowMajor : Eigen::ColMajor>
         m_mat;
@@ -1575,7 +1595,8 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_cmv(std::move(other.m_cmv)),
+          m_trialGradients(std::move(other.m_trialGradients)),
+          m_testGradients(std::move(other.m_testGradients)),
           m_mat(std::move(other.m_mat))
       {}
 
@@ -1609,6 +1630,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
 
         const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index idx = polytope.getIndex();
 
         auto& integrand = *m_integrand;
@@ -1652,17 +1674,17 @@ namespace Rodin::Variational
           return *this;
         ScalarType* A_data = m_mat.data();
 
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> Gtr;
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> Gte;
+        auto& Gtr = m_trialGradients;
+        auto& Gte = m_testGradients;
 
         if (Gtr.size() < ntr)
           Gtr.resize(ntr);
         if (Gte.size() < nte)
           Gte.resize(nte);
         for (size_t a = 0; a < ntr; ++a)
-          Gtr[a].resize(static_cast<std::uint8_t>(d));
+          Gtr[a].resize(spaceDimension);
         for (size_t b = 0; b < nte; ++b)
-          Gte[b].resize(static_cast<std::uint8_t>(d));
+          Gte[b].resize(spaceDimension);
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -1680,7 +1702,7 @@ namespace Rodin::Variational
           const auto& teTab = testfe.getTabulation(*m_qf);
 
           // Build physical gradients for trial and test
-          if (d == 3)
+          if (d == 3 && spaceDimension == 3)
           {
             const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0), a20 = Jinv(2, 0);
             const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1), a21 = Jinv(2, 1);
@@ -1703,7 +1725,7 @@ namespace Rodin::Variational
               Gte[b][2] = a02 * gx + a12 * gy + a22 * gz;
             }
           }
-          else if (d == 2)
+          else if (d == 2 && spaceDimension == 2)
           {
             const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0);
             const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1);
@@ -1723,7 +1745,7 @@ namespace Rodin::Variational
               Gte[b][1] = a01 * gx + a11 * gy;
             }
           }
-          else if (d == 1)
+          else if (d == 1 && spaceDimension == 1)
           {
             const ScalarType a00 = Jinv(0, 0);
             for (size_t a = 0; a < ntr; ++a)
@@ -1739,32 +1761,68 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(false);
+            // The inverse Jacobian is d-by-s for a cell embedded in ambient
+            // dimension s. Restore scratch extents after coefficient callbacks.
+            for (size_t a = 0; a < ntr; ++a)
+            {
+              const auto gradient = trTab.getGradient(qp, a);
+              for (size_t coordinate = 0; coordinate < spaceDimension; ++coordinate)
+              {
+                ScalarType value = 0;
+                for (size_t reference = 0; reference < d; ++reference)
+                  value += Jinv(reference, coordinate) * gradient[reference];
+                Gtr[a][coordinate] = value;
+              }
+            }
+            for (size_t b = 0; b < nte; ++b)
+            {
+              const auto gradient = teTab.getGradient(qp, b);
+              for (size_t coordinate = 0; coordinate < spaceDimension; ++coordinate)
+              {
+                ScalarType value = 0;
+                for (size_t reference = 0; reference < d; ++reference)
+                  value += Jinv(reference, coordinate) * gradient[reference];
+                Gte[b][coordinate] = value;
+              }
+            }
           }
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
             std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coefficientValue;
+            // Conjugate the reversed product to remain trial-linear while
+            // keeping the test-gradient dimension invariant in the inner loop.
             for (size_t b = 0; b < nte; ++b)
             {
               ScalarType* row = A_data + b * ntr;
               const auto& gb = Gte[b];
               for (size_t a = 0; a < ntr; ++a)
-                row[a] += wdet * csv * Math::dot(gb, Gtr[a]);
+                row[a] += wdet * csv * Math::conj(Math::dot(gb, Gtr[a]));
             }
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            m_cmv = coefficientValue;
+            if (coefficientValue.rows() != spaceDimension ||
+              coefficientValue.cols() != spaceDimension)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Diffusion tensor dimensions must match the ambient dimension."
+                << Alert::Raise;
+            }
+            // Apply the tensor once per trial basis and reuse it for every test basis.
+            for (size_t a = 0; a < ntr; ++a)
+            {
+              Math::SpatialVector<ScalarType> transformed = coefficientValue * Gtr[a];
+              Gtr[a] = std::move(transformed);
+            }
             for (size_t b = 0; b < nte; ++b)
             {
               ScalarType* row = A_data + b * ntr;
               const auto& gb = Gte[b];
               for (size_t a = 0; a < ntr; ++a)
               {
-                Math::SpatialVector<ScalarType> aGtrA = m_cmv * Gtr[a];
-                row[a] += wdet * Math::dot(gb, aGtrA);
+                row[a] += wdet * Math::conj(Math::dot(gb, Gtr[a]));
               }
             }
           }
@@ -1806,7 +1864,9 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::SpatialMatrix<ScalarType> m_cmv;
+      /// @brief Owned physical-gradient workspaces, independent of nested integrators.
+      std::vector<Math::SpatialVector<ScalarType>> m_trialGradients, m_testGradients;
+
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -2256,6 +2316,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
 
         const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index idx = polytope.getIndex();
 
         auto& integrand = *m_integrand;
@@ -2310,7 +2371,7 @@ namespace Rodin::Variational
         if (GtrS.size() < scalarCountTr)
           GtrS.resize(scalarCountTr);
         for (size_t a = 0; a < scalarCountTr; ++a)
-          GtrS[a].resize(static_cast<std::uint8_t>(d));
+          GtrS[a].resize(static_cast<std::uint8_t>(spaceDimension));
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -2323,7 +2384,21 @@ namespace Rodin::Variational
           const auto Jinv = p.getJacobianInverse();
 
           // Physical gradients of scalar trial basis functions
-          if (d == 3)
+          if (spaceDimension != d)
+          {
+            for (size_t a = 0; a < scalarCountTr; ++a)
+            {
+              const auto gradient = trTabS.getGradient(qp, a);
+              for (size_t axis = 0; axis < spaceDimension; ++axis)
+              {
+                ScalarType value = 0;
+                for (size_t reference = 0; reference < d; ++reference)
+                  value += Jinv(reference, axis) * gradient[reference];
+                GtrS[a][axis] = value;
+              }
+            }
+          }
+          else if (d == 3)
           {
             const ScalarType j00 = Jinv(0, 0), j10 = Jinv(1, 0), j20 = Jinv(2, 0);
             const ScalarType j01 = Jinv(0, 1), j11 = Jinv(1, 1), j21 = Jinv(2, 1);
@@ -2373,9 +2448,8 @@ namespace Rodin::Variational
 
             for (size_t s = 0; s < scalarCountTr; ++s)
             {
-              // Only components c < d contribute: physical gradient has d entries.
-              // Components c >= d have zero divergence (no spatial dimension for them).
-              for (size_t c = 0; c < std::min(vdim, d); ++c)
+              // The physical gradient has one entry per ambient coordinate.
+              for (size_t c = 0; c < std::min(vdim, spaceDimension); ++c)
               {
                 const size_t a = s * vdim + c;
                 row[a] += wdet * phi_te * GtrS[s][c];
@@ -2581,6 +2655,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
 
         const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
         const Index idx = polytope.getIndex();
 
         auto& integrand = *m_integrand;
@@ -2635,7 +2710,7 @@ namespace Rodin::Variational
         if (GteS.size() < scalarCountTe)
           GteS.resize(scalarCountTe);
         for (size_t b = 0; b < scalarCountTe; ++b)
-          GteS[b].resize(static_cast<std::uint8_t>(d));
+          GteS[b].resize(static_cast<std::uint8_t>(spaceDimension));
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -2648,7 +2723,21 @@ namespace Rodin::Variational
           const auto Jinv = p.getJacobianInverse();
 
           // Physical gradients of scalar test basis functions
-          if (d == 3)
+          if (spaceDimension != d)
+          {
+            for (size_t b = 0; b < scalarCountTe; ++b)
+            {
+              const auto gradient = teTabS.getGradient(qp, b);
+              for (size_t axis = 0; axis < spaceDimension; ++axis)
+              {
+                ScalarType value = 0;
+                for (size_t reference = 0; reference < d; ++reference)
+                  value += Jinv(reference, axis) * gradient[reference];
+                GteS[b][axis] = value;
+              }
+            }
+          }
+          else if (d == 3)
           {
             const ScalarType j00 = Jinv(0, 0), j10 = Jinv(1, 0), j20 = Jinv(2, 0);
             const ScalarType j01 = Jinv(0, 1), j11 = Jinv(1, 1), j21 = Jinv(2, 1);
@@ -2697,9 +2786,8 @@ namespace Rodin::Variational
 
             for (size_t s = 0; s < scalarCountTe; ++s)
             {
-              // Only components c < d contribute: physical gradient has d entries.
-              // Components c >= d have zero divergence (no spatial dimension for them).
-              for (size_t c = 0; c < std::min(vdim, d); ++c)
+              // The physical gradient has one entry per ambient coordinate.
+              for (size_t c = 0; c < std::min(vdim, spaceDimension); ++c)
               {
                 const size_t b = s * vdim + c;
                 A[b * ntr + a] += wdet * phi_tr * GteS[s][c];
@@ -2914,7 +3002,6 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_cmv(std::move(other.m_cmv)),
           m_mat(std::move(other.m_mat))
       {}
 
@@ -2994,8 +3081,18 @@ namespace Rodin::Variational
         assert(testScalarCount > 0);
         assert(ntr % trialScalarCount == 0);
         assert(nte % testScalarCount == 0);
-        const size_t vdim = ntr / trialScalarCount;
-        assert(vdim == nte / testScalarCount);
+        const size_t trialVdim = ntr / trialScalarCount;
+        const size_t testVdim = nte / testScalarCount;
+        const size_t vdim = trialVdim;
+        if constexpr (!FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
+        {
+          if (trialVdim != testVdim)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Scalar Jacobian weights require equal component counts."
+              << Alert::Raise;
+          }
+        }
 
         const bool symmetric =
           !FormLanguage::IsMatrixRange<CoefficientRangeType>::Value && KTrial == KTest &&
@@ -3188,7 +3285,13 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            m_cmv = coefficientValue;
+            if (coefficientValue.rows() != testVdim ||
+              coefficientValue.cols() != trialVdim)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Jacobian weight must map trial components to test components."
+                << Alert::Raise;
+            }
 
             // With matrix coefficient, the Frobenius inner product becomes:
             // (A * J_trial) : J_test = sum_{c,j} A(c,c2) * grad_trial_c2[j] * grad_test_c[j]
@@ -3199,15 +3302,16 @@ namespace Rodin::Variational
               for (size_t ia = 0; ia < trialScalarCount; ++ia)
               {
                 // grad_tr . grad_te (scalar dot of physical gradients)
-                const ScalarType gradDot = Math::dot(gb, GtrS[ia]);
+                const ScalarType gradDot = Math::conj(Math::dot(gb, GtrS[ia]));
 
-                for (size_t dComp = 0; dComp < vdim; ++dComp)
+                for (size_t dComp = 0; dComp < testVdim; ++dComp)
                 {
-                  const size_t row = ib * vdim + dComp;
-                  for (size_t cComp = 0; cComp < vdim; ++cComp)
+                  const size_t row = ib * testVdim + dComp;
+                  for (size_t cComp = 0; cComp < trialVdim; ++cComp)
                   {
-                    const size_t col = ia * vdim + cComp;
-                    A_data[row * ntr + col] += wdet * m_cmv(dComp, cComp) * gradDot;
+                    const size_t col = ia * trialVdim + cComp;
+                    A_data[row * ntr + col] +=
+                      wdet * coefficientValue(dComp, cComp) * gradDot;
                   }
                 }
               }
@@ -3257,7 +3361,6 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -4283,8 +4386,11 @@ namespace Rodin::Variational
 
         const size_t kTrial = trialfe.getOrder();
         const size_t kTest = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (kTrial == 0 || kTest == 0) ? 0 : (kTrial + kTest - 2));
+        const auto requestedOrder = this->getOrder(polytope);
+        const size_t order = requestedOrder
+          ? *requestedOrder
+          : integrand.getOrder(polytope).value_or(
+              (kTrial == 0 || kTest == 0) ? 0 : kTrial + kTest - 2);
 
         const auto geometry = polytope.getGeometry();
         if (!m_set || m_order != order || m_geometry != geometry)
@@ -4305,7 +4411,6 @@ namespace Rodin::Variational
         const size_t trialVdim = trialfes.getVectorDimension();
         const size_t testVdim = testfes.getVectorDimension();
 
-        assert(trialVdim == testVdim);
         assert(trialfe.getCount() == trialScalarCount * trialVdim);
         assert(testfe.getCount() == testScalarCount * testVdim);
 

@@ -40,6 +40,7 @@
 #ifndef RODIN_VARIATIONAL_TRACE_H
 #define RODIN_VARIATIONAL_TRACE_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/Polytope.h"
@@ -252,6 +253,12 @@ namespace Rodin::Variational
       constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
       }
 
       /**

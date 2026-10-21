@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Exact mass and boundary oracles for single-field PETSc targets. */
+/// @file @brief Exact mass and boundary oracles for single-field PETSc targets.
 #ifndef RODIN_TESTS_PETSC_SINGLEFIELDTARGETASSEMBLY_H
 #define RODIN_TESTS_PETSC_SINGLEFIELDTARGETASSEMBLY_H
 #include <gtest/gtest.h>
@@ -113,7 +113,8 @@ namespace Rodin::Tests::Unit
   /// @brief Exact nodal mass matrices distinguish every field component and target update.
   template <template <class, class> class Assembler, bool Quadratic, size_t Rank,
     class MeshType, class Scalar = PetscScalar>
-  void checkSingleFieldTargets(MeshType& mesh, MPI_Comm communicator)
+  void checkSingleFieldTargets(
+    MeshType& mesh, MPI_Comm communicator, bool refreshFull = false)
   {
     SCOPED_TRACE(::testing::Message() << "quadratic=" << Quadratic << ", rank=" << Rank);
     using Range = std::conditional_t<Rank == 0, Scalar,
@@ -258,20 +259,38 @@ namespace Rodin::Tests::Unit
       }
     }
     ASSERT_LT((raw * exact - load).norm(), 1e-12);
-    auto full = raw, rowOnly = raw;
-    auto fullLoad = load, rowLoad = load;
+    auto full = raw;
+    auto fullLoad = load;
     for (const auto dof : fixed)
     {
       fullLoad -= raw.col(dof) * exact[dof];
       full.row(dof).setZero();
       full.col(dof).setZero();
       full(dof, dof) = 1;
-      rowOnly.row(dof).setZero();
-      rowOnly(dof, dof) = 1;
-      rowLoad[dof] = exact[dof];
     }
     for (const auto dof : fixed)
       fullLoad[dof] = exact[dof];
+    if (refreshFull)
+    {
+      for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
+      {
+        SCOPED_TRACE(static_cast<int>(target));
+        backend->execute(system, input);
+        EXPECT_LT((matrix() - full).norm(), 1e-11);
+        EXPECT_LT(
+          (gatherTargetVector(system.getVector(), communicator) - fullLoad).norm(),
+          1e-11);
+        backend->execute(system, input, target);
+        const auto actual = matrix();
+        const auto actualLoad = gatherTargetVector(system.getVector(), communicator);
+        EXPECT_LT((actual - full).norm(), 1e-11);
+        EXPECT_LT((actualLoad - fullLoad).norm(), 1e-11);
+        const Math::Vector<Scalar> solution = actual.fullPivLu().solve(actualLoad);
+        EXPECT_LT((solution - exact).norm(), 1e-10);
+        EXPECT_LT((actual * exact - actualLoad).norm(), 1e-11);
+      }
+      return;
+    }
     for (size_t repeat = 0; repeat < 2; ++repeat)
     {
       SCOPED_TRACE(repeat);
@@ -284,16 +303,16 @@ namespace Rodin::Tests::Unit
       EXPECT_LT((recovered - exact).norm(), 1e-10);
       ASSERT_EQ(VecSet(system.getVector(), Scalar(11) * factor), PETSC_SUCCESS);
       backend->execute(system, input, AssemblyTarget::LHS);
-      EXPECT_LT((matrix() - rowOnly).norm(), 1e-11);
+      EXPECT_LT((matrix() - full).norm(), 1e-11);
       EXPECT_LT((gatherTargetVector(system.getVector(), communicator) -
                   Math::Vector<Scalar>::Constant(size, Scalar(11) * factor))
                   .norm(),
         1e-11);
       ASSERT_EQ(MatScale(system.getOperator(), 3), PETSC_SUCCESS);
       backend->execute(system, input, AssemblyTarget::RHS);
-      EXPECT_LT((matrix() - Scalar(3) * rowOnly).norm(), 1e-11);
+      EXPECT_LT((matrix() - Scalar(3) * full).norm(), 1e-11);
       EXPECT_LT(
-        (gatherTargetVector(system.getVector(), communicator) - rowLoad).norm(), 1e-11);
+        (gatherTargetVector(system.getVector(), communicator) - fullLoad).norm(), 1e-11);
     }
   }
 

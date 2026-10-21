@@ -12,6 +12,7 @@
 #ifndef RODIN_VARIATIONAL_COMPONENT_H
 #define RODIN_VARIATIONAL_COMPONENT_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "Rodin/Geometry/Point.h"
 
 #include "Rodin/FormLanguage/Traits.h"
@@ -157,6 +158,19 @@ namespace Rodin::Variational
         return getOperand().getOrder(geom);
       }
 
+      /**
+       * @brief Selects the operand trace before applying this pointwise operation.
+       * @param attributes Cell attributes selecting the trace.
+       * @returns This expression with the selected operand trace.
+       */
+      template <class... Attributes>
+      constexpr auto& traceOf(const Attributes&... attributes)
+      {
+        Parent::traceOf(attributes...);
+        m_fn->traceOf(attributes...);
+        return *this;
+      }
+
       Component* copy() const noexcept override
       {
         return new Component(*this);
@@ -274,6 +288,19 @@ namespace Rodin::Variational
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return getOperand().getOrder(geom);
+      }
+
+      /**
+       * @brief Selects the operand trace before applying this pointwise operation.
+       * @param attributes Cell attributes selecting the trace.
+       * @returns This expression with the selected operand trace.
+       */
+      template <class... Attributes>
+      constexpr auto& traceOf(const Attributes&... attributes)
+      {
+        Parent::traceOf(attributes...);
+        m_fn->traceOf(attributes...);
+        return *this;
       }
 
       Component* copy() const noexcept override
@@ -958,6 +985,12 @@ namespace Rodin::Variational
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_operand->getDOFs(poly);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return m_operand->getDOFIndices();
       }
 
       /**

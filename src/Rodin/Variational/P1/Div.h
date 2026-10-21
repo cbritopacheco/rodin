@@ -211,8 +211,12 @@ namespace Rodin::Variational
         const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
-        assert(vdim ==
-          d); // divergence is defined as trace of Jacobian: requires vdim == spatial dim.
+        if (vdim != mesh.getSpaceDimension())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Divergence requires one vector component per ambient coordinate."
+            << Alert::Raise;
+        }
 
         const auto geom = polytope.getGeometry();
         const P1Element<ScalarType> feScalar(geom);
@@ -235,7 +239,7 @@ namespace Rodin::Variational
 
           // phys grad components: gphys(j) = Σ_k Jinv(k,j) * ghat(k)
           // and add u(v)\cdotgphys
-          for (size_t j = 0; j < d; ++j)
+          for (size_t j = 0; j < vdim; ++j)
           {
             ScalarType gphysJ = ScalarType(0);
             for (size_t k = 0; k < d; ++k)
@@ -582,7 +586,12 @@ namespace Rodin::Variational
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
-        assert(vdim == d);
+        if (vdim != mesh.getSpaceDimension())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Divergence requires one vector component per ambient coordinate."
+            << Alert::Raise;
+        }
 
         // cell key
         typename Cache::CellKey cellKey;
@@ -644,7 +653,7 @@ namespace Rodin::Variational
             for (size_t k = 0; k < d; ++k)
               ghat(k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
 
-            for (size_t c = 0; c < d; ++c)
+            for (size_t c = 0; c < vdim; ++c)
             {
               ScalarType gphysC = ScalarType(0);
               for (size_t k = 0; k < d; ++k)

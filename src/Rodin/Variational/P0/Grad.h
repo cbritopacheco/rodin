@@ -206,6 +206,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Returns the degree of the identically zero broken gradient.
+       * @param polytope Cell; the zero expression is independent of its geometry.
+       * @returns Zero.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
+      {
+        return 0;
+      }
+
+      /**
        * @brief Creates a polymorphic copy.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */

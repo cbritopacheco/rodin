@@ -52,3 +52,12 @@ add_executable(RodinAssemblyRegionSelectionTest RegionSelectionTest.cpp)
 target_link_libraries(RodinAssemblyRegionSelectionTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
 rodin_discover_tests(RodinAssemblyRegionSelectionTest PROPERTIES LABELS unit)
+
+add_executable(RodinAssemblyTargetedBoundaryTest TargetedBoundaryTest.cpp)
+target_link_libraries(RodinAssemblyTargetedBoundaryTest PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
+rodin_discover_tests(RodinAssemblyTargetedBoundaryTest PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinAssemblyConstraintChainTest ConstraintChainTest.cpp)
+target_link_libraries(RodinAssemblyConstraintChainTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
+rodin_discover_tests(RodinAssemblyConstraintChainTest PROPERTIES LABELS unit TIMEOUT 60)

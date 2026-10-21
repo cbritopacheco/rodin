@@ -180,7 +180,8 @@ namespace Rodin::Variational
 
           phys = JinvT * ref;
 
-          for (size_t comp = 0; comp < vdim && comp < d; ++comp)
+          for (size_t comp = 0; comp < vdim && comp < static_cast<size_t>(phys.size());
+            ++comp)
           {
             const size_t local = alpha * vdim + comp;
             out += gf[fes.getGlobalIndex({d, i}, local)] *
@@ -290,9 +291,8 @@ namespace Rodin::Variational
 
             gradPhys = JinvT * ref;
 
-            // divergence contribution is u_comp * dphi/dx_comp if comp < d
-            // (only makes sense when vdim == d; if vdim != d, we only sum over min(vdim,d))
-            if (comp < d)
+            // The trace uses physical gradient components, including on embedded cells.
+            if (comp < static_cast<size_t>(gradPhys.size()))
             {
               const auto& uA = gf[fes.getGlobalIndex({d, i}, a)];
               // u_a is vector coefficient for basis "component", but in your layout
@@ -516,7 +516,8 @@ namespace Rodin::Variational
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-            m_cache.divPhys[local] = (comp < d) ? phys(comp) : ScalarType(0);
+            m_cache.divPhys[local] =
+              (comp < static_cast<size_t>(phys.size())) ? phys(comp) : ScalarType(0);
           }
         }
 

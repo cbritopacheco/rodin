@@ -16,6 +16,7 @@
  * - Matrix Frobenius inner product: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$
  */
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <Eigen/Core>
 
 #include "Rodin/Geometry/Polytope.h"
@@ -480,6 +481,12 @@ namespace Rodin::Variational
         return this->getRHS().getDOFs(element);
       }
 
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return this->getRHS().getDOFIndices();
+      }
+
       /**
        * @brief Gets the finite element space.
        * @returns The finite element space.
@@ -705,6 +712,12 @@ namespace Rodin::Variational
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getLHS().getDOFIndices();
       }
 
       /**

@@ -12,6 +12,7 @@
 #ifndef RODIN_VARIATIONAL_TRANSPOSE_H
 #define RODIN_VARIATIONAL_TRANSPOSE_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
@@ -116,6 +117,19 @@ namespace Rodin::Variational
         return getOperand().getOrder(polytope);
       }
 
+      /**
+       * @brief Selects the operand trace before applying this pointwise operation.
+       * @param attributes Cell attributes selecting the trace.
+       * @returns This expression with the selected operand trace.
+       */
+      template <class... Attributes>
+      constexpr auto& traceOf(const Attributes&... attributes)
+      {
+        Parent::traceOf(attributes...);
+        m_operand->traceOf(attributes...);
+        return *this;
+      }
+
       Transpose* copy() const noexcept override
       {
         return new Transpose(*this);
@@ -203,6 +217,12 @@ namespace Rodin::Variational
       constexpr size_t getDOFs(const Geometry::Polytope& simplex) const
       {
         return getOperand().getDOFs(simplex);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
       }
 
       /**

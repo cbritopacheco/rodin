@@ -39,6 +39,7 @@
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H
 #define RODIN_VARIATIONAL_DERIVATIVE_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <cassert>
 #include <cstdlib>
 
@@ -188,11 +189,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -228,11 +237,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -325,7 +342,7 @@ namespace Rodin::Variational
       Derivative(size_t i, const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_i(i),
-          m_u(u)
+          m_gradient(u)
       {}
 
       /**
@@ -335,7 +352,7 @@ namespace Rodin::Variational
       Derivative(const Derivative& other)
         : Parent(other),
           m_i(other.m_i),
-          m_u(other.m_u)
+          m_gradient(other.m_gradient)
       {}
 
       /**
@@ -345,7 +362,7 @@ namespace Rodin::Variational
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_i(other.m_i),
-          m_u(std::move(other.m_u))
+          m_gradient(std::move(other.m_gradient))
       {}
 
       /**
@@ -354,7 +371,7 @@ namespace Rodin::Variational
        */
       constexpr const OperandType& getOperand() const
       {
-        return m_u.get();
+        return m_gradient.getOperand();
       }
 
       /**
@@ -376,40 +393,68 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
+      }
+
       /**
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
       const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_ip);
-        return *m_ip;
+        return m_gradient.getIntegrationPoint();
       }
 
-      // Derivative& setIntegrationPoint(const Geometry::Point& p)
-      // {
-      //   m_ip = &ip;
-      //   const auto& polytope = p.getPolytope();
-      //   const size_t d = polytope.getDimension();
-      //   const Index i = polytope.getIndex();
-      //   const auto& fes = this->getFiniteElementSpace();
-      //   const auto& fe = fes.getFiniteElement(d, i);
-      //   const auto& rc = p.getReferenceCoordinates();
-      //   const size_t dofs = this->getDOFs(p.getPolytope());
-      //   m_gradients.resize(dofs);
-      //   for (size_t local = 0; local < dofs; local++)
-      //     m_gradients[local] = p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
-      //   return *this;
-      // }
+      /**
+       * @brief Starts a cell binding of the owned gradient evaluator.
+       * @param polytope Cell whose basis will be differentiated.
+       * @returns This derivative.
+       */
+      Derivative& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_gradient.setPolytope(polytope);
+        return *this;
+      }
+
+      /**
+       * @brief Prepares the physical gradient at an integration point.
+       * @param point Evaluation point.
+       * @returns This derivative.
+       */
+      Derivative& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_gradient.setIntegrationPoint(point);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the polynomial order of the physical derivative.
+       * @param polytope Cell supplying the geometry.
+       * @returns The gradient evaluator's polynomial order, when known.
+       */
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return m_gradient.getOrder(polytope);
+      }
 
       /**
        * @brief Gets the basis function of a local degree of freedom.
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */
-      decltype(auto) getBasis(size_t local) const
+      ScalarType getBasis(size_t local) const
       {
-        return m_gradients[local](m_i);
+        const auto gradient = m_gradient.getBasis(local);
+        if (m_i >= gradient.size())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Partial derivative direction exceeds the spatial dimension."
+            << Alert::Raise;
+        }
+        return gradient[m_i];
       }
 
       Derivative* copy() const noexcept override
@@ -419,11 +464,7 @@ namespace Rodin::Variational
 
     private:
       size_t m_i;
-      std::reference_wrapper<const OperandType> m_u;
-
-      const IntegrationPoint* m_ip;
-
-      std::vector<Math::SpatialVector<Real>> m_gradients;
+      Grad<OperandType> m_gradient;
   };
 
   /**
@@ -711,6 +752,12 @@ namespace Rodin::Variational
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_gradient.getDOFs(poly);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return m_gradient.getDOFIndices();
       }
 
       /**

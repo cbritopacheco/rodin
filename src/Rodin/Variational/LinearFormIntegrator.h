@@ -16,6 +16,7 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <type_traits>
 
 #include "Rodin/Geometry/Region.h"
@@ -102,8 +103,8 @@ namespace Rodin::Variational
       template <class OtherNumber>
       LinearFormIntegratorBase(const LinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
-          m_v(other.m_v->copy()),
-          m_attrs(other.m_attrs)
+          m_v(other.getTestFunction().copy()),
+          m_attrs(other.getAttributes())
       {}
 
       /**
@@ -123,9 +124,15 @@ namespace Rodin::Variational
       template <class OtherNumber>
       LinearFormIntegratorBase(LinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
-          m_v(std::move(other.m_v)),
-          m_attrs(std::move(other.m_attrs))
+          m_v(other.getTestFunction().copy()),
+          m_attrs(other.getAttributes())
       {}
+
+      /// @returns The bound test numbering, or no override for ordinary element DOFs.
+      Utility::OptionalReference<const IndexArray> getTestDOFIndices() const
+      {
+        return m_testDOFs;
+      }
 
       /// @brief Virtual destructor
       virtual ~LinearFormIntegratorBase() = default;
@@ -230,7 +237,18 @@ namespace Rodin::Variational
        */
       virtual Geometry::Region getRegion() const = 0;
 
+    protected:
+      /**
+       * @brief Binds the numbering prepared by a two-sided integrand.
+       * @param test Test numbering, absent for ordinary element bases.
+       */
+      void setDOFIndices(Utility::OptionalReference<const IndexArray> test)
+      {
+        m_testDOFs = test;
+      }
+
     private:
+      Utility::OptionalReference<const IndexArray> m_testDOFs;
       std::unique_ptr<FormLanguage::Base> m_v;
       FlatSet<Geometry::Attribute> m_attrs;
   };

@@ -45,6 +45,7 @@
 #ifndef RODIN_VARIATIONAL_POTENTIAL_H
 #define RODIN_VARIATIONAL_POTENTIAL_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Math/SpatialTensor.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
@@ -73,7 +74,8 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
     /// @brief Scalar value type.
-    using ScalarType = Real;
+    using ScalarType =
+      typename FormLanguage::Traits<Variational::FunctionBase<RHSDerived>>::ScalarType;
 
     /// @brief Left-hand side operand type.
     using LHSType = LHS;
@@ -82,7 +84,7 @@ namespace Rodin::FormLanguage
     using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
 
     /// @brief Cell kernel type.
-    using KernelType = LHSType;
+    using KernelType = std::decay_t<LHSType>;
 
     /// @brief Operand type.
     using OperandType = RHSType;
@@ -136,7 +138,7 @@ namespace Rodin::FormLanguage
         FES, Space>;
 
     /// @brief Cell kernel type.
-    using KernelType = LHS;
+    using KernelType = std::decay_t<LHS>;
 
     /// @brief Operand type.
     using OperandType = RHSType;
@@ -182,6 +184,13 @@ namespace Rodin::Variational
 
   /**
    * @brief Potential of a function expression against a kernel.
+   *
+   * Scalar function evaluation integrates over the evaluation point's mesh.
+   * Source-cell formulas are selected independently for each reference geometry.
+   * The default degree of exactness is seven; @ref setOrder controls the
+   * accuracy policy for nonpolynomial kernels. Vector and matrix function
+   * evaluation are unavailable and are diagnosed explicitly.
+   * Kernels are owned by value, including in copies of this expression.
    * @ingroup PotentialSpecializations
    */
   template <class LHS, class RHSDerived>
@@ -190,13 +199,14 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Scalar value type.
-      using ScalarType = Real;
+      using ScalarType =
+        typename FormLanguage::Traits<Variational::FunctionBase<RHSDerived>>::ScalarType;
 
       /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
       /// @brief Cell kernel type.
-      using KernelType = LHSType;
+      using KernelType = std::decay_t<LHSType>;
 
       /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
@@ -232,7 +242,8 @@ namespace Rodin::Variational
        */
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel),
-          m_u(u.copy())
+          m_u(u.copy()),
+          m_order(DefaultOrder)
       {}
 
       /**
@@ -242,7 +253,8 @@ namespace Rodin::Variational
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel),
-          m_u(other.m_u->copy())
+          m_u(other.m_u->copy()),
+          m_order(other.m_order)
       {}
 
       /**
@@ -252,7 +264,8 @@ namespace Rodin::Variational
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_order(other.m_order)
       {}
 
       /**
@@ -261,7 +274,7 @@ namespace Rodin::Variational
        */
       const auto& getKernel() const
       {
-        return m_kernel.get();
+        return m_kernel;
       }
 
       /**
@@ -284,14 +297,13 @@ namespace Rodin::Variational
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
         const auto& mesh = p.getPolytope().getMesh();
-        assert(false);
         if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
         {
           ScalarType res = 0;
           for (auto it = mesh.getCell(); it; ++it)
           {
             const auto& polytope = *it;
-            const auto& qf = *m_qf;
+            const auto& qf = getQuadratureFormula(polytope);
             const auto& quadrature = polytope.getQuadrature(qf);
             for (size_t i = 0; i < quadrature.getSize(); i++)
             {
@@ -306,62 +318,42 @@ namespace Rodin::Variational
         else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
           Math::Vector<ScalarType> res;
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Vector-valued function potentials are not implemented." << Alert::Raise;
           return res;
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Unsupported function potential range." << Alert::Raise;
           return void();
         }
       }
 
-      // void getValue(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
-      // {
-      //   const auto& kernel = getKernel();
-      //   const auto& operand = getOperand();
-      //   const auto& mesh = p.getPolytope().getMesh();
-      //   assert(false);
-      //   // res.resize(getRangeShape().height());
-      //   res.setZero();
-      //   Math::Matrix<ScalarType> kxy;
-      //   if (m_qf.has_value())
-      //   {
-      //     for (auto it = mesh.getCell(); it; ++it)
-      //     {
-      //       const auto& polytope = *it;
-      //       const auto& qf = m_qf.value()(polytope);
-      //       for (size_t i = 0; i < qf.getSize(); i++)
-      //       {
-      //         const Geometry::Point y(polytope, qf.getPoint(i));
-      //         kernel(kxy, p, y);
-      //         res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
-      //       }
-      //     }
-      //   }
-      //   else
-      //   {
-      //     for (auto it = mesh.getCell(); it; ++it)
-      //     {
-      //       const auto& polytope = *it;
-      //       const QF::PolytopeQuadratureFormula qf(polytope.getGeometry());
-      //       for (size_t i = 0; i < qf.getSize(); i++)
-      //       {
-      //         const Geometry::Point y(polytope, qf.getPoint(i));
-      //         kernel(kxy, p, y);
-      //         res += qf.getWeight(i) * y.getDistortion() * kxy * operand(y);
-      //       }
-      //     }
-      //   }
-      // }
+      /**
+       * @brief Sets the degree of exactness used for source-cell integration.
+       * @param order Polynomial degree of exactness.
+       * @returns This potential.
+       *
+       * General kernels need not be polynomial. The order is an accuracy
+       * parameter, as in the potential assembly rules; it does not certify
+       * exact integration of a singular kernel.
+       */
+      Potential& setOrder(size_t order)
+      {
+        m_order = order;
+        return *this;
+      }
 
       /**
-       * @brief Gets the quadrature formula of the potential.
-       * @returns The quadrature formula of the potential.
+       * @brief Gets the source-cell quadrature formula.
+       * @param polytope Source cell supplying the reference geometry.
+       * @returns Persistent formula of the configured degree of exactness.
        */
-      const auto& getQuadratureFormula() const
+      const QF::QuadratureFormula& getQuadratureFormula(
+        const Geometry::Polytope& polytope) const
       {
-        return m_qf;
+        return QF::PolytopeQuadratureFormula::get(m_order, polytope.getGeometry());
       }
 
       Potential* copy() const noexcept override
@@ -370,9 +362,12 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const KernelType> m_kernel;
+      KernelType m_kernel;
       std::unique_ptr<OperandType> m_u;
-      const QF::QuadratureFormula* m_qf = nullptr;
+
+      /// @brief Default source quadrature degree, shared with potential assembly.
+      static constexpr size_t DefaultOrder = 7;
+      size_t m_order;
   };
 
   /**
@@ -421,7 +416,7 @@ namespace Rodin::Variational
       using LHSType = LHS;
 
       /// @brief Cell kernel type.
-      using KernelType = LHS;
+      using KernelType = std::decay_t<LHS>;
 
       /// @brief Right-hand side operand type.
       using RHSType =
@@ -499,7 +494,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const KernelType> m_kernel;
+      KernelType m_kernel;
       std::reference_wrapper<const OperandType> m_u;
   };
 

@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Single-field target updates for all supported nodal value ranges. */
+/// @file @brief Single-field target updates for all supported nodal value ranges.
 #include "SingleFieldTargetAssembly.h"
 
 using namespace Rodin;
@@ -45,6 +45,40 @@ TEST(PETSc_SingleFieldTargets, OpenMP)
   auto mesh = intervalMesh();
   Rodin::Tests::Unit::checkAllSingleFieldTargets<PETSc::Assembly::OpenMP>(
     mesh, PETSC_COMM_SELF);
+}
+#endif
+
+/// @brief P1 single-side refreshes remain compatible with a fully assembled linear system.
+TEST(PETSc_SingleFieldTargets, SequentialP1RefreshAfterFull)
+{
+  auto mesh = intervalMesh();
+  Rodin::Tests::Unit::checkSingleFieldTargets<PETSc::Assembly::Sequential, false, 0>(
+    mesh, PETSC_COMM_SELF, true);
+}
+
+/// @brief H1 single-side refreshes retain full-system boundary lifting.
+TEST(PETSc_SingleFieldTargets, SequentialH1RefreshAfterFull)
+{
+  auto mesh = intervalMesh();
+  Rodin::Tests::Unit::checkSingleFieldTargets<PETSc::Assembly::Sequential, true, 0>(
+    mesh, PETSC_COMM_SELF, true);
+}
+
+#ifdef RODIN_USE_OPENMP
+/// @brief OpenMP P1 refreshes retain full-system boundary lifting.
+TEST(PETSc_SingleFieldTargets, OpenMPP1RefreshAfterFull)
+{
+  auto mesh = intervalMesh();
+  Rodin::Tests::Unit::checkSingleFieldTargets<PETSc::Assembly::OpenMP, false, 0>(
+    mesh, PETSC_COMM_SELF, true);
+}
+
+/// @brief OpenMP H1 refreshes retain full-system boundary lifting.
+TEST(PETSc_SingleFieldTargets, OpenMPH1RefreshAfterFull)
+{
+  auto mesh = intervalMesh();
+  Rodin::Tests::Unit::checkSingleFieldTargets<PETSc::Assembly::OpenMP, true, 0>(
+    mesh, PETSC_COMM_SELF, true);
 }
 #endif
 

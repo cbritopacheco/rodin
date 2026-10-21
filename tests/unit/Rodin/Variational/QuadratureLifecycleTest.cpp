@@ -340,3 +340,37 @@ TEST(QuadratureLifecycle, ComplexH1)
   for (size_t dimension : {size_t(1), size_t(2)})
     checkLocalQuadratureLifecycle<Complex, true>(dimension);
 }
+
+/// @brief Rebinding a general function rule selects the current cell geometry.
+TEST(QuadratureLifecycle, GenericFunctionChangesGeometry)
+{
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  auto triangle = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({1, 0})
+                    .vertex({0, 1})
+                    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                    .finalize();
+  auto square = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
+  const auto triangleCell = triangle.getCell();
+  const auto squareCell = square.getCell();
+  RealFunction constant(Real(1));
+  auto rule = []<class Derived>(const FunctionBase<Derived>& function) {
+    return QuadratureRule<FunctionBase<Derived>>(function);
+  }(constant);
+  rule.setPolytope(*triangleCell);
+  EXPECT_NEAR(rule.compute(), 0.5, 1e-14);
+  rule.setPolytope(*squareCell);
+  EXPECT_NEAR(rule.compute(), 1, 1e-14);
+  auto copied = rule;
+  auto moved = std::move(rule);
+  copied.setPolytope(*triangleCell);
+  EXPECT_NEAR(copied.compute(), 0.5, 1e-14);
+  EXPECT_NEAR(moved.compute(), 1, 1e-14);
+  moved.setPolytope(*triangleCell);
+  EXPECT_NEAR(moved.compute(), 0.5, 1e-14);
+}

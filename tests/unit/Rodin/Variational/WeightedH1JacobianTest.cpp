@@ -471,3 +471,57 @@ namespace Rodin::Tests::Unit
       WeightedJacobianGeometry{"CurvedEmbeddedTriangle", G::Triangle, true, true}),
     [](const auto& info) { return std::string(info.param.name); });
 }
+
+/// @brief Rectangular component maps use independent trial and test strides.
+TEST(WeightedH1Jacobian, RectangularComponentMaps)
+{
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+  {
+    auto mesh = LocalMesh::UniformGrid(geometry, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    const auto cell = mesh.getCell();
+    const auto check = [&]<class Scalar>() {
+      for (const auto& [trialCount, testCount] :
+        {std::pair<size_t, size_t>{1, 2}, {2, 1}, {2, 3}, {3, 2}})
+      {
+        H1<2, Math::SpatialVector<Scalar>> trial(
+          std::integral_constant<size_t, 2>{}, mesh, trialCount);
+        H1<1, Math::SpatialVector<Scalar>> test(
+          std::integral_constant<size_t, 1>{}, mesh, testCount);
+        TrialFunction u(trial);
+        TestFunction v(test);
+        Math::SpatialMatrix<Scalar> matrix(testCount, trialCount);
+        for (size_t row = 0; row < testCount; ++row)
+        {
+          for (size_t col = 0; col < trialCount; ++col)
+          {
+            matrix(row, col) = Scalar(1 + row + 2 * col);
+            if constexpr (std::is_same_v<Scalar, Complex>)
+              matrix(row, col) += Complex(0, 1 + row - Real(col));
+          }
+        }
+        MatrixFunction coefficient(matrix);
+        auto integral = Integral(coefficient * Jacobian(u), Jacobian(v));
+        integral.setOrder(5);
+        Rodin::Tests::QuadratureReference<decltype(integral)> reference(integral);
+        reference.assemble(*cell, 5);
+        integral.setPolytope(*cell);
+        for (size_t te = 0; te < v.getDOFs(*cell); ++te)
+        {
+          for (size_t tr = 0; tr < u.getDOFs(*cell); ++tr)
+          {
+            EXPECT_NEAR(
+              std::abs(integral.integrate(tr, te) - reference.getOperator()(te, tr)), 0,
+              1e-11);
+          }
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+}

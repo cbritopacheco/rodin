@@ -179,8 +179,8 @@ namespace Rodin::Variational
        * @param[in] polytope Polytope on which the integral is to be evaluated
        * @returns Reference to this object
        *
-       * If no explicit quadrature formula was set previously, a default generic
-       * polytope quadrature of order 1 is selected for the polytope geometry.
+       * A generic polytope quadrature of order 1 is selected for the current
+       * polytope geometry, including when binding a different reference cell.
        * The corresponding mapped quadrature is owned until the next bind.
        */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope)
@@ -188,8 +188,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
         m_value.reset();
 
-        if (!m_qf)
-          m_qf = &QF::PolytopeQuadratureFormula::get(1, polytope.getGeometry());
+        m_qf = &QF::PolytopeQuadratureFormula::get(1, polytope.getGeometry());
 
         assert(m_qf);
         m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
@@ -604,6 +603,7 @@ namespace Rodin::Variational
 
         const auto& trial = integrand.getLHS();
         const auto& test = integrand.getRHS();
+        this->setDOFIndices(trial.getDOFIndices(), test.getDOFIndices());
 
         const auto& trialfes = trial.getFiniteElementSpace();
         const auto& testfes = test.getFiniteElementSpace();
@@ -629,8 +629,11 @@ namespace Rodin::Variational
         assert(m_qf);
         m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
-        const size_t ntr = trial.getDOFs(*m_polytope);
-        const size_t nte = test.getDOFs(*m_polytope);
+        const auto trialIndices = this->getTrialDOFIndices();
+        const auto testIndices = this->getTestDOFIndices();
+        const size_t ntr =
+          trialIndices ? trialIndices->size() : trial.getDOFs(*m_polytope);
+        const size_t nte = testIndices ? testIndices->size() : test.getDOFs(*m_polytope);
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
@@ -877,7 +880,10 @@ namespace Rodin::Variational
         assert(m_qf);
         m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
-        const size_t nte = integrand.getDOFs(polytope);
+        this->setDOFIndices(integrand.getDOFIndices());
+        const auto testIndices = this->getTestDOFIndices();
+        const size_t nte =
+          testIndices ? testIndices->size() : integrand.getDOFs(polytope);
 
         m_vec.resize(static_cast<Eigen::Index>(nte));
         m_vec.setZero();

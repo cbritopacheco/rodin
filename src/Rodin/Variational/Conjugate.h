@@ -12,6 +12,7 @@
  * @brief Complex conjugate operation for functions.
  */
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "ForwardDecls.h"
 
 #include "Rodin/Math/Common.h"
@@ -137,6 +138,19 @@ namespace Rodin::Variational
         return getOperand().getOrder(geometry);
       }
 
+      /**
+       * @brief Selects the operand trace before applying this pointwise operation.
+       * @param attributes Cell attributes selecting the trace.
+       * @returns This expression with the selected operand trace.
+       */
+      template <class... Attributes>
+      constexpr auto& traceOf(const Attributes&... attributes)
+      {
+        Parent::traceOf(attributes...);
+        m_v->traceOf(attributes...);
+        return *this;
+      }
+
       Conjugate* copy() const noexcept override
       {
         return new Conjugate(*this);
@@ -235,6 +249,12 @@ namespace Rodin::Variational
       constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
+      }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
       }
 
       /**

@@ -407,3 +407,36 @@ TEST(Rodin_Variational_BoundaryNormal, MissingTraceRaisesAndPermitsRecovery)
     }
   }
 }
+
+/// @brief Embedded surface boundaries have outward unit conormals in the cell plane.
+TEST(Rodin_Variational_BoundaryNormal, TiltedSurfaceConormals)
+{
+  auto mesh = LocalMesh::Builder()
+                .initialize(3)
+                .nodes(3)
+                .vertex({0, 0, 0})
+                .vertex({1, 0, 0})
+                .vertex({0, 1, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  mesh.getConnectivity().compute(1, 2);
+  BoundaryNormal normal(mesh);
+  const Math::SpatialVector<Real> planeNormal{
+    0, -1 / std::sqrt(Real(2)), 1 / std::sqrt(Real(2))};
+  const Math::SpatialPoint centroid{Real(1) / 3, Real(1) / 3, Real(1) / 3};
+  size_t checked = 0;
+  for (auto face = mesh.getBoundary(); face; ++face)
+  {
+    const Point point(*face, Math::SpatialPoint{0.5});
+    const auto value = normal.getValue(point);
+    const auto& vertices = face->getVertices();
+    const auto tangent =
+      mesh.getVertexCoordinates(vertices[1]) - mesh.getVertexCoordinates(vertices[0]);
+    EXPECT_NEAR(value.norm(), 1, 1e-13);
+    EXPECT_NEAR(value.dot(planeNormal), 0, 1e-13);
+    EXPECT_NEAR(value.dot(tangent), 0, 1e-13);
+    EXPECT_LT(value.dot(centroid - point.getPhysicalCoordinates()), 0);
+    ++checked;
+  }
+  EXPECT_EQ(checked, 3u);
+}

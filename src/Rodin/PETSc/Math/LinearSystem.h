@@ -319,12 +319,17 @@ namespace Rodin::Math
        * @brief Enforces Dirichlet boundary conditions by eliminating
        *        constrained DOFs from the linear system.
        *
-       * For every entry @f$ (i, u_i) @f$ in @p dofs the method:
-       * 1. Sets @f$ x_i = u_i @f$ in the solution vector.
-       * 2. Zeros row @f$ i @f$ of the matrix and places a @f$ 1 @f$ on
-       *    the diagonal (`MatZeroRows` with `diag = 1.0`).
-       * 3. Adjusts @f$ \mathbf{b} @f$ so that @f$ x_i = u_i @f$ is
-       *    enforced after the solve.
+       * For every entry @f$ (i, u_i) @f$ in @p dofs, replaces row @f$i@f$
+       * by the unit diagonal row and sets @f$b_i=u_i@f$. Unconstrained rows
+       * and constrained columns retain their original entries. This row-only
+       * operation gives the prescribed solution for arbitrary square operators,
+       * but generally does not preserve matrix symmetry. The solution vector is
+       * not changed before the solve.
+       *
+       * Canonical variational assembly performs row-and-column elimination with
+       * right-hand-side lifting, preserving symmetry when the original operator
+       * is symmetric. The low-level PETSc operation documented here follows
+       * @c MatZeroRows instead.
        *
        * All indices in @p dofs are shifted by @p offset, which is useful
        * for block systems where each field starts at a non-zero position.

@@ -58,6 +58,7 @@
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
+#include "FaceNormal.h"
 
 namespace Rodin::Variational
 {
@@ -94,7 +95,8 @@ namespace Rodin::Variational
        */
       BoundaryNormal(const Geometry::MeshBase& mesh)
         : m_sdim(mesh.getSpaceDimension()),
-          m_mesh(mesh)
+          m_mesh(mesh),
+          m_normal(mesh)
       {
         assert(m_sdim > 0);
       }
@@ -106,7 +108,8 @@ namespace Rodin::Variational
       BoundaryNormal(const BoundaryNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim),
-          m_mesh(other.m_mesh)
+          m_mesh(other.m_mesh),
+          m_normal(other.m_normal)
       {}
 
       /**
@@ -116,7 +119,8 @@ namespace Rodin::Variational
       BoundaryNormal(BoundaryNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim)),
-          m_mesh(std::move(other.m_mesh))
+          m_mesh(std::move(other.m_mesh)),
+          m_normal(std::move(other.m_normal))
       {}
 
       /**
@@ -210,6 +214,11 @@ namespace Rodin::Variational
         {
           assert(d == mesh.getDimension() - 1);
           assert(mesh.isBoundary(i));
+          if (meshDim == 2 && m_sdim == 3)
+          {
+            res = m_normal.getValue(p);
+            return;
+          }
           if (jacobian.rows() == 2)
           {
             res[0] = jacobian(1, 0);
@@ -327,6 +336,7 @@ namespace Rodin::Variational
     private:
       const size_t m_sdim;
       std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      FaceNormal m_normal;
   };
 }
 

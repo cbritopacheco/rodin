@@ -331,6 +331,8 @@ namespace Rodin::Assembly
       template <class TrialFES, class TestFES>
       static size_t getCapacity(const TrialFES& trialFES, const TestFES& testFES)
       {
+        if (trialFES.getSize() == 0 || testFES.getSize() == 0)
+          return 0;
         return testFES.getSize() * std::log(trialFES.getSize());
       }
 

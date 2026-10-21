@@ -13,6 +13,7 @@
  */
 
 #include "Rodin/Types.h"
+#include <algorithm>
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscsystypes.h>
@@ -189,7 +190,9 @@ namespace Rodin::Assembly
                 continue;
             }
             lfi.setPolytope(*it);
-            const auto& dofs = input.getFES().getDOFs(it.getDimension(), it->getIndex());
+            const auto& dofs = lfi.getTestDOFIndices()
+              ? *lfi.getTestDOFIndices()
+              : input.getFES().getDOFs(it.getDimension(), it->getIndex());
             for (PetscInt l = 0; l < dofs.size(); ++l)
             {
               const PetscScalar v = PetscScalar(lfi.integrate(l));
@@ -294,8 +297,11 @@ namespace Rodin::Assembly
                 continue;
             }
             bfi.setPolytope(*it);
-            const auto& rows = input.getTestFES().getDOFs(d, i);
-            const auto& cols = input.getTrialFES().getDOFs(d, i);
+            const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                       : input.getTestFES().getDOFs(d, i);
+            const auto& cols = bfi.getTrialDOFIndices()
+              ? *bfi.getTrialDOFIndices()
+              : input.getTrialFES().getDOFs(d, i);
             for (PetscInt i = 0; i < rows.size(); ++i)
             {
               for (PetscInt j = 0; j < cols.size(); ++j)
@@ -475,6 +481,8 @@ namespace Rodin::Assembly
 
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;
+        const bool liftBoundary =
+          mode == AssemblyMode::RHS && !input.getProblemBody().getDBCs().empty();
 
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -538,6 +546,8 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
         {
@@ -576,6 +586,16 @@ namespace Rodin::Assembly
         (void)ierr;
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
+          if (!doMatrix)
+          {
+            if (!constraints.isFixed(row) && constraints.isFixed(col))
+            {
+              const PetscScalar shift = -val * constraints.getFixedValue(col);
+              ierr = VecSetValue(b, static_cast<PetscInt>(row), shift, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            return;
+          }
           const PetscScalar colValue = constraints.isIdentified(col)
             ? constraints.getIdentificationValue(col)
             : PetscScalar(0);
@@ -626,7 +646,7 @@ namespace Rodin::Assembly
         /// @brief Mesh type.
         using MeshType = std::decay_t<decltype(mesh)>;
 
-        if (doMatrix)
+        if (doMatrix || liftBoundary)
         {
           for (auto& bfi : pb.getLocalBFIs())
           {
@@ -644,10 +664,24 @@ namespace Rodin::Assembly
               const size_t d = it->getDimension();
               const Index p = it->getIndex();
 
+              if (!doMatrix && bfi.getRegion() == Geometry::Region::Cells)
+              {
+                const auto& boundaryDOFs = trialFES.getDOFs(d, p);
+                const bool affected =
+                  std::any_of(boundaryDOFs.begin(), boundaryDOFs.end(), [&](Index local) {
+                    const Index column = local;
+                    return constraints.isFixed(column) &&
+                      constraints.getFixedValue(column) != PetscScalar(0);
+                  });
+                if (!affected)
+                  continue;
+              }
               bfi.setPolytope(*it);
 
-              const auto& rowsDOF = testFES.getDOFs(d, p);
-              const auto& colsDOF = trialFES.getDOFs(d, p);
+              const auto& rowsDOF = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                            : testFES.getDOFs(d, p);
+              const auto& colsDOF = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
+                                                             : trialFES.getDOFs(d, p);
 
               for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
               {
@@ -748,7 +782,9 @@ namespace Rodin::Assembly
               }
 
               lfi.setPolytope(*it);
-              const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
+              const auto& dofs = lfi.getTestDOFIndices()
+                ? *lfi.getTestDOFIndices()
+                : testFES.getDOFs(it->getDimension(), it->getIndex());
               for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
               {
                 const PetscScalar val = PetscScalar(lfi.integrate(l));
@@ -902,8 +938,8 @@ namespace Rodin::Assembly
           }
           else if (mode == AssemblyMode::LHS)
           {
-            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()), bcIdx.data(), 1.0,
-              nullptr, nullptr);
+            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(), 1.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
           }
@@ -1023,6 +1059,8 @@ namespace Rodin::Assembly
       {
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;
+        const bool liftBoundary =
+          mode == AssemblyMode::RHS && !input.getProblemBody().getDBCs().empty();
 
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -1159,6 +1197,9 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
+
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
         {
@@ -1202,6 +1243,16 @@ namespace Rodin::Assembly
         (void)ierr;
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
+          if (!doMatrix)
+          {
+            if (!constraints.isFixed(row) && constraints.isFixed(col))
+            {
+              const PetscScalar shift = -val * constraints.getFixedValue(col);
+              ierr = VecSetValue(b, static_cast<PetscInt>(row), shift, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            return;
+          }
           const PetscScalar colValue = constraints.isIdentified(col)
             ? constraints.getIdentificationValue(col)
             : PetscScalar(0);
@@ -1245,7 +1296,7 @@ namespace Rodin::Assembly
         // ------------------------
         // Assemble bilinear terms into A
         // ------------------------
-        if (doMatrix)
+        if (doMatrix || liftBoundary)
         {
           // Local BFIs
           for (auto& bfi : pb.getLocalBFIs())
@@ -1276,10 +1327,24 @@ namespace Rodin::Assembly
                   const size_t d = it->getDimension();
                   const Index p = it->getIndex();
 
+                  if (!doMatrix && bfi.getRegion() == Geometry::Region::Cells)
+                  {
+                    const auto& boundaryDOFs = uFES.getDOFs(d, p);
+                    const bool affected = std::any_of(
+                      boundaryDOFs.begin(), boundaryDOFs.end(), [&](Index local) {
+                        const Index column = static_cast<Index>(uOff) + local;
+                        return constraints.isFixed(column) &&
+                          constraints.getFixedValue(column) != PetscScalar(0);
+                      });
+                    if (!affected)
+                      continue;
+                  }
                   bfi.setPolytope(*it);
 
-                  const auto& rows = vFES.getDOFs(d, p);
-                  const auto& cols = uFES.getDOFs(d, p);
+                  const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+                                                             : vFES.getDOFs(d, p);
+                  const auto& cols = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
+                                                              : uFES.getDOFs(d, p);
 
                   const PetscInt nr = static_cast<PetscInt>(rows.size());
                   const PetscInt nc = static_cast<PetscInt>(cols.size());
@@ -1403,12 +1468,15 @@ namespace Rodin::Assembly
             }
           }
 
-          ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
+          if (doMatrix)
+          {
+            ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+          }
         } // doMatrix
 
         // ------------------------
@@ -1437,7 +1505,9 @@ namespace Rodin::Assembly
 
                 lfi.setPolytope(*it);
 
-                const auto& dofs = vFES.getDOFs(it.getDimension(), it->getIndex());
+                const auto& dofs = lfi.getTestDOFIndices()
+                  ? *lfi.getTestDOFIndices()
+                  : vFES.getDOFs(it.getDimension(), it->getIndex());
                 for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
                 {
                   const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
@@ -1587,8 +1657,8 @@ namespace Rodin::Assembly
           }
           else if (mode == AssemblyMode::LHS)
           {
-            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()), bcIdx.data(), 1.0,
-              nullptr, nullptr);
+            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(), 1.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
           }

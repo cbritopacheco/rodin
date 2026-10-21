@@ -25,6 +25,7 @@
 #ifndef RODIN_VARIATIONAL_MULT_H
 #define RODIN_VARIATIONAL_MULT_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <memory>
 #include <type_traits>
 
@@ -491,6 +492,12 @@ namespace Rodin::Variational
         return getRHS().getDOFs(element);
       }
 
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getRHS().getDOFIndices();
+      }
+
       /**
        * @brief Gets the finite element space.
        * @returns The finite element space.
@@ -762,6 +769,12 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getLHS().getDOFIndices();
+      }
+
       /**
        * @brief Gets the finite element space.
        * @returns The finite element space.
@@ -1028,6 +1041,7 @@ namespace Rodin::Variational
       Mult& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_rhs->setPolytope(polytope);
+        this->setDOFIndices(m_rhs->getTrialDOFIndices(), m_rhs->getTestDOFIndices());
         return *this;
       }
 
@@ -1168,6 +1182,7 @@ namespace Rodin::Variational
       Mult& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_rhs->setPolytope(polytope);
+        this->setDOFIndices(m_rhs->getTestDOFIndices());
         return *this;
       }
 

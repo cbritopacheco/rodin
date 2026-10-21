@@ -363,6 +363,21 @@ namespace Rodin::Variational
   template <class... Args>
   class Zero;
 
+  /**
+   * @brief Evaluation base for a two-sided shape trace.
+   * @tparam Derived Concrete average or jump expression.
+   * @tparam Operand Cell-local shape expression.
+   */
+  template <class Derived, class Operand>
+  class InterfaceShapeFunctionBase;
+
+  /**
+   * @brief Union numbering of two finite element supports.
+   * @tparam Enabled Whether union numbering is required.
+   */
+  template <bool Enabled>
+  class DOFMapping;
+
   template <class Operand>
   class Jump;
 
