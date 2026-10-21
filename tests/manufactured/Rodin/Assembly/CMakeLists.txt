@@ -25,3 +25,9 @@ gtest_discover_tests(RodinManufacturedTargetedAssembly
   PROPERTIES
     LABELS manufactured
 )
+
+add_executable(RodinManufacturedSparseElimination SparseEliminationTest.cpp)
+target_link_libraries(RodinManufacturedSparseElimination PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinManufacturedSparseElimination
+  PROPERTIES LABELS manufactured TIMEOUT 180)

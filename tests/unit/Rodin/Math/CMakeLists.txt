@@ -143,3 +143,7 @@ gtest_discover_tests(RodinMathSpatialBoundaryTest PROPERTIES LABELS unit)
 add_executable(RodinMathSpatialEigenInteropTest SpatialEigenInteropTest.cpp)
 target_link_libraries(RodinMathSpatialEigenInteropTest PRIVATE GTest::gtest_main Rodin::Math)
 gtest_discover_tests(RodinMathSpatialEigenInteropTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathSparseEliminationTest SparseEliminationTest.cpp)
+target_link_libraries(RodinMathSparseEliminationTest PRIVATE GTest::gtest_main Rodin::Rodin)
+gtest_discover_tests(RodinMathSparseEliminationTest PROPERTIES LABELS unit TIMEOUT 120)

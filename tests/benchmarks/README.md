@@ -54,6 +54,51 @@ support, not a production Stokes solver. A root-owned spectral calculation and
 its result communication must not be interpreted as distributed assembly
 imbalance. Such measurements do not count as production solver coverage.
 
+## Sparse elimination
+
+`RodinSparseEliminationBenchmarks` measures the public native sparse
+`LinearSystem::eliminate` operation on P1 and degree-three stiffness-plus-mass
+systems across Segment, Triangle, Quadrilateral, Tetrahedron, Hexahedron,
+Pyramid and Wedge meshes. Sizes range from roughly one thousand to one hundred
+thousand DOFs (the segment sweep also includes smaller systems). Random and
+contiguous subsets prescribe 1%, 2%, 5%, 10%, 40%, 50%, 80%, or 90% of the
+coefficients. The `placement` argument distinguishes random (`0`), contiguous
+(`1`), and the complete assembled boundary (`2`, with `percent:0`). Boundary
+indices come from `DirichletBC`; their values are coefficients of the exact
+algebraic vector, not samples of an analytic boundary function.
+
+The `Direct` family constructs directed upper-band CSC matrices of 1,000,
+10,000 and 100,000 rows, with widths 8 and 64 and 1–10% scattered constraints.
+The `missing:1` cases also omit columns and diagonals. They exercise the
+absence of transpose storage and include diagonal insertion in the timed
+operation. These are algebraic systems, not manufactured PDE convergence tests.
+
+Assembly, subset construction, independent projector guards and matrix/load
+restoration are excluded. FEM calls retain their compressed allocation. Direct
+calls receive an exact-capacity copy so structural growth cannot disappear
+through allocation reuse; copying is outside timing. All algorithm-owned
+scratch and storage growth are inside timing. Manual timings report calling-
+thread CPU seconds, including clock-read overhead; they are not wall-time or
+whole-process throughput measurements. Each result is checked against the
+matrix/load projector formula and the exact algebraic residual. Numerical guard
+failures make the executable return failure.
+
+The target is opt-in, serial, and not registered with CTest. For example:
+
+```sh
+cmake --build build --target RodinSparseEliminationBenchmarks
+build/tests/benchmarks/Rodin/Math/RodinSparseEliminationBenchmarks \
+  --benchmark_filter='SparseElimination/Direct/dofs:10000/width:64/percent:5/missing:1' \
+  --benchmark_repetitions=7
+```
+
+Select a bounded family before running under a sampling profiler. Run one
+benchmark process at a time. Use the same binary configuration, constraints,
+coefficient restoration and timing scope for comparisons; retain repetition
+and dispersion information on shared machines. The mathematical elimination
+contract and algorithm are documented in the boundary-conditions guide and
+in the sparse `LinearSystem::eliminate` Doxygen block.
+
 ## Mathematical measurement model
 
 Let $\mathcal{T}_h$ be a mesh of $\Omega\subset\mathbb{R}^{D}$, with

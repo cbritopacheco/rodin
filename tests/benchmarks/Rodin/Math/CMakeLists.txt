@@ -29,3 +29,7 @@ target_link_libraries(RodinSpatialVectorStorageBenchmarks PRIVATE
 add_executable(RodinSparseAlgebraBenchmarks EXCLUDE_FROM_ALL SparseAlgebra.cpp)
 target_link_libraries(RodinSparseAlgebraBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
+
+add_executable(RodinSparseEliminationBenchmarks EXCLUDE_FROM_ALL SparseElimination.cpp)
+target_link_libraries(RodinSparseEliminationBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
