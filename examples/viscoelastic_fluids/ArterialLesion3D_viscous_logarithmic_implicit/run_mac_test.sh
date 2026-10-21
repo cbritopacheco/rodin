@@ -14,6 +14,11 @@
 #     exp     the exp form (Moreno et al.), without d_t E_h in its subscale
 #     expold  the exp form as before (-al_subscale_time_residual 1)
 #     psi     the former term-by-term psi form
+#     oldbdf1 old in BDF1 (TIME_ORDER=1): BDF1 in the field and in the subscale,
+#             the scheme of the 2D tests (Kolmogorov, manufactured); with d_t
+#             psi_h in the subscale residual the factor 1 - tau'/dt stays >= 0
+#     D       new with fluid D (sPTT, Wi 2, beta 0.889): the same flow with
+#             moderate elasticity (results in <variant>/Re600_Wo5.5/S75/Wi2)
 #  The flow peaks at t = T/2 = 0.128 s and the former failures came after it,
 #  in the deceleration: one cycle (CYCLES=1, the ramp cycle) is enough.
 #
@@ -102,6 +107,7 @@ fi
 mkdir -p "$OUT/$MESH_LEVEL"
 PIDS=""
 for V in $VARIANTS; do
+  TO=2; FL=R
   case "$V" in
     new)    FORM=psi_rb; EXTRA="" ;;
     old)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 1" ;;
@@ -109,14 +115,16 @@ for V in $VARIANTS; do
     exp)    FORM=exp;    EXTRA="" ;;
     expold) FORM=exp;    EXTRA="-al_subscale_time_residual 1" ;;
     psi)    FORM=psi;    EXTRA="" ;;
+    oldbdf1) FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; TO=1 ;;
+    D)      FORM=psi_rb; EXTRA=""; FL=D ;;
     *) echo "unknown variant $V"; exit 1 ;;
   esac
   rm -rf "$OUT/$MESH_LEVEL/$V"
   (
-    env FLUIDS=R NP="$NPV" TIME_ORDER=2 MESH_LEVEL="$MESH_LEVEL" OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" \
-      CYCLES_R="$CYCLES" SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" \
+    env FLUIDS="$FL" WI=2 NP="$NPV" TIME_ORDER="$TO" MESH_LEVEL="$MESH_LEVEL" OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" \
+      CYCLES_R="$CYCLES" CYCLES="$CYCLES" SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" \
       EXE3D="$EXE" MPIRUN="$MPIRUN" OUT3D="$OUT/$MESH_LEVEL/$V" RETRY=0 bash "$HERE/run_3d.sh" 600 S75
-    d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"
+    d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"; [[ "$FL" == D ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/Wi2"
     if "$PY" -c "import numpy, h5py" 2> /dev/null && [[ -f "$d/case.xdmf" ]]; then
       "$PY" "$HERE/locate_blowup.py" "$d" --last 8 > "$OUT/$MESH_LEVEL/$V/blowup.txt" 2>&1
     fi
@@ -130,7 +138,7 @@ done
   {
     echo "variant      status  t_end      max|sigma|  max|u|   retries  Newton(max)"
     for V in $VARIANTS; do
-      d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"
+      d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"; [[ "$V" == D ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/Wi2"
       st=RUNNING; [[ -f "$d/DONE" ]] && st=DONE; [[ -f "$d/FAILED" ]] && st=FAILED
       awk -F, -v v="$V" -v st="$st" 'NR == 1 { for (i = 1; i <= NF; i++) c[$i] = i; next }
         { t = $c["t"]; s = $c["maxSigma"] + 0; u = $c["maxU"] + 0; r += $c["retries"];
