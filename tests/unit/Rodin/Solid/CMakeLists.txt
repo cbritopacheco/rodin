@@ -22,3 +22,8 @@ add_executable(RodinSolidMixedInternalVirtualWorkTest Integrators/MixedInternalV
 target_link_libraries(RodinSolidMixedInternalVirtualWorkTest
   PRIVATE GTest::gtest_main Rodin::Solid Rodin::Variational)
 rodin_discover_tests(RodinSolidMixedInternalVirtualWorkTest PROPERTIES LABELS unit)
+
+add_executable(RodinSolidHolzapfelOgdenTest Constitutive/HolzapfelOgdenTest.cpp)
+target_link_libraries(RodinSolidHolzapfelOgdenTest
+  PRIVATE GTest::gtest_main Rodin::Solid)
+rodin_discover_tests(RodinSolidHolzapfelOgdenTest PROPERTIES LABELS unit)

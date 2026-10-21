@@ -79,3 +79,34 @@ INSTANTIATE_TEST_SUITE_P(StarlingSegments, Solid_ActiveFiberEquilibrium,
   testing::Values(GainPoint{Real(-0.05), Real(0.19)}, GainPoint{Real(0.515), Real(0.56)},
     GainPoint{Real(0.865), Real(0.87)}, GainPoint{Real(1.15), Real(1)},
     GainPoint{Real(1.85), Real(0.5)}));
+
+/// @brief Static responses expose the independent-field residual and fixed-field tangent.
+TEST(Solid_ActiveFiberLaw, StaticResponseDoesNotCondenseIndependentExtension)
+{
+  for (const Real stiffness : {Real(0), Real(7)})
+  {
+    ActiveFiberLaw::Parameters parameters;
+    parameters.stiffness = stiffness;
+    const ActiveFiberLaw law(parameters);
+    const Real strain = 0.23, extension = 0.11, step = 1e-6;
+    const auto response = law.evaluateStatic(strain, extension);
+    EXPECT_EQ(response.residual, -stiffness * (strain - extension) * (1 + 2 * strain));
+    EXPECT_EQ(response.tangent, response.dStressDe);
+    EXPECT_NEAR(response.tangent,
+      (law.stress(strain + step, extension) - law.stress(strain - step, extension)) /
+        (2 * step),
+      1e-8);
+    EXPECT_TRUE(std::isfinite(response.residual));
+    EXPECT_TRUE(std::isfinite(response.tangent));
+    EXPECT_NEAR(response.kce,
+      (law.evaluateStatic(strain + step, extension).residual -
+        law.evaluateStatic(strain - step, extension).residual) /
+        (2 * step),
+      1e-8);
+    EXPECT_NEAR(response.kcc,
+      (law.evaluateStatic(strain, extension + step).residual -
+        law.evaluateStatic(strain, extension - step).residual) /
+        (2 * step),
+      1e-8);
+  }
+}

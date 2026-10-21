@@ -305,10 +305,8 @@ namespace Rodin::Solid
         response.dStressDc = dStressDc(e, c);
         response.kcc = m_parameters.stiffness * (1.0 + 2.0 * e);
         response.kce = -m_parameters.stiffness * (1.0 + 4.0 * e - 2.0 * c);
-        response.residual =
-          (-m_parameters.stiffness * (e - c) * (1.0 + 2.0 * e)) / response.kcc;
-        response.tangent =
-          response.dStressDe - response.dStressDc * response.kce / response.kcc;
+        response.residual = -m_parameters.stiffness * (e - c) * (1.0 + 2.0 * e);
+        response.tangent = response.dStressDe;
         return response;
       }
 
