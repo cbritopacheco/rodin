@@ -279,3 +279,30 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+/// @brief Embedded-cell displacement retains all ambient components.
+TEST(Rodin_Adaptation_DeformationMap, EmbeddedDisplacementExtent)
+{
+  auto mesh = LocalMesh::Builder()
+                .initialize(3)
+                .nodes(3)
+                .vertex({0, 0, 0})
+                .vertex({1, 0, 0})
+                .vertex({0, 1, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  const auto cell = mesh.getCell();
+  const Point point(*cell, Math::SpatialPoint{0.2, 0.3});
+  const IntegrationPoint ip(point);
+  Location::AABB<LocalMesh> locator(mesh);
+  VectorFunction displacement{0., 0.1, 0.1};
+  DeformationMap deformation(displacement, locator);
+  const auto value = deformation.getDisplacementValue(point, ip);
+  ASSERT_EQ(value.size(), 3u);
+  EXPECT_EQ(value[0], 0);
+  EXPECT_EQ(value[1], 0.1);
+  EXPECT_EQ(value[2], 0.1);
+  VectorFunction invalid{0., 0.1};
+  DeformationMap wrong(invalid, locator);
+  EXPECT_THROW(wrong.getDisplacementValue(point, ip), Alert::Exception);
+}

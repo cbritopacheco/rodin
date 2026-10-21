@@ -153,7 +153,14 @@ namespace Rodin::Adaptation
       {
         const auto uq =
           ip.getQuadratureFormula() ? m_u.get().getValue(ip) : m_u.get().getValue(pt);
-        Math::SpatialVector<Real> displacement(pt.getPolytope().getMesh().getDimension());
+        Math::SpatialVector<Real> displacement(
+          pt.getPolytope().getMesh().getSpaceDimension());
+        if (static_cast<size_t>(uq.size()) != static_cast<size_t>(displacement.size()))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Displacement dimension must match the mesh ambient dimension."
+            << Alert::Raise;
+        }
         displacement.setZero();
         for (std::size_t r = 0; r < static_cast<std::size_t>(displacement.size()); ++r)
           displacement(static_cast<Eigen::Index>(r)) = uq(r);

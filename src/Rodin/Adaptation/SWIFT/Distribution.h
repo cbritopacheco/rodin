@@ -6,6 +6,10 @@
 #define RODIN_ADAPTATION_SWIFT_DISTRIBUTION_H
 
 #include <vector>
+#include <functional>
+#ifdef RODIN_USE_MPI
+#include <boost/mpi/collectives/all_reduce.hpp>
+#endif
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "../CellDeformation.h"
@@ -137,7 +141,10 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Global mean-strain subtraction represented by @f$UU^\top@f$.
        * Native linear forms integrate the symmetric strain in an orthonormal
        * tensor basis. The volume and moments use the sparse core's quadrature,
-       * preserving the variance identity for the centered form.
+       * preserving the variance identity for the centered form. Current volume
+       * is integrated directly as the same reference weights times geometric
+       * distortion and deformation determinant. Interpolated position fields
+       * cannot define this volume when displacement degree is below map degree.
        * @returns Mean-strain coupling matrix @f$U@f$ for the current fields and weights.
        */
       Math::Matrix<Real> getCentering() const
@@ -155,21 +162,40 @@ namespace Rodin::Adaptation::SWIFT
         const auto gradient =
           Variational::Jacobian(test) * CurrentInverse<Displacement>(current, dimension);
         const auto strain = Real(0.5) * (gradient + Variational::Transpose(gradient));
-        auto traceIntegral = Variational::Integral(weight * Variational::Trace(strain));
-        traceIntegral.setOrder(m_order);
-        Variational::LinearForm trace(test);
-        trace = traceIntegral;
-        trace.assemble();
-        Variational::GridFunction position(test.getFiniteElementSpace());
-        position =
-          Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
-            return Math::SpatialVector<Real>(point.getCoordinates());
-          });
-        position += current;
-        const Real volume = trace.getVector().dot(position.getData()) / Real(dimension);
-        assert(volume > Real(0));
+        const auto& mesh = test.getFiniteElementSpace().getMesh();
+        Real volume = 0;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          if constexpr (requires { mesh.getShard(); })
+          {
+            if (!mesh.getShard().isOwned(dimension, cell->getIndex()))
+              continue;
+          }
+          const auto& formula =
+            QF::PolytopeQuadratureFormula::get(m_order, cell->getGeometry());
+          const auto& quadrature = cell->getQuadrature(formula);
+          for (size_t sample = 0; sample < quadrature.getSize(); ++sample)
+          {
+            const Variational::IntegrationPoint point(quadrature, sample);
+            volume += formula.getWeight(sample) *
+              quadrature.getPoint(sample).getDistortion() * weight.getValue(point);
+          }
+        }
+#ifdef RODIN_USE_MPI
+        if constexpr (requires { mesh.getShard(); })
+        {
+          volume = boost::mpi::all_reduce(
+            mesh.getContext().getCommunicator(), volume, std::plus<Real>());
+        }
+#endif
+        if (!(volume > 0) || !std::isfinite(volume))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Mean-strain centering requires finite positive current volume."
+            << Alert::Raise;
+        }
         Math::Matrix<Real> centering(
-          trace.getVector().size(), dimension * (dimension + 1) / 2);
+          test.getFiniteElementSpace().getSize(), dimension * (dimension + 1) / 2);
         size_t column = 0;
         for (size_t a = 0; a < dimension; ++a)
         {
