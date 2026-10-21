@@ -2326,10 +2326,17 @@ namespace Rodin::Examples::ViscoelasticFluids
       return fromPoint(atN, LogNewton, [c, b, w](const LogPoint& q) -> Eigen::Matrix3d {
         return q.A[c][b].transpose() / w; });
     };
-    const auto testD = m_chiD + tauP * Mult(Jacobian(m_chiD), m_uOld)
+    const auto stabD = tauP * Mult(Jacobian(m_chiD), m_uOld)
       + (-1.0) * tauR * Mult(adjointJN(0, 0, wD), m_chiD);
-    const auto testO = m_chiO + tauP * Mult(Jacobian(m_chiO), m_uOld)
+    const auto stabO = tauP * Mult(Jacobian(m_chiO), m_uOld)
       + (-1.0) * tauR * Mult(adjointJN(1, 1, wO), m_chiO);
+    const auto testD = m_chiD + stabD;
+    const auto testO = m_chiO + stabO;
+    // d_t psi_h leaves the residual of psi~ (Config::psiRBTimeResidual off):
+    // cT (psi - psi_hist) is taken back from the stabilisation terms below
+    // (the Petrov-Galerkin test, and sigma~ in the momentum).
+    const Real cT = m_cfg.psiRBTimeResidual ? 0.0 : 1.0 / dtM;
+    const Real hT = m_cfg.psiRBTimeResidual ? 1.0 : 0.0;   // psi_hist in R_known
     const auto crossD = (-1.0) * tauR * Mult(adjointJN(0, 1, wO), m_chiD);   // residual O, chi_D
     const auto crossO = (-1.0) * tauR * Mult(adjointJN(1, 0, wD), m_chiO);   // residual D, chi_O
     // tau' pair<C>(JN[memP psi~^n + Pi[R^n]]) = tau' sum_B A[C][B] y_B.
@@ -2353,14 +2360,14 @@ namespace Rodin::Examples::ViscoelasticFluids
       });
     };
     // s tau' Dexp[memP psi~^n + Pi[R^n] - R_known] against eps(v).
-    const auto stressKnown = PointwiseTensor([this, at, kB, s, memP, dtM](const Point& p) -> Eigen::Matrix3d {
+    const auto stressKnown = PointwiseTensor([this, at, kB, s, memP, dtM, hT](const Point& p) -> Eigen::Matrix3d {
       const LogPoint& q = logPointAt(at, p, LogNewton);
-      // R_known = R_rest - psi_hist/dtM - (u^k . grad) psi^k, as a tensor.
+      // R_known = R_rest - hT psi_hist/dtM - (u^k . grad) psi^k, as a tensor.
       Eigen::Matrix3d rk;
       rk << q.r[0](0), 0.5 * q.r[1](0), 0.5 * q.r[1](1),
             0.5 * q.r[1](0), q.r[0](1), 0.5 * q.r[1](2),
             0.5 * q.r[1](1), 0.5 * q.r[1](2), q.r[0](2);
-      rk -= unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p)) / dtM;
+      rk -= (hT / dtM) * unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p));
       const auto GD = Jacobian(m_psiItD).getValue(p);
       const auto GO = Jacobian(m_psiItO).getValue(p);
       const auto uk = m_uIt.getValue(p);
@@ -2401,6 +2408,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       + withOrder(Integral(s * dexp<O>(at, m_psiO)
           + mst * tauP * (dexp<O>(at, (1.0 / wO) * rOO) + dexp<D>(at, (1.0 / wD) * rDO)), symV))
       + withOrder(Integral(stressKnown, symV))
+      // d_t psi_h out of sigma~: + s tau' cT Dexp[psi] (mst tauP rDD carries -s tau'/dtM)
+      + (s * cT) * withOrder(Integral(tauP * (dexp<D>(at, m_psiD) + dexp<O>(at, m_psiO)), symV))
       + s * withOrder(Integral(C, symV)) - s * Integral(I, symV)
       - Integral(m_p, Div(m_v))
 
@@ -2413,10 +2422,15 @@ namespace Rodin::Examples::ViscoelasticFluids
       + withOrder(Integral(kD, testD)) + withOrder(Integral(kO, testO))
       - withOrder(Integral(tauP * knownSub(false), Mult(Jacobian(m_chiD), m_uOld)))
       - withOrder(Integral(tauP * knownSub(true), Mult(Jacobian(m_chiO), m_uOld)))
+      // d_t psi_h out of the Petrov-Galerkin test: - cT w_C <psi_C - psi_hist,C, stab_C>
+      - (cT * wD) * withOrder(Integral(m_psiD, stabD)) + (cT * wD) * withOrder(Integral(m_psiHistD, stabD))
+      - (cT * wO) * withOrder(Integral(m_psiO, stabO)) + (cT * wO) * withOrder(Integral(m_psiHistO, stabO))
       // the D-O coupling of the adjoint reaction, and its known part
       + withOrder(Integral(rOO, crossD)) + withOrder(Integral(rOD, crossD)) + withOrder(Integral(rOu, crossD))
       + withOrder(Integral(rDD, crossO)) + withOrder(Integral(rDO, crossO)) + withOrder(Integral(rDu, crossO))
       + withOrder(Integral(kO, crossD)) + withOrder(Integral(kD, crossO))
+      - (cT * wO) * withOrder(Integral(m_psiO, crossD)) + (cT * wO) * withOrder(Integral(m_psiHistO, crossD))
+      - (cT * wD) * withOrder(Integral(m_psiD, crossO)) + (cT * wD) * withOrder(Integral(m_psiHistD, crossO))
       + withOrder(Integral(tauR * knownJN(0), m_chiD))
       + withOrder(Integral(tauR * knownJN(1), m_chiO))
 
@@ -2628,7 +2642,8 @@ namespace Rodin::Examples::ViscoelasticFluids
         Eigen::Matrix3d R;
         Eigen::Vector3d divE;
     };
-    const auto stepPoint = [this, model, dtM](const Point& p) -> StepPoint {
+    const Real hT = m_cfg.psiRBTimeResidual ? 1.0 : 0.0;
+    const auto stepPoint = [this, model, dtM, hT](const Point& p) -> StepPoint {
       const Eigen::Matrix3d psi = unpack(m_psiItD.getValue(p), m_psiItO.getValue(p));
       const auto J = Jacobian(m_uIt).getValue(p);
       const auto uv = m_uIt.getValue(p);
@@ -2641,7 +2656,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       const auto& B = voigtBasisEigen();
       const LogEig eig = logEig(psi);
       StepPoint out;
-      out.R = (psi - unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p))) / dtM +
+      // d_t psi_h only with Config::psiRBTimeResidual (P^perp[d_t psi_h] = 0).
+      out.R = (hT / dtM) * (psi - unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p))) +
         nonlinearMap(psi, L, model);
       out.divE.setZero();
       for (int j = 0; j < 3; ++j)
@@ -3554,6 +3570,13 @@ namespace Rodin::Examples::ViscoelasticFluids
                     << " steps (" << nominalSteps << " total), inflow ramped over "
                     << m_cfg.rampCycles << " cycle(s); XDMF every " << m_cfg.outputEvery
                     << " steps and at every cycle boundary" << Alert::Raise;
+      Alert::Info() << "[run] formulation " << m_cfg.formulation << ", "
+                    << (m_cfg.dynamicSubscales ? "dynamic" : "quasi-static") << " subscales"
+                    << (m_cfg.formulation == "psi_rb"
+                          ? (m_cfg.psiRBTimeResidual ? ", d_t psi_h in R(psi~)" : ", R(psi~) without d_t psi_h")
+                          : "")
+                    << "; Newton on (u, p, psi) with the momentum convection at u* (BDF extrapolation);"
+                    << " the PC is an LU of an earlier Jacobian, GMRES solves the current one" << Alert::Raise;
       if (m_cfg.adaptiveTimeStep)
         Alert::Info() << "[run] step control: retry with dt x " << m_cfg.dtShrink << " (at most "
                       << m_cfg.maxStepRetries << " times, dt >= " << dtMin << " s), growth x "
@@ -3805,6 +3828,7 @@ int main(int argc, char** argv)
       getReal("-al_c4", cfg.c4);
       getBool("-al_dynamic_subscales", cfg.dynamicSubscales);
       getBool("-al_adjoint_reaction", cfg.adjointReaction);
+      getBool("-al_psi_rb_time_residual", cfg.psiRBTimeResidual);
 
       getReal("-al_diameter", cfg.diameter);
       getReal("-al_rho", cfg.rho);
