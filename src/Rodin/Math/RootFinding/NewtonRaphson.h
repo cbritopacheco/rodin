@@ -188,8 +188,9 @@ namespace Rodin::Math::RootFinding
 
           // Newton step with scale-aware guard on gp
           Scalar dt;
+          const Scalar derivativeScale = std::isfinite(fg) ? std::fabs(fg) : Scalar(0);
           const Scalar gpTol = std::numeric_limits<Scalar>::epsilon() *
-            (static_cast<Scalar>(1) + std::fabs(fg));
+            (static_cast<Scalar>(1) + derivativeScale);
           if (std::fabs(fg) > gpTol)
           {
             dt = -fv / fg;

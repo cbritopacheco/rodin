@@ -1270,17 +1270,20 @@ namespace Rodin::Math
        * @brief Computes the Moore-Penrose pseudo-inverse.
        *
        * For full column rank matrices (@f$ m \geq n @f$), computes
-       * @f$ A^+ = (A^T A)^{-1} A^T @f$.
+       * @f$ A^+ = (A^* A)^{-1} A^* @f$.
        * For full row rank matrices (@f$ m < n @f$), computes
-       * @f$ A^+ = A^T (A A^T)^{-1} @f$.
+       * @f$ A^+ = A^* (A A^*)^{-1} @f$.
+       *
+       * The matrices are assumed to have full rank. Here @f$ A^* @f$ denotes
+       * the conjugate transpose, including for complex scalar fields.
        *
        * @return The pseudo-inverse @f$ A^+ @f$
        */
       constexpr SpatialMatrix pseudoInverse() const noexcept
       {
-        // Moore-Penrose pseudoinverse via (A^T A)^{-1} A^T for full column rank
-        // and A^T (A A^T)^{-1} for full row rank.
-        SpatialMatrix<Scalar> aT = this->transpose();
+        // Moore-Penrose pseudoinverse via (A^* A)^{-1} A^* for full column rank
+        // and A^* (A A^*)^{-1} for full row rank.
+        SpatialMatrix<Scalar> aT = this->adjoint();
         if (m_rows >= m_cols)
         {
           // Full column rank assumed
@@ -1303,7 +1306,7 @@ namespace Rodin::Math
        * @param[in] s Scalar multiplier
        * @return Reference to @f$ *this @f$ after scaling
        */
-      constexpr SpatialMatrix& operator*=(const Scalar& s) noexcept
+      constexpr SpatialMatrix& operator*=(Scalar s) noexcept
       {
         if (m_rows == 0 || m_cols == 0)
           return *this;
@@ -1402,6 +1405,7 @@ namespace Rodin::Math
         if (r == 0 || k == 0 || c == 0)
         {
           m_cols = c;
+          setZero();
           return *this;
         }
 

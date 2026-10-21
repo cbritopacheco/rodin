@@ -302,3 +302,20 @@ namespace
     EXPECT_FALSE(solver.solve(function, Scalar(1.5), Scalar(1), Scalar(2)));
   }
 }
+
+/// @brief A missing derivative enables the documented secant fallback within budget.
+TEST_F(NewtonRaphsonTest, NaNDerivativeUsesSecant)
+{
+  NewtonRaphson<Real> solver;
+  size_t calls = 0;
+  const auto root = solver.solve(
+    [&](Real value) {
+      ++calls;
+      return std::pair<Real, Real>{
+        value - Real(0.123456789), std::numeric_limits<Real>::quiet_NaN()};
+    },
+    Real(0.7), Real(0), Real(1));
+  ASSERT_TRUE(root);
+  EXPECT_NEAR(*root, Real(0.123456789), 1e-12);
+  EXPECT_LT(calls, 10u);
+}

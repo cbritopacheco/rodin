@@ -184,6 +184,55 @@ namespace Rodin::Math
       {
         return static_cast<const Derived&>(*this).getSolution();
       }
+
+    protected:
+      /**
+       * @brief Combines repeated masters before applying a constraint transformation.
+       * @param dofs Supplied constraint rows.
+       * @returns A normalized copy only when at least one row repeats a master.
+       *
+       * Already normalized rows incur no allocation. A repeated master denotes
+       * the sum of its coefficients in both projection and reconstruction.
+       */
+      template <class Scalar>
+      static Optional<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>>
+      normalizeConstraints(
+        const IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>& dofs)
+      {
+        // Repeated masters represent one coefficient equal to their sum.
+        // Preserve the allocation-free normal path for already normalized rows.
+        for (const auto& [parent, row] : dofs)
+        {
+          const auto& masters = row.first;
+          for (Index i = 0; i < static_cast<size_t>(masters.size()); ++i)
+          {
+            for (Index j = 0; j < i; ++j)
+            {
+              if (masters(i) == masters(j))
+              {
+                auto normalized = dofs;
+                for (auto& [index, entries] : normalized)
+                {
+                  IndexMap<Scalar> coefficients;
+                  for (Index k = 0; k < static_cast<size_t>(entries.first.size()); ++k)
+                    coefficients[entries.first(k)] += entries.second(k);
+                  entries.first.resize(coefficients.size());
+                  entries.second.resize(coefficients.size());
+                  Index local = 0;
+                  for (const auto& [master, coefficient] : coefficients)
+                  {
+                    entries.first(local) = master;
+                    entries.second(local++) = coefficient;
+                  }
+                }
+                return normalized;
+              }
+            }
+          }
+        }
+
+        return {};
+      }
   };
 
   /**
@@ -553,6 +602,9 @@ namespace Rodin::Math
         const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
         size_t offset = 0)
       {
+        if (const auto normalized = Parent::normalizeConstraints(dofs))
+          return merge(*normalized, offset);
+
         auto& stiffness = this->getOperator();
         auto& mass = this->getVector();
 
@@ -895,6 +947,9 @@ namespace Rodin::Math
         const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
         size_t offset = 0)
       {
+        if (const auto normalized = Parent::normalizeConstraints(dofs))
+          return merge(*normalized, offset);
+
         auto& stiffness = this->getOperator();
         auto& mass = this->getVector();
 

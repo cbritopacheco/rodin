@@ -267,7 +267,7 @@ namespace Rodin::Math
        * @param s Scalar factor.
        * @returns Reference to this object after the operation.
        */
-      SpatialVector& operator*=(const ScalarType& s) noexcept
+      SpatialVector& operator*=(ScalarType s) noexcept
       {
         switch (m_size)
         {
@@ -294,7 +294,7 @@ namespace Rodin::Math
        * @param s Scalar factor.
        * @returns Reference to this object after the operation.
        */
-      SpatialVector& operator/=(const ScalarType& s) noexcept
+      SpatialVector& operator/=(ScalarType s) noexcept
       {
         switch (m_size)
         {

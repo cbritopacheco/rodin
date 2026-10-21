@@ -711,3 +711,40 @@ namespace
       (constBase.getSolution() - Vector<Scalar>::Constant(4, Scalar(-9))).norm(), 0);
   }
 }
+
+/// @brief Repeated master entries have the same meaning as their summed coefficient.
+TYPED_TEST(LinearSystemMergeTest, RepeatedMasters)
+{
+  using Operator = TypeParam;
+  using Scalar = typename Operator::Scalar;
+  const Matrix<Scalar> matrix = Matrix<Scalar>::Identity(3, 3);
+  LinearSystem<Operator, Vector<Scalar>> repeated, unique;
+  for (auto* system : {&repeated, &unique})
+  {
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      system->getOperator() = matrix.sparseView();
+    else
+      system->getOperator() = matrix;
+    system->getVector() = Vector<Scalar>::Ones(3);
+  }
+  IndexMap<std::pair<IndexArray, Vector<Scalar>>> constraints;
+  IndexArray masters(3);
+  masters << 1, 1, 2;
+  Vector<Scalar> coefficients(3);
+  coefficients << Scalar(0.25), Scalar(0.5), Scalar(0.25);
+  if constexpr (std::is_same_v<Scalar, Complex>)
+    coefficients[0] += Scalar(0, 0.125);
+  constraints[0] = {masters, coefficients};
+  repeated.merge(constraints);
+  masters.resize(2);
+  masters << 1, 2;
+  Vector<Scalar> combined(2);
+  combined << coefficients[0] + coefficients[1], coefficients[2];
+  constraints[0] = {masters, combined};
+  unique.merge(constraints);
+  EXPECT_LT(
+    (Matrix<Scalar>(repeated.getOperator()) - Matrix<Scalar>(unique.getOperator()))
+      .norm(),
+    1e-14);
+  EXPECT_LT((repeated.getVector() - unique.getVector()).norm(), 1e-14);
+}

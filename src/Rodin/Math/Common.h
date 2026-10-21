@@ -109,6 +109,28 @@ namespace Rodin::Math
   }
 
   /**
+   * @brief Conjugates each active component of a spatial vector.
+   * @param value Vector to conjugate.
+   * @returns An owning spatial vector with unchanged dimension.
+   */
+  template <class Scalar>
+  auto conj(const SpatialVector<Scalar>& value)
+  {
+    return value.conjugate();
+  }
+
+  /**
+   * @brief Conjugates each active entry of a spatial matrix.
+   * @param value Matrix to conjugate.
+   * @returns An owning spatial matrix with unchanged dimensions.
+   */
+  template <class Scalar>
+  auto conj(const SpatialMatrix<Scalar>& value)
+  {
+    return value.conjugate();
+  }
+
+  /**
    * @brief Computes the square of a value.
    *
    * Returns @f$ x^2 = x \times x @f$ efficiently without calling std::pow.
