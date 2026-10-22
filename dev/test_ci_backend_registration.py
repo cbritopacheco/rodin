@@ -26,7 +26,8 @@ class BackendRegistrationTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
         targets = ["GTest::gtest", "GTest::gtest_main", "Rodin::Geometry", "Rodin::Variational",
-                   "Rodin::MPI", "Rodin::PETSc", "Rodin::Solver", "RodinConvergence", "RodinConvergenceH"]
+                   "Rodin::MPI", "Rodin::PETSc", "Rodin::Solver", "Rodin::Assembly",
+                   "RodinConvergence", "RodinConvergenceH"]
         directories = [directory] if isinstance(directory, str) else directory
         folders = ["cases"] if len(directories) == 1 else [f"cases{i}" for i in range(len(directories))]
         (source / "CMakeLists.txt").write_text(
@@ -44,6 +45,32 @@ class BackendRegistrationTest(unittest.TestCase):
             commands = ci.commands((build / folder / "CTestTestfile.cmake").read_text())
             tests.update({args[0]: args[1:] for command, args, *_ in commands if command == "add_test"})
         return tests, build
+
+    def test_native_hp_stokes_cases_have_independent_time_budgets(self):
+        tests, build = self.configure("tests/convergence/hp/Stokes")
+        source = (ROOT / "tests/convergence/hp/Stokes/Stokes.cpp").read_text()
+        cases = re.findall(r'TEST_P\(StokesHPTest,\s*(\w+)\)', source)
+        expected = Counter(f"AllGeometries/StokesHPTest.{case}/{geometry}"
+                           for case, geometry in itertools.product(cases, GEOMETRIES[1:]))
+        actual = Counter()
+        for command in tests.values():
+            self.assertTrue(command[0].endswith("RodinConvergenceHPStokes"))
+            filters = [arg.removeprefix("--gtest_filter=") for arg in command
+                       if arg.startswith("--gtest_filter=")]
+            self.assertEqual(len(filters), 1)
+            actual[filters[0]] += 1
+        self.assertEqual(actual, expected)
+        properties = {}
+        for command, args, *_ in ci.commands((build / "cases/CTestTestfile.cmake").read_text()):
+            if command == "set_tests_properties":
+                boundary = args.index("PROPERTIES")
+                row = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties[name] = row
+        self.assertEqual(set(properties), set(tests))
+        for row in properties.values():
+            self.assertEqual(row["TIMEOUT"], "600")
+            self.assertEqual(set(row["LABELS"].split(";")), {"convergence", "slow"})
 
     def test_matrix_range_target_and_all_ranks_are_registered(self):
         for petsc in [False, True]:
