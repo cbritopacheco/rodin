@@ -2165,7 +2165,9 @@ jobs:
     needs:
       - Plan
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Package provisioning and instrumented compilation can consume 45 minutes
+    # before the serial test matrix finishes. Keep individual CTest watchdogs.
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
