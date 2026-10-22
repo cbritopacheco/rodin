@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <functional>
+#include "Rodin/Configure.h"
 #ifdef RODIN_USE_MPI
 #include <boost/mpi/collectives/all_reduce.hpp>
 #endif
