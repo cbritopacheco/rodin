@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Independent vertex-value and row-layout oracles for PETSc MEDIT output. */
+/// @file @brief Vertex-value, row-layout and complex-rejection oracles for PETSc MEDIT output.
 #include <gtest/gtest.h>
 #include <petsc.h>
 #include <memory>
@@ -22,7 +22,7 @@ using namespace Rodin::IO;
 
 namespace
 {
-  /// @brief Every printed row contains the analytic value at exactly one mesh vertex.
+  /// @brief Real output preserves vertex values; complex output is rejected transactionally.
   template <bool Quadratic, size_t Rank, class Scalar = PetscScalar>
   void checkVertexRows()
   {
@@ -95,6 +95,13 @@ namespace
     for (size_t repeat = 0; repeat < 2; ++repeat)
     {
       std::stringstream stream;
+      if constexpr (std::is_same_v<Scalar, Complex>)
+      {
+        stream << "retained";
+        EXPECT_THROW(printer->print(stream), Alert::Exception);
+        EXPECT_EQ(stream.str(), "retained");
+        continue;
+      }
       printer->print(stream);
       std::string keyword;
       size_t version, dimension, vertices, fields;
