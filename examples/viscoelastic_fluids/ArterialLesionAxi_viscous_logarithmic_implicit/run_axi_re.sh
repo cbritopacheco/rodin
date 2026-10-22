@@ -135,7 +135,7 @@ fluid_args() {
     N)  echo "-al_wi 0.01 -al_ptt_epsilon $PTT_EPS" ;;
     D)  echo "-al_wi $2 -al_ptt_epsilon $PTT_EPS" ;;
     CY) echo "-al_fluid cy -al_eta_ref $ETA_REF" ;;
-    R)  echo "-al_fluid gsptt -al_eta_ref $ETA_REF -al_eta_p 0.050 -al_ptt_epsilon 0.2 -al_lambda $LAMBDA_R -al_de 0 -al_wi 0 -al_conformation_its 10 -al_inlet_developed_conformation 1" ;;
+    R)  echo "-al_fluid gsptt -al_eta_ref $ETA_REF -al_eta_p ${ETAP_R:-0.050} -al_ptt_epsilon 0.2 -al_lambda $LAMBDA_R -al_de 0 -al_wi 0 -al_conformation_its 10 -al_inlet_developed_conformation 1" ;;
     *)  echo "unknown fluid $1" >&2; return 1 ;;
   esac
 }
