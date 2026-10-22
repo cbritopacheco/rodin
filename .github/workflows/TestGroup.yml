@@ -40,7 +40,7 @@ permissions:
   contents: read
 jobs:
   Run:
-    name: gcc-14, ${{ inputs.backend }}, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
+    name: GCC-14, ${{ inputs.backend == 'optional' && 'Optional' || inputs.backend == 'default' && 'Default' || 'Baseline' }}, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:

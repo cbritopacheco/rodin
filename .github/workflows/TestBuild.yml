@@ -13,7 +13,7 @@ permissions:
   contents: read
 jobs:
   Build:
-    name: ${{ fromJSON(inputs.definition).compiler }}, ${{ fromJSON(inputs.definition).mode }}, MT-${{ fromJSON(inputs.definition).cmake.RODIN_MULTITHREADED }}, ${{ inputs.id }}
+    name: GCC-14, ${{ fromJSON(inputs.definition).mode == 'native' && 'Native' || fromJSON(inputs.definition).mode == 'mpi' && 'MPI' || fromJSON(inputs.definition).mode == 'petsc' && 'PETSc' || 'Complex' }}, MT-${{ fromJSON(inputs.definition).cmake.RODIN_MULTITHREADED }}, ${{ inputs.id }}
     runs-on: ${{ fromJSON(inputs.definition).runner }}
     timeout-minutes: 360
     env:

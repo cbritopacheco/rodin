@@ -80,7 +80,9 @@ def display_group(group):
     parts[0] = {"unit": "Unit", "manufactured": "Manufactured",
                 "convergence": "Convergence", "cmake": "CMake",
                 "src": "Libraries"}.get(parts[0], parts[0])
-    return " / ".join(parts)
+    names = {"h": "H", "p": "P", "hp": "HP", "isoparametric": "Isoparametric",
+             "petsc": "PETSc", "mpi": "MPI"}
+    return " / ".join(names.get(part, part[:1].upper() + part[1:]) for part in parts)
 
 
 def targets(build):
