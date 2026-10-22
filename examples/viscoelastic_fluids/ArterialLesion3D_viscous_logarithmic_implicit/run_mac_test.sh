@@ -20,6 +20,9 @@
 #             psi_h in the subscale residual the factor 1 - tau'/dt stays >= 0
 #     D       new with fluid D (sPTT, Wi 2, beta 0.889): the same flow with
 #             moderate elasticity (results in <variant>/Re600_Wo5.5/S75/Wi2)
+#     R01     fluid R with lambda 0.1 s and eta_p 0.0104 (the largest with a
+#             positive solvent): De 0.39, lambda gd ~ 1e3 at the wall, beta 0.81,
+#             the same N1 at the wall (~40 Pa) as R at 4.83 s
 #  The flow peaks at t = T/2 = 0.128 s and the former failures came after it,
 #  in the deceleration: one cycle (CYCLES=1, the ramp cycle) is enough.
 #
@@ -108,7 +111,7 @@ fi
 mkdir -p "$OUT/$MESH_LEVEL"
 PIDS=""
 for V in $VARIANTS; do
-  TO=2; FL=R
+  TO=2; FL=R; LR=4.83; EP=0.050
   case "$V" in
     new)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 0" ;;
     old)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 1" ;;
@@ -118,11 +121,12 @@ for V in $VARIANTS; do
     psi)    FORM=psi;    EXTRA="" ;;
     oldbdf1) FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; TO=1 ;;
     D)      FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; FL=D ;;
+    R01)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; LR=0.1; EP=0.0104 ;;
     *) echo "unknown variant $V"; exit 1 ;;
   esac
   rm -rf "$OUT/$MESH_LEVEL/$V"
   (
-    env FLUIDS="$FL" WI=2 NP="$NPV" TIME_ORDER="$TO" MESH_LEVEL="$MESH_LEVEL" OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" \
+    env FLUIDS="$FL" WI=2 LAMBDA_R="$LR" ETAP_R="$EP" NP="$NPV" TIME_ORDER="$TO" MESH_LEVEL="$MESH_LEVEL" OUTPUT_EVERY="$OUTPUT_EVERY" STEPS="$STEPS" \
       CYCLES_R="$CYCLES" CYCLES="$CYCLES" SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" \
       EXE3D="$EXE" MPIRUN="$MPIRUN" OUT3D="$OUT/$MESH_LEVEL/$V" RETRY=0 bash "$HERE/run_3d.sh" 600 S75
     d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"; [[ "$FL" == D ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/Wi2"
