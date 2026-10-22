@@ -194,8 +194,11 @@ namespace Rodin::MMG
     // MMG5_pTria : mesh->tria
     if (src->tria)
     {
-      MMG5_SAFE_CALLOC(dst->tria, src->ntmax + 1, MMG5_Tria, /* No op */);
-      std::copy(src->tria, src->tria + src->ntmax + 1, dst->tria);
+      // Volume boundary triangles have count-sized storage; triangle element
+      // arrays in planar and surface meshes also contain their free-list slots.
+      const auto triangleCount = src->tetra ? src->nt : src->ntmax;
+      MMG5_SAFE_CALLOC(dst->tria, triangleCount + 1, MMG5_Tria, /* No op */);
+      std::copy(src->tria, src->tria + triangleCount + 1, dst->tria);
     }
     else
       dst->tria = nullptr;

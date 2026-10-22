@@ -12,6 +12,7 @@
 #include <array>
 #include <algorithm>
 #include <set>
+#include <tuple>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -463,8 +464,16 @@ namespace Rodin::Tests::Unit
     return true;
   }
 
-  static bool hasEntityWithCoordinates(
-    MMG::Mesh& mesh, Polytope::Type type, const std::vector<Point>& points)
+  /**
+   * @brief Finds an entity by its unordered physical vertex coordinates.
+   * @param mesh Mesh to search, computing incidence when needed.
+   * @param type Geometry of the sought entity.
+   * @param points Expected physical vertex coordinates.
+   * @param required Optional required-index set restricting the matching entities.
+   * @returns Whether a matching entity belongs to the selected set.
+   */
+  static bool hasEntityWithCoordinates(MMG::Mesh& mesh, Polytope::Type type,
+    const std::vector<Point>& points, const IndexSet* required = nullptr)
   {
     const size_t dimension = getDimension(type);
     if (dimension < mesh.getDimension())
@@ -473,11 +482,40 @@ namespace Rodin::Tests::Unit
     {
       if (it->getGeometry() != type)
         continue;
+      if (required && !required->count(it->getIndex()))
+        continue;
       const auto candidate = getVertexCoordinates(mesh, *it);
       if (containsPointSet(candidate, points) && containsPointSet(points, candidate))
         return true;
     }
     return false;
+  }
+
+  /**
+   * @brief Checks required geometry after remesher renumbering and tag propagation.
+   * @param source Input mesh with required entities not cut by the level set.
+   * @param result Remeshed output whose required tags must identify that geometry.
+   */
+  static void expectRequiredGeometry(const MMG::Mesh& source, MMG::Mesh& result)
+  {
+    for (const auto& [type, input, output] :
+      {std::tuple{Polytope::Type::Point, &source.getRequiredVertices(),
+         &result.getRequiredVertices()},
+        std::tuple{Polytope::Type::Segment, &source.getRequiredEdges(),
+          &result.getRequiredEdges()},
+        std::tuple{Polytope::Type::Triangle, &source.getRequiredTriangles(),
+          &result.getRequiredTriangles()},
+        std::tuple{Polytope::Type::Tetrahedron, &source.getRequiredTetrahedra(),
+          &result.getRequiredTetrahedra()}})
+    {
+      for (const Index index : *input)
+      {
+        SCOPED_TRACE(::testing::Message() << static_cast<int>(type) << ':' << index);
+        const auto points =
+          getVertexCoordinates(source, *source.getPolytope(getDimension(type), index));
+        EXPECT_TRUE(hasEntityWithCoordinates(result, type, points, output));
+      }
+    }
   }
 
   static bool hasVertexWithCoordinates(MMG::Mesh& mesh, const Point& point)
@@ -743,55 +781,73 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies copy construction for MMG mesh by checking exact expected values, true predicates, copy semantics.
   TEST(Rodin_MMG_Mesh, CopyConstruction)
   {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
-    mesh.setCorner(0);
-    mesh.setCorner(3);
-    mesh.setRidge(0);
-    mesh.setRequiredVertex(5);
-    mesh.setRequiredEdge(2);
-    mesh.setRequiredTriangle(1);
-    mesh.setRequiredTetrahedron(0);
+    for (const bool volume : {false, true})
+    {
+      SCOPED_TRACE(volume);
+      MMG::Mesh mesh;
+      mesh = volume ? mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4})
+                    : mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(1, mesh.getDimension());
+      if (volume)
+        mesh.getConnectivity().compute(2, 3);
+      mesh.setCorner(0);
+      mesh.setCorner(3);
+      mesh.setRidge(0);
+      mesh.setRequiredVertex(5);
+      mesh.setRequiredEdge(2);
+      mesh.setRequiredTriangle(1);
+      if (volume)
+        mesh.setRequiredTetrahedron(0);
 
-    MMG::Mesh copy(mesh);
-    EXPECT_EQ(copy.getVertexCount(), mesh.getVertexCount());
-    EXPECT_EQ(copy.getCellCount(), mesh.getCellCount());
-    EXPECT_EQ(copy.getCorners().size(), 2);
-    EXPECT_EQ(copy.getRidges().size(), 1);
-    EXPECT_EQ(copy.getRequiredVertices().size(), 1);
-    EXPECT_EQ(copy.getRequiredEdges().size(), 1);
-    EXPECT_EQ(copy.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(copy.getRequiredTetrahedra().size(), 1);
-    EXPECT_TRUE(copy.getCorners().count(0));
-    EXPECT_TRUE(copy.getCorners().count(3));
-    EXPECT_TRUE(copy.getRequiredTriangles().count(1));
-    EXPECT_TRUE(copy.getRequiredTetrahedra().count(0));
+      MMG::Mesh copy(mesh);
+      EXPECT_EQ(copy.getVertexCount(), mesh.getVertexCount());
+      EXPECT_EQ(copy.getCellCount(), mesh.getCellCount());
+      EXPECT_EQ(copy.getCorners().size(), 2);
+      EXPECT_EQ(copy.getRidges().size(), 1);
+      EXPECT_EQ(copy.getRequiredVertices().size(), 1);
+      EXPECT_EQ(copy.getRequiredEdges().size(), 1);
+      EXPECT_EQ(copy.getRequiredTriangles().size(), 1);
+      EXPECT_EQ(copy.getRequiredTetrahedra().size(), volume ? 1 : 0);
+      EXPECT_TRUE(copy.getCorners().count(0));
+      EXPECT_TRUE(copy.getCorners().count(3));
+      EXPECT_TRUE(copy.getRequiredTriangles().count(1));
+      EXPECT_EQ(copy.getRequiredTetrahedra().count(0), volume ? 1 : 0);
+    }
   }
 
   /// @brief Verifies move construction for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, MoveConstruction)
   {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
-    mesh.setCorner(0);
-    mesh.setRidge(0);
-    mesh.setRequiredVertex(5);
-    mesh.setRequiredEdge(2);
-    mesh.setRequiredTriangle(1);
-    mesh.setRequiredTetrahedron(0);
+    for (const bool volume : {false, true})
+    {
+      SCOPED_TRACE(volume);
+      MMG::Mesh mesh;
+      mesh = volume ? mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4})
+                    : mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(1, mesh.getDimension());
+      if (volume)
+        mesh.getConnectivity().compute(2, 3);
+      mesh.setCorner(0);
+      mesh.setRidge(0);
+      mesh.setRequiredVertex(5);
+      mesh.setRequiredEdge(2);
+      mesh.setRequiredTriangle(1);
+      if (volume)
+        mesh.setRequiredTetrahedron(0);
 
-    size_t vertexCount = mesh.getVertexCount();
-    size_t cellCount = mesh.getCellCount();
+      size_t vertexCount = mesh.getVertexCount();
+      size_t cellCount = mesh.getCellCount();
 
-    MMG::Mesh moved(std::move(mesh));
-    EXPECT_EQ(moved.getVertexCount(), vertexCount);
-    EXPECT_EQ(moved.getCellCount(), cellCount);
-    EXPECT_EQ(moved.getCorners().size(), 1);
-    EXPECT_EQ(moved.getRidges().size(), 1);
-    EXPECT_EQ(moved.getRequiredVertices().size(), 1);
-    EXPECT_EQ(moved.getRequiredEdges().size(), 1);
-    EXPECT_EQ(moved.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(moved.getRequiredTetrahedra().size(), 1);
+      MMG::Mesh moved(std::move(mesh));
+      EXPECT_EQ(moved.getVertexCount(), vertexCount);
+      EXPECT_EQ(moved.getCellCount(), cellCount);
+      EXPECT_EQ(moved.getCorners().size(), 1);
+      EXPECT_EQ(moved.getRidges().size(), 1);
+      EXPECT_EQ(moved.getRequiredVertices().size(), 1);
+      EXPECT_EQ(moved.getRequiredEdges().size(), 1);
+      EXPECT_EQ(moved.getRequiredTriangles().size(), 1);
+      EXPECT_EQ(moved.getRequiredTetrahedra().size(), volume ? 1 : 0);
+    }
   }
 
   /// @brief Verifies move assignment for MMG mesh by checking exact expected values, move semantics.
@@ -799,6 +855,7 @@ namespace Rodin::Tests::Unit
   {
     MMG::Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh.getConnectivity().compute(1, 2);
     mesh.setCorner(0);
     mesh.setRidge(0);
 
@@ -1770,6 +1827,7 @@ namespace Rodin::Tests::Unit
       return dx * dx + dy * dy + dz * dz - 0.16;
     };
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
@@ -1778,8 +1836,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getCellCount(), 0);
-    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
-    EXPECT_TRUE(result.getRequiredTriangles().count(required));
+    expectRequiredGeometry(requiredMesh, result);
   }
 
   /// @brief Verifies preserves required entities 2 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
@@ -1810,6 +1867,7 @@ namespace Rodin::Tests::Unit
       return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
     };
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
@@ -1818,12 +1876,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getCellCount(), 0);
-    EXPECT_EQ(result.getRequiredVertices().size(), 1);
-    EXPECT_EQ(result.getRequiredEdges().size(), 1);
-    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    expectRequiredGeometry(requiredMesh, result);
   }
 
   /// @brief Verifies preserves uncut required entity geometry 2 D for MMG level set discretizer by checking true predicates.
@@ -1866,15 +1919,14 @@ namespace Rodin::Tests::Unit
     MMG::RealGridFunction ls(fes);
     ls = lsFn;
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
                          .setHMax(0.1)
                          .discretize(ls);
 
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    expectRequiredGeometry(requiredMesh, result);
     EXPECT_TRUE(hasVertexWithCoordinates(result, requiredVertexPoint));
     EXPECT_TRUE(
       hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredEdgePoints));
@@ -1934,6 +1986,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(foundUncutTetrahedron);
     mesh.setRequiredTetrahedron(requiredTetrahedron);
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
@@ -1942,14 +1995,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getCellCount(), 0);
-    EXPECT_EQ(result.getRequiredVertices().size(), 1);
-    EXPECT_EQ(result.getRequiredEdges().size(), 1);
-    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(result.getRequiredTetrahedra().size(), 1);
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
-    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
+    expectRequiredGeometry(requiredMesh, result);
   }
 
   /// @brief Verifies preserves uncut required entity geometry 3 D for MMG level set discretizer by checking true predicates.
@@ -2001,16 +2047,14 @@ namespace Rodin::Tests::Unit
     MMG::RealGridFunction ls(fes);
     ls = lsFn;
 
+    const MMG::Mesh requiredMesh(mesh);
     MMG::Mesh result = MMG::LevelSetDiscretizer()
                          .split(interior, {interior, exterior})
                          .setBoundaryReference(10)
                          .setHMax(0.35)
                          .discretize(ls);
 
-    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
-    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
-    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
-    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
+    expectRequiredGeometry(requiredMesh, result);
     EXPECT_TRUE(hasVertexWithCoordinates(result, requiredVertexPoint));
     EXPECT_TRUE(
       hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredEdgePoints));
@@ -2838,6 +2882,7 @@ namespace Rodin::Tests::Unit
   {
     MMG::Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh.getConnectivity().compute(1, 2);
 
     mesh.setRidge(0);
     mesh.setRidge(0);
@@ -2848,27 +2893,36 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies move assignment clears source for MMG mesh by checking exact expected values, false predicates, move semantics.
   TEST(Rodin_MMG_Mesh, MoveAssignmentClearsSource)
   {
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
-    mesh.setCorner(0);
-    mesh.setCorner(3);
-    mesh.setRidge(1);
-    mesh.setRequiredVertex(5);
-    mesh.setRequiredEdge(2);
-    mesh.setRequiredTriangle(1);
-    mesh.setRequiredTetrahedron(0);
+    for (const bool volume : {false, true})
+    {
+      SCOPED_TRACE(volume);
+      MMG::Mesh mesh;
+      mesh = volume ? mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4})
+                    : mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(1, mesh.getDimension());
+      if (volume)
+        mesh.getConnectivity().compute(2, 3);
+      mesh.setCorner(0);
+      mesh.setCorner(3);
+      mesh.setRidge(1);
+      mesh.setRequiredVertex(5);
+      mesh.setRequiredEdge(2);
+      mesh.setRequiredTriangle(1);
+      if (volume)
+        mesh.setRequiredTetrahedron(0);
 
-    MMG::Mesh target;
-    target = std::move(mesh);
+      MMG::Mesh target;
+      target = std::move(mesh);
 
-    // Target has the data
-    EXPECT_EQ(target.getCorners().size(), 2);
-    EXPECT_EQ(target.getRidges().size(), 1);
-    EXPECT_EQ(target.getRequiredVertices().size(), 1);
-    EXPECT_EQ(target.getRequiredEdges().size(), 1);
-    EXPECT_EQ(target.getRequiredTriangles().size(), 1);
-    EXPECT_EQ(target.getRequiredTetrahedra().size(), 1);
-    EXPECT_FALSE(target.isEmpty());
+      // Target has the data
+      EXPECT_EQ(target.getCorners().size(), 2);
+      EXPECT_EQ(target.getRidges().size(), 1);
+      EXPECT_EQ(target.getRequiredVertices().size(), 1);
+      EXPECT_EQ(target.getRequiredEdges().size(), 1);
+      EXPECT_EQ(target.getRequiredTriangles().size(), 1);
+      EXPECT_EQ(target.getRequiredTetrahedra().size(), volume ? 1 : 0);
+      EXPECT_FALSE(target.isEmpty());
+    }
   }
 
   /// @brief Verifies copy preserves metadata after mutation for MMG mesh by checking exact expected values, copy semantics.
@@ -2894,7 +2948,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_MMG_Mesh, ParentMoveAssignmentClearsMMGMetadata)
   {
     MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
+    mesh.getConnectivity().compute(1, 3);
+    mesh.getConnectivity().compute(2, 3);
     mesh.setCorner(0);
     mesh.setRidge(1);
     mesh.setRequiredTriangle(0);
