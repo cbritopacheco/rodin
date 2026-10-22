@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Shared exact oracles for local and distributed mixed PETSc targets. */
+/// @file @brief Shared exact oracles for local and distributed mixed PETSc targets.
 #ifndef RODIN_TESTS_PETSC_MIXEDTARGETASSEMBLY_H
 #define RODIN_TESTS_PETSC_MIXEDTARGETASSEMBLY_H
 #include <gtest/gtest.h>
@@ -174,9 +174,7 @@ namespace Rodin::Tests::Unit
     const std::array<Index, 2> fixed{
       positions.front().second, 3 + positions.back().second};
     auto full = raw;
-    auto rowOnly = raw;
     auto fullLoad = load;
-    auto rowLoad = load;
     if constexpr (Affine)
     {
       const Index slave = fixed[0], master = 3 + positions.front().second;
@@ -203,9 +201,6 @@ namespace Rodin::Tests::Unit
         full.row(dof).setZero();
         full.col(dof).setZero();
         full(dof, dof) = 1;
-        rowOnly.row(dof).setZero();
-        rowOnly(dof, dof) = 1;
-        rowLoad[dof] = exact[dof];
       }
       for (const auto dof : fixed)
         fullLoad[dof] = exact[dof];
@@ -230,14 +225,26 @@ namespace Rodin::Tests::Unit
       }
       ASSERT_EQ(VecSet(system.getVector(), Scalar(11) * factor), PETSC_SUCCESS);
       backend->execute(system, input, AssemblyTarget::LHS);
-      EXPECT_LT((matrix() - rowOnly).norm(), 1e-12);
+      EXPECT_LT((matrix() - full).norm(), 1e-12);
       EXPECT_LT(
         (vector() - Math::Vector<Scalar>::Constant(size, Scalar(11) * factor)).norm(),
         1e-12);
       ASSERT_EQ(MatScale(system.getOperator(), 3), PETSC_SUCCESS);
       backend->execute(system, input, AssemblyTarget::RHS);
-      EXPECT_LT((matrix() - Scalar(3) * rowOnly).norm(), 1e-12);
-      EXPECT_LT((vector() - rowLoad).norm(), 1e-12);
+      EXPECT_LT((matrix() - Scalar(3) * full).norm(), 1e-12);
+      EXPECT_LT((vector() - fullLoad).norm(), 1e-12);
+
+      // Refreshing the operator completes the same constrained system as full
+      // assembly, while retaining the independently lifted right-hand side.
+      backend->execute(system, input, AssemblyTarget::LHS);
+      const auto refreshedMatrix = matrix();
+      const auto refreshedLoad = vector();
+      EXPECT_LT((refreshedMatrix - full).norm(), 1e-12);
+      EXPECT_LT((refreshedLoad - fullLoad).norm(), 1e-12);
+      EXPECT_LT((refreshedMatrix * exact - refreshedLoad).norm(), 1e-12);
+      const Math::Vector<Scalar> refreshedSolution =
+        refreshedMatrix.fullPivLu().solve(refreshedLoad);
+      EXPECT_LT((refreshedSolution - exact).norm(), 1e-11);
     }
   }
 }

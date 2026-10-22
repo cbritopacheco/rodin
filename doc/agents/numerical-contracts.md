@@ -183,6 +183,24 @@ Assembly eliminates or expands them through the constraint map. Do not replace
 them with penalty terms unless the mathematical model explicitly asks for a
 penalty method.
 
+### Targeted assembly with prescribed values
+
+For a square system with matching trial/test constraint indices, let
+\(P\) project onto unconstrained DOFs and let \(g\) contain the prescribed
+values, with zero entries on unconstrained DOFs. Full assembly produces
+
+$$
+A_D = PAP + (I-P), \qquad b_D = P(b-Ag)+g.
+$$
+
+An LHS-only update produces the same row-and-column-eliminated operator
+\(A_D\), leaving the stored right-hand side untouched. An RHS-only update
+produces \(b_D\), leaving the stored operator untouched. Its lifting uses
+the current unconstrained bilinear form, including local, nonlocal and
+preassembled contributions, rather than the entries of a previously
+eliminated or externally scaled stored matrix. Successive target updates
+therefore reconstruct the same constrained system as full assembly.
+
 
 ### Affine identification over real and complex fields
 
