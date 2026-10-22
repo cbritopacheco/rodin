@@ -262,8 +262,12 @@ namespace Rodin::Solid
         /// @brief Previous fiber strain for midpoint evaluation.
         Optional<Real> previousFiberStrain;
 
-        /// @brief Compares captured values and their presence exactly.
-        bool operator==(const Inputs&) const = default;
+        /**
+         * @brief Compares captured values and their presence exactly.
+         * @param other Captured inputs to compare.
+         * @return Whether every captured value and its presence agree.
+         */
+        bool operator==(const Inputs& other) const = default;
       };
 
       /// @brief Cached active quantities at a quadrature point.
