@@ -711,6 +711,39 @@ namespace Rodin::Variational
       constexpr const Math::SpatialPoint& getNode(size_t i) const;
 
       /**
+       * @brief Finds a reference point among the interpolation nodes.
+       *
+       * Matching uses exact reference coordinates, without a distance tolerance.
+       * This permits pointwise nodal evaluation to retain the exact cardinal
+       * identity without discarding small values at nearby nonnodal points.
+       * @param point Reference coordinates; trailing padding is ignored.
+       * @returns Node index, or an empty optional for a nonnodal or undersized point.
+       */
+      Optional<size_t> getNodeIndex(const Math::SpatialPoint& point) const
+      {
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        if (static_cast<size_t>(point.size()) < dimension)
+          return {};
+        const auto& nodes = getNodes(this->getGeometry());
+        for (size_t node = 0; node < nodes.size(); ++node)
+        {
+          bool matches = true;
+          for (size_t direction = 0; direction < dimension; ++direction)
+          {
+            if (point(direction) != nodes[node](direction))
+            {
+              matches = false;
+              break;
+            }
+          }
+          if (matches)
+            return node;
+        }
+        return {};
+      }
+
+      /**
        * @brief Gets the linear form (evaluation functional) for the i-th DOF.
        * @param i DOF index (0 to getCount()-1)
        * @return Linear form object that evaluates functions at the i-th node

@@ -173,6 +173,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Pointwise interpolation-node bindings use exact cardinal values.
+       * This preserves structural zeros in identification constraints; nearby
+       * points and quadrature samples retain ordinary basis evaluation.
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -212,8 +216,11 @@ namespace Rodin::Variational
           else
           {
             const auto& rc = p.getReferenceCoordinates();
+            const auto node = fe.getNodeIndex(rc);
             for (size_t a = 0; a < ndof; ++a)
-              m_cache.basis[a] = fe.getBasis(a)(rc);
+            {
+              m_cache.basis[a] = node ? ScalarType(a == *node) : fe.getBasis(a)(rc);
+            }
           }
         }
 
@@ -462,11 +469,14 @@ namespace Rodin::Variational
 
           const auto* tab = qf ? &feScalar.getTabulation(*qf) : nullptr;
           const auto& rc = p.getReferenceCoordinates();
+          const auto node = qf ? Optional<size_t>{} : feScalar.getNodeIndex(rc);
 
           // φ_{a,c} = φ_a e_c
           for (size_t a = 0; a < ndofScalar; ++a)
           {
-            const ScalarType val = qf ? tab->getBasis(qp, a) : feScalar.getBasis(a)(rc);
+            const ScalarType val = qf ? tab->getBasis(qp, a)
+              : node                  ? ScalarType(a == *node)
+                                      : feScalar.getBasis(a)(rc);
             for (size_t c = 0; c < vdim; ++c)
             {
               RangeType v;
@@ -656,10 +666,14 @@ namespace Rodin::Variational
             tab;
           if (const auto* formula = ip.getReferenceQuadratureFormula())
             tab = scalar.findTabulation(*formula);
+          const auto node = ip.getReferenceQuadratureFormula()
+            ? Optional<size_t>{}
+            : scalar.getNodeIndex(point);
           for (size_t a = 0; a < scalar.getCount(); ++a)
           {
-            const auto value =
-              tab ? tab->get().getBasis(ip.getIndex(), a) : scalar.getBasis(a)(point);
+            const auto value = tab ? tab->get().getBasis(ip.getIndex(), a)
+              : node               ? Scalar(a == *node)
+                                   : scalar.getBasis(a)(point);
             for (size_t c = 0; c < components; ++c)
             {
               auto& basis = m_basis[a * components + c];

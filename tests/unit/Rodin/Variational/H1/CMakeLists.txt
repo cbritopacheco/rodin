@@ -27,6 +27,11 @@ target_link_libraries(RodinVariationalH1ShapeFunctionTest PRIVATE
   GTest::gtest_main Rodin::Variational)
 rodin_discover_tests(RodinVariationalH1ShapeFunctionTest PROPERTIES LABELS unit)
 
+add_executable(RodinVariationalH1NodalShapeFunctionTest NodalShapeFunctionTest.cpp)
+target_link_libraries(RodinVariationalH1NodalShapeFunctionTest PRIVATE
+  GTest::gtest_main Rodin::Variational)
+rodin_discover_tests(RodinVariationalH1NodalShapeFunctionTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalH1GradientEvaluationTest GradientEvaluationTest.cpp)
 target_link_libraries(RodinVariationalH1GradientEvaluationTest PRIVATE
   GTest::gtest_main Rodin::Variational)
