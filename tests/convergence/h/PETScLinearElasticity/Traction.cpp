@@ -5,10 +5,12 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Mixed traction and nearly incompressible PETSc verification. */
+/// @file @brief Mixed traction and nearly incompressible PETSc verification.
 
 #include "PETScLinearElasticityProblem.h"
 #include "FieldConvergence.h"
+#include <chrono>
+#include <iostream>
 #ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
 #include "CurvedGeometry.h"
 #endif
@@ -90,7 +92,22 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
         for (size_t n : levels)
         {
           SCOPED_TRACE(::testing::Message() << "degree=" << K << " n=" << n);
+          const auto start = std::chrono::steady_clock::now();
+          const auto report = [&](const char* phase) {
+#ifdef RODIN_USE_MPI
+            if (world->rank() != 0)
+              return;
+#endif
+            std::cout << "[elasticity-boundary-rate] degree=" << K << " n=" << n
+                      << " nearly=" << nearly << " phase=" << phase << " wall_seconds="
+                      << std::chrono::duration<Real>(
+                           std::chrono::steady_clock::now() - start)
+                           .count()
+                      << std::endl;
+          };
+          report("begin");
           const auto mesh = makeMesh<ContextType>(geometry, n, !nearly);
+          report("mesh");
           using Problem =
             PETScLinearElasticityProblem<K, std::remove_cvref_t<decltype(mesh)>>;
           const Problem problem(mesh,
@@ -98,7 +115,9 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
             AssemblyOrder,
             nearly ? Problem::Boundary::Dirichlet : Problem::Boundary::MixedTraction,
             nearly ? NearlyLambda : Lambda, nearly ? NearlyMu : Mu, PCJACOBI);
+          report("assembled");
           history.append(Real(1) / Real(n - 1), {problem.solve()});
+          report("solved-and-measured");
         }
         history.expectAlgebraicFloor(nearly ? Rates{2.25, 1.35}
             : K == 1                        ? Rates{1.65, 0.75}

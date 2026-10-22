@@ -191,141 +191,50 @@ jobs:
     needs:
       - Plan
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || (matrix.group == 'convergence/hp/NonlinearPoisson' || matrix.group == 'convergence/p/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
+    timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group, '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - multithreaded: 'ON'
-            suite: pressure_light
-            path: Convergence / h / Stokes / Stability
-            group: ''
-          - multithreaded: 'ON'
-            suite: pressure_tetrahedron
-            path: Convergence / h / Stokes / Stability
-            group: ''
-          - multithreaded: 'ON'
-            suite: pressure_pyramid
-            path: Convergence / h / Stokes / Stability
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_projection
-            path: Convergence / Isoparametric / Projection
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_diffusion_light
-            path: Convergence / Isoparametric / Diffusion
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_diffusion_tetrahedron
-            path: Convergence / Isoparametric / Diffusion
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_diffusion_pyramid
-            path: Convergence / Isoparametric / Diffusion
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_reaction_light
-            path: Convergence / Isoparametric / ReactionDiffusion
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_reaction_tetrahedron
-            path: Convergence / Isoparametric / ReactionDiffusion
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_reaction_pyramid
-            path: Convergence / Isoparametric / ReactionDiffusion
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_nonlinear_light
-            path: Convergence / Isoparametric / NonlinearPoisson
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_nonlinear_tetrahedron
-            path: Convergence / Isoparametric / NonlinearPoisson
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_nonlinear_pyramid
-            path: Convergence / Isoparametric / NonlinearPoisson
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_elasticity
-            path: Convergence / Isoparametric / LinearElasticity
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_stokes
-            path: Convergence / Isoparametric / Stokes
-            group: ''
-          - multithreaded: 'ON'
-            suite: curved_helmholtz
-            path: Convergence / Isoparametric / Helmholtz
-            group: ''
-          - multithreaded: 'OFF'
-            suite: pressure_light
-            path: Convergence / h / Stokes / Stability
-            group: ''
-          - multithreaded: 'OFF'
-            suite: pressure_tetrahedron
-            path: Convergence / h / Stokes / Stability
-            group: ''
-          - multithreaded: 'OFF'
-            suite: pressure_pyramid
-            path: Convergence / h / Stokes / Stability
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_projection
-            path: Convergence / Isoparametric / Projection
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_diffusion_light
-            path: Convergence / Isoparametric / Diffusion
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_diffusion_tetrahedron
-            path: Convergence / Isoparametric / Diffusion
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_diffusion_pyramid
-            path: Convergence / Isoparametric / Diffusion
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_reaction_light
-            path: Convergence / Isoparametric / ReactionDiffusion
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_reaction_tetrahedron
-            path: Convergence / Isoparametric / ReactionDiffusion
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_reaction_pyramid
-            path: Convergence / Isoparametric / ReactionDiffusion
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_nonlinear_light
-            path: Convergence / Isoparametric / NonlinearPoisson
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_nonlinear_tetrahedron
-            path: Convergence / Isoparametric / NonlinearPoisson
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_nonlinear_pyramid
-            path: Convergence / Isoparametric / NonlinearPoisson
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_elasticity
-            path: Convergence / Isoparametric / LinearElasticity
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_stokes
-            path: Convergence / Isoparametric / Stokes
-            group: ''
-          - multithreaded: 'OFF'
-            suite: curved_helmholtz
-            path: Convergence / Isoparametric / Helmholtz
-            group: ''
+          - {multithreaded: 'ON', suite: pressure_light, path: Convergence / h / Stokes / Stability, group: ''}
+          - {multithreaded: 'ON', suite: pressure_tetrahedron, path: Convergence / h / Stokes / Stability, group: ''}
+          - {multithreaded: 'ON', suite: pressure_pyramid, path: Convergence / h / Stokes / Stability, group: ''}
+          - {multithreaded: 'ON', suite: curved_projection, path: Convergence / Isoparametric / Projection, group: ''}
+          - {multithreaded: 'ON', suite: curved_diffusion_light, path: Convergence / Isoparametric / Diffusion, group: ''}
+          - {multithreaded: 'ON', suite: curved_diffusion_tetrahedron, path: Convergence / Isoparametric / Diffusion, group: ''}
+          - {multithreaded: 'ON', suite: curved_diffusion_pyramid, path: Convergence / Isoparametric / Diffusion, group: ''}
+          - {multithreaded: 'ON', suite: curved_reaction_light, path: Convergence / Isoparametric / ReactionDiffusion, group: ''}
+          - {multithreaded: 'ON', suite: curved_reaction_tetrahedron, path: Convergence / Isoparametric / ReactionDiffusion, group: ''}
+          - {multithreaded: 'ON', suite: curved_reaction_pyramid, path: Convergence / Isoparametric / ReactionDiffusion, group: ''}
+          - {multithreaded: 'ON', suite: curved_nonlinear_light, path: Convergence / Isoparametric / NonlinearPoisson, group: ''}
+          - {multithreaded: 'ON', suite: curved_nonlinear_tetrahedron, path: Convergence / Isoparametric / NonlinearPoisson, group: ''}
+          - {multithreaded: 'ON', suite: curved_nonlinear_pyramid, path: Convergence / Isoparametric / NonlinearPoisson, group: ''}
+          - {multithreaded: 'ON', suite: curved_elasticity_light, path: Convergence / Isoparametric / LinearElasticity, group: ''}
+          - {multithreaded: 'ON', suite: curved_elasticity_tetrahedron, path: Convergence / Isoparametric / LinearElasticity, group: ''}
+          - {multithreaded: 'ON', suite: curved_elasticity_pyramid, path: Convergence / Isoparametric / LinearElasticity, group: ''}
+          - {multithreaded: 'ON', suite: curved_stokes, path: Convergence / Isoparametric / Stokes, group: ''}
+          - {multithreaded: 'ON', suite: curved_helmholtz, path: Convergence / Isoparametric / Helmholtz, group: ''}
+          - {multithreaded: 'OFF', suite: pressure_light, path: Convergence / h / Stokes / Stability, group: ''}
+          - {multithreaded: 'OFF', suite: pressure_tetrahedron, path: Convergence / h / Stokes / Stability, group: ''}
+          - {multithreaded: 'OFF', suite: pressure_pyramid, path: Convergence / h / Stokes / Stability, group: ''}
+          - {multithreaded: 'OFF', suite: curved_projection, path: Convergence / Isoparametric / Projection, group: ''}
+          - {multithreaded: 'OFF', suite: curved_diffusion_light, path: Convergence / Isoparametric / Diffusion, group: ''}
+          - {multithreaded: 'OFF', suite: curved_diffusion_tetrahedron, path: Convergence / Isoparametric / Diffusion, group: ''}
+          - {multithreaded: 'OFF', suite: curved_diffusion_pyramid, path: Convergence / Isoparametric / Diffusion, group: ''}
+          - {multithreaded: 'OFF', suite: curved_reaction_light, path: Convergence / Isoparametric / ReactionDiffusion, group: ''}
+          - {multithreaded: 'OFF', suite: curved_reaction_tetrahedron, path: Convergence / Isoparametric / ReactionDiffusion, group: ''}
+          - {multithreaded: 'OFF', suite: curved_reaction_pyramid, path: Convergence / Isoparametric / ReactionDiffusion, group: ''}
+          - {multithreaded: 'OFF', suite: curved_nonlinear_light, path: Convergence / Isoparametric / NonlinearPoisson, group: ''}
+          - {multithreaded: 'OFF', suite: curved_nonlinear_tetrahedron, path: Convergence / Isoparametric / NonlinearPoisson, group: ''}
+          - {multithreaded: 'OFF', suite: curved_nonlinear_pyramid, path: Convergence / Isoparametric / NonlinearPoisson, group: ''}
+          - {multithreaded: 'OFF', suite: curved_elasticity_light, path: Convergence / Isoparametric / LinearElasticity, group: ''}
+          - {multithreaded: 'OFF', suite: curved_elasticity_tetrahedron, path: Convergence / Isoparametric / LinearElasticity, group: ''}
+          - {multithreaded: 'OFF', suite: curved_elasticity_pyramid, path: Convergence / Isoparametric / LinearElasticity, group: ''}
+          - {multithreaded: 'OFF', suite: curved_stokes, path: Convergence / Isoparametric / Stokes, group: ''}
+          - {multithreaded: 'OFF', suite: curved_helmholtz, path: Convergence / Isoparametric / Helmholtz, group: ''}
     env:
       OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
       RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
     steps:
@@ -361,7 +270,7 @@ jobs:
               cmake --build build -j 2 --target RodinConvergenceIsoparametricReactionDiffusion ;;
             curved_nonlinear_*)
               cmake --build build -j 2 --target RodinConvergenceIsoparametricNonlinearPoisson ;;
-            curved_elasticity)
+            curved_elasticity_*)
               cmake --build build -j 2 --target RodinConvergenceIsoparametricLinearElasticity ;;
             curved_stokes)
               cmake --build build -j 2 --target RodinConvergenceIsoparametricStokes ;;
@@ -385,7 +294,7 @@ jobs:
             curved_diffusion_*) suite_pattern='(Approximated|Lifted|SmoothLifted)?Diffusion' ;;
             curved_reaction_*) suite_pattern='ReactionDiffusion' ;;
             curved_nonlinear_*) suite_pattern='NonlinearPoisson' ;;
-            curved_elasticity) suite_pattern='LinearElasticity' ;;
+            curved_elasticity_*) suite_pattern='LinearElasticity' ;;
             curved_stokes) suite_pattern='Stokes' ;;
             curved_helmholtz) suite_pattern='Helmholtz' ;;
             *) exit 1 ;;
@@ -396,7 +305,8 @@ jobs:
               --output-on-failure --no-tests=error -j 1
           elif [[ "${{ matrix.suite }}" == curved_diffusion_* || \
                   "${{ matrix.suite }}" == curved_reaction_* || \
-                  "${{ matrix.suite }}" == curved_nonlinear_* ]]; then
+                  "${{ matrix.suite }}" == curved_nonlinear_* || \
+                  "${{ matrix.suite }}" == curved_elasticity_* ]]; then
             case "${{ matrix.suite }}" in
               *_light) geometry_exclude='_(Tetrahedron|Pyramid)$' ;;
               *_tetrahedron) geometry_exclude='_(Segment|Triangle|Quadrilateral|Pyramid|Hexahedron|Wedge)$' ;;
@@ -424,7 +334,7 @@ jobs:
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, suite=${{ matrix.suite }})
   ConvergenceBaseline:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || (matrix.group == 'convergence/hp/NonlinearPoisson' || matrix.group == 'convergence/p/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
+    timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group, '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.native_convergence) }}
@@ -690,205 +600,256 @@ jobs:
     needs:
       - Plan
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ startsWith(matrix.suite, 'pressure_') && 360 || startsWith(matrix.suite, 'nonlinear_boundary') && 240 || 120 }}
+    timeout-minutes: ${{ matrix.suite == 'bulk' && 120 || 360 }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - multithreaded: 'ON'
-            suite: bulk
-            context: all
-            path: Convergence / h / PETSc
-          - multithreaded: 'ON'
-            suite: poisson_boundary
-            context: all
-            path: Convergence / h / PETScPoisson / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: conductivity_boundary
-            context: all
-            path: Convergence / h / PETScConductivity / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: elasticity_boundary
-            context: all
-            path: Convergence / h / PETScLinearElasticity / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: stokes_boundary
-            context: all
-            path: Convergence / h / PETScStokes / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: reaction_boundary
-            context: all
-            path: Convergence / h / PETScReactionDiffusion / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: nonlinear_boundary
-            context: all
-            path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: nonlinear_boundary_tetrahedron
-            context: all
-            path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: nonlinear_boundary_pyramid
-            context: all
-            path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: bulk
-            context: all
-            path: Convergence / h / PETSc
-          - multithreaded: 'OFF'
-            suite: poisson_boundary
-            context: all
-            path: Convergence / h / PETScPoisson / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: conductivity_boundary
-            context: all
-            path: Convergence / h / PETScConductivity / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: elasticity_boundary
-            context: all
-            path: Convergence / h / PETScLinearElasticity / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: stokes_boundary
-            context: all
-            path: Convergence / h / PETScStokes / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: reaction_boundary
-            context: all
-            path: Convergence / h / PETScReactionDiffusion / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: nonlinear_boundary
-            context: all
-            path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: nonlinear_boundary_tetrahedron
-            context: all
-            path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions
-          - multithreaded: 'OFF'
-            suite: nonlinear_boundary_pyramid
-            context: all
-            path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions
-          - multithreaded: 'ON'
-            suite: pressure_light
-            context: local
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_light
-            context: np1
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_light
-            context: np2
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_light
-            context: np3
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_light
-            context: np4
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_light
-            context: local
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_light
-            context: np1
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_light
-            context: np2
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_light
-            context: np3
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_light
-            context: np4
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_tetrahedron
-            context: local
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_tetrahedron
-            context: np1
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_tetrahedron
-            context: np2
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_tetrahedron
-            context: np3
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_tetrahedron
-            context: np4
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_tetrahedron
-            context: local
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_tetrahedron
-            context: np1
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_tetrahedron
-            context: np2
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_tetrahedron
-            context: np3
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_tetrahedron
-            context: np4
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_pyramid
-            context: local
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_pyramid
-            context: np1
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_pyramid
-            context: np2
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_pyramid
-            context: np3
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'ON'
-            suite: pressure_pyramid
-            context: np4
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_pyramid
-            context: local
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_pyramid
-            context: np1
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_pyramid
-            context: np2
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_pyramid
-            context: np3
-            path: Convergence / h / PETScStokes / Stability
-          - multithreaded: 'OFF'
-            suite: pressure_pyramid
-            context: np4
-            path: Convergence / h / PETScStokes / Stability
+          - {multithreaded: 'ON', suite: bulk, context: all, path: Convergence / h / PETSc, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: bulk, context: all, path: Convergence / h / PETSc, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_light, context: local, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_light, context: np1, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_light, context: np2, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_light, context: np3, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_light, context: np4, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_light, context: local, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_light, context: np1, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_light, context: np2, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_light, context: np3, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_light, context: np4, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_tetrahedron, context: local, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_tetrahedron, context: np1, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_tetrahedron, context: np2, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_tetrahedron, context: np3, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_tetrahedron, context: np4, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_tetrahedron, context: local, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_tetrahedron, context: np1, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_tetrahedron, context: np2, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_tetrahedron, context: np3, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_tetrahedron, context: np4, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_pyramid, context: local, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_pyramid, context: np1, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_pyramid, context: np2, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_pyramid, context: np3, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: pressure_pyramid, context: np4, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_pyramid, context: local, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_pyramid, context: np1, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_pyramid, context: np2, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_pyramid, context: np3, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'OFF', suite: pressure_pyramid, context: np4, path: Convergence / h / PETScStokes / Stability, geometry: all, study: all}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: local, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: local, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: local, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np1, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np1, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np1, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np2, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np2, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np2, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np3, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np3, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np3, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np4, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np4, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: poisson_boundary, context: np4, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: local, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: local, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: local, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np1, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np1, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np1, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np2, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np2, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np2, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np3, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np3, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np3, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np4, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np4, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: conductivity_boundary, context: np4, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: local, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: local, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: local, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np1, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np1, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np1, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np2, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np2, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np2, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np3, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np3, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np3, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np4, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np4, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: elasticity_boundary, context: np4, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: local, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: local, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: local, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np1, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np1, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np1, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np2, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np2, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np2, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np3, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np3, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np3, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np4, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np4, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: stokes_boundary, context: np4, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: local, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: local, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: local, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np1, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np1, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np1, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np2, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np2, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np2, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np3, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np3, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np3, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np4, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np4, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: reaction_boundary, context: np4, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: local, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: local, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: local, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: local, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: local, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: local, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np1, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np1, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np2, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np2, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np3, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np3, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np4, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np4, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'ON', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: local, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: local, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: local, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np1, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np1, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np1, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np2, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np2, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np2, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np3, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np3, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np3, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np4, geometry: light, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np4, geometry: tetrahedron, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: poisson_boundary, context: np4, geometry: pyramid, study: all, physics: Poisson, path: Convergence / h / PETScPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: local, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: local, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: local, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np1, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np1, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np1, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np2, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np2, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np2, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np3, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np3, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np3, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np4, geometry: light, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np4, geometry: tetrahedron, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: conductivity_boundary, context: np4, geometry: pyramid, study: all, physics: Conductivity, path: Convergence / h / PETScConductivity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: local, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: local, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: local, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np1, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np1, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np1, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np2, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np2, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np2, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np3, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np3, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np3, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np4, geometry: light, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np4, geometry: tetrahedron, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: elasticity_boundary, context: np4, geometry: pyramid, study: all, physics: LinearElasticity, path: Convergence / h / PETScLinearElasticity / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: local, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: local, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: local, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np1, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np1, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np1, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np2, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np2, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np2, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np3, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np3, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np3, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np4, geometry: light, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np4, geometry: tetrahedron, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: stokes_boundary, context: np4, geometry: pyramid, study: all, physics: Stokes, path: Convergence / h / PETScStokes / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: local, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: local, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: local, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np1, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np1, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np1, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np2, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np2, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np2, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np3, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np3, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np3, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np4, geometry: light, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np4, geometry: tetrahedron, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: reaction_boundary, context: np4, geometry: pyramid, study: all, physics: ReactionDiffusion, path: Convergence / h / PETScReactionDiffusion / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: local, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: local, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: local, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: local, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: local, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: local, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np1, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np1, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np1, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np2, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np2, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np2, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np3, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np3, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np3, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np4, geometry: light, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np4, geometry: tetrahedron, study: all, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: P1Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: P2Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: P3Rates, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
+          - {multithreaded: 'OFF', suite: nonlinear_boundary, context: np4, geometry: pyramid, study: Controls, physics: NonlinearPoisson, path: Convergence / h / PETScNonlinearPoisson / BoundaryConditions}
     env:
       OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
       RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
     steps:
@@ -961,61 +922,32 @@ jobs:
           # This is a process resource report, not summed MPI peak memory or a benchmark.
           /usr/bin/time --verbose ctest --test-dir build/tests -R "$pattern" \
             --output-on-failure --no-tests=error -j 1
-      - name: Build PETSc Poisson boundary convergence suite
-        if: matrix.suite == 'poisson_boundary'
+      - name: Build PETSc boundary convergence suites
+        if: endsWith(matrix.suite, '_boundary')
         env:
           GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScPoissonBoundary
-      - name: Run PETSc Poisson boundary convergence suite
-        if: matrix.suite == 'poisson_boundary'
-        run: ctest --test-dir build/tests -R '^RodinConvergenceHPETScPoissonBoundary_' --output-on-failure -j 1
-      - name: Build PETSc linear elasticity boundary convergence suite
-        if: matrix.suite == 'elasticity_boundary'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScLinearElasticityBoundary
-      - name: Run PETSc linear elasticity boundary convergence suite
-        if: matrix.suite == 'elasticity_boundary'
-        run: ctest --test-dir build/tests -R '^RodinConvergenceHPETScLinearElasticityBoundary_' --output-on-failure -j 1
-      - name: Build PETSc conductivity boundary convergence suite
-        if: matrix.suite == 'conductivity_boundary'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScConductivityBoundary
-      - name: Run PETSc conductivity boundary convergence suite
-        if: matrix.suite == 'conductivity_boundary'
-        run: ctest --test-dir build/tests -R '^RodinConvergenceHPETScConductivityBoundary_' --output-on-failure -j 1
-      - name: Build PETSc Stokes traction convergence suite
-        if: matrix.suite == 'stokes_boundary'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScStokesBoundary
-      - name: Run PETSc Stokes traction convergence suite
-        if: matrix.suite == 'stokes_boundary'
-        run: ctest --test-dir build/tests -R '^RodinConvergenceHPETScStokesBoundary_' --output-on-failure -j 1
-      - name: Build PETSc reaction-diffusion boundary convergence suite
-        if: matrix.suite == 'reaction_boundary'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScReactionDiffusionBoundary
-      - name: Run PETSc reaction-diffusion boundary convergence suite
-        if: matrix.suite == 'reaction_boundary'
-        run: ctest --test-dir build/tests -R '^RodinConvergenceHPETScReactionDiffusionBoundary_' --output-on-failure -j 1
-      - name: Build PETSc nonlinear Poisson boundary convergence suite
-        if: startsWith(matrix.suite, 'nonlinear_boundary')
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScNonlinearPoissonBoundary
-      - name: Run PETSc nonlinear Poisson boundary convergence suite
-        if: startsWith(matrix.suite, 'nonlinear_boundary')
+        run: cmake --build build -j 2 --target RodinConvergenceHPETSc${{ matrix.physics }}Boundary
+      - name: Run PETSc boundary convergence suites
+        if: endsWith(matrix.suite, '_boundary')
         run: |
-          if [ "${{ matrix.suite }}" = "nonlinear_boundary_tetrahedron" ]; then
-            ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_.*Tetrahedron$' --output-on-failure -j 1
-          elif [ "${{ matrix.suite }}" = "nonlinear_boundary_pyramid" ]; then
-            ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_.*Pyramid$' --output-on-failure -j 1
-          else
-            ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_' -E '(Tetrahedron|Pyramid)$' --output-on-failure -j 1
-          fi
+          case "${{ matrix.geometry }}" in
+            light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+            tetrahedron) geometry_pattern='Tetrahedron' ;;
+            pyramid) geometry_pattern='Pyramid' ;;
+            *) exit 1 ;;
+          esac
+          context_pattern=''
+          if [ "${{ matrix.context }}" != local ]; then context_pattern='MPI_${{ matrix.context }}_'; fi
+          study_pattern='([A-Za-z0-9]+_)?'
+          case "${{ matrix.study }}" in
+            all) ;;
+            P1Rates|P2Rates|P3Rates) study_pattern='(MixedNeumann|Robin|PureNeumann)${{ matrix.study }}_' ;;
+            Controls) study_pattern='Controls_' ;;
+            *) exit 1 ;;
+          esac
+          ctest --test-dir build/tests \
+            -R "^RodinConvergenceHPETSc${{ matrix.physics }}Boundary_${context_pattern}${study_pattern}${geometry_pattern}$" \
+            --output-on-failure --no-tests=error -j 1
       - name: Publish independent production coverage
         id: coverage_record
         uses: ./.github/actions/coverage
@@ -1024,30 +956,79 @@ jobs:
           definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
           artifact_name: ci-target-${{ github.job }}-${{ strategy.job-index }}
 
-    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, context=${{ matrix.context }})
+    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, context=${{ matrix.context }}, geometry=${{ matrix.geometry }}, study=${{ matrix.study }})
   PETScDegreeConvergence:
     needs:
       - Plan
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
         include:
-          - multithreaded: 'ON'
-            suite: scalar_mixed
-            path: Convergence / p-hp / PETSc / Scalar
-          - multithreaded: 'ON'
-            suite: linear_elasticity
-            path: Convergence / p-hp / PETSc / LinearElasticity
-          - multithreaded: 'OFF'
-            suite: scalar_mixed
-            path: Convergence / p-hp / PETSc / Scalar
-          - multithreaded: 'OFF'
-            suite: linear_elasticity
-            path: Convergence / p-hp / PETSc / LinearElasticity
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: local}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np1}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np2}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np3}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np4}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: local}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np1}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np2}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np3}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np4}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: local}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np1}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np2}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np3}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np4}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: local}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np1}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np2}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np3}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np4}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: local}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np1}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np2}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np3}
+          - {multithreaded: 'ON', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np4}
+          - {multithreaded: 'ON', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: local}
+          - {multithreaded: 'ON', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np1}
+          - {multithreaded: 'ON', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np2}
+          - {multithreaded: 'ON', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np3}
+          - {multithreaded: 'ON', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np4}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: local}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np1}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np2}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np3}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Poisson, context: np4}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: local}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np1}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np2}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np3}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Conductivity, context: np4}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: local}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np1}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np2}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np3}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: ReactionDiffusion, context: np4}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: local}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np1}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np2}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np3}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: NonlinearPoisson, context: np4}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: local}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np1}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np2}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np3}
+          - {multithreaded: 'OFF', suite: scalar_mixed, path: Convergence / p-hp / PETSc / Scalar, physics: Stokes, context: np4}
+          - {multithreaded: 'OFF', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: local}
+          - {multithreaded: 'OFF', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np1}
+          - {multithreaded: 'OFF', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np2}
+          - {multithreaded: 'OFF', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np3}
+          - {multithreaded: 'OFF', suite: linear_elasticity, path: Convergence / p-hp / PETSc / LinearElasticity, physics: LinearElasticity, context: np4}
     env:
       OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
     steps:
       - uses: actions/checkout@v4
@@ -1070,30 +1051,22 @@ jobs:
         env:
           GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: |
-          if [ "${{ matrix.suite }}" = linear_elasticity ]; then
-            cmake --build build -j 2 --target \
-              RodinConvergencePPETScLinearElasticity \
-              RodinConvergenceHPPETScLinearElasticity
-          else
-            cmake --build build -j 2 --target \
-              RodinConvergencePPETScNonlinearPoisson \
-              RodinConvergenceHPPETScNonlinearPoisson \
-              RodinConvergencePPETScReactionDiffusion \
-              RodinConvergenceHPPETScReactionDiffusion \
-              RodinConvergencePPETScPoisson RodinConvergenceHPPETScPoisson \
-              RodinConvergencePPETScConductivity RodinConvergenceHPPETScConductivity \
-              RodinConvergencePPETScStokes RodinConvergenceHPPETScStokes
-          fi
+          cmake --build build -j 2 --target \
+            RodinConvergencePPETSc${{ matrix.physics }} \
+            RodinConvergenceHPPETSc${{ matrix.physics }}
       - name: Run PETSc degree-refinement suites
         run: |
-          if [ "${{ matrix.suite }}" = linear_elasticity ]; then
-            ctest --test-dir build/tests \
-              -R '^RodinConvergence(P|HP)PETScLinearElasticity_' \
-              --output-on-failure -j 1
-          else
-            ctest --test-dir build/tests -R '^RodinConvergence(P|HP)PETSc' \
-              -E 'LinearElasticity' --output-on-failure -j 1
+          prefix='^RodinConvergence(P|HP)PETSc${{ matrix.physics }}_'
+          if [ "${{ matrix.context }}" != local ]; then
+            if [ "${{ matrix.physics }}" = Stokes ]; then
+              prefix='^RodinConvergence(P|HP)PETScMPIStokes_${{ matrix.context }}_'
+            else
+              prefix="${prefix}MPI_${{ matrix.context }}_"
+            fi
           fi
+          ctest --test-dir build/tests \
+            -R "${prefix}[A-Za-z]+$" \
+            --output-on-failure --no-tests=error -j 1
       - name: Publish independent production coverage
         id: coverage_record
         uses: ./.github/actions/coverage
@@ -1102,148 +1075,273 @@ jobs:
           definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
           artifact_name: ci-target-${{ github.job }}-${{ strategy.job-index }}
 
-    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }})
+    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, physics=${{ matrix.physics }}, context=${{ matrix.context }})
   PETScCurvedConvergence:
     needs:
       - Plan
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: ${{ matrix.physics == 'NonlinearPoisson' && 360 || 240 }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - multithreaded: 'ON'
-            suite: scalar
-            geometry: light
-            selection: all
-            path: Convergence / Isoparametric / PETSc / Scalar
-          - multithreaded: 'ON'
-            suite: scalar
-            geometry: tetrahedron
-            selection: all
-            path: Convergence / Isoparametric / PETSc / Scalar
-          - multithreaded: 'ON'
-            suite: scalar
-            geometry: pyramid
-            selection: all
-            path: Convergence / Isoparametric / PETSc / Scalar
-          - multithreaded: 'ON'
-            suite: linear_elasticity
-            geometry: light
-            selection: all
-            path: Convergence / Isoparametric / LinearElasticity
-          - multithreaded: 'ON'
-            suite: linear_elasticity
-            geometry: tetrahedron
-            selection: all
-            path: Convergence / Isoparametric / LinearElasticity
-          - multithreaded: 'ON'
-            suite: linear_elasticity
-            geometry: pyramid
-            selection: all
-            path: Convergence / Isoparametric / LinearElasticity
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: light
-            selection: all
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: tetrahedron
-            selection: all
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: scalar
-            geometry: light
-            selection: all
-            path: Convergence / Isoparametric / PETSc / Scalar
-          - multithreaded: 'OFF'
-            suite: scalar
-            geometry: tetrahedron
-            selection: all
-            path: Convergence / Isoparametric / PETSc / Scalar
-          - multithreaded: 'OFF'
-            suite: scalar
-            geometry: pyramid
-            selection: all
-            path: Convergence / Isoparametric / PETSc / Scalar
-          - multithreaded: 'OFF'
-            suite: linear_elasticity
-            geometry: light
-            selection: all
-            path: Convergence / Isoparametric / LinearElasticity
-          - multithreaded: 'OFF'
-            suite: linear_elasticity
-            geometry: tetrahedron
-            selection: all
-            path: Convergence / Isoparametric / LinearElasticity
-          - multithreaded: 'OFF'
-            suite: linear_elasticity
-            geometry: pyramid
-            selection: all
-            path: Convergence / Isoparametric / LinearElasticity
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: light
-            selection: all
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: tetrahedron
-            selection: all
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: pyramid
-            selection: local
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: pyramid
-            selection: np1
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: pyramid
-            selection: np2
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: pyramid
-            selection: np3
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'ON'
-            suite: stokes
-            geometry: pyramid
-            selection: np4
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: pyramid
-            selection: local
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: pyramid
-            selection: np1
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: pyramid
-            selection: np2
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: pyramid
-            selection: np3
-            path: Convergence / Isoparametric / Stokes
-          - multithreaded: 'OFF'
-            suite: stokes
-            geometry: pyramid
-            selection: np4
-            path: Convergence / Isoparametric / Stokes
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: light, selection: local, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: light, selection: np1, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: light, selection: np2, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: light, selection: np3, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: light, selection: np4, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: pyramid, selection: local, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: linear_elasticity, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: light, selection: all, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: tetrahedron, selection: all, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: light, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: ReactionDiffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Lifted}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: ApproximatedP3Q2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P1}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: P2}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: NonlinearPoisson, partition: Controls}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: P0Projection, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: Diffusion, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: local, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: scalar, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / PETSc / Scalar, physics: GeometryApproximation, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: light, selection: local, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: light, selection: np1, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: light, selection: np2, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: light, selection: np3, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: light, selection: np4, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: tetrahedron, selection: local, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: tetrahedron, selection: np1, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: tetrahedron, selection: np2, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: tetrahedron, selection: np3, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: tetrahedron, selection: np4, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: pyramid, selection: local, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: linear_elasticity, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / LinearElasticity, physics: LinearElasticity, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: light, selection: all, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: tetrahedron, selection: all, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: pyramid, selection: local, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'ON', suite: stokes, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: pyramid, selection: local, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: pyramid, selection: np1, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: pyramid, selection: np2, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: pyramid, selection: np3, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
+          - {multithreaded: 'OFF', suite: stokes, geometry: pyramid, selection: np4, path: Convergence / Isoparametric / Stokes, physics: Stokes, partition: all}
     env:
       OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
     steps:
       - uses: actions/checkout@v4
@@ -1266,28 +1364,13 @@ jobs:
         env:
           GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: |
-          case "${{ matrix.suite }}" in
-            scalar)
-              cmake --build build -j 2 --target \
-                RodinConvergenceIsoparametricPETScReactionDiffusion \
-                RodinConvergenceIsoparametricPETScNonlinearPoisson \
-                RodinConvergenceIsoparametricPETScP0Projection \
-                RodinConvergenceIsoparametricPETScDiffusion \
-                RodinConvergenceIsoparametricPETScGeometryApproximation ;;
-            linear_elasticity)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScLinearElasticity ;;
-            stokes)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScStokes ;;
-            *) exit 1 ;;
-          esac
+          cmake --build build -j 2 --target RodinConvergenceIsoparametricPETSc${{ matrix.physics }}
       - name: Run curved PETSc convergence suites
         run: |
-          case "${{ matrix.suite }}" in
-            scalar) physics_pattern='(ReactionDiffusion|NonlinearPoisson|P0Projection|Diffusion|ApproximatedDiffusion|LiftedDiffusion|SmoothLiftedDiffusion|GeometryApproximation)' ;;
-            linear_elasticity) physics_pattern='LinearElasticity' ;;
-            stokes) physics_pattern='Stokes' ;;
-            *) exit 1 ;;
-          esac
+          physics_pattern='${{ matrix.physics }}'
+          if [ "${{ matrix.physics }}" = Diffusion ]; then
+            physics_pattern='(Approximated|Lifted|SmoothLifted)?Diffusion'
+          fi
           case "${{ matrix.geometry }}" in
             tetrahedron) geometry_pattern='Tetrahedron' ;;
             pyramid) geometry_pattern='Pyramid' ;;
@@ -1300,9 +1383,17 @@ jobs:
             np1|np2|np3|np4) context_pattern='MPI'; rank_pattern=".*${{ matrix.selection }}_" ;;
             *) exit 1 ;;
           esac
+          partition_pattern='.*'
+          exclude_pattern='a^'
+          case "${{ matrix.partition }}" in
+            all) ;;
+            Lifted) partition_pattern='Q[13]Test_LiftedAffineRates_' ;;
+            Controls) exclude_pattern='Rates_' ;;
+            *) partition_pattern='Test_${{ matrix.partition }}Rates_' ;;
+          esac
           ctest --test-dir build/tests \
-            -R "^RodinConvergenceIsoparametricPETSc${context_pattern}${physics_pattern}_${rank_pattern}.*${geometry_pattern}$" \
-            --output-on-failure --no-tests=error -j 1
+            -R "^RodinConvergenceIsoparametricPETSc${context_pattern}${physics_pattern}_${rank_pattern}${partition_pattern}${geometry_pattern}$" \
+            -E "$exclude_pattern" --output-on-failure --no-tests=error -j 1
       - name: Publish independent production coverage
         id: coverage_record
         uses: ./.github/actions/coverage
@@ -1312,7 +1403,7 @@ jobs:
           artifact_name: ci-target-${{ github.job }}-${{ strategy.job-index }}
 
     name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, geometry=${{ matrix.geometry }}, selection=${{
-      matrix.selection }})
+      matrix.selection }}, physics=${{ matrix.physics }}, partition=${{ matrix.partition }})
   PETScCurvedBoundaryConvergence:
     needs:
       - Plan
@@ -1934,54 +2025,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - multithreaded: 'ON'
-            suite: bulk
-            path: Convergence / h / PETSc / Complex
-          - multithreaded: 'ON'
-            suite: curved_helmholtz_light
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'ON'
-            suite: curved_helmholtz_tetrahedron
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'ON'
-            suite: curved_helmholtz_pyramid
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'ON'
-            suite: curved_projection
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'ON'
-            suite: boundary
-            path: Convergence / h / PETSc / BoundaryConditions / Complex
-          - multithreaded: 'ON'
-            suite: curved_boundary
-            path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
-          - multithreaded: 'ON'
-            suite: submesh
-            path: Unit / Rodin / PETSc / H1Restriction / Slow
-          - multithreaded: 'OFF'
-            suite: bulk
-            path: Convergence / h / PETSc / Complex
-          - multithreaded: 'OFF'
-            suite: curved_helmholtz_light
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'OFF'
-            suite: curved_helmholtz_tetrahedron
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'OFF'
-            suite: curved_helmholtz_pyramid
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'OFF'
-            suite: curved_projection
-            path: Convergence / Isoparametric / PETSc / Complex
-          - multithreaded: 'OFF'
-            suite: boundary
-            path: Convergence / h / PETSc / BoundaryConditions / Complex
-          - multithreaded: 'OFF'
-            suite: curved_boundary
-            path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
-          - multithreaded: 'OFF'
-            suite: submesh
-            path: Unit / Rodin / PETSc / H1Restriction / Slow
+          - {multithreaded: 'ON', suite: bulk, path: Convergence / h / PETSc / Complex, context: all}
+          - {multithreaded: 'ON', suite: curved_helmholtz_light, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'ON', suite: curved_helmholtz_tetrahedron, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'ON', suite: curved_helmholtz_pyramid, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'ON', suite: curved_projection, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'ON', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: local}
+          - {multithreaded: 'ON', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np1}
+          - {multithreaded: 'ON', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np2}
+          - {multithreaded: 'ON', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np3}
+          - {multithreaded: 'ON', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np4}
+          - {multithreaded: 'ON', suite: curved_boundary, path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex, context: all}
+          - {multithreaded: 'ON', suite: submesh, path: Unit / Rodin / PETSc / H1Restriction / Slow, context: all}
+          - {multithreaded: 'OFF', suite: bulk, path: Convergence / h / PETSc / Complex, context: all}
+          - {multithreaded: 'OFF', suite: curved_helmholtz_light, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'OFF', suite: curved_helmholtz_tetrahedron, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'OFF', suite: curved_helmholtz_pyramid, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'OFF', suite: curved_projection, path: Convergence / Isoparametric / PETSc / Complex, context: all}
+          - {multithreaded: 'OFF', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: local}
+          - {multithreaded: 'OFF', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np1}
+          - {multithreaded: 'OFF', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np2}
+          - {multithreaded: 'OFF', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np3}
+          - {multithreaded: 'OFF', suite: boundary, path: Convergence / h / PETSc / BoundaryConditions / Complex, context: np4}
+          - {multithreaded: 'OFF', suite: curved_boundary, path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex, context: all}
+          - {multithreaded: 'OFF', suite: submesh, path: Unit / Rodin / PETSc / H1Restriction / Slow, context: all}
     env:
       GCOV: gcov-14
       RODIN_COVERAGE: ${{ matrix.suite == 'submesh' && 'ON' || 'OFF' }}
@@ -2047,7 +2114,11 @@ jobs:
         run: cmake --build build -j 2 --target RodinConvergenceHPETScHelmholtzBoundary
       - name: Run complex PETSc Helmholtz boundary suite
         if: matrix.suite == 'boundary'
-        run: ctest --test-dir build/tests -R '^RodinConvergenceHPETScHelmholtzBoundary_' --output-on-failure -j 1
+        run: |
+          context_pattern=''
+          if [ "${{ matrix.context }}" != local ]; then context_pattern='MPI_${{ matrix.context }}_'; fi
+          ctest --test-dir build/tests -R "^RodinConvergenceHPETScHelmholtzBoundary_${context_pattern}[A-Za-z]+$" \
+            --output-on-failure --no-tests=error -j 1
       - name: Build complex PETSc SubMesh restriction matrix
         if: matrix.suite == 'submesh'
         env:
@@ -2094,7 +2165,7 @@ jobs:
           definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
           artifact_name: ci-target-${{ github.job }}-${{ strategy.job-index }}
 
-    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }})
+    name: ${{ matrix.path }} (multithreaded=${{ matrix.multithreaded }}, suite=${{ matrix.suite }}, context=${{ matrix.context }})
   PETScMatrixRanges:
     needs:
       - Plan

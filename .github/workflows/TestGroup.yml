@@ -130,7 +130,9 @@ jobs:
           GROUP: ${{ inputs.group }}
           PROFILE: ${{ inputs.profile }}
           BASELINE: ${{ inputs.baseline }}
-          PARALLEL: ${{ inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '1' ||
+          # Matrix-range sanitizer compilation alone uses about 5 GiB; keep it
+          # separate from the other large distributed-space translation units.
+          PARALLEL: ${{ inputs.group == 'unit/Rodin/MPI/Variational' && '1' || inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '1' ||
             '2' }}
         run: |
           args=()

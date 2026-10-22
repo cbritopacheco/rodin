@@ -34,6 +34,14 @@ add_executable(RodinMPIDerivativeStateTest DerivativeStateTest.cpp)
 target_link_libraries(RodinMPIDerivativeStateTest
   PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
 
+add_executable(RodinMPIMatrixRangeTest MatrixRangeTest.cpp)
+target_link_libraries(RodinMPIMatrixRangeTest
+  PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
+if (RODIN_USE_PETSC)
+  target_compile_definitions(RodinMPIMatrixRangeTest PRIVATE RODIN_TEST_WITH_PETSC)
+  target_link_libraries(RodinMPIMatrixRangeTest PRIVATE Rodin::PETSc)
+endif()
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -48,6 +56,16 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 foreach(np 1 2 3 4)
+  add_test(
+    NAME RodinMPIMatrixRangeTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIMatrixRangeTest>)
+  set_tests_properties(RodinMPIMatrixRangeTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    PROCESSORS ${np})
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIMatrixRangeTest_np${np})
+
   add_test(
     NAME RodinMPIDerivativeStateTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}

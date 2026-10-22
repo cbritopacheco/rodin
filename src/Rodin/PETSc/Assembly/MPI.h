@@ -7,6 +7,10 @@
 #ifndef RODIN_PETSC_ASSEMBLY_MPI_H
 #define RODIN_PETSC_ASSEMBLY_MPI_H
 
+#include "Rodin/Configure.h"
+
+#ifdef RODIN_USE_MPI
+
 /**
  * @file
  * @brief MPI assembly specializations targeting PETSc objects.
@@ -1945,4 +1949,5 @@ namespace Rodin::PETSc::Math::Assembly
   using MPI = Rodin::Assembly::MPI<LinearAlgebraType, Operand>;
 }
 
+#endif // RODIN_USE_MPI
 #endif // RODIN_PETSC_ASSEMBLY_MPI_H

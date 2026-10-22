@@ -171,6 +171,13 @@ threading; final line coverage is their union, never an average of percentages.
 
 `dev/ci_test_plan.py` reads the explicit workflow matrices with pinned PyYAML
 (provisioned by preflight) to inventory every targeted coverage partition.
+Long PETSc convergence lanes partition independent PDEs and communicator
+sizes rather than sharing one job deadline. Curved elasticity invokes each
+GoogleTest study separately; each study retains its complete refinement
+history. Pyramid nonlinear rate studies have separate scheduling partitions,
+with complementary controls executed once. The CI registration guards verify
+the concrete CMake targets, MPI rank registrations, matrix-size limits, and
+selection of every curved elasticity and nonlinear study exactly once.
 Zero-hit baseline jobs retain previously compiled test/template instantiations
 and production libraries even when those targets are absent from a runtime
 selection. Tests and benchmarks supply execution hits, never denominator

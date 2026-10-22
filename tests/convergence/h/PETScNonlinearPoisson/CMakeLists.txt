@@ -1,18 +1,28 @@
 add_executable(RodinConvergenceHPETScNonlinearPoisson NonlinearPoisson.cpp)
 include(../../PETScRefinement.cmake)
-rodin_add_petsc_refinement(RodinConvergenceHPETScNonlinearPoissonBoundary BoundaryConditions.cpp)
-# The complete one-rank tetrahedron registration took 1317 seconds with
-# idle sleep prevented. Allow platform/version headroom for this resolved
-# study; overnight suspension is not a valid runtime measurement. The
-# watchdog remains an execution policy, not a numerical acceptance criterion.
-set_tests_properties(RodinConvergenceHPETScNonlinearPoissonBoundary_Tetrahedron
-  PROPERTIES TIMEOUT 3600)
-if (RODIN_USE_MPI)
-  foreach(np 1 2 3 4)
-    set_tests_properties(RodinConvergenceHPETScNonlinearPoissonBoundary_MPI_np${np}_Tetrahedron
-      PROPERTIES TIMEOUT 3600)
+rodin_add_petsc_refinement(RodinConvergenceHPETScNonlinearPoissonBoundary BoundaryConditions.cpp
+  RATE_CASES MixedNeumannP1Rates MixedNeumannP2Rates MixedNeumannP3Rates
+  RobinP1Rates RobinP2Rates RobinP3Rates
+  PureNeumannP1Rates PureNeumannP2Rates PureNeumannP3Rates)
+# Individual pyramid rate histories exceeded thirty minutes in CI. The
+# resolved tetrahedron and pyramid histories retain all levels and receive a
+# three-hour scheduling allowance; other geometries keep the usual watchdog.
+foreach(geometry Tetrahedron Pyramid)
+  foreach(boundary MixedNeumann Robin PureNeumann)
+    foreach(degree 1 2 3)
+      set_tests_properties(
+        RodinConvergenceHPETScNonlinearPoissonBoundary_${boundary}P${degree}Rates_${geometry}
+        PROPERTIES TIMEOUT 10800)
+      if(RODIN_USE_MPI)
+        foreach(np 1 2 3 4)
+          set_tests_properties(
+            RodinConvergenceHPETScNonlinearPoissonBoundary_MPI_np${np}_${boundary}P${degree}Rates_${geometry}
+            PROPERTIES TIMEOUT 10800)
+        endforeach()
+      endif()
+    endforeach()
   endforeach()
-endif()
+endforeach()
 target_link_libraries(RodinConvergenceHPETScNonlinearPoisson
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_NONLINEARPOISSON_GEOMETRIES
