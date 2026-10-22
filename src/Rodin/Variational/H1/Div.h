@@ -181,7 +181,7 @@ namespace Rodin::Variational
           phys = JinvT * ref;
 
           for (size_t comp = 0; comp < vdim && comp < static_cast<size_t>(phys.size());
-            ++comp)
+               ++comp)
           {
             const size_t local = alpha * vdim + comp;
             out += gf[fes.getGlobalIndex({d, i}, local)] *

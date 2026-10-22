@@ -2492,7 +2492,7 @@ namespace Rodin::Variational
           {
             ScalarType div = 0;
             for (size_t comp = 0; comp < std::min(vdim, static_cast<size_t>(Jinv.cols()));
-              ++comp)
+                 ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
@@ -2786,7 +2786,7 @@ namespace Rodin::Variational
           {
             ScalarType div = 0;
             for (size_t comp = 0; comp < std::min(vdim, static_cast<size_t>(Jinv.cols()));
-              ++comp)
+                 ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
@@ -3393,7 +3393,7 @@ namespace Rodin::Variational
               jacobian.resize(trialfes.getVectorDimension(), d);
               const auto& basis = trialfe.getBasis(local);
               for (size_t component = 0; component < trialfes.getVectorDimension();
-                ++component)
+                   ++component)
               {
                 for (size_t axis = 0; axis < d; ++axis)
                 {
@@ -3414,7 +3414,7 @@ namespace Rodin::Variational
                 jacobian.resize(testfes.getVectorDimension(), d);
                 const auto& basis = testfe.getBasis(local);
                 for (size_t component = 0; component < testfes.getVectorDimension();
-                  ++component)
+                     ++component)
                 {
                   for (size_t axis = 0; axis < d; ++axis)
                   {

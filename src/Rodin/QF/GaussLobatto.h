@@ -425,7 +425,7 @@ namespace Rodin::QF
           static_cast<size_t>(std::numeric_limits<Eigen::Index>::max()) / sizeof(Real));
         size_t size = 1;
         for (size_t direction = 0; direction < std::max<size_t>(1, dimension);
-          ++direction)
+             ++direction)
         {
           if (counts[direction] < 2 || counts[direction] > capacity / size)
           {

@@ -2619,10 +2619,10 @@ namespace Rodin::IO
 
         const auto& charts = mesh.getPolytopeTransformationIndex();
         for (size_t dimension = 0;
-          dimension <= mesh.getConnectivity().getMaximalDimension(); ++dimension)
+             dimension <= mesh.getConnectivity().getMaximalDimension(); ++dimension)
         {
           for (size_t index = 0; index < mesh.getConnectivity().getCount(dimension);
-            ++index)
+               ++index)
           {
             if (const auto* chart = charts.find(dimension, index))
             {

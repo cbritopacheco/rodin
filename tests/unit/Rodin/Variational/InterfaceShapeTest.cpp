@@ -138,7 +138,7 @@ TEST(InterfaceShape, ComposedValues)
     moved.setPolytope(*face).setIntegrationPoint(ip);
     Real sum = 0;
     for (size_t local = 0; local < static_cast<size_t>(moved.getDOFIndices()->size());
-      ++local)
+         ++local)
       sum += moved.getBasis(local);
     EXPECT_NEAR(sum, 2, 1e-13);
   }
@@ -279,7 +279,7 @@ TEST(InterfaceShape, ComplexMatrixValues)
     average.setPolytope(*face).setIntegrationPoint(ip);
     jump.setPolytope(*face).setIntegrationPoint(ip);
     for (size_t local = 0; local < static_cast<size_t>(average.getDOFIndices()->size());
-      ++local)
+         ++local)
     {
       const auto value = average.getBasis(local);
       EXPECT_EQ(value.rows(), 2);
