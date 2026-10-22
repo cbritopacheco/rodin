@@ -3,6 +3,7 @@
 import importlib.util
 import hashlib
 import json
+import shutil
 from pathlib import Path
 import tempfile
 import unittest
@@ -23,10 +24,31 @@ class ProductionCoverageTest(unittest.TestCase):
             self.assertEqual(len(lines), 3)
             self.assertEqual(sum(lines.values()), 1)
 
+    def test_shared_build_lanes_pool_complementary_hits_without_duplicate_denominators(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            initial = folder / "initial.info"
+            first = folder / "first.info"
+            second = folder / "second.info"
+            initial.write_text("SF:/builder/src/Rodin/Math/Foo.h\nDA:1,0\nDA:2,0\nDA:3,0\nDA:4,0\nend_of_record\n")
+            first.write_text("SF:/runner/first/src/Rodin/Math/Foo.h\nDA:1,7\nDA:2,0\nDA:3,0\nDA:4,0\nend_of_record\n")
+            second.write_text("SF:/runner/second/src/Rodin/Math/Foo.h\nDA:1,0\nDA:2,9\nDA:3,0\nDA:4,0\nend_of_record\n")
+            first_lines = coverage.production_lines([first])
+            second_lines = coverage.production_lines([second])
+            union = coverage.production_lines([initial, first, second])
+            self.assertEqual(len(union), 4)
+            self.assertEqual(sum(first_lines.values()), 1)
+            self.assertEqual(sum(second_lines.values()), 1)
+            self.assertEqual(sum(union.values()), 2)
+            self.assertFalse(union[("src/Rodin/Math/Foo.h", 3)])
+            self.assertFalse(union[("src/Rodin/Math/Foo.h", 4)])
+            self.assertEqual(coverage.production_lines([second, initial, first, first]), union)
+
     def test_test_sources_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             report = Path(directory) / "test.info"
-            for source in ["tests/unit/foo.cpp", "src/Rodin/Test/Random.h", "third-party/foo.cpp"]:
+            for source in ["tests/unit/foo.cpp", "tests/benchmarks/Rodin/Foo.cpp", "benchmarks/Foo.cpp",
+                           "src/Rodin/Test/Random.h", "third-party/foo.cpp"]:
                 report.write_text("SF:" + source + "\nDA:1,1\n")
                 with self.assertRaisesRegex(ValueError, "Non-production"):
                     coverage.production_lines([report])
@@ -101,6 +123,38 @@ class ProductionCoverageTest(unittest.TestCase):
             report.write_text("changed")
             with self.assertRaisesRegex(ValueError, "changed targeted"):
                 coverage.verify_target_receipts(expected, folder, "current")
+
+    def test_shared_executable_keeps_distinct_execution_receipts(self):
+        import ci_builds
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            definitions = []
+            build_keys = []
+            for rank in [1, 2]:
+                row = {"multithreaded": "ON", "np": str(rank), "partition": "standard"}
+                build_keys.append(ci_builds.identity(ci_builds.definition("MPIH1Restriction", row)))
+                definition = {"job": "MPIH1Restriction", "matrix": row}
+                definitions.append(definition)
+                lane = folder / str(rank)
+                lane.mkdir()
+                report = lane / "RodinCoverage.info"
+                report.write_text("SF:src/Rodin/Math/Foo.h\nDA:1," + str(int(rank == 1))
+                                  + "\nDA:2," + str(int(rank == 2)) + "\nend_of_record\n")
+                receipt = {"definition": definition, "commit": "current",
+                           "report_sha256": hashlib.sha256(report.read_bytes()).hexdigest()}
+                (lane / "target-receipt.json").write_text(json.dumps(receipt))
+            self.assertEqual(build_keys[0], build_keys[1])
+            self.assertNotEqual(coverage.target_identity(definitions[0]), coverage.target_identity(definitions[1]))
+            self.assertEqual(len(coverage.verify_target_receipts(definitions, folder, "current")), 2)
+            pooled = coverage.production_lines(list(folder.rglob("RodinCoverage.info")))
+            self.assertEqual((sum(pooled.values()), len(pooled)), (2, 2))
+            shutil.copytree(folder / "2", folder / "duplicate")
+            with self.assertRaisesRegex(ValueError, "duplicate"):
+                coverage.verify_target_receipts(definitions, folder, "current")
+            shutil.rmtree(folder / "duplicate")
+            (folder / "2/target-receipt.json").unlink()
+            with self.assertRaisesRegex(ValueError, "Missing targeted"):
+                coverage.verify_target_receipts(definitions, folder, "current")
 
     def test_backend_context_combines_execution_lanes_without_combining_build_variants(self):
         definition = {"profile": "unit", "backend": "baseline", "build_type": "Release",

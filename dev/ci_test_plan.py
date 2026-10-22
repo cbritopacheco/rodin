@@ -129,7 +129,11 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("ci-test-plan.json"))
     args = parser.parse_args()
     matrices = plan()
+    from ci_builds import plan as build_plan
+    import yaml
+    builds = build_plan(yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text()))
     args.output.write_text(json.dumps(matrices, indent=2) + "\n")
+    args.output.with_name("ci-build-plan.json").write_text(json.dumps(builds, indent=2) + "\n")
     native = [{"multithreaded": mt, "suite": "baseline", "group": group,
                "path": display_group(group)} for group in native_convergence_groups() for mt in ["ON", "OFF"]]
     args.output.with_name("ci-convergence-plan.json").write_text(json.dumps(native, indent=2) + "\n")
@@ -139,9 +143,10 @@ def main():
         raise ValueError("Native convergence exceeds the matrix limit; split by refinement family")
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
-            for name, rows in matrices.items():
+            for name, rows in {**matrices, **{"build_" + key: rows for key, rows in builds.items()}}.items():
                 stream.write(name + "=" + json.dumps({"include": rows}, separators=(",", ":")) + "\n")
             stream.write("native_convergence=" + json.dumps({"include": native}, separators=(",", ":")) + "\n")
+    print("Shared builds:", {name: len(rows) for name, rows in builds.items()})
     print("Planned jobs:", {name: len(rows) for name, rows in matrices.items()})
 
 

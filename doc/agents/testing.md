@@ -205,3 +205,32 @@ CI facts that bite:
   `@see` blocks and prose lists should use explicit `@ref` references or HTML
   links for public classes, templates, specialization groups, and generated
   file pages instead of bare comma-separated names.
+
+### Shared compilation and independent execution
+
+The explicit convergence and native MPI restriction matrices share compatible
+builds through `dev/ci_builds.py` and `TestBuild.yml`. A build key contains the
+compiler, runner, complete CMake configuration and registered target set. MPI
+rank, geometry, refinement-history selection and boundary-condition partition
+remain execution coordinates. The configured CMake target manifest validates
+every requested executable before compilation. Bounded build families avoid a
+single global compilation barrier; the curved boundary families share their
+common executable producers. Existing module-group, baseline, installation and
+standalone MatrixRanges builds retain their current scheduling.
+
+The immutable artifact contains executables, libraries, generated CTest files,
+CMake metadata, target manifests and all zero-hit `.gcno` notes. Compile objects
+and `.gcda` runtime counters are excluded. Each execution job restores its own
+copy at the original absolute build location, after checking the source commit,
+configuration, architecture, compiler version and archive digest. Dynamic
+runtime-library and MPI-launcher digests must also match. The generated build
+suppresses CMake regeneration during test and coverage operations; consumers never compile test
+targets. Artifacts remain available for seven days; an expired artifact requires
+rerunning its build producer.
+
+Execution job names, matrices, environments, timeouts, case selections and MPI
+ranks are preserved. Discovery profiles remain outside the measured coverage
+directory. Every execution lane publishes its own coverage contribution and
+receipt, and the complete-current-commit gate also requires the shared build
+families to succeed. A failed build is reported in its build job; dependent
+execution families are skipped rather than reported as numerical failures.

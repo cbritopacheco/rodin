@@ -1,0 +1,64 @@
+# Compile one compatible test family for independent execution partitions.
+name: Tests / Build
+'on':
+  workflow_call:
+    inputs:
+      definition:
+        type: string
+        required: true
+      id:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  Build:
+    name: ${{ fromJSON(inputs.definition).compiler }}, ${{ fromJSON(inputs.definition).mode }}, MT-${{ fromJSON(inputs.definition).cmake.RODIN_MULTITHREADED }}, ${{ inputs.id }}
+    runs-on: ${{ fromJSON(inputs.definition).runner }}
+    timeout-minutes: 360
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+      OMP_WAIT_POLICY: PASSIVE
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ fromJSON(inputs.definition).compiler }}
+          cmake: true
+      - name: Install compatible dependencies
+        env:
+          MODE: ${{ fromJSON(inputs.definition).mode }}
+        run: |
+          boost=libboost1.74-all-dev
+          if [ "$MODE" = mpi ]; then boost=libboost-all-dev; fi
+          packages=(lcov "$boost" libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev)
+          case "$MODE" in
+            native) ;;
+            mpi) packages+=(mpi-default-bin mpi-default-dev) ;;
+            petsc) packages+=(petsc-dev mpich) ;;
+            complex) packages+=(libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config) ;;
+            *) exit 1 ;;
+          esac
+          sudo apt-get update
+          sudo apt-get install -y "${packages[@]}"
+      - name: Compile registered targets
+        env:
+          DEFINITION: ${{ inputs.definition }}
+        run: python3 dev/ci_builds.py build --definition "$DEFINITION"
+      - name: Package immutable test build
+        env:
+          DEFINITION: ${{ inputs.definition }}
+        run: python3 dev/ci_builds.py pack --definition "$DEFINITION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-build-${{ inputs.id }}
+          path: ci-build-artifact/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+          overwrite: true

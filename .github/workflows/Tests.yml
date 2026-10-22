@@ -27,6 +27,13 @@ jobs:
       slow: ${{ steps.plan.outputs.slow }}
       baseline: ${{ steps.plan.outputs.baseline }}
       native_convergence: ${{ steps.plan.outputs.native_convergence }}
+      build_native: ${{ steps.plan.outputs.build_native }}
+      build_restriction: ${{ steps.plan.outputs.build_restriction }}
+      build_petsc_h: ${{ steps.plan.outputs.build_petsc_h }}
+      build_petsc_degree: ${{ steps.plan.outputs.build_petsc_degree }}
+      build_petsc_curved: ${{ steps.plan.outputs.build_petsc_curved }}
+      build_petsc_boundary: ${{ steps.plan.outputs.build_petsc_boundary }}
+      build_complex: ${{ steps.plan.outputs.build_complex }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,9 +51,80 @@ jobs:
           name: ci-test-plan
           path: |
             ci-test-plan.json
+            ci-build-plan.json
             ci-convergence-plan.json
             ci-coverage-targets.json
           if-no-files-found: error
+  Build_native:
+    name: Build / native
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_native) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  Build_restriction:
+    name: Build / restriction
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_restriction) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  Build_petsc_h:
+    name: Build / petsc_h
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_h) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  Build_petsc_degree:
+    name: Build / petsc_degree
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_degree) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  Build_petsc_curved:
+    name: Build / petsc_curved
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_curved) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  Build_petsc_boundary:
+    name: Build / petsc_boundary
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_boundary) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  Build_complex:
+    name: Build / complex
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.build_complex) }}
+    uses: ./.github/workflows/TestBuild.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
   Unit1:
     name: ${{ matrix.name }}
     needs:
@@ -190,6 +268,7 @@ jobs:
   Convergence:
     needs:
       - Plan
+      - Build_native
     runs-on: ubuntu-latest
     timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group, '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
@@ -250,37 +329,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           libomp-dev
-      - name: Configure convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MPI=OFF
-          -DRODIN_USE_PETSC=OFF -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-      - name: Build convergence suites
-        run: |
-          case "${{ matrix.suite }}" in
-            baseline) python3 dev/ci_tests.py build --group "$CONVERGENCE_GROUP" --profile convergence-baseline ;;
-            pressure_*)
-              cmake --build build -j 2 --target RodinConvergenceHStokesStability ;;
-            curved_projection)
-              cmake --build build -j 2 --target \
-                RodinConvergenceIsoparametricP0Projection \
-                RodinConvergenceIsoparametricGeometryApproximation ;;
-            curved_diffusion_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricDiffusion ;;
-            curved_reaction_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricReactionDiffusion ;;
-            curved_nonlinear_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricNonlinearPoisson ;;
-            curved_elasticity_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricLinearElasticity ;;
-            curved_stokes)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricStokes ;;
-            curved_helmholtz)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricHelmholtz ;;
-            *) exit 1 ;;
-          esac
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-          CONVERGENCE_GROUP: ${{ matrix.group }}
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: Convergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run convergence suites
         run: |
           curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
@@ -441,6 +494,7 @@ jobs:
   MPIH1Restriction:
     needs:
       - Plan
+      - Build_restriction
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
@@ -566,14 +620,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           lcov libomp-dev mpi-default-bin mpi-default-dev
-      - name: Configure native MPI restriction build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MPI=ON
-          -DRODIN_USE_PETSC=OFF -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-      - name: Build native MPI restriction suite
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinMPISubMeshGridFunctionTest
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: MPIH1Restriction
+          matrix: ${{ toJSON(matrix) }}
       - name: Record native MPI CPU placement
         env:
           MPI_RANKS: ${{ matrix.np }}
@@ -599,6 +650,7 @@ jobs:
   PETScConvergence:
     needs:
       - Plan
+      - Build_petsc_h
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.suite == 'bulk' && 120 || 360 }}
     strategy:
@@ -865,25 +917,15 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           petsc-dev mpich
-      - name: Configure PETSc convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
-      - name: Build PETSc convergence suite
-        if: matrix.suite == 'bulk'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScPoisson RodinConvergenceHPETScMPIPoisson RodinConvergenceHPETScConductivity
-          RodinConvergenceHPETScLinearElasticity RodinConvergenceHPETScReactionDiffusion RodinConvergenceHPETScNonlinearPoisson RodinConvergenceHPETScStokes
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: PETScConvergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run PETSc convergence suite
         if: matrix.suite == 'bulk'
         run: ctest --test-dir build/tests -R '^RodinConvergenceHPETSc' -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_|^RodinConvergenceHPETSc(MPI)?StokesStability_'
           --output-on-failure -j 1
-      - name: Build PETSc pressure-spectrum suite
-        if: startsWith(matrix.suite, 'pressure_')
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScStokesStability
       - name: Run PETSc pressure-spectrum suite
         if: startsWith(matrix.suite, 'pressure_')
         run: |
@@ -922,11 +964,6 @@ jobs:
           # This is a process resource report, not summed MPI peak memory or a benchmark.
           /usr/bin/time --verbose ctest --test-dir build/tests -R "$pattern" \
             --output-on-failure --no-tests=error -j 1
-      - name: Build PETSc boundary convergence suites
-        if: endsWith(matrix.suite, '_boundary')
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETSc${{ matrix.physics }}Boundary
       - name: Run PETSc boundary convergence suites
         if: endsWith(matrix.suite, '_boundary')
         run: |
@@ -960,6 +997,7 @@ jobs:
   PETScDegreeConvergence:
     needs:
       - Plan
+      - Build_petsc_degree
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
@@ -1043,17 +1081,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           petsc-dev mpich
-      - name: Configure PETSc degree-refinement build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
-      - name: Build PETSc degree-refinement suites
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: |
-          cmake --build build -j 2 --target \
-            RodinConvergencePPETSc${{ matrix.physics }} \
-            RodinConvergenceHPPETSc${{ matrix.physics }}
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: PETScDegreeConvergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run PETSc degree-refinement suites
         run: |
           prefix='^RodinConvergence(P|HP)PETSc${{ matrix.physics }}_'
@@ -1079,6 +1111,7 @@ jobs:
   PETScCurvedConvergence:
     needs:
       - Plan
+      - Build_petsc_curved
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.physics == 'NonlinearPoisson' && 360 || 240 }}
     strategy:
@@ -1356,15 +1389,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           petsc-dev mpich
-      - name: Configure curved PETSc convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
-      - name: Build curved PETSc convergence suites
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: |
-          cmake --build build -j 2 --target RodinConvergenceIsoparametricPETSc${{ matrix.physics }}
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: PETScCurvedConvergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run curved PETSc convergence suites
         run: |
           physics_pattern='${{ matrix.physics }}'
@@ -1407,6 +1436,7 @@ jobs:
   PETScCurvedBoundaryConvergence:
     needs:
       - Plan
+      - Build_petsc_boundary
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.physics == 'ReactionDiffusion' && matrix.geometry == 'pyramid' && 300 || 240 }}
     strategy:
@@ -1759,14 +1789,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           petsc-dev mpich
-      - name: Configure curved boundary convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
-      - name: Build curved boundary convergence suite
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: PETScCurvedBoundaryConvergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run curved boundary convergence partition
         run: |
           case "${{ matrix.geometry }}" in
@@ -1797,6 +1824,7 @@ jobs:
   PETScCurvedNonlinearTetrahedronConvergence:
     needs:
       - Plan
+      - Build_petsc_boundary
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
@@ -1979,14 +2007,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           petsc-dev mpich
-      - name: Configure curved nonlinear tetrahedral convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
-      - name: Build curved nonlinear tetrahedral convergence suite
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: PETScCurvedNonlinearTetrahedronConvergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run curved nonlinear tetrahedral convergence partition
         run: |
           case "${{ matrix.selection }}" in
@@ -2019,6 +2044,7 @@ jobs:
   PETScComplexConvergence:
     needs:
       - Plan
+      - Build_complex
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || startsWith(matrix.suite, 'curved_helmholtz') && 180 || 120 }}
     strategy:
@@ -2066,26 +2092,15 @@ jobs:
       - name: Install complex PETSc dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           libomp-dev libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
-      - name: Configure complex PETSc convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON -DRODIN_USE_ASAN=OFF -DRODIN_USE_UBSAN=OFF   -DPETSc_DIR="$(pkg-config
-          --variable=prefix PETSc)"
-      - name: Build complex PETSc convergence suite
-        if: matrix.suite == 'bulk'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScHelmholtz RodinPETScSNESStateTest RodinConvergencePPETScHelmholtz RodinConvergenceHPPETScHelmholtz
-          RodinPETScScalarIntegralTest RodinVariationalIntegralTest
+      - name: Restore shared test build
+        uses: ./.github/actions/test-build
+        with:
+          job: PETScComplexConvergence
+          matrix: ${{ toJSON(matrix) }}
       - name: Run complex PETSc convergence suite
         if: matrix.suite == 'bulk'
         run: ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc(MPI)?Helmholtz|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
           -E '^RodinConvergenceHPETScHelmholtzBoundary_' --output-on-failure --no-tests=error -j 1
-      - name: Build curved complex PETSc Helmholtz suite
-        if: startsWith(matrix.suite, 'curved_helmholtz')
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScHelmholtz
       - name: Run curved complex PETSc Helmholtz suite
         if: startsWith(matrix.suite, 'curved_helmholtz')
         run: |
@@ -2098,20 +2113,10 @@ jobs:
           ctest --test-dir build/tests \
             -R "^RodinConvergenceIsoparametricPETSc(MPI)?Helmholtz_.*${geometry_pattern}$" \
             --output-on-failure --no-tests=error -j 1
-      - name: Build curved complex PETSc projection suite
-        if: matrix.suite == 'curved_projection'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScP0Projection
       - name: Run curved complex PETSc projection suite
         if: matrix.suite == 'curved_projection'
         run: ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_' --output-on-failure --no-tests=error -j
           1
-      - name: Build complex PETSc Helmholtz boundary suite
-        if: matrix.suite == 'boundary'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceHPETScHelmholtzBoundary
       - name: Run complex PETSc Helmholtz boundary suite
         if: matrix.suite == 'boundary'
         run: |
@@ -2119,11 +2124,6 @@ jobs:
           if [ "${{ matrix.context }}" != local ]; then context_pattern='MPI_${{ matrix.context }}_'; fi
           ctest --test-dir build/tests -R "^RodinConvergenceHPETScHelmholtzBoundary_${context_pattern}[A-Za-z]+$" \
             --output-on-failure --no-tests=error -j 1
-      - name: Build complex PETSc SubMesh restriction matrix
-        if: matrix.suite == 'submesh'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinPETScMPIH1SubMeshRestrictionTest
       - name: Discover coverage tests without runtime profiles
         if: matrix.suite == 'submesh'
         env:
@@ -2149,11 +2149,6 @@ jobs:
             build/tests/Testing/Temporary/LastTest.log
             build/tests/Testing/Temporary/LastTestsFailed.log
           if-no-files-found: ignore
-      - name: Build curved complex PETSc Helmholtz boundary suite
-        if: matrix.suite == 'curved_boundary'
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScHelmholtzBoundary
       - name: Run curved complex PETSc Helmholtz boundary suite
         if: matrix.suite == 'curved_boundary'
         run: ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETScHelmholtzBoundary_' --output-on-failure --no-tests=error -j 1
@@ -2367,6 +2362,13 @@ jobs:
     name: Coverage / Finalize
     if: always()
     needs:
+      - Build_native
+      - Build_restriction
+      - Build_petsc_h
+      - Build_petsc_degree
+      - Build_petsc_curved
+      - Build_petsc_boundary
+      - Build_complex
       - Unit1
       - Unit2
       - Unit3

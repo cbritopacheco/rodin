@@ -1,0 +1,29 @@
+name: Restore independent test build
+description: Restore the current-commit build for one isolated execution lane.
+inputs:
+  job:
+    description: Existing test job family.
+    required: true
+  matrix:
+    description: Existing execution matrix coordinates.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Identify compatible build
+      id: build
+      shell: bash
+      env:
+        JOB: ${{ inputs.job }}
+        MATRIX: ${{ inputs.matrix }}
+      run: python3 dev/ci_builds.py key --job "$JOB" --matrix "$MATRIX"
+    - uses: actions/download-artifact@v4
+      with:
+        name: ci-build-${{ steps.build.outputs.id }}
+        path: ci-build-artifact
+    - name: Restore clean runner-local build
+      shell: bash
+      env:
+        JOB: ${{ inputs.job }}
+        MATRIX: ${{ inputs.matrix }}
+      run: python3 dev/ci_builds.py restore --job "$JOB" --matrix "$MATRIX"
