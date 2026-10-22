@@ -1,3 +1,7 @@
 # Every resource is binary or generated input data and is stored in Git LFS.
 # Keep this broad so new resource formats cannot silently bypass the policy.
 resources/** filter=lfs diff=lfs merge=lfs -text
+
+# Campaign meshes stored as plain files (no LFS), at the author's request.
+resources/examples/viscoelastic_fluids/*_pipe_layers.mesh !filter !diff !merge -text
+resources/examples/viscoelastic_fluids/*_pipe_layerswo.mesh !filter !diff !merge -text
