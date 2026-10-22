@@ -194,8 +194,8 @@ namespace Rodin::Solid
    * ConstitutivePoint cp(pt, state);
    * cp.set<Tags::FiberDirection>(fiberDir);
    *
-   * law.getCache(cache, cp);
-   * law.getFirstPiolaKirchhoffStress(P, cache, cp);
+   * law.setConstitutivePoint(cp);
+   * law.getFirstPiolaKirchhoffStress(P);
    * @endcode
    *
    * ## Usage (without geometry, for unit testing)

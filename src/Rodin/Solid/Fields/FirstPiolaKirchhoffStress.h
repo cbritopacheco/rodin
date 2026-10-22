@@ -33,14 +33,14 @@ namespace Rodin::Solid
    * ## Usage
    * @code
    * NeoHookean law(lambda, mu);
-   * NeoHookean::Cache cache;
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
-   * law.getCache(cache, state);
+   * ConstitutivePoint point(state);
+   * law.setConstitutivePoint(point);
    *
    * FirstPiolaKirchhoffStress<NeoHookean> pk1(law);
    * Math::SpatialMatrix<Real> P;
-   * pk1.getFirstPiolaKirchhoffStress(P, cache, state);
+   * pk1.getFirstPiolaKirchhoffStress(P);
    * @endcode
    *
    * @tparam LawDerived The hyperelastic law type
@@ -52,12 +52,9 @@ namespace Rodin::Solid
       /// @brief Constitutive law type.
       using LawType = LawDerived;
 
-      /// @brief Cache type used by the constitutive law.
-      using CacheType = typename LawType::Cache;
-
       /**
        * @brief Constructs the stress evaluator.
-       * @param law Reference to the constitutive law
+       * @param law Reference to a prepared constitutive law
        */
       FirstPiolaKirchhoffStress(const LawType& law)
         : m_law(law)
@@ -78,13 +75,10 @@ namespace Rodin::Solid
       /**
        * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
        * @param[out] P Output stress tensor
-       * @param[in] cache Constitutive invariant cache populated by getCache().
-       * @param[in] cp Constitutive point
        */
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
-        const CacheType& cache, const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
       {
-        m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+        m_law.getFirstPiolaKirchhoffStress(P);
       }
 
       /**

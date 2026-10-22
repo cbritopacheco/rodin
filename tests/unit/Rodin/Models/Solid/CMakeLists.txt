@@ -1,4 +1,9 @@
-add_executable(RodinSolidTest SolidTest.cpp)
+add_executable(RodinSolidTest
+  SolidTest.cpp
+  ../../Solid/Constitutive/BindingTest.cpp
+  ../../Solid/Constitutive/YeohTest.cpp
+  ../../Solid/Constitutive/HolzapfelOgdenTest.cpp
+  ../../Solid/Local/CallbacksTest.cpp)
 target_link_libraries(RodinSolidTest
   PUBLIC
   GTest::gtest

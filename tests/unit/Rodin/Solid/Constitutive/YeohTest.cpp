@@ -19,18 +19,18 @@ namespace
     Math::SpatialMatrix<Real> stress, tangent;
   };
 
-  Response evaluate(const HyperElasticLaw<Yeoh>& law, const Math::SpatialMatrix<Real>& h,
+  Response evaluate(const Yeoh& law, const Math::SpatialMatrix<Real>& h,
     const Math::SpatialMatrix<Real>& increment)
   {
     KinematicState state(h.rows());
     state.setDisplacementGradient(h);
     ConstitutivePoint point(state);
-    Yeoh::Cache cache;
-    law.getCache(cache, point);
+    auto prepared = law;
+    prepared.setConstitutivePoint(point);
     Response result;
-    result.energy = law.getStrainEnergyDensity(cache, point);
-    law.getFirstPiolaKirchhoffStress(result.stress, cache, point);
-    law.getMaterialTangent(result.tangent, cache, point, increment);
+    result.energy = prepared.getStrainEnergyDensity();
+    prepared.getFirstPiolaKirchhoffStress(result.stress);
+    prepared.getMaterialTangent(result.tangent, increment);
     return result;
   }
 }

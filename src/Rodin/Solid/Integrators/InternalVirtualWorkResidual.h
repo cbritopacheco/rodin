@@ -226,11 +226,10 @@ namespace Rodin::Solid
           if (m_input)
             m_input(cp);
 
-          typename LawType::Cache cache;
-          m_law.getCache(cache, cp);
+          m_law.setConstitutivePoint(cp);
 
           Math::SpatialMatrix<ScalarType> P;
-          m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+          m_law.getFirstPiolaKirchhoffStress(P);
 
           // R_te += w P : grad v_te
           for (size_t te = 0; te < testDofs; ++te)
@@ -517,11 +516,10 @@ namespace Rodin::Solid
           if (m_input)
             m_input(cp);
 
-          typename LawType::Cache cache;
-          m_law.getCache(cache, cp);
+          m_law.setConstitutivePoint(cp);
 
           Math::SpatialMatrix<ScalarType> P;
-          m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+          m_law.getFirstPiolaKirchhoffStress(P);
 
           const ScalarType p = m_pressure.get().getValue(ip);
           const ScalarType J = state.getJacobian();

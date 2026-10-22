@@ -378,7 +378,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   // ========================================================================
   // InternalVirtualWork output / commit tests
   //
-  // commit() evaluates the law at every quadrature point and hands each cache
+  // commit() evaluates the law at every quadrature point and hands each prepared
   // to the output, without assembling. The point of the hook is that the input
   // and the output are driven by the same sweep, so their (cell, quadrature
   // point) indexing agrees by construction rather than by a matching guess.
@@ -425,10 +425,10 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
   /**
    * @brief Verifies commit() runs the input before the law, so the output
-   *        observes a cache built from the injected data. With the dynamic
-   *        tags supplied, the active contraction cache must be dynamic.
+   *        observes a prepared built from the injected data. With the dynamic
+   *        tags supplied, the active contraction prepared must be dynamic.
    */
-  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitOutputSeesInputDrivenCache)
+  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitOutputSeesInputDrivenLaw)
   {
     Mesh mesh = makeUnitSquareMesh();
     const size_t dim = mesh.getSpaceDimension();
@@ -464,12 +464,12 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
     std::size_t calls = 0;
     bool allDynamic = true;
-    ivw.setOutput([&](const Solid::ConstitutivePoint&, const auto& cache) {
+    ivw.setOutput([&](const Solid::ConstitutivePoint&, const auto& prepared) {
       ++calls;
       // The dynamic branch is only taken when the input's tags are present,
       // so this proves input ran before the law and the output sees the
-      // resulting cache.
-      allDynamic = allDynamic && cache.dynamic;
+      // resulting prepared.
+      allDynamic = allDynamic && prepared.isDynamic();
     });
 
     ivw.commit();

@@ -53,14 +53,6 @@ namespace Rodin::Solid
   class NeoHookean final : public HyperElasticLaw<NeoHookean>
   {
     public:
-      /// Precomputed cache for the Neo-Hookean law.
-      struct Cache
-      {
-        Real I1;    ///< First invariant @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
-        Real J;     ///< Jacobian
-        Real logJ;  ///< @f$ \ln(J) @f$
-      };
-
       /**
        * @brief Constructs a Neo-Hookean law with the given Lamé parameters.
        * @param lambda First Lamé parameter @f$ \lambda @f$
@@ -102,42 +94,53 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Populates the invariant cache at a constitutive point.
-       * @param cache Storage for the constitutive invariant cache.
-       * @param cp Constitutive evaluation point.
+       * @brief Binds owned evaluation data, reusing unchanged constitutive inputs.
+       * @param cp Constitutive point supplying kinematics and law-specific inputs.
+       * @returns This law after successful binding.
        */
-      void getCache(Cache& cache, const ConstitutivePoint& cp) const
+      NeoHookean& setConstitutivePoint(const ConstitutivePoint& cp)
       {
-        const auto& state = cp.getKinematicState();
-        const auto& C = state.getRightCauchyGreenTensor();
-        cache.I1 = C.trace();
-        cache.J = state.getJacobian();
-        cache.logJ = state.getLogJacobian();
+        if (m_state && hasSameKinematics(*m_state, cp.getKinematicState()))
+        {
+          return *this;
+        }
+        m_state.reset();
+        computeCache(m_cache, cp);
+        m_state.emplace(cp.getKinematicState());
+        return *this;
       }
 
       /**
-       * @brief Returns the stored strain-energy density.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       * @returns The stored strain-energy density.
+       * @brief Returns the owned kinematics of the prepared point.
+       * @returns Prepared kinematic state.
        */
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
+      const KinematicState& getKinematicState() const
       {
-        const size_t d = cp.getKinematicState().getDimension();
+        this->require(m_state.has_value(), __func__);
+        return *m_state;
+      }
+
+      /**
+       * @brief Returns the strain-energy density at the prepared point.
+       * @returns Stored strain-energy density.
+       */
+      Real getStrainEnergyDensity() const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const size_t d = state.getDimension();
         return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d)) - m_mu * cache.logJ +
           0.5 * m_lambda * cache.logJ * cache.logJ;
       }
 
       /**
-       * @brief Computes the first Piola-Kirchhoff stress.
-       * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
+       * @brief Computes stress at the prepared point.
+       * @param P Output first Piola-Kirchhoff stress.
        */
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
-        const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
 
@@ -146,16 +149,15 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Computes the material tangent action.
-       * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       * @param dF Increment of the deformation gradient.
+       * @brief Computes the tangent action at the prepared point.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
        */
-      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
-        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
 
         // Frobenius inner product F^{-T} : dF
@@ -168,6 +170,34 @@ namespace Rodin::Solid
       }
 
     private:
+      /// Precomputed cache for the Neo-Hookean law.
+      struct Cache
+      {
+        Real I1;    ///< First invariant @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
+        Real J;     ///< Jacobian
+        Real logJ;  ///< @f$ \ln(J) @f$
+      };
+
+      /**
+       * @brief Populates the invariant cache at a constitutive point.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
+      void computeCache(Cache& cache, const ConstitutivePoint& cp) const
+      {
+        const auto& state = cp.getKinematicState();
+        const auto& C = state.getRightCauchyGreenTensor();
+        cache.I1 = C.trace();
+        cache.J = state.getJacobian();
+        cache.logJ = state.getLogJacobian();
+      }
+
+      /// @brief Private intermediate values for the prepared input.
+      Cache m_cache{};
+
+      /// @brief Owned snapshot; empty until binding succeeds.
+      Optional<KinematicState> m_state;
+
       Real m_lambda;
       Real m_mu;
   };

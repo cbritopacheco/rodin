@@ -97,11 +97,8 @@ namespace Rodin::Solid
       /// @brief Current displacement state type.
       using StateType = State;
 
-      /// @brief The law's cache type, handed to the output by @c commit().
-      using CacheType = typename Law::Cache;
-
       /// @brief Type-erased output callable for this law.
-      using OutputFunctionType = OutputFunction<CacheType>;
+      using OutputFunctionType = OutputFunction<LawType>;
 
       /**
        * @brief Constructs the internal virtual work object.
@@ -154,7 +151,7 @@ namespace Rodin::Solid
       /**
        * @brief Sets the output invoked at each quadrature point by @c commit().
        *
-       * The output is the dual of @c setInput(): it reads the law's cache
+       * The output is the dual of @c setInput(): it reads the prepared law
        * after evaluation, and is the extraction site for committed internal
        * variables, recovered stresses or diagnostics. It is invoked only by
        * @c commit(), never during assembly, so a caller controls exactly when
@@ -178,7 +175,7 @@ namespace Rodin::Solid
        * constitutive evaluation of @c Residual() and @c Tangent() at the
        * current displacement -- the same kinematics, the same
        * @c ConstitutivePoint, the same @c Input -- and hands each resulting
-       * cache to the output. Callers use this to commit internal variables
+       * prepared law to the output. Callers use this to commit internal variables
        * once a nonlinear solve has converged, without recomputing the
        * kinematics themselves.
        *
@@ -202,6 +199,7 @@ namespace Rodin::Solid
         const size_t d = mesh.getSpaceDimension();
 
         auto stateGradient = Variational::Jacobian(displacement);
+        auto law = m_law;
 
         for (auto it = mesh.getCell(); it; ++it)
         {
@@ -232,10 +230,8 @@ namespace Rodin::Solid
             if (m_input)
               m_input(cp);
 
-            typename LawType::Cache cache;
-            m_law.getCache(cache, cp);
-
-            m_output(cp, cache);
+            law.setConstitutivePoint(cp);
+            m_output(cp, law);
           }
         }
       }

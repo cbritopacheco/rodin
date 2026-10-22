@@ -67,6 +67,151 @@ namespace Rodin::Solid
         Real kappa = 0.0;
       };
 
+      /**
+       * @brief Constructs the law from a parameter object.
+       * @param params Material parameters configuring the law.
+       */
+      explicit HolzapfelOgden(const Parameters& params)
+        : m_params(params)
+      {}
+
+      /**
+       * @brief Constructs the law from scalar material parameters.
+       * @param mu1 Isochoric first-invariant coefficient.
+       * @param mu2 Isochoric second-invariant coefficient.
+       * @param C0 Exponential first-invariant scale.
+       * @param C1 Exponential first-invariant stiffness.
+       * @param C2 Fiber exponential scale.
+       * @param C3 Fiber exponential stiffness.
+       * @param kappa Volumetric penalty coefficient.
+       */
+      HolzapfelOgden(Real mu1, Real mu2, Real C0, Real C1, Real C2, Real C3, Real kappa)
+        : m_params{mu1, mu2, C0, C1, C2, C3, kappa}
+      {}
+
+      /**
+       * @brief Returns the material parameters.
+       * @returns The material parameters.
+       */
+      const Parameters& getParameters() const
+      {
+        return m_params;
+      }
+
+      /**
+       * @brief Binds owned evaluation data, reusing unchanged constitutive inputs.
+       * @param cp Constitutive point supplying kinematics and law-specific inputs.
+       * @returns This law after successful binding.
+       */
+      HolzapfelOgden& setConstitutivePoint(const ConstitutivePoint& cp)
+      {
+        const auto direction = FiberKinematics::direction(cp);
+        if (m_state && hasSameKinematics(*m_state, cp.getKinematicState()) &&
+          hasSameDirection(m_cache.direction, direction))
+        {
+          return *this;
+        }
+        m_state.reset();
+        computeCache(m_cache, cp.getKinematicState(), direction);
+        m_state.emplace(cp.getKinematicState());
+        return *this;
+      }
+
+      /**
+       * @brief Returns the owned kinematics of the prepared point.
+       * @returns Prepared kinematic state.
+       */
+      const KinematicState& getKinematicState() const
+      {
+        this->require(m_state.has_value(), __func__);
+        return *m_state;
+      }
+
+      /**
+       * @brief Returns the strain-energy density at the prepared point.
+       * @returns Stored strain-energy density.
+       */
+      Real getStrainEnergyDensity() const
+      {
+        const auto& cache = m_cache;
+        this->require(m_state.has_value(), __func__);
+        return m_params.mu1 * (cache.I1bar - 3.0) + m_params.mu2 * (cache.I2bar - 3.0) +
+          m_params.C0 * std::exp(m_params.C1 * square(cache.I1bar - 3.0)) +
+          m_params.C2 * std::exp(m_params.C3 * square(cache.I4bar - 1.0)) +
+          m_params.kappa * (cache.J - 1.0 - std::log(cache.J));
+      }
+
+      /**
+       * @brief Computes stress at the prepared point.
+       * @param P Output first Piola-Kirchhoff stress.
+       */
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const auto& F = state.getDeformationGradient();
+        const auto& C = state.getRightCauchyGreenTensor();
+        const auto& Cinv = C.inverse();
+        const size_t d = state.getDimension();
+
+        Math::SpatialMatrix<Real> I(
+          static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        I.setIdentity();
+        const Math::SpatialMatrix<Real> A = FiberKinematics::dyad(cache.direction);
+
+        const auto derivative = getEnergyDerivatives(cache);
+        const Math::SpatialMatrix<Real> dWdC = derivative.first * I +
+          derivative.second * (cache.I1 * I - C) + derivative.volume * Cinv +
+          derivative.fiber * A;
+
+        P = 2.0 * F * dWdC;
+      }
+
+      /**
+       * @brief Computes the tangent action at the prepared point.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
+       */
+      void getMaterialTangent(
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const auto& F = state.getDeformationGradient();
+        const auto& C = state.getRightCauchyGreenTensor();
+        const auto Cinv = C.inverse();
+        const auto derivative = getEnergyDerivatives(cache);
+        const Math::SpatialMatrix<Real> dC = F.transpose() * dF + dF.transpose() * F;
+        const Real trace = (Cinv * dC).trace();
+        const Real dI1 = dC.trace();
+        const Real dI2 = cache.I1 * dI1 - (C * dC).trace();
+        const Real dI4 = cache.direction.dot(dC * cache.direction);
+        const Real dI1bar = cache.I3m13 * dI1 - cache.I1bar * trace / 3;
+        const Real dI4bar = cache.I3m13 * dI4 - cache.I4bar * trace / 3;
+        const Real dW1 =
+          -derivative.first * trace / 3 + derivative.firstCurvature * dI1bar;
+        const Real dW2 = -2 * derivative.second * trace / 3;
+        const Real dW4 =
+          -derivative.fiber * trace / 3 + derivative.fiberCurvature * dI4bar;
+        const Real dVolume =
+          -(dI1 * derivative.first + cache.I1 * dW1 + 2 * dI2 * derivative.second +
+            2 * cache.I2 * dW2 + dI4 * derivative.fiber + cache.I4 * dW4) /
+            3 +
+          m_params.kappa * cache.J * trace / 4;
+        const auto identity =
+          Math::SpatialMatrix<Real>::Identity(state.getDimension(), state.getDimension());
+        const auto fiber = FiberKinematics::dyad(cache.direction);
+        const Math::SpatialMatrix<Real> secondInvariant = cache.I1 * identity - C;
+        const Math::SpatialMatrix<Real> stress = derivative.first * identity +
+          derivative.second * secondInvariant + derivative.volume * Cinv +
+          derivative.fiber * fiber;
+        const Math::SpatialMatrix<Real> increment = dW1 * identity +
+          dW2 * secondInvariant + derivative.second * (dI1 * identity - dC) +
+          dVolume * Cinv - derivative.volume * (Cinv * dC * Cinv) + dW4 * fiber;
+        dP = 2 * (dF * stress + F * increment);
+      }
+
+    private:
       /// @brief Cached invariant values and fiber direction.
       struct Cache
       {
@@ -104,120 +249,12 @@ namespace Rodin::Solid
         Math::SpatialVector<Real> direction;
       };
 
-      /**
-       * @brief Constructs the law from a parameter object.
-       * @param params Material parameters configuring the law.
-       */
-      explicit HolzapfelOgden(const Parameters& params)
-        : m_params(params)
-      {}
+      /// @brief Private intermediate values for the prepared input.
+      Cache m_cache{};
 
-      /**
-       * @brief Constructs the law from scalar material parameters.
-       * @param mu1 Isochoric first-invariant coefficient.
-       * @param mu2 Isochoric second-invariant coefficient.
-       * @param C0 Exponential first-invariant scale.
-       * @param C1 Exponential first-invariant stiffness.
-       * @param C2 Fiber exponential scale.
-       * @param C3 Fiber exponential stiffness.
-       * @param kappa Volumetric penalty coefficient.
-       */
-      HolzapfelOgden(Real mu1, Real mu2, Real C0, Real C1, Real C2, Real C3, Real kappa)
-        : m_params{mu1, mu2, C0, C1, C2, C3, kappa}
-      {}
+      /// @brief Owned snapshot; empty until binding succeeds.
+      Optional<KinematicState> m_state;
 
-      /**
-       * @brief Returns the material parameters.
-       * @returns The material parameters.
-       */
-      const Parameters& getParameters() const
-      {
-        return m_params;
-      }
-
-      /**
-       * @brief Populates invariant caches at a constitutive point.
-       * @param cache Storage for the constitutive invariant cache.
-       * @param cp Constitutive evaluation point.
-       */
-      void getCache(Cache& cache, const ConstitutivePoint& cp) const
-      {
-        getCache(cache, cp.getKinematicState(), FiberKinematics::direction(cp));
-      }
-
-      /**
-       * @brief Returns the stored strain-energy density.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @returns The stored strain-energy density.
-       * @param cp Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.
-       */
-      Real getStrainEnergyDensity(
-        const Cache& cache, [[maybe_unused]] const ConstitutivePoint& cp) const
-      {
-        return m_params.mu1 * (cache.I1bar - 3.0) + m_params.mu2 * (cache.I2bar - 3.0) +
-          m_params.C0 * std::exp(m_params.C1 * square(cache.I1bar - 3.0)) +
-          m_params.C2 * std::exp(m_params.C3 * square(cache.I4bar - 1.0)) +
-          m_params.kappa * (cache.J - 1.0 - std::log(cache.J));
-      }
-
-      /**
-       * @brief Computes the first Piola-Kirchhoff stress.
-       * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       */
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
-        const ConstitutivePoint& cp) const
-      {
-        computeFirstPiolaKirchhoffStress(P, cache, cp.getKinematicState());
-      }
-
-      /**
-       * @brief Computes the analytic material tangent action at fixed reference fiber direction.
-       * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       * @param dF Increment of the deformation gradient.
-       */
-      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
-        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
-      {
-        const auto& state = cp.getKinematicState();
-        const auto& F = state.getDeformationGradient();
-        const auto& C = state.getRightCauchyGreenTensor();
-        const auto Cinv = C.inverse();
-        const auto derivative = getEnergyDerivatives(cache);
-        const Math::SpatialMatrix<Real> dC = F.transpose() * dF + dF.transpose() * F;
-        const Real trace = (Cinv * dC).trace();
-        const Real dI1 = dC.trace();
-        const Real dI2 = cache.I1 * dI1 - (C * dC).trace();
-        const Real dI4 = cache.direction.dot(dC * cache.direction);
-        const Real dI1bar = cache.I3m13 * dI1 - cache.I1bar * trace / 3;
-        const Real dI4bar = cache.I3m13 * dI4 - cache.I4bar * trace / 3;
-        const Real dW1 =
-          -derivative.first * trace / 3 + derivative.firstCurvature * dI1bar;
-        const Real dW2 = -2 * derivative.second * trace / 3;
-        const Real dW4 =
-          -derivative.fiber * trace / 3 + derivative.fiberCurvature * dI4bar;
-        const Real dVolume =
-          -(dI1 * derivative.first + cache.I1 * dW1 + 2 * dI2 * derivative.second +
-            2 * cache.I2 * dW2 + dI4 * derivative.fiber + cache.I4 * dW4) /
-            3 +
-          m_params.kappa * cache.J * trace / 4;
-        const auto identity =
-          Math::SpatialMatrix<Real>::Identity(state.getDimension(), state.getDimension());
-        const auto fiber = FiberKinematics::dyad(cache.direction);
-        const Math::SpatialMatrix<Real> secondInvariant = cache.I1 * identity - C;
-        const Math::SpatialMatrix<Real> stress = derivative.first * identity +
-          derivative.second * secondInvariant + derivative.volume * Cinv +
-          derivative.fiber * fiber;
-        const Math::SpatialMatrix<Real> increment = dW1 * identity +
-          dW2 * secondInvariant + derivative.second * (dI1 * identity - dC) +
-          dVolume * Cinv - derivative.volume * (Cinv * dC * Cinv) + dW4 * fiber;
-        dP = 2 * (dF * stress + F * increment);
-      }
-
-    private:
       /// @brief Invariant derivatives of the energy and scaled volume derivative.
       struct EnergyDerivatives
       {
@@ -290,8 +327,7 @@ namespace Rodin::Solid
        * @param state Kinematic state at the material point.
        * @param direction Material direction to include in the stress contribution.
        */
-
-      void getCache(Cache& cache, const KinematicState& state,
+      void computeCache(Cache& cache, const KinematicState& state,
         const Math::SpatialVector<Real>& direction) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
@@ -306,34 +342,6 @@ namespace Rodin::Solid
         cache.direction = direction;
         cache.I4 = direction.dot(C * direction);
         cache.I4bar = cache.I4 * cache.I3m13;
-      }
-
-      /**
-       * @brief Accumulates the cached first Piola-Kirchhoff stress.
-       * @param P First Piola-Kirchhoff stress accumulator.
-       * @param cache Constitutive cache used or updated by the evaluation.
-       * @param state Kinematic state at the material point.
-       */
-
-      void computeFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
-        const Cache& cache, const KinematicState& state) const
-      {
-        const auto& F = state.getDeformationGradient();
-        const auto& C = state.getRightCauchyGreenTensor();
-        const auto& Cinv = C.inverse();
-        const size_t d = state.getDimension();
-
-        Math::SpatialMatrix<Real> I(
-          static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
-        I.setIdentity();
-        const Math::SpatialMatrix<Real> A = FiberKinematics::dyad(cache.direction);
-
-        const auto derivative = getEnergyDerivatives(cache);
-        const Math::SpatialMatrix<Real> dWdC = derivative.first * I +
-          derivative.second * (cache.I1 * I - C) + derivative.volume * Cinv +
-          derivative.fiber * A;
-
-        P = 2.0 * F * dWdC;
       }
 
       Parameters m_params;

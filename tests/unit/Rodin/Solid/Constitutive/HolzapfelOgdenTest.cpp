@@ -27,12 +27,12 @@ namespace
     for (size_t i = 0; i < fiber.size(); ++i)
       fiber[i] = 1 + i;
     point.set<Tags::FiberDirection>(fiber);
-    HolzapfelOgden::Cache cache;
-    law.getCache(cache, point);
+    auto prepared = law;
+    prepared.setConstitutivePoint(point);
     MaterialResponse response;
-    response.energy = law.getStrainEnergyDensity(cache, point);
-    law.getFirstPiolaKirchhoffStress(response.stress, cache, point);
-    law.getMaterialTangent(response.tangent, cache, point, increment);
+    response.energy = prepared.getStrainEnergyDensity();
+    prepared.getFirstPiolaKirchhoffStress(response.stress);
+    prepared.getMaterialTangent(response.tangent, increment);
     return response;
   }
 

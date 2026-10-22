@@ -334,13 +334,15 @@ int main(int argc, char** argv)
   StepDiagnostics diagnostics;
 
   auto commitOutput = [&]([[maybe_unused]] const Solid::ConstitutivePoint& cp,
-                        const auto& cache) {
+                        const auto& prepared) {
     diagnostics.minActiveExtension =
-      std::min(diagnostics.minActiveExtension, cache.activeExtension);
+      std::min(diagnostics.minActiveExtension, prepared.getActiveExtension());
     diagnostics.maxActiveExtension =
-      std::max(diagnostics.maxActiveExtension, cache.activeExtension);
-    diagnostics.maxGamma = std::max(diagnostics.maxGamma, std::abs(cache.newState.gamma));
-    diagnostics.maxBeta = std::max(diagnostics.maxBeta, std::abs(cache.newState.beta));
+      std::max(diagnostics.maxActiveExtension, prepared.getActiveExtension());
+    diagnostics.maxGamma =
+      std::max(diagnostics.maxGamma, std::abs(prepared.getActiveState().gamma));
+    diagnostics.maxBeta =
+      std::max(diagnostics.maxBeta, std::abs(prepared.getActiveState().beta));
   };
 
   // ---- time loop ----------------------------------------------------------
@@ -415,28 +417,28 @@ int main(int argc, char** argv)
       kinematics.setDisplacementGradient(Jacobian(u).getValue(point));
       Solid::ConstitutivePoint cp(point, kinematics);
       activeInput(cp);
-      decltype(law)::Cache cache;
-      law.getCache(cache, cp);
-      return cache;
+      auto prepared = law;
+      prepared.setConstitutivePoint(cp);
+      return prepared;
     };
     const auto residual = [&](size_t row) {
-      return RealFunction(
-        [&, row](const Point& point) { return evaluate(point).residual.value[row]; });
+      return RealFunction([&, row](const Point& point) {
+        return evaluate(point).getActiveResidual().value[row];
+      });
     };
     const auto derivative = [&](size_t row, size_t column) {
       return RealFunction([&, row, column](const Point& point) {
-        return evaluate(point).residual.derivative(row, column);
+        return evaluate(point).getActiveResidual().derivative(row, column);
       });
     };
     const auto coupling = [&](bool momentum) {
       return MatrixFunction(dim, dim, [&, momentum](const Point& point) {
-        const auto cache = evaluate(point);
-        Solid::KinematicState kinematics(dim);
-        kinematics.setDisplacementGradient(Jacobian(u).getValue(point));
-        const Real factor = momentum ? Real(0.5) * cache.active.dStressDc
-                                     : cache.residual.strainDerivative[0];
-        Math::SpatialMatrix<Real> result =
-          factor * kinematics.getDeformationGradient() * cache.fiber.tensor();
+        const auto prepared = evaluate(point);
+        const auto& kinematics = prepared.getKinematicState();
+        const Real factor = momentum ? Real(0.5) * prepared.getActiveResponse().dStressDc
+                                     : prepared.getActiveResidual().strainDerivative[0];
+        Math::SpatialMatrix<Real> result = factor * kinematics.getDeformationGradient() *
+          prepared.getFiberKinematics().tensor();
         return result;
       });
     };

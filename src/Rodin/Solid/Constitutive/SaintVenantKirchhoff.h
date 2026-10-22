@@ -50,15 +50,6 @@ namespace Rodin::Solid
   class SaintVenantKirchhoff final : public HyperElasticLaw<SaintVenantKirchhoff>
   {
     public:
-      /// Precomputed cache for the Saint-Venant-Kirchhoff law.
-      struct Cache
-      {
-        Math::SpatialMatrix<Real> E;  ///< Green-Lagrange strain @f$ \mathbf{E} @f$
-        Math::SpatialMatrix<Real>
-          S;  ///< Second Piola-Kirchhoff stress @f$ \mathbf{S} @f$
-        Real trE;              ///< @f$ \operatorname{tr}(\mathbf{E}) @f$
-      };
-
       /**
        * @brief Constructs a Saint-Venant-Kirchhoff law with the given Lamé parameters.
        * @param lambda First Lamé parameter @f$ \lambda @f$
@@ -100,63 +91,65 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Populates the Green-Lagrange strain and stress cache.
-       * @param cache Storage for the constitutive invariant cache.
-       * @param cp Constitutive evaluation point.
+       * @brief Binds owned evaluation data, reusing unchanged constitutive inputs.
+       * @param cp Constitutive point supplying kinematics and law-specific inputs.
+       * @returns This law after successful binding.
        */
-      void getCache(Cache& cache, const ConstitutivePoint& cp) const
+      SaintVenantKirchhoff& setConstitutivePoint(const ConstitutivePoint& cp)
       {
-        const auto& state = cp.getKinematicState();
-        const auto& C = state.getRightCauchyGreenTensor();
-        const size_t d = state.getDimension();
-        Math::SpatialMatrix<Real> I;
-        I.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
-        I.setIdentity();
-
-        // E = 0.5 (C - I)
-        cache.E = 0.5 * C + (-0.5) * I;
-        cache.trE = cache.E.trace();
-
-        // S = lambda tr(E) I + 2 mu E
-        cache.S = m_lambda * cache.trE * I + 2.0 * m_mu * cache.E;
+        if (m_state && hasSameKinematics(*m_state, cp.getKinematicState()))
+        {
+          return *this;
+        }
+        m_state.reset();
+        computeCache(m_cache, cp);
+        m_state.emplace(cp.getKinematicState());
+        return *this;
       }
 
       /**
-       * @brief Returns the stored strain-energy density.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @returns The stored strain-energy density.
-       * @param cp Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.
+       * @brief Returns the owned kinematics of the prepared point.
+       * @returns Prepared kinematic state.
        */
-      Real getStrainEnergyDensity(
-        const Cache& cache, [[maybe_unused]] const ConstitutivePoint& cp) const
+      const KinematicState& getKinematicState() const
       {
+        this->require(m_state.has_value(), __func__);
+        return *m_state;
+      }
+
+      /**
+       * @brief Returns the strain-energy density at the prepared point.
+       * @returns Stored strain-energy density.
+       */
+      Real getStrainEnergyDensity() const
+      {
+        const auto& cache = m_cache;
+        this->require(m_state.has_value(), __func__);
         return 0.5 * m_lambda * cache.trE * cache.trE + m_mu * cache.E.dot(cache.E);
       }
 
       /**
-       * @brief Computes the first Piola-Kirchhoff stress.
-       * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
+       * @brief Computes stress at the prepared point.
+       * @param P Output first Piola-Kirchhoff stress.
        */
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
-        const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
       {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         // P = F S
-        P = cp.getKinematicState().getDeformationGradient() * cache.S;
+        P = state.getDeformationGradient() * cache.S;
       }
 
       /**
-       * @brief Computes the material tangent action.
-       * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       * @param dF Increment of the deformation gradient.
+       * @brief Computes the tangent action at the prepared point.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
        */
-      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
-        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& F = state.getDeformationGradient();
         const size_t d = state.getDimension();
         Math::SpatialMatrix<Real> I;
@@ -175,6 +168,43 @@ namespace Rodin::Solid
       }
 
     private:
+      /// Precomputed cache for the Saint-Venant-Kirchhoff law.
+      struct Cache
+      {
+        Math::SpatialMatrix<Real> E;  ///< Green-Lagrange strain @f$ \mathbf{E} @f$
+        Math::SpatialMatrix<Real>
+          S;  ///< Second Piola-Kirchhoff stress @f$ \mathbf{S} @f$
+        Real trE;              ///< @f$ \operatorname{tr}(\mathbf{E}) @f$
+      };
+
+      /**
+       * @brief Populates the Green-Lagrange strain and stress cache.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
+      void computeCache(Cache& cache, const ConstitutivePoint& cp) const
+      {
+        const auto& state = cp.getKinematicState();
+        const auto& C = state.getRightCauchyGreenTensor();
+        const size_t d = state.getDimension();
+        Math::SpatialMatrix<Real> I;
+        I.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        I.setIdentity();
+
+        // E = 0.5 (C - I)
+        cache.E = 0.5 * C + (-0.5) * I;
+        cache.trE = cache.E.trace();
+
+        // S = lambda tr(E) I + 2 mu E
+        cache.S = m_lambda * cache.trE * I + 2.0 * m_mu * cache.E;
+      }
+
+      /// @brief Private intermediate values for the prepared input.
+      Cache m_cache{};
+
+      /// @brief Owned snapshot; empty until binding succeeds.
+      Optional<KinematicState> m_state;
+
       Real m_lambda;
       Real m_mu;
   };

@@ -41,7 +41,7 @@ namespace
     Index cell, quadrature;
     Real jacobian, invariant;
     const ConstitutivePoint* point;
-    const void* cache;
+    const void* prepared;
   };
 
   struct Extraction : Output<Extraction>
@@ -50,11 +50,14 @@ namespace
       : samples(destination)
     {}
 
-    template <class Cache>
-    void extract(const ConstitutivePoint& point, const Cache& cache) const
+    template <class Law>
+    void extract(const ConstitutivePoint& point, const Law& prepared) const
     {
-      samples->push_back({point.get<Tags::CellIndex>(),
-        point.get<Tags::QuadraturePointIndex>(), cache.J, cache.I1, &point, &cache});
+      samples->push_back(
+        {point.get<Tags::CellIndex>(), point.get<Tags::QuadraturePointIndex>(),
+          prepared.getKinematicState().getJacobian(),
+          prepared.getKinematicState().getRightCauchyGreenTensor().trace(), &point,
+          &prepared});
     }
 
     std::shared_ptr<List<Sample>> samples;
@@ -99,8 +102,8 @@ class Solid_LocalOutput : public testing::Test
 using Laws = testing::Types<NeoHookean, Yeoh>;
 TYPED_TEST_SUITE(Solid_LocalOutput, Laws);
 
-/// @brief Output adapters dispatch both law cache types without copying point or cache.
-TYPED_TEST(Solid_LocalOutput, PreservesCacheAndPointReferencesAfterCallbackCopy)
+/// @brief Output adapters dispatch both law prepared types without copying point or prepared.
+TYPED_TEST(Solid_LocalOutput, PreservesLawAndPointReferencesAfterCallbackCopy)
 {
   for (size_t dimension : {2u, 3u})
   {
@@ -113,20 +116,25 @@ TYPED_TEST(Solid_LocalOutput, PreservesCacheAndPointReferencesAfterCallbackCopy)
     KinematicState state(dimension);
     state.setDisplacementGradient(gradient);
     ConstitutivePoint point(state);
-    typename TypeParam::Cache cache;
-    if constexpr (std::is_same_v<TypeParam, NeoHookean>)
-      NeoHookean(Real(2), Real(3)).getCache(cache, point);
-    else
-      Yeoh(Real(1), Real(0.2), Real(0.1), Real(10)).getCache(cache, point);
+    auto prepared = [] {
+      if constexpr (std::is_same_v<TypeParam, NeoHookean>)
+      {
+        return NeoHookean(Real(2), Real(3));
+      }
+      else
+      {
+        return Yeoh(Real(1), Real(0.2), Real(0.1), Real(10));
+      }
+    }();
+    prepared.setConstitutivePoint(point);
 
     auto samples = std::make_shared<List<Sample>>();
-    OutputFunction<typename TypeParam::Cache> callback;
+    OutputFunction<TypeParam> callback;
     {
       const Extraction extraction(samples);
-      callback = [extraction](const ConstitutivePoint& point,
-                   const typename TypeParam::Cache& cache) {
+      callback = [extraction](const ConstitutivePoint& point, const TypeParam& prepared) {
         const Output<Extraction>& base = extraction;
-        base.extract(point, cache);
+        base.extract(point, prepared);
       };
     }
     auto copied = callback;
@@ -135,7 +143,7 @@ TYPED_TEST(Solid_LocalOutput, PreservesCacheAndPointReferencesAfterCallbackCopy)
     {
       point.set<Tags::CellIndex>(17 + i);
       point.set<Tags::QuadraturePointIndex>(3 + i);
-      copied(point, cache);
+      copied(point, prepared);
     }
     ASSERT_EQ(samples->size(), 2u);
     Index i = 0;
@@ -144,7 +152,7 @@ TYPED_TEST(Solid_LocalOutput, PreservesCacheAndPointReferencesAfterCallbackCopy)
       EXPECT_EQ(sample.cell, 17 + i);
       EXPECT_EQ(sample.quadrature, 3 + i);
       EXPECT_EQ(sample.point, &point);
-      EXPECT_EQ(sample.cache, &cache);
+      EXPECT_EQ(sample.prepared, &prepared);
       EXPECT_NEAR(
         sample.jacobian, dimension == 2 ? Real(1.08) : Real(1.188), Real(1e-12));
       EXPECT_NEAR(

@@ -47,18 +47,6 @@ namespace Rodin::Solid
   class MooneyRivlin final : public HyperElasticLaw<MooneyRivlin>
   {
     public:
-      /// Precomputed cache for the Mooney-Rivlin law.
-      struct Cache
-      {
-        Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
-        Real I2;      ///< @f$ I_2 @f$
-        Real J;       ///< Jacobian
-        Real Jm2d;    ///< @f$ J^{-2/d} @f$
-        Real Jm4d;    ///< @f$ J^{-4/d} @f$
-        Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
-        Real I2bar;   ///< @f$ \bar{I}_2 = J^{-4/d} I_2 @f$
-      };
-
       /**
        * @brief Constructs a Mooney-Rivlin law.
        * @param c1 First material constant
@@ -111,51 +99,53 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Populates the invariant cache at a constitutive point.
-       * @param cache Storage for the constitutive invariant cache.
-       * @param cp Constitutive evaluation point.
+       * @brief Binds owned evaluation data, reusing unchanged constitutive inputs.
+       * @param cp Constitutive point supplying kinematics and law-specific inputs.
+       * @returns This law after successful binding.
        */
-      void getCache(Cache& cache, const ConstitutivePoint& cp) const
+      MooneyRivlin& setConstitutivePoint(const ConstitutivePoint& cp)
       {
-        const auto& state = cp.getKinematicState();
-        const auto& C = state.getRightCauchyGreenTensor();
-        const size_t d = state.getDimension();
-        const Real dd = static_cast<Real>(d);
-
-        cache.J = state.getJacobian();
-        cache.I1 = C.trace();
-        cache.I2 = 0.5 * (cache.I1 * cache.I1 - (C * C).trace());
-
-        cache.Jm2d = std::pow(cache.J, -2.0 / dd);
-        cache.Jm4d = std::pow(cache.J, -4.0 / dd);
-
-        cache.I1bar = cache.Jm2d * cache.I1;
-        cache.I2bar = cache.Jm4d * cache.I2;
+        if (m_state && hasSameKinematics(*m_state, cp.getKinematicState()))
+        {
+          return *this;
+        }
+        m_state.reset();
+        computeCache(m_cache, cp);
+        m_state.emplace(cp.getKinematicState());
+        return *this;
       }
 
       /**
-       * @brief Returns the stored strain-energy density.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       * @returns The stored strain-energy density.
+       * @brief Returns the owned kinematics of the prepared point.
+       * @returns Prepared kinematic state.
        */
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
+      const KinematicState& getKinematicState() const
       {
-        const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
+        this->require(m_state.has_value(), __func__);
+        return *m_state;
+      }
+
+      /**
+       * @brief Returns the strain-energy density at the prepared point.
+       * @returns Stored strain-energy density.
+       */
+      Real getStrainEnergyDensity() const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const Real dd = static_cast<Real>(state.getDimension());
         return m_c1 * (cache.I1bar - dd) + m_c2 * (cache.I2bar - dd) +
           0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
       }
 
       /**
-       * @brief Computes the first Piola-Kirchhoff stress.
-       * @param P Storage for the first Piola-Kirchhoff stress.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
+       * @brief Computes stress at the prepared point.
+       * @param P Output first Piola-Kirchhoff stress.
        */
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
-        const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
         const auto& C = state.getRightCauchyGreenTensor();
@@ -182,16 +172,15 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Computes the material tangent action.
-       * @param dP Storage for the resulting stress increment.
-       * @param cache Constitutive invariant cache populated by getCache().
-       * @param cp Constitutive evaluation point.
-       * @param dF Increment of the deformation gradient.
+       * @brief Computes the tangent action at the prepared point.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
        */
-      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
-        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
         const auto& C = state.getRightCauchyGreenTensor();
@@ -240,6 +229,47 @@ namespace Rodin::Solid
       }
 
     private:
+      /// Precomputed cache for the Mooney-Rivlin law.
+      struct Cache
+      {
+        Real I1; ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
+        Real I2; ///< @f$ I_2 @f$
+        Real J; ///< Jacobian
+        Real Jm2d; ///< @f$ J^{-2/d} @f$
+        Real Jm4d; ///< @f$ J^{-4/d} @f$
+        Real I1bar; ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
+        Real I2bar; ///< @f$ \bar{I}_2 = J^{-4/d} I_2 @f$
+      };
+
+      /**
+       * @brief Populates the invariant cache at a constitutive point.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
+      void computeCache(Cache& cache, const ConstitutivePoint& cp) const
+      {
+        const auto& state = cp.getKinematicState();
+        const auto& C = state.getRightCauchyGreenTensor();
+        const size_t d = state.getDimension();
+        const Real dd = static_cast<Real>(d);
+
+        cache.J = state.getJacobian();
+        cache.I1 = C.trace();
+        cache.I2 = 0.5 * (cache.I1 * cache.I1 - (C * C).trace());
+
+        cache.Jm2d = std::pow(cache.J, -2.0 / dd);
+        cache.Jm4d = std::pow(cache.J, -4.0 / dd);
+
+        cache.I1bar = cache.Jm2d * cache.I1;
+        cache.I2bar = cache.Jm4d * cache.I2;
+      }
+
+      /// @brief Private intermediate values for the prepared input.
+      Cache m_cache{};
+
+      /// @brief Owned snapshot; empty until binding succeeds.
+      Optional<KinematicState> m_state;
+
       Real m_c1;
       Real m_c2;
       Real m_kappa;

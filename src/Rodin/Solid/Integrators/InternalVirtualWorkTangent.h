@@ -255,15 +255,14 @@ namespace Rodin::Solid
           if (m_input)
             m_input(cp);
 
-          typename LawType::Cache cache;
-          m_law.getCache(cache, cp);
+          m_law.setConstitutivePoint(cp);
 
           for (size_t tr = 0; tr < trialDofs; ++tr)
           {
             const auto dF = trialGradient.getBasis(tr);
 
             Math::SpatialMatrix<ScalarType> dP;
-            m_law.getMaterialTangent(dP, cache, cp, dF);
+            m_law.getMaterialTangent(dP, dF);
 
             // K_{te,tr} += w (A : grad du_tr) : grad v_te
             for (size_t te = 0; te < testDofs; ++te)
@@ -581,8 +580,7 @@ namespace Rodin::Solid
           if (m_input)
             m_input(cp);
 
-          typename LawType::Cache cache;
-          m_law.getCache(cache, cp);
+          m_law.setConstitutivePoint(cp);
 
           const ScalarType p = m_pressure.get().getValue(ip);
           const ScalarType J = state.getJacobian();
@@ -593,7 +591,7 @@ namespace Rodin::Solid
             const auto dF = trialGradient.getBasis(tr);
 
             Math::SpatialMatrix<ScalarType> dP;
-            m_law.getMaterialTangent(dP, cache, cp, dF);
+            m_law.getMaterialTangent(dP, dF);
 
             // DJ[du] = J (F^{-T} : grad du)
             ScalarType FinvTdF = 0;
