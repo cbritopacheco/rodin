@@ -37,6 +37,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
@@ -79,6 +81,13 @@ namespace Rodin::Solid
    * @f[
    *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
    * @f]
+   *
+   * ## Architecture
+   *
+   * Cell binding selects a two- or three-dimensional instantiation of the same
+   * quadrature algorithm. Two-dimensional contractions have fixed bounds;
+   * three-dimensional contractions retain the generic loop. The finite element
+   * supplies all local basis functions and their numbering.
    */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType>
@@ -195,6 +204,7 @@ namespace Rodin::Solid
 
       /**
        * @brief Sets the current polytope and assembles the element tangent.
+       * @throws Alert::Exception If the cell dimension is not two or three.
        * @param polytope Mesh entity used by this operation.
        * @returns Reference to this object after the operation.
        */
@@ -202,13 +212,90 @@ namespace Rodin::Solid
         const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
+        switch (polytope.getDimension())
+        {
+          case 2:
+            compute<2>(polytope);
+            break;
+          case 3:
+            compute<3>(polytope);
+            break;
+          default:
+            Alert::MemberFunctionException(*this, __func__)
+              << "Hyperelastic tangent integration requires dimension two or three."
+              << Alert::Raise;
+        }
+        return *this;
+      }
 
-        const size_t d = polytope.getDimension();
+      /**
+       * @brief Returns an entry of the current element tangent matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_matrix(te, tr);
+      }
+
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return m_polytope->get();
+      }
+
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
+      Geometry::Region getRegion() const final override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      /**
+       * @brief Polymorphically copies this tangent integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
+      InternalVirtualWorkTangent* copy() const noexcept final override
+      {
+        return new InternalVirtualWorkTangent(*this);
+      }
+
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
+
+    private:
+      /**
+       * @brief Computes the cell tangent with fixed two-dimensional contraction bounds.
+       *
+       * The generic three-dimensional loop is retained because fully unrolling
+       * its nine components can reduce throughput. Both instantiations use the
+       * same constitutive actions and component accumulation order.
+       *
+       * @tparam Dimension Spatial dimension, two or three.
+       * @param polytope Cell supplying quadrature and finite elements.
+       */
+      template <size_t Dimension>
+      void compute(const Geometry::Polytope& polytope)
+      {
+        const size_t d = Dimension == 2 ? Dimension : polytope.getDimension();
         const Index idx = polytope.getIndex();
         const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
         const auto& stateFES = m_statefes.get();
-        const size_t vdim = testFES.getVectorDimension();
+        const size_t vdim = Dimension == 2 ? Dimension : testFES.getVectorDimension();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
         const auto& testFE = testFES.getFiniteElement(d, idx);
@@ -278,59 +365,8 @@ namespace Rodin::Solid
             }
           }
         }
-
-        return *this;
       }
 
-      /**
-       * @brief Returns an entry of the current element tangent matrix.
-       * @param tr Trial shape-function expression.
-       * @param te Test shape-function expression.
-       * @returns Integral computed by the quadrature rule.
-       */
-      ScalarType integrate(size_t tr, size_t te) final override
-      {
-        return m_matrix(te, tr);
-      }
-
-      /**
-       * @brief Returns the current polytope.
-       * @returns The current polytope.
-       */
-      const Geometry::Polytope& getPolytope() const final override
-      {
-        assert(m_polytope);
-        return m_polytope->get();
-      }
-
-      /**
-       * @brief Returns the integration region.
-       * @returns The integration region.
-       */
-      Geometry::Region getRegion() const final override
-      {
-        return Geometry::Region::Cells;
-      }
-
-      /**
-       * @brief Polymorphically copies this tangent integrator.
-       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
-       */
-      InternalVirtualWorkTangent* copy() const noexcept final override
-      {
-        return new InternalVirtualWorkTangent(*this);
-      }
-
-      /**
-       * @brief Returns the stored constitutive law.
-       * @returns The stored constitutive law.
-       */
-      const LawType& getLaw() const
-      {
-        return m_law;
-      }
-
-    private:
       /**
        * @brief Checks compatibility of the displacement and form spaces.
        * @param displacement Displacement field defining the kinematic state.

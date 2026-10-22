@@ -1,5 +1,6 @@
 add_executable(RodinSolidTest
   SolidTest.cpp
+  ../../Solid/Integrators/InternalVirtualWorkTangentTest.cpp
   ../../Solid/Constitutive/BindingTest.cpp
   ../../Solid/Constitutive/YeohTest.cpp
   ../../Solid/Constitutive/HolzapfelOgdenTest.cpp
