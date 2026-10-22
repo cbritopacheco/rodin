@@ -7,9 +7,10 @@
 #     cd ~/rodin && bash examples/viscoelastic_fluids/ArterialLesion3D_viscous_logarithmic_implicit/run_mac_test.sh
 #
 #  Variants (VARIANTS, run at the same time, the cores shared among them):
-#     new     psi_rb, stress subscale residual without d_t psi_h (default)
-#     old     psi_rb with d_t psi_h in it (-al_subscale_time_residual 1): the
-#             former scheme, which blew up at t = 0.14 s on layersc
+#     new     psi_rb, stress subscale residual without d_t psi_h
+#             (-al_subscale_time_residual 0); refuted on xcoarse
+#     old     psi_rb with d_t psi_h in it (the default again): ran the ramp
+#             cycle on xcoarse, blew up at t = 0.14 s on layersc
 #     nodiv   new without the div sigma subscale u3 (-al_stress_div_scale 0)
 #     exp     the exp form (Moreno et al.), without d_t E_h in its subscale
 #     expold  the exp form as before (-al_subscale_time_residual 1)
@@ -29,7 +30,7 @@
 #  were extreme in the last outputs).
 #
 #  Environment (defaults):
-#     VARIANTS="new old nodiv exp"   MESH_LEVEL=xcoarse (22k tetrahedra;
+#     VARIANTS="old oldbdf1 D"   MESH_LEVEL=xcoarse (22k tetrahedra;
 #              layersxc 75k, layersc 121k: the throat wall and jet shear layer
 #              refined)
 #     NP       performance cores (sysctl hw.perflevel0.physicalcpu on macOS),
@@ -47,7 +48,7 @@ MPIRUN="${MPIRUN:-mpirun}"
 STEPS="${STEPS:-200}"
 CYCLES="${CYCLES:-1}"
 OUTPUT_EVERY="${OUTPUT_EVERY:-5}"
-VARIANTS="${VARIANTS:-new old nodiv exp}"
+VARIANTS="${VARIANTS:-old oldbdf1 D}"
 MESH_LEVEL="${MESH_LEVEL:-xcoarse}"
 MESHDIR="$REPO/resources/examples/viscoelastic_fluids"
 EXE="$REPO/$BUILD/examples/viscoelastic_fluids/ArterialLesion3D_viscous_logarithmic_implicit/ArterialLesion3D_viscous_logarithmic_implicit"
@@ -109,14 +110,14 @@ PIDS=""
 for V in $VARIANTS; do
   TO=2; FL=R
   case "$V" in
-    new)    FORM=psi_rb; EXTRA="" ;;
+    new)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 0" ;;
     old)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 1" ;;
-    nodiv)  FORM=psi_rb; EXTRA="-al_stress_div_scale 0" ;;
-    exp)    FORM=exp;    EXTRA="" ;;
+    nodiv)  FORM=psi_rb; EXTRA="-al_stress_div_scale 0 -al_subscale_time_residual 0" ;;
+    exp)    FORM=exp;    EXTRA="-al_subscale_time_residual 0" ;;
     expold) FORM=exp;    EXTRA="-al_subscale_time_residual 1" ;;
     psi)    FORM=psi;    EXTRA="" ;;
     oldbdf1) FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; TO=1 ;;
-    D)      FORM=psi_rb; EXTRA=""; FL=D ;;
+    D)      FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; FL=D ;;
     *) echo "unknown variant $V"; exit 1 ;;
   esac
   rm -rf "$OUT/$MESH_LEVEL/$V"

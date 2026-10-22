@@ -330,10 +330,13 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        same errors.
           bool adjointReaction = false;
           /// @brief "psi_rb" and "exp": keep d_t of the FE field (BDF) in the
-          ///        residual that drives the stress subscale (off, default:
-          ///        without it, as in the OSS, where P^perp[d_t psi_h] = 0, and
-          ///        as in the term-by-term form of Castillo, Moreno, Baiges,
-          ///        Codina, ACME). "exp": s~ = alpha3' (memS s~^n - R + Pi), R ~
+          ///        residual that drives the stress subscale (on, default);
+          ///        off: without it, as in the OSS, where P^perp[d_t psi_h] = 0,
+          ///        and as in the term-by-term form of Castillo, Moreno, Baiges,
+          ///        Codina, ACME. Off was tried as the fix of the analysis
+          ///        below and refuted (S75 R Re 600, xcoarse, 200 steps/cycle):
+          ///        on ran the ramp cycle without a rejected step, off cut dt
+          ///        to 2e-5 s with max|sigma| ~ 2.5e4 Pa from t = 0.157 s. "exp": s~ = alpha3' (memS s~^n - R + Pi), R ~
           ///        k_a (E - E_hist)/dtM, alpha3' -> 2 eta_p dt/lambda where
           ///        alpha3 >> that: the stress s (E - I) + s~ seen by the
           ///        momentum responds to E^{n+1} with s (1 - dt/dtM), -s/2 in
@@ -345,7 +348,7 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        dt (slow flow, flow reversal, and everywhere as dt -> 0):
           ///        the u-psi coupling changes sign. The S75 Re 600 test grew
           ///        at ~8000 1/s from t = 0.135 s (deceleration) whatever dt.
-          bool subscaleTimeResidual = false;
+          bool subscaleTimeResidual = true;
           /// @brief "sptt", "gsptt" or "cy" (file header).
           std::string fluid = "sptt";
           CarreauYasuda carreauYasuda;
