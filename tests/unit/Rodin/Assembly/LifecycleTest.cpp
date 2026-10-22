@@ -128,24 +128,10 @@ namespace
         {
           assemble();
           assemble(target);
-          Math::Matrix<Scalar> targetMatrix = expectedMatrix;
-          Math::Vector<Scalar> targetRHS = expectedRHS;
-#ifdef RODIN_USE_OPENMP
-          constexpr bool RowOnlyTargets = ExplicitSequential;
-#else
-          constexpr bool RowOnlyTargets = true;
-#endif
-          if constexpr (RowOnlyTargets)
-          {
-            if (target == AssemblyTarget::LHS)
-              targetMatrix = projection * unconstrained + identity - projection;
-            else
-              targetRHS = projection * load.getVector() + lifting;
-          }
           const auto& system = assembledSystem();
           EXPECT_LT(
-            (Math::Matrix<Scalar>(system.getOperator()) - targetMatrix).norm(), 1e-12);
-          EXPECT_LT((system.getVector() - targetRHS).norm(), 1e-11);
+            (Math::Matrix<Scalar>(system.getOperator()) - expectedMatrix).norm(), 1e-12);
+          EXPECT_LT((system.getVector() - expectedRHS).norm(), 1e-11);
         }
       };
       P1<Math::SpatialVector<Scalar>> linear(mesh, 2);
@@ -393,7 +379,7 @@ TEST(Rodin_Assembly_SequentialTargets, DensePreassembledValueConstraints)
   checkPreassembledValueConstraints<Math::Matrix<Real>, true>();
 }
 
-/// @brief Explicit Sequential sparse targets obey row-only value elimination.
+/// @brief Explicit Sequential sparse targets preserve full value elimination and lifting.
 TEST(Rodin_Assembly_SequentialTargets, SparsePreassembledValueConstraints)
 {
   checkPreassembledValueConstraints<Math::SparseMatrix<Real>, true>();
