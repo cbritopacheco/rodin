@@ -203,8 +203,7 @@ has $n_v=19999$ and $n_p=650$: the full dense coupling would exceed the
 allowance, while $A=I$, $B=[I\;0]$ and $M=I$ give the independent spectrum
 $\lambda_j=1$. Unequal mass, non-nodal constant coefficients, an exact
 rectangular obstruction and omitted divergence are checked separately.
-The algebraic regressions are locally verified; PDE-spectrum
-recertification of this bounded-workspace implementation is pending.
+
 
 For $k=2$, all six applicable geometries use $n=2,3,5$ on affine and exact quadratic
 maps. Assembly orders $16$ and $20$ are compared independently; each positive
@@ -218,8 +217,6 @@ Omitting the divergence operator on the curved $n=3$ mesh must give an
 exactly zero spectrum and fail the positivity predicate with unchanged
 space dimensions.
 
-The $P_3/P_2$ extension was locally verified with the previous dense oracle
-in sequential and OpenMP builds.
 It retains all
 six applicable geometries, affine and exact quadratic maps, and independent
 assembly orders $16$ and $20$. Its three levels are $n=3,4,5$; every level
@@ -274,3 +271,8 @@ the higher-order matrix remains pending. CI measured approximately 1900
 seconds for one quadrature-order evaluation at the largest pyramid point.
 The three-hour allowance retains the pair of independent evaluations;
 it is an execution policy, not a measured upper runtime bound.
+
+## Supporting records
+
+Historical execution observations are retained in the separate
+[qualification record](qualification.md).

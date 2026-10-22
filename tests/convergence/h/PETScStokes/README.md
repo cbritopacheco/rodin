@@ -117,10 +117,7 @@ linked p/hp suites; the distinct mixed-boundary formulation follows below.
 
 The separate `RodinConvergenceHPETScStokesStability` target measures the
 finite-dimensional stability of the homogeneous-velocity $P_2/P_1$ pair
-without solving a manufactured saddle-point problem. The finite local/MPI
-matrix was locally verified with the previous dense oracle in
-sequential/OpenMP configurations; this is not
-hosted-CI certification or a mesh-uniform stability theorem.
+without solving a manufactured saddle-point problem.
 Let $A\in\mathbb R^{N_u\times N_u}$ denote the velocity-gradient energy
 matrix, $B\in\mathbb R^{N_p\times N_u}$ the divergence matrix, and
 $M\in\mathbb R^{N_p\times N_p}$ the pressure mass matrix, assembled from
@@ -168,24 +165,18 @@ is required. Removing divergence leaves the dimensions unchanged and must
 produce an exactly zero spectrum. These are spectral refinement studies,
 not error-slope studies: no power of $h$ is fitted to $\beta_h$.
 
-The $P_3/P_2$ extension was locally verified with that oracle, independently
-of the $P_2/P_1$ matrix. It uses the same six applicable
+The $P_3/P_2$ extension uses the same six applicable
 geometries and affine/exact quadratic maps, with three levels $n=3,4,5$ and
 assembly orders $16$ and $20$. Every level requires resolved positivity,
 agreement of the Schur and whitened-divergence routes, and the stated relative
 quadrature budget. The curved $n=3$ missing-divergence control must retain the
-dimensions and give exactly zero eigenvalues. Local and MPI ranks one
-through four pass in sequential/OpenMP configurations; these are finite-mesh
-checks, not hosted-CI certification or a mesh-uniform lower bound.
+dimensions and give exactly zero eigenvalues.
 
 The implemented $P_4/P_3$ extension retains the six geometries, both maps,
 $n=3,4,5$, orders $16$ and $20$, positivity and residual criteria, and a
 curved $n=3$ missing-divergence control. Native and real-PETSc local/MPI
 rank 1–4 registrations are present in both thread configurations.
-Certification of this extension and recertification of the existing
-PDE spectra with the [bounded-workspace shared oracle](../Stokes/README.md#bounded-workspace-spectral-construction)
-are pending. Its algebraic known-spectrum, non-nodal-constant and logical
-constraint regressions are locally verified. The new degree-four
+The new degree-four
 hierarchy and control use separate slow processes, with the
 geometry-specific watchdogs specified below and explicit MPI processor
 counts; the old registrations
@@ -312,12 +303,10 @@ without changing meshes, degrees, quadrature, solvers or acceptance criteria.
 This bounds process lifetime between separate studies; it is not a repair of
 library allocation behavior or a continuous peak-memory guarantee. The default
 registration of other suites is unchanged.
-The finite flat-traction matrix is locally verified: 180 registrations,
-360 configurations and 792 participant reports cover six geometries,
-Local/MPI ranks one through four, and sequential/OpenMP assembly. Historical
-full-matrix results are qualified by an exact formatting-only transformation
-of the shared field-data header; a fresh Triangle Local/MPI-2 subset verifies
-24 configurations and 36 reports against the formatted header. This is not
-a second complete matrix run or hosted-CI certification.
 Registration and the mathematical specification do not by themselves certify
 passing rates; backend/geometry validation is required separately.
+
+## Supporting records
+
+Historical execution observations are retained in the separate
+[qualification record](qualification.md).

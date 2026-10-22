@@ -281,13 +281,7 @@ separated into local and individual MPI rank-count jobs, each with a
 300-minute CI budget including configuration and compilation. Other
 natural-boundary contexts retain 1800 seconds and their existing CI
 partitions. This scheduling policy preserves all 27 cases per context,
-refinement levels, quadrature and numerical acceptance. The completed
-sequential local pyramid group took approximately 139 minutes with other
-validation work active; MPI-1 exceeded 157 minutes before its final boundary
-family. These are scheduling observations, not isolated benchmarks. The
-complete local matrix has passed under both assembly modes, with Local and
-MPI ranks one through four on all seven geometries. Hosted-CI success and
-runner-specific budget headroom remain separate checks.
+refinement levels, quadrature and numerical acceptance.
 
 An additional P1 quadrature-adequacy study uses $n=5$ for each natural
 boundary variant and geometry. It compares assembly order 12 and norm
@@ -355,11 +349,9 @@ geometry errors must remain unchanged.
 Separate registrations cover seven geometries in native and real-PETSc
 local contexts, MPI ranks one through four, and both thread configurations.
 Slow labels, 1800-second watchdogs and pyramid locks are retained. The older
-approximated groups exclude these additions. The complete finite matrix is
-locally verified: 84 registrations select 252 configurations, with 504
-successful rank-level reports. Both thread configurations have been built
-with Clang and syntax-checked with GCC. Registration selection, source
-identity, runtime reports and build dependency freshness are independently
-checked. Sampled RSS guards are not continuous peak-memory measurements;
-hosted CI and behavior outside these finite hierarchies remain separate.
-The natural-boundary matrix uses a different target and is unaffected.
+approximated groups exclude these additions. The natural-boundary matrix uses a different target and is unaffected.
+
+## Supporting records
+
+Historical execution observations are retained in the separate
+[qualification record](qualification.md).
