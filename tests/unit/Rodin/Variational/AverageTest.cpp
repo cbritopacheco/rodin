@@ -158,6 +158,11 @@ TEST(Rodin_Variational_Average, DiscontinuousIntegrationPointTracesAllGeometries
           continue;
         const Index first = *incidence.begin();
         const Index second = *std::next(incidence.begin());
+        EXPECT_EQ(&averageBasis.setPolytope(*face), &averageBasis);
+        EXPECT_EQ(&jumpBasis.setPolytope(*face), &jumpBasis);
+        ASSERT_EQ(averageBasis.getDOFIndices()->size(), 2);
+        ASSERT_EQ(jumpBasis.getDOFIndices()->size(), 2);
+        const IndexArray indices = *averageBasis.getDOFIndices();
         const auto& quadrature =
           QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
         const auto& points = face->getQuadrature(quadrature);
@@ -174,8 +179,21 @@ TEST(Rodin_Variational_Average, DiscontinuousIntegrationPointTracesAllGeometries
           EXPECT_EQ(&jumpBasis.setIntegrationPoint(point), &jumpBasis);
           EXPECT_EQ(&averageBasis.getIntegrationPoint(), &point);
           EXPECT_EQ(&jumpBasis.getIntegrationPoint(), &point);
-          EXPECT_EQ(averageBasis.getBasis(0), Scalar(1));
-          EXPECT_EQ(jumpBasis.getBasis(0), Scalar(0));
+          Scalar reconstructedAverage = 0;
+          Scalar reconstructedJump = 0;
+          for (size_t local = 0; local < 2; ++local)
+          {
+            const Index global = indices[local];
+            EXPECT_TRUE(global == first || global == second);
+            EXPECT_EQ((*jumpBasis.getDOFIndices())[local], global);
+            EXPECT_EQ(averageBasis.getBasis(local), Scalar(0.5));
+            EXPECT_EQ(
+              jumpBasis.getBasis(local), global == first ? Scalar(1) : Scalar(-1));
+            reconstructedAverage += averageBasis.getBasis(local) * field[global];
+            reconstructedJump += jumpBasis.getBasis(local) * field[global];
+          }
+          EXPECT_EQ(reconstructedAverage, average.getValue(point));
+          EXPECT_EQ(reconstructedJump, jump.getValue(point));
         }
         checked = true;
         break;

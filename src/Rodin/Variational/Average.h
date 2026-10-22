@@ -183,7 +183,6 @@ namespace Rodin::Variational
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
         const auto* qf = ip.getQuadratureFormula();
-        assert(qf);
         const IntegrationPoint ip1(p1, qf, ip.getIndex());
         const IntegrationPoint ip2(p2, qf, ip.getIndex());
         const auto v1 = getOperand().getValue(ip1);
