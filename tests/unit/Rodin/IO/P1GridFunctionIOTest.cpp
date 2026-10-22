@@ -19,9 +19,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  /**
-   * @brief Test saving and loading P1 GridFunction on triangle mesh (2D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on triangle mesh (2D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Triangle)
   {
     // Create 2D triangle mesh with >= 16 elements (4x4 grid = 32 triangles)
@@ -64,9 +62,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on quadrilateral mesh (2D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on quadrilateral mesh (2D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Quadrilateral)
   {
     // Create 2D quad mesh with >= 16 elements (5x5 grid = 16 quads)
@@ -107,9 +103,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on tetrahedron mesh (3D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on tetrahedron mesh (3D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Tetrahedron)
   {
     // Create 3D tet mesh with >= 16 elements (3x3x3 grid = 162 tets)
@@ -152,9 +146,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on wedge mesh (3D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on wedge mesh (3D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Wedge)
   {
     // Create 3D wedge mesh with >= 16 elements (3x3x3 grid)
@@ -237,9 +229,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on segment mesh (1D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on segment mesh (1D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Segment)
   {
     // Create 1D segment mesh with >= 16 elements (17 divisions = 16 segments)
@@ -279,9 +269,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on mixed 2D mesh
-   */
+  /// @brief Test saving and loading P1 GridFunction on mixed 2D mesh
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Mixed2D)
   {
     // Create a mixed mesh with triangles and quads, >= 16 elements
@@ -370,9 +358,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test file-based I/O for P1 GridFunction
-   */
+  /// @brief Test file-based I/O for P1 GridFunction
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadFile)
   {
     // Create a simple 2D mesh
@@ -518,7 +504,7 @@ namespace Rodin::Tests::Unit
       std::stringstream stream;
       stream << "# Independent vector fixture\n\nFiniteElementSpace\n"
              << "FiniteElementCollection: H1_2D_P1\nVDim: 3\nOrdering: " << ordering
-             << "\n\n# Coefficients\n";
+             << "\n\n";
       for (size_t i = 0; i < 3 * vertexCount; ++i)
       {
         const size_t vertex = ordering == 0 ? i % vertexCount : i / 3;

@@ -222,7 +222,7 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
 /// @brief Verifies wedge geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
 TEST_F(GaussLegendreTest, WedgeGeometry)
 {
-  GaussLegendre gl_wedge(Polytope::Type::Wedge, 2, 3);
+  GaussLegendre gl_wedge(Polytope::Type::Wedge, 2, 2, 3);
   EXPECT_EQ(gl_wedge.getSize(), 12); // 2x2x3 points (triangle base * height)
   EXPECT_EQ(gl_wedge.getGeometry(), Polytope::Type::Wedge);
 
