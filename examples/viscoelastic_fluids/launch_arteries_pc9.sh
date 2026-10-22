@@ -115,11 +115,12 @@ if [[ "${SKIP_3D:-0}" != 1 ]]; then
     read -r D U ML WV <<< "$(artery "$A")"
     read -r RE WO ST <<< "$(derive "$D" "$U")"
     NP="$NP3D"; [[ "$ML" == layerswo ]] && NP="$NPWO"
+    WAVE=""; [[ "$WV" == 1 ]] && WAVE="$WF"
     for F in $FLUIDS3D; do
       for G in $GEOS; do
         add "$NP" 2 "3D_${A}_${G}_${F}" "$(q env FLUIDS="$F" NP="$NP" TIME_ORDER=2 MESH_LEVEL="$ML" WO="$WO" \
           OUTPUT_EVERY=$(( ST / 20 )) STEPS="$ST" CYCLES=4 CYCLES_R=4 SOLVER="$SOLVER3D" HARMONICS=10 \
-          ${WV/#1/WAVEFORM="$WF"} ${WV/#0/WAVEFORM=} PETSC_EXTRA="-al_diameter $D" \
+          WAVEFORM="$WAVE" PETSC_EXTRA="-al_diameter $D" \
           EXE3D="$EXE3D" OUT3D="$OUT/3D/$A" bash "$S3" "$RE" "$G")" \
           "Re $RE  Wo $WO  D $D m  U $U m/s  $ST steps/cycle  $ML"
       done
