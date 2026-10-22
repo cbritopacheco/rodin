@@ -4,9 +4,16 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Independent mass-system oracles for PETSc problem ownership and target updates. */
+
+/**
+ * @file
+ * @brief Independent mass-system oracles for PETSc problem ownership and target updates.
+ *
+ * Partial assembly retains full Dirichlet elimination and raw-form lifting.
+ * The unselected stored matrix or vector remains unchanged, including after
+ * external scaling.
+ */
 #include <gtest/gtest.h>
-#include <petsc.h>
 #include <array>
 #include <memory>
 #include <numeric>
@@ -71,9 +78,7 @@ namespace
     const Math::Matrix<Scalar> identity = Math::Matrix<Scalar>::Identity(size, size);
     const Math::Matrix<Scalar> full =
       projection * raw * projection + identity - projection;
-    const Math::Matrix<Scalar> rowOnly = projection * raw + identity - projection;
     const Math::Vector<Scalar> fullLoad = projection * (load - raw * lift) + lift;
-    const Math::Vector<Scalar> rowLoad = projection * load + lift;
     EXPECT_LT((raw * exact - load).norm(), 1e-13);
     auto checkFull = [&](const auto& problem) {
       const auto& system = problem.getLinearSystem();
@@ -91,12 +96,11 @@ namespace
       EXPECT_EQ(system.getSolution(), original.getLinearSystem().getSolution());
       ASSERT_EQ(VecSet(system.getVector(), Scalar(7)), PETSC_SUCCESS);
       problem.assemble(AssemblyTarget::LHS);
-      EXPECT_LT((matrix(system) - rowOnly).norm(), 1e-12);
+      EXPECT_LT((matrix(system) - full).norm(), 1e-12);
       EXPECT_LT(
         (vector(system.getVector()) - Math::Vector<Scalar>::Constant(size, 7)).norm(),
         1e-12);
-      EXPECT_LT(
-        (matrix(std::as_const(original).getLinearSystem()) - rowOnly).norm(), 1e-12);
+      EXPECT_LT((matrix(std::as_const(original).getLinearSystem()) - full).norm(), 1e-12);
       EXPECT_LT((vector(std::as_const(original).getLinearSystem().getVector()) -
                   Math::Vector<Scalar>::Constant(size, 7))
                   .norm(),
@@ -105,12 +109,12 @@ namespace
       ASSERT_EQ(MatScale(system.getOperator(), Scalar(3)), PETSC_SUCCESS);
       problem.assemble(AssemblyTarget::RHS);
       EXPECT_LT((matrix(system) - Scalar(3) * full).norm(), 1e-12);
-      EXPECT_LT((vector(system.getVector()) - rowLoad).norm(), 1e-12);
+      EXPECT_LT((vector(system.getVector()) - fullLoad).norm(), 1e-12);
       EXPECT_LT(
         (matrix(std::as_const(original).getLinearSystem()) - Scalar(3) * full).norm(),
         1e-12);
       EXPECT_LT(
-        (vector(std::as_const(original).getLinearSystem().getVector()) - rowLoad).norm(),
+        (vector(std::as_const(original).getLinearSystem().getVector()) - fullLoad).norm(),
         1e-12);
       std::unique_ptr<typename ProblemType::ProblemBodyType> refreshed(body.copy());
       problem = *refreshed;
