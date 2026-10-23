@@ -119,6 +119,11 @@ python3 -m pip install -r dev/Requirements.txt
 python3 dev/include_dependency_graph.py --help
 ```
 
+## Pull-Request Labels
+
+The [labeler guide](labeler.md) explains module/category mappings, safe workflow
+execution and the end-to-end action regressions in `test_labeler.py`.
+
 ## CI Status
 
 Static-analysis reports are published for the main branches:
