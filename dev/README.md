@@ -44,6 +44,11 @@ Incremental style and documentation checks compare current findings with their
 committed baselines. Formatting uses the canonical formatter rather than a
 separate CI-only interpretation of indentation.
 
+## Pull-request labels
+
+The [labeler guide](labeler.md) explains module/category mappings, safe workflow
+execution and the end-to-end action regressions in `test_labeler.py`.
+
 ## Supporting documents
 
 - [Tooling procedures](tooling.md): invocation and baseline maintenance.

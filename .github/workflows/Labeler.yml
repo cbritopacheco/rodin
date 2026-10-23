@@ -1,25 +1,24 @@
-# This workflow will triage pull requests and apply a label based on the
-# paths that are modified in the pull request.
-#
-# To use this workflow, you will need to set up a .github/labeler.yml
-# file with configuration.  For more information, see:
-# https://github.com/actions/labeler
-
+# Label only from trusted base-branch rules; never check out pull-request code here.
 name: Labeler
-on:
+'on':
   pull_request_target:
     types: [opened, synchronize, reopened]
     branches: [master, develop]
 
+permissions:
+  contents: read
+
 jobs:
   label:
-
+    name: Apply Labels
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-
+      issues: write
     steps:
-    - uses: actions/labeler@v4
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      - uses: actions/labeler@b8dd2d9be0f68b860e7dae5dae7d772984eacd6d # v6.2.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: false
+          dot: true
