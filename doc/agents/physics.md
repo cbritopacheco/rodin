@@ -121,9 +121,9 @@ so triangular direct solvers and the true-residual test use the same operator.
 Metric and hinge Problems and metric forms are retained, but deformation-dependent forms are
 reassembled per outer iteration. MUMPS retains symbolic analysis while the
 augmented sparsity pattern is unchanged and numeric factors for identical systems.
-`AnalyticFunctionAdapters.h` lifts analytic lambdas into FunctionBase;
-`CellGeomCache` caches per-cell geometry. Historical experimental comparisons
-remain in experiments/swift_calibration; they are not current implementations.
+Analytic targets use the native callable `VectorFunction` and `MatrixFunction`
+interfaces. Calibration uses the shared reconstruction examples; there is no
+separate legacy fitting driver or affine-triangle geometry cache.
 
 Standing principle regardless of branch: interface-fitting constraints
 inside variational solves are smooth penalties, never hard projections

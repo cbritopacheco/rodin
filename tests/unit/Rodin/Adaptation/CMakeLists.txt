@@ -43,12 +43,10 @@ target_link_libraries(RodinAdaptationSWIFTAdaptTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
 gtest_discover_tests(RodinAdaptationSWIFTAdaptTest PROPERTIES LABELS unit)
 
-if(TARGET Rodin::MMG)
-  add_executable(RodinAdaptationSWIFTExampleParametersTest SWIFTExampleParametersTest.cpp)
-  target_link_libraries(RodinAdaptationSWIFTExampleParametersTest
-    PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation Rodin::MMG)
-  gtest_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
-endif()
+add_executable(RodinAdaptationSWIFTExampleParametersTest SWIFTExampleParametersTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTExampleParametersTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
 
 add_executable(RodinAdaptationSWIFTRegularityMetricTest SWIFTRegularityMetricTest.cpp)
 add_executable(RodinAdaptationSWIFTDirectionalNewtonTest SWIFTDirectionalNewtonTest.cpp)
@@ -91,6 +89,7 @@ if(TARGET SWIFT_ReconstructionP1)
           --output=${output_dir}/reconstruction)
       set_tests_properties(${fixture}.Generate PROPERTIES
         LABELS unit FIXTURES_SETUP ${fixture} TIMEOUT 120
+        PASS_REGULAR_EXPRESSION "MinSTCut classification: [1-9][0-9]* solid cells, [1-9][0-9]* fluid cells, [1-9][0-9]* interface facets"
         WORKING_DIRECTORY "${output_dir}"
         ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1;VECLIB_MAXIMUM_THREADS=1")
       add_test(NAME ${fixture}.Verify COMMAND RodinAdaptationSWIFTOutputTest)

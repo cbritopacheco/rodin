@@ -35,7 +35,7 @@ namespace Rodin::Examples
           /// Cell-average fidelity multiplier.
           Real fidelity = 1;
           /// Dimensionless smoothing; the driver supplies h times this weight.
-          Real smoothing = 1;
+          Real smoothing = Real(0.01);
       } classification;
 
       /**
