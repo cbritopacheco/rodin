@@ -128,6 +128,7 @@ def configured_profiles(build):
         planned = {**groups("unit"), **groups("manufactured")}
         for target in configured:
             if (target["kind"] == "test" and "convergence-baseline" in requirements[target["target"]]
+                    and "/PETSc" not in group_for(target)
                     and group_for(target) not in native_convergence_groups()):
                 raise ValueError("Convergence group is missing from the execution plan: " + group_for(target))
             if target["kind"] == "test" and target["owner"].startswith(("tests/unit/", "tests/manufactured/")):
@@ -422,7 +423,7 @@ def run_group(build, group, profile, backend=None):
     return outcome
 
 
-def configure(build, group, profile, build_type, multithreaded, asan, ubsan, backend=None):
+def configuration(group, profile, build_type, multithreaded, asan, ubsan, backend=None):
     backend = backend or {"unit": "optional", "manufactured": "default"}.get(profile, "baseline")
     coverage = asan == "OFF" and ubsan == "OFF"
     options = {
@@ -446,13 +447,18 @@ def configure(build, group, profile, build_type, multithreaded, asan, ubsan, bac
                         "RODIN_BUILD_UNIT_TESTS": "OFF", "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
                         "RODIN_BUILD_CONVERGENCE_TESTS": "ON", "RODIN_CODE_COVERAGE": "ON"})
     if backend == "optional":
-        options.update({"CMAKE_PREFIX_PATH": os.environ["SUITESPARSE_PREFIX"],
+        options.update({"CMAKE_PREFIX_PATH": os.environ.get("SUITESPARSE_PREFIX", str(ROOT / "suitesparse")),
                         "RODIN_USE_MUMPS": "OFF" if asan == "ON" else "ON",
                         "RODIN_USE_CHOLMOD": "ON", "RODIN_USE_PARU": "ON",
                         "RODIN_USE_SPQR": "ON", "RODIN_USE_UMFPACK": "ON"})
     elif backend == "baseline":
         options.update({"RODIN_USE_SCOTCH": "ON", "RODIN_USE_UMFPACK": "ON",
                         "RODIN_USE_CHOLMOD": "ON", "RODIN_USE_SPQR": "ON"})
+    return options
+
+
+def configure(build, group, profile, build_type, multithreaded, asan, ubsan, backend=None):
+    options = configuration(group, profile, build_type, multithreaded, asan, ubsan, backend)
     subprocess.run(["cmake", "-S", str(ROOT), "-B", str(build)] +
                    ["-D" + key + "=" + value for key, value in options.items()], check=True)
 

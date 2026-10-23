@@ -12,25 +12,20 @@ from ci_test_plan import plan, targeted_plan, native_convergence_groups
 
 
 class TestPlanTest(unittest.TestCase):
-    def test_incremental_upload_names_fit_codecov_and_identify_each_lane(self):
+    def test_incremental_publications_fit_the_service_limit(self):
         import yaml
         from ci_tests import ROOT
-        workflow = yaml.safe_load((ROOT / ".github/workflows/TestGroup.yml").read_text())
-        upload = next(step for step in workflow["jobs"]["Run"]["steps"]
-                      if step.get("id") == "upload")
-        template = upload["with"]["name"]
-        names = []
-        for entries in plan().values():
-            for row in entries:
-                if row["asan"] != "OFF" or row["ubsan"] != "OFF":
-                    continue
-                name = re.sub(r"\$\{\{\s*inputs\.(\w+)\s*\}\}",
-                              lambda match: str(row[match.group(1)]), template)
-                self.assertNotIn("${{", name)
-                self.assertLessEqual(len(name.encode("utf-8")), 100, row["id"])
-                names.append(name)
-        self.assertTrue(names)
+        jobs = yaml.safe_load((ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        publishers = [j for j in jobs.values() if j.get('uses') == './.github/workflows/CoveragePublish.yml']
+        names = ['ci-batch-' + j['with']['family'] for j in publishers]
+        self.assertEqual(len(names), 17)
+        self.assertLess(len(names), 150)
         self.assertEqual(len(names), len(set(names)))
+        self.assertTrue(all(len(name.encode('utf-8')) <= 100 for name in names))
+        action = yaml.safe_load((ROOT / '.github/actions/coverage/action.yml').read_text())
+        self.assertFalse(any(s.get('uses', '').startswith('codecov/') for s in action['runs']['steps']))
+        ordinary = yaml.safe_load((ROOT / '.github/workflows/TestGroup.yml').read_text())
+        self.assertFalse(any(s.get('uses', '').startswith('codecov/') for s in ordinary['jobs']['Run']['steps']))
 
     def test_configuration_matrix_and_job_limits(self):
         matrices = plan()
@@ -84,8 +79,13 @@ class TestPlanTest(unittest.TestCase):
             self.assertEqual(publisher["uses"], "./.github/actions/coverage")
         action = yaml.safe_load((ROOT / ".github/actions/coverage/action.yml").read_text())
         ids = [s.get("id") for s in action["runs"]["steps"]]
-        self.assertLess(ids.index("coverage_capture"), ids.index("coverage_upload"))
-        self.assertLess(ids.index("coverage_upload"), ids.index("coverage_receipt"))
+        self.assertLess(ids.index("coverage_capture"), ids.index("coverage_receipt"))
+        for name, job in jobs.items():
+            if not any(d["job"] == name for d in definitions):
+                continue
+            self.assertEqual(sum(s.get("uses") == "./.github/actions/test-build" for s in job["steps"]), 1)
+            self.assertTrue(any(p.get("uses") == "./.github/workflows/CoveragePublish.yml" and
+                                p["with"]["family"] == name and name in p["needs"] for p in jobs.values()))
 
     def test_native_restriction_rank_partitions_preserve_every_invocation(self):
         import re

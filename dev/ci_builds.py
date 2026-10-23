@@ -184,7 +184,7 @@ def runtime_libraries(spec, build_dir):
 
 
 def pack(spec, build_dir, destination):
-    if not next(build_dir.rglob('*.gcno'), None):
+    if spec['cmake'].get('RODIN_CODE_COVERAGE') == 'ON' and not next(build_dir.rglob('*.gcno'), None):
         raise ValueError('Shared instrumented build has no coverage notes')
     destination.mkdir(parents=True, exist_ok=False)
     metadata = {'schema': 1, 'definition': spec, 'identity': identity(spec),
@@ -194,9 +194,11 @@ def pack(spec, build_dir, destination):
     archive = destination / 'build.tar.gz'
     with tarfile.open(archive, 'w:gz', compresslevel=1) as tar:
         for path in sorted(build_dir.rglob('*')):
-            # Executables, CTest files, CMake metadata and zero-hit coverage
-            # notes travel together. Objects and runtime counters do not.
-            if path.is_dir() or (path.is_file() and path.suffix not in ['.o', '.gcda']):
+            # Executables, CTest files, CMake metadata and zero-hit notes travel
+            # together. Common producers retain objects for directory builders;
+            # runtime artifacts and all stages exclude execution counters.
+            excluded = ['.gcda'] if spec.get('stage') == 'common' else ['.o', '.gcda']
+            if path.is_dir() or (path.is_file() and path.suffix not in excluded):
                 if path.is_symlink():
                     path.resolve().relative_to(build_dir.resolve())
                 tar.add(path, arcname=str(path.relative_to(build_dir)), recursive=False)
@@ -204,7 +206,7 @@ def pack(spec, build_dir, destination):
     (destination / 'manifest.json').write_text(json.dumps(metadata, indent=2) + '\n')
 
 
-def restore(spec, build_dir, source):
+def restore(spec, build_dir, source, overlay=False):
     metadata = json.loads((source / 'manifest.json').read_text())
     expected = {'schema': 1, 'definition': spec, 'identity': identity(spec),
                 'commit': commit(), 'workspace': str(ROOT), 'build': str(build_dir.resolve()),
@@ -215,9 +217,9 @@ def restore(spec, build_dir, source):
     archive = source / 'build.tar.gz'
     if digest(archive) != metadata['sha256']:
         raise ValueError('Shared test build checksum mismatch')
-    if build_dir.exists():
+    if build_dir.exists() and not overlay:
         raise ValueError('Restore requires an empty build location')
-    build_dir.mkdir(parents=True)
+    build_dir.mkdir(parents=True, exist_ok=overlay)
     with tarfile.open(archive) as tar:
         for member in tar.getmembers():
             destination = build_dir / member.name

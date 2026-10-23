@@ -152,10 +152,14 @@ selection, and runs CTest serially. Each distributed invocation keeps its
 registered MPI rank count. Build-time and discovery-only runtime profiles are
 redirected outside the measured coverage directory.
 
-Unsanitized Unit, Manufactured and Slow lanes upload production-only LCOV
-independently as they finish. Native/MPI/PETSc convergence and restriction lanes
-also capture and upload their own reports; sanitizer and installation checks do
-not contribute coverage. There is no separate coverage test execution lane.
+Unsanitized Unit, Manufactured and Slow lanes independently capture and save
+production-only LCOV and a current-commit receipt. Native/MPI/PETSc convergence
+and restriction lanes do the same. Sanitizer and installation checks retain
+their test configurations but do not contribute coverage. There is no separate
+coverage test execution lane. Incremental publisher jobs validate every expected
+lane receipt and combine the reports into 17 Codecov submissions per run. Each
+batch retains its complete contribution/hash inventory. This avoids relying on
+an account-specific increase over Codecov's default per-commit upload limit.
 The former Coverage backend configuration is retained under ordinary Unit and
 Manufactured jobs as `Backends / Baseline`; their slow tests run only in Slow.
 Native MPI H1 restriction jobs partition the complete 420-case matrix by MPI
@@ -208,29 +212,48 @@ CI facts that bite:
 
 ### Shared compilation and independent execution
 
-The explicit convergence and native MPI restriction matrices share compatible
-builds through `dev/ci_builds.py` and `TestBuild.yml`. A build key contains the
-compiler, runner, complete CMake configuration and registered target set. MPI
-rank, geometry, refinement-history selection and boundary-condition partition
-remain execution coordinates. The configured CMake target manifest validates
-every requested executable before compilation. Bounded build families avoid a
-single global compilation barrier; the curved boundary families share their
-common executable producers. Existing module-group, baseline, installation and
-standalone MatrixRanges builds retain their current scheduling.
+`dev/ci_build_graph.py` plans common compilation by complete compiler, backend,
+runner, build-type, threading and sanitizer configuration. Tests are registered
+as a superset; these registration switches do not change the production ABI.
+The original execution requests and configuration-specific compilation
+inventories remain mandatory. Installation tests retain their actual install
+and consumption builds, which are the operations being tested.
 
-The immutable artifact contains executables, libraries, generated CTest files,
+Each common producer configures once and compiles the CMake codemodel dependency
+closure of requested executables and explicit baseline libraries, including
+shared test dependencies. Unrelated library variants are not built. Its archive retains objects for
+reuse by directory builders. Tracked source and submodule timestamps are
+normalized before compilation so later checkouts do not invalidate those
+objects. No source contents are changed. Directory builders verify that no
+common object was rebuilt.
+
+Executable ownership comes from the configured CMake target manifest. Build
+names follow `Tests / Build / Unit / Rodin / Geometry`,
+`Tests / Build / Manufactured / Rodin / P1` and the corresponding convergence
+hierarchy. Logical component selections reuse the physical directory's build.
+Directories exceeding twelve executable targets are divided into numbered
+build groups. Each executable has exactly one producer per common
+configuration. Backend branches have separate planning/build dependencies so
+PETSc studies can start without waiting for ordinary unit sanitizer builds.
+
+The runtime artifact contains executables, libraries, generated CTest files,
 CMake metadata, target manifests and all zero-hit `.gcno` notes. Compile objects
-and `.gcda` runtime counters are excluded. Each execution job restores its own
-copy at the original absolute build location, after checking the source commit,
-configuration, architecture, compiler version and archive digest. Dynamic
-runtime-library and MPI-launcher digests must also match. The generated build
-suppresses CMake regeneration during test and coverage operations; consumers never compile test
-targets. Artifacts remain available for seven days; an expired artifact requires
-rerunning its build producer.
+and `.gcda` runtime counters are excluded from execution workspaces. A lane can
+restore several directory artifacts when its original selection spans several
+directories. Regular and Slow selections share compatible executables; MPI
+ranks, geometries and refinement selections do not trigger compilation.
 
-Execution job names, matrices, environments, timeouts, case selections and MPI
-ranks are preserved. Discovery profiles remain outside the measured coverage
-directory. Every execution lane publishes its own coverage contribution and
-receipt, and the complete-current-commit gate also requires the shared build
-families to succeed. A failed build is reported in its build job; dependent
-execution families are skipped rather than reported as numerical failures.
+Every restoration checks the commit, complete configuration, architecture,
+compiler version, archive digest, dynamic runtime-library hashes and MPI
+launcher. The generated build suppresses CMake regeneration during execution
+and coverage capture. Artifacts remain available for seven days; expired
+artifacts require rerunning their producer.
+
+Execution matrices, environments, timeouts, case selections and MPI ranks are
+preserved. Discovery counters remain outside the measured coverage directory.
+Finalization requires every expected execution receipt, every directory build,
+unchanged common objects, the full original compilation inventories and a
+successful Codecov publication covering every eligible report exactly once.
+It independently compares the published LCOV union with the raw lane union,
+retains zero-hit production lines, and enforces 95% line coverage. Missing
+reports cannot be replaced by carryforward coverage or a partial percentage.

@@ -1,5 +1,5 @@
 name: Independent production coverage
-description: Capture, audit, upload and record one successful execution partition.
+description: Capture, audit and save one mandatory contribution for incremental publication.
 inputs:
   token:
     description: Codecov upload token.
@@ -21,19 +21,6 @@ runs:
       run: |
         cmake --build build --target RodinCoverage
         python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
-    - name: Upload independent production coverage
-      id: coverage_upload
-      uses: codecov/codecov-action@v5
-      with:
-        files: ${{ github.workspace }}/build/RodinCoverage.info
-        disable_search: true
-        plugins: noop
-        token: ${{ inputs.token }}
-        name: ${{ inputs.artifact_name }}
-        flags: tests
-        root_dir: ${{ github.workspace }}
-        use_pypi: true
-        fail_ci_if_error: true
     - name: Record independent coverage contribution
       id: coverage_receipt
       shell: bash

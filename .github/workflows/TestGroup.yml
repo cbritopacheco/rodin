@@ -3,6 +3,9 @@ name: Tests / Group
 'on':
   workflow_call:
     inputs:
+      family:
+        type: string
+        required: true
       profile:
         type: string
         required: true
@@ -38,6 +41,7 @@ name: Tests / Group
         required: false
 permissions:
   contents: read
+  actions: read
 jobs:
   Run:
     name: GCC-14, ${{ inputs.backend == 'optional' && 'Optional' || inputs.backend == 'default' && 'Default' || 'Baseline' }}, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
@@ -75,69 +79,16 @@ jobs:
           OPENBLAS_NUM_THREADS=1
           OMPI_MCA_hwloc_base_binding_policy=none
           ENV
-      - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: gcc-14
-          cmake: true
-      - name: Install dependencies
-        run: |
-          case "$PROFILE" in
-            unit) sudo apt-get update && sudo apt-get install -y libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libmumps-dev libmumps-headers-dev libomp-dev mpi-default-bin mpi-default-dev petsc-dev mpich lcov ;;
-            manufactured) sudo apt-get update && sudo apt-get install -y libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov ;;
-            slow) sudo apt-get update && sudo apt-get install -y libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov ;;
-            coverage) sudo apt-get update && sudo apt-get install -y gcc-14 g++-14 libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov ;;
-            *) exit 1 ;;
-          esac
-        env:
-          PROFILE: ${{ inputs.profile }}
-      - name: Restore SuiteSparse
-        id: suitesparse
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.SUITESPARSE_PREFIX }}
-          key: suitesparse-${{ env.SUITESPARSE_VERSION }}-${{ runner.os }}-gcc-14
-        if: inputs.backend == 'optional'
-      - name: Build SuiteSparse
-        if: inputs.backend == 'optional' && steps.suitesparse.outputs.cache-hit != 'true'
-        run: |
-          curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
-          cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX="${SUITESPARSE_PREFIX}" \
-            -DSUITESPARSE_ENABLE_PROJECTS="suitesparse_config;amd;camd;colamd;ccolamd;cholmod;umfpack;spqr;paru" \
-            -DSUITESPARSE_USE_CUDA=OFF \
-            -DSUITESPARSE_USE_FORTRAN=OFF \
-            -DSUITESPARSE_DEMOS=OFF
-          cmake --build suitesparse-build
-          cmake --install suitesparse-build
-      - name: Configure group
-        env:
-          GROUP: ${{ inputs.group }}
-          PROFILE: ${{ inputs.profile }}
-          BACKEND: ${{ inputs.backend }}
-          BUILD_TYPE: ${{ inputs.build_type }}
-          MULTITHREADED: ${{ inputs.multithreaded }}
-          ASAN: ${{ inputs.asan }}
-          UBSAN: ${{ inputs.ubsan }}
-        run: |
-          python3 dev/ci_tests.py configure --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND" \
-            --build-type "$BUILD_TYPE" --multithreaded "$MULTITHREADED" --asan "$ASAN" --ubsan "$UBSAN"
-      - name: Build selected targets
+      - name: Restore directory-owned test build
         id: build
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-          GROUP: ${{ inputs.group }}
-          PROFILE: ${{ inputs.profile }}
-          BASELINE: ${{ inputs.baseline }}
-          # Matrix-range sanitizer compilation alone uses about 5 GiB; keep it
-          # separate from the other large distributed-space translation units.
-          PARALLEL: ${{ inputs.group == 'unit/Rodin/MPI/Variational' && '1' || inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '1' ||
-            '2' }}
+        uses: ./.github/actions/test-build
+        with:
+          job: Ordinary
+          matrix: ${{ toJSON(inputs) }}
+          environment: 'true'
+      - name: Inspect restored selection
+        id: selection
         run: |
-          args=()
-          if [ "$BASELINE" = true ]; then args+=(--baseline); fi
-          python3 dev/ci_tests.py build --group "$GROUP" --profile "$PROFILE" --parallel "$PARALLEL" "${args[@]}"
           python3 - <<'PYTHON'
           import json, os
           from pathlib import Path
@@ -155,7 +106,7 @@ jobs:
         run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND"
       - name: Capture production coverage
         id: capture
-        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.build.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.selection.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}
         env:
           BASELINE: ${{ inputs.baseline }}
         run: |
@@ -166,21 +117,6 @@ jobs:
             cmake --build build --target RodinCoverage
           fi
           python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
-      - name: Upload incremental production coverage
-        id: upload
-        if: ${{ !cancelled() && steps.capture.outcome == 'success' }}
-        uses: codecov/codecov-action@v5
-        with:
-          files: ${{ github.workspace }}/build/RodinCoverage.info
-          disable_search: true
-          plugins: noop
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: ${{ inputs.baseline && 'baseline' || inputs.profile }}
-          # Keep within Codecov's 100-character upload-name limit and match the receipt artifact.
-          name: ci-result-${{ inputs.id }}
-          root_dir: ${{ github.workspace }}
-          use_pypi: true
-          fail_ci_if_error: true
       - name: Record producer outcome
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         env:
@@ -188,13 +124,12 @@ jobs:
           BUILD_OUTCOME: ${{ steps.build.outcome }}
           TEST_OUTCOME: ${{ steps.tests.outcome }}
           CAPTURE_OUTCOME: ${{ steps.capture.outcome }}
-          COVERAGE_UPLOADED: ${{ steps.upload.outcome }}
         run: python3 dev/ci_coverage.py record --output ci-result
       - name: Save invocation and coverage records
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           overwrite: true
-          name: ci-result-${{ inputs.id }}
+          name: ci-result-${{ inputs.family }}-${{ inputs.id }}
           path: ci-result/
           if-no-files-found: error

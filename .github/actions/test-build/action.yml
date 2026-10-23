@@ -7,23 +7,38 @@ inputs:
   matrix:
     description: Existing execution matrix coordinates.
     required: true
+  environment:
+    description: Install the compatible environment before restoring.
+    default: 'false'
 runs:
   using: composite
   steps:
+    - name: Identify build backend
+      id: configuration
+      shell: bash
+      env:
+        JOB: ${{ inputs.job }}
+        MATRIX: ${{ inputs.matrix }}
+      run: python3 dev/ci_build_graph.py mode --job "$JOB" --matrix "$MATRIX"
+    - uses: actions/download-artifact@v4
+      with:
+        name: ci-build-index-${{ steps.configuration.outputs.mode }}
+        path: .
     - name: Identify compatible build
       id: build
       shell: bash
       env:
         JOB: ${{ inputs.job }}
         MATRIX: ${{ inputs.matrix }}
-      run: python3 dev/ci_builds.py key --job "$JOB" --matrix "$MATRIX"
-    - uses: actions/download-artifact@v4
+      run: python3 dev/ci_build_graph.py identify --job "$JOB" --matrix "$MATRIX"
+    - uses: ./.github/actions/test-environment
+      if: inputs.environment == 'true'
       with:
-        name: ci-build-${{ steps.build.outputs.id }}
-        path: ci-build-artifact
+        definition: ${{ steps.build.outputs.definition }}
     - name: Restore clean runner-local build
       shell: bash
       env:
         JOB: ${{ inputs.job }}
         MATRIX: ${{ inputs.matrix }}
-      run: python3 dev/ci_builds.py restore --job "$JOB" --matrix "$MATRIX"
+        GH_TOKEN: ${{ github.token }}
+      run: python3 dev/ci_build_graph.py restore --job "$JOB" --matrix "$MATRIX"

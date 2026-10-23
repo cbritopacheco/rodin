@@ -3,10 +3,12 @@
 import importlib.util
 import hashlib
 import json
+import os
 import shutil
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location("ci_coverage", Path(__file__).with_name("ci_coverage.py"))
 coverage = importlib.util.module_from_spec(SPEC)
@@ -14,6 +16,12 @@ SPEC.loader.exec_module(coverage)
 
 
 class ProductionCoverageTest(unittest.TestCase):
+    def test_compact_dependency_results_reject_every_unsuccessful_state(self):
+        for state in ['failure', 'cancelled', 'skipped', 'timed_out']:
+            with self.subTest(state=state), patch.dict(os.environ, {'CI_JOB_RESULTS': json.dumps(['success', state])}):
+                with self.assertRaisesRegex(ValueError, 'Required test/coverage jobs did not succeed'):
+                    coverage.finalize(None)
+
     def test_zero_hit_lines_survive_incremental_union(self):
         with tempfile.TemporaryDirectory() as directory:
             first = Path(directory) / "initial.info"

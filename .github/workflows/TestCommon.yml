@@ -1,0 +1,51 @@
+name: Tests / Build / Common
+'on':
+  workflow_call:
+    inputs:
+      definition:
+        type: string
+        required: true
+      id:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  Build:
+    name: GCC-14, ${{ fromJSON(inputs.definition).cmake.CMAKE_BUILD_TYPE }}, MT-${{ fromJSON(inputs.definition).cmake.RODIN_MULTITHREADED }}, ASan-${{ fromJSON(inputs.definition).cmake.RODIN_USE_ASAN }}, UBSan-${{ fromJSON(inputs.definition).cmake.RODIN_USE_UBSAN }}
+    runs-on: ${{ fromJSON(inputs.definition).runner }}
+    timeout-minutes: 360
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+      OMP_WAIT_POLICY: PASSIVE
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - uses: ./.github/actions/test-environment
+        with:
+          definition: ${{ inputs.definition }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ci-test-plan
+          path: .
+      - name: Compile common libraries once
+        env:
+          DEFINITION: ${{ inputs.definition }}
+        run: python3 dev/ci_build_graph.py common --definition "$DEFINITION"
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-common-${{ inputs.id }}
+          path: ci-common-artifact/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-common-manifest-${{ fromJSON(inputs.definition).mode }}-${{ inputs.id }}
+          path: ci-common-record/
+          if-no-files-found: error

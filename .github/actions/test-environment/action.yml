@@ -1,0 +1,54 @@
+name: Compatible test environment
+description: Install the same compiler and runtime dependencies for producers and consumers.
+inputs:
+  definition:
+    description: Complete shared-build configuration.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: aminya/setup-cpp@v1
+      with:
+        compiler: ${{ fromJSON(inputs.definition).compiler }}
+        cmake: true
+    - name: Install compatible dependencies
+      shell: bash
+      env:
+        MODE: ${{ fromJSON(inputs.definition).mode }}
+      run: |
+        boost=libboost1.74-all-dev
+        if [ "$MODE" = mpi ]; then boost=libboost-all-dev; fi
+        packages=(lcov "$boost" libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev)
+        case "$MODE" in
+          native) ;;
+          mpi) packages+=(mpi-default-bin mpi-default-dev) ;;
+          petsc) packages+=(petsc-dev mpich) ;;
+          complex) packages+=(libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config) ;;
+          ranges_real) packages+=(libpetsc-real-dev mpi-default-dev) ;;
+          ranges_complex) packages+=(libpetsc-complex-dev mpi-default-dev pkg-config) ;;
+          optional|default|baseline) packages+=(libmumps-dev libmumps-headers-dev mpi-default-bin mpi-default-dev petsc-dev mpich) ;;
+          *) exit 1 ;;
+        esac
+        sudo apt-get update
+        sudo apt-get install -y "${packages[@]}"
+    - name: Restore SuiteSparse
+      id: suitesparse
+      if: fromJSON(inputs.definition).mode == 'optional'
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/suitesparse
+        key: suitesparse-7.14.1-${{ runner.os }}-gcc-14
+    - name: Build SuiteSparse
+      if: fromJSON(inputs.definition).mode == 'optional' && steps.suitesparse.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        SUITESPARSE_VERSION: 7.14.1
+        SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
+      run: |
+        curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
+        cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
+          -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${SUITESPARSE_PREFIX}" \
+          -DSUITESPARSE_ENABLE_PROJECTS="suitesparse_config;amd;camd;colamd;ccolamd;cholmod;umfpack;spqr;paru" \
+          -DSUITESPARSE_USE_CUDA=OFF -DSUITESPARSE_USE_FORTRAN=OFF -DSUITESPARSE_DEMOS=OFF
+        cmake --build suitesparse-build -j 2
+        cmake --install suitesparse-build

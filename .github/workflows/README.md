@@ -10,8 +10,11 @@ can share compilation without sharing runtime state.
 | Workflow | Responsibility |
 | --- | --- |
 | [Tests.yml](Tests.yml) | Plans the test matrices, schedules grouped and dedicated tests, checks installation, and finalizes coverage. |
-| [TestGroup.yml](TestGroup.yml) | Reusable runner for directory groups: configure, build the selected targets, run the selected CTest invocations and publish coverage when enabled. |
-| [TestBuild.yml](TestBuild.yml) | Reusable producer of immutable compiled artifacts for compatible dedicated convergence and MPI restriction partitions. |
+| [TestGroup.yml](TestGroup.yml) | Restore directory builds, run the selected regular/Slow invocations, and save independent coverage contributions. |
+| [TestCommon.yml](TestCommon.yml) | Configure and compile common libraries once per compatible configuration. |
+| [TestBuildPlan.yml](TestBuildPlan.yml) | Resolve unique executable ownership from configured CMake manifests. |
+| [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile bounded directory groups using unchanged common objects. |
+| [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Builds and checks the generated documentation and handles documentation publication. |
@@ -20,9 +23,9 @@ can share compilation without sharing runtime state.
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
 | [copilot-setup-steps.yml](copilot-setup-steps.yml) | Provisions the GitHub coding-agent environment; it is separate from numerical test scheduling. |
 
-The trigger declarations in each workflow define when it runs. `TestGroup.yml`
-and `TestBuild.yml` are called by `Tests.yml`, rather than starting a second
-independent test campaign. A newer push cancels superseded runs according to
+The trigger declarations in each workflow define when it runs. The reusable
+test, build and publication workflows are called by `Tests.yml`; they do not
+start a second independent test campaign. A newer push cancels superseded runs according to
 the top-level workflows' concurrency policies.
 
 ## Registration and scheduling
@@ -65,52 +68,66 @@ Geometry cases remain in the unit profile, and native H1 restriction cases use
 their dedicated rank partitions. Follow those selectors when extending these
 families rather than inferring execution solely from the label table.
 
-The planner writes four artifacts for inspection:
+The planner writes execution inventories and build contracts for inspection:
 
 - `ci-test-plan.json`: grouped execution and compilation-baseline matrices.
 - `ci-convergence-plan.json`: discovered native baseline convergence groups.
-- `ci-build-plan.json`: deduplicated dedicated build definitions.
+- `ci-build-plan.json`: original dedicated compile contracts, retained for auditing.
+- `ci-common-plan.json`: common configurations and all original execution requests.
+- `ci-build-index.json` / `ci-directory-plan.json`: configured ownership and
+  bounded build matrices, published separately for each backend branch.
 - `ci-coverage-targets.json`: expected dedicated coverage contributions.
 
 ## Shared builds and isolated execution
 
-Dedicated convergence and native MPI H1 restriction lanes use this flow:
+All unit, manufactured, Slow, convergence, MPI restriction and MatrixRanges
+execution lanes use the same build/restore architecture:
 
 ```mermaid
 flowchart TD
-  P[Plan registrations and execution partitions] --> B[Compile compatible target families]
-  B --> A[Upload immutable build artifacts]
-  A --> E1[Restore private build and run partition A]
-  A --> E2[Restore private build and run partition B]
-  E1 --> C1[Coverage report and execution receipt A]
-  E2 --> C2[Coverage report and execution receipt B]
-  C1 --> F[Validate complete contributions and merge coverage]
-  C2 --> F
+  P[Plan unchanged execution requests] --> C[Compile common libraries per configuration]
+  C --> D[Resolve CMake directory ownership]
+  D --> B[Compile each directory executable once]
+  B --> E1[Restore private build and run regular selection]
+  B --> E2[Restore private build and run Slow or rank selection]
+  E1 --> R1[Independent report and receipt]
+  E2 --> R2[Independent report and receipt]
+  R1 --> U[Validate and publish incremental union]
+  R2 --> U
+  U --> F[Complete coverage and 95 percent gate]
 ```
 
-[ci_builds.py](../../dev/ci_builds.py) defines seven bounded build families:
-`native`, `restriction`, `petsc_h`, `petsc_degree`, `petsc_curved`,
-`petsc_boundary` and `complex`. A build key contains the compiler, runner,
-complete CMake configuration and exact target set. Runtime coordinates such as
-MPI ranks, geometry and refinement-study selection can reuse that build when
-they do not change its definition. This shares compilation per compatible
-target family, rather than compiling the entire project once for every backend.
-Grouped tests, native baseline convergence, compilation baselines, installation
-and standalone MatrixRanges lanes retain their own builds.
+[ci_build_graph.py](../../dev/ci_build_graph.py) separates common objects,
+directory-owned executables and execution-only coordinates. The complete
+compiler/backend/build-type/threading/sanitizer configuration determines
+compatibility. Directory groups follow the test hierarchy, with numbered
+subgroups above twelve executable targets. Test enable switches register a
+superset without changing production ABI; original configuration-specific
+inventories and runtime selectors remain required.
 
-Artifacts contain executables, libraries, generated CTest/CMake metadata,
-target manifests and zero-hit `.gcno` coverage notes. They exclude `.o` objects
-and runtime `.gcda` counters. The [restore action](../actions/test-build/action.yml)
-extracts a private copy at the original absolute location and validates the
-commit, definition, architecture, compiler version, archive checksum and runtime
-library/MPI-launcher fingerprints. Consumers do not compile; CMake regeneration
-is suppressed for these artifacts.
+Common compilation follows the CMake dependency closure of requested executables
+and explicit baseline libraries; it does not build unrelated library variants.
+Common archives include objects for subsequent builders. Tracked input
+contents are unchanged; stable source/submodule timestamps prevent later
+checkouts invalidating restored objects. Every directory builder checks that
+its common objects remained unchanged. Each executable belongs to exactly one
+producer for a common configuration. Backend branches progress independently,
+so PETSc convergence does not wait for ordinary unit sanitizer compilation.
+Installation checks retain their actual install/consumption builds.
 
-A build failure appears in its producer job and skips the dependent execution
-family. Restore failures indicate artifact/configuration incompatibility, before
-numerical execution. Artifacts expire after seven days; rerun the producer and
-dependent execution jobs when an artifact has expired. Each build family has
-its own dependency barrier, rather than one global barrier for every test.
+Execution artifacts contain executables, libraries, generated CTest/CMake
+metadata, manifests and all zero-hit `.gcno` notes. Execution workspaces exclude
+objects and runtime `.gcda` counters. The
+[restore action](../actions/test-build/action.yml) checks the source commit,
+configuration, architecture, compiler version, archive checksum and runtime
+library/MPI-launcher fingerprints. A selection spanning several directories
+restores their compatible artifacts. CMake regeneration is suppressed;
+execution lanes do not rebuild test targets.
+
+Regular and Slow variants share executables. MPI ranks, geometries and study
+partitions remain execution coordinates with their original timeouts and
+numerical criteria. A failed producer blocks dependent execution rather than
+masquerading as a numerical failure. Artifacts expire after seven days.
 
 ## Coverage pooling
 
@@ -120,7 +137,7 @@ production code but their own source lines are excluded from the denominator.
 Coverage describes compiled code and its instantiated templates.
 
 - Unsanitized grouped unit/manufactured/slow and dedicated convergence/restriction
-  lanes publish independent LCOV contributions. Sanitizer and installation checks
+  lanes save independent LCOV contributions and receipts. Sanitizer and installation checks
   do not contribute coverage.
 - Initial zero-hit reports and compilation baselines preserve the configured
   production libraries and template instantiations even when a runtime partition
@@ -132,8 +149,14 @@ Coverage describes compiled code and its instantiated templates.
 - [ci_coverage.py](../../dev/ci_coverage.py) checks the current commit, expected
   producers, report digests and compilation inventory before merging. Missing,
   duplicated, stale or tampered contributions cannot silently pass the gate.
-- `Tests / Coverage / Finalize` requires successful producer uploads and shared
-  build families, enforces the **95% production line coverage floor**, and
+- Seventeen incremental publisher jobs validate all reports in their execution
+  families before submitting production line unions. Each publication records
+  every contributing lane and report digest. This keeps service submissions
+  below Codecov's default per-commit limit without dropping any contribution.
+- `Tests / Coverage / Finalize` verifies all directory builds, unchanged common
+  objects, compilation inventories and successful publications. It compares
+  the published union against the full raw lane union, enforces the
+  **95% production line coverage floor**, and
   finalizes Codecov notifications. It does not rebuild or rerun tests. Historical
   carryforward coverage cannot replace a required current-commit contribution.
 

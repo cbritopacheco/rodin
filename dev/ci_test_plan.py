@@ -143,10 +143,10 @@ def main():
         raise ValueError("Native convergence exceeds the matrix limit; split by refinement family")
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
-            for name, rows in {**matrices, **{"build_" + key: rows for key, rows in builds.items()}}.items():
+            for name, rows in matrices.items():
                 stream.write(name + "=" + json.dumps({"include": rows}, separators=(",", ":")) + "\n")
             stream.write("native_convergence=" + json.dumps({"include": native}, separators=(",", ":")) + "\n")
-    print("Shared builds:", {name: len(rows) for name, rows in builds.items()})
+    print("Dedicated compile contracts:", {name: len(rows) for name, rows in builds.items()})
     print("Planned jobs:", {name: len(rows) for name, rows in matrices.items()})
 
 

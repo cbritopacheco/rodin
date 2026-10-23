@@ -33,7 +33,7 @@ class SharedBuildPlanTest(unittest.TestCase):
         builds = ci.plan(self.workflow)
         for job, family in ci.FAMILIES.items():
             definition = self.workflow['jobs'][job]
-            self.assertIn('Build_' + family, definition['needs'])
+            self.assertTrue(any(name.startswith('Directory') for name in definition['needs']))
             self.assertFalse(any(step.get('name', '').startswith(('Build ', 'Configure '))
                                  for step in definition['steps']))
             self.assertEqual(sum(step.get('uses') == './.github/actions/test-build'
@@ -48,8 +48,9 @@ class SharedBuildPlanTest(unittest.TestCase):
         self.assertEqual(sum(map(len, builds.values())), 84)
         self.assertEqual(sum(len(self.workflow['jobs'][job]['strategy']['matrix']['include'])
                              for job in ci.FAMILIES), 742)
-        for family in builds:
-            self.assertIn('Build_' + family, self.workflow['jobs']['CoverageFinalize']['needs'])
+        for producer, job in self.workflow['jobs'].items():
+            if job.get('uses') in ['./.github/workflows/TestCommon.yml', './.github/workflows/TestDirectoryBuild.yml']:
+                self.assertIn(producer, self.workflow['jobs']['CoverageFinalize']['needs'])
 
     def test_rank_geometry_and_study_share_the_compiled_executable(self):
         row = dict(multithreaded='ON', suite='nonlinear_boundary', physics='NonlinearPoisson',

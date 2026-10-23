@@ -76,6 +76,23 @@ PETSc lane automatically.
 For slow tests, label the registration `slow` together with its category. When
 splitting one executable's cases between ordinary and slow registrations, use
 complementary `TEST_FILTER` expressions so cases are neither repeated nor lost.
+The Slow variant retains the directory hierarchy and reuses the regular lane's
+compatible executable. It changes execution selection and watchdog policy,
+not compiler flags or build ownership.
+
+All execution families consume directory builds from the configured target
+manifest. Common objects are compiled once per compatible configuration;
+executables have one physical-directory producer, subdivided into numbered
+groups above twelve targets. Compiler, backend, optimization, threading and
+sanitizer variants remain distinct. Rank and geometry selections share builds.
+No execution lane should gain an inline configure/build command.
+
+Every eligible lane saves its own production LCOV report and receipt. A new
+partition must be included in its family's expected publication inventory.
+Publisher jobs validate complete families and combine their contributions into
+bounded incremental Codecov submissions. Finalization checks that every raw
+report was published exactly once and that the published line union equals
+the complete raw union before enforcing 95% coverage.
 
 ### Add an entirely new top-level test category
 

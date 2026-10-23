@@ -1,0 +1,67 @@
+name: Tests / Build / Directory
+'on':
+  workflow_call:
+    inputs:
+      runner:
+        type: string
+        required: true
+      mode:
+        type: string
+        required: true
+      id:
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  Build:
+    name: Compile registered targets
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 360
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+      OMP_WAIT_POLICY: PASSIVE
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Free compilation disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+      - name: Hydrate discovery resources
+        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ci-build-index-${{ inputs.mode }}
+          path: .
+      - name: Resolve directory configuration
+        id: configuration
+        env:
+          BUILD_ID: ${{ inputs.id }}
+        run: python3 dev/ci_build_graph.py directory-definition --id "$BUILD_ID"
+      - uses: ./.github/actions/test-environment
+        with:
+          definition: ${{ steps.configuration.outputs.definition }}
+      - name: Compile directory executables using common objects
+        env:
+          BUILD_ID: ${{ inputs.id }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 dev/ci_build_graph.py directory --id "$BUILD_ID"
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-build-${{ inputs.id }}
+          path: ci-build-artifact/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-built-${{ inputs.id }}
+          path: ci-built-record/
+          if-no-files-found: error

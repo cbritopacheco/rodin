@@ -11,6 +11,7 @@ name: Tests
       - develop
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: Tests-${{ github.ref }}
   cancel-in-progress: true
@@ -27,13 +28,15 @@ jobs:
       slow: ${{ steps.plan.outputs.slow }}
       baseline: ${{ steps.plan.outputs.baseline }}
       native_convergence: ${{ steps.plan.outputs.native_convergence }}
-      build_native: ${{ steps.plan.outputs.build_native }}
-      build_restriction: ${{ steps.plan.outputs.build_restriction }}
-      build_petsc_h: ${{ steps.plan.outputs.build_petsc_h }}
-      build_petsc_degree: ${{ steps.plan.outputs.build_petsc_degree }}
-      build_petsc_curved: ${{ steps.plan.outputs.build_petsc_curved }}
-      build_petsc_boundary: ${{ steps.plan.outputs.build_petsc_boundary }}
-      build_complex: ${{ steps.plan.outputs.build_complex }}
+      common_optional: ${{ steps.common.outputs.common_optional }}
+      common_default: ${{ steps.common.outputs.common_default }}
+      common_baseline: ${{ steps.common.outputs.common_baseline }}
+      common_native: ${{ steps.common.outputs.common_native }}
+      common_mpi: ${{ steps.common.outputs.common_mpi }}
+      common_petsc: ${{ steps.common.outputs.common_petsc }}
+      common_complex: ${{ steps.common.outputs.common_complex }}
+      common_ranges_real: ${{ steps.common.outputs.common_ranges_real }}
+      common_ranges_complex: ${{ steps.common.outputs.common_ranges_complex }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +48,9 @@ jobs:
       - name: Plan current source groups
         id: plan
         run: python3 dev/ci_test_plan.py
+      - name: Plan common compilation configurations
+        id: common
+        run: python3 dev/ci_build_graph.py prepare
       - uses: actions/upload-artifact@v4
         with:
           overwrite: true
@@ -54,86 +60,388 @@ jobs:
             ci-build-plan.json
             ci-convergence-plan.json
             ci-coverage-targets.json
+            ci-common-plan.json
           if-no-files-found: error
-  Build_native:
-    name: Build / Native
+  CommonOptional:
+    name: Build / Common / Optional
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_native) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_optional) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
-  Build_restriction:
-    name: Build / Restriction
+  BuildPlanOptional:
+    name: Build / Plan / Optional
+    needs: [Plan, CommonOptional]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: optional
+  DirectoryOptional1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanOptional
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanOptional.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryOptional2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanOptional
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanOptional.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryOptional3:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanOptional
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanOptional.outputs.directory_3) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryOptional4:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanOptional
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanOptional.outputs.directory_4) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonDefault:
+    name: Build / Common / Default
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_restriction) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_default) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
-  Build_petsc_h:
-    name: Build / PETSc / H
+  BuildPlanDefault:
+    name: Build / Plan / Default
+    needs: [Plan, CommonDefault]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: default
+  DirectoryDefault1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanDefault
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanDefault.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryDefault2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanDefault
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanDefault.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonBaseline:
+    name: Build / Common / Baseline
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_h) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_baseline) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
-  Build_petsc_degree:
-    name: Build / PETSc / Degree
+  BuildPlanBaseline:
+    name: Build / Plan / Baseline
+    needs: [Plan, CommonBaseline]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: baseline
+  DirectoryBaseline1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanBaseline
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanBaseline.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryBaseline2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanBaseline
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanBaseline.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonNative:
+    name: Build / Common / Native
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_degree) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_native) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
-  Build_petsc_curved:
-    name: Build / PETSc / Curved
+  BuildPlanNative:
+    name: Build / Plan / Native
+    needs: [Plan, CommonNative]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: native
+  DirectoryNative1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanNative
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanNative.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryNative2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanNative
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanNative.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonMPI:
+    name: Build / Common / MPI
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_curved) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_mpi) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
-  Build_petsc_boundary:
-    name: Build / PETSc / Boundary
+  BuildPlanMPI:
+    name: Build / Plan / MPI
+    needs: [Plan, CommonMPI]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: mpi
+  DirectoryMPI1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanMPI
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanMPI.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryMPI2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanMPI
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanMPI.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonPETSc:
+    name: Build / Common / PETSc
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_petsc_boundary) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_petsc) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
-  Build_complex:
-    name: Build / Complex
+  BuildPlanPETSc:
+    name: Build / Plan / PETSc
+    needs: [Plan, CommonPETSc]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: petsc
+  DirectoryPETSc1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanPETSc
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanPETSc.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryPETSc2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanPETSc
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanPETSc.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonComplex:
+    name: Build / Common / Complex
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.build_complex) }}
-    uses: ./.github/workflows/TestBuild.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_complex) }}
+    uses: ./.github/workflows/TestCommon.yml
     with:
       definition: ${{ toJSON(matrix.definition) }}
       id: ${{ matrix.id }}
+  BuildPlanComplex:
+    name: Build / Plan / Complex
+    needs: [Plan, CommonComplex]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: complex
+  DirectoryComplex1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanComplex
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanComplex.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryComplex2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanComplex
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanComplex.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonMatrixRangesReal:
+    name: Build / Common / PETSc / MatrixRanges / Real
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_ranges_real) }}
+    uses: ./.github/workflows/TestCommon.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  BuildPlanMatrixRangesReal:
+    name: Build / Plan / PETSc / MatrixRanges / Real
+    needs: [Plan, CommonMatrixRangesReal]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: ranges_real
+  DirectoryMatrixRangesReal1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanMatrixRangesReal
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanMatrixRangesReal.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryMatrixRangesReal2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanMatrixRangesReal
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanMatrixRangesReal.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  CommonMatrixRangesComplex:
+    name: Build / Common / PETSc / MatrixRanges / Complex
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.common_ranges_complex) }}
+    uses: ./.github/workflows/TestCommon.yml
+    with:
+      definition: ${{ toJSON(matrix.definition) }}
+      id: ${{ matrix.id }}
+  BuildPlanMatrixRangesComplex:
+    name: Build / Plan / PETSc / MatrixRanges / Complex
+    needs: [Plan, CommonMatrixRangesComplex]
+    uses: ./.github/workflows/TestBuildPlan.yml
+    with:
+      mode: ranges_complex
+  DirectoryMatrixRangesComplex1:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanMatrixRangesComplex
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanMatrixRangesComplex.outputs.directory_1) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
+  DirectoryMatrixRangesComplex2:
+    name: Build / ${{ matrix.name }}
+    needs: BuildPlanMatrixRangesComplex
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.BuildPlanMatrixRangesComplex.outputs.directory_2) }}
+    uses: ./.github/workflows/TestDirectoryBuild.yml
+    with:
+      id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      mode: ${{ matrix.mode }}
   Unit1:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryOptional1
+      - DirectoryOptional2
+      - DirectoryOptional3
+      - DirectoryOptional4
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.unit_1) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: unit_1
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -149,11 +457,18 @@ jobs:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryOptional1
+      - DirectoryOptional2
+      - DirectoryOptional3
+      - DirectoryOptional4
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.unit_2) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: unit_2
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -169,11 +484,18 @@ jobs:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryOptional1
+      - DirectoryOptional2
+      - DirectoryOptional3
+      - DirectoryOptional4
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.unit_3) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: unit_3
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -189,11 +511,16 @@ jobs:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryDefault1
+      - DirectoryDefault2
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.manufactured_1) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: manufactured_1
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -209,11 +536,16 @@ jobs:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryDefault1
+      - DirectoryDefault2
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.manufactured_2) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: manufactured_2
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -229,11 +561,14 @@ jobs:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.slow) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: slow
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -249,11 +584,20 @@ jobs:
     name: ${{ matrix.name }}
     needs:
       - Plan
+      - DirectoryOptional1
+      - DirectoryOptional2
+      - DirectoryOptional3
+      - DirectoryOptional4
+      - DirectoryDefault1
+      - DirectoryDefault2
+      - DirectoryBaseline1
+      - DirectoryBaseline2
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.baseline) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
+      family: baseline
       backend: ${{ matrix.backend }}
       profile: ${{ matrix.profile }}
       group: ${{ matrix.group }}
@@ -268,7 +612,8 @@ jobs:
   Convergence:
     needs:
       - Plan
-      - Build_native
+      - DirectoryNative1
+      - DirectoryNative2
     runs-on: ubuntu-latest
     timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group, '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
@@ -408,37 +753,10 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           libomp-dev
-      - name: Configure convergence build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MPI=OFF
-          -DRODIN_USE_PETSC=OFF -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-      - name: Build convergence suites
-        run: |
-          case "${{ matrix.suite }}" in
-            baseline) python3 dev/ci_tests.py build --group "$CONVERGENCE_GROUP" --profile convergence-baseline ;;
-            pressure_*)
-              cmake --build build -j 2 --target RodinConvergenceHStokesStability ;;
-            curved_projection)
-              cmake --build build -j 2 --target \
-                RodinConvergenceIsoparametricP0Projection \
-                RodinConvergenceIsoparametricGeometryApproximation ;;
-            curved_diffusion_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricDiffusion ;;
-            curved_reaction_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricReactionDiffusion ;;
-            curved_nonlinear_*)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricNonlinearPoisson ;;
-            curved_elasticity)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricLinearElasticity ;;
-            curved_stokes)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricStokes ;;
-            curved_helmholtz)
-              cmake --build build -j 2 --target RodinConvergenceIsoparametricHelmholtz ;;
-            *) exit 1 ;;
-          esac
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-          CONVERGENCE_GROUP: ${{ matrix.group }}
+      - uses: ./.github/actions/test-build
+        with:
+          job: ConvergenceBaseline
+          matrix: ${{ toJSON(matrix) }}
       - name: Run convergence suites
         run: |
           curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
@@ -491,10 +809,13 @@ jobs:
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
     needs:
       - Plan
+      - DirectoryNative1
+      - DirectoryNative2
   MPIH1Restriction:
     needs:
       - Plan
-      - Build_restriction
+      - DirectoryMPI1
+      - DirectoryMPI2
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
@@ -650,7 +971,8 @@ jobs:
   PETScConvergence:
     needs:
       - Plan
-      - Build_petsc_h
+      - DirectoryPETSc1
+      - DirectoryPETSc2
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.suite == 'bulk' && 120 || 360 }}
     strategy:
@@ -997,7 +1319,8 @@ jobs:
   PETScDegreeConvergence:
     needs:
       - Plan
-      - Build_petsc_degree
+      - DirectoryPETSc1
+      - DirectoryPETSc2
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
@@ -1111,7 +1434,8 @@ jobs:
   PETScCurvedConvergence:
     needs:
       - Plan
-      - Build_petsc_curved
+      - DirectoryPETSc1
+      - DirectoryPETSc2
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.physics == 'NonlinearPoisson' && 360 || 240 }}
     strategy:
@@ -1436,7 +1760,8 @@ jobs:
   PETScCurvedBoundaryConvergence:
     needs:
       - Plan
-      - Build_petsc_boundary
+      - DirectoryPETSc1
+      - DirectoryPETSc2
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.physics == 'ReactionDiffusion' && matrix.geometry == 'pyramid' && 300 || 240 }}
     strategy:
@@ -1824,7 +2149,8 @@ jobs:
   PETScCurvedNonlinearTetrahedronConvergence:
     needs:
       - Plan
-      - Build_petsc_boundary
+      - DirectoryPETSc1
+      - DirectoryPETSc2
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
@@ -2044,7 +2370,8 @@ jobs:
   PETScComplexConvergence:
     needs:
       - Plan
-      - Build_complex
+      - DirectoryComplex1
+      - DirectoryComplex2
     runs-on: ubuntu-24.04
     timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || startsWith(matrix.suite, 'curved_helmholtz') && 180 || 120 }}
     strategy:
@@ -2164,6 +2491,10 @@ jobs:
   PETScMatrixRanges:
     needs:
       - Plan
+      - DirectoryMatrixRangesReal1
+      - DirectoryMatrixRangesReal2
+      - DirectoryMatrixRangesComplex1
+      - DirectoryMatrixRangesComplex2
     runs-on: ubuntu-latest
     # Package provisioning and instrumented compilation can consume 45 minutes
     # before the serial test matrix finishes. Keep individual CTest watchdogs.
@@ -2202,17 +2533,10 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev
           libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
-      - name: Configure PETSc matrix-range build
-        run: cmake -S . -B build -DRODIN_CODE_COVERAGE=ON -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_BENCHMARKS=OFF -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_MULTITHREADED=${{
-          matrix.multithreaded }} -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON -DRODIN_USE_ASAN=OFF -DRODIN_USE_UBSAN=OFF
-      - name: Build PETSc matrix-range and I/O tests
-        env:
-          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
-        run: cmake --build build -j 2 --target RodinMPIMatrixRangeTest RodinPETScGridFunctionTest RodinPETScMPIGridFunctionTest RodinPETScMPIP0P0gTest
-          RodinPETScMPISubMeshGridFunctionTest RodinPETScIOHDF5IOTest RodinPETScIOMEDITIOTest RodinPETScIOMFEMIOTest RodinPETScIOMFEMMPIIOTest
-          RodinPETScSingleFieldConstraintTest RodinPETScRestrictedNonlocalTest RodinPETScMixedTargetAssemblyTest RodinPETScMPIMixedTargetAssemblyTest
-          RodinPETScSingleFieldTargetAssemblyTest RodinPETScSNESStateTest
+      - uses: ./.github/actions/test-build
+        with:
+          job: PETScMatrixRanges
+          matrix: ${{ toJSON(matrix) }}
       - name: Discover coverage tests without runtime profiles
         env:
           GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
@@ -2360,17 +2684,201 @@ jobs:
             build/test-installation-project/
           retention-days: 7
     name: Installation / MacOS (OS=${{ matrix.os }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc }})
+  PublishUnit1:
+    name: Coverage / Publish / Unit / 1
+    needs: [Plan, Unit1]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: unit_1
+  PublishUnit2:
+    name: Coverage / Publish / Unit / 2
+    needs: [Plan, Unit2]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: unit_2
+  PublishUnit3:
+    name: Coverage / Publish / Unit / 3
+    needs: [Plan, Unit3]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: unit_3
+  PublishManufactured1:
+    name: Coverage / Publish / Manufactured / 1
+    needs: [Plan, Manufactured1]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: manufactured_1
+  PublishManufactured2:
+    name: Coverage / Publish / Manufactured / 2
+    needs: [Plan, Manufactured2]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: manufactured_2
+  PublishSlow:
+    name: Coverage / Publish / slow
+    needs: [Plan, Slow]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: slow
+  PublishBaseline:
+    name: Coverage / Publish / baseline
+    needs: [Plan, Baseline]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: ordinary
+      family: baseline
+  PublishConvergence:
+    name: Coverage / Publish / Convergence / Native / Partitions
+    needs: [Plan, Convergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: Convergence
+  PublishConvergenceBaseline:
+    name: Coverage / Publish / Convergence / Native / Directories
+    needs: [Plan, ConvergenceBaseline]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: ConvergenceBaseline
+  PublishMPIH1Restriction:
+    name: Coverage / Publish / Unit / Rodin / MPI / H1Restriction
+    needs: [Plan, MPIH1Restriction]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: MPIH1Restriction
+  PublishPETScConvergence:
+    name: Coverage / Publish / Convergence / H / PETSc
+    needs: [Plan, PETScConvergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScConvergence
+  PublishPETScDegreeConvergence:
+    name: Coverage / Publish / Convergence / Degree / PETSc
+    needs: [Plan, PETScDegreeConvergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScDegreeConvergence
+  PublishPETScCurvedConvergence:
+    name: Coverage / Publish / Convergence / Isoparametric / PETSc
+    needs: [Plan, PETScCurvedConvergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScCurvedConvergence
+  PublishPETScCurvedBoundaryConvergence:
+    name: Coverage / Publish / Convergence / Isoparametric / PETSc / BoundaryConditions
+    needs: [Plan, PETScCurvedBoundaryConvergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScCurvedBoundaryConvergence
+  PublishPETScCurvedNonlinearTetrahedronConvergence:
+    name: Coverage / Publish / Convergence / Isoparametric / PETSc / NonlinearPoisson / Tetrahedron
+    needs: [Plan, PETScCurvedNonlinearTetrahedronConvergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScCurvedNonlinearTetrahedronConvergence
+  PublishPETScComplexConvergence:
+    name: Coverage / Publish / Convergence / Complex / PETSc
+    needs: [Plan, PETScComplexConvergence]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScComplexConvergence
+  PublishPETScMatrixRanges:
+    name: Coverage / Publish / Unit / Rodin / PETSc / MatrixRanges
+    needs: [Plan, PETScMatrixRanges]
+    uses: ./.github/workflows/CoveragePublish.yml
+    secrets: inherit
+    with:
+      kind: targeted
+      family: PETScMatrixRanges
   CoverageFinalize:
     name: Coverage / Finalize
     if: always()
     needs:
-      - Build_native
-      - Build_restriction
-      - Build_petsc_h
-      - Build_petsc_degree
-      - Build_petsc_curved
-      - Build_petsc_boundary
-      - Build_complex
+      - CommonOptional
+      - BuildPlanOptional
+      - DirectoryOptional1
+      - DirectoryOptional2
+      - DirectoryOptional3
+      - DirectoryOptional4
+      - CommonDefault
+      - BuildPlanDefault
+      - DirectoryDefault1
+      - DirectoryDefault2
+      - CommonBaseline
+      - BuildPlanBaseline
+      - DirectoryBaseline1
+      - DirectoryBaseline2
+      - CommonNative
+      - BuildPlanNative
+      - DirectoryNative1
+      - DirectoryNative2
+      - CommonMPI
+      - BuildPlanMPI
+      - DirectoryMPI1
+      - DirectoryMPI2
+      - CommonPETSc
+      - BuildPlanPETSc
+      - DirectoryPETSc1
+      - DirectoryPETSc2
+      - CommonComplex
+      - BuildPlanComplex
+      - DirectoryComplex1
+      - DirectoryComplex2
+      - CommonMatrixRangesReal
+      - BuildPlanMatrixRangesReal
+      - DirectoryMatrixRangesReal1
+      - DirectoryMatrixRangesReal2
+      - CommonMatrixRangesComplex
+      - BuildPlanMatrixRangesComplex
+      - DirectoryMatrixRangesComplex1
+      - DirectoryMatrixRangesComplex2
+      - PublishUnit1
+      - PublishUnit2
+      - PublishUnit3
+      - PublishManufactured1
+      - PublishManufactured2
+      - PublishSlow
+      - PublishBaseline
+      - PublishConvergence
+      - PublishConvergenceBaseline
+      - PublishMPIH1Restriction
+      - PublishPETScConvergence
+      - PublishPETScDegreeConvergence
+      - PublishPETScCurvedConvergence
+      - PublishPETScCurvedBoundaryConvergence
+      - PublishPETScCurvedNonlinearTetrahedronConvergence
+      - PublishPETScComplexConvergence
+      - PublishPETScMatrixRanges
       - Unit1
       - Unit2
       - Unit3
@@ -2411,9 +2919,24 @@ jobs:
         with:
           name: ci-test-plan
           path: .
+      - name: Download shared-build index
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ci-build-index-*
+          path: ci-build-indices
+      - name: Download directory build receipts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ci-built-*
+          path: ci-artifacts
+      - name: Download successful coverage publications
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ci-publication-*
+          path: ci-artifacts
       - name: Verify complete coverage and unchanged compilation inventory
         env:
-          CI_JOB_RESULTS: ${{ toJSON(needs) }}
+          CI_JOB_RESULTS: ${{ toJSON(needs.*.result) }}
         run: python3 dev/ci_coverage.py finalize
       - name: Publish complete coverage summary
         uses: actions/upload-artifact@v4
