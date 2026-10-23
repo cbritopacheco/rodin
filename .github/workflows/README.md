@@ -11,9 +11,9 @@ can share compilation without sharing runtime state.
 | --- | --- |
 | [Tests.yml](Tests.yml) | Plans the test matrices, schedules grouped and dedicated tests, checks installation, and finalizes coverage. |
 | [TestGroup.yml](TestGroup.yml) | Restore directory builds, run the selected regular/Slow invocations, and save independent coverage contributions. |
-| [TestConfiguration.yml](TestConfiguration.yml) | Generated configuration-local DAG: compile common libraries, resolve ownership and release each hierarchy independently. |
+| `TestConfiguration_*.yml` (for example [native](TestConfiguration_native.yml)) | Generated backend-specific DAGs: compile common libraries, resolve ownership and release each hierarchy independently. |
 | [TestCommon.yml](TestCommon.yml) | Common-library compilation recipe used to generate the configuration workflow. |
-| [TestTargeted.yml](TestTargeted.yml) | Generated dedicated execution workflows, preserving numerical commands and rank partitions. |
+| Dedicated family workflows (for example [TestConvergence.yml](TestConvergence.yml)) | Generated single-family execution workflows, preserving numerical commands and rank partitions. |
 | [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile bounded directory groups using unchanged common objects. |
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
@@ -178,6 +178,12 @@ when adding a backend or family.
 
 Each compatible configuration has an independent common/directory/execution
 graph. Execution jobs depend on their required directory/component producers.
+Eleven backend/instrumentation variants declare only their applicable execution
+groups; sanitizer variants omit coverage publisher declarations. Dedicated
+families each have a single-job reusable workflow. This avoids registering
+thousands of skipped checks for unrelated backends and families. A conditionally
+disabled target can still leave an empty producer, which is validated against
+the configured manifest and recorded explicitly.
 The generated DAG is maintained by [ci_schedule.py](../../dev/ci_schedule.py);
 dedicated lane sources live in
 [targeted-lanes.yml](../ci/targeted-lanes.yml). After editing registrations or

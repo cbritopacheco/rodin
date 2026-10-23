@@ -13,11 +13,16 @@ python3 dev/ci_schedule.py
 python3 -m unittest discover -s dev -p 'test_ci_*.py' -v
 ```
 
-The generator writes `TestConfiguration.yml` and `TestTargeted.yml` under
+The generator writes eleven `TestConfiguration_*.yml` backend/instrumentation
+variants and ten single-family `Test<Family>.yml` wrappers under
 `.github/workflows/`. Each compatible configuration gets independent hierarchy
 producers and parallel execution partitions. An execution group depends only
 on its required producers. Configured CMake manifests must validate those
 dependency bounds; registration references do not decide which targets exist.
+Only applicable execution groups are declared in each variant. Sanitizer
+variants omit publishers, and dedicated wrappers have no inactive family jobs.
+This keeps unrelated branches out of the check list instead of generating
+thousands of skipped checks.
 
 `ConvergenceBaseline` obtains its directory matrix from the native planner;
 the other dedicated families declare their full `include` matrices here.

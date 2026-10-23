@@ -20,7 +20,17 @@ jobs:
     name: CMake / CI
     runs-on: ubuntu-latest
     outputs:
-      configurations: ${{ steps.common.outputs.configurations }}
+      configurations_baseline: ${{ steps.common.outputs.configurations_baseline }}
+      configurations_complex: ${{ steps.common.outputs.configurations_complex }}
+      configurations_default_coverage: ${{ steps.common.outputs.configurations_default_coverage }}
+      configurations_default_sanitized: ${{ steps.common.outputs.configurations_default_sanitized }}
+      configurations_mpi: ${{ steps.common.outputs.configurations_mpi }}
+      configurations_native: ${{ steps.common.outputs.configurations_native }}
+      configurations_optional_coverage: ${{ steps.common.outputs.configurations_optional_coverage }}
+      configurations_optional_sanitized: ${{ steps.common.outputs.configurations_optional_sanitized }}
+      configurations_petsc: ${{ steps.common.outputs.configurations_petsc }}
+      configurations_ranges_complex: ${{ steps.common.outputs.configurations_ranges_complex }}
+      configurations_ranges_real: ${{ steps.common.outputs.configurations_ranges_real }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -53,14 +63,134 @@ jobs:
 
           '
         if-no-files-found: error
-  Configurations:
+  Configurations_baseline:
     name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Plan.outputs.configurations) }}
-    uses: ./.github/workflows/TestConfiguration.yml
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_baseline) }}
+    uses: ./.github/workflows/TestConfiguration_baseline.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_complex:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_complex) }}
+    uses: ./.github/workflows/TestConfiguration_complex.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_default_coverage:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_coverage) }}
+    uses: ./.github/workflows/TestConfiguration_default_coverage.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_default_sanitized:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_sanitized) }}
+    uses: ./.github/workflows/TestConfiguration_default_sanitized.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_mpi:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_mpi) }}
+    uses: ./.github/workflows/TestConfiguration_mpi.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_native:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_native) }}
+    uses: ./.github/workflows/TestConfiguration_native.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_optional_coverage:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_coverage) }}
+    uses: ./.github/workflows/TestConfiguration_optional_coverage.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_optional_sanitized:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_sanitized) }}
+    uses: ./.github/workflows/TestConfiguration_optional_sanitized.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_petsc:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_petsc) }}
+    uses: ./.github/workflows/TestConfiguration_petsc.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_ranges_complex:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_complex) }}
+    uses: ./.github/workflows/TestConfiguration_ranges_complex.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_ranges_real:
+    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_real) }}
+    uses: ./.github/workflows/TestConfiguration_ranges_real.yml
     with:
       id: ${{ matrix.id }}
       definition: ${{ toJSON(matrix.definition) }}
@@ -189,7 +319,17 @@ jobs:
     if: always()
     needs:
     - Plan
-    - Configurations
+    - Configurations_baseline
+    - Configurations_complex
+    - Configurations_default_coverage
+    - Configurations_default_sanitized
+    - Configurations_mpi
+    - Configurations_native
+    - Configurations_optional_coverage
+    - Configurations_optional_sanitized
+    - Configurations_petsc
+    - Configurations_ranges_complex
+    - Configurations_ranges_real
     - InstallationUbuntu
     - InstallationMacOS
     runs-on: ubuntu-latest

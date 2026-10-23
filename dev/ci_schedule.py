@@ -85,7 +85,7 @@ def execution_key(request, family):
     return key('e', [job, family, selection])
 
 
-def layout():
+def layout(variant=None):
     scopes, declared = source_scopes()
     ordinary, targeted = requests()
     executions = {}
@@ -94,12 +94,16 @@ def layout():
     rows += [(r['job'], r) for r in targeted]
     for family, request in rows:
         job, matrix = request['job'], request['matrix']
+        spec = graph.specification(job, matrix)
+        if variant is not None and graph.configuration_variant(spec) != variant:
+            continue
         identity = execution_key(request, family)
         if identity in executions:
             continue
         if job == 'Ordinary':
             group = matrix['group']
-            dependencies = set(scopes) if group == 'src/Rodin' else {
+            dependencies = {s for s in scopes if spec['cmake'].get('RODIN_BUILD_' +
+                            s.split('/')[0].upper() + '_TESTS') == 'ON'} if group == 'src/Rodin' else {
                 s for s, info in scopes.items() if info['execution'] == group or s == group}
             label = matrix['name']
         elif job == 'ConvergenceBaseline':
@@ -114,7 +118,9 @@ def layout():
             label = ' + '.join(tests.display_group(s) for s in sorted(dependencies))
         executions[identity] = {'job': job, 'family': family, 'name': label,
                                 'dependencies': sorted(key('b', s) for s in dependencies)}
-    return {key('b', s): dict(info, path=s) for s, info in scopes.items()}, executions
+    required = {k for e in executions.values() for k in e['dependencies']}
+    return {key('b', s): dict(info, path=s) for s, info in scopes.items()
+            if variant is None or key('b', s) in required}, executions
 
 
 def prepare(common_id):
@@ -122,7 +128,7 @@ def prepare(common_id):
     entries = json.loads((ROOT / 'ci-common-plan.json').read_text())
     entry = next(e for e in entries if e['id'] == common_id)
     index, _ = graph.index_graph(ROOT / 'ci-common-record', common_id=common_id)
-    producers, executions = layout()
+    producers, executions = layout(graph.configuration_variant(entry['definition']))
     build_rows, execution_rows = {}, {}
     build_owner = {}
     for identity, record in index['builds'].items():
@@ -175,8 +181,8 @@ def expression(value):
     return '${{ ' + value + ' }}'
 
 
-def configuration_workflow():
-    producers, executions = layout()
+def configuration_workflow(variant=None):
+    producers, executions = layout(variant)
     common_source = yaml.safe_load((ROOT / '.github/workflows/TestCommon.yml').read_text())
     common = copy.deepcopy(common_source['jobs']['Build'])
     common['name'] = 'Build / Common libraries'
@@ -207,11 +213,13 @@ def configuration_workflow():
                         'with': {k: expression('matrix.' + k) for k in ['family', 'backend', 'profile', 'group',
                                  'build_type', 'multithreaded', 'asan', 'ubsan', 'id', 'name', 'baseline']}})
         else:
-            job.update({'uses': './.github/workflows/TestTargeted.yml',
-                        'with': {'family': execution['job'], 'matrix': expression('needs.Common.outputs.' + identity)}})
+            job.update({'uses': './.github/workflows/Test' + execution['job'] + '.yml',
+                        'with': {'matrix': expression('needs.Common.outputs.' + identity)}})
         job['secrets'] = 'inherit'
         jobs[identity] = job
     for family in sorted({e['family'] for e in executions.values()}):
+        if variant is not None and variant.endswith('_sanitized'):
+            continue
         members = [k for k, e in executions.items() if e['family'] == family]
         jobs['Publish_' + family] = {
             'name': 'Coverage / Publish / ' + family,
@@ -227,23 +235,29 @@ def configuration_workflow():
         'permissions': {'contents': 'read', 'actions': 'read'}, 'jobs': jobs}
 
 
-def targeted_workflow():
-    jobs = copy.deepcopy(ci_lanes.jobs())
+def targeted_workflow(family=None):
+    jobs = {k: copy.deepcopy(v) for k, v in ci_lanes.jobs().items() if family is None or family == k}
     for name, job in jobs.items():
         job.pop('needs', None)
-        job['if'] = expression("inputs.family == '" + name + "'")
+        if family is None:
+            job['if'] = expression("inputs.family == '" + name + "'")
         job['strategy']['matrix'] = expression('fromJSON(inputs.matrix)')
         for step in job['steps']:
             if step.get('id') == 'coverage_record':
                 step['with'].pop('artifact_name', None)
-    return {'name': 'Tests / Dedicated selection', 'on': {'workflow_call': {'inputs': {
-        'family': {'type': 'string', 'required': True}, 'matrix': {'type': 'string', 'required': True}},
+    inputs = {'matrix': {'type': 'string', 'required': True}}
+    if family is None:
+        inputs['family'] = {'type': 'string', 'required': True}
+    return {'name': 'Tests / Dedicated selection', 'on': {'workflow_call': {'inputs': inputs,
         'secrets': {'CODECOV_TOKEN': {'required': False}}}},
         'permissions': {'contents': 'read', 'actions': 'read'}, 'jobs': jobs}
 
 
 def generated():
-    return {'TestConfiguration.yml': configuration_workflow(), 'TestTargeted.yml': targeted_workflow()}
+    ordinary, targeted = requests()
+    variants = sorted({graph.configuration_variant(e['definition']) for e in graph.prepare(ordinary, targeted)})
+    return {**{'TestConfiguration_' + v + '.yml': configuration_workflow(v) for v in variants},
+            **{'Test' + f + '.yml': targeted_workflow(f) for f in ci_lanes.jobs()}}
 
 
 def main():

@@ -238,12 +238,16 @@ configuration. Each configuration has an independent generated hierarchy DAG;
 execution groups wait only for their required directory/component producers.
 PETSc studies, unrelated physics and sanitizer configurations do not share a
 backend-wide build barrier. Configuration-local publishers also wait only for
-their own family. Regenerate `TestConfiguration.yml` and `TestTargeted.yml` with
+their own family. Regenerate the backend-specific `TestConfiguration_*.yml`
+graphs and dedicated `Test<Family>.yml` wrappers with
 `python3 dev/ci_schedule.py --write` after registration or lane edits; preflight
 rejects stale output. Dedicated numerical recipes live in
 `.github/ci/targeted-lanes.yml`. Configured manifests validate every generated
 dependency edge before builders or executions start. See the
 [extension guide](../../dev/ci-testing.md) for the editing procedure.
+Declare only applicable execution groups in a backend variant; sanitizer
+variants omit publishers, and each dedicated wrapper contains a single family.
+Universal guarded branches create unnecessary skipped check rows.
 
 The runtime artifact contains executables, libraries, generated CTest files,
 CMake metadata, target manifests and all zero-hit `.gcno` notes. Compile objects

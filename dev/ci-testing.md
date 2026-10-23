@@ -52,7 +52,7 @@ another configuration's completed contributions.
 ### Regenerate the dependency graph
 
 GitHub dependencies cannot select one child of a matrix. The generated
-`TestConfiguration.yml` therefore declares separate directory/component jobs
+The `TestConfiguration_*.yml` variants declare separate directory/component jobs
 inside each compatible configuration; execution jobs name only their required
 hierarchy producers. Directory subdivisions can compile in parallel, and the
 original Slow/geometry/rank partitions remain separate execution jobs.
@@ -65,11 +65,19 @@ python3 dev/ci_schedule.py --write
 python3 dev/ci_schedule.py
 ```
 
-The first command regenerates `TestConfiguration.yml` and `TestTargeted.yml`;
+The first command regenerates the eleven `TestConfiguration_*.yml` variants
+and ten dedicated `Test<Family>.yml` execution wrappers;
 the second checks that committed output is current. Edit their source recipes,
 not the generated files. The common-library recipe lives in `TestCommon.yml`;
 dedicated numerical recipes and their full matrices live in
 [targeted-lanes.yml](../.github/ci/targeted-lanes.yml).
+
+Backend/instrumentation variants contain only the execution groups required by
+their plan. Sanitizer variants have no coverage publisher jobs, and each
+dedicated-family wrapper has just its own job. Avoid adding universal workflow
+branches guarded by backend/family `if` conditions: those create skipped check
+rows even when no work was ever scheduled for them. Configured ownership checks
+still reject any required producer missing from a generated variant.
 
 Source registration references establish scheduling bounds, not executable
 eligibility. Configured CMake manifests still choose all build targets and must

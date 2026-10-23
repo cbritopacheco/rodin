@@ -51,7 +51,7 @@ class SharedBuildPlanTest(unittest.TestCase):
         self.assertEqual(sum(len(self.workflow['jobs'][job]['strategy']['matrix']['include'])
                              for job in ci.FAMILIES), 742)
         top = yaml.safe_load((ci.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
-        self.assertIn('Configurations', top['CoverageFinalize']['needs'])
+        self.assertTrue(all(name in top['CoverageFinalize']['needs'] for name in top if name.startswith('Configurations_')))
 
     def test_rank_geometry_and_study_share_the_compiled_executable(self):
         row = dict(multithreaded='ON', suite='nonlinear_boundary', physics='NonlinearPoisson',

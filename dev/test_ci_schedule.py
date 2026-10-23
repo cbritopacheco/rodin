@@ -16,6 +16,30 @@ import ci_tests as tests
 
 
 class HierarchicalScheduleTest(unittest.TestCase):
+    def test_variants_do_not_declare_unrelated_execution_or_family_branches(self):
+        ordinary, targeted = schedule.requests()
+        entries = graph.prepare(ordinary, targeted)
+        families = {r['id']: f for f, rows in ordinary.items() for r in rows}
+        expected = {}
+        for entry in entries:
+            variant = graph.configuration_variant(entry['definition'])
+            expected.setdefault(variant, set()).update(schedule.execution_key(
+                r, families[r['matrix']['id']] if r['job'] == 'Ordinary' else r['job']) for r in entry['requests'])
+        declared = 0
+        for variant, identities in expected.items():
+            _, executions = schedule.layout(variant)
+            self.assertEqual(set(executions), identities)
+            jobs = schedule.configuration_workflow(variant)['jobs']
+            declared += len(jobs) * sum(graph.configuration_variant(e['definition']) == variant for e in entries)
+            if variant.endswith('_sanitized'):
+                self.assertFalse(any(name.startswith('Publish_') for name in jobs))
+        self.assertLess(declared, 46 * 235 // 4)
+        self.assertEqual(len(schedule.configuration_workflow('mpi')['jobs']), 4)
+        for family in ci_lanes.jobs():
+            jobs = schedule.targeted_workflow(family)['jobs']
+            self.assertEqual(set(jobs), {family})
+            self.assertNotIn('if', jobs[family])
+
     def test_preloaded_artifacts_never_fall_back_to_network(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -32,8 +56,11 @@ class HierarchicalScheduleTest(unittest.TestCase):
         producers, executions = schedule.layout()
         workflow = schedule.configuration_workflow()['jobs']
         top = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
-        self.assertEqual(top['Configurations']['needs'], 'Plan')
-        self.assertFalse(top['Configurations']['strategy']['fail-fast'])
+        configurations = [job for name, job in top.items() if name.startswith('Configurations_')]
+        self.assertEqual(len(configurations), 11)
+        for job in configurations:
+            self.assertEqual(job['needs'], 'Plan')
+            self.assertFalse(job['strategy']['fail-fast'])
         for identity in producers:
             self.assertEqual(workflow[identity]['needs'], ['Common'])
             self.assertFalse(workflow[identity]['strategy']['fail-fast'])
@@ -66,7 +93,7 @@ class HierarchicalScheduleTest(unittest.TestCase):
         family, row = next((f, r) for f, rows in ordinary.items() for r in rows
                            if r['group'] == 'unit/Rodin/Geometry')
         request = {'job': 'Ordinary', 'matrix': row}
-        entry = {'id': 'common', 'definition': {'cmake': {'RODIN_CODE_COVERAGE': 'ON'}}, 'requests': [request]}
+        entry = {'id': 'common', 'definition': {'mode': 'default', 'cmake': {'RODIN_CODE_COVERAGE': 'ON'}}, 'requests': [request]}
         producer = schedule.key('b', row['group'])
         execution = schedule.execution_key(request, family)
         index = {'builds': {'one': {'definition': {'directory': row['group'],

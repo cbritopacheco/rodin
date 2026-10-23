@@ -30,6 +30,13 @@ BACKEND_NAMES = {'optional': 'Optional', 'default': 'Default', 'baseline': 'Base
                  'ranges_real': 'PETSc Real', 'ranges_complex': 'PETSc Complex'}
 
 
+def configuration_variant(spec):
+    mode = spec['mode']
+    if mode in ['optional', 'default']:
+        return mode + ('_coverage' if spec['cmake']['RODIN_CODE_COVERAGE'] == 'ON' else '_sanitized')
+    return mode
+
+
 def request_key(job, matrix):
     if job == 'Ordinary':
         matrix = {k: v for k, v in matrix.items() if k != 'family'}
@@ -384,6 +391,10 @@ def main():
             with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
                 stream.write('configurations=' + json.dumps({'include': [
                     {'id': e['id'], 'definition': e['definition']} for e in rows]}, separators=(',', ':')) + '\n')
+                for variant in sorted({configuration_variant(e['definition']) for e in rows}):
+                    stream.write('configurations_' + variant + '=' + json.dumps({'include': [
+                        {'id': e['id'], 'definition': e['definition']} for e in rows
+                        if configuration_variant(e['definition']) == variant]}, separators=(',', ':')) + '\n')
                 for mode in sorted({e['definition']['mode'] for e in rows}):
                     stream.write('common_' + mode + '=' + json.dumps(
                         {'include': [{'id': e['id'], 'definition': e['definition']}
