@@ -11,7 +11,9 @@ suites in `tests/`.
 | `ci_test_plan.py` | Test directory scheduling, dedicated coverage partition inventory and shared-build planning. |
 | `ci_tests.py` | Configured target selection, scoped GoogleTest discovery and serial CTest execution. |
 | `ci_builds.py` | Compatible build definitions, immutable artifact publication and validated restoration. |
+| `ci_build_graph.py` | Common-library dependency closure, directory executable ownership, bounded producer matrices and execution bindings. |
 | `ci_coverage.py` | Execution receipts, coverage contribution validation, pooling and the final production coverage gate. |
+| `ci_coverage_publish.py` | Complete family validation, incremental Codecov unions and publication receipts. |
 | `audit_coverage.py`, `audit_source.py` | Compiled coverage inventories and source-level function/exception inventories, respectively. |
 | `format_cpp.py`, `check_format.py` | Canonical C++ formatting and the changed-line formatting check. |
 | `style_lint.py` | House rules beyond formatter and compiler checks. |
@@ -30,6 +32,12 @@ supply authoritative target information. Build artifacts contain compiled code,
 while execution jobs own their runtime counters. Coverage collection validates
 those independent contributions before taking their production-line union.
 The [workflow overview](../.github/workflows/README.md) describes the job graph.
+The [test registration guide](ci-testing.md) maps changes to their owning files:
+adding a case, adding an executable, splitting Slow selections, changing rank
+partitions, or introducing a backend configuration. Build ownership follows
+physical CMake directories; execution grouping and publication families are
+separate scheduling decisions. Generated plans and receipts are CI artifacts,
+not hand-maintained executable lists.
 
 Incremental style and documentation checks compare current findings with their
 committed baselines. Formatting uses the canonical formatter rather than a

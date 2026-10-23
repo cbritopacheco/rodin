@@ -160,6 +160,42 @@ Coverage describes compiled code and its instantiated templates.
   finalizes Codecov notifications. It does not rebuild or rerun tests. Historical
   carryforward coverage cannot replace a required current-commit contribution.
 
+## Editing and diagnosing the graph
+
+The [extension guide](../../dev/ci-testing.md) maps each test or lane change to
+its owning files. Ordinary test additions usually need only local CMake
+registration. Dedicated selectors and compile recipes require explicit edits;
+dynamic build discovery does not invent a new physics or rank partition.
+Keep compilation in the reusable producers and runtime selection in the
+execution lanes. Update dependency edges and completeness inventories together
+when adding a backend or family.
+
+Each backend has an independent common/build-plan/directory branch. Execution
+jobs depend on their compatible backend's producers; a new backend must wire
+that branch before using the restore action. Preserve the environment package
+recipe and compiler/runtime fingerprints on both sides. Installation and the
+independent `Build.yml` checks retain their own compilation because building
+and consuming those configurations is the operation under test.
+
+Artifacts provide the following path from a registration to the final report:
+
+| Stage | Evidence and failure diagnosis |
+| --- | --- |
+| Plan | `ci-test-plan` contains execution matrices, dedicated compile contracts, common configurations and expected coverage partitions. Missing rows indicate scheduling/selector problems. |
+| Common compilation | `ci-common-manifest-<mode>-*` records configured targets and resolved requests. Configure errors or missing targets belong to this stage, before numerical execution. |
+| Directory planning | `ci-build-index-<mode>` contains `ci-build-index.json` and bounded directory matrices. The index links each execution request to its common configuration and required executable producers. |
+| Directory compilation | `ci-build-<id>` contains the runtime archive; `ci-built-<id>` records its definition, archive digest and unchanged common objects. A common-object rebuild fails this stage. |
+| Restore and execution | The restore action validates the commit, absolute build path, compiler, architecture and runtime libraries. Grouped lanes save `ci-result-<family>-<id>`; dedicated lanes save `ci-target-<job>-<index>`. Inspect their report and receipt alongside the CTest log. |
+| Publication | `ci-publication-<family>` contains `CombinedCoverage.info` and `publication.json`, including every source report digest and the successful upload receipt. A missing lane report fails publication rather than producing a partial family. |
+| Finalization | `coverage-final-summary` records the complete production line result. Missing inventories, builds, contributions or publications fail this gate, as does a raw/published union mismatch or coverage below 95%. |
+
+Build archives are current-run artifacts, not a cross-commit executable cache.
+If they expire, rerun the required producer and dependent jobs; an unrelated
+run's archive or a historical Codecov report cannot substitute for them.
+An upload receipt proves submission, not completion of Codecov processing.
+When confirming coverage, check the complete local union and the final
+current-commit Codecov report after all family uploads have been processed.
+
 ## Related documentation
 
 The [test registration guide](../../dev/ci-testing.md) explains how to add tests,

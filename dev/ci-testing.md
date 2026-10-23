@@ -1,5 +1,51 @@
 # CI test registration and extension
 
+The [test suite README](../tests/README.md) describes the categories and local
+runner. The [workflow overview](../.github/workflows/README.md) describes the
+shared-build graph and coverage artifacts. This guide identifies what must
+change when a test or lane is extended.
+
+## Choose the scope of the change
+
+| Change | Owning files and checks |
+| --- | --- |
+| Another case or source in an existing executable | Test source and its local `CMakeLists.txt`; inspect registration and execution filters. |
+| Another ordinary component or module | Local and parent CMake registrations; ordinary target discovery is automatic. Review grouping in `ci_tests.py` only if the new component needs separate execution scheduling. |
+| A Slow selection | CMake labels and complementary filters; confirm ordinary and Slow selections cover the intended cases without overlap. |
+| A dedicated physics, geometry, degree or rank partition | The relevant matrix and execution selector in `Tests.yml`; `ci_builds.py` if the required targets or compile configuration change. Preserve MPI commands and ranks. |
+| A new backend or compile configuration | `ci_tests.py` configuration or `ci_builds.py` definition, `ci_build_graph.py` configuration routing, the test-environment action, and the common/build-plan/directory dependency branches in `Tests.yml`. |
+| A new execution/publication family | Planner inventory, workflow dependencies, report artifact family, publisher scheduling and finalizer dependencies; verify every eligible contribution is published exactly once. |
+| Oversized compilation or execution | Measure the owning directory/component; adjust build subdivision in `ci_build_graph.py` or execution grouping in `ci_tests.py` separately. Do not remove configurations or tests. |
+
+The Python files above live in `dev/`; workflow files live in
+`.github/workflows/`. The environment action is
+[test-environment/action.yml](../.github/actions/test-environment/action.yml).
+The existing infrastructure regressions in `dev/test_ci_*.py` guard registration,
+selection, build compatibility and coverage completeness.
+
+## Build ownership, execution lanes and publication families
+
+A target's physical CMake registration directory owns its build. For example,
+an executable registered under `tests/unit/Rodin/Math/` is built under that
+directory even if its cases have several logical execution groups. Compatible
+regular and Slow selections share that producer. A different sanitizer or
+backend configuration needs a separate compatible producer.
+
+The builder limits each directory group to twelve executable targets and
+isolates known expensive components. Numbered subdivisions are generated when
+needed; they are not new test categories. Execution grouping can independently
+batch short siblings under a parent or isolate an expensive component.
+Workflow matrix bands only distribute those generated entries within GitHub's
+matrix limit; their numbers do not define directory ownership.
+
+Coverage publication groups completed executions by family. The current graph
+has seven ordinary and ten dedicated publisher families. Adding a case to an
+existing lane does not add another Codecov upload. Adding a lane to an existing
+family extends that family's mandatory report inventory. Adding a family must
+also extend publication and finalization dependencies; a successful test job
+alone does not establish a complete coverage campaign.
+
+## Registration procedures
 
 ### Add a test or GoogleTest suite to an existing executable
 
@@ -116,6 +162,13 @@ mkdir -p /tmp/rodin-ci-plan
 python3 dev/ci_test_plan.py --output /tmp/rodin-ci-plan/ci-test-plan.json
 ```
 
+This also writes `ci-build-plan.json`, `ci-convergence-plan.json` and
+`ci-coverage-targets.json` beside the requested output. Compare the generated
+rows before and after an edit, including compile flags, threading, sanitizers,
+geometry/study selectors and MPI ranks. The configured ownership index is
+generated later from actual CMake manifests; a source-only plan cannot prove
+that an optional target exists or has a compatible build producer.
+
 For an already configured build with the required backend options, build and
 inspect a group, then run it. The build may compile in parallel; tests run one
 invocation at a time:
@@ -142,8 +195,18 @@ Some artifact/coverage integration checks require Linux, CMake, a C++ compiler,
 LCOV and matching gcov. A skipped tool-dependent check does not validate that
 integration. Intentional changes to compilation contracts require reviewing and
 updating the pinned guard expectations, rather than weakening them to accept
-arbitrary output. Matrix families must remain within GitHub's 256-entry limit;
+arbitrary output. In particular, `test_ci_build_graph.py` contains snapshots of
+execution definitions and contracts: inspect the concrete inventory difference
+before updating a digest. Preserve every previously required configuration,
+test and rank unless an explicit change to that contract is authorized.
+Matrix families must remain within GitHub's 256-entry limit;
 the planner rejects an oversized family so it can be split explicitly.
+
+For workflow edits, run actionlint as well. For build-graph edits, use the
+Linux artifact/coverage integration guards: they check that common objects are
+not rebuilt, restored selections contain their executables, and independent
+executions start with clean counters. For publication changes, retain the
+raw-to-published union equality check and the complete 95% final gate.
 
 See also the [testing rules](../doc/agents/testing.md),
 [benchmark guide](../tests/benchmarks/README.md) and

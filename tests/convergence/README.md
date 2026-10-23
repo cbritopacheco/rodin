@@ -242,6 +242,22 @@ at 1–4 ranks, a coefficient-omission negative control, and quadrature/solver
 sensitivity. Its [suite specification](h/PETScConductivity/README.md) records
 the exact data, levels, acceptance bounds, and backend scope.
 
+## Registration and CI scheduling
+
+Keep new studies under their refinement axis and physics/backend directory,
+include them from the parent CMake registration, and document the numerical
+contract in the suite README. Native baseline groups are discovered from these
+directories; dedicated isoparametric and PETSc families also require explicit
+execution selections and a matching build recipe. A `convergence` label alone
+does not create those dedicated lanes.
+
+Rank, geometry and Slow partitions reuse compatible directory builds. Preserve
+the complete refinement sequence inside each rate test; job splitting must not
+turn a multi-level study into independent single-level assertions. Follow the
+[CI extension guide](../../dev/ci-testing.md) for selectors, backend recipes and
+mandatory coverage contributions, and the
+[workflow overview](../../.github/workflows/README.md) for shared-build ownership.
+
 ## Qualification records
 
 [Qualification records and work plans](qualification.md) are maintained
