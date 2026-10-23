@@ -19,12 +19,6 @@ import ci_tests as tests
 
 ROOT = tests.ROOT
 DIRECTORY_BANDS = 2
-# Limit the executable work queued behind one producer; configuration variants
-# stay separate. Very large individual translation units keep their own budget.
-DIRECTORY_TARGET_LIMIT = 12
-# These translation units already had separate execution jobs for compile/run
-# cost. Keep their compiler memory budgets isolated inside the physical tree.
-ISOLATED_DIRECTORY_TARGETS = set(tests.COMPONENTS) | {'RodinMPIMatrixRangeTest'}
 BACKEND_NAMES = {'optional': 'Optional', 'default': 'Default', 'baseline': 'Baseline',
                  'native': 'Native', 'mpi': 'MPI', 'petsc': 'PETSc', 'complex': 'PETSc Complex',
                  'ranges_real': 'PETSc Real', 'ranges_complex': 'PETSc Complex'}
@@ -128,13 +122,48 @@ def selected(build, request):
     return [configured[name] for name in names]
 
 
+def build_group(owner):
+    """Stop at the module for Unit/Manufactured and study type for Convergence."""
+    parts = owner.removeprefix('tests/').split('/')
+    if parts[0] not in ['unit', 'manufactured', 'convergence']:
+        raise ValueError('Unknown test build hierarchy: ' + owner)
+    return '/'.join(parts[:2] if parts[0] == 'convergence' else parts[:3])
+
+
 def directory(target):
-    # Build ownership follows physical registration directories. Execution can
-    # batch short siblings or split logical components independently of it.
+    # Physical registration stays in the manifest. Compatible executables share
+    # the producer at the agreed hierarchy cut, independently of runtime lanes.
     group = target['owner'].removeprefix('tests/')
     if not (ROOT / 'tests' / group / 'CMakeLists.txt').is_file():
         raise ValueError('Target has no source directory: ' + str(target))
-    return group
+    return build_group(group)
+
+
+def directory_plan(entry, records):
+    """Bind configured selections to one producer per compatible hierarchy group."""
+    groups, requests = {}, {}
+    for record in records:
+        request = record['request']
+        for target in record['selected']:
+            if target['kind'] == 'test':
+                targets = groups.setdefault(directory(target), {})
+                if target['target'] in targets and targets[target['target']] != target:
+                    raise ValueError('Conflicting configured executable ownership')
+                targets[target['target']] = target
+        key = request_key(**request)
+        if key in requests:
+            raise ValueError('Duplicate execution request')
+        requests[key] = {k: record[k] for k in ['request', 'selected', 'configured']}
+        requests[key]['common'] = entry['id']
+    specs = {group: {**entry['definition'], 'stage': 'directory', 'common': entry['id'],
+                     'directory': group, 'targets': sorted(targets)}
+             for group, targets in sorted(groups.items())}
+    for record in requests.values():
+        wanted = {t['target'] for t in record['selected']}
+        record['builds'] = [archive.identity(row) for row in specs.values()
+                            if wanted.intersection(row['targets'])]
+    return {'commit': archive.commit(), 'common': entry['id'], 'definition': entry['definition'],
+            'requests': requests, 'directories': specs}
 
 
 def compile_common(entry, build, destination):
@@ -175,38 +204,9 @@ def compile_common(entry, build, destination):
                        flags['RODIN_USE_ASAN'] == 'OFF' and flags['RODIN_USE_UBSAN'] == 'OFF') else '2'
     subprocess.run(['cmake', '--build', str(build), '--parallel', parallel, '--target'] + sorted(libraries),
                    check=True, env=dict(os.environ, GCOV_PREFIX=str(ROOT / 'coverage-discovery-excluded')))
-    groups, requests = {}, {}
-    for request, chosen in selections:
-        owned = set()
-        for target in chosen:
-            if target['kind'] != 'test':
-                continue
-            group = directory(target)
-            owned.add(group)
-            groups.setdefault(group, {})[target['target']] = target
-        requests[request_key(**request)] = {'request': request, 'selected': chosen,
-                                           'configured': original_inventory(build, request),
-                                           'directories': sorted(owned), 'common': entry['id']}
-    specs = {}
-    for group, targets in groups.items():
-        names = sorted(set(targets) - ISOLATED_DIRECTORY_TARGETS)
-        chunks = [names[i:i + DIRECTORY_TARGET_LIMIT] for i in range(0, len(names), DIRECTORY_TARGET_LIMIT)]
-        chunks += [[name] for name in sorted(set(targets) & ISOLATED_DIRECTORY_TARGETS)]
-        for part, chunk in enumerate(chunks, 1):
-            row = {**spec, 'stage': 'directory', 'common': entry['id'], 'directory': group,
-                   'targets': chunk}
-            label = group
-            if len(chunks) > 1:
-                row['part'] = part
-                label += '/' + str(part)
-            specs[label] = row
-    for record in requests.values():
-        wanted = {t['target'] for t in record['selected']}
-        record['builds'] = [archive.identity(row) for row in specs.values()
-                            if wanted.intersection(row['targets'])]
-        record.pop('directories')
-    document = {'commit': archive.commit(), 'common': entry['id'], 'definition': spec,
-                'requests': requests, 'directories': specs}
+    document = directory_plan(entry, [{'request': request, 'selected': chosen,
+                                     'configured': original_inventory(build, request)}
+                                    for request, chosen in selections])
     destination.mkdir(parents=True)
     (destination / 'graph.json').write_text(json.dumps(document, indent=2) + '\n')
     archive.pack(spec, build, ROOT / 'ci-common-artifact')
@@ -249,13 +249,25 @@ def index_graph(folder, mode=None, common_id=None):
                 restored_names.update(builds[key]['definition']['targets'])
             if not selected_names <= restored_names:
                 raise ValueError('Selected executable has no directory producer')
-    owners = set()
+    owners, producer_groups = set(), set()
+    expected_owners = {(record['common'], target['target']): directory(target)
+                       for record in requests.values() for target in record['selected'] if target['kind'] == 'test'}
     for row in builds.values():
+        spec = row['definition']
+        producer = (spec['common'], spec['directory'])
+        if ('part' in spec or spec['directory'] != build_group(spec['directory']) or
+                producer in producer_groups or not spec['targets']):
+            raise ValueError('Build producer does not stop at the agreed hierarchy level')
+        producer_groups.add(producer)
         for target in row['definition']['targets']:
             owner = (row['definition']['common'], target)
             if owner in owners:
                 raise ValueError('Executable compiled by more than one directory group')
+            if expected_owners.get(owner) != spec['directory']:
+                raise ValueError('Executable assigned to the wrong hierarchy group')
             owners.add(owner)
+    if owners != expected_owners.keys():
+        raise ValueError('Missing hierarchy executable producers')
     # Optional Unit spans sixteen configurations and hundreds of executables;
     # four matrix bands keep it below GitHub's 256-child limit. Other backend
     # branches need two, including the two-producer native MPI restriction set.
@@ -291,14 +303,14 @@ def compile_directory(spec, build):
     stamp_sources()
     artifact = ROOT / 'ci-common-input'
     artifact = download('ci-common-' + spec['common'], artifact) or artifact
-    common = {k: v for k, v in spec.items() if k not in ['common', 'directory', 'part']}
+    common = {k: v for k, v in spec.items() if k not in ['common', 'directory']}
     common.update(stage='common', targets=[])
     archive.restore(common, build, artifact)
     objects = {p: (archive.digest(p), p.stat().st_mtime_ns) for p in build.rglob('*.o')}
     # Keep the existing single-compiler safeguards for memory-heavy MPI and
     # optimized optional-backend instantiations.
     flags = spec['cmake']
-    parallel = '1' if ('MPI/Variational' in spec['directory'] or
+    parallel = '1' if (spec['directory'] == 'unit/Rodin/MPI' or
                       spec['mode'] == 'optional' and flags['CMAKE_BUILD_TYPE'] == 'Release' and
                       flags['RODIN_USE_ASAN'] == 'OFF' and flags['RODIN_USE_UBSAN'] == 'OFF') else '2'
     subprocess.run(['cmake', '--build', str(build), '--parallel', parallel, '--target'] + spec['targets'],

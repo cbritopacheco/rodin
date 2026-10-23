@@ -13,21 +13,15 @@ flowchart LR
     Common["Build / Common Libraries"]:::build
     b_1b3e09feff6d0310["Build / Manufactured / Rodin / Assembly"]:::build
     b_4fc891bf60607765["Build / Manufactured / Rodin / H1"]:::build
-    b_98cb3a9d18fb71d9["Build / Manufactured / Rodin / MPI / H1 / LinearElasticity"]:::build
-    b_21363f9fea89f273["Build / Manufactured / Rodin / MPI / H1 / Poisson"]:::build
+    b_22bdf11a32b1e59b["Build / Manufactured / Rodin / MPI"]:::build
     b_716d8deb40dfbdad["Build / Manufactured / Rodin / Models"]:::build
-    b_a2ddfff506400652["Build / Manufactured / Rodin / Models / Advection"]:::build
-    b_d3955dc6cad96f08["Build / Manufactured / Rodin / Models / Eikonal"]:::build
     b_e96c266e7ada561e["Build / Manufactured / Rodin / P0"]:::build
     b_ae3ddeee44430a7b["Build / Manufactured / Rodin / P0_P1"]:::build
     b_0dbff32f8c18754e["Build / Manufactured / Rodin / P1"]:::build
-    b_52251a2e7e31490d["Build / Manufactured / Rodin / P1 / LinearElasticity3D"]:::build
     b_4664058fb1624a42["Build / Manufactured / Rodin / P1_H1"]:::build
     b_c73f1c5dc55cbb1f["Build / Manufactured / Rodin / PETSc"]:::build
-    b_ef20d4e67a7ff792["Build / Manufactured / Rodin / PETSc / MPI"]:::build
     b_832be36f07ba17e2["Build / Manufactured / Rodin / PreassembledMixed"]:::build
     b_40fe281c3dcd857e["Build / Manufactured / Rodin / Solver"]:::build
-    b_7f51e665c29421b7["Build / Manufactured / Rodin / Solver / NewtonSolver"]:::build
     b_5c91cfe734862c19["Build / Unit / Rodin"]:::build
     b_5833ff7d963e7fee["Build / Unit / Rodin / Adaptation"]:::build
     b_0e82251d491a0194["Build / Unit / Rodin / Alert"]:::build
@@ -40,19 +34,10 @@ flowchart LR
     b_4e56c84e9baa72b7["Build / Unit / Rodin / IO"]:::build
     b_ecbe4399e9f2fd07["Build / Unit / Rodin / Location"]:::build
     b_ca2643c5829f1ad3["Build / Unit / Rodin / MMG"]:::build
-    b_0ba5e06f63d29f41["Build / Unit / Rodin / MPI / Assembly"]:::build
-    b_8c2a7fe80b6f7815["Build / Unit / Rodin / MPI / Context"]:::build
-    b_00252e282cec298e["Build / Unit / Rodin / MPI / Geometry"]:::build
-    b_7b2d0458e9a22597["Build / Unit / Rodin / MPI / IO"]:::build
-    b_a915ee2d3d772b6a["Build / Unit / Rodin / MPI / Location"]:::build
-    b_ee1b4e2461083fd5["Build / Unit / Rodin / MPI / Variational"]:::build
-    b_347310df662ebb56["Build / Unit / Rodin / MPI / Variational / MatrixRanges"]:::build
+    b_c1bc7e84d44b7de8["Build / Unit / Rodin / MPI"]:::build
     b_fc7950278f0f6db5["Build / Unit / Rodin / Math"]:::build
-    b_7226511f37479a94["Build / Unit / Rodin / Models / Advection"]:::build
-    b_7c43905e2931804c["Build / Unit / Rodin / Models / Eikonal"]:::build
-    b_ef31f4a45823df8b["Build / Unit / Rodin / Models / Solid"]:::build
+    b_dcc15e3351f9c5a5["Build / Unit / Rodin / Models"]:::build
     b_a2c40791b7670c5d["Build / Unit / Rodin / PETSc"]:::build
-    b_543a4d59daa2ec69["Build / Unit / Rodin / PETSc / IO"]:::build
     b_97bf7f954e3089cd["Build / Unit / Rodin / QF"]:::build
     b_b9184473e7719e76["Build / Unit / Rodin / Scotch"]:::build
     b_a064c813cec4d83a["Build / Unit / Rodin / Serialization"]:::build
@@ -61,12 +46,6 @@ flowchart LR
     b_645f577853c8d2be["Build / Unit / Rodin / Test"]:::build
     b_3418b4119a4f13ce["Build / Unit / Rodin / Utility"]:::build
     b_53c1b5c7da997368["Build / Unit / Rodin / Variational"]:::build
-    b_d728da3f6812a384["Build / Unit / Rodin / Variational / H1"]:::build
-    b_7767ab7f4eb55311["Build / Unit / Rodin / Variational / H1 / MassQuadrature"]:::build
-    b_1d2abe33942fe80e["Build / Unit / Rodin / Variational / H1 / ShapeFunction"]:::build
-    b_7e7f412ab5eaf701["Build / Unit / Rodin / Variational / MatrixQuadrature"]:::build
-    b_488151aa9c26792b["Build / Unit / Rodin / Variational / QuadratureExpression"]:::build
-    b_6a36f2bc420b8e73["Build / Unit / Rodin / Variational / QuadratureRuleSpecialization"]:::build
     e_02ad63ad55a5966b["Manufactured / Rodin / Slow"]:::execution
     e_0902c944445fce1e["Unit / Rodin / Variational / H1 / ShapeFunction / Backends / Baseline"]:::execution
     e_1e60a7246d24bcf4["Manufactured / Rodin / Backends / Baseline"]:::execution
@@ -107,21 +86,15 @@ flowchart LR
     Publish_unit_3["Coverage / Publish / Unit / 3"]:::coverage
     Common --> b_1b3e09feff6d0310
     Common --> b_4fc891bf60607765
-    Common --> b_98cb3a9d18fb71d9
-    Common --> b_21363f9fea89f273
+    Common --> b_22bdf11a32b1e59b
     Common --> b_716d8deb40dfbdad
-    Common --> b_a2ddfff506400652
-    Common --> b_d3955dc6cad96f08
     Common --> b_e96c266e7ada561e
     Common --> b_ae3ddeee44430a7b
     Common --> b_0dbff32f8c18754e
-    Common --> b_52251a2e7e31490d
     Common --> b_4664058fb1624a42
     Common --> b_c73f1c5dc55cbb1f
-    Common --> b_ef20d4e67a7ff792
     Common --> b_832be36f07ba17e2
     Common --> b_40fe281c3dcd857e
-    Common --> b_7f51e665c29421b7
     Common --> b_5c91cfe734862c19
     Common --> b_5833ff7d963e7fee
     Common --> b_0e82251d491a0194
@@ -134,19 +107,10 @@ flowchart LR
     Common --> b_4e56c84e9baa72b7
     Common --> b_ecbe4399e9f2fd07
     Common --> b_ca2643c5829f1ad3
-    Common --> b_0ba5e06f63d29f41
-    Common --> b_8c2a7fe80b6f7815
-    Common --> b_00252e282cec298e
-    Common --> b_7b2d0458e9a22597
-    Common --> b_a915ee2d3d772b6a
-    Common --> b_ee1b4e2461083fd5
-    Common --> b_347310df662ebb56
+    Common --> b_c1bc7e84d44b7de8
     Common --> b_fc7950278f0f6db5
-    Common --> b_7226511f37479a94
-    Common --> b_7c43905e2931804c
-    Common --> b_ef31f4a45823df8b
+    Common --> b_dcc15e3351f9c5a5
     Common --> b_a2c40791b7670c5d
-    Common --> b_543a4d59daa2ec69
     Common --> b_97bf7f954e3089cd
     Common --> b_b9184473e7719e76
     Common --> b_a064c813cec4d83a
@@ -155,149 +119,107 @@ flowchart LR
     Common --> b_645f577853c8d2be
     Common --> b_3418b4119a4f13ce
     Common --> b_53c1b5c7da997368
-    Common --> b_d728da3f6812a384
-    Common --> b_7767ab7f4eb55311
-    Common --> b_1d2abe33942fe80e
-    Common --> b_7e7f412ab5eaf701
-    Common --> b_488151aa9c26792b
-    Common --> b_6a36f2bc420b8e73
     Common --> e_02ad63ad55a5966b
     b_1b3e09feff6d0310 --> e_02ad63ad55a5966b
     b_40fe281c3dcd857e --> e_02ad63ad55a5966b
     b_4664058fb1624a42 --> e_02ad63ad55a5966b
     b_716d8deb40dfbdad --> e_02ad63ad55a5966b
-    b_7f51e665c29421b7 --> e_02ad63ad55a5966b
     b_832be36f07ba17e2 --> e_02ad63ad55a5966b
-    b_a2ddfff506400652 --> e_02ad63ad55a5966b
     b_ae3ddeee44430a7b --> e_02ad63ad55a5966b
     b_c73f1c5dc55cbb1f --> e_02ad63ad55a5966b
-    b_d3955dc6cad96f08 --> e_02ad63ad55a5966b
     b_e96c266e7ada561e --> e_02ad63ad55a5966b
-    b_ef20d4e67a7ff792 --> e_02ad63ad55a5966b
     Common --> e_0902c944445fce1e
-    b_1d2abe33942fe80e --> e_0902c944445fce1e
+    b_53c1b5c7da997368 --> e_0902c944445fce1e
     Common --> e_1e60a7246d24bcf4
     b_1b3e09feff6d0310 --> e_1e60a7246d24bcf4
     b_40fe281c3dcd857e --> e_1e60a7246d24bcf4
     b_4664058fb1624a42 --> e_1e60a7246d24bcf4
     b_716d8deb40dfbdad --> e_1e60a7246d24bcf4
-    b_7f51e665c29421b7 --> e_1e60a7246d24bcf4
     b_832be36f07ba17e2 --> e_1e60a7246d24bcf4
-    b_a2ddfff506400652 --> e_1e60a7246d24bcf4
     b_ae3ddeee44430a7b --> e_1e60a7246d24bcf4
     b_c73f1c5dc55cbb1f --> e_1e60a7246d24bcf4
-    b_d3955dc6cad96f08 --> e_1e60a7246d24bcf4
     b_e96c266e7ada561e --> e_1e60a7246d24bcf4
-    b_ef20d4e67a7ff792 --> e_1e60a7246d24bcf4
     Common --> e_1fea204855efc00f
-    b_347310df662ebb56 --> e_1fea204855efc00f
-    b_ee1b4e2461083fd5 --> e_1fea204855efc00f
+    b_c1bc7e84d44b7de8 --> e_1fea204855efc00f
     Common --> e_2cc98b51c9d77f30
-    b_543a4d59daa2ec69 --> e_2cc98b51c9d77f30
     b_a2c40791b7670c5d --> e_2cc98b51c9d77f30
     Common --> e_3b9348adab56cb6b
     b_0dbff32f8c18754e --> e_3b9348adab56cb6b
     Common --> e_41b363ca687142b3
     b_4fc891bf60607765 --> e_41b363ca687142b3
     Common --> e_4a2b49e231129006
-    b_347310df662ebb56 --> e_4a2b49e231129006
-    b_ee1b4e2461083fd5 --> e_4a2b49e231129006
+    b_c1bc7e84d44b7de8 --> e_4a2b49e231129006
     Common --> e_4cca9a8538cc6aad
-    b_52251a2e7e31490d --> e_4cca9a8538cc6aad
+    b_0dbff32f8c18754e --> e_4cca9a8538cc6aad
     Common --> e_58bfd15ee9417aa2
     b_4fc891bf60607765 --> e_58bfd15ee9417aa2
     Common --> e_680fee2db4506cf4
-    b_7e7f412ab5eaf701 --> e_680fee2db4506cf4
+    b_53c1b5c7da997368 --> e_680fee2db4506cf4
     Common --> e_6d8bcfd9c4246aac
-    b_0ba5e06f63d29f41 --> e_6d8bcfd9c4246aac
+    b_c1bc7e84d44b7de8 --> e_6d8bcfd9c4246aac
     Common --> e_74373ab9a7387dc3
-    b_ef31f4a45823df8b --> e_74373ab9a7387dc3
+    b_dcc15e3351f9c5a5 --> e_74373ab9a7387dc3
     Common --> e_8e1d1dc208212471
-    b_98cb3a9d18fb71d9 --> e_8e1d1dc208212471
+    b_22bdf11a32b1e59b --> e_8e1d1dc208212471
     Common --> e_98047d7208498759
-    b_98cb3a9d18fb71d9 --> e_98047d7208498759
+    b_22bdf11a32b1e59b --> e_98047d7208498759
     Common --> e_9c68bf931a59a45f
-    b_543a4d59daa2ec69 --> e_9c68bf931a59a45f
     b_a2c40791b7670c5d --> e_9c68bf931a59a45f
     Common --> e_ab3f31961e0632cc
-    b_488151aa9c26792b --> e_ab3f31961e0632cc
+    b_53c1b5c7da997368 --> e_ab3f31961e0632cc
     Common --> e_b1dd47638d1bef42
     b_0dbff32f8c18754e --> e_b1dd47638d1bef42
     Common --> e_b88223a2a372730c
-    b_21363f9fea89f273 --> e_b88223a2a372730c
+    b_22bdf11a32b1e59b --> e_b88223a2a372730c
     Common --> e_cee61ec2449cb999
-    b_6a36f2bc420b8e73 --> e_cee61ec2449cb999
+    b_53c1b5c7da997368 --> e_cee61ec2449cb999
     Common --> e_d0380ee0576ba0f7
     b_5833ff7d963e7fee --> e_d0380ee0576ba0f7
     Common --> e_d19b8fc0b65f74a7
     b_53c1b5c7da997368 --> e_d19b8fc0b65f74a7
     Common --> e_d9c53777a387fc06
-    b_21363f9fea89f273 --> e_d9c53777a387fc06
+    b_22bdf11a32b1e59b --> e_d9c53777a387fc06
     Common --> e_e40e24bb0f7f2d9e
-    b_00252e282cec298e --> e_e40e24bb0f7f2d9e
-    b_7b2d0458e9a22597 --> e_e40e24bb0f7f2d9e
-    b_8c2a7fe80b6f7815 --> e_e40e24bb0f7f2d9e
-    b_a915ee2d3d772b6a --> e_e40e24bb0f7f2d9e
+    b_c1bc7e84d44b7de8 --> e_e40e24bb0f7f2d9e
     Common --> e_e541e873336ae2ab
-    b_0ba5e06f63d29f41 --> e_e541e873336ae2ab
+    b_c1bc7e84d44b7de8 --> e_e541e873336ae2ab
     Common --> e_e69b3dbff2bf906c
-    b_d728da3f6812a384 --> e_e69b3dbff2bf906c
+    b_53c1b5c7da997368 --> e_e69b3dbff2bf906c
     Common --> e_ec3565cfb8138ed9
-    b_00252e282cec298e --> e_ec3565cfb8138ed9
-    b_0ba5e06f63d29f41 --> e_ec3565cfb8138ed9
     b_0dbff32f8c18754e --> e_ec3565cfb8138ed9
     b_0e82251d491a0194 --> e_ec3565cfb8138ed9
     b_0f8acb8fe0ac9042 --> e_ec3565cfb8138ed9
     b_152c84d53dc9e29a --> e_ec3565cfb8138ed9
     b_1b3e09feff6d0310 --> e_ec3565cfb8138ed9
-    b_1d2abe33942fe80e --> e_ec3565cfb8138ed9
-    b_21363f9fea89f273 --> e_ec3565cfb8138ed9
+    b_22bdf11a32b1e59b --> e_ec3565cfb8138ed9
     b_340d7b7af2d634ee --> e_ec3565cfb8138ed9
     b_3418b4119a4f13ce --> e_ec3565cfb8138ed9
-    b_347310df662ebb56 --> e_ec3565cfb8138ed9
     b_40fe281c3dcd857e --> e_ec3565cfb8138ed9
     b_463ef7e0f7a1d998 --> e_ec3565cfb8138ed9
     b_4664058fb1624a42 --> e_ec3565cfb8138ed9
-    b_488151aa9c26792b --> e_ec3565cfb8138ed9
     b_4e56c84e9baa72b7 --> e_ec3565cfb8138ed9
     b_4fc891bf60607765 --> e_ec3565cfb8138ed9
-    b_52251a2e7e31490d --> e_ec3565cfb8138ed9
     b_53c1b5c7da997368 --> e_ec3565cfb8138ed9
-    b_543a4d59daa2ec69 --> e_ec3565cfb8138ed9
     b_5833ff7d963e7fee --> e_ec3565cfb8138ed9
     b_5c91cfe734862c19 --> e_ec3565cfb8138ed9
     b_645f577853c8d2be --> e_ec3565cfb8138ed9
-    b_6a36f2bc420b8e73 --> e_ec3565cfb8138ed9
     b_716d8deb40dfbdad --> e_ec3565cfb8138ed9
-    b_7226511f37479a94 --> e_ec3565cfb8138ed9
-    b_7767ab7f4eb55311 --> e_ec3565cfb8138ed9
     b_785f3821cc91e4a9 --> e_ec3565cfb8138ed9
-    b_7b2d0458e9a22597 --> e_ec3565cfb8138ed9
-    b_7c43905e2931804c --> e_ec3565cfb8138ed9
     b_7d7d3d20b4fc1a2d --> e_ec3565cfb8138ed9
-    b_7e7f412ab5eaf701 --> e_ec3565cfb8138ed9
-    b_7f51e665c29421b7 --> e_ec3565cfb8138ed9
     b_832be36f07ba17e2 --> e_ec3565cfb8138ed9
     b_8af7cb003ac9fe49 --> e_ec3565cfb8138ed9
-    b_8c2a7fe80b6f7815 --> e_ec3565cfb8138ed9
     b_97bf7f954e3089cd --> e_ec3565cfb8138ed9
-    b_98cb3a9d18fb71d9 --> e_ec3565cfb8138ed9
     b_a064c813cec4d83a --> e_ec3565cfb8138ed9
     b_a2c40791b7670c5d --> e_ec3565cfb8138ed9
-    b_a2ddfff506400652 --> e_ec3565cfb8138ed9
     b_a6c5959469f87019 --> e_ec3565cfb8138ed9
-    b_a915ee2d3d772b6a --> e_ec3565cfb8138ed9
     b_ae3ddeee44430a7b --> e_ec3565cfb8138ed9
     b_b9184473e7719e76 --> e_ec3565cfb8138ed9
+    b_c1bc7e84d44b7de8 --> e_ec3565cfb8138ed9
     b_c73f1c5dc55cbb1f --> e_ec3565cfb8138ed9
     b_ca2643c5829f1ad3 --> e_ec3565cfb8138ed9
-    b_d3955dc6cad96f08 --> e_ec3565cfb8138ed9
-    b_d728da3f6812a384 --> e_ec3565cfb8138ed9
+    b_dcc15e3351f9c5a5 --> e_ec3565cfb8138ed9
     b_e96c266e7ada561e --> e_ec3565cfb8138ed9
     b_ecbe4399e9f2fd07 --> e_ec3565cfb8138ed9
-    b_ee1b4e2461083fd5 --> e_ec3565cfb8138ed9
-    b_ef20d4e67a7ff792 --> e_ec3565cfb8138ed9
-    b_ef31f4a45823df8b --> e_ec3565cfb8138ed9
     b_fc7950278f0f6db5 --> e_ec3565cfb8138ed9
     Common --> e_f1f84fad36c84070
     b_0e82251d491a0194 --> e_f1f84fad36c84070
@@ -308,9 +230,7 @@ flowchart LR
     b_4e56c84e9baa72b7 --> e_f1f84fad36c84070
     b_5c91cfe734862c19 --> e_f1f84fad36c84070
     b_645f577853c8d2be --> e_f1f84fad36c84070
-    b_7226511f37479a94 --> e_f1f84fad36c84070
     b_785f3821cc91e4a9 --> e_f1f84fad36c84070
-    b_7c43905e2931804c --> e_f1f84fad36c84070
     b_7d7d3d20b4fc1a2d --> e_f1f84fad36c84070
     b_8af7cb003ac9fe49 --> e_f1f84fad36c84070
     b_97bf7f954e3089cd --> e_f1f84fad36c84070
@@ -318,14 +238,15 @@ flowchart LR
     b_a6c5959469f87019 --> e_f1f84fad36c84070
     b_b9184473e7719e76 --> e_f1f84fad36c84070
     b_ca2643c5829f1ad3 --> e_f1f84fad36c84070
+    b_dcc15e3351f9c5a5 --> e_f1f84fad36c84070
     b_ecbe4399e9f2fd07 --> e_f1f84fad36c84070
     b_fc7950278f0f6db5 --> e_f1f84fad36c84070
     Common --> e_f902161e19bc35bc
     b_152c84d53dc9e29a --> e_f902161e19bc35bc
     Common --> e_fce35885472e0a05
-    b_7767ab7f4eb55311 --> e_fce35885472e0a05
+    b_53c1b5c7da997368 --> e_fce35885472e0a05
     Common --> e_fe559a2375c8bb17
-    b_52251a2e7e31490d --> e_fe559a2375c8bb17
+    b_0dbff32f8c18754e --> e_fe559a2375c8bb17
     Common --> Publish_baseline
     e_ec3565cfb8138ed9 --> Publish_baseline
     Common --> Publish_manufactured_1

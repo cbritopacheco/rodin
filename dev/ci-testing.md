@@ -15,7 +15,7 @@ change when a test or lane is extended.
 | A dedicated physics, geometry, degree or rank partition | The relevant matrix and execution selector in `.github/ci/targeted-lanes.yml`; `ci_builds.py` if the required targets or compile configuration change. Preserve MPI commands and ranks. |
 | A new backend or compile configuration | `ci_tests.py` configuration or `ci_builds.py` definition, `ci_build_graph.py` configuration routing, and the test-environment action. Each configuration automatically gets its own hierarchy DAG. |
 | A new execution/publication family | Planner inventory, workflow dependencies, report artifact family, publisher scheduling and finalizer dependencies; verify every eligible contribution is published exactly once. |
-| Oversized compilation or execution | Measure the owning directory/component; adjust build subdivision in `ci_build_graph.py` or execution grouping in `ci_tests.py` separately. Do not remove configurations or tests. |
+| Oversized compilation or execution | Measure the hierarchy group; review its cut level in `ci_build_graph.py` or execution grouping in `ci_tests.py` separately. Do not remove configurations or tests. |
 
 The Python files above live in `dev/`; workflow files live in
 `.github/workflows/`. The environment action is
@@ -25,18 +25,28 @@ selection, build compatibility and coverage completeness.
 
 ## Build ownership, execution lanes and publication families
 
-A target's physical CMake registration directory owns its build. For example,
-an executable registered under `tests/unit/Rodin/Math/` is built under that
-directory even if its cases have several logical execution groups. Compatible
-regular and Slow selections share that producer. A different sanitizer or
-backend configuration needs a separate compatible producer.
+A target's physical CMake registration directory remains its source owner.
+Compilation stops at explicit hierarchy levels, defined by `build_group()` in
+`ci_build_graph.py`:
 
-The builder limits each directory group to twelve executable targets and
-isolates known expensive components. Numbered subdivisions are generated when
-needed; they are not new test categories. Execution grouping can independently
-batch short siblings under a parent or isolate an expensive component.
-Workflow matrix bands only distribute those generated entries within GitHub's
-matrix limit; their numbers do not define directory ownership.
+| Category | Build group boundary | Included descendants |
+| --- | --- | --- |
+| Unit | `unit/Rodin/<Module>` | The module's entire subtree, including MPI and PETSc subdirectories. |
+| Manufactured | `manufactured/Rodin/<Module>` | The module's entire subtree, including Solver/NewtonSolver and MPI/H1. |
+| Convergence | `convergence/{h,p,hp,isoparametric}` | Every selected physics subtree under that study type. |
+
+Targets registered directly at a category or Rodin root remain in that parent's
+own group; they do not absorb separately grouped descendants. Each configured
+executable has exactly one producer. Compatible regular, Slow, geometry and
+rank partitions share that producer. Different compiler/backend/build-type/
+threading/sanitizer configurations retain separate producers.
+
+There is no automatic twelve-target limit, numbered build subdivision or
+component-specific build exception. Execution components remain independent
+lanes. Descending below an agreed build boundary requires an explicit policy
+change justified by measured build time or memory, with matching dependency
+and completeness guards. Existing compiler concurrency safeguards remain,
+including serial compilation for the consolidated Unit/MPI group.
 
 Coverage publication groups completed executions by family. The current graph
 has seven ordinary and ten dedicated publisher families. Adding a case to an
@@ -52,9 +62,9 @@ another configuration's completed contributions.
 ### Regenerate the dependency graph
 
 GitHub dependencies cannot select one child of a matrix. The generated
-The `TestConfiguration_*.yml` variants declare separate directory/component jobs
-inside each compatible configuration; execution jobs name only their required
-hierarchy producers. Directory subdivisions can compile in parallel, and the
+`TestConfiguration_*.yml` variants declare a producer for each applicable
+hierarchy group inside each compatible configuration. Execution jobs wait only
+for their required groups. Different groups can compile independently, and the
 original Slow/geometry/rank partitions remain separate execution jobs.
 
 After changing registration directories, execution grouping, dedicated lane
@@ -82,7 +92,9 @@ still reject any required producer missing from a generated variant.
 Source registration references establish scheduling bounds, not executable
 eligibility. Configured CMake manifests still choose all build targets and must
 confirm that every required producer is present in the generated dependency
-edges. Dynamically constructed dedicated target names need an explicit source
+edges and that every declared group has configured executables. Disabled optional
+directories require matching scheduling bounds in `ci_schedule.py`; do not create
+empty producers or skip conditions for them. Dynamically constructed dedicated target names need an explicit source
 edge in `ci_schedule.py`; the two diffusion boundary aliases document this case.
 A missing or ambiguous edge fails common planning before any test can be omitted.
 
@@ -169,8 +181,8 @@ not compiler flags or build ownership.
 
 All execution families consume directory builds from the configured target
 manifest. Common objects are compiled once per compatible configuration;
-executables have one physical-directory producer, subdivided into numbered
-groups above twelve targets. Compiler, backend, optimization, threading and
+executables have one producer at the agreed module/study-type boundary,
+including all selected descendants. Compiler, backend, optimization, threading and
 sanitizer variants remain distinct. Rank and geometry selections share builds.
 No execution lane should gain an inline configure/build command.
 

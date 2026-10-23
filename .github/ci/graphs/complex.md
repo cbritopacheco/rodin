@@ -11,11 +11,10 @@ Arrows are the actual `needs` dependencies; this is a scheduling diagram, not a 
 ```mermaid
 flowchart LR
     Common["Build / Common Libraries"]:::build
-    b_7e7393f2d1535333["Build / Convergence / H / PETScHelmholtz"]:::build
-    b_2f5194ab0b824e48["Build / Convergence / HP / PETScHelmholtz"]:::build
-    b_529d455ca0628361["Build / Convergence / Isoparametric / Helmholtz"]:::build
-    b_ae895a3eb0b1b80d["Build / Convergence / Isoparametric / P0Projection"]:::build
-    b_018475937d39c109["Build / Convergence / P / PETScHelmholtz"]:::build
+    b_2989e83a0d5f4507["Build / Convergence / H"]:::build
+    b_6554bf74aa040f2d["Build / Convergence / HP"]:::build
+    b_5b5ca12157517189["Build / Convergence / Isoparametric"]:::build
+    b_6680ea56fdf3c71b["Build / Convergence / P"]:::build
     b_a2c40791b7670c5d["Build / Unit / Rodin / PETSc"]:::build
     b_53c1b5c7da997368["Build / Unit / Rodin / Variational"]:::build
     e_49d80aa3c06ede54["Convergence / Isoparametric / Helmholtz"]:::execution
@@ -25,29 +24,28 @@ flowchart LR
     e_dcc533e56a7df1dd["Unit / Rodin / PETSc"]:::execution
     e_f1a9d74134e3f21d["Convergence / Isoparametric / Helmholtz"]:::execution
     Publish_PETScComplexConvergence["Coverage / Publish / PETScComplexConvergence"]:::coverage
-    Common --> b_7e7393f2d1535333
-    Common --> b_2f5194ab0b824e48
-    Common --> b_529d455ca0628361
-    Common --> b_ae895a3eb0b1b80d
-    Common --> b_018475937d39c109
+    Common --> b_2989e83a0d5f4507
+    Common --> b_6554bf74aa040f2d
+    Common --> b_5b5ca12157517189
+    Common --> b_6680ea56fdf3c71b
     Common --> b_a2c40791b7670c5d
     Common --> b_53c1b5c7da997368
     Common --> e_49d80aa3c06ede54
-    b_529d455ca0628361 --> e_49d80aa3c06ede54
+    b_5b5ca12157517189 --> e_49d80aa3c06ede54
     Common --> e_85e43709b28c601a
-    b_ae895a3eb0b1b80d --> e_85e43709b28c601a
+    b_5b5ca12157517189 --> e_85e43709b28c601a
     Common --> e_88fe1d228cff84d4
-    b_018475937d39c109 --> e_88fe1d228cff84d4
-    b_2f5194ab0b824e48 --> e_88fe1d228cff84d4
+    b_2989e83a0d5f4507 --> e_88fe1d228cff84d4
     b_53c1b5c7da997368 --> e_88fe1d228cff84d4
-    b_7e7393f2d1535333 --> e_88fe1d228cff84d4
+    b_6554bf74aa040f2d --> e_88fe1d228cff84d4
+    b_6680ea56fdf3c71b --> e_88fe1d228cff84d4
     b_a2c40791b7670c5d --> e_88fe1d228cff84d4
     Common --> e_8c961bfcb2a42ff2
-    b_7e7393f2d1535333 --> e_8c961bfcb2a42ff2
+    b_2989e83a0d5f4507 --> e_8c961bfcb2a42ff2
     Common --> e_dcc533e56a7df1dd
     b_a2c40791b7670c5d --> e_dcc533e56a7df1dd
     Common --> e_f1a9d74134e3f21d
-    b_529d455ca0628361 --> e_f1a9d74134e3f21d
+    b_5b5ca12157517189 --> e_f1a9d74134e3f21d
     Common --> Publish_PETScComplexConvergence
     e_88fe1d228cff84d4 --> Publish_PETScComplexConvergence
     e_f1a9d74134e3f21d --> Publish_PETScComplexConvergence

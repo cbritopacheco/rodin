@@ -14,7 +14,7 @@ can share compilation without sharing runtime state.
 | `TestConfiguration_*.yml` (for example [native](TestConfiguration_native.yml)) | Generated backend-specific DAGs: compile common libraries, resolve ownership and release each hierarchy independently. |
 | [TestCommon.yml](TestCommon.yml) | Common-library compilation recipe used to generate the configuration workflow. |
 | Dedicated family workflows (for example [TestConvergence.yml](TestConvergence.yml)) | Generated single-family execution workflows, preserving numerical commands and rank partitions. |
-| [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile bounded directory groups using unchanged common objects. |
+| [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile module/study-type groups using unchanged common objects. |
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
@@ -142,11 +142,15 @@ Display names capitalize hierarchy segments and preserve established spellings:
 remain internal identifiers; they do not determine displayed capitalization.
 
 [ci_build_graph.py](../../dev/ci_build_graph.py) separates common objects,
-directory-owned executables and execution-only coordinates. The complete
+hierarchy-owned executable artifacts and execution-only coordinates. The complete
 compiler/backend/build-type/threading/sanitizer configuration determines
-compatibility. Directory groups follow the test hierarchy, with numbered
-subgroups above twelve executable targets. Test enable switches register a
-superset without changing production ABI; original configuration-specific
+compatibility. Compilation stops at `Unit / Rodin / <Module>`,
+`Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
+`/ Isoparametric`. Selected descendants share their group's single artifact;
+direct root targets retain a separate parent group. There are no automatic
+numbered subdivisions or component-specific compilation jobs. Execution lanes
+retain their existing partitions. Test enable switches register a superset
+without changing production ABI; original configuration-specific
 inventories and runtime selectors remain required.
 
 Common compilation follows the CMake dependency closure of requested executables
@@ -156,10 +160,11 @@ contents are unchanged; stable source/submodule timestamps prevent later
 checkouts invalidating restored objects. Every directory builder checks that
 its common objects remained unchanged. Each executable belongs to exactly one
 producer for a common configuration. Each of the 46 compatible configurations
-progresses independently. Within it, each directory/component producer is a
-distinct dependency job. Execution waits only for its required hierarchy
-producers, so an unrelated geometry, physics or sanitizer build does not delay
-a ready group. Known expensive components have separate producer jobs.
+progresses independently. Within it, each module/study-type producer is a
+distinct dependency job. A lane waits for its combined build group to finish,
+including sibling targets in that group. Unrelated hierarchy groups and
+configurations do not delay a ready lane. Changes to cut levels require measured
+build-time or memory evidence.
 Installation checks retain their actual install/consumption builds.
 
 Execution artifacts contain executables, libraries, generated CTest/CMake
@@ -241,11 +246,12 @@ execution lanes. Update dependency edges and completeness inventories together
 when adding a backend or family.
 
 Each compatible configuration has an independent common/directory/execution
-graph. Execution jobs depend on their required directory/component producers.
+graph. Execution jobs depend on their required hierarchy-group producers.
 Eleven backend/instrumentation variants declare only their applicable execution
 groups; sanitizer variants omit coverage publisher declarations. Dedicated
 families each have a single-job reusable workflow. Executable declarations
-create producers only at their owning directory or isolated component; references in test commands do not create extra producers.
+map to their agreed module/study-type producer; references in test commands
+do not create extra producers.
 Disabled optional backend directories are excluded from the applicable graph.
 Configured binding requires every declared producer and execution matrix to be
 nonempty. A missing producer, request or coverage family fails validation;

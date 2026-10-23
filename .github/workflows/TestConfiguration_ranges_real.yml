@@ -68,19 +68,18 @@ jobs:
         path: ci-build-index.json
         if-no-files-found: error
     outputs:
-      b_347310df662ebb56: ${{ steps.schedule.outputs.b_347310df662ebb56 }}
+      b_c1bc7e84d44b7de8: ${{ steps.schedule.outputs.b_c1bc7e84d44b7de8 }}
       b_a2c40791b7670c5d: ${{ steps.schedule.outputs.b_a2c40791b7670c5d }}
-      b_543a4d59daa2ec69: ${{ steps.schedule.outputs.b_543a4d59daa2ec69 }}
       e_f5a2fd27664628c4: ${{ steps.schedule.outputs.e_f5a2fd27664628c4 }}
       p_PETScMatrixRanges: ${{ steps.schedule.outputs.p_PETScMatrixRanges }}
-  b_347310df662ebb56:
+  b_c1bc7e84d44b7de8:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_347310df662ebb56) }}
+      matrix: ${{ fromJSON(needs.Common.outputs.b_c1bc7e84d44b7de8) }}
     uses: ./.github/workflows/TestDirectoryBuild.yml
     with:
       id: ${{ matrix.id }}
@@ -99,26 +98,12 @@ jobs:
       id: ${{ matrix.id }}
       runner: ${{ matrix.runner }}
       common: ${{ inputs.id }}
-  b_543a4d59daa2ec69:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_543a4d59daa2ec69) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
   e_f5a2fd27664628c4:
     name: Unit / Rodin / MPI / Variational / MatrixRanges + Unit / Rodin / PETSc + Unit / Rodin / PETSc / IO
     needs:
     - Common
-    - b_347310df662ebb56
-    - b_543a4d59daa2ec69
     - b_a2c40791b7670c5d
+    - b_c1bc7e84d44b7de8
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/TestPETScMatrixRanges.yml
     with:

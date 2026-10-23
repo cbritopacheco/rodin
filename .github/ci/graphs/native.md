@@ -12,37 +12,10 @@ Arrows are the actual `needs` dependencies; this is a scheduling diagram, not a 
 flowchart LR
     Common["Build / Common Libraries"]:::build
     b_fba7096b050e9837["Build / Convergence"]:::build
-    b_9fba20ba53550660["Build / Convergence / H / Conductivity"]:::build
-    b_23d6093effc75202["Build / Convergence / H / Helmholtz"]:::build
-    b_942a4b85784a2358["Build / Convergence / H / LinearElasticity"]:::build
-    b_cfb4c1fca1dd5790["Build / Convergence / H / NonlinearPoisson"]:::build
-    b_cac8bcb80c5e4bb5["Build / Convergence / H / P0Projection"]:::build
-    b_f44ead2f36b9da81["Build / Convergence / H / Poisson"]:::build
-    b_82e5f60ae95422ff["Build / Convergence / H / ReactionDiffusion"]:::build
-    b_c3cba2e8394f441b["Build / Convergence / H / Stokes"]:::build
-    b_3cc37c75d2aca2b4["Build / Convergence / HP / Conductivity"]:::build
-    b_4561725553c1e2a1["Build / Convergence / HP / Helmholtz"]:::build
-    b_32154128e1887aca["Build / Convergence / HP / LinearElasticity"]:::build
-    b_0e472f92c22e217c["Build / Convergence / HP / NonlinearPoisson"]:::build
-    b_70bb53997c2bf2b2["Build / Convergence / HP / Poisson"]:::build
-    b_38b63810656e3d35["Build / Convergence / HP / ReactionDiffusion"]:::build
-    b_b560abb6254a075b["Build / Convergence / HP / Stokes"]:::build
+    b_2989e83a0d5f4507["Build / Convergence / H"]:::build
+    b_6554bf74aa040f2d["Build / Convergence / HP"]:::build
     b_5b5ca12157517189["Build / Convergence / Isoparametric"]:::build
-    b_3e2b9fcf4b6a473d["Build / Convergence / Isoparametric / Diffusion"]:::build
-    b_a0a9016a642031de["Build / Convergence / Isoparametric / GeometryApproximation"]:::build
-    b_529d455ca0628361["Build / Convergence / Isoparametric / Helmholtz"]:::build
-    b_2c9635f8beafe0cd["Build / Convergence / Isoparametric / LinearElasticity"]:::build
-    b_9601421e12a0f511["Build / Convergence / Isoparametric / NonlinearPoisson"]:::build
-    b_ae895a3eb0b1b80d["Build / Convergence / Isoparametric / P0Projection"]:::build
-    b_59d68de42da58d73["Build / Convergence / Isoparametric / ReactionDiffusion"]:::build
-    b_469a556fdb8f8deb["Build / Convergence / Isoparametric / Stokes"]:::build
-    b_24393615162e530a["Build / Convergence / P / Conductivity"]:::build
-    b_6cccb55b7d97676c["Build / Convergence / P / Helmholtz"]:::build
-    b_28bd6c0d677a55a3["Build / Convergence / P / LinearElasticity"]:::build
-    b_5a4a73b3e46af05e["Build / Convergence / P / NonlinearPoisson"]:::build
-    b_4661d2b0be247a0e["Build / Convergence / P / Poisson"]:::build
-    b_bd1e701d4943792f["Build / Convergence / P / ReactionDiffusion"]:::build
-    b_73d1715a6cf443ea["Build / Convergence / P / Stokes"]:::build
+    b_6680ea56fdf3c71b["Build / Convergence / P"]:::build
     e_0df4df781bb335f1["Convergence / Isoparametric / Diffusion"]:::execution
     e_144e1ab7b4d1f245["Convergence / P / Stokes"]:::execution
     e_2a40580473607358["Convergence / HP / NonlinearPoisson"]:::execution
@@ -78,98 +51,70 @@ flowchart LR
     Publish_Convergence["Coverage / Publish / Convergence"]:::coverage
     Publish_ConvergenceBaseline["Coverage / Publish / ConvergenceBaseline"]:::coverage
     Common --> b_fba7096b050e9837
-    Common --> b_9fba20ba53550660
-    Common --> b_23d6093effc75202
-    Common --> b_942a4b85784a2358
-    Common --> b_cfb4c1fca1dd5790
-    Common --> b_cac8bcb80c5e4bb5
-    Common --> b_f44ead2f36b9da81
-    Common --> b_82e5f60ae95422ff
-    Common --> b_c3cba2e8394f441b
-    Common --> b_3cc37c75d2aca2b4
-    Common --> b_4561725553c1e2a1
-    Common --> b_32154128e1887aca
-    Common --> b_0e472f92c22e217c
-    Common --> b_70bb53997c2bf2b2
-    Common --> b_38b63810656e3d35
-    Common --> b_b560abb6254a075b
+    Common --> b_2989e83a0d5f4507
+    Common --> b_6554bf74aa040f2d
     Common --> b_5b5ca12157517189
-    Common --> b_3e2b9fcf4b6a473d
-    Common --> b_a0a9016a642031de
-    Common --> b_529d455ca0628361
-    Common --> b_2c9635f8beafe0cd
-    Common --> b_9601421e12a0f511
-    Common --> b_ae895a3eb0b1b80d
-    Common --> b_59d68de42da58d73
-    Common --> b_469a556fdb8f8deb
-    Common --> b_24393615162e530a
-    Common --> b_6cccb55b7d97676c
-    Common --> b_28bd6c0d677a55a3
-    Common --> b_5a4a73b3e46af05e
-    Common --> b_4661d2b0be247a0e
-    Common --> b_bd1e701d4943792f
-    Common --> b_73d1715a6cf443ea
+    Common --> b_6680ea56fdf3c71b
     Common --> e_0df4df781bb335f1
-    b_3e2b9fcf4b6a473d --> e_0df4df781bb335f1
+    b_5b5ca12157517189 --> e_0df4df781bb335f1
     Common --> e_144e1ab7b4d1f245
-    b_73d1715a6cf443ea --> e_144e1ab7b4d1f245
+    b_6680ea56fdf3c71b --> e_144e1ab7b4d1f245
     Common --> e_2a40580473607358
-    b_0e472f92c22e217c --> e_2a40580473607358
+    b_6554bf74aa040f2d --> e_2a40580473607358
     Common --> e_2b3a9a14b2d7c912
-    b_942a4b85784a2358 --> e_2b3a9a14b2d7c912
+    b_2989e83a0d5f4507 --> e_2b3a9a14b2d7c912
     Common --> e_2c680b0073998f69
-    b_9fba20ba53550660 --> e_2c680b0073998f69
+    b_2989e83a0d5f4507 --> e_2c680b0073998f69
     Common --> e_2dfbc3964a484232
-    b_70bb53997c2bf2b2 --> e_2dfbc3964a484232
+    b_6554bf74aa040f2d --> e_2dfbc3964a484232
     Common --> e_37925412bcb83582
-    b_c3cba2e8394f441b --> e_37925412bcb83582
+    b_2989e83a0d5f4507 --> e_37925412bcb83582
     Common --> e_3acdedb6655f5c44
-    b_3cc37c75d2aca2b4 --> e_3acdedb6655f5c44
+    b_6554bf74aa040f2d --> e_3acdedb6655f5c44
     Common --> e_48bbb20805cf058d
-    b_6cccb55b7d97676c --> e_48bbb20805cf058d
+    b_6680ea56fdf3c71b --> e_48bbb20805cf058d
     Common --> e_4f301ada09c9205c
-    b_bd1e701d4943792f --> e_4f301ada09c9205c
+    b_6680ea56fdf3c71b --> e_4f301ada09c9205c
     Common --> e_74d6728e3d2b64ab
-    b_469a556fdb8f8deb --> e_74d6728e3d2b64ab
+    b_5b5ca12157517189 --> e_74d6728e3d2b64ab
     Common --> e_7da666b38631f609
-    b_9601421e12a0f511 --> e_7da666b38631f609
+    b_5b5ca12157517189 --> e_7da666b38631f609
     Common --> e_803e0868df0fe74e
-    b_4661d2b0be247a0e --> e_803e0868df0fe74e
+    b_6680ea56fdf3c71b --> e_803e0868df0fe74e
     Common --> e_81a57d13ebc6752f
-    b_24393615162e530a --> e_81a57d13ebc6752f
+    b_6680ea56fdf3c71b --> e_81a57d13ebc6752f
     Common --> e_866157d02f2b58b2
-    b_23d6093effc75202 --> e_866157d02f2b58b2
+    b_2989e83a0d5f4507 --> e_866157d02f2b58b2
     Common --> e_8a925bf3c3d50065
-    b_5a4a73b3e46af05e --> e_8a925bf3c3d50065
+    b_6680ea56fdf3c71b --> e_8a925bf3c3d50065
     Common --> e_8dd89036ed1241f2
-    b_4561725553c1e2a1 --> e_8dd89036ed1241f2
+    b_6554bf74aa040f2d --> e_8dd89036ed1241f2
     Common --> e_9078bac80628c8bf
-    b_cfb4c1fca1dd5790 --> e_9078bac80628c8bf
+    b_2989e83a0d5f4507 --> e_9078bac80628c8bf
     Common --> e_94bd9f5c1c3d6e1f
-    b_2c9635f8beafe0cd --> e_94bd9f5c1c3d6e1f
+    b_5b5ca12157517189 --> e_94bd9f5c1c3d6e1f
     Common --> e_9953f8a5e49b3e47
-    b_f44ead2f36b9da81 --> e_9953f8a5e49b3e47
+    b_2989e83a0d5f4507 --> e_9953f8a5e49b3e47
     Common --> e_9f12a59cc8fa2f52
-    b_a0a9016a642031de --> e_9f12a59cc8fa2f52
-    b_ae895a3eb0b1b80d --> e_9f12a59cc8fa2f52
+    b_5b5ca12157517189 --> e_9f12a59cc8fa2f52
     Common --> e_a46043847f7c8006
-    b_59d68de42da58d73 --> e_a46043847f7c8006
+    b_5b5ca12157517189 --> e_a46043847f7c8006
     Common --> e_a7111da6e796e795
-    b_28bd6c0d677a55a3 --> e_a7111da6e796e795
+    b_6680ea56fdf3c71b --> e_a7111da6e796e795
     Common --> e_ab26f58bd7bade89
-    b_38b63810656e3d35 --> e_ab26f58bd7bade89
+    b_6554bf74aa040f2d --> e_ab26f58bd7bade89
     Common --> e_b479fb96c6b3ceb3
-    b_c3cba2e8394f441b --> e_b479fb96c6b3ceb3
+    b_2989e83a0d5f4507 --> e_b479fb96c6b3ceb3
     Common --> e_b85333893be4635e
-    b_82e5f60ae95422ff --> e_b85333893be4635e
+    b_2989e83a0d5f4507 --> e_b85333893be4635e
     Common --> e_b9796210fd86a60b
-    b_32154128e1887aca --> e_b9796210fd86a60b
+    b_6554bf74aa040f2d --> e_b9796210fd86a60b
     Common --> e_e9a9f0e0d3e7cba3
-    b_b560abb6254a075b --> e_e9a9f0e0d3e7cba3
+    b_6554bf74aa040f2d --> e_e9a9f0e0d3e7cba3
     Common --> e_ef6c8d0bfb0f1d97
-    b_529d455ca0628361 --> e_ef6c8d0bfb0f1d97
+    b_5b5ca12157517189 --> e_ef6c8d0bfb0f1d97
     Common --> e_fa952edc66d840a6
-    b_cac8bcb80c5e4bb5 --> e_fa952edc66d840a6
+    b_2989e83a0d5f4507 --> e_fa952edc66d840a6
     Common --> e_fcc7414cbbbd07cb
     b_fba7096b050e9837 --> e_fcc7414cbbbd07cb
     Common --> e_ff3ceb0dc795ea80

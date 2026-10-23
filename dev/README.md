@@ -36,7 +36,8 @@ The [workflow overview](../.github/workflows/README.md) describes the job graph.
 The [test registration guide](ci-testing.md) maps changes to their owning files:
 adding a case, adding an executable, splitting Slow selections, changing rank
 partitions, or introducing a backend configuration. Build ownership follows
-physical CMake directories; execution grouping and publication families are
+the module/study-type hierarchy while manifests retain physical CMake owners;
+execution grouping and publication families are
 separate scheduling decisions. Generated plans and receipts are CI artifacts,
 not hand-maintained executable lists.
 

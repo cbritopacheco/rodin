@@ -68,10 +68,10 @@ jobs:
         path: ci-build-index.json
         if-no-files-found: error
     outputs:
+      b_5c91cfe734862c19: ${{ steps.schedule.outputs.b_5c91cfe734862c19 }}
       b_5833ff7d963e7fee: ${{ steps.schedule.outputs.b_5833ff7d963e7fee }}
       b_0e82251d491a0194: ${{ steps.schedule.outputs.b_0e82251d491a0194 }}
       b_0f8acb8fe0ac9042: ${{ steps.schedule.outputs.b_0f8acb8fe0ac9042 }}
-      b_5c91cfe734862c19: ${{ steps.schedule.outputs.b_5c91cfe734862c19 }}
       b_7d7d3d20b4fc1a2d: ${{ steps.schedule.outputs.b_7d7d3d20b4fc1a2d }}
       b_8af7cb003ac9fe49: ${{ steps.schedule.outputs.b_8af7cb003ac9fe49 }}
       b_152c84d53dc9e29a: ${{ steps.schedule.outputs.b_152c84d53dc9e29a }}
@@ -80,19 +80,10 @@ jobs:
       b_4e56c84e9baa72b7: ${{ steps.schedule.outputs.b_4e56c84e9baa72b7 }}
       b_ecbe4399e9f2fd07: ${{ steps.schedule.outputs.b_ecbe4399e9f2fd07 }}
       b_ca2643c5829f1ad3: ${{ steps.schedule.outputs.b_ca2643c5829f1ad3 }}
-      b_0ba5e06f63d29f41: ${{ steps.schedule.outputs.b_0ba5e06f63d29f41 }}
-      b_8c2a7fe80b6f7815: ${{ steps.schedule.outputs.b_8c2a7fe80b6f7815 }}
-      b_00252e282cec298e: ${{ steps.schedule.outputs.b_00252e282cec298e }}
-      b_7b2d0458e9a22597: ${{ steps.schedule.outputs.b_7b2d0458e9a22597 }}
-      b_a915ee2d3d772b6a: ${{ steps.schedule.outputs.b_a915ee2d3d772b6a }}
-      b_ee1b4e2461083fd5: ${{ steps.schedule.outputs.b_ee1b4e2461083fd5 }}
-      b_347310df662ebb56: ${{ steps.schedule.outputs.b_347310df662ebb56 }}
+      b_c1bc7e84d44b7de8: ${{ steps.schedule.outputs.b_c1bc7e84d44b7de8 }}
       b_fc7950278f0f6db5: ${{ steps.schedule.outputs.b_fc7950278f0f6db5 }}
-      b_7226511f37479a94: ${{ steps.schedule.outputs.b_7226511f37479a94 }}
-      b_7c43905e2931804c: ${{ steps.schedule.outputs.b_7c43905e2931804c }}
-      b_ef31f4a45823df8b: ${{ steps.schedule.outputs.b_ef31f4a45823df8b }}
+      b_dcc15e3351f9c5a5: ${{ steps.schedule.outputs.b_dcc15e3351f9c5a5 }}
       b_a2c40791b7670c5d: ${{ steps.schedule.outputs.b_a2c40791b7670c5d }}
-      b_543a4d59daa2ec69: ${{ steps.schedule.outputs.b_543a4d59daa2ec69 }}
       b_97bf7f954e3089cd: ${{ steps.schedule.outputs.b_97bf7f954e3089cd }}
       b_a064c813cec4d83a: ${{ steps.schedule.outputs.b_a064c813cec4d83a }}
       b_463ef7e0f7a1d998: ${{ steps.schedule.outputs.b_463ef7e0f7a1d998 }}
@@ -100,12 +91,6 @@ jobs:
       b_645f577853c8d2be: ${{ steps.schedule.outputs.b_645f577853c8d2be }}
       b_3418b4119a4f13ce: ${{ steps.schedule.outputs.b_3418b4119a4f13ce }}
       b_53c1b5c7da997368: ${{ steps.schedule.outputs.b_53c1b5c7da997368 }}
-      b_7e7f412ab5eaf701: ${{ steps.schedule.outputs.b_7e7f412ab5eaf701 }}
-      b_488151aa9c26792b: ${{ steps.schedule.outputs.b_488151aa9c26792b }}
-      b_6a36f2bc420b8e73: ${{ steps.schedule.outputs.b_6a36f2bc420b8e73 }}
-      b_d728da3f6812a384: ${{ steps.schedule.outputs.b_d728da3f6812a384 }}
-      b_7767ab7f4eb55311: ${{ steps.schedule.outputs.b_7767ab7f4eb55311 }}
-      b_1d2abe33942fe80e: ${{ steps.schedule.outputs.b_1d2abe33942fe80e }}
       e_d0380ee0576ba0f7: ${{ steps.schedule.outputs.e_d0380ee0576ba0f7 }}
       e_e541e873336ae2ab: ${{ steps.schedule.outputs.e_e541e873336ae2ab }}
       e_74373ab9a7387dc3: ${{ steps.schedule.outputs.e_74373ab9a7387dc3 }}
@@ -281,92 +266,14 @@ jobs:
       id: ${{ matrix.id }}
       runner: ${{ matrix.runner }}
       common: ${{ inputs.id }}
-  b_0ba5e06f63d29f41:
+  b_c1bc7e84d44b7de8:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_0ba5e06f63d29f41) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_8c2a7fe80b6f7815:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_8c2a7fe80b6f7815) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_00252e282cec298e:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_00252e282cec298e) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_7b2d0458e9a22597:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_7b2d0458e9a22597) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_a915ee2d3d772b6a:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_a915ee2d3d772b6a) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_ee1b4e2461083fd5:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_ee1b4e2461083fd5) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_347310df662ebb56:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_347310df662ebb56) }}
+      matrix: ${{ fromJSON(needs.Common.outputs.b_c1bc7e84d44b7de8) }}
     uses: ./.github/workflows/TestDirectoryBuild.yml
     with:
       id: ${{ matrix.id }}
@@ -385,40 +292,14 @@ jobs:
       id: ${{ matrix.id }}
       runner: ${{ matrix.runner }}
       common: ${{ inputs.id }}
-  b_7226511f37479a94:
+  b_dcc15e3351f9c5a5:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_7226511f37479a94) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_7c43905e2931804c:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_7c43905e2931804c) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_ef31f4a45823df8b:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_ef31f4a45823df8b) }}
+      matrix: ${{ fromJSON(needs.Common.outputs.b_dcc15e3351f9c5a5) }}
     uses: ./.github/workflows/TestDirectoryBuild.yml
     with:
       id: ${{ matrix.id }}
@@ -432,19 +313,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_a2c40791b7670c5d) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_543a4d59daa2ec69:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_543a4d59daa2ec69) }}
     uses: ./.github/workflows/TestDirectoryBuild.yml
     with:
       id: ${{ matrix.id }}
@@ -541,89 +409,11 @@ jobs:
       id: ${{ matrix.id }}
       runner: ${{ matrix.runner }}
       common: ${{ inputs.id }}
-  b_d728da3f6812a384:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_d728da3f6812a384) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_7767ab7f4eb55311:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_7767ab7f4eb55311) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_1d2abe33942fe80e:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_1d2abe33942fe80e) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_7e7f412ab5eaf701:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_7e7f412ab5eaf701) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_488151aa9c26792b:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_488151aa9c26792b) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_6a36f2bc420b8e73:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_6a36f2bc420b8e73) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
   e_0902c944445fce1e:
     name: Unit / Rodin / Variational / H1 / ShapeFunction
     needs:
     - Common
-    - b_1d2abe33942fe80e
+    - b_53c1b5c7da997368
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -646,8 +436,7 @@ jobs:
     name: Unit / Rodin / MPI / Variational
     needs:
     - Common
-    - b_347310df662ebb56
-    - b_ee1b4e2461083fd5
+    - b_c1bc7e84d44b7de8
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -670,7 +459,6 @@ jobs:
     name: Unit / Rodin / PETSc
     needs:
     - Common
-    - b_543a4d59daa2ec69
     - b_a2c40791b7670c5d
     if: ${{ !cancelled() }}
     strategy:
@@ -694,7 +482,7 @@ jobs:
     name: Unit / Rodin / Variational / MatrixQuadrature
     needs:
     - Common
-    - b_7e7f412ab5eaf701
+    - b_53c1b5c7da997368
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -717,7 +505,7 @@ jobs:
     name: Unit / Rodin / Models / Solid
     needs:
     - Common
-    - b_ef31f4a45823df8b
+    - b_dcc15e3351f9c5a5
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -762,7 +550,7 @@ jobs:
     name: Unit / Rodin / Variational / QuadratureExpression
     needs:
     - Common
-    - b_488151aa9c26792b
+    - b_53c1b5c7da997368
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -785,7 +573,7 @@ jobs:
     name: Unit / Rodin / Variational / QuadratureRuleSpecialization
     needs:
     - Common
-    - b_6a36f2bc420b8e73
+    - b_53c1b5c7da997368
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -854,10 +642,7 @@ jobs:
     name: Unit / Rodin / MPI
     needs:
     - Common
-    - b_00252e282cec298e
-    - b_7b2d0458e9a22597
-    - b_8c2a7fe80b6f7815
-    - b_a915ee2d3d772b6a
+    - b_c1bc7e84d44b7de8
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -880,7 +665,7 @@ jobs:
     name: Unit / Rodin / MPI / Assembly
     needs:
     - Common
-    - b_0ba5e06f63d29f41
+    - b_c1bc7e84d44b7de8
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -903,7 +688,7 @@ jobs:
     name: Unit / Rodin / Variational / H1
     needs:
     - Common
-    - b_d728da3f6812a384
+    - b_53c1b5c7da997368
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
@@ -934,15 +719,14 @@ jobs:
     - b_4e56c84e9baa72b7
     - b_5c91cfe734862c19
     - b_645f577853c8d2be
-    - b_7226511f37479a94
     - b_785f3821cc91e4a9
-    - b_7c43905e2931804c
     - b_7d7d3d20b4fc1a2d
     - b_8af7cb003ac9fe49
     - b_97bf7f954e3089cd
     - b_a064c813cec4d83a
     - b_a6c5959469f87019
     - b_ca2643c5829f1ad3
+    - b_dcc15e3351f9c5a5
     - b_ecbe4399e9f2fd07
     - b_fc7950278f0f6db5
     if: ${{ !cancelled() }}
@@ -990,7 +774,7 @@ jobs:
     name: Unit / Rodin / Variational / H1 / MassQuadrature
     needs:
     - Common
-    - b_7767ab7f4eb55311
+    - b_53c1b5c7da997368
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false

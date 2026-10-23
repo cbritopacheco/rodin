@@ -1,4 +1,4 @@
-name: Tests / Build / Directory
+name: Tests / Build / Hierarchy
 'on':
   workflow_call:
     inputs:
@@ -16,7 +16,7 @@ permissions:
   actions: read
 jobs:
   Build:
-    name: Compile registered targets
+    name: Compile Hierarchy Group
     runs-on: ${{ inputs.runner }}
     timeout-minutes: 360
     env:

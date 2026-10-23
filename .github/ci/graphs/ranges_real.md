@@ -11,18 +11,15 @@ Arrows are the actual `needs` dependencies; this is a scheduling diagram, not a 
 ```mermaid
 flowchart LR
     Common["Build / Common Libraries"]:::build
-    b_347310df662ebb56["Build / Unit / Rodin / MPI / Variational / MatrixRanges"]:::build
+    b_c1bc7e84d44b7de8["Build / Unit / Rodin / MPI"]:::build
     b_a2c40791b7670c5d["Build / Unit / Rodin / PETSc"]:::build
-    b_543a4d59daa2ec69["Build / Unit / Rodin / PETSc / IO"]:::build
     e_f5a2fd27664628c4["Unit / Rodin / MPI / Variational / MatrixRanges + Unit / Rodin / PETSc + Unit / Rodin / PETSc / IO"]:::execution
     Publish_PETScMatrixRanges["Coverage / Publish / PETScMatrixRanges"]:::coverage
-    Common --> b_347310df662ebb56
+    Common --> b_c1bc7e84d44b7de8
     Common --> b_a2c40791b7670c5d
-    Common --> b_543a4d59daa2ec69
     Common --> e_f5a2fd27664628c4
-    b_347310df662ebb56 --> e_f5a2fd27664628c4
-    b_543a4d59daa2ec69 --> e_f5a2fd27664628c4
     b_a2c40791b7670c5d --> e_f5a2fd27664628c4
+    b_c1bc7e84d44b7de8 --> e_f5a2fd27664628c4
     Common --> Publish_PETScMatrixRanges
     e_f5a2fd27664628c4 --> Publish_PETScMatrixRanges
     classDef build fill:#dbeafe,stroke:#2563eb,color:#111827

@@ -161,9 +161,13 @@ class HierarchicalScheduleTest(unittest.TestCase):
         for family in ['Convergence', 'PETScCurvedConvergence', 'PETScCurvedBoundaryConvergence']:
             members = [e for e in executions.values() if e['job'] == family]
             self.assertGreater(len(members), 1)
-            # Geometry/physics branches do not wait for every other branch.
-            self.assertTrue(any(set(a['dependencies']).isdisjoint(b['dependencies'])
-                                for a in members for b in members))
+        # Physics partitions share their study-type build, while unrelated
+        # hierarchy groups still release independently.
+        curved = [e for e in executions.values() if e['job'] == 'PETScCurvedConvergence']
+        self.assertTrue(all(e['dependencies'] == [schedule.key('b', 'convergence/isoparametric')]
+                            for e in curved))
+        self.assertTrue(any(set(a['dependencies']).isdisjoint(b['dependencies'])
+                            for a in curved for b in executions.values() if b['dependencies']))
 
     def test_generated_runtime_preserves_every_numerical_step(self):
         generated = schedule.targeted_workflow()['jobs']

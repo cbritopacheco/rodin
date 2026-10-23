@@ -231,14 +231,16 @@ common object was rebuilt.
 Executable ownership comes from the configured CMake target manifest. Build
 names follow `Tests / Build / Unit / Rodin / Geometry`,
 `Tests / Build / Manufactured / Rodin / P1` and the corresponding convergence
-hierarchy. Logical component selections reuse the physical directory's build.
-Directories exceeding twelve executable targets are divided into numbered
-build groups. Each executable has exactly one producer per common
-configuration. Each configuration has an independent generated hierarchy DAG;
-execution groups wait only for their required directory/component producers.
-PETSc studies, unrelated physics and sanitizer configurations do not share a
-backend-wide build barrier. Configuration-local publishers also wait only for
-their own family. Regenerate the backend-specific `TestConfiguration_*.yml`
+hierarchy. Compilation stops at `Unit / Rodin / <Module>`,
+`Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
+`/ Isoparametric`. All selected descendants share that producer. Direct root
+targets retain their own parent group. There are no automatic twelve-target
+subdivisions or component-specific producers. Each executable has exactly one
+producer per compatible configuration. Logical execution components, Slow,
+geometry and MPI-rank partitions remain separate. A lane waits for its combined
+hierarchy group; unrelated groups and configurations remain independent.
+Changes to cut levels require measured build-time or memory evidence.
+Configuration-local publishers also wait only for their own family. Regenerate the backend-specific `TestConfiguration_*.yml`
 graphs and dedicated `Test<Family>.yml` wrappers with
 `python3 dev/ci_schedule.py --write` after registration or lane edits; preflight
 rejects stale output. Dedicated numerical recipes live in

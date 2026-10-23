@@ -18,6 +18,57 @@ import ci_tests as tests
 
 
 class BuildGraphPlanTest(unittest.TestCase):
+    def test_hierarchy_cuts_preserve_category_and_module_boundaries(self):
+        for owner, expected in [
+                ('unit/Rodin', 'unit/Rodin'),
+                ('unit/Rodin/MPI/Geometry', 'unit/Rodin/MPI'),
+                ('unit/Rodin/PETSc/IO', 'unit/Rodin/PETSc'),
+                ('unit/Rodin/Models/Solid', 'unit/Rodin/Models'),
+                ('unit/Rodin/Variational/H1', 'unit/Rodin/Variational'),
+                ('manufactured/Rodin/Solver/NewtonSolver', 'manufactured/Rodin/Solver'),
+                ('manufactured/Rodin/MPI/H1/Poisson', 'manufactured/Rodin/MPI'),
+                ('convergence', 'convergence'),
+                ('convergence/h/PETScPoisson', 'convergence/h'),
+                ('convergence/p/Poisson', 'convergence/p'),
+                ('convergence/hp/LinearElasticity', 'convergence/hp'),
+                ('convergence/isoparametric/Diffusion', 'convergence/isoparametric')]:
+            self.assertEqual(graph.build_group(owner), expected)
+            self.assertEqual(graph.build_group('tests/' + owner), expected)
+        with self.assertRaisesRegex(ValueError, 'Unknown test build hierarchy'):
+            graph.build_group('benchmarks/Rodin/Math')
+
+    def test_siblings_and_large_target_sets_share_one_producer(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            targets = []
+            for i in range(15):
+                owner = 'unit/Rodin/MPI/' + ('Geometry' if i % 2 else 'Variational')
+                folder = root / 'tests' / owner
+                folder.mkdir(parents=True, exist_ok=True)
+                (folder / 'CMakeLists.txt').touch()
+                targets.append({'target': 'Target' + str(i), 'owner': 'tests/' + owner, 'kind': 'test'})
+            # Formerly isolated components remain execution partitions, not
+            # additional compilation producers.
+            targets.append(dict(targets[-1], target='RodinMPIMatrixRangeTest'))
+            first = planning.entry('unit', 'unit/Rodin/MPI', 'Debug', 'OFF', backend='default')
+            slow = planning.entry('slow', 'unit/Rodin/MPI', 'Debug', 'OFF', backend='default')
+            records = [{'request': {'job': 'Ordinary', 'matrix': first}, 'selected': targets, 'configured': targets},
+                       {'request': {'job': 'Ordinary', 'matrix': slow}, 'selected': targets[:1], 'configured': targets}]
+            frozen = json.dumps(records, sort_keys=True)
+            entry = {'id': 'common', 'definition': graph.common_specification(graph.specification('Ordinary', first))}
+            with patch.object(graph, 'ROOT', root), patch.object(archive, 'commit', return_value='current'):
+                document = graph.directory_plan(entry, records)
+            self.assertEqual(list(document['directories']), ['unit/Rodin/MPI'])
+            producer = document['directories']['unit/Rodin/MPI']
+            self.assertEqual(set(producer['targets']), {t['target'] for t in targets})
+            self.assertNotIn('part', producer)
+            regular = document['requests'][graph.request_key('Ordinary', first)]
+            slow_record = document['requests'][graph.request_key('Ordinary', slow)]
+            self.assertEqual(regular['builds'], slow_record['builds'])
+            self.assertEqual(regular['selected'], targets)
+            self.assertEqual(slow_record['selected'], targets[:1])
+            self.assertEqual(json.dumps(records, sort_keys=True), frozen)
+
     def requests(self):
         native = [{'multithreaded': mt, 'suite': 'baseline', 'group': group, 'path': tests.display_group(group)}
                   for group in planning.native_convergence_groups() for mt in ['ON', 'OFF']]
@@ -121,7 +172,8 @@ class BuildGraphExecutionTest(unittest.TestCase):
             build = root / 'build'
             geometry = root / 'tests/unit/Rodin/Geometry'
             variational = root / 'tests/unit/Rodin/Variational'
-            for path in [geometry, variational, root / 'src/Rodin']:
+            nested = geometry / 'Nested'
+            for path in [geometry, nested, variational, root / 'src/Rodin']:
                 path.mkdir(parents=True)
             (root / 'CMakeLists.txt').write_text(
                 'cmake_minimum_required(VERSION 3.20)\nproject(Graph LANGUAGES CXX)\n'
@@ -134,17 +186,19 @@ class BuildGraphExecutionTest(unittest.TestCase):
                 '"target\\towner\\texecutable\\tkind\\tprofiles\\n'
                 'Common\\tsrc/Rodin\\t\\tlibrary\\t\\n'
                 'First\\ttests/unit/Rodin/Geometry\\t$<TARGET_FILE:First>\\ttest\\tunit;slow\\n'
+                'Third\\ttests/unit/Rodin/Geometry/Nested\\t$<TARGET_FILE:Third>\\ttest\\tunit\\n'
                 'Second\\ttests/unit/Rodin/Variational\\t$<TARGET_FILE:Second>\\ttest\\tunit\\n")\n')
             (root / 'src/Rodin/Common.cpp').write_text('int common(int n) { return n == 2 ? 0 : 1; }\n')
             (root / 'src/Rodin/Unused.cpp').write_text('#error An unrelated library must not be compiled\n')
-            for owner, name in [(geometry, 'First'), (variational, 'Second')]:
+            for owner, name in [(geometry, 'First'), (variational, 'Second'), (nested, 'Third')]:
                 (owner / (name + '.cpp')).write_text('int common(int); int main(int n, char**) { return common(n); }\n')
                 body = f'add_executable({name} {name}.cpp)\ntarget_link_libraries({name} Common)\n'
                 body += f'add_test(NAME {name} COMMAND {name} regular)\nset_tests_properties({name} PROPERTIES LABELS unit)\n'
                 if name == 'First':
                     body += 'add_test(NAME Slow COMMAND First slow)\nset_tests_properties(Slow PROPERTIES LABELS slow)\n'
+                    body += 'add_subdirectory(Nested)\n'
                 (owner / 'CMakeLists.txt').write_text(body)
-            inputs = [root / 'CMakeLists.txt', *root.rglob('*.cpp'), geometry / 'CMakeLists.txt', variational / 'CMakeLists.txt']
+            inputs = [*root.rglob('CMakeLists.txt'), *root.rglob('*.cpp')]
             def stamp():
                 for path in inputs:
                     os.utime(path, (946684800, 946684800))
@@ -159,7 +213,7 @@ class BuildGraphExecutionTest(unittest.TestCase):
             original_specification = graph.specification
             def specification(job, matrix):
                 if job == 'Together':
-                    return original_specification('Ordinary', first) | {'targets': ['First', 'Second']}
+                    return original_specification('Ordinary', first) | {'targets': ['First', 'Second', 'Third']}
                 return original_specification(job, matrix)
             patches = [patch.object(graph, 'ROOT', root), patch.object(tests, 'ROOT', root),
                        patch.object(archive, 'ROOT', root), patch.object(archive, 'commit', return_value='current'),
@@ -179,6 +233,8 @@ class BuildGraphExecutionTest(unittest.TestCase):
             graph.compile_common(common[0], build, root / 'ci-common-records' / common[0]['id'])
             index, bands = graph.index_graph(root / 'ci-common-records')
             self.assertEqual(len(index['builds']), 2)
+            self.assertEqual(next(r['definition']['targets'] for r in index['builds'].values()
+                                  if r['definition']['directory'] == 'unit/Rodin/Geometry'), ['First', 'Third'])
             self.assertEqual(index['requests'][graph.request_key('Ordinary', first)]['builds'],
                              index['requests'][graph.request_key('Ordinary', slow)]['builds'])
             original_objects = {p.relative_to(build): archive.digest(p) for p in build.rglob('*.o')}
@@ -203,6 +259,11 @@ class BuildGraphExecutionTest(unittest.TestCase):
             self.assertFalse(list(build.rglob('*.gcda')))
             self.assertEqual(tests.run_group(build, first['group'], 'unit', 'default'), 0)
             self.assertFalse((build / 'tests/unit/Rodin/Variational/Second').exists())
+            self.assertTrue((build / 'tests/unit/Rodin/Geometry/Nested/Third').is_file())
+            build.rename(root / 'regular-execution')
+            graph.restore_request(index, 'Ordinary', slow, build)
+            self.assertFalse(list(build.rglob('*.gcda')))
+            self.assertEqual(tests.run_group(build, slow['group'], 'slow', 'default'), 0)
 
 
 if __name__ == '__main__':

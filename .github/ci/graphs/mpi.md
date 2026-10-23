@@ -11,12 +11,12 @@ Arrows are the actual `needs` dependencies; this is a scheduling diagram, not a 
 ```mermaid
 flowchart LR
     Common["Build / Common Libraries"]:::build
-    b_ee1b4e2461083fd5["Build / Unit / Rodin / MPI / Variational"]:::build
+    b_c1bc7e84d44b7de8["Build / Unit / Rodin / MPI"]:::build
     e_3e58689d45a989fd["Unit / Rodin / MPI / Variational"]:::execution
     Publish_MPIH1Restriction["Coverage / Publish / MPIH1Restriction"]:::coverage
-    Common --> b_ee1b4e2461083fd5
+    Common --> b_c1bc7e84d44b7de8
     Common --> e_3e58689d45a989fd
-    b_ee1b4e2461083fd5 --> e_3e58689d45a989fd
+    b_c1bc7e84d44b7de8 --> e_3e58689d45a989fd
     Common --> Publish_MPIH1Restriction
     e_3e58689d45a989fd --> Publish_MPIH1Restriction
     classDef build fill:#dbeafe,stroke:#2563eb,color:#111827

@@ -21,9 +21,10 @@ on its required producers. Configured CMake manifests must validate those
 dependency bounds; registration references do not decide which targets exist.
 Only applicable execution groups are declared in each variant. Sanitizer
 variants omit publishers, and dedicated wrappers have no inactive family jobs.
-Only real executable declarations create directory/component producers;
-command references do not create an empty parent when all executables have
-isolated component producers. Disabled optional backend directories are absent
+Real executable declarations map to module-level Unit/Manufactured producers
+and study-type Convergence producers. Selected descendants share one artifact;
+execution components do not create extra compilation jobs. There are no automatic
+target-count subdivisions. Command references do not create extra producers. Disabled optional backend directories are absent
 from the graph. Configured binding rejects empty producer or execution matrices
 and noncontributing coverage families. No applicable stage may be skipped to
 hide missing work; dependency failures remain failures. Explicit cancellation
