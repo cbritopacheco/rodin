@@ -17,7 +17,7 @@ permissions:
   actions: read
 jobs:
   Common:
-    name: Build / Common libraries
+    name: Build / Common Libraries
     runs-on: ${{ fromJSON(inputs.definition).runner }}
     timeout-minutes: 360
     env:
@@ -94,7 +94,6 @@ jobs:
       b_a2c40791b7670c5d: ${{ steps.schedule.outputs.b_a2c40791b7670c5d }}
       b_543a4d59daa2ec69: ${{ steps.schedule.outputs.b_543a4d59daa2ec69 }}
       b_97bf7f954e3089cd: ${{ steps.schedule.outputs.b_97bf7f954e3089cd }}
-      b_b9184473e7719e76: ${{ steps.schedule.outputs.b_b9184473e7719e76 }}
       b_a064c813cec4d83a: ${{ steps.schedule.outputs.b_a064c813cec4d83a }}
       b_463ef7e0f7a1d998: ${{ steps.schedule.outputs.b_463ef7e0f7a1d998 }}
       b_a6c5959469f87019: ${{ steps.schedule.outputs.b_a6c5959469f87019 }}
@@ -130,7 +129,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_5c91cfe734862c19 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_5c91cfe734862c19) }}
@@ -143,7 +142,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_5833ff7d963e7fee != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_5833ff7d963e7fee) }}
@@ -156,7 +155,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_0e82251d491a0194 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_0e82251d491a0194) }}
@@ -169,7 +168,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_0f8acb8fe0ac9042 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_0f8acb8fe0ac9042) }}
@@ -182,7 +181,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_7d7d3d20b4fc1a2d != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_7d7d3d20b4fc1a2d) }}
@@ -195,7 +194,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_8af7cb003ac9fe49 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_8af7cb003ac9fe49) }}
@@ -208,7 +207,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_152c84d53dc9e29a != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_152c84d53dc9e29a) }}
@@ -221,7 +220,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_785f3821cc91e4a9 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_785f3821cc91e4a9) }}
@@ -234,7 +233,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_340d7b7af2d634ee != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_340d7b7af2d634ee) }}
@@ -247,7 +246,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_4e56c84e9baa72b7 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_4e56c84e9baa72b7) }}
@@ -260,7 +259,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_ecbe4399e9f2fd07 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_ecbe4399e9f2fd07) }}
@@ -273,7 +272,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_ca2643c5829f1ad3 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_ca2643c5829f1ad3) }}
@@ -286,7 +285,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_0ba5e06f63d29f41 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_0ba5e06f63d29f41) }}
@@ -299,7 +298,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_8c2a7fe80b6f7815 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_8c2a7fe80b6f7815) }}
@@ -312,7 +311,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_00252e282cec298e != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_00252e282cec298e) }}
@@ -325,7 +324,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_7b2d0458e9a22597 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_7b2d0458e9a22597) }}
@@ -338,7 +337,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_a915ee2d3d772b6a != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_a915ee2d3d772b6a) }}
@@ -351,7 +350,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_ee1b4e2461083fd5 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_ee1b4e2461083fd5) }}
@@ -364,7 +363,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_347310df662ebb56 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_347310df662ebb56) }}
@@ -377,7 +376,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_fc7950278f0f6db5 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_fc7950278f0f6db5) }}
@@ -390,7 +389,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_7226511f37479a94 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_7226511f37479a94) }}
@@ -403,7 +402,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_7c43905e2931804c != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_7c43905e2931804c) }}
@@ -416,7 +415,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_ef31f4a45823df8b != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_ef31f4a45823df8b) }}
@@ -429,7 +428,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_a2c40791b7670c5d != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_a2c40791b7670c5d) }}
@@ -442,7 +441,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_543a4d59daa2ec69 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_543a4d59daa2ec69) }}
@@ -455,23 +454,10 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_97bf7f954e3089cd != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_97bf7f954e3089cd) }}
-    uses: ./.github/workflows/TestDirectoryBuild.yml
-    with:
-      id: ${{ matrix.id }}
-      runner: ${{ matrix.runner }}
-      common: ${{ inputs.id }}
-  b_b9184473e7719e76:
-    name: Build / ${{ matrix.name }}
-    needs:
-    - Common
-    if: ${{ needs.Common.outputs.b_b9184473e7719e76 != '' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.b_b9184473e7719e76) }}
     uses: ./.github/workflows/TestDirectoryBuild.yml
     with:
       id: ${{ matrix.id }}
@@ -481,7 +467,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_a064c813cec4d83a != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_a064c813cec4d83a) }}
@@ -494,7 +480,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_463ef7e0f7a1d998 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_463ef7e0f7a1d998) }}
@@ -507,7 +493,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_a6c5959469f87019 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_a6c5959469f87019) }}
@@ -520,7 +506,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_645f577853c8d2be != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_645f577853c8d2be) }}
@@ -533,7 +519,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_3418b4119a4f13ce != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_3418b4119a4f13ce) }}
@@ -546,7 +532,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_53c1b5c7da997368 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_53c1b5c7da997368) }}
@@ -559,7 +545,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_d728da3f6812a384 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_d728da3f6812a384) }}
@@ -572,7 +558,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_7767ab7f4eb55311 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_7767ab7f4eb55311) }}
@@ -585,7 +571,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_1d2abe33942fe80e != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_1d2abe33942fe80e) }}
@@ -598,7 +584,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_7e7f412ab5eaf701 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_7e7f412ab5eaf701) }}
@@ -611,7 +597,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_488151aa9c26792b != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_488151aa9c26792b) }}
@@ -624,7 +610,7 @@ jobs:
     name: Build / ${{ matrix.name }}
     needs:
     - Common
-    if: ${{ needs.Common.outputs.b_6a36f2bc420b8e73 != '' }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.b_6a36f2bc420b8e73) }}
@@ -638,8 +624,7 @@ jobs:
     needs:
     - Common
     - b_1d2abe33942fe80e
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_0902c944445fce1e != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_0902c944445fce1e) }}
@@ -663,8 +648,7 @@ jobs:
     - Common
     - b_347310df662ebb56
     - b_ee1b4e2461083fd5
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_1fea204855efc00f != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_1fea204855efc00f) }}
@@ -688,8 +672,7 @@ jobs:
     - Common
     - b_543a4d59daa2ec69
     - b_a2c40791b7670c5d
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_2cc98b51c9d77f30 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_2cc98b51c9d77f30) }}
@@ -712,8 +695,7 @@ jobs:
     needs:
     - Common
     - b_7e7f412ab5eaf701
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_680fee2db4506cf4 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_680fee2db4506cf4) }}
@@ -736,8 +718,7 @@ jobs:
     needs:
     - Common
     - b_ef31f4a45823df8b
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_74373ab9a7387dc3 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_74373ab9a7387dc3) }}
@@ -759,8 +740,7 @@ jobs:
     name: CMake / ThirdPartyIsolation
     needs:
     - Common
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_84e1789adadc2e2e != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_84e1789adadc2e2e) }}
@@ -783,8 +763,7 @@ jobs:
     needs:
     - Common
     - b_488151aa9c26792b
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_ab3f31961e0632cc != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_ab3f31961e0632cc) }}
@@ -807,8 +786,7 @@ jobs:
     needs:
     - Common
     - b_6a36f2bc420b8e73
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_cee61ec2449cb999 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_cee61ec2449cb999) }}
@@ -831,8 +809,7 @@ jobs:
     needs:
     - Common
     - b_5833ff7d963e7fee
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_d0380ee0576ba0f7 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_d0380ee0576ba0f7) }}
@@ -855,8 +832,7 @@ jobs:
     needs:
     - Common
     - b_53c1b5c7da997368
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_d19b8fc0b65f74a7 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_d19b8fc0b65f74a7) }}
@@ -882,8 +858,7 @@ jobs:
     - b_7b2d0458e9a22597
     - b_8c2a7fe80b6f7815
     - b_a915ee2d3d772b6a
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_e40e24bb0f7f2d9e != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_e40e24bb0f7f2d9e) }}
@@ -906,8 +881,7 @@ jobs:
     needs:
     - Common
     - b_0ba5e06f63d29f41
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_e541e873336ae2ab != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_e541e873336ae2ab) }}
@@ -930,8 +904,7 @@ jobs:
     needs:
     - Common
     - b_d728da3f6812a384
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_e69b3dbff2bf906c != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_e69b3dbff2bf906c) }}
@@ -969,12 +942,10 @@ jobs:
     - b_97bf7f954e3089cd
     - b_a064c813cec4d83a
     - b_a6c5959469f87019
-    - b_b9184473e7719e76
     - b_ca2643c5829f1ad3
     - b_ecbe4399e9f2fd07
     - b_fc7950278f0f6db5
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_f1f84fad36c84070 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_f1f84fad36c84070) }}
@@ -997,8 +968,7 @@ jobs:
     needs:
     - Common
     - b_152c84d53dc9e29a
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_f902161e19bc35bc != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_f902161e19bc35bc) }}
@@ -1021,8 +991,7 @@ jobs:
     needs:
     - Common
     - b_7767ab7f4eb55311
-    if: ${{ !cancelled() && needs.Common.result == 'success' && needs.Common.outputs.e_fce35885472e0a05 != '' && !contains(needs.*.result,
-      'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Common.outputs.e_fce35885472e0a05) }}

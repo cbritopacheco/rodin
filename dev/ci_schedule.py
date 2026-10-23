@@ -24,6 +24,9 @@ import ci_test_plan as planning
 import ci_tests as tests
 
 ROOT = tests.ROOT
+# Source scheduling bounds for optional directories. Configured manifests still
+# certify every selected target and reject an omitted producer.
+DIRECTORY_REQUIREMENTS = {'unit/Rodin/Scotch': 'RODIN_USE_SCOTCH'}
 
 
 def key(prefix, value):
@@ -45,22 +48,23 @@ def source_scopes():
         for path in sorted((ROOT / 'tests' / suite).rglob('CMakeLists.txt')):
             owner = str(path.parent.relative_to(ROOT / 'tests'))
             commands = list(tests.commands(path.read_text()))
-            if not any(name.lower() in ['add_executable', 'add_test', 'rodin_add_petsc_refinement']
-                       for name, _, _ in commands):
-                continue
-            # A helper can declare a target, e.g. rodin_add_petsc_refinement.
-            # Literal first-argument references bound its source directory;
-            # the configured manifest must confirm that bound before use.
-            declarations = {args[0] for _, args, _ in commands if args and args[0].startswith('Rodin')}
-            scopes[owner] = {'owner': owner, 'execution': tests.execution_group(owner)}
+            # Only executable declarations create build producers. add_test and
+            # target_link_libraries references are not additional executable owners.
+            declarations = {args[0] for name, args, _ in commands if args and
+                            name.lower() in ['add_executable', 'rodin_add_petsc_refinement'] and
+                            args[0].startswith('Rodin')}
+            if any(name.lower() == 'add_executable' and args and not args[0].startswith('Rodin')
+                   for name, args, _ in commands):
+                # Loop-generated executable names retain their physical owner;
+                # their configured target inventory remains authoritative.
+                scopes[owner] = {'owner': owner, 'execution': tests.execution_group(owner)}
             for name in sorted(declarations):
                 target = {'owner': 'tests/' + owner, 'target': name}
                 branch = scope(target)
                 if name in declared and declared[name] != branch:
                     raise ValueError('Ambiguous source dependency edge: ' + name)
                 declared[name] = branch
-                if branch != owner:
-                    scopes[branch] = {'owner': owner, 'execution': tests.execution_group(branch)}
+                scopes[branch] = {'owner': owner, 'execution': tests.execution_group(branch)}
     # These two target names are assembled in a CMake loop in Diffusion.
     # This supplies scheduling edges only; prepare() verifies actual ownership.
     for physics in ['Poisson', 'Conductivity']:
@@ -116,6 +120,8 @@ def layout(variant=None):
                 raise ValueError('Dedicated targets need explicit source dependency edges: ' + str(missing))
             dependencies = {declared[t] for t in required}
             label = ' + '.join(tests.display_group(s) for s in sorted(dependencies))
+        dependencies = {s for s in dependencies if s not in DIRECTORY_REQUIREMENTS or
+                        spec['cmake'].get(DIRECTORY_REQUIREMENTS[s]) == 'ON'}
         executions[identity] = {'job': job, 'family': family, 'name': label,
                                 'dependencies': sorted(key('b', s) for s in dependencies)}
     required = {k for e in executions.values() for k in e['dependencies']}
@@ -159,6 +165,11 @@ def prepare(common_id):
     expected = {graph.request_key(**r) for r in entry['requests']}
     if expected != index['requests'].keys():
         raise ValueError('Configuration scheduling lost execution requests')
+    if build_rows.keys() != producers.keys():
+        missing = [producers[k]['path'] for k in producers.keys() - build_rows.keys()]
+        raise ValueError('Declared producer has no configured executable: ' + str(sorted(missing)))
+    if execution_rows.keys() != executions.keys():
+        raise ValueError('Declared execution group has no required requests')
     (ROOT / 'ci-build-index.json').write_text(json.dumps(index, indent=2) + '\n')
     values = {**build_rows, **execution_rows}
     with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
@@ -172,8 +183,9 @@ def prepare(common_id):
                 contributing = [r for r in entry['requests'] if
                                 (families[r['matrix']['id']] if r['job'] == 'Ordinary' else r['job']) == family and
                                 index['requests'][graph.request_key(**r)]['selected']]
-                if contributing:
-                    output.write('p_' + family + '=true\n')
+                if not contributing:
+                    raise ValueError('Declared coverage family has no contributing requests: ' + family)
+                output.write('p_' + family + '=true\n')
     print('Independent hierarchical producers:', len(build_rows), '; execution groups:', len(execution_rows))
 
 
@@ -185,7 +197,7 @@ def configuration_workflow(variant=None):
     producers, executions = layout(variant)
     common_source = yaml.safe_load((ROOT / '.github/workflows/TestCommon.yml').read_text())
     common = copy.deepcopy(common_source['jobs']['Build'])
-    common['name'] = 'Build / Common libraries'
+    common['name'] = 'Build / Common Libraries'
     common['outputs'] = {name: expression('steps.schedule.outputs.' + name) for name in [
         *producers, *executions, *('p_' + family for family in sorted({e['family'] for e in executions.values()}))]}
     common['steps'] += [
@@ -197,16 +209,16 @@ def configuration_workflow(variant=None):
     jobs = {'Common': common}
     for identity, producer in sorted(producers.items(), key=lambda x: x[1]['path']):
         jobs[identity] = {'name': 'Build / ${{ matrix.name }}', 'needs': ['Common'],
-                         'if': expression("needs.Common.outputs." + identity + " != ''"),
+                         'if': expression('!cancelled()'),
                          'strategy': {'fail-fast': False, 'matrix': expression('fromJSON(needs.Common.outputs.' + identity + ')')},
                          'uses': './.github/workflows/TestDirectoryBuild.yml',
                          'with': {'id': expression('matrix.id'), 'runner': expression('matrix.runner'),
                                   'common': expression('inputs.id')}}
     for identity, execution in sorted(executions.items()):
         dependencies = ['Common', *execution['dependencies']]
-        condition = ("!cancelled() && needs.Common.result == 'success' && needs.Common.outputs." + identity +
-                     " != '' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')")
-        job = {'name': execution['name'], 'needs': dependencies, 'if': expression(condition)}
+        # Every declaration is mandatory. Missing matrices or artifacts must
+        # fail; dependency failures must not turn required work into skipped jobs.
+        job = {'name': execution['name'], 'needs': dependencies, 'if': expression('!cancelled()')}
         if execution['job'] == 'Ordinary':
             job.update({'strategy': {'fail-fast': False, 'matrix': expression('fromJSON(needs.Common.outputs.' + identity + ')')},
                         'uses': './.github/workflows/TestGroup.yml',
@@ -222,10 +234,9 @@ def configuration_workflow(variant=None):
             continue
         members = [k for k, e in executions.items() if e['family'] == family]
         jobs['Publish_' + family] = {
-            'name': 'Coverage / Publish / ' + family,
+            'name': 'Coverage / Publish / ' + tests.display_group(family.replace('_', '/')),
             'needs': ['Common', *members],
-            'if': expression("!cancelled() && needs.Common.outputs.p_" + family +
-                             " == 'true' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"),
+            'if': expression('!cancelled()'),
             'uses': './.github/workflows/CoveragePublish.yml', 'secrets': 'inherit',
             'with': {'kind': 'ordinary' if family in requests()[0] else 'targeted', 'family': family,
                      'common': expression('inputs.id')}}
@@ -248,7 +259,7 @@ def targeted_workflow(family=None):
     inputs = {'matrix': {'type': 'string', 'required': True}}
     if family is None:
         inputs['family'] = {'type': 'string', 'required': True}
-    return {'name': 'Tests / Dedicated selection', 'on': {'workflow_call': {'inputs': inputs,
+    return {'name': 'Tests / Dedicated Selection', 'on': {'workflow_call': {'inputs': inputs,
         'secrets': {'CODECOV_TOKEN': {'required': False}}}},
         'permissions': {'contents': 'read', 'actions': 'read'}, 'jobs': jobs}
 

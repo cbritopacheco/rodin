@@ -21,8 +21,13 @@ on its required producers. Configured CMake manifests must validate those
 dependency bounds; registration references do not decide which targets exist.
 Only applicable execution groups are declared in each variant. Sanitizer
 variants omit publishers, and dedicated wrappers have no inactive family jobs.
-This keeps unrelated branches out of the check list instead of generating
-thousands of skipped checks.
+Only real executable declarations create directory/component producers;
+command references do not create an empty parent when all executables have
+isolated component producers. Disabled optional backend directories are absent
+from the graph. Configured binding rejects empty producer or execution matrices
+and noncontributing coverage families. No applicable stage may be skipped to
+hide missing work; dependency failures remain failures. Explicit cancellation
+still stops superseded runs.
 
 `ConvergenceBaseline` obtains its directory matrix from the native planner;
 the other dedicated families declare their full `include` matrices here.

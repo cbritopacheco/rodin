@@ -86,17 +86,60 @@ execution lanes use the same build/restore architecture:
 
 ```mermaid
 flowchart TD
-  P[Plan unchanged execution requests] --> C[Compile common libraries per configuration]
-  C --> D[Resolve CMake directory ownership]
-  D --> B[Compile each directory executable once]
-  B --> E1[Restore private build and run regular selection]
-  B --> E2[Restore private build and run Slow or rank selection]
-  E1 --> R1[Independent report and receipt]
-  E2 --> R2[Independent report and receipt]
-  R1 --> U[Validate and publish incremental union]
-  R2 --> U
-  U --> F[Complete coverage and 95 percent gate]
+    P[Plan all tests and configurations] --> C[Common libraries per compatible configuration]
+    P --> I[Installation: build and consume installed packages]
+    C --> D[Resolve CMake ownership and build directory executables once]
+    C --> B[Zero-hit compilation baseline and inventory]
+
+    D --> U[Unit / Rodin / Module]
+    D --> M[Manufactured / Rodin / Module]
+    D --> V[Convergence / H, P, HP, Isoparametric / Physics]
+    D --> A[MPI / PETSc: restriction, convergence and MatrixRanges partitions]
+    D --> S[Slow variants within their Unit or Manufactured hierarchy]
+
+    U --> R[Eligible lanes: independent coverage reports and receipts]
+    M --> R
+    V --> R
+    A --> R
+    S --> R
+    U --> T[Required execution outcomes, including sanitizer configurations]
+    M --> T
+    V --> T
+    A --> T
+    S --> T
+
+    R --> Q[Configuration-local incremental coverage publications]
+    B --> F[Complete coverage verification and 95 percent gate]
+    Q --> F
+    T --> F
+    I --> F
 ```
+
+The shared-build portion repeats independently for each compatible
+configuration. Directory producers follow the physical test hierarchy, such as
+`Unit / Rodin / Geometry` and `Manufactured / Rodin / H1`. Each execution
+partition waits only for its required producers. The directory, execution,
+report and publication nodes represent multiple independent jobs and artifacts;
+they do not impose a global barrier before execution or publication.
+
+MPI/PETSc denotes backend-specific partitions within the test categories,
+including distributed manufactured and convergence tests; it is not a second
+execution of every category. Each distributed invocation preserves its original
+MPI ranks. Slow is an orthogonal execution profile within the relevant category:
+regular and Slow partitions share compiled executables without repeating their
+test selections. Sanitizer and installation checks retain their required
+outcomes without contributing coverage. The final gate requires those outcomes
+as well as every eligible coverage contribution and the compilation baseline.
+
+The queue initially contains planning, installation checks and common builds.
+Directory and execution matrices appear as their prerequisites finish, so the
+currently queued job count is not the total test campaign. All 1,240 execution
+requests across 46 compatible configurations remain mandatory.
+
+Display names capitalize hierarchy segments and preserve established spellings:
+`Tests / Complex`, `Tests / MPI`, `Tests / PETSc`, `Unit / Rodin / Geometry`,
+`Slow`, `MatrixRanges` and `macOS`. Lowercase backend keys and artifact names
+remain internal identifiers; they do not determine displayed capitalization.
 
 [ci_build_graph.py](../../dev/ci_build_graph.py) separates common objects,
 directory-owned executables and execution-only coordinates. The complete
@@ -180,10 +223,16 @@ Each compatible configuration has an independent common/directory/execution
 graph. Execution jobs depend on their required directory/component producers.
 Eleven backend/instrumentation variants declare only their applicable execution
 groups; sanitizer variants omit coverage publisher declarations. Dedicated
-families each have a single-job reusable workflow. This avoids registering
-thousands of skipped checks for unrelated backends and families. A conditionally
-disabled target can still leave an empty producer, which is validated against
-the configured manifest and recorded explicitly.
+families each have a single-job reusable workflow. Executable declarations
+create producers only at their owning directory or isolated component; references in test commands do not create extra producers.
+Disabled optional backend directories are excluded from the applicable graph.
+Configured binding requires every declared producer and execution matrix to be
+nonempty. A missing producer, request or coverage family fails validation;
+it is not accepted as a skipped stage. Required downstream stages also remain
+required after dependency failures, exposing missing matrices or artifacts as
+failures rather than silently skipping work. Explicit workflow cancellation
+still stops superseded runs.
+
 The generated DAG is maintained by [ci_schedule.py](../../dev/ci_schedule.py);
 dedicated lane sources live in
 [targeted-lanes.yml](../ci/targeted-lanes.yml). After editing registrations or

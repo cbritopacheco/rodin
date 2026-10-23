@@ -64,9 +64,10 @@ jobs:
           '
         if-no-files-found: error
   Configurations_baseline:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Baseline / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_baseline) }}
@@ -76,9 +77,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_complex:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_complex) }}
@@ -88,9 +90,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_default_coverage:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_coverage) }}
@@ -100,9 +103,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_default_sanitized:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_sanitized) }}
@@ -112,9 +116,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_mpi:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: MPI / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_mpi) }}
@@ -124,9 +129,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_native:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Native / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_native) }}
@@ -136,9 +142,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_optional_coverage:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_coverage) }}
@@ -148,9 +155,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_optional_sanitized:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_sanitized) }}
@@ -160,9 +168,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_petsc:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: PETSc / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_petsc) }}
@@ -172,9 +181,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_ranges_complex:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: PETSc / MatrixRanges / Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_complex) }}
@@ -184,9 +194,10 @@ jobs:
       definition: ${{ toJSON(matrix.definition) }}
     secrets: inherit
   Configurations_ranges_real:
-    name: ${{ matrix.definition.mode }} / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+    name: PETSc / MatrixRanges / Real / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_real) }}
@@ -198,6 +209,7 @@ jobs:
   InstallationUbuntu:
     needs:
     - Plan
+    if: ${{ !cancelled() }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -254,6 +266,7 @@ jobs:
   InstallationMacOS:
     needs:
     - Plan
+    if: ${{ !cancelled() }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -313,7 +326,7 @@ jobs:
 
           '
         retention-days: 7
-    name: Installation / MacOS (OS=${{ matrix.os }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc }})
+    name: Installation / macOS (OS=${{ matrix.os }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc }})
   CoverageFinalize:
     name: Coverage / Finalize
     if: always()

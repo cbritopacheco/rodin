@@ -40,6 +40,63 @@ class HierarchicalScheduleTest(unittest.TestCase):
             self.assertEqual(set(jobs), {family})
             self.assertNotIn('if', jobs[family])
 
+    def test_display_names_preserve_capitalization_without_changing_identifiers(self):
+        top = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        labels = {'baseline': 'Baseline', 'complex': 'Complex', 'default_coverage': 'Default',
+                  'default_sanitized': 'Default', 'mpi': 'MPI', 'native': 'Native',
+                  'optional_coverage': 'Optional', 'optional_sanitized': 'Optional', 'petsc': 'PETSc',
+                  'ranges_complex': 'PETSc / MatrixRanges / Complex',
+                  'ranges_real': 'PETSc / MatrixRanges / Real'}
+        for variant, label in labels.items():
+            job = top['Configurations_' + variant]
+            self.assertTrue(job['name'].startswith(label + ' / '), job['name'])
+            self.assertEqual(job['uses'], './.github/workflows/TestConfiguration_' + variant + '.yml')
+        self.assertTrue(top['InstallationMacOS']['name'].startswith('Installation / macOS '))
+        jobs = schedule.configuration_workflow()['jobs']
+        self.assertEqual(jobs['Common']['name'], 'Build / Common Libraries')
+        for family in schedule.requests()[0]:
+            publisher = jobs['Publish_' + family]
+            self.assertEqual(publisher['with']['family'], family)
+            self.assertEqual(publisher['name'],
+                             'Coverage / Publish / ' + tests.display_group(family.replace('_', '/')))
+
+    def test_producers_have_executables_and_respect_disabled_backends(self):
+        scopes, declared = schedule.source_scopes()
+        self.assertNotIn('manufactured/Rodin/MPI/H1', scopes)
+        for component in ['Poisson', 'LinearElasticity']:
+            self.assertIn('manufactured/Rodin/MPI/H1/' + component, scopes)
+        # Loop-generated solver targets need a real directory producer.
+        self.assertIn('manufactured/Rodin/Solver', scopes)
+        self.assertEqual(declared['RodinManufacturedMPIH1PoissonTest'],
+                         'manufactured/Rodin/MPI/H1/Poisson')
+        scotch = schedule.key('b', 'unit/Rodin/Scotch')
+        for variant in ['optional_coverage', 'optional_sanitized', 'default_coverage', 'default_sanitized']:
+            self.assertNotIn(scotch, schedule.layout(variant)[0])
+        self.assertIn(scotch, schedule.layout('baseline')[0])
+
+    def test_every_declared_execution_is_required_in_each_configuration(self):
+        ordinary, targeted = schedule.requests()
+        families = {r['id']: f for f, rows in ordinary.items() for r in rows}
+        for entry in graph.prepare(ordinary, targeted):
+            variant = graph.configuration_variant(entry['definition'])
+            _, executions = schedule.layout(variant)
+            expected = {schedule.execution_key(r, families[r['matrix']['id']] if r['job'] == 'Ordinary'
+                        else r['job']) for r in entry['requests']}
+            self.assertEqual(set(executions), expected)
+            jobs = schedule.configuration_workflow(variant)['jobs']
+            for name, job in jobs.items():
+                if name != 'Common':
+                    self.assertEqual(job['if'], '${{ !cancelled() }}')
+            if not variant.endswith('_sanitized'):
+                expected_families = {families[r['matrix']['id']] if r['job'] == 'Ordinary'
+                                     else r['job'] for r in entry['requests']}
+                self.assertEqual({name.removeprefix('Publish_') for name in jobs
+                                  if name.startswith('Publish_')}, expected_families)
+        top = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        for name, job in top.items():
+            if name.startswith(('Configurations_', 'Installation')):
+                self.assertEqual(job['if'], '${{ !cancelled() }}')
+
     def test_preloaded_artifacts_never_fall_back_to_network(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -111,6 +168,18 @@ class HierarchicalScheduleTest(unittest.TestCase):
             self.assertEqual(json.loads(values[producer])['include'][0]['id'], 'one')
             self.assertEqual(json.loads(values[execution])['include'], [dict(row, family=family)])
             self.assertEqual(values['p_' + family], 'true')
+            empty = copy.deepcopy(good)
+            empty[0]['unused'] = {'path': 'manufactured/Rodin/Empty'}
+            with patch.object(schedule, 'ROOT', root), patch.object(graph, 'index_graph', return_value=(index, {})), \
+                    patch.object(schedule, 'layout', return_value=empty):
+                with self.assertRaisesRegex(ValueError, 'Declared producer has no configured executable'):
+                    schedule.prepare('common')
+            empty = copy.deepcopy(good)
+            empty[1]['unused'] = {'family': family, 'dependencies': []}
+            with patch.object(schedule, 'ROOT', root), patch.object(graph, 'index_graph', return_value=(index, {})), \
+                    patch.object(schedule, 'layout', return_value=empty):
+                with self.assertRaisesRegex(ValueError, 'Declared execution group has no required requests'):
+                    schedule.prepare('common')
             broken = copy.deepcopy(good)
             broken[1][execution]['dependencies'] = []
             with patch.object(schedule, 'ROOT', root), patch.object(graph, 'index_graph', return_value=(index, {})), \
