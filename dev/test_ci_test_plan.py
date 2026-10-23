@@ -15,10 +15,17 @@ class TestPlanTest(unittest.TestCase):
     def test_incremental_publications_fit_the_service_limit(self):
         import yaml
         from ci_tests import ROOT
-        jobs = yaml.safe_load((ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
-        publishers = [j for j in jobs.values() if j.get('uses') == './.github/workflows/CoveragePublish.yml']
-        names = ['ci-batch-' + j['with']['family'] for j in publishers]
-        self.assertEqual(len(names), 17)
+        import ci_build_graph as graph
+        import ci_schedule
+        ordinary, targeted = ci_schedule.requests()
+        by_id = {r['id']: f for f, rows in ordinary.items() for r in rows}
+        names = []
+        for entry in graph.prepare(ordinary, targeted):
+            if entry['definition']['cmake']['RODIN_CODE_COVERAGE'] != 'ON':
+                continue
+            families = {by_id[r['matrix']['id']] if r['job'] == 'Ordinary' else r['job'] for r in entry['requests']}
+            names += ['ci-batch-' + f + '-' + entry['id'] for f in families]
+        self.assertGreater(len(names), 17)
         self.assertLess(len(names), 150)
         self.assertEqual(len(names), len(set(names)))
         self.assertTrue(all(len(name.encode('utf-8')) <= 100 for name in names))
@@ -59,7 +66,7 @@ class TestPlanTest(unittest.TestCase):
     def test_every_targeted_execution_has_independent_collection(self):
         import yaml
         from ci_tests import ROOT
-        jobs = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]
+        jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]
         native = [{"group": group, "multithreaded": mt} for group in native_convergence_groups()
                   for mt in ["ON", "OFF"]]
         definitions = targeted_plan(native)
@@ -84,14 +91,18 @@ class TestPlanTest(unittest.TestCase):
             if not any(d["job"] == name for d in definitions):
                 continue
             self.assertEqual(sum(s.get("uses") == "./.github/actions/test-build" for s in job["steps"]), 1)
-            self.assertTrue(any(p.get("uses") == "./.github/workflows/CoveragePublish.yml" and
-                                p["with"]["family"] == name and name in p["needs"] for p in jobs.values()))
+            import ci_schedule
+            dag = ci_schedule.configuration_workflow()['jobs']
+            _, executions = ci_schedule.layout()
+            members = [k for k, e in executions.items() if e['job'] == name]
+            self.assertTrue(members)
+            self.assertTrue(set(members) <= set(dag['Publish_' + name]['needs']))
 
     def test_native_restriction_rank_partitions_preserve_every_invocation(self):
         import re
         import yaml
         from ci_tests import ROOT
-        job = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]["MPIH1Restriction"]
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["MPIH1Restriction"]
         rows = job["strategy"]["matrix"]["include"]
         command = next(s["run"] for s in job["steps"] if s.get("name") == "Run native MPI restriction rank partition")
         self.assertIn("-j 1", command)
@@ -157,7 +168,7 @@ class TestPlanTest(unittest.TestCase):
     def test_petsc_pressure_partitions_select_every_split_case_once(self):
         import yaml
         from ci_tests import ROOT
-        workflow = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())
+        workflow = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())
         job = workflow["jobs"]["PETScConvergence"]
         command = next(step["run"] for step in job["steps"]
                        if "geometry_pattern" in step.get("run", ""))

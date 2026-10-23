@@ -38,6 +38,22 @@ class DiscoveryCoverageTest(unittest.TestCase):
 
 
 class ExecutionProfilesTest(unittest.TestCase):
+    def test_dedicated_convergence_targets_are_not_required_in_baseline_plan(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            row = {'target': 'RodinConvergenceIsoparametricLinearElasticity', 'kind': 'test',
+                   'owner': 'tests/convergence/isoparametric/LinearElasticity',
+                   'executable': str(build / 'elasticity'), 'profiles': 'convergence-baseline'}
+            ci.configured_profiles.cache_clear()
+            self.addCleanup(ci.configured_profiles.cache_clear)
+            with patch.object(ci, 'targets', return_value=[row]):
+                result = ci.configured_profiles(build)
+            self.assertIn('convergence-baseline', result[row['target']])
+            ci.configured_profiles.cache_clear()
+            with patch.object(ci, 'targets', return_value=[dict(row, target='UnscheduledConvergenceTarget')]):
+                with self.assertRaisesRegex(ValueError, 'missing from the execution plan'):
+                    ci.configured_profiles(build)
+
     def test_preserve_old_selections(self):
         def test(name, *labels):
             return {"name": name, "properties": [{"name": "LABELS", "value": list(labels)}]}

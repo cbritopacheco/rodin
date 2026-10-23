@@ -115,6 +115,12 @@ def record_target(args):
     (args.output / "target-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     for name in ["RodinCoverage.info", "coverage-audit.json"]:
         (args.output / name).write_bytes((args.build / name).read_bytes())
+    if os.environ.get('GITHUB_OUTPUT'):
+        from ci_build_graph import specification, common_specification
+        from ci_builds import identity
+        common = identity(common_specification(specification(**definition)))
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write('artifact=ci-target-' + definition['job'] + '-' + common + '-' + target_identity(definition)[:24] + '\n')
 
 
 def verify_target_receipts(definitions, folder, commit):

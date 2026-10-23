@@ -157,7 +157,8 @@ production-only LCOV and a current-commit receipt. Native/MPI/PETSc convergence
 and restriction lanes do the same. Sanitizer and installation checks retain
 their test configurations but do not contribute coverage. There is no separate
 coverage test execution lane. Incremental publisher jobs validate every expected
-lane receipt and combine the reports into 17 Codecov submissions per run. Each
+lane receipt and combine the reports within each family and configuration into
+at most 64 Codecov submissions per run across 17 families. Each
 batch retains its complete contribution/hash inventory. This avoids relying on
 an account-specific increase over Codecov's default per-commit upload limit.
 The former Coverage backend configuration is retained under ordinary Unit and
@@ -233,8 +234,16 @@ names follow `Tests / Build / Unit / Rodin / Geometry`,
 hierarchy. Logical component selections reuse the physical directory's build.
 Directories exceeding twelve executable targets are divided into numbered
 build groups. Each executable has exactly one producer per common
-configuration. Backend branches have separate planning/build dependencies so
-PETSc studies can start without waiting for ordinary unit sanitizer builds.
+configuration. Each configuration has an independent generated hierarchy DAG;
+execution groups wait only for their required directory/component producers.
+PETSc studies, unrelated physics and sanitizer configurations do not share a
+backend-wide build barrier. Configuration-local publishers also wait only for
+their own family. Regenerate `TestConfiguration.yml` and `TestTargeted.yml` with
+`python3 dev/ci_schedule.py --write` after registration or lane edits; preflight
+rejects stale output. Dedicated numerical recipes live in
+`.github/ci/targeted-lanes.yml`. Configured manifests validate every generated
+dependency edge before builders or executions start. See the
+[extension guide](../../dev/ci-testing.md) for the editing procedure.
 
 The runtime artifact contains executables, libraries, generated CTest files,
 CMake metadata, target manifests and all zero-hit `.gcno` notes. Compile objects

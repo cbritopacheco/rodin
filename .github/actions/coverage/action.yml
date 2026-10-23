@@ -7,9 +7,6 @@ inputs:
   definition:
     description: JSON execution job and matrix coordinates.
     required: true
-  artifact_name:
-    description: Unique artifact name for this execution partition.
-    required: true
 runs:
   using: composite
   steps:
@@ -31,6 +28,6 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         overwrite: true
-        name: ${{ inputs.artifact_name }}
+        name: ${{ steps.coverage_receipt.outputs.artifact }}
         path: ci-target-result
         if-no-files-found: error

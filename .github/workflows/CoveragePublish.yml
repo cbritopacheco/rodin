@@ -8,6 +8,9 @@ name: Tests / Coverage / Publish
       family:
         type: string
         required: true
+      common:
+        type: string
+        required: true
     secrets:
       CODECOV_TOKEN:
         required: false
@@ -30,13 +33,14 @@ jobs:
       - name: Download independent lane reports and receipts
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ inputs.kind == 'ordinary' && 'ci-result' || 'ci-target' }}-${{ inputs.family }}-*
+          pattern: ${{ inputs.kind == 'ordinary' && 'ci-result' || 'ci-target' }}-${{ inputs.family }}-${{ inputs.common }}-*
           path: ci-contributions
       - name: Verify all producers and form production coverage union
         env:
           KIND: ${{ inputs.kind }}
           FAMILY: ${{ inputs.family }}
-        run: python3 dev/ci_coverage_publish.py collect --kind "$KIND" --family "$FAMILY"
+          COMMON: ${{ inputs.common }}
+        run: python3 dev/ci_coverage_publish.py collect --kind "$KIND" --family "$FAMILY" --common "$COMMON"
       - name: Upload incremental coverage union
         id: upload
         uses: codecov/codecov-action@v5
@@ -45,7 +49,7 @@ jobs:
           disable_search: true
           plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
-          name: ci-batch-${{ inputs.family }}
+          name: ci-batch-${{ inputs.family }}-${{ inputs.common }}
           flags: tests
           root_dir: ${{ github.workspace }}
           use_pypi: true
@@ -57,6 +61,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           overwrite: true
-          name: ci-publication-${{ inputs.family }}
+          name: ci-publication-${{ inputs.family }}-${{ inputs.common }}
           path: ci-publication/
           if-no-files-found: error

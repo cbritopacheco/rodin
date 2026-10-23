@@ -95,6 +95,8 @@ jobs:
           if json.loads(Path('build/ci-built-targets.json').read_text()):
               with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
                   output.write('has_targets=true\n')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('common=' + json.loads(Path('build/ci-build-binding.json').read_text())['common'] + '\n')
           PYTHON
       - name: Run group serially
         id: tests
@@ -130,6 +132,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           overwrite: true
-          name: ci-result-${{ inputs.family }}-${{ inputs.id }}
+          name: ci-result-${{ inputs.family }}-${{ steps.selection.outputs.common }}-${{ inputs.id }}
           path: ci-result/
           if-no-files-found: error

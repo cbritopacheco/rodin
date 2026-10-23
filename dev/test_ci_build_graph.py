@@ -59,7 +59,7 @@ class BuildGraphPlanTest(unittest.TestCase):
                              lookup[graph.request_key('Ordinary', regular)])
 
     def test_runtime_jobs_restore_and_publish_without_compiling(self):
-        jobs = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        jobs = yaml.safe_load((tests.ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
         ordinary, targeted = self.requests()
         for name in {d['job'] for d in targeted}:
             job = jobs[name]
@@ -73,33 +73,34 @@ class BuildGraphPlanTest(unittest.TestCase):
         steps = publisher['jobs']['Publish']['steps']
         self.assertLess(next(i for i, s in enumerate(steps) if 'collect --kind' in s.get('run', '')),
                         next(i for i, s in enumerate(steps) if s.get('id') == 'upload'))
-        gate = next(s for s in jobs['CoverageFinalize']['steps'] if s.get('env', {}).get('CI_JOB_RESULTS'))
+        top = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        gate = next(s for s in top['CoverageFinalize']['steps'] if s.get('env', {}).get('CI_JOB_RESULTS'))
         self.assertEqual(gate['env']['CI_JOB_RESULTS'], '${{ toJSON(needs.*.result) }}')
 
     def test_every_ordinary_coordinate_and_publisher_is_wired(self):
-        jobs = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        import ci_schedule
+        jobs = ci_schedule.configuration_workflow()['jobs']
+        _, executions = ci_schedule.layout()
         ordinary, _ = self.requests()
         seen = set()
         for name, job in jobs.items():
             if job.get('uses') != './.github/workflows/TestGroup.yml':
                 continue
-            family = job['with']['family']
+            family = executions[name]['family']
             self.assertIn(family, ordinary)
             seen.add(family)
             for coordinate in ['profile', 'backend', 'group', 'build_type', 'multithreaded',
                                'asan', 'ubsan', 'id', 'name', 'baseline']:
                 self.assertEqual(job['with'][coordinate], '${{ matrix.' + coordinate + ' }}')
             publisher = next(p for p in jobs.values() if p.get('uses') == './.github/workflows/CoveragePublish.yml'
-                             and p['with'] == {'kind': 'ordinary', 'family': family})
+                             and p['with']['kind'] == 'ordinary' and p['with']['family'] == family)
             self.assertIn(name, publisher['needs'])
         self.assertEqual(seen, ordinary.keys())
-        self.assertNotIn('DirectoryOptional1', jobs['PETScConvergence']['needs'])
-        self.assertNotIn('DirectoryOptional1', jobs['ConvergenceBaseline']['needs'])
-        self.assertIn('DirectoryPETSc1', jobs['PETScConvergence']['needs'])
-        self.assertIn('DirectoryOptional4', jobs['Unit1']['needs'])
+        for name in executions:
+            self.assertEqual(set(jobs[name]['needs']), {'Common', *executions[name]['dependencies']})
 
     def test_targeted_numerical_commands_and_watchdogs_are_unchanged(self):
-        jobs = yaml.safe_load((tests.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        jobs = yaml.safe_load((tests.ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
         snapshot = {}
         for name, job in jobs.items():
             if not any(s.get('id') == 'coverage_record' for s in job.get('steps', [])):

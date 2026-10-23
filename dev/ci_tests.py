@@ -124,11 +124,16 @@ def configured_profiles(build):
     if (ROOT / "dev/ci_test_plan.py").is_file():
         # Planning reads source directories, while target names/conditions come
         # from CMake. Reject a future registration that would escape either plan.
-        from ci_test_plan import groups, native_convergence_groups
+        from ci_test_plan import groups, native_convergence_groups, targeted_plan
+        from ci_builds import definition
+        dedicated = {name for request in targeted_plan([]) if request['job'] not in
+                     ['ConvergenceBaseline', 'PETScMatrixRanges']
+                     for name in definition(request['job'], request['matrix'])['targets']}
         planned = {**groups("unit"), **groups("manufactured")}
         for target in configured:
             if (target["kind"] == "test" and "convergence-baseline" in requirements[target["target"]]
                     and "/PETSc" not in group_for(target)
+                    and target['target'] not in dedicated
                     and group_for(target) not in native_convergence_groups()):
                 raise ValueError("Convergence group is missing from the execution plan: " + group_for(target))
             if target["kind"] == "test" and target["owner"].startswith(("tests/unit/", "tests/manufactured/")):

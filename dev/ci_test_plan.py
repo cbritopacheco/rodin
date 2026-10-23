@@ -111,8 +111,8 @@ def plan(root=ROOT):
 
 def targeted_plan(native):
     """Read concrete execution matrices so added partitions cannot escape the gate."""
-    import yaml
-    workflow = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())
+    from ci_lanes import jobs
+    workflow = {'jobs': jobs()}
     result = []
     for job, definition in workflow["jobs"].items():
         if not any(step.get("id") == "coverage_record" for step in definition.get("steps", [])):
@@ -131,7 +131,8 @@ def main():
     matrices = plan()
     from ci_builds import plan as build_plan
     import yaml
-    builds = build_plan(yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text()))
+    from ci_lanes import jobs
+    builds = build_plan({'jobs': jobs()})
     args.output.write_text(json.dumps(matrices, indent=2) + "\n")
     args.output.with_name("ci-build-plan.json").write_text(json.dumps(builds, indent=2) + "\n")
     native = [{"multithreaded": mt, "suite": "baseline", "group": group,

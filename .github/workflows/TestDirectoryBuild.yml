@@ -5,7 +5,7 @@ name: Tests / Build / Directory
       runner:
         type: string
         required: true
-      mode:
+      common:
         type: string
         required: true
       id:
@@ -36,7 +36,7 @@ jobs:
         run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
       - uses: actions/download-artifact@v4
         with:
-          name: ci-build-index-${{ inputs.mode }}
+          name: ci-build-index-${{ inputs.common }}
           path: .
       - name: Resolve directory configuration
         id: configuration
@@ -46,10 +46,15 @@ jobs:
       - uses: ./.github/actions/test-environment
         with:
           definition: ${{ steps.configuration.outputs.definition }}
+      - name: Download this configuration's common objects
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ci-common-${{ inputs.common }}
+          path: ci-runtime-inputs
       - name: Compile directory executables using common objects
         env:
           BUILD_ID: ${{ inputs.id }}
-          GH_TOKEN: ${{ github.token }}
+          CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
         run: python3 dev/ci_build_graph.py directory --id "$BUILD_ID"
       - uses: actions/upload-artifact@v4
         with:

@@ -117,7 +117,7 @@ class BackendRegistrationTest(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_curved_job_partitions_select_every_study_once(self):
-        job = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]["PETScCurvedConvergence"]
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["PETScCurvedConvergence"]
         step = next(s["run"] for s in job["steps"] if s.get("name") == "Run curved PETSc convergence suites")
         tests, _ = self.configure("tests/convergence/isoparametric/LinearElasticity")
         names = [n for n in tests if "PETSc" in n and "Boundary" not in n]
@@ -149,7 +149,7 @@ class BackendRegistrationTest(unittest.TestCase):
     def test_degree_job_partitions_select_every_registered_study_once(self):
         physics = ["Poisson", "Conductivity", "NonlinearPoisson", "ReactionDiffusion", "LinearElasticity", "Stokes"]
         tests, _ = self.configure([f"tests/convergence/{family}/PETSc{p}" for family, p in itertools.product(["p", "hp"], physics)])
-        job = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]["PETScDegreeConvergence"]
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["PETScDegreeConvergence"]
         step = next(s["run"] for s in job["steps"] if s.get("name") == "Run PETSc degree-refinement suites")
         counts = Counter()
         with tempfile.TemporaryDirectory(prefix="rodin-ci-degree-selectors-") as directory:
@@ -173,7 +173,7 @@ class BackendRegistrationTest(unittest.TestCase):
         modules = ["Poisson", "Conductivity", "LinearElasticity", "Stokes", "ReactionDiffusion", "NonlinearPoisson"]
         tests, _ = self.configure([f"tests/convergence/h/PETSc{module}" for module in modules])
         names = [name for name in tests if re.match(r"^RodinConvergenceHPETSc(?:" + "|".join(modules) + r")Boundary_", name)]
-        job = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]["PETScConvergence"]
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["PETScConvergence"]
         step = next(s["run"] for s in job["steps"] if s.get("name") == "Run PETSc boundary convergence suites")
         counts = Counter()
         with tempfile.TemporaryDirectory(prefix="rodin-ci-traction-selectors-") as directory:
@@ -194,7 +194,7 @@ class BackendRegistrationTest(unittest.TestCase):
         self.assertEqual(counts, Counter({name: 1 for name in names}))
 
     def test_expanded_jobs_fit_github_matrix_limit(self):
-        jobs = yaml.safe_load((ROOT / ".github/workflows/Tests.yml").read_text())["jobs"]
+        jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]
         for job in jobs.values():
             matrix = job.get("strategy", {}).get("matrix", {})
             if isinstance(matrix, dict):

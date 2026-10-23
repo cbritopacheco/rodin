@@ -12,8 +12,8 @@ change when a test or lane is extended.
 | Another case or source in an existing executable | Test source and its local `CMakeLists.txt`; inspect registration and execution filters. |
 | Another ordinary component or module | Local and parent CMake registrations; ordinary target discovery is automatic. Review grouping in `ci_tests.py` only if the new component needs separate execution scheduling. |
 | A Slow selection | CMake labels and complementary filters; confirm ordinary and Slow selections cover the intended cases without overlap. |
-| A dedicated physics, geometry, degree or rank partition | The relevant matrix and execution selector in `Tests.yml`; `ci_builds.py` if the required targets or compile configuration change. Preserve MPI commands and ranks. |
-| A new backend or compile configuration | `ci_tests.py` configuration or `ci_builds.py` definition, `ci_build_graph.py` configuration routing, the test-environment action, and the common/build-plan/directory dependency branches in `Tests.yml`. |
+| A dedicated physics, geometry, degree or rank partition | The relevant matrix and execution selector in `.github/ci/targeted-lanes.yml`; `ci_builds.py` if the required targets or compile configuration change. Preserve MPI commands and ranks. |
+| A new backend or compile configuration | `ci_tests.py` configuration or `ci_builds.py` definition, `ci_build_graph.py` configuration routing, and the test-environment action. Each configuration automatically gets its own hierarchy DAG. |
 | A new execution/publication family | Planner inventory, workflow dependencies, report artifact family, publisher scheduling and finalizer dependencies; verify every eligible contribution is published exactly once. |
 | Oversized compilation or execution | Measure the owning directory/component; adjust build subdivision in `ci_build_graph.py` or execution grouping in `ci_tests.py` separately. Do not remove configurations or tests. |
 
@@ -44,6 +44,39 @@ existing lane does not add another Codecov upload. Adding a lane to an existing
 family extends that family's mandatory report inventory. Adding a family must
 also extend publication and finalization dependencies; a successful test job
 alone does not establish a complete coverage campaign.
+
+Configuration-local family publishers permit at most 64 submissions in the
+present plan. They release independently; a slow configuration does not delay
+another configuration's completed contributions.
+
+### Regenerate the dependency graph
+
+GitHub dependencies cannot select one child of a matrix. The generated
+`TestConfiguration.yml` therefore declares separate directory/component jobs
+inside each compatible configuration; execution jobs name only their required
+hierarchy producers. Directory subdivisions can compile in parallel, and the
+original Slow/geometry/rank partitions remain separate execution jobs.
+
+After changing registration directories, execution grouping, dedicated lane
+matrices or selectors, run from the repository root:
+
+```sh
+python3 dev/ci_schedule.py --write
+python3 dev/ci_schedule.py
+```
+
+The first command regenerates `TestConfiguration.yml` and `TestTargeted.yml`;
+the second checks that committed output is current. Edit their source recipes,
+not the generated files. The common-library recipe lives in `TestCommon.yml`;
+dedicated numerical recipes and their full matrices live in
+[targeted-lanes.yml](../.github/ci/targeted-lanes.yml).
+
+Source registration references establish scheduling bounds, not executable
+eligibility. Configured CMake manifests still choose all build targets and must
+confirm that every required producer is present in the generated dependency
+edges. Dynamically constructed dedicated target names need an explicit source
+edge in `ci_schedule.py`; the two diffusion boundary aliases document this case.
+A missing or ambiguous edge fails common planning before any test can be omitted.
 
 ## Registration procedures
 
@@ -112,7 +145,7 @@ study. Follow the existing
 
 For ordinary native convergence groups, directory discovery supplies baseline
 scheduling. Dedicated native isoparametric and PETSc convergence families use
-explicit matrices in `Tests.yml`: adding a new executable/physics family requires
+explicit matrices in `.github/ci/targeted-lanes.yml`: adding a new executable/physics family requires
 updating its execution selections and `ci_builds.py` target recipe. Adding only
 a rank, geometry or study partition can reuse an existing recipe if its compiled
 target/configuration is unchanged. Confirm timeout budgets and all required

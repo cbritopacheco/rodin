@@ -13,6 +13,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install pinned lane selection dependency
+      shell: bash
+      run: python3 -m pip install PyYAML==6.0.2
     - name: Identify build backend
       id: configuration
       shell: bash
@@ -22,7 +25,7 @@ runs:
       run: python3 dev/ci_build_graph.py mode --job "$JOB" --matrix "$MATRIX"
     - uses: actions/download-artifact@v4
       with:
-        name: ci-build-index-${{ steps.configuration.outputs.mode }}
+        name: ci-build-index-${{ steps.configuration.outputs.common }}
         path: .
     - name: Identify compatible build
       id: build
@@ -35,10 +38,15 @@ runs:
       if: inputs.environment == 'true'
       with:
         definition: ${{ steps.build.outputs.definition }}
+    - name: Download only this selection's required builds
+      uses: actions/download-artifact@v4
+      with:
+        pattern: ${{ steps.build.outputs.artifacts }}
+        path: ci-runtime-inputs
     - name: Restore clean runner-local build
       shell: bash
       env:
         JOB: ${{ inputs.job }}
         MATRIX: ${{ inputs.matrix }}
-        GH_TOKEN: ${{ github.token }}
+        CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
       run: python3 dev/ci_build_graph.py restore --job "$JOB" --matrix "$MATRIX"

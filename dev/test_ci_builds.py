@@ -17,7 +17,7 @@ import ci_builds as ci
 
 class SharedBuildPlanTest(unittest.TestCase):
     def setUp(self):
-        self.workflow = yaml.safe_load((ci.ROOT / '.github/workflows/Tests.yml').read_text())
+        self.workflow = yaml.safe_load((ci.ROOT / '.github/ci/targeted-lanes.yml').read_text())
 
     def test_original_compile_contracts_are_preserved(self):
         # Independently derived by executing the pre-rework configure/build
@@ -33,7 +33,9 @@ class SharedBuildPlanTest(unittest.TestCase):
         builds = ci.plan(self.workflow)
         for job, family in ci.FAMILIES.items():
             definition = self.workflow['jobs'][job]
-            self.assertTrue(any(name.startswith('Directory') for name in definition['needs']))
+            import ci_schedule
+            _, executions = ci_schedule.layout()
+            self.assertTrue(any(e['job'] == job and e['dependencies'] for e in executions.values()))
             self.assertFalse(any(step.get('name', '').startswith(('Build ', 'Configure '))
                                  for step in definition['steps']))
             self.assertEqual(sum(step.get('uses') == './.github/actions/test-build'
@@ -48,9 +50,8 @@ class SharedBuildPlanTest(unittest.TestCase):
         self.assertEqual(sum(map(len, builds.values())), 84)
         self.assertEqual(sum(len(self.workflow['jobs'][job]['strategy']['matrix']['include'])
                              for job in ci.FAMILIES), 742)
-        for producer, job in self.workflow['jobs'].items():
-            if job.get('uses') in ['./.github/workflows/TestCommon.yml', './.github/workflows/TestDirectoryBuild.yml']:
-                self.assertIn(producer, self.workflow['jobs']['CoverageFinalize']['needs'])
+        top = yaml.safe_load((ci.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
+        self.assertIn('Configurations', top['CoverageFinalize']['needs'])
 
     def test_rank_geometry_and_study_share_the_compiled_executable(self):
         row = dict(multithreaded='ON', suite='nonlinear_boundary', physics='NonlinearPoisson',

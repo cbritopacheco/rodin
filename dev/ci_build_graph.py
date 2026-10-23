@@ -205,7 +205,7 @@ def compile_common(entry, build, destination):
     archive.pack(spec, build, ROOT / 'ci-common-artifact')
 
 
-def index_graph(folder, mode=None):
+def index_graph(folder, mode=None, common_id=None):
     requests, builds, common = {}, {}, {}
     for path in folder.rglob('graph.json'):
         graph = json.loads(path.read_text())
@@ -222,7 +222,8 @@ def index_graph(folder, mode=None):
                 raise ValueError('Duplicate directory build')
             builds[key] = {'id': key, 'name': tests.display_group(group), 'definition': spec}
     expected = [e for e in json.loads((ROOT / 'ci-common-plan.json').read_text())
-                if mode is None or e['definition']['mode'] == mode]
+                if (mode is None or e['definition']['mode'] == mode)
+                and (common_id is None or e['id'] == common_id)]
     expected_requests = {request_key(**r) for e in expected for r in e['requests']}
     if set(common) != {e['id'] for e in expected} or set(requests) != expected_requests:
         raise ValueError('Missing common builds or execution requests')
@@ -251,7 +252,7 @@ def index_graph(folder, mode=None):
     # Optional Unit spans sixteen configurations and hundreds of executables;
     # four matrix bands keep it below GitHub's 256-child limit. Other backend
     # branches need two, including the two-producer native MPI restriction set.
-    band_count = 4 if mode == 'optional' else DIRECTORY_BANDS
+    band_count = min(len(builds), 4 if mode == 'optional' else DIRECTORY_BANDS)
     bands = {f'directory_{i + 1}': [] for i in range(band_count)}
     for i, row in enumerate(sorted(builds.values(), key=lambda r: (r['name'], r['id']))):
         spec = row['definition']
@@ -269,14 +270,20 @@ def index_graph(folder, mode=None):
 
 
 def download(name, destination):
+    if os.environ.get('CI_RESTORED_ARTIFACTS'):
+        source = Path(os.environ['CI_RESTORED_ARTIFACTS']) / name
+        if not (source / 'manifest.json').is_file():
+            raise ValueError('Required shared build artifact was not downloaded: ' + name)
+        return source
     subprocess.run(['gh', 'run', 'download', os.environ['GITHUB_RUN_ID'], '--name', name,
                     '--dir', str(destination)], check=True)
+    return destination
 
 
 def compile_directory(spec, build):
     stamp_sources()
     artifact = ROOT / 'ci-common-input'
-    download('ci-common-' + spec['common'], artifact)
+    artifact = download('ci-common-' + spec['common'], artifact) or artifact
     common = {k: v for k, v in spec.items() if k not in ['common', 'directory', 'part']}
     common.update(stage='common', targets=[])
     archive.restore(common, build, artifact)
@@ -310,11 +317,11 @@ def restore_request(index, job, matrix, build):
     common = record['common']
     if not record['builds']:
         folder = ROOT / 'ci-restore' / common
-        download('ci-common-' + common, folder)
+        folder = download('ci-common-' + common, folder) or folder
         archive.restore(index['common'][common], build, folder)
     for i, key in enumerate(record['builds']):
         folder = ROOT / 'ci-restore' / key
-        download('ci-build-' + key, folder)
+        folder = download('ci-build-' + key, folder) or folder
         archive.restore(index['builds'][key]['definition'], build, folder, overlay=i > 0)
     for path in build.rglob('*.o'):
         path.unlink()
@@ -375,6 +382,8 @@ def main():
         print('Common configurations:', len(rows), '; execution requests:', sum(len(e['requests']) for e in rows))
         if os.environ.get('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+                stream.write('configurations=' + json.dumps({'include': [
+                    {'id': e['id'], 'definition': e['definition']} for e in rows]}, separators=(',', ':')) + '\n')
                 for mode in sorted({e['definition']['mode'] for e in rows}):
                     stream.write('common_' + mode + '=' + json.dumps(
                         {'include': [{'id': e['id'], 'definition': e['definition']}
@@ -398,7 +407,9 @@ def main():
                     stream.write(name + '=' + json.dumps({'include': rows}, separators=(',', ':')) + '\n')
     elif args.operation == 'mode':
         with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
-            stream.write('mode=' + specification(args.job, json.loads(args.matrix))['mode'] + '\n')
+            spec = specification(args.job, json.loads(args.matrix))
+            stream.write('mode=' + spec['mode'] + '\n')
+            stream.write('common=' + archive.identity(common_specification(spec)) + '\n')
     elif args.operation == 'directory-definition':
         index = json.loads((ROOT / 'ci-build-index.json').read_text())
         if index['commit'] != archive.commit():
@@ -414,6 +425,10 @@ def main():
             spec = index['common'][index['requests'][request_key(args.job, matrix)]['common']]
             with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
                 stream.write('definition=' + json.dumps(spec, separators=(',', ':')) + '\n')
+                record = index['requests'][request_key(args.job, matrix)]
+                names = ['ci-build-' + k for k in record['builds']] or ['ci-common-' + record['common']]
+                pattern = names[0] if len(names) == 1 else '{' + ','.join(names) + '}'
+                stream.write('artifacts=' + pattern + '\n')
 
 
 if __name__ == '__main__':

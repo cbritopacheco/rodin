@@ -11,8 +11,9 @@ can share compilation without sharing runtime state.
 | --- | --- |
 | [Tests.yml](Tests.yml) | Plans the test matrices, schedules grouped and dedicated tests, checks installation, and finalizes coverage. |
 | [TestGroup.yml](TestGroup.yml) | Restore directory builds, run the selected regular/Slow invocations, and save independent coverage contributions. |
-| [TestCommon.yml](TestCommon.yml) | Configure and compile common libraries once per compatible configuration. |
-| [TestBuildPlan.yml](TestBuildPlan.yml) | Resolve unique executable ownership from configured CMake manifests. |
+| [TestConfiguration.yml](TestConfiguration.yml) | Generated configuration-local DAG: compile common libraries, resolve ownership and release each hierarchy independently. |
+| [TestCommon.yml](TestCommon.yml) | Common-library compilation recipe used to generate the configuration workflow. |
+| [TestTargeted.yml](TestTargeted.yml) | Generated dedicated execution workflows, preserving numerical commands and rank partitions. |
 | [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile bounded directory groups using unchanged common objects. |
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
@@ -74,8 +75,8 @@ The planner writes execution inventories and build contracts for inspection:
 - `ci-convergence-plan.json`: discovered native baseline convergence groups.
 - `ci-build-plan.json`: original dedicated compile contracts, retained for auditing.
 - `ci-common-plan.json`: common configurations and all original execution requests.
-- `ci-build-index.json` / `ci-directory-plan.json`: configured ownership and
-  bounded build matrices, published separately for each backend branch.
+- `ci-build-index.json`: configured ownership and exact execution/build bindings,
+  published separately for each compatible configuration.
 - `ci-coverage-targets.json`: expected dedicated coverage contributions.
 
 ## Shared builds and isolated execution
@@ -111,8 +112,11 @@ Common archives include objects for subsequent builders. Tracked input
 contents are unchanged; stable source/submodule timestamps prevent later
 checkouts invalidating restored objects. Every directory builder checks that
 its common objects remained unchanged. Each executable belongs to exactly one
-producer for a common configuration. Backend branches progress independently,
-so PETSc convergence does not wait for ordinary unit sanitizer compilation.
+producer for a common configuration. Each of the 46 compatible configurations
+progresses independently. Within it, each directory/component producer is a
+distinct dependency job. Execution waits only for its required hierarchy
+producers, so an unrelated geometry, physics or sanitizer build does not delay
+a ready group. Known expensive components have separate producer jobs.
 Installation checks retain their actual install/consumption builds.
 
 Execution artifacts contain executables, libraries, generated CTest/CMake
@@ -149,8 +153,10 @@ Coverage describes compiled code and its instantiated templates.
 - [ci_coverage.py](../../dev/ci_coverage.py) checks the current commit, expected
   producers, report digests and compilation inventory before merging. Missing,
   duplicated, stale or tampered contributions cannot silently pass the gate.
-- Seventeen incremental publisher jobs validate all reports in their execution
-  families before submitting production line unions. Each publication records
+- Configuration-local publishers validate all reports in their execution
+  families before submitting production line unions. The present plan permits
+  at most 64 submissions across the 17 families; empty contributions do not
+  create uploads. Each publication records
   every contributing lane and report digest. This keeps service submissions
   below Codecov's default per-commit limit without dropping any contribution.
 - `Tests / Coverage / Finalize` verifies all directory builds, unchanged common
@@ -170,9 +176,15 @@ Keep compilation in the reusable producers and runtime selection in the
 execution lanes. Update dependency edges and completeness inventories together
 when adding a backend or family.
 
-Each backend has an independent common/build-plan/directory branch. Execution
-jobs depend on their compatible backend's producers; a new backend must wire
-that branch before using the restore action. Preserve the environment package
+Each compatible configuration has an independent common/directory/execution
+graph. Execution jobs depend on their required directory/component producers.
+The generated DAG is maintained by [ci_schedule.py](../../dev/ci_schedule.py);
+dedicated lane sources live in
+[targeted-lanes.yml](../ci/targeted-lanes.yml). After editing registrations or
+dedicated lanes, run `python3 dev/ci_schedule.py --write`, review the generated
+edges, and run the infrastructure guards. Preflight rejects stale generated
+workflows, and configured manifest binding rejects missing dependency edges.
+Preserve the environment package
 recipe and compiler/runtime fingerprints on both sides. Installation and the
 independent `Build.yml` checks retain their own compilation because building
 and consuming those configurations is the operation under test.
@@ -183,10 +195,10 @@ Artifacts provide the following path from a registration to the final report:
 | --- | --- |
 | Plan | `ci-test-plan` contains execution matrices, dedicated compile contracts, common configurations and expected coverage partitions. Missing rows indicate scheduling/selector problems. |
 | Common compilation | `ci-common-manifest-<mode>-*` records configured targets and resolved requests. Configure errors or missing targets belong to this stage, before numerical execution. |
-| Directory planning | `ci-build-index-<mode>` contains `ci-build-index.json` and bounded directory matrices. The index links each execution request to its common configuration and required executable producers. |
+| Directory planning | `ci-build-index-<configuration-id>` contains `ci-build-index.json`. The index links each execution request to its common configuration and required executable producers. The common job emits bounded matrices for individual hierarchy jobs. |
 | Directory compilation | `ci-build-<id>` contains the runtime archive; `ci-built-<id>` records its definition, archive digest and unchanged common objects. A common-object rebuild fails this stage. |
-| Restore and execution | The restore action validates the commit, absolute build path, compiler, architecture and runtime libraries. Grouped lanes save `ci-result-<family>-<id>`; dedicated lanes save `ci-target-<job>-<index>`. Inspect their report and receipt alongside the CTest log. |
-| Publication | `ci-publication-<family>` contains `CombinedCoverage.info` and `publication.json`, including every source report digest and the successful upload receipt. A missing lane report fails publication rather than producing a partial family. |
+| Restore and execution | The restore action validates the commit, absolute build path, compiler, architecture and runtime libraries. Grouped lanes save `ci-result-<family>-<configuration-id>-<id>`; dedicated lanes save `ci-target-<job>-<configuration-id>-<partition-hash>`. The hash derives from the original full execution definition, independent of its matrix position. Inspect each report and receipt alongside the CTest log. |
+| Publication | `ci-publication-<family>-<configuration-id>` contains `CombinedCoverage.info` and `publication.json`, including every source report digest and the successful upload receipt. A missing lane report fails publication rather than producing a partial family. Each publisher waits only for its family within that configuration. |
 | Finalization | `coverage-final-summary` records the complete production line result. Missing inventories, builds, contributions or publications fail this gate, as does a raw/published union mismatch or coverage below 95%. |
 
 Build archives are current-run artifacts, not a cross-commit executable cache.
