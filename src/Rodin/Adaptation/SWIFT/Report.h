@@ -114,7 +114,7 @@ namespace Rodin::Adaptation::SWIFT
       std::size_t energyRejections = 0;
       /// @brief Last accepted line-search factor.
       Real lastAlpha = 0;
-      /// @brief Effective per-volume coefficient assembled for the last hinge QP.
+      /// @brief Predicted decrease per volume, before the two hinge strengths.
       Real hingeCoefficient = 0;
       /// @brief Last inner Newton correction relative to the current iterate.
       Real innerRelativeCorrection = 0;
@@ -173,10 +173,6 @@ namespace Rodin::Adaptation::SWIFT
       bool qualityBudgetSatisfied = false;
       /// @brief Measure of the complete interface quadrature set.
       Real interfaceMeasure = 0;
-      /// @brief RMS jump of the normal field across the interface.
-      Real normalJumpRMS = 0;
-      /// @brief Maximum jump of the normal field across the interface.
-      Real normalJumpMax = 0;
       /// @brief Final Welsch fitting energy.
       Real energy = 0;
       /// @brief Why fitting stopped; only GeometricTarget certifies the target hit.

@@ -35,7 +35,7 @@ namespace Rodin::Examples
           /// Cell-average fidelity multiplier.
           Real fidelity = 1;
           /// Dimensionless smoothing; the driver supplies h times this weight.
-          Real smoothing = 1;
+          Real smoothing = Real(0.01);
       } classification;
 
       /**
@@ -77,14 +77,13 @@ namespace Rodin::Examples
             {&p.model.distribution.deviatoric, "Centered deviatoric-strain stiffness"}},
           {"model-distribution-divergence",
             {&p.model.distribution.divergence, "Centered divergence stiffness"}},
-          {"model-hinge", {&p.model.hinge, "Hinge/model-decrease ratio"}},
           {"model-jacobian", {&p.model.jacobian, "Relative Jacobian floor"}},
           {"model-distortion", {&p.model.distortion, "Relative distortion budget"}},
           {"model-quality-guard", {&p.model.qualityGuard, "Hinge activation guard"}},
-          {"model-jacobian-weight",
-            {&p.model.jacobianWeight, "Jacobian hinge row weight"}},
-          {"model-distortion-weight",
-            {&p.model.distortionWeight, "Distortion hinge row weight"}},
+          {"model-hinge-jacobian",
+            {&p.model.hinge.jacobian, "Jacobian recovery strength"}},
+          {"model-hinge-distortion",
+            {&p.model.hinge.distortion, "Distortion recovery strength"}},
           {"model-robust-scale",
             {&p.model.robustScale, "Welsch scale; zero selects automatic"}},
           {"globalization-directional-newton",

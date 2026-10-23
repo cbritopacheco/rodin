@@ -2,8 +2,8 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_SWIFT_QUALITYLATTICE_H
-#define RODIN_ADAPTATION_SWIFT_QUALITYLATTICE_H
+#ifndef RODIN_ADAPTATION_SWIFT_WITNESSLATTICE_H
+#define RODIN_ADAPTATION_SWIFT_WITNESSLATTICE_H
 
 #include <cassert>
 #include <map>
@@ -27,7 +27,7 @@ namespace Rodin::Adaptation::SWIFT
    * The quadrature interface supplies mapped-point caching, not polynomial
    * exactness or a continuous quality certificate.
    */
-  class QualityLattice final : public QF::QuadratureFormulaBase
+  class WitnessLattice final : public QF::QuadratureFormulaBase
   {
     public:
       /**
@@ -36,18 +36,18 @@ namespace Rodin::Adaptation::SWIFT
        * @param subdivisions Positive number of subdivisions per reference edge.
        * @returns Cached generating lattice for this geometry and subdivision count.
        */
-      static const QualityLattice& get(
+      static const WitnessLattice& get(
         Geometry::Polytope::Type geometry, size_t subdivisions)
       {
         assert(subdivisions > 0);
         using Key = std::pair<Geometry::Polytope::Type, size_t>;
         static std::mutex mutex;
-        static std::map<Key, std::unique_ptr<QualityLattice>> cache;
+        static std::map<Key, std::unique_ptr<WitnessLattice>> cache;
         const std::lock_guard lock(mutex);
         const Key key{geometry, subdivisions};
         auto& formula = cache[key];
         if (!formula)
-          formula.reset(new QualityLattice(geometry, subdivisions));
+          formula.reset(new WitnessLattice(geometry, subdivisions));
         return *formula;
       }
 
@@ -84,9 +84,9 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Copies the witness set with a fresh cache identity.
        * @returns Newly allocated copy owned by the caller.
        */
-      QualityLattice* copy() const noexcept override
+      WitnessLattice* copy() const noexcept override
       {
-        return new QualityLattice(*this);
+        return new WitnessLattice(*this);
       }
 
     private:
@@ -95,7 +95,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param geometry Reference-cell geometry.
        * @param m Positive number of subdivisions per reference edge.
        */
-      QualityLattice(Geometry::Polytope::Type geometry, size_t m)
+      WitnessLattice(Geometry::Polytope::Type geometry, size_t m)
       {
         using G = Geometry::Polytope::Type;
         const size_t dimension = Geometry::Polytope::Traits(geometry).getDimension();

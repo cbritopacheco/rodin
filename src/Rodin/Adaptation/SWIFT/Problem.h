@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -170,7 +169,7 @@ namespace Rodin::Adaptation::SWIFT
    * parameters.model.fit = 1;
    * parameters.model.distribution.deviatoric = Real(1e-4);
    * parameters.model.distribution.divergence = Real(1e-2);
-   * parameters.model.hinge = 10;
+   * parameters.model.hinge = {.jacobian = 1, .distortion = 10};
    * parameters.model.distortion = 10;
    * parameters.model.jacobian = Real(0.01);
    * // These are work budgets; zero geometric tolerance selects the automatic target.
@@ -302,10 +301,12 @@ namespace Rodin::Adaptation::SWIFT
    * Directional Newton rescales this physical predictor using
    * @f[
    * a_k=\begin{cases}
-   * \dfrac{f_k[p_k]}{c_k}, & \lambda_{\max}=0,\\
+   * \dfrac{f_k[p_k]}{c_k}, & c_k>0,\ \lambda_{\max}=0,\\
    * \min\left\{\dfrac{f_k[p_k]}{c_k},\,
    * \dfrac{\ell_{\max}}{\|p_k\|_{\infty,\mathrm{samp}}}\right\},
-   * & \lambda_{\max}>0,
+   * & c_k>0,\ \lambda_{\max}>0,\\
+   * \dfrac{\ell_{\max}}{\|p_k\|_{\infty,\mathrm{samp}}},
+   * & c_k\le0,\ \lambda_{\max}>0.
    * \end{cases}
    * \qquad \bar p_k=a_kp_k,\qquad \bar M_k=M_k/a_k.
    * @f]
@@ -313,16 +314,13 @@ namespace Rodin::Adaptation::SWIFT
    * motion bound is @f$\ell_{\max}=h\lambda_{\max}@f$, where
    * @f$\lambda_{\max}>0@f$ is a dimensionless motion limit; the norm is the sampled
    * componentwise maximum of the physical field, not its coefficient vector.
-   * The scalar curvature is selected from
+   * The scalar curvature is
    * @f[
-   * c_k^{\mathrm N}=G^{-2}\int_{\Gamma_0}
-   *   \rho_\sigma''(r_k)(g_k\cdot p_k)^2\,dS_x,
-   * \qquad
-   * c_k^{\mathrm{GN}}=G^{-2}\int_{\Gamma_0}
-   *   e^{-r_k^2/\sigma^2}(g_k\cdot p_k)^2\,dS_x.
+   * c_k=G^{-2}\int_{\Gamma_0}
+   *   \rho_\sigma''(r_k)(g_k\cdot p_k)^2\,dS_x.
    * @f]
-   * The Newton value is used when positive; otherwise the positive weighted
-   * Gauss--Newton value is used.
+   * Nonpositive curvature has no finite minimizing scale without a motion bound
+   * and produces an invalid-scaling exit. Nonfinite curvature is rejected.
    * No level-set Hessian is required. This is a scalar line model, not a full
    * outer Newton iteration. Without directional scaling, @f$a_k=1@f$.
    *
@@ -345,10 +343,10 @@ namespace Rodin::Adaptation::SWIFT
    * @f]
    * With @f$(t)_+=\max(t,0)@f$, the affine squared-hinge penalty is
    * @f[
-   * B_k(v)=\frac{\mu_k}{2}\sum_K\sum_{s\in\mathcal S_K}
-   *   \left[w^J_{K,s}\kappa_J\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
-   *        +w^Q_{K,s}\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
-   * \qquad \mu_k=\widehat\mu\frac{f_k[\bar p_k]}{2|\Omega_0|}.
+   * B_k(v)=\frac{\gamma_k}{2}\sum_K\sum_{s\in\mathcal S_K}
+   *   \left[w^J_{K,s}\mu_j\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
+   *        +w^Q_{K,s}\mu_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
+   * \qquad \gamma_k=\frac{f_k[\bar p_k]}{2|\Omega_0|}.
    * @f]
    * The set @f$\mathcal S_K@f$ contains the same closed-form reference covering
    * points as the actual-quality checks. For each constraint, @ref QualitySamples
@@ -422,10 +420,9 @@ namespace Rodin::Adaptation::SWIFT
    * | @f$h@f$ | `model.h` | Background reference size; scales distribution, motion limit and geometric target | Required |
    * | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
    * | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
-   * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-2}@f$ |
-   * | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$10@f$ |
-   * | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$1@f$ |
-   * | @f$\kappa_Q@f$ | `model.distortionWeight` | Relative distortion-hinge row weight | @f$1@f$ |
+   * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
+   * | @f$\mu_j@f$ | `model.hinge.jacobian` | Jacobian recovery strength | @f$10@f$ |
+   * | @f$\mu_Q@f$ | `model.hinge.distortion` | Distortion recovery strength | @f$100@f$ |
    * | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
    * | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
    * | @f$Q_{\max}@f$ | `model.distortion` | Maximum admissible relative distortion | @f$10@f$ |
@@ -470,15 +467,15 @@ namespace Rodin::Adaptation::SWIFT
    * automatic scale, which remains fixed during the solve.
    *
    * @subsection swift-quality-controls Quality recovery and admissibility
-   * @ref Parameters::Model::hinge scales the finite hinge penalty relative to
-   * the predicted fitting improvement. Increasing @f$\widehat\mu@f$ strengthens
+   * @ref Parameters::Model::Hinge sets the two independent penalty strengths
+   * relative to predicted fitting improvement. Increasing either strengthens
    * recovery when hinges are active; it has no effect on inactive hinges and
    * does not guarantee nonlinear feasibility.
    * @ref Parameters::Model::qualityGuard sets their activation margins relative
    * to the identity margins. A wider guard reacts earlier, but also changes
    * the slack normalization and hence the penalty curvature.
-   * @ref Parameters::Model::jacobianWeight and @ref Parameters::Model::distortionWeight set the
-   * relative importance of the Jacobian and distortion hinge rows.
+   * @ref Parameters::Model::Hinge::jacobian and @ref Parameters::Model::Hinge::distortion set the
+   * Jacobian and distortion recovery strengths, respectively.
    *
    * @ref Parameters::Model::distortion is a spendable distortion budget, not a
    * quantity that must be minimized. @ref Parameters::Model::jacobian protects
@@ -656,21 +653,6 @@ namespace Rodin::Adaptation::SWIFT
           Real residualSup = 0;
       };
 
-      /**
-       * @brief Kink of the discrete interface across facet boundaries.
-       *
-       * These statistics describe the classified interface only; they do not
-       * alter the geometric target or the solver tolerances.
-       */
-      struct NormalJump
-      {
-          /// @brief Measure-weighted RMS angle between adjacent facet normals.
-          Real rms = 0;
-
-          /// @brief Largest angle between adjacent facet normals.
-          Real max = 0;
-      };
-
     public:
       /**
        * @brief Constructs the fitting problem from trial and test functions.
@@ -767,7 +749,7 @@ namespace Rodin::Adaptation::SWIFT
           Alert::Exception() << "SWIFT requires a finite positive fitting weight."
                              << Alert::Raise;
         for (const Real value :
-          {parameters.model.jacobianWeight, parameters.model.distortionWeight,
+          {parameters.model.hinge.jacobian, parameters.model.hinge.distortion,
             parameters.model.distribution.deviatoric,
             parameters.model.distribution.divergence,
             parameters.convergence.tolerance.innerAbsolute,
@@ -801,7 +783,6 @@ namespace Rodin::Adaptation::SWIFT
           !(parameters.model.jacobian > Real(0) && parameters.model.jacobian < Real(1)) ||
           !(parameters.model.distortion > Real(1)) ||
           !std::isfinite(parameters.model.distortion) ||
-          !std::isfinite(parameters.model.hinge) || parameters.model.hinge < Real(0) ||
           !std::isfinite(parameters.convergence.tolerance.geometric) ||
           parameters.convergence.tolerance.geometric < Real(0))
           Alert::Exception()
@@ -899,9 +880,6 @@ namespace Rodin::Adaptation::SWIFT
           rep.reason = Report::Reason::EmptyInterface;
           return finish(rep);
         }
-        const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
-        rep.normalJumpRMS = normalJump.rms;
-        rep.normalJumpMax = normalJump.max;
         const Real geometricScale = std::pow(
           h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
         const Real geometricTarget = p.convergence.tolerance.geometric > Real(0)
@@ -1154,13 +1132,12 @@ namespace Rodin::Adaptation::SWIFT
           rep.predictorScale = Real(1);
           if (p.globalization.directionalNewton)
           {
-            const auto curvatures = getSurfaceDirectionalCurvature(mesh, fes, u,
-              predictor, phi, grad, interfaceFacets, loss, dataNormalization, locator);
+            const Real curvature = getSurfaceDirectionalCurvature(mesh, fes, u, predictor,
+              phi, grad, interfaceFacets, loss, dataNormalization, locator);
             const Real norm = getPhysicalDisplacementNorm(
               mesh, fes, validationCells, predictor, p.quadrature.validation);
-            rep.predictorScale =
-              getDirectionalNewtonStep(predictorAction, curvatures.first,
-                curvatures.second, norm, h * p.globalization.maxStepOverH);
+            rep.predictorScale = getDirectionalNewtonStep(
+              predictorAction, curvature, norm, h * p.globalization.maxStepOverH);
             if (!(rep.predictorScale > Real(0)) || !std::isfinite(rep.predictorScale))
             {
               rep.reason = Report::Reason::InvalidScaling;
@@ -1180,9 +1157,7 @@ namespace Rodin::Adaptation::SWIFT
               const auto precision = std::cout.precision();
               std::cout << std::setprecision(std::numeric_limits<Real>::max_digits10)
                         << "      swift directional: outer=" << rep.iterations
-                        << "  curvature=" << curvatures.first
-                        << "  fitting_curvature=" << curvatures.second
-                        << "  scale=" << rep.predictorScale
+                        << "  curvature=" << curvature << "  scale=" << rep.predictorScale
                         << "  step_over_h=" << norm * rep.predictorScale / h << '\n';
               std::cout.precision(precision);
             }
@@ -1191,9 +1166,8 @@ namespace Rodin::Adaptation::SWIFT
 
           {
             const Real modelDecrease = Real(0.5) * std::max(Real(0), predictorAction);
-            const Real hingeCoefficient = domainMeasure > Real(0)
-              ? p.model.hinge * modelDecrease / domainMeasure
-              : Real(0);
+            const Real hingeCoefficient =
+              domainMeasure > Real(0) ? modelDecrease / domainMeasure : Real(0);
             rep.hingeCoefficient = hingeCoefficient;
             const size_t innerIterations = p.convergence.iterations.inner;
             const Real predictorNorm =
@@ -1385,7 +1359,7 @@ namespace Rodin::Adaptation::SWIFT
                             << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
                             << "  linear_ok=1  cg_it=" << linearIterations
                             << "  cg_err=" << linearError
-                            << "  mu_eff=" << hingeCoefficient << std::endl;
+                            << "  hinge_scale=" << hingeCoefficient << std::endl;
                   std::cout.precision(precision);
                 }
                 scratch *= innerAlpha;
@@ -1675,14 +1649,13 @@ namespace Rodin::Adaptation::SWIFT
        * @param loss Fixed-scale robust loss.
        * @param normalization Energy and force normalization factor.
        * @param locator Target-evaluation point locator.
-       * @returns Robust scalar curvature and its nonnegative influence-weighted counterpart.
+       * @returns Robust scalar directional curvature.
        */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
-      std::pair<Real, Real> getSurfaceDirectionalCurvature(const Mesh& mesh,
-        const FES& fes, const Displacement& current, const Displacement& direction,
-        const PhiType& phi, const GradType& grad,
-        const std::vector<Index>& interfaceFacets, const Loss& loss, Real normalization,
-        const LocatorType& locator) const
+      Real getSurfaceDirectionalCurvature(const Mesh& mesh, const FES& fes,
+        const Displacement& current, const Displacement& direction, const PhiType& phi,
+        const GradType& grad, const std::vector<Index>& interfaceFacets, const Loss& loss,
+        Real normalization, const LocatorType& locator) const
       {
         if constexpr (requires { current.acquire(); })
           current.acquire();
@@ -1692,7 +1665,7 @@ namespace Rodin::Adaptation::SWIFT
           phi.acquire();
         if constexpr (requires { grad.acquire(); })
           grad.acquire();
-        std::vector<std::pair<Real, Real>> facetCurvatures(interfaceFacets.size());
+        std::vector<Real> facetCurvatures(interfaceFacets.size());
 #ifdef RODIN_USE_OPENMP
 #pragma omp parallel
 #endif
@@ -1716,17 +1689,13 @@ namespace Rodin::Adaptation::SWIFT
               const Real action = state.getGradient().dot(value);
               const Real weight =
                 qf.getWeight(q) * point.getDistortion() * normalization * action * action;
-              facetCurvatures[i].first += weight * loss.getCurvature(residual);
-              facetCurvatures[i].second += weight * state.getWeight();
+              facetCurvatures[i] += weight * loss.getCurvature(residual);
             }
           }
         }
-        std::pair<Real, Real> curvature{};
+        Real curvature = Real(0);
         for (const auto& value : facetCurvatures)
-        {
-          curvature.first += value.first;
-          curvature.second += value.second;
-        }
+          curvature += value;
         return curvature;
       }
 
@@ -2324,142 +2293,6 @@ namespace Rodin::Adaptation::SWIFT
         return {std::sqrt(std::max(Real(0), total.squaredDistance) / total.measure),
           total.maximumDistance,
           std::sqrt(std::max(Real(0), total.squaredNormal) / total.measure)};
-      }
-
-      /**
-       * @brief Normal-jump statistics of the discrete interface.
-       *
-       * Facets are adjacent when they share a vertex in two dimensions or an
-       * edge in three, and each adjacent pair contributes the angle between its
-       * normals weighted by the mean of the two facet measures. Normals are
-       * compared up to sign, since facet orientation is not consistent across
-       * the interface.
-       */
-      /**
-       * @brief Computes jumps between averaged adjacent interface normals.
-       * @param mesh Fixed reference mesh.
-       * @param fes Displacement finite element space defining quadrature orders.
-       * @param interfaceFacets Indices of the classified interface facets.
-       * @param dimension Spatial dimension.
-       * @returns Measure-weighted RMS and maximum normal-angle jumps.
-       */
-      template <class Mesh, class FES>
-      NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
-        const std::vector<Index>& interfaceFacets, std::size_t dimension) const
-      {
-        // Averaged unit normal and measure of each facet. The normal is the
-        // quadrature average of the pointwise unit normals, so a curved facet
-        // contributes its mean orientation; a facet degenerate throughout
-        // falls back to a fixed direction rather than a null vector.
-        constexpr Real degenerate = Real(1e-30);
-        std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
-        std::vector<Real> measures(interfaceFacets.size(), Real(0));
-
-        for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-        {
-          const auto face = mesh.getFace(interfaceFacets[i]);
-          const auto& qf = getQuadrature(*face, fes);
-          const auto& quad = face->getQuadrature(qf);
-
-          Math::SpatialVector<Real> n = Math::SpatialVector<Real>::Zero(dimension);
-          Real measure = 0;
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
-          {
-            const auto& pt = quad.getPoint(q);
-            const Real w = qf.getWeight(q) * pt.getDistortion();
-            const auto& J = pt.getJacobian();
-            // The facet normal: in 2D the tangent rotated a quarter turn, in
-            // 3D the cross product of the two tangents.
-            Math::SpatialVector<Real> nq;
-            if (dimension == 2)
-            {
-              nq.resize(2);
-              nq(0) = J(1, 0);
-              nq(1) = -J(0, 0);
-            }
-            else
-            {
-              Math::SpatialVector<Real> a = Math::SpatialVector<Real>::Zero(dimension);
-              Math::SpatialVector<Real> b = Math::SpatialVector<Real>::Zero(dimension);
-              for (std::size_t r = 0; r < dimension; ++r)
-              {
-                a(static_cast<Eigen::Index>(r)) = J(r, 0);
-                b(static_cast<Eigen::Index>(r)) = J(r, 1);
-              }
-              nq = a.cross(b);
-            }
-            const Real norm = nq.norm();
-            if (norm > degenerate)
-            {
-              n += w * (nq / norm);
-              measure += w;
-            }
-          }
-
-          if (n.norm() <= degenerate)
-          {
-            n.setZero();
-            n(0) = Real(1);
-          }
-          else
-          {
-            n /= n.norm();
-          }
-          measures[i] = measure;
-          normals[i] = n;
-        }
-
-        const auto edgeKey = [](Index a, Index b) -> std::uint64_t {
-          const auto lo = static_cast<std::uint64_t>(std::min(a, b));
-          const auto hi = static_cast<std::uint64_t>(std::max(a, b));
-          return (lo << 32) ^ hi;
-        };
-
-        // Facets sharing an incidence, keyed by the shared entity.
-        UnorderedMap<std::uint64_t, std::vector<std::size_t>> incident;
-        if (dimension == 2)
-        {
-          incident.reserve(2 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
-              incident[static_cast<std::uint64_t>(v)].push_back(i);
-          }
-        }
-        else if (dimension == 3)
-        {
-          incident.reserve(3 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            const auto& vv = mesh.getFace(interfaceFacets[i])->getVertices();
-            incident[edgeKey(vv[0], vv[1])].push_back(i);
-            incident[edgeKey(vv[1], vv[2])].push_back(i);
-            incident[edgeKey(vv[2], vv[0])].push_back(i);
-          }
-        }
-
-        NormalJump jump;
-        Real squared = 0;
-        Real weight = 0;
-        for (const auto& [key, faces] : incident)
-        {
-          (void)key;
-          for (std::size_t a = 0; a < faces.size(); ++a)
-          {
-            for (std::size_t b = a + 1; b < faces.size(); ++b)
-            {
-              const auto ia = faces[a], ib = faces[b];
-              const Real dot = std::abs(normals[ia].dot(normals[ib]));
-              const Real theta = std::acos(std::max(Real(-1), std::min(Real(1), dot)));
-              const Real w = Real(0.5) * (measures[ia] + measures[ib]);
-              squared += w * theta * theta;
-              weight += w;
-              jump.max = std::max(jump.max, theta);
-            }
-          }
-        }
-        jump.rms = weight > Real(0) ? std::sqrt(squared / weight) : Real(0);
-        return jump;
       }
 
       /**

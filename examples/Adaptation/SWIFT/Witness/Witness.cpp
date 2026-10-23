@@ -3,7 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <Rodin/Alert.h>
-#include <Rodin/Adaptation/SWIFT/QualityLattice.h>
+#include <Rodin/Adaptation/SWIFT/WitnessLattice.h>
 #include <Rodin/Geometry/Polytope.h>
 #include <Rodin/Math/SpatialVector.h>
 
@@ -234,7 +234,7 @@ namespace Examples
         {
           initialResolution = m_options.subdivisions;
           const auto& lattice =
-            Adaptation::SWIFT::QualityLattice::get(m_type, initialResolution);
+            Adaptation::SWIFT::WitnessLattice::get(m_type, initialResolution);
           for (size_t i = 0; i < lattice.getSize(); ++i)
             initial.push_back(m_dimension ? lattice.getPoint(i) : m_vertices.front());
           initialLatticeSize = initial.size();

@@ -20,8 +20,8 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Constructs the SWIFT hinge state.
        * @param deformation Frozen outer deformation.
        * @param innerGradient Gradient of the proposed inner increment.
-       * @param parameters Quality bounds, guard widths and relative hinge weights.
-       * @param hingeCoefficient Effective penalty coefficient for this outer model.
+       * @param parameters Quality bounds, guard widths and constraint strengths.
+       * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
        */
       HingeState(const CellDeformation& deformation,
         const Math::SpatialMatrix<Real>& innerGradient, const Parameters& parameters,
@@ -44,16 +44,16 @@ namespace Rodin::Adaptation::SWIFT
         };
         coefficients(m_jAction, m_jSlack,
           parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-          parameters.model.jacobianWeight, m_jHessian, m_jForce);
+          parameters.model.hinge.jacobian, m_jHessian, m_jForce);
         coefficients(m_qAction, m_qSlack,
           parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
-          parameters.model.distortionWeight, m_qHessian, m_qForce);
+          parameters.model.hinge.distortion, m_qHessian, m_qForce);
       }
 
       /**
        * @brief Affine quality energy with the construction parameters, evaluated only on demand.
-       * @param parameters Quality guards and relative hinge weights used at construction.
-       * @param hingeCoefficient Effective penalty coefficient used at construction.
+       * @param parameters Quality guards and constraint strengths used at construction.
+       * @param hingeCoefficient Predicted decrease per volume used at construction.
        * @param weightJ Frozen Jacobian witness measure.
        * @param weightQ Frozen distortion witness measure.
        * @returns The squared-hinge energy, or infinity for an inadmissible frozen state.
@@ -70,11 +70,11 @@ namespace Rodin::Adaptation::SWIFT
         return weightJ *
           energy(m_jSlack,
             parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-            parameters.model.jacobianWeight) +
+            parameters.model.hinge.jacobian) +
           weightQ *
           energy(m_qSlack,
             parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
-            parameters.model.distortionWeight);
+            parameters.model.hinge.distortion);
       }
 
       /**
