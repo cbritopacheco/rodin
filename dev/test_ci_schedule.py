@@ -2,6 +2,7 @@
 import copy
 import json
 import os
+import re
 from pathlib import Path
 import tempfile
 import unittest
@@ -96,6 +97,37 @@ class HierarchicalScheduleTest(unittest.TestCase):
         for name, job in top.items():
             if name.startswith(('Configurations_', 'Installation')):
                 self.assertEqual(job['if'], '${{ !cancelled() }}')
+
+    def test_diagrams_follow_actual_workflow_dependencies(self):
+        for name, document in schedule.generated().items():
+            if not name.startswith('TestConfiguration_'):
+                continue
+            variant = name.removeprefix('TestConfiguration_').removesuffix('.yml')
+            diagram = schedule.workflow_diagram(variant, document)
+            edges = set(re.findall(r'^    (\w+) --> (\w+)$', diagram, re.M))
+            expected = {(dependency, identity) for identity, job in document['jobs'].items()
+                        for dependency in job.get('needs', [])}
+            self.assertEqual(edges, expected)
+            self.assertEqual(set(re.findall(r'^    (\w+)\[', diagram, re.M)), document['jobs'].keys())
+            self.assertEqual((tests.ROOT / '.github/ci/graphs' / (variant + '.md')).read_text(), diagram)
+        fixture = {'jobs': {'Common': {'name': 'Build "quoted" <label>'}}}
+        diagram = schedule.workflow_diagram('fixture', fixture)
+        self.assertIn('&quot;quoted&quot; &lt;label&gt;', diagram)
+
+    def test_graph_summary_links_exact_commit_without_changing_graph(self):
+        with tempfile.TemporaryDirectory() as directory:
+            summary = Path(directory) / 'summary.md'
+            summary.write_text('Existing summary\n')
+            env = {'GITHUB_SERVER_URL': 'https://github.com', 'GITHUB_REPOSITORY': 'owner/rodin',
+                   'GITHUB_RUN_ID': '123', 'GITHUB_SHA': 'exact-commit', 'GITHUB_STEP_SUMMARY': str(summary)}
+            with patch.dict(os.environ, env):
+                schedule.graph_summary(['mpi'])
+            text = summary.read_text()
+            self.assertTrue(text.startswith('Existing summary\n'))
+            self.assertIn('https://github.com/owner/rodin/actions/runs/123', text)
+            self.assertIn('/blob/exact-commit/.github/ci/graphs/mpi.md', text)
+            self.assertIn('/blob/exact-commit/.github/workflows/TestConfiguration_mpi.yml', text)
+            self.assertNotIn('```mermaid', text)
 
     def test_preloaded_artifacts_never_fall_back_to_network(self):
         with tempfile.TemporaryDirectory() as directory:

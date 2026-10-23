@@ -209,6 +209,27 @@ Coverage describes compiled code and its instantiated templates.
   finalizes Codecov notifications. It does not rebuild or rerun tests. Historical
   carryforward coverage cannot replace a required current-commit contribution.
 
+## Viewing the job graphs
+
+Open **Actions → Tests → a workflow run** to use GitHub's native live graph.
+Job status and dependency edges appear there; click a job for its logs. See
+[GitHub’s graph guide](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-the-visualization-graph). The
+existing **CMake / CI** job also adds **Test job graphs** to the run summary,
+with links to the live run, per-configuration diagrams and workflow sources at
+that run's exact commit.
+
+The [generated graph index](../ci/graphs/README.md) provides a smaller diagram
+for each backend/instrumentation variant. These Mermaid diagrams are generated
+from the same job definitions and `needs` edges as the workflows. They show
+stage groups before matrix expansion, with compilation, execution and coverage
+publication distinguished by color. They are scheduling diagrams, not live
+status or coverage reports. The overview above explains the complete category
+and finalization architecture.
+
+Regenerating the workflows also regenerates these diagrams. Preflight rejects
+stale output. No extra CI job, third-party rendering service or graph-rendering
+dependency is required.
+
 ## Editing and diagnosing the graph
 
 The [extension guide](../../dev/ci-testing.md) maps each test or lane change to

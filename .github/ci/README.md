@@ -40,3 +40,9 @@ remain guarded even when scheduling changes.
 See the [extension guide](../../dev/ci-testing.md) for specific changes and the
 [workflow architecture](../workflows/README.md) for artifacts, coverage and
 failure diagnosis.
+
+The [generated dependency diagrams](graphs/README.md) follow the same source
+job definitions as the workflows. The existing planning job links the native
+live graph and commit-matched diagrams from the Actions run summary. Regenerate
+the diagrams with the workflows; they show stage groups rather than expanded
+matrix children or live job status.

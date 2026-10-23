@@ -37,8 +37,8 @@ jobs:
         lfs: false
     - name: Install CI planning dependency
       run: python3 -m pip install PyYAML==6.0.2
-    - name: Verify generated hierarchical dependency graph
-      run: python3 dev/ci_schedule.py
+    - name: Verify dependency graph and publish graph navigation
+      run: python3 dev/ci_schedule.py --summary
     - name: Verify scoped discovery and incremental coverage guards
       run: python3 -m unittest discover -s dev -p 'test_ci_*.py' -v
     - name: Plan current source groups
