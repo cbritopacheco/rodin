@@ -147,8 +147,13 @@
   solve. Thus the quadratic metric preconditions the robust descent; it does
   not replace the robust objective with a least-squares objective.
 
-  Directional Newton scales the predictor before the affine hinge solve:
-  @f$\bar p_k=a_kp_k@f$ and @f$\bar M_k=M_k/a_k@f$. The inner model is
+  Directional Newton scales the predictor using the robust directional curvature
+  without the level-set Hessian. A positive physical-motion bound caps the scale;
+  nonpositive curvature selects that bound. Without a bound, nonpositive
+  curvature has no finite minimizing step and stops with an invalid-scaling
+  status. Nonfinite curvature is rejected. The predictor and metric are rescaled
+  as @f$\bar p_k=a_kp_k@f$ and @f$\bar M_k=M_k/a_k@f$ before the affine hinge solve.
+  The inner model is
   @f[
     \min_{v\in V_h}\left\{
        \tfrac12\bar M_k[v,v]-f_k[v]+B_k(v)\right\},
