@@ -12,6 +12,26 @@ from ci_test_plan import plan, targeted_plan, native_convergence_groups
 
 
 class TestPlanTest(unittest.TestCase):
+    def test_incremental_upload_names_fit_codecov_and_identify_each_lane(self):
+        import yaml
+        from ci_tests import ROOT
+        workflow = yaml.safe_load((ROOT / ".github/workflows/TestGroup.yml").read_text())
+        upload = next(step for step in workflow["jobs"]["Run"]["steps"]
+                      if step.get("id") == "upload")
+        template = upload["with"]["name"]
+        names = []
+        for entries in plan().values():
+            for row in entries:
+                if row["asan"] != "OFF" or row["ubsan"] != "OFF":
+                    continue
+                name = re.sub(r"\$\{\{\s*inputs\.(\w+)\s*\}\}",
+                              lambda match: str(row[match.group(1)]), template)
+                self.assertNotIn("${{", name)
+                self.assertLessEqual(len(name.encode("utf-8")), 100, row["id"])
+                names.append(name)
+        self.assertTrue(names)
+        self.assertEqual(len(names), len(set(names)))
+
     def test_configuration_matrix_and_job_limits(self):
         matrices = plan()
         rows = [row for entries in matrices.values() for row in entries]

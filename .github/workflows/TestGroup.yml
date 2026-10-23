@@ -176,7 +176,8 @@ jobs:
           plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ inputs.baseline && 'baseline' || inputs.profile }}
-          name: ${{ inputs.name }} (${{ inputs.backend }}, ${{ inputs.build_type }}, MT=${{ inputs.multithreaded }}, ASan=${{ inputs.asan }}, UBSan=${{ inputs.ubsan }})
+          # Keep within Codecov's 100-character upload-name limit and match the receipt artifact.
+          name: ci-result-${{ inputs.id }}
           root_dir: ${{ github.workspace }}
           use_pypi: true
           fail_ci_if_error: true
