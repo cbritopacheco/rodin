@@ -29,6 +29,50 @@ test, build and publication workflows are called by `Tests.yml`; they do not
 start a second independent test campaign. A newer push cancels superseded runs according to
 the top-level workflows' concurrency policies.
 
+## Linux dependencies and disk headroom
+
+Linux package provisioning uses
+[`apt-dependencies`](../actions/apt-dependencies/action.yml) and
+[`ci_environment.py`](../../dev/ci_environment.py). Shared builders, ordinary and
+dedicated execution lanes, installation, Build, Documentation and Linux style
+dependency steps use this installer. Test commands, configurations, MPI ranks
+and coverage producers are independent of the cache.
+
+The installer refreshes signed APT indexes, resolves and pins requested packages
+and their installation dependencies, then restores `.deb` downloads. Keys include
+Ubuntu release, architecture, runner image, requested package set and resolved
+versions. Compatible compiler-flag/test-selection variants share downloads. A
+prefix restore may supply older archives, but APT must still validate and obtain
+the exact pinned packages. Only package archives are cached; installed `/usr`
+trees, build outputs, `.gcda` counters and test results are not. Downloads live
+under `runner.temp/rodin-apt-archives`, outside the system cache removed by
+`apt-get clean`. Locks and partial downloads are not cached. A missing cache
+changes performance only, never the tests or their acceptance conditions.
+
+Index attempts have a 90-second budget and complete package-download attempts a
+300-second budget. GNU `timeout` terminates the privileged APT process group
+before fallback. After the runner's original sources, fallback uses the official
+Ubuntu archive and then its kernel.org mirror, retaining suites, components,
+signing keys and exact resolved versions. Third-party source definitions remain
+unchanged. Final installation is offline, allows no package removals and has a
+900-second budget; configuration failures are not retried as download failures.
+Exhausted mirrors fail the job rather than skip its tests.
+
+Disk checks log available space and require **8 GiB of free headroom**. This is
+a conservative initial policy, not a measured peak for every hierarchy group.
+With sufficient space they do nothing. Otherwise, on GitHub-hosted runners only,
+they remove unused .NET, Android, Haskell and CodeQL trees one at a time, logging
+each deletion's duration and recovered free space and stopping when sufficient.
+They never delete dependency archives or Rodin build/coverage artifacts. If the
+allowlisted cleanup cannot supply enough space, the job fails explicitly. Local
+and self-hosted machines are never cleaned by this helper. Dependency setup and
+artifact restoration recheck headroom, replacing unconditional bulk deletion.
+
+Change package lists in `test-environment/action.yml` for shared environments,
+or in `../ci/targeted-lanes.yml` for dedicated lanes, then regenerate dedicated
+workflows. Package changes naturally invalidate the resolved-version cache key.
+See [the extension guide](../../dev/ci-testing.md) for lane editing and validation.
+
 ## Registration and scheduling
 
 1. CMake includes the enabled test directories and registers their targets and

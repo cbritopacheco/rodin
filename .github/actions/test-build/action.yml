@@ -43,6 +43,9 @@ runs:
       with:
         pattern: ${{ steps.build.outputs.artifacts }}
         path: ci-runtime-inputs
+    - name: Check restoration disk headroom
+      shell: bash
+      run: python3 dev/ci_environment.py disk
     - name: Restore clean runner-local build
       shell: bash
       env:

@@ -11,6 +11,7 @@ suites in `tests/`.
 | `ci_test_plan.py` | Test directory scheduling, dedicated coverage partition inventory and shared-build planning. |
 | `ci_tests.py` | Configured target selection, scoped GoogleTest discovery and serial CTest execution. |
 | `ci_builds.py` | Compatible build definitions, immutable artifact publication and validated restoration. |
+| `ci_environment.py` | Signed, version-pinned APT download caching, bounded mirror fallback and conditional hosted-runner disk cleanup. |
 | `ci_build_graph.py` | Common-library dependency closure, directory executable ownership, bounded producer matrices and execution bindings. |
 | `ci_schedule.py`, `ci_lanes.py` | Generated configuration-local hierarchy dependencies and authoritative dedicated lane recipes. |
 | `ci_coverage.py` | Execution receipts, coverage contribution validation, pooling and the final production coverage gate. |

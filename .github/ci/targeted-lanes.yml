@@ -168,8 +168,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libomp-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -227,8 +228,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libomp-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - uses: ./.github/actions/test-build
       with:
         job: ConvergenceBaseline
@@ -386,8 +388,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev mpi-default-bin mpi-default-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev mpi-default-bin mpi-default-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2097,8 +2100,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2467,8 +2471,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4287,8 +4292,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4664,8 +4670,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4867,8 +4874,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5009,9 +5017,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install complex PETSc dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libomp-dev libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
-        lcov
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5112,8 +5120,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
     - uses: ./.github/actions/test-build
       with:
         job: PETScMatrixRanges

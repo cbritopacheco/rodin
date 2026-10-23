@@ -5,6 +5,17 @@ runner. The [workflow overview](../.github/workflows/README.md) describes the
 shared-build graph and coverage artifacts. This guide identifies what must
 change when a test or lane is extended.
 
+Linux dependencies are provisioned through
+[`apt-dependencies`](../.github/actions/apt-dependencies/action.yml). Keep package
+lists in the shared environment action or dedicated lane source, rather than
+adding bare `apt-get` calls to generated workflows. Download caches are keyed by
+runner image, architecture, requested packages and resolved versions, so test
+selection and MPI ranks do not create new package caches. Every lane still runs
+and captures fresh coverage. See [dependency and disk policies](../.github/workflows/README.md#linux-dependencies-and-disk-headroom)
+for mirror deadlines, exact-version fallback and conditional cleanup. Validate
+changes with `test_ci_environment.py`, the full serial CI guard suite and the
+generated-workflow consistency check.
+
 ## Choose the scope of the change
 
 | Change | Owning files and checks |

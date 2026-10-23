@@ -36,8 +36,10 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev
-        libmetis-dev libhdf5-dev lcov libomp-dev mpi-default-bin mpi-default-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev
+          mpi-default-bin mpi-default-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
