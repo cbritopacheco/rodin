@@ -47,8 +47,10 @@ namespace
     field = VectorFunction(size_t(3), [](const Point& point) {
       return Math::SpatialVector<Real>{0, point.y(), point.z()};
     });
-    TrialFunction u(vectors), w(scalars);
-    TestFunction v(vectors), q(scalars);
+    TrialFunction u(vectors);
+    TrialFunction w(scalars);
+    TestFunction v(vectors);
+    TestFunction q(scalars);
     const auto cell = mesh.getCell();
     const auto& formula = QF::PolytopeQuadratureFormula::get(5, cell->getGeometry());
     const auto& quadrature = cell->getQuadrature(formula);

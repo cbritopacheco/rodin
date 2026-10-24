@@ -239,10 +239,10 @@ namespace Rodin::Math
       auto dot(const SpatialTensor<OtherScalar, Rank>& other) const
       {
         assert(m_extents == other.getExtents());
-        using Result = decltype(Scalar{} * OtherScalar{});
+        using Result = decltype(Math::dot(Scalar{}, OtherScalar{}));
         Result value = 0;
         for (size_t i = 0; i < m_size; ++i)
-          value += m_data[i] * Math::conj(other[i]);
+          value += Math::dot(m_data[i], other[i]);
         return value;
       }
 

@@ -19,6 +19,7 @@
 #include <boost/serialization/complex.hpp>
 
 #include <Rodin/Serialization/Array.h>
+#include <Rodin/Serialization/EigenMatrix.h>
 
 namespace Rodin::Tests::Unit
 {
@@ -85,5 +86,117 @@ namespace Rodin::Tests::Unit
     check.template operator()<Real>();
     check.template operator()<Complex>();
     check.template operator()<Index>();
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Rodin vectors preserve Eigen's archive representation and ownership.
+  TYPED_TEST(ArraySerialization, EigenBackedVectorRoundTrip)
+  {
+    using Output = typename TypeParam::first_type;
+    using Input = typename TypeParam::second_type;
+    Math::Vector<Complex> dynamic(2);
+    dynamic << Complex(1, 2), Complex(-3, 4);
+    const Math::FixedSizeVector<Complex, 2> fixed = dynamic;
+    std::stringstream stream;
+    {
+      Output archive(stream);
+      archive << dynamic << fixed;
+    }
+    Math::Vector<Complex> loaded(7);
+    Math::FixedSizeVector<Complex, 2> loadedFixed;
+    {
+      Input archive(stream);
+      archive >> loaded >> loadedFixed;
+    }
+    EXPECT_EQ(loaded.size(), 2);
+    EXPECT_EQ(loaded, dynamic);
+    EXPECT_EQ(loadedFixed, fixed);
+    EXPECT_EQ(loaded.dot(loadedFixed), Complex(30));
+    // Legacy Eigen vectors use the same coefficient and dimension encoding.
+    std::stringstream legacy;
+    {
+      const Eigen::VectorX<Complex> native = dynamic;
+      Output archive(legacy);
+      archive << native;
+    }
+    {
+      Input archive(legacy);
+      archive >> loaded;
+    }
+    EXPECT_EQ(loaded, dynamic);
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Matrix owners retain Eigen archive compatibility for rectangular and empty shapes.
+  TYPED_TEST(ArraySerialization, EigenBackedMatrixRoundTrip)
+  {
+    using Output = typename TypeParam::first_type;
+    using Input = typename TypeParam::second_type;
+    for (int rows = 0; rows <= 3; ++rows)
+    {
+      for (int cols = 0; cols <= 3; ++cols)
+      {
+        Math::Matrix<Complex> original(rows, cols);
+        for (int i = 0; i < rows; ++i)
+        {
+          for (int j = 0; j < cols; ++j)
+            original(i, j) = Complex(i + 3 * j + 1, i - j - 2);
+        }
+        std::stringstream stream;
+        {
+          Output archive(stream);
+          archive << original;
+        }
+        Math::Matrix<Complex> loaded = Math::Matrix<Complex>::Constant(5, 7, Complex(99));
+        {
+          Input archive(stream);
+          archive >> loaded;
+        }
+        EXPECT_EQ(loaded.rows(), rows);
+        EXPECT_EQ(loaded.cols(), cols);
+        EXPECT_EQ(loaded, original);
+        stream.clear();
+        stream.seekg(0);
+        {
+          Eigen::MatrixX<Complex> native;
+          Input archive(stream);
+          archive >> native;
+          EXPECT_EQ(native, original);
+        }
+        std::stringstream legacy;
+        {
+          const Eigen::MatrixX<Complex> native = original;
+          Output archive(legacy);
+          archive << native;
+        }
+        {
+          Input archive(legacy);
+          archive >> loaded;
+        }
+        EXPECT_EQ(loaded, original);
+      }
+    }
+    const Math::FixedSizeMatrix<Complex, 2, 3> rectangle =
+      Math::FixedSizeMatrix<Complex, 2, 3>::Constant(Complex(2, 3));
+    const Math::FixedSizeMatrix<Complex, 1, 3> row =
+      Math::FixedSizeMatrix<Complex, 1, 3>::Constant(Complex(1, -2));
+    std::stringstream stream;
+    {
+      Output archive(stream);
+      archive << rectangle << row;
+    }
+    Math::FixedSizeMatrix<Complex, 2, 3> loaded;
+    Math::FixedSizeMatrix<Complex, 1, 3> loadedRow;
+    {
+      Input archive(stream);
+      archive >> loaded >> loadedRow;
+    }
+    EXPECT_EQ(loaded, rectangle);
+    EXPECT_EQ(loadedRow, row);
+    EXPECT_EQ(loadedRow.dot(row), Complex(15));
   }
 }

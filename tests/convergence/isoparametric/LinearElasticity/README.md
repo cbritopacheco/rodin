@@ -382,8 +382,3 @@ Separate registrations cover seven geometries, native and real-PETSc local
 execution, MPI ranks one through four and both thread configurations. Slow
 labels, 1800-second watchdogs, processor counts and pyramid resource locks
 remain explicit.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).

@@ -11,7 +11,8 @@ runs:
       with:
         compiler: ${{ fromJSON(inputs.definition).compiler }}
         cmake: true
-    - name: Install compatible dependencies
+    - name: Select compatible dependencies
+      id: packages
       shell: bash
       env:
         MODE: ${{ fromJSON(inputs.definition).mode }}
@@ -29,8 +30,11 @@ runs:
           optional|default|baseline) packages+=(libmumps-dev libmumps-headers-dev mpi-default-bin mpi-default-dev petsc-dev mpich) ;;
           *) exit 1 ;;
         esac
-        sudo apt-get update
-        sudo apt-get install -y "${packages[@]}"
+        echo "packages=${packages[*]}" >> "$GITHUB_OUTPUT"
+    - name: Install compatible dependencies
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: ${{ steps.packages.outputs.packages }}
     - name: Restore SuiteSparse
       id: suitesparse
       if: fromJSON(inputs.definition).mode == 'optional'

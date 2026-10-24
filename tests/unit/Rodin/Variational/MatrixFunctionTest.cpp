@@ -212,3 +212,33 @@ TEST(Rodin_Variational_MatrixFunction, CallableShapeErrorsPermitRetry)
   check.template operator()<Real>();
   check.template operator()<Complex>();
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Native Eigen constants keep their copied value and right-conjugating contractions.
+  TEST(MatrixFunctionContract, ComplexEigenStorageAndTemporaries)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto cell = mesh.getPolytope(mesh.getDimension(), 0);
+    Point point(*cell, Math::SpatialPoint{0.25, 0.25});
+    Eigen::MatrixX<Complex> native(2, 2);
+    native << Complex(1, 2), Complex(3, -1), Complex(-2, 1), Complex(2, -3);
+    const auto saved = native;
+    MatrixFunction owned(native);
+    MatrixFunction temporary((native + native).eval());
+    Math::Matrix<Complex> right(2, 2);
+    right << Complex(2, -3), Complex(-1, 4), Complex(3, 2), Complex(1, -2);
+    MatrixFunction rhs(right);
+    Complex expected = 0;
+    for (int i = 0; i < 2; ++i)
+    {
+      for (int j = 0; j < 2; ++j)
+        expected += saved(i, j) * std::conj(right(i, j));
+    }
+    native.setZero();
+    right.setZero();
+    EXPECT_EQ(owned.getValue(point), saved);
+    EXPECT_EQ(Dot(owned, rhs).getValue(point), expected);
+    EXPECT_EQ(Dot(temporary, rhs).getValue(point), Complex(2) * expected);
+  }
+}

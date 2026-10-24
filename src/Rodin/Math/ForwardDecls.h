@@ -47,6 +47,22 @@ namespace Rodin::Math
   template <class Operator, class Vector>
   class LinearSystem;
 
+  /// @brief Dynamic-size dense matrix.
+  template <class Scalar>
+  class Matrix;
+
+  /// @brief Compile-time fixed-size dense matrix.
+  template <class Scalar, size_t Rows, size_t Cols>
+  class FixedSizeMatrix;
+
+  /// @brief Dynamic-size dense vector.
+  template <class Scalar>
+  class Vector;
+
+  /// @brief Compile-time fixed-size dense vector.
+  template <class Scalar, size_t Size>
+  class FixedSizeVector;
+
   template <class Scalar>
   class SpatialVector;
 

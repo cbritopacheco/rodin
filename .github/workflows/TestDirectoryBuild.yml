@@ -28,10 +28,8 @@ jobs:
         with:
           submodules: recursive
           lfs: false
-      - name: Free compilation disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          sudo apt-get clean
+      - name: Check compilation disk headroom
+        run: python3 dev/ci_environment.py disk
       - name: Hydrate discovery resources
         run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
       - uses: actions/download-artifact@v4
@@ -46,6 +44,8 @@ jobs:
       - uses: ./.github/actions/test-environment
         with:
           definition: ${{ steps.configuration.outputs.definition }}
+      - name: Check disk headroom after dependency installation
+        run: python3 dev/ci_environment.py disk
       - name: Download this configuration's common objects
         uses: actions/download-artifact@v4
         with:

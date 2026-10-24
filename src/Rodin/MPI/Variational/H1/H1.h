@@ -19,6 +19,7 @@
  * dimension (vertices, edges, faces, cells).
  */
 
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 #include <map>
 #include <algorithm>
@@ -200,6 +201,20 @@ namespace Rodin::Variational
           }
 
           /**
+           * @brief Evaluates a reference expansion at a certified quadrature sample.
+           * @param point Sample whose reference association is preserved by composition.
+           * @returns Mapped expansion value.
+           */
+          constexpr auto operator()(const IntegrationPoint& point) const
+          {
+            if constexpr (std::is_invocable_v<const FunctionType&,
+                            const IntegrationPoint&>)
+              return getFunction()(point);
+            else
+              return (*this)(point.getPoint());
+          }
+
+          /**
            * @brief Evaluates the pushed-forward callable into storage.
            * @tparam T Result storage type.
            * @param res Result storage.
@@ -342,16 +357,6 @@ namespace Rodin::Variational
       auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
-      }
-
-      /// @brief Evaluates the local shard expansion directly at reference coordinates.
-      template <class Coefficient>
-      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& fe = getFiniteElement(idx.first, idx.second);
-        fe.evaluate(
-          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:
@@ -1089,6 +1094,20 @@ namespace Rodin::Variational
           }
 
           /**
+           * @brief Evaluates a reference expansion at a certified quadrature sample.
+           * @param point Sample whose reference association is preserved by composition.
+           * @returns Mapped expansion value.
+           */
+          constexpr auto operator()(const IntegrationPoint& point) const
+          {
+            if constexpr (std::is_invocable_v<const FunctionType&,
+                            const IntegrationPoint&>)
+              return getFunction()(point);
+            else
+              return (*this)(point.getPoint());
+          }
+
+          /**
            * @brief Evaluates the pushed-forward callable into storage.
            * @tparam T Result storage type.
            * @param res Result storage.
@@ -1358,22 +1377,6 @@ namespace Rodin::Variational
         [[maybe_unused]] const Geometry::Polytope& entity, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
-      }
-
-      /**
-       * @brief Evaluates the local shard expansion directly at reference coordinates.
-       * @param out Storage for the computed result.
-       * @param idx Index of the requested entry.
-       * @param coefficient Coefficient multiplying the expression.
-       * @param p Point at which the operation is evaluated.
-       */
-      template <class Coefficient>
-      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& fe = getFiniteElement(idx.first, idx.second);
-        fe.evaluate(
-          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:

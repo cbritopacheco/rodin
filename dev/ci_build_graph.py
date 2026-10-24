@@ -12,7 +12,10 @@ import argparse
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
+import tempfile
+import time
 
 import ci_builds as archive
 import ci_tests as tests
@@ -291,12 +294,37 @@ def index_graph(folder, mode=None, common_id=None):
 def download(name, destination):
     if os.environ.get('CI_RESTORED_ARTIFACTS'):
         source = Path(os.environ['CI_RESTORED_ARTIFACTS']) / name
-        if not (source / 'manifest.json').is_file():
+        if all((source / entry).is_file() for entry in ['manifest.json', 'build.tar.gz']):
+            return source
+        if not os.environ.get('GH_TOKEN'):
             raise ValueError('Required shared build artifact was not downloaded: ' + name)
-        return source
-    subprocess.run(['gh', 'run', 'download', os.environ['GITHUB_RUN_ID'], '--name', name,
-                    '--dir', str(destination)], check=True)
-    return destination
+        print('Incomplete pre-downloaded artifact; retrying ' + name, flush=True)
+        destination = source
+    # A successful downloader exit does not establish a complete artifact.
+    # Keep incomplete attempts separate; archive.restore verifies identity and SHA256.
+    attempts = 3
+    backoff_seconds = 2
+    # Two minutes per transfer bounds a stalled fallback within a lane's budget.
+    timeout_seconds = 120
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    for attempt in range(attempts):
+        try:
+            with tempfile.TemporaryDirectory(prefix=name + '-', dir=destination.parent) as temporary:
+                staging = Path(temporary)
+                print('Downloading ' + name + ' (attempt ' + str(attempt + 1) + ')', flush=True)
+                subprocess.run(['gh', 'run', 'download', os.environ['GITHUB_RUN_ID'], '--name', name,
+                                '--dir', str(staging)], check=True, timeout=timeout_seconds)
+                if not all((staging / entry).is_file() for entry in ['manifest.json', 'build.tar.gz']):
+                    raise ValueError('Incomplete shared build download: ' + name)
+                if destination.exists():
+                    shutil.rmtree(destination)
+                staging.rename(destination)
+            return destination
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, ValueError):
+            if attempt + 1 == attempts:
+                raise
+            time.sleep(backoff_seconds * (attempt + 1))
 
 
 def compile_directory(spec, build):

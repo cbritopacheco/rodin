@@ -168,8 +168,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libomp-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -227,8 +228,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libomp-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev
     - uses: ./.github/actions/test-build
       with:
         job: ConvergenceBaseline
@@ -386,8 +388,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev mpi-default-bin mpi-default-dev
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev lcov libomp-dev mpi-default-bin mpi-default-dev
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -414,20 +417,68 @@ jobs:
       }})
   PETScConvergence:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ matrix.suite == 'bulk' && 120 || 360 }}
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
         include:
         - multithreaded: 'ON'
           suite: bulk
-          context: all
+          context: local
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'ON'
+          suite: bulk
+          context: np1
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'ON'
+          suite: bulk
+          context: np2
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'ON'
+          suite: bulk
+          context: np3
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'ON'
+          suite: bulk
+          context: np4
           path: Convergence / H / PETSc
           geometry: all
           study: all
         - multithreaded: 'OFF'
           suite: bulk
-          context: all
+          context: local
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'OFF'
+          suite: bulk
+          context: np1
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'OFF'
+          suite: bulk
+          context: np2
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'OFF'
+          suite: bulk
+          context: np3
+          path: Convergence / H / PETSc
+          geometry: all
+          study: all
+        - multithreaded: 'OFF'
+          suite: bulk
+          context: np4
           path: Convergence / H / PETSc
           geometry: all
           study: all
@@ -2097,8 +2148,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2106,8 +2158,19 @@ jobs:
         matrix: ${{ toJSON(matrix) }}
     - name: Run PETSc convergence suite
       if: matrix.suite == 'bulk'
-      run: ctest --test-dir build/tests -R '^RodinConvergenceHPETSc' -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_|^RodinConvergenceHPETSc(MPI)?StokesStability_'
-        --output-on-failure -j 1
+      run: |
+        case "${{ matrix.context }}" in
+          local)
+            pattern='^RodinConvergenceHPETSc'
+            context_exclude='|^RodinConvergenceHPETScMPI' ;;
+          np1|np2|np3|np4)
+            pattern='^RodinConvergenceHPETScMPI.*_${{ matrix.context }}(_|$)'
+            context_exclude='' ;;
+          *) exit 1 ;;
+        esac
+        ctest --test-dir build/tests -R "$pattern" \
+          -E "^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_|^RodinConvergenceHPETSc(MPI)?StokesStability_${context_exclude}" \
+          --output-on-failure --no-tests=error -j 1
     - name: Run PETSc pressure-spectrum suite
       if: startsWith(matrix.suite, 'pressure_')
       run: "case \"${{ matrix.suite }}\" in\n  pressure_light) geometry_pattern='(Triangle|Quadrilateral|Hexahedron|Wedge)'\
@@ -2467,8 +2530,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4287,8 +4351,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4315,7 +4380,7 @@ jobs:
       }}, Selection=${{ matrix.selection }}, Physics=${{ matrix.physics }}, Partition=${{ matrix.partition }})
   PETScCurvedBoundaryConvergence:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ matrix.physics == 'ReactionDiffusion' && matrix.geometry == 'pyramid' && 300 || 240 }}
+    timeout-minutes: ${{ matrix.physics == 'NonlinearPoisson' && 360 || matrix.physics == 'ReactionDiffusion' && 360 || 240 }}
     strategy:
       fail-fast: false
       matrix:
@@ -4325,331 +4390,985 @@ jobs:
           geometry: light
           selection: all
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Poisson
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: light
           selection: all
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: light
           selection: all
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: light
           selection: all
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: pyramid
           selection: all
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: NonlinearPoisson
           geometry: light
           selection: all
           path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: NonlinearPoisson
           geometry: pyramid
-          selection: all
+          selection: local
           path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'ON'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
         - multithreaded: 'ON'
           physics: Stokes
           geometry: light
           selection: all
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Stokes
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Stokes
           geometry: pyramid
           selection: all
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: light
           selection: all
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: light
           selection: all
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: light
           selection: all
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: light
           selection: all
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: pyramid
           selection: all
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: NonlinearPoisson
           geometry: light
           selection: all
           path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: NonlinearPoisson
           geometry: pyramid
-          selection: all
+          selection: local
           path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: local
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np1
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np2
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np3
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP1Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP2Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: MixedNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: RobinP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: PureNeumannP3Rates
+        - multithreaded: 'OFF'
+          physics: NonlinearPoisson
+          geometry: pyramid
+          selection: np4
+          path: Convergence / Isoparametric / NonlinearPoisson / BoundaryConditions
+          study: Controls
         - multithreaded: 'OFF'
           physics: Stokes
           geometry: light
           selection: all
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Stokes
           geometry: tetrahedron
           selection: all
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Stokes
           geometry: pyramid
           selection: all
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Poisson
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Poisson
           geometry: pyramid
           selection: np1
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: pyramid
           selection: np1
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Poisson
           geometry: pyramid
           selection: np2
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: pyramid
           selection: np2
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Poisson
           geometry: pyramid
           selection: np3
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: pyramid
           selection: np3
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Poisson
           geometry: pyramid
           selection: np4
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Poisson
           geometry: pyramid
           selection: np4
           path: Convergence / Isoparametric / Poisson / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: pyramid
           selection: np1
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: pyramid
           selection: np1
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: pyramid
           selection: np2
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: pyramid
           selection: np2
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: pyramid
           selection: np3
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: pyramid
           selection: np3
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: Conductivity
           geometry: pyramid
           selection: np4
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: Conductivity
           geometry: pyramid
           selection: np4
           path: Convergence / Isoparametric / Conductivity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np1
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np1
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np2
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np2
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np3
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np3
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np4
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: ReactionDiffusion
           geometry: pyramid
           selection: np4
           path: Convergence / Isoparametric / ReactionDiffusion / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: local
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: local
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np1
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np1
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np2
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np2
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np3
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np3
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np4
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
         - multithreaded: 'OFF'
           physics: LinearElasticity
           geometry: tetrahedron
           selection: np4
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -4664,28 +5383,44 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScCurvedBoundaryConvergence
         matrix: ${{ toJSON(matrix) }}
     - name: Run curved boundary convergence partition
-      run: "case \"${{ matrix.geometry }}\" in\n  tetrahedron) geometry_pattern='Tetrahedron' ;;\n  pyramid) geometry_pattern='Pyramid'\
-        \ ;;\n  light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;\n  *) exit 1 ;;\n\
-        esac\ncase \"${{ matrix.selection }}\" in\n  all) context_pattern='.*' ;;\n  local) context_pattern='' ;;\n\
-        \  np1|np2|np3|np4) context_pattern='MPI_${{ matrix.selection }}_' ;;\n  *) exit 1 ;;\nesac\nctest --test-dir\
-        \ build/tests \\\n  -R \"^RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary_${context_pattern}${geometry_pattern}$\"\
-        \ \\\n  --output-on-failure --no-tests=error -j 1\n"
+      run: |
+        case "${{ matrix.geometry }}" in
+          tetrahedron) geometry_pattern='Tetrahedron' ;;
+          pyramid) geometry_pattern='Pyramid' ;;
+          light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+          *) exit 1 ;;
+        esac
+        case "${{ matrix.selection }}" in
+          all) context_pattern='(MPI_np[1-4]_)?' ;;
+          local) context_pattern='' ;;
+          np1|np2|np3|np4) context_pattern='MPI_${{ matrix.selection }}_' ;;
+          *) exit 1 ;;
+        esac
+        case "${{ matrix.study }}" in
+          all) study_pattern='([A-Za-z][A-Za-z0-9]*_)?' ;;
+          MixedNeumannP[123]Rates|RobinP[123]Rates|PureNeumannP[123]Rates) study_pattern='${{ matrix.study }}_' ;;
+          Controls) study_pattern='Controls_' ;;
+          *) exit 1 ;;
+        esac
+        ctest --test-dir build/tests \
+          -R "^RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary_${context_pattern}${study_pattern}${geometry_pattern}$" \
+          --output-on-failure --no-tests=error -j 1
     - name: Publish independent production coverage
       id: coverage_record
       uses: ./.github/actions/coverage
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
-    name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Physics=${{ matrix.physics }}, Geometry=${{ matrix.geometry
-      }}, Selection=${{ matrix.selection }})
+    name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Physics=${{ matrix.physics }}, Geometry=${{ matrix.geometry }}, Selection=${{ matrix.selection }}, Study=${{ matrix.study }})
   PETScCurvedNonlinearTetrahedronConvergence:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
@@ -4867,8 +5602,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4941,7 +5677,23 @@ jobs:
         - multithreaded: 'ON'
           suite: curved_boundary
           path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
-          context: all
+          context: local
+        - multithreaded: 'ON'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np1
+        - multithreaded: 'ON'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np2
+        - multithreaded: 'ON'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np3
+        - multithreaded: 'ON'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np4
         - multithreaded: 'ON'
           suite: submesh
           path: Unit / Rodin / PETSc / H1Restriction / Slow
@@ -4989,7 +5741,23 @@ jobs:
         - multithreaded: 'OFF'
           suite: curved_boundary
           path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
-          context: all
+          context: local
+        - multithreaded: 'OFF'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np1
+        - multithreaded: 'OFF'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np2
+        - multithreaded: 'OFF'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np3
+        - multithreaded: 'OFF'
+          suite: curved_boundary
+          path: Convergence / Isoparametric / PETSc / BoundaryConditions / Complex
+          context: np4
         - multithreaded: 'OFF'
           suite: submesh
           path: Unit / Rodin / PETSc / H1Restriction / Slow
@@ -5009,9 +5777,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install complex PETSc dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libomp-dev libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
-        lcov
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5067,8 +5835,15 @@ jobs:
         if-no-files-found: ignore
     - name: Run curved complex PETSc Helmholtz boundary suite
       if: matrix.suite == 'curved_boundary'
-      run: ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETScHelmholtzBoundary_' --output-on-failure
-        --no-tests=error -j 1
+      run: |
+        case "${{ matrix.context }}" in
+          local) context_pattern='' ;;
+          np1|np2|np3|np4) context_pattern='MPI_${{ matrix.context }}_' ;;
+          *) exit 1 ;;
+        esac
+        ctest --test-dir build/tests \
+          -R "^RodinConvergenceIsoparametricPETScHelmholtzBoundary_${context_pattern}[A-Za-z][A-Za-z0-9]*_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$" \
+          --output-on-failure --no-tests=error -j 1
     - name: Publish independent production coverage
       id: coverage_record
       uses: ./.github/actions/coverage
@@ -5112,8 +5887,9 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
-        libscotch-dev libmetis-dev libhdf5-dev libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
     - uses: ./.github/actions/test-build
       with:
         job: PETScMatrixRanges

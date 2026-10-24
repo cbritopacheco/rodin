@@ -824,7 +824,14 @@ namespace Rodin::Variational
         const auto coefficient = [&](size_t local) -> decltype(auto) {
           return this->operator[](dofs[local]);
         };
-        fes.evaluate(res, {d, i}, coefficient, p);
+        const auto& element = fes.getFiniteElement(d, i);
+        const auto expansion = [&](const Math::SpatialPoint& coordinates) {
+          RangeType value;
+          element.evaluate(value, coefficient, coordinates);
+          return value;
+        };
+        const auto mapping = fes.getPushforward({d, i}, expansion);
+        res = mapping(p);
       }
 
       /**
@@ -845,22 +852,39 @@ namespace Rodin::Variational
         const Index i = polytope.getIndex();
 
         const auto& dofs = getCachedDOFs(d, i);
-        const auto& basisValues = getBasisValues(d, i, ip);
-        for (Index local = 0; local < basisValues.size(); ++local)
-        {
-          const auto k = [&] {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& element = fes.getFiniteElement(d, i);
+        const auto coefficient = [&](size_t local) -> decltype(auto) {
+          return this->operator[](dofs[local]);
+        };
+        const auto expansion = [&](const auto& sample) {
+          RangeType value;
+          if constexpr (std::is_same_v<std::decay_t<decltype(sample)>, IntegrationPoint>)
+          {
+            const auto* formula = sample.getReferenceQuadratureFormula();
             if constexpr (requires {
-                            this->operator[](dofs[local]) * basisValues[local];
+                            element.evaluate(
+                              value, coefficient, *formula, sample.getIndex());
                           })
-              return this->operator[](dofs[local]) * basisValues[local];
-            else
-              return basisValues[local] * this->operator[](dofs[local]);
-          }();
-          if (local == 0)
-            res = k;
+            {
+              if (formula)
+              {
+                element.evaluate(value, coefficient, *formula, sample.getIndex());
+                return value;
+              }
+            }
+            element.evaluate(
+              value, coefficient, sample.getPoint().getReferenceCoordinates());
+          }
           else
-            res += k;
-        }
+            element.evaluate(value, coefficient, sample);
+          return value;
+        };
+        const auto mapping = fes.getPushforward({d, i}, expansion);
+        if constexpr (requires { mapping(ip); })
+          res = mapping(ip);
+        else
+          res = mapping(p);
       }
 
       /**
@@ -1255,7 +1279,7 @@ namespace Rodin::Variational
 
     private:
       /**
-       * @brief Per-thread cache of the DOFs and basis values of the polytope
+       * @brief Per-thread cache of the DOFs of the polytope
        * last evaluated.
        *
        * The cache outlives the grid functions that fill it, so it cannot be
@@ -1286,8 +1310,6 @@ namespace Rodin::Variational
         size_t d;
         Index i;
         std::vector<Index> dofs;
-
-        std::vector<RangeType> basisValues;
       };
 
       /**
@@ -1332,31 +1354,6 @@ namespace Rodin::Variational
             cache.dofs[local] = dofs[local];
         }
         return cache.dofs;
-      }
-
-      /**
-       * @brief Prepares fresh physical basis values in reusable per-thread storage.
-       * @param d Topological dimension of the evaluation entity.
-       * @param i Index of the evaluation entity.
-       * @param ip Quadrature point identifying the cached basis values.
-       * @returns Scratch values overwritten by the next evaluation on this thread.
-       */
-
-      const std::vector<RangeType>& getBasisValues(
-        size_t d, Index i, const IntegrationPoint& ip) const
-      {
-        auto& cache = getEvaluationCache();
-        const auto* fes = &this->getFiniteElementSpace();
-        const auto* element = &fes->getFiniteElement(d, i);
-        const size_t count = element->getCount();
-        const auto& point = ip.getPoint();
-        cache.basisValues.resize(count);
-        for (Index local = 0; local < count; ++local)
-        {
-          const auto mapping = fes->getPushforward({d, i}, element->getBasis(local));
-          cache.basisValues[local] = mapping(point);
-        }
-        return cache.basisValues;
       }
 
       Optional<std::string> m_name;

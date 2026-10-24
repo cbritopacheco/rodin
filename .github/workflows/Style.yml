@@ -41,9 +41,11 @@ jobs:
         # The clang-format binary is pinned via pip to the exact version the
         # tree was formatted with — patch releases of clang-format can wrap
         # lines differently. apt provides the git-clang-format driver script.
-        run: |
-          sudo apt-get update && sudo apt-get install -y clang-format-18
-          pip install clang-format==18.1.8
+        uses: ./.github/actions/apt-dependencies
+        with:
+          packages: clang-format-18
+      - name: Install pinned formatter
+        run: pip install clang-format==18.1.8
       - name: Test formatter indentation configuration
         run: python3 -m unittest discover -s dev -p test_format_config.py -v
       - name: Check formatting of changed lines
@@ -75,10 +77,9 @@ jobs:
           submodules: true
           lfs: false
       - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          clang-tidy-18 libomp-18-dev cmake libboost-all-dev libeigen3-dev
-          libhdf5-dev libsuitesparse-dev libscotch-dev libmetis-dev petsc-dev mpich
+        uses: ./.github/actions/apt-dependencies
+        with:
+          packages: clang-tidy-18 libomp-18-dev cmake libboost-all-dev libeigen3-dev libhdf5-dev libsuitesparse-dev libscotch-dev libmetis-dev petsc-dev mpich
       - name: Configure (generates Configure.h)
         run: >-
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -108,8 +109,11 @@ jobs:
         # comparable against the doxygen version it was generated with.
         # texlive-binaries provides bibtex, without which every \cite emits
         # a warning that is absent from the baseline.
+        uses: ./.github/actions/apt-dependencies
+        with:
+          packages: texlive-binaries
+      - name: Install pinned Doxygen binary
         run: |
-          sudo apt-get update && sudo apt-get install -y texlive-binaries
           curl -sSL -o doxygen.tar.gz \
             https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
           tar -xzf doxygen.tar.gz

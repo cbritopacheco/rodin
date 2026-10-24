@@ -11,6 +11,7 @@ suites in `tests/`.
 | `ci_test_plan.py` | Test directory scheduling, dedicated coverage partition inventory and shared-build planning. |
 | `ci_tests.py` | Configured target selection, scoped GoogleTest discovery and serial CTest execution. |
 | `ci_builds.py` | Compatible build definitions, immutable artifact publication and validated restoration. |
+| `ci_environment.py` | Signed, version-pinned APT download caching, bounded mirror fallback and conditional hosted-runner disk cleanup. |
 | `ci_build_graph.py` | Common-library dependency closure, directory executable ownership, bounded producer matrices and execution bindings. |
 | `ci_schedule.py`, `ci_lanes.py` | Generated configuration-local hierarchy dependencies and authoritative dedicated lane recipes. |
 | `ci_coverage.py` | Execution receipts, coverage contribution validation, pooling and the final production coverage gate. |
@@ -54,8 +55,6 @@ execution and the end-to-end action regressions in `test_labeler.py`.
 
 - [Tooling procedures](tooling.md): invocation and baseline maintenance.
 - [CI test registration guide](ci-testing.md): adding tests, modules and suites.
-- [Coverage and source review history](coverage-history.md): investigation
-  records and historical measurements, separate from the directory architecture.
 
-Generated profiles, meshes, solver logs and scratch outputs belong outside this
-directory. Shared tracked resources live in `resources/` under Git LFS.
+Investigation reports, timing JSON, profiles, meshes, solver logs and scratch
+outputs must stay outside the repository and must not be committed. Shared tracked resources live in `resources/` under Git LFS.

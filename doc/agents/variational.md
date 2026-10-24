@@ -137,10 +137,23 @@ without a matching cell binding always refresh. Copies start unbound. Reference
 basis tables may survive bindings because they depend on the reference formula,
 not physical geometry. Custom cell integrators establish the same lifecycle.
 
-GridFunction retains DOF/scratch allocation reuse but recomputes pushed-forward
-basis values on each direct integration-point evaluation. Caller-owned
-FunctionBase::Cache retains the resulting field value across basis indices for
-the current point binding. Shared fields acquire no mutable cell binding.
+GridFunction owns expansion evaluation and interpolation. It obtains element
+association and local DOF indexing from the FES, reads current coefficients,
+contracts the reference expansion and applies the supplied pushforward using
+current geometry. FES classes have no `evaluate` operation. Generic evaluation
+must not assume nodal coefficients or a component layout: those details remain
+inside each element's basis/expansion implementation.
+
+Composition pushforwards can forward a certified IntegrationPoint to the
+reference expansion. H1 elements then contract against immutable reference
+tabulation, including scalar, vector and matrix ranges. Other pushforwards
+continue requesting their actual reference coordinates; transformed or
+resampled coordinates never inherit an unrelated sample's certification.
+Reference tables are borrowed only after coefficient callbacks, which may
+insert and evict tables. No coefficients or mapped values are retained in the
+reference cache. GridFunction retains DOF allocation reuse; caller-owned
+FunctionBase::Cache retains field values for an explicit point binding.
+Shared fields acquire no mutable cell binding.
 DeformationMap owns one explicitly prepared moved point: point binding locates
 once, parameterless access reuses it, cell binding clears it, and direct point
 queries always locate afresh. No transformation token, UUID or revision is used.
@@ -203,6 +216,20 @@ storage with a different lifetime and construction cost. Associated integration
 points retain the existing reference-table path. A pointwise-gradient improvement
 must therefore be attributed separately from warm assembly that already uses
 reference association. Neither operation introduces communication.
+
+Certified local cell samples also reach native P1 field derivatives and matrix-valued
+P1/H1 field and shape gradients. Matrix Jacobian, divergence and directional
+expressions delegate to the same gradient. Plain-point and provenance-only queries,
+facet-to-volume traces and cross-mesh remapping retain direct coordinate evaluation.
+Callable MatrixFunction retains its Point callback contract, including generic
+callables that use Point-specific members. MassForm coefficients and
+SWIFT quality, displacement and source-sampling loops retain owner/index association.
+Moved target points still carry their actual new coordinates without association.
+Vector P1/H1 basis Jacobians accept a formula and sample index for reference
+contractions; the element owns its component ordering. SWIFT surface-map validation
+uses that operation when available and retains the public directional-basis fallback
+for other elements. This computes facet-reference derivatives, not a volume trace.
+No additional cache, mutable cell binding or coefficient snapshot is introduced.
 
 Matrix-valued H1 shape leaves may borrow an already prepared scalar reference
 table while filling their owned component basis. Reference association is

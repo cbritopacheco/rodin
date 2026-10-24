@@ -475,8 +475,3 @@ runtime reports have been checked independently, including source identity,
 case selection, watchdogs, processor counts and resource locks. Sampled RSS
 guards do not establish continuous peak-memory bounds. Hosted CI verification
 and convergence beyond these finite hierarchies remain separate obligations.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).

@@ -44,10 +44,13 @@ namespace Rodin::Math
    *
    * For @f$z=a+ib@f$, the magnitude is @f$|z|=\sqrt{a^2+b^2}@f$.
    *
+   * @tparam Scalar Complex scalar type.
    * @param x Complex scalar whose magnitude is evaluated.
    * @returns The nonnegative real magnitude.
    */
-  inline Real abs(const Complex& x)
+  template <class Scalar>
+    requires(Eigen::NumTraits<Scalar>::IsComplex != 0)
+  inline typename Eigen::NumTraits<Scalar>::Real abs(const Scalar& x)
   {
     return std::abs(x);
   }
@@ -72,10 +75,13 @@ namespace Rodin::Math
    *
    * For @f$ z = a + bi @f$, returns @f$ \bar{z} = a - bi @f$.
    *
+   * @tparam Scalar Complex scalar type.
    * @param[in] x Complex number
-   * @return Complex conjugate @f$ \bar{x} @f$
+   * @return Complex conjugate @f$ \bar{x} @f$, preserving scalar precision.
    */
-  constexpr Complex conj(const Complex& x)
+  template <class Scalar>
+    requires(Eigen::NumTraits<Scalar>::IsComplex != 0)
+  constexpr Scalar conj(const Scalar& x)
   {
     return std::conj(x);
   }
@@ -100,10 +106,13 @@ namespace Rodin::Math
    *
    * For real numbers, the conjugate is the number itself.
    *
+   * @tparam Scalar Arithmetic scalar type.
    * @param[in] x Real number
-   * @return @f$ x @f$
+   * @return @f$ x @f$, preserving scalar precision.
    */
-  constexpr Real conj(const Real& x)
+  template <class Scalar>
+    requires std::is_arithmetic_v<Scalar>
+  constexpr Scalar conj(const Scalar& x)
   {
     return x;
   }
@@ -556,33 +565,65 @@ namespace Rodin::Math
   }
 
   /**
-   * @brief Computes the dot product of two real numbers.
-   *
-   * For real numbers, the dot product is simply multiplication:
-   * @f$ \text{lhs} \cdot \text{rhs} = \text{lhs} \times \text{rhs} @f$.
-   *
-   * @param[in] lhs Left-hand side operand
-   * @param[in] rhs Right-hand side operand
-   * @return @f$ \text{lhs} \times \text{rhs} @f$
+   * @brief Multiplies two real scalars.
+   * @tparam Left Left arithmetic type.
+   * @tparam Right Right arithmetic type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Ordinary arithmetic product.
    */
-  inline constexpr Real dot(const Real& lhs, const Real& rhs)
+  template <class Left, class Right>
+    requires(std::is_arithmetic_v<Left> && std::is_arithmetic_v<Right>)
+  inline constexpr auto dot(const Left& lhs, const Right& rhs)
   {
     return lhs * rhs;
   }
 
   /**
-   * @brief Computes the dot product of two complex numbers.
-   *
-   * For complex numbers, the dot product uses conjugation:
-   * @f$ z_1 \cdot z_2 = z_1 \times \overline{z_2} @f$.
-   *
-   * @param[in] lhs Left-hand side complex number
-   * @param[in] rhs Right-hand side complex number
-   * @return @f$ \text{lhs} \times \overline{\text{rhs}} @f$
+   * @brief Multiplies complex scalars, conjugating the right operand.
+   * @tparam Left Left floating-point component type.
+   * @tparam Right Right floating-point component type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns @f$u\overline{v}@f$ at their common scalar precision.
    */
-  inline constexpr Complex dot(const Complex& lhs, const Complex& rhs)
+  template <class Left, class Right>
+  inline constexpr auto dot(const std::complex<Left>& lhs, const std::complex<Right>& rhs)
   {
-    return lhs * conj(rhs);
+    using Scalar = std::common_type_t<Left, Right>;
+    return std::complex<Scalar>(lhs) * std::conj(std::complex<Scalar>(rhs));
+  }
+
+  /**
+   * @brief Multiplies real and complex scalars, conjugating the right operand.
+   * @tparam Left Left arithmetic type.
+   * @tparam Right Right floating-point component type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns @f$u\overline{v}@f$ at their common scalar precision.
+   */
+  template <class Left, class Right>
+    requires std::is_arithmetic_v<Left>
+  inline constexpr auto dot(const Left& lhs, const std::complex<Right>& rhs)
+  {
+    using Scalar = std::common_type_t<Left, Right>;
+    return Scalar(lhs) * std::conj(std::complex<Scalar>(rhs));
+  }
+
+  /**
+   * @brief Multiplies complex and real scalars.
+   * @tparam Left Left floating-point component type.
+   * @tparam Right Right arithmetic type.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns @f$u\overline{v}=uv@f$ at their common scalar precision.
+   */
+  template <class Left, class Right>
+    requires std::is_arithmetic_v<Right>
+  inline constexpr auto dot(const std::complex<Left>& lhs, const Right& rhs)
+  {
+    using Scalar = std::common_type_t<Left, Right>;
+    return std::complex<Scalar>(lhs) * Scalar(rhs);
   }
 
   /**
@@ -606,19 +647,31 @@ namespace Rodin::Math
   {
     assert(lhs.rows() == rhs.rows());
     assert(lhs.cols() == rhs.cols());
-    return (lhs.array() * rhs.conjugate().array()).sum();
+    using LeftScalar = typename LHSDerived::Scalar;
+    using RightScalar = typename RHSDerived::Scalar;
+    if constexpr (requires {
+                    typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
+                      Eigen::internal::scalar_product_op<LeftScalar,
+                        RightScalar>>::ReturnType;
+                  })
+      return (lhs.array() * rhs.conjugate().array()).sum();
+    else
+    {
+      using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+      return (lhs.template cast<Scalar>().array() *
+        rhs.template cast<Scalar>().conjugate().array())
+        .sum();
+    }
   }
 
   /**
    * @brief Computes the dot product of two SpatialVector objects.
    *
    * For logical dimension @f$d\le3@f$, computes
-   * @f$\sum_{i=0}^{d-1}u_i\overline{v_i}@f$. Fixed-extent Eigen blocks avoid
-   * a dynamic reduction for same-scalar bounded vectors. Mixed scalar products
-   * retain the dynamic reduction: fixed blocks can change their packetization
-   * and floating-point contraction on GCC. Three same-scalar entries are grouped
-   * as the first two followed by the third, retaining the dynamic reduction's
-   * accumulation order rather than introducing a reassociated three-term sum.
+   * @f$\sum_{i=0}^{d-1}u_i\overline{v_i}@f$. Real operands use scalar
+   * contractions; complex operands retain fixed-extent reductions with right
+   * conjugation. Mixed scalar products retain their dynamic reduction. Fused
+   * arithmetic and reduction order may differ within floating-point rounding.
    * Inactive storage is never read; the empty product is zero.
    *
    * @tparam LHSScalar Scalar type of left-hand side
@@ -641,6 +694,26 @@ namespace Rodin::Math
     {
       using Result =
         decltype(dot(lhs.getData().template head<1>(), rhs.getData().template head<1>()));
+      if constexpr (std::is_same_v<LHSScalar, Real>)
+      {
+        const auto* left = lhs.getData().data();
+        const auto* right = rhs.getData().data();
+        switch (lhs.size())
+        {
+          case 0:
+            return Result(0);
+          case 1:
+            return left[0] * right[0];
+          case 2:
+            return left[0] * right[0] + left[1] * right[1];
+          case 3:
+            return (left[0] * right[0] + left[1] * right[1]) + left[2] * right[2];
+          default:
+            assert(false);
+            return Result(0);
+        }
+      }
+
       switch (lhs.size())
       {
         case 0:
@@ -662,6 +735,12 @@ namespace Rodin::Math
   /**
    * @brief Computes the dot product of two SpatialMatrix objects.
    *
+   * Computes @f$\sum_{i,j} A_{ij}\overline{B_{ij}}@f$ over active entries.
+   * Real matrices retain dimension-specific kernels in one shape dispatch,
+   * shared with the member dot operation. Full-size storage uses Eigen's fixed
+   * reduction directly; smaller shapes use explicit active entries. Empty
+   * shapes return zero without reading inactive storage.
+   *
    * @tparam LHSScalar Scalar type of left-hand side
    * @tparam RHSScalar Scalar type of right-hand side
    * @param[in] lhs Left-hand side SpatialMatrix
@@ -676,6 +755,57 @@ namespace Rodin::Math
     assert(lhs.cols() == rhs.cols());
     const auto rows = static_cast<Eigen::Index>(lhs.rows());
     const auto cols = static_cast<Eigen::Index>(lhs.cols());
+    if constexpr (std::is_same_v<LHSScalar, Real> && std::is_same_v<RHSScalar, Real>)
+    {
+      const auto& left = lhs.getData();
+      const auto& right = rhs.getData();
+      constexpr unsigned ExtentCount = SpatialMatrix<LHSScalar>::MaxSize + 1;
+      switch (static_cast<unsigned>(rows) * ExtentCount + static_cast<unsigned>(cols))
+      {
+        case 0:
+          return Real(0);
+        case 1:
+          return Real(0);
+        case 2:
+          return Real(0);
+        case 3:
+          return Real(0);
+        case 4:
+          return Real(0);
+        case 5:
+          return left(0, 0) * right(0, 0);
+        case 6:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1);
+        case 7:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(0, 2) * right(0, 2);
+        case 8:
+          return Real(0);
+        case 9:
+          return left(0, 0) * right(0, 0) + left(1, 0) * right(1, 0);
+        case 10:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(1, 0) * right(1, 0) + left(1, 1) * right(1, 1);
+        case 11:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(0, 2) * right(0, 2) + left(1, 0) * right(1, 0) +
+            left(1, 1) * right(1, 1) + left(1, 2) * right(1, 2);
+        case 12:
+          return Real(0);
+        case 13:
+          return left(0, 0) * right(0, 0) + left(1, 0) * right(1, 0) +
+            left(2, 0) * right(2, 0);
+        case 14:
+          return left(0, 0) * right(0, 0) + left(0, 1) * right(0, 1) +
+            left(1, 0) * right(1, 0) + left(1, 1) * right(1, 1) +
+            left(2, 0) * right(2, 0) + left(2, 1) * right(2, 1);
+        case 15:
+          return dot(left, right);
+        default:
+          assert(false);
+          return Real(0);
+      }
+    }
     return dot(
       lhs.getData().topLeftCorner(rows, cols), rhs.getData().topLeftCorner(rows, cols));
   }

@@ -66,8 +66,13 @@ namespace Rodin::Adaptation::SWIFT
     {
       const auto cell = mesh.getCell(index);
       const Geometry::Polytope::Traits traits(cell->getGeometry());
-      const auto evaluate = [&](const Geometry::Point& point) {
-        const auto value = step.getValue(point);
+      const auto evaluate = [&](const auto& point) {
+        const auto value = [&]() {
+          if constexpr (requires { step.getValue(point); })
+            return step.getValue(point);
+          else
+            return step.getValue(point.getPoint());
+        }();
         Real norm = 0;
         for (std::size_t component = 0; component < mesh.getDimension(); ++component)
         {
@@ -90,7 +95,10 @@ namespace Rodin::Adaptation::SWIFT
         cell->getGeometry());
       const auto& quadrature = cell->getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-        maximum = std::max(maximum, evaluate(quadrature.getPoint(q)));
+      {
+        maximum =
+          std::max(maximum, evaluate(Variational::IntegrationPoint(quadrature, q)));
+      }
     }
     return maximum;
   }
@@ -1719,7 +1727,7 @@ namespace Rodin::Adaptation::SWIFT
             {
               const auto& point = quadrature.getPoint(q);
               const Variational::IntegrationPoint ip(quadrature, q);
-              const auto value = direction.getValue(point);
+              const auto value = direction.getValue(ip);
               const ResidualState state(phi, grad, deformation, ip, loss);
               const Real residual = state.getResidual();
               const Real action = state.getGradient().dot(value);
@@ -1864,7 +1872,7 @@ namespace Rodin::Adaptation::SWIFT
               const auto& point = quadrature.getPoint(q);
               const Variational::IntegrationPoint ip(quadrature, q);
               facetAction += qf.getWeight(q) * point.getDistortion() *
-                force.getValue(ip).dot(direction.getValue(point));
+                force.getValue(ip).dot(direction.getValue(ip));
             }
           }
         }
@@ -2244,18 +2252,33 @@ namespace Rodin::Adaptation::SWIFT
               const Variational::IntegrationPoint ip(quadrature, q);
               const auto& J = point.getJacobian();
               SpatialMat mappedJacobian = J;
-              const auto& rc = point.getReferenceCoordinates();
               for (std::size_t local = 0; local < fe.getCount(); ++local)
               {
                 const Index dof =
                   fes.getGlobalIndex({face->getDimension(), facetIndex}, local);
-                for (std::size_t axis = 0; axis < face->getDimension(); ++axis)
+                const auto coefficient = u[dof];
+                if constexpr (requires { fe.getBasis(local).getJacobian()(qf, q); })
                 {
-                  for (std::size_t component = 0; component < dimension; ++component)
+                  const auto derivative = fe.getBasis(local).getJacobian()(qf, q);
+                  for (std::size_t axis = 0; axis < face->getDimension(); ++axis)
                   {
-                    mappedJacobian(static_cast<Eigen::Index>(component),
-                      static_cast<Eigen::Index>(axis)) += u[dof] *
-                      fe.getBasis(local).template getDerivative<1>(component, axis)(rc);
+                    for (std::size_t component = 0; component < dimension; ++component)
+                    {
+                      mappedJacobian(component, axis) +=
+                        coefficient * derivative(component, axis);
+                    }
+                  }
+                }
+                else
+                {
+                  const auto& rc = point.getReferenceCoordinates();
+                  for (std::size_t axis = 0; axis < face->getDimension(); ++axis)
+                  {
+                    for (std::size_t component = 0; component < dimension; ++component)
+                    {
+                      mappedJacobian(component, axis) += coefficient *
+                        fe.getBasis(local).template getDerivative<1>(component, axis)(rc);
+                    }
                   }
                 }
               }
@@ -2386,9 +2409,15 @@ namespace Rodin::Adaptation::SWIFT
           const auto& quad = face->getQuadrature(qf);
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
-            const auto& point = quad.getPoint(q);
-            residuals.push_back(std::abs(phi.getValue(point)));
-            gradientScale = std::max(gradientScale, grad.getValue(point).norm());
+            const Variational::IntegrationPoint ip(quad, q);
+            const auto evaluate = [&](const auto& function) {
+              if constexpr (requires { function.getValue(ip); })
+                return function.getValue(ip);
+              else
+                return function.getValue(ip.getPoint());
+            };
+            residuals.push_back(std::abs(evaluate(phi)));
+            gradientScale = std::max(gradientScale, evaluate(grad).norm());
           }
         }
 

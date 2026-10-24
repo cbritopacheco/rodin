@@ -350,8 +350,3 @@ Separate registrations cover seven geometries in native and real-PETSc
 local contexts, MPI ranks one through four, and both thread configurations.
 Slow labels, 1800-second watchdogs and pyramid locks are retained. The older
 approximated groups exclude these additions. The natural-boundary matrix uses a different target and is unaffected.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).

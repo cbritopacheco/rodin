@@ -617,65 +617,31 @@ namespace Rodin::Math
       }
 
       /**
-       * @brief Returns the Euclidean dot product with another spatial vector.
-       * @param other Other operand.
-       * @returns The Euclidean dot product with another spatial vector.
+       * @brief Contracts active components, conjugating the right operand.
+       *
+       * Computes @f$\sum_i u_i\overline{v_i}@f$, as does Math::dot.
+       * Mixed supported scalar fields retain the promoted result type.
+       *
+       * @tparam OtherScalar Right operand's scalar type.
+       * @param other Right operand.
+       * @returns Right-conjugating scalar contraction.
        */
-      inline constexpr ScalarType dot(const SpatialVector& other) const noexcept
+      template <class OtherScalar>
+      constexpr auto dot(const SpatialVector<OtherScalar>& other) const noexcept
       {
-        assert(m_size == other.m_size);
-
-        const auto& a = m_data;
-        const auto& b = other.m_data;
-
-        ScalarType s = ScalarType(0);
-        switch (m_size)
-        {
-          case 3:
-            s += a[2] * b[2];
-            [[fallthrough]];
-          case 2:
-            s += a[1] * b[1];
-            [[fallthrough]];
-          case 1:
-            s += a[0] * b[0];
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return s;
+        return Math::dot(*this, other);
       }
 
       /**
-       * @brief Returns the Euclidean dot product with an Eigen vector expression.
-       * @param other Other operand.
-       * @returns The Euclidean dot product with an Eigen vector expression.
+       * @brief Contracts an Eigen vector, conjugating the right operand.
+       * @tparam EigenDerived Right Eigen vector expression type.
+       * @param other Right operand.
+       * @returns Right-conjugating contraction with scalar promotion.
        */
       template <class EigenDerived>
-      constexpr ScalarType dot(
-        const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      constexpr auto dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        assert(static_cast<std::uint8_t>(other.size()) == m_size);
-        ScalarType s = ScalarType(0);
-        switch (m_size)
-        {
-          case 3:
-            s += m_data[2] * other(static_cast<Eigen::Index>(2));
-            [[fallthrough]];
-          case 2:
-            s += m_data[1] * other(static_cast<Eigen::Index>(1));
-            [[fallthrough]];
-          case 1:
-            s += m_data[0] * other(static_cast<Eigen::Index>(0));
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return s;
+        return Math::dot(*this, other);
       }
 
       /**
@@ -791,6 +757,7 @@ namespace Rodin::Math
       /**
        * @brief Returns the @f$ \ell^P @f$ norm of this vector.
        *
+       * The case @f$P=2@f$ uses norm() directly.
        * Only active components contribute to
        * @f$\|v\|_P=(\sum_i |v_i|^P)^{1/P}@f$ over either scalar field.
        *
@@ -801,26 +768,31 @@ namespace Rodin::Math
       constexpr typename Eigen::NumTraits<ScalarType>::Real lpNorm() const noexcept
       {
         static_assert(P > 0);
-        using RealScalar = typename Eigen::NumTraits<ScalarType>::Real;
-        RealScalar s = RealScalar(0);
-        std::integral_constant<size_t, P> p;
-        switch (m_size)
+        if constexpr (P == 2)
+          return norm();
+        else
         {
-          case 3:
-            s += Math::pow(Math::abs(m_data[2]), p);
-            [[fallthrough]];
-          case 2:
-            s += Math::pow(Math::abs(m_data[1]), p);
-            [[fallthrough]];
-          case 1:
-            s += Math::pow(Math::abs(m_data[0]), p);
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
+          using RealScalar = typename Eigen::NumTraits<ScalarType>::Real;
+          RealScalar s = RealScalar(0);
+          std::integral_constant<size_t, P> p;
+          switch (m_size)
+          {
+            case 3:
+              s += Math::pow(Math::abs(m_data[2]), p);
+              [[fallthrough]];
+            case 2:
+              s += Math::pow(Math::abs(m_data[1]), p);
+              [[fallthrough]];
+            case 1:
+              s += Math::pow(Math::abs(m_data[0]), p);
+              [[fallthrough]];
+            case 0:
+              break;
+            default:
+              assert(false);
+          }
+          return Math::pow(s, RealScalar(1) / RealScalar(P));
         }
-        return Math::pow(s, RealScalar(1) / RealScalar(P));
       }
 
       /**

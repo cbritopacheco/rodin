@@ -95,7 +95,7 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
-  BENCHMARK_F(GridFunctionEvaluationBenchmark, P1ScalarSpaceExpansion)
+  BENCHMARK_F(GridFunctionEvaluationBenchmark, P1ScalarValue)
   (benchmark::State& state)
   {
     P1 fes(mesh);
@@ -103,14 +103,10 @@ namespace Rodin::Tests::Benchmarks
     gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
     const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
-    const auto& dofs = fes.getDOFs(2, 0);
 
     for (auto _ : state)
     {
-      Real value;
-      fes.evaluate(
-        value, {2, 0}, [&](size_t local) -> decltype(auto) { return gf[dofs[local]]; },
-        p);
+      Real value = gf.getValue(p);
       benchmark::DoNotOptimize(value);
     }
   }
@@ -250,6 +246,48 @@ namespace Rodin::Tests::Benchmarks
       }
       benchmark::DoNotOptimize(value);
     }
+  }
+
+  BENCHMARK_F(GridFunctionEvaluationBenchmark, H1P4ScalarQuadrature)
+  (benchmark::State& state)
+  {
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+    GridFunction gf(fes);
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
+    const auto cell = mesh.getCell(0);
+    const auto& formula = QF::PolytopeQuadratureFormula::get(16, cell->getGeometry());
+    const PolytopeQuadrature quadrature(*cell, formula);
+
+    for (auto _ : state)
+    {
+      for (size_t sample = 0; sample < quadrature.getSize(); ++sample)
+      {
+        Real value = gf.getValue(IntegrationPoint(quadrature, sample));
+        benchmark::DoNotOptimize(value);
+      }
+    }
+    state.SetItemsProcessed(state.iterations() * quadrature.getSize());
+  }
+
+  BENCHMARK_F(GridFunctionEvaluationBenchmark, H1P4ScalarPointwise)
+  (benchmark::State& state)
+  {
+    H1 fes(std::integral_constant<size_t, 4>{}, mesh);
+    GridFunction gf(fes);
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
+    const auto cell = mesh.getCell(0);
+    const auto& formula = QF::PolytopeQuadratureFormula::get(16, cell->getGeometry());
+    const PolytopeQuadrature quadrature(*cell, formula);
+
+    for (auto _ : state)
+    {
+      for (size_t sample = 0; sample < quadrature.getSize(); ++sample)
+      {
+        Real value = gf.getValue(quadrature.getPoint(sample));
+        benchmark::DoNotOptimize(value);
+      }
+    }
+    state.SetItemsProcessed(state.iterations() * quadrature.getSize());
   }
 
   /// @endcond

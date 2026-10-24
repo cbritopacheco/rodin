@@ -43,10 +43,14 @@ runs:
       with:
         pattern: ${{ steps.build.outputs.artifacts }}
         path: ci-runtime-inputs
+    - name: Check restoration disk headroom
+      shell: bash
+      run: python3 dev/ci_environment.py disk
     - name: Restore clean runner-local build
       shell: bash
       env:
         JOB: ${{ inputs.job }}
         MATRIX: ${{ inputs.matrix }}
         CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
+        GH_TOKEN: ${{ github.token }}
       run: python3 dev/ci_build_graph.py restore --job "$JOB" --matrix "$MATRIX"

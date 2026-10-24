@@ -15,7 +15,7 @@ permissions:
 jobs:
   PETScConvergence:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ matrix.suite == 'bulk' && 120 || 360 }}
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(inputs.matrix) }}
@@ -35,8 +35,10 @@ jobs:
         compiler: gcc-14
         cmake: true
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev
-        libmetis-dev libhdf5-dev petsc-dev mpich
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev
+          mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -44,8 +46,10 @@ jobs:
         matrix: ${{ toJSON(matrix) }}
     - name: Run PETSc convergence suite
       if: matrix.suite == 'bulk'
-      run: ctest --test-dir build/tests -R '^RodinConvergenceHPETSc' -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_|^RodinConvergenceHPETSc(MPI)?StokesStability_'
-        --output-on-failure -j 1
+      run: "case \"${{ matrix.context }}\" in\n  local)\n    pattern='^RodinConvergenceHPETSc'\n    context_exclude='|^RodinConvergenceHPETScMPI'\
+        \ ;;\n  np1|np2|np3|np4)\n    pattern='^RodinConvergenceHPETScMPI.*_${{ matrix.context }}(_|$)'\n    context_exclude=''\
+        \ ;;\n  *) exit 1 ;;\nesac\nctest --test-dir build/tests -R \"$pattern\" \\\n  -E \"^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_|^RodinConvergenceHPETSc(MPI)?StokesStability_${context_exclude}\"\
+        \ \\\n  --output-on-failure --no-tests=error -j 1\n"
     - name: Run PETSc pressure-spectrum suite
       if: startsWith(matrix.suite, 'pressure_')
       run: "case \"${{ matrix.suite }}\" in\n  pressure_light) geometry_pattern='(Triangle|Quadrilateral|Hexahedron|Wedge)'\

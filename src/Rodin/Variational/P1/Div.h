@@ -140,7 +140,51 @@ namespace Rodin::Variational
        */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
-        interpolate(out, ip.getPoint());
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
+        if (vdim != spaceDimension)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Divergence requires one vector component per ambient coordinate."
+            << Alert::Raise;
+        }
+
+        const P1Element<ScalarType> feS(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        Math::SpatialVector<ScalarType> ref(static_cast<std::uint8_t>(d));
+        Math::SpatialVector<ScalarType> phys(spaceDimension);
+
+        out = ScalarType(0);
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = feS.getTabulation(*qf).getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            out += gf[fes.getGlobalIndex({d, i}, local)] *
+              phys(static_cast<std::uint8_t>(comp));
+          }
+        }
       }
 
       /**

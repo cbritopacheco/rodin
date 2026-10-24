@@ -96,7 +96,7 @@ namespace Rodin::Tests::Convergence
           {
             const auto& original = originalQuadrature.getPoint(qp);
             const auto& point = mappedQuadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(point, &qf, qp);
+            const Variational::IntegrationPoint ip(mappedQuadrature, qp);
             const auto exactPosition = exactMap(original.getPhysicalCoordinates());
             const auto exactJacobian =
               exactMap.getJacobian(original.getPhysicalCoordinates());

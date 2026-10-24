@@ -145,7 +145,7 @@ namespace Rodin::Tests::Benchmarks
         {
           if constexpr (std::is_same_v<Scalar, Complex>)
           {
-            dotReference += std::conj(Wide(x(j))) * Wide(z(j));
+            dotReference += Wide(x(j)) * std::conj(Wide(z(j)));
             normReference += std::norm(Wide(x(j)));
           }
           else

@@ -554,8 +554,3 @@ Represented, lifted-field and total pressure errors must each satisfy
 $E_0<10^{-11}$ and $E_1<10^{-11}$, using dimensionless absolute budgets.
 This fixed-mesh regression supplements the three-level $n=3,5,9$ geometry
 study without relaxing its $10^{-9}$ reproduction budget.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).
