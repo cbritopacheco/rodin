@@ -135,7 +135,8 @@ class HierarchicalScheduleTest(unittest.TestCase):
             source = root / 'ci-build-one'
             source.mkdir()
             (source / 'manifest.json').write_text('{}')
-            with patch.dict(os.environ, CI_RESTORED_ARTIFACTS=str(root)), patch.object(graph.subprocess, 'run') as run:
+            (source / 'build.tar.gz').write_bytes(b'archive')
+            with patch.dict(os.environ, CI_RESTORED_ARTIFACTS=str(root), GH_TOKEN=''), patch.object(graph.subprocess, 'run') as run:
                 self.assertEqual(graph.download('ci-build-one', root / 'unused'), source)
                 with self.assertRaisesRegex(ValueError, 'was not downloaded'):
                     graph.download('ci-build-missing', root / 'unused')

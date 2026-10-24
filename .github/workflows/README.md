@@ -226,6 +226,14 @@ library/MPI-launcher fingerprints. A selection spanning several directories
 restores their compatible artifacts. CMake regeneration is suppressed;
 execution lanes do not rebuild test targets.
 
+Execution lanes pre-download only their indexed archives. Restoration accepts
+that download only when both `manifest.json` and `build.tar.gz` exist. An
+incomplete download triggers `gh run download` for that exact archive with the
+workflow's read-only Actions token: at most three fresh attempts, each bounded
+to two minutes. A downloader success alone is insufficient. Source/configuration
+and SHA256 validation remain mandatory; failed recovery fails the lane instead
+of skipping its tests.
+
 Regular and Slow variants share executables. MPI ranks, geometries and study
 partitions remain execution coordinates with their original timeouts and
 numerical criteria. A failed producer blocks dependent execution rather than
