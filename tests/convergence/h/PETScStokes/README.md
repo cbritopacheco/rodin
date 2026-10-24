@@ -305,8 +305,3 @@ library allocation behavior or a continuous peak-memory guarantee. The default
 registration of other suites is unchanged.
 Registration and the mathematical specification do not by themselves certify
 passing rates; backend/geometry validation is required separately.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).

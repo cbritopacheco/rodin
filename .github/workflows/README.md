@@ -185,8 +185,6 @@ currently queued job count is not the total test campaign. All 1,354 execution
 requests across 46 compatible configurations remain mandatory. The 114 added
 partitions separate previously oversized PETSc aggregate selections by context
 and complete rate history; they reuse the same builds and retain the same tests.
-See the [PETSc timing investigation](../../dev/petsc-ci-timings.md) for measured
-runner costs, process/job timeout policies and the preservation checks.
 
 Display names capitalize hierarchy segments and preserve established spellings:
 `Tests / Complex`, `Tests / MPI`, `Tests / PETSc`, `Unit / Rodin / Geometry`,

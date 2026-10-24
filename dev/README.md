@@ -27,10 +27,6 @@ suites in `tests/`.
 | `test_*.py` | Regression tests for the developer tools. |
 | `Requirements.txt` | Dependencies for the developer utilities that use them. |
 
-The [PETSc CI timing investigation](petsc-ci-timings.md) records geometry costs,
-local/runner comparison limits and the timeout/partition policy. Consult it
-before changing numerical workloads to address a scheduling timeout.
-
 ## Relationships
 
 The CI planner reads test registration directories; configured CMake manifests
@@ -59,8 +55,6 @@ execution and the end-to-end action regressions in `test_labeler.py`.
 
 - [Tooling procedures](tooling.md): invocation and baseline maintenance.
 - [CI test registration guide](ci-testing.md): adding tests, modules and suites.
-- [Coverage and source review history](coverage-history.md): investigation
-  records and historical measurements, separate from the directory architecture.
 
-Generated profiles, meshes, solver logs and scratch outputs belong outside this
-directory. Shared tracked resources live in `resources/` under Git LFS.
+Investigation reports, timing JSON, profiles, meshes, solver logs and scratch
+outputs must stay outside the repository and must not be committed. Shared tracked resources live in `resources/` under Git LFS.

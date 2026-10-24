@@ -521,8 +521,3 @@ geometries in native local and real-PETSc local/MPI contexts, ranks one through
 four, both thread modes, slow labels, 1800-second timeouts and pyramid locks.
 They exclude the higher-order cases from the existing P1/P2 registration
 to avoid overlapping execution or consuming its timeout budget.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).

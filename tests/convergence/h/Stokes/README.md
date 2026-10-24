@@ -271,8 +271,3 @@ the higher-order matrix remains pending. CI measured approximately 1900
 seconds for one quadrature-order evaluation at the largest pyramid point.
 The three-hour allowance retains the pair of independent evaluations;
 it is an execution policy, not a measured upper runtime bound.
-
-## Supporting records
-
-Historical execution observations are retained in the separate
-[qualification record](qualification.md).

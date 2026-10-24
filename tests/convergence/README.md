@@ -257,8 +257,3 @@ turn a multi-level study into independent single-level assertions. Follow the
 [CI extension guide](../../dev/ci-testing.md) for selectors, backend recipes and
 mandatory coverage contributions, and the
 [workflow overview](../../.github/workflows/README.md) for shared-build ownership.
-
-## Qualification records
-
-[Qualification records and work plans](qualification.md) are maintained
-separately from this description of the convergence suite design.
