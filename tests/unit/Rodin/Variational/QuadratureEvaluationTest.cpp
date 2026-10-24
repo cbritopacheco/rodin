@@ -255,8 +255,8 @@ namespace Rodin::Tests::Unit
           }
         }
         EXPECT_TRUE(scalar.getFiniteElement(cell->getDimension(), cell->getIndex())
-            .findTabulation(formula)
-            .has_value());
+                      .findTabulation(formula)
+                      .has_value());
       }
     };
     check.template operator()<Real>();
