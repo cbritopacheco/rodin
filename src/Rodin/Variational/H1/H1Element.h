@@ -39,7 +39,7 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Geometry/Polytope.h"
-#include "Rodin/QF/ForwardDecls.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
