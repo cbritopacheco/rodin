@@ -32,6 +32,7 @@
  * P0g from P0Element headers if you prefer.
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <cassert>
 #include <utility>
 #include <vector>
@@ -50,10 +51,11 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P0gElement<Range>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = Range;
   };
 }
 
@@ -67,236 +69,245 @@ namespace Rodin::Variational
   {
     using G = Geometry::Polytope::Type;
 
-  public:
-    /// @brief Parent class type.
-    using Parent = FiniteElementBase<P0gElement<Scalar>>;
-    /// @brief Scalar value type.
-    using ScalarType = Scalar;
-    /// @brief Range (evaluation value) type.
-    using RangeType = Scalar;
-
-    /// @brief Degree-of-freedom functional of the P0g element.
-    class LinearForm
-    {
     public:
-      /**
-       * @brief Constructs the LinearForm from the given arguments.
-       * @param g Reference-cell geometry.
-       */
-      constexpr explicit LinearForm(G g) : m_g(g) {}
-      /**
-       * @brief Copy constructor.
-       * @param other Object to copy from.
-       */
-      constexpr LinearForm(const LinearForm& other) = default;
+      /// @brief Parent class type.
+      using Parent = FiniteElementBase<P0gElement<Scalar>>;
 
-      /**
-       * @brief Applies the functional to a callable.
-       * @returns Value of the expression at the supplied evaluation point.
-       * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
-       */
-      template <class T>
-      constexpr ScalarType operator()(const T& v) const
+      /// @brief Scalar value type.
+      using ScalarType = Scalar;
+
+      /// @brief Range (evaluation value) type.
+      using RangeType = Scalar;
+
+      /// @brief Degree-of-freedom functional of the P0g element.
+      class LinearForm
       {
-        return v(P0gElement<ScalarType>(m_g).getNode(0));
-      }
+        public:
+          /**
+           * @brief Constructs the LinearForm from the given arguments.
+           * @param g Reference-cell geometry.
+           */
+          constexpr explicit LinearForm(G g)
+            : m_g(g)
+          {}
 
-    private:
-      const G m_g;
-    };
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          constexpr LinearForm(const LinearForm& other) = default;
 
-    /// @brief Basis function of the P0g element.
-    class BasisFunction
-    {
-    public:
-      /// @brief Type returned by the callable.
-      using ReturnType = Scalar;
+          /**
+           * @brief Applies the functional to a callable.
+           * @returns Value of the expression at the supplied evaluation point.
+           * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
+           */
+          template <class T>
+          constexpr ScalarType operator()(const T& v) const
+          {
+            return v(P0gElement<ScalarType>(m_g).getNode(0));
+          }
 
-      /// @brief Derivative of a P0g basis function, identically zero.
-      template <size_t Order>
-      class DerivativeFunction
-      {
-      public:
-        constexpr DerivativeFunction() = default;
-
-        /**
-         * @brief Copy constructor.
-         * @param other Object to copy from.
-         */
-        constexpr DerivativeFunction(const DerivativeFunction& other) = default;
-
-        /**
-         * @brief Evaluates at a point on the reference element.
-         * @returns Value of the expression at the supplied evaluation point.
-         * @param xi Reference coordinates; the constant result is independent of this argument.
-         */
-        constexpr ReturnType operator()(
-          [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
-        {
-          return ReturnType(0);
-        }
+        private:
+          const G m_g;
       };
 
-      constexpr BasisFunction() = default;
+      /// @brief Basis function of the P0g element.
+      class BasisFunction
+      {
+        public:
+          /// @brief Type returned by the callable.
+          using ReturnType = Scalar;
+
+          /// @brief Derivative of a P0g basis function, identically zero.
+          template <size_t Order>
+          class DerivativeFunction
+          {
+            public:
+              constexpr DerivativeFunction() = default;
+
+              /**
+               * @brief Copy constructor.
+               * @param other Object to copy from.
+               */
+              constexpr DerivativeFunction(const DerivativeFunction& other) = default;
+
+              /**
+               * @brief Evaluates at a point on the reference element.
+               * @returns Value of the expression at the supplied evaluation point.
+               * @param xi Reference coordinates; the constant result is independent of this argument.
+               */
+              constexpr ReturnType operator()(
+                [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
+              {
+                return ReturnType(0);
+              }
+          };
+
+          constexpr BasisFunction() = default;
+
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          constexpr BasisFunction(const BasisFunction& other) = default;
+
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @returns Value of the expression at the supplied evaluation point.
+           * @param xi Reference coordinates; the constant result is independent of this argument.
+           */
+          constexpr ReturnType operator()(
+            [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
+          {
+            return ReturnType(1);
+          }
+
+          /**
+           * @brief Gets the derivative of the basis function.
+           * @returns Reference-coordinate derivative function for the basis.
+           * @param direction Reference-coordinate direction; the constant basis has zero derivative in every direction.
+           */
+          template <size_t Order>
+          constexpr DerivativeFunction<Order> getDerivative(
+            [[maybe_unused]] size_t direction) const
+          {
+            return DerivativeFunction<Order>();
+          }
+      };
+
+      constexpr P0gElement() = default;
+
+      /**
+       * @brief Constructs the P0gElement from the given arguments.
+       * @param geometry Reference geometry.
+       */
+      constexpr explicit P0gElement(G geometry)
+        : Parent(geometry)
+      {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr BasisFunction(const BasisFunction& other) = default;
+      constexpr P0gElement(const P0gElement& other) = default;
 
       /**
-       * @brief Evaluates at a point on the reference element.
-       * @returns Value of the expression at the supplied evaluation point.
-       * @param xi Reference coordinates; the constant result is independent of this argument.
+       * @brief Move constructor.
+       * @param other Object to move from.
        */
-      constexpr ReturnType operator()(
-        [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
+      constexpr P0gElement(P0gElement&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
+      constexpr P0gElement& operator=(const P0gElement& other)
       {
-        return ReturnType(1);
+        Parent::operator=(other);
+        return *this;
+      }
+
+      constexpr ~P0gElement() override = default;
+
+      /**
+       * @brief Gets the number of degrees of freedom of the element.
+       * @returns The number of degrees of freedom of the element.
+       */
+      constexpr size_t getCount() const
+      {
+        return 1;
       }
 
       /**
-       * @brief Gets the derivative of the basis function.
-       * @returns Reference-coordinate derivative function for the basis.
-       * @param direction Reference-coordinate direction; the constant basis has zero derivative in every direction.
+       * @brief Gets the node of a local degree of freedom.
+       * @param i Index of the requested entry.
+       * @returns The node of a local degree of freedom.
        */
-      template <size_t Order>
-      constexpr DerivativeFunction<Order> getDerivative(
-        [[maybe_unused]] size_t direction) const
+      const Math::SpatialVector<Real>& getNode(size_t i) const
       {
-        return DerivativeFunction<Order>();
+        assert(i == 0);
+        switch (this->getGeometry())
+        {
+          case G::Point:
+          {
+            static const Math::SpatialVector<Real> s_node{};
+            return s_node;
+          }
+          case G::Segment:
+          {
+            static const Math::SpatialVector<Real> s_node{0.5};
+            return s_node;
+          }
+          case G::Triangle:
+          {
+            static const Math::SpatialVector<Real> s_node{
+              {Real(1) / Real(3), Real(1) / Real(3)}};
+            return s_node;
+          }
+          case G::Quadrilateral:
+          {
+            static const Math::SpatialVector<Real> s_node{{0.5, 0.5}};
+            return s_node;
+          }
+          case G::Tetrahedron:
+          {
+            static const Math::SpatialVector<Real> s_node{{0.25, 0.25, 0.25}};
+            return s_node;
+          }
+          case G::Pyramid:
+          {
+            static const Math::SpatialVector<Real> s_node{{0.375, 0.375, 0.25}};
+            return s_node;
+          }
+          case G::Wedge:
+          {
+            static const Math::SpatialVector<Real> s_node{
+              {Real(1) / Real(3), Real(1) / Real(3), 0.5}};
+            return s_node;
+          }
+          case G::Hexahedron:
+          {
+            static const Math::SpatialVector<Real> s_node{{0.5, 0.5, 0.5}};
+            return s_node;
+          }
+        }
+        assert(false);
+        static const Math::SpatialVector<Real> s_null{};
+        return s_null;
       }
-    };
 
-    constexpr P0gElement() = default;
-
-    /**
-     * @brief Constructs the P0gElement from the given arguments.
-     * @param geometry Reference geometry.
-     */
-    constexpr explicit P0gElement(G geometry)
-      : Parent(geometry)
-    {}
-
-    /**
-     * @brief Copy constructor.
-     * @param other Object to copy from.
-     */
-    constexpr P0gElement(const P0gElement& other) = default;
-
-    /**
-     * @brief Move constructor.
-     * @param other Object to move from.
-     */
-    constexpr P0gElement(P0gElement&& other)
-      : Parent(std::move(other))
-    {}
-
-    /**
-     * @brief Copy assignment.
-     * @param other Object to copy from.
-     * @returns Reference to this object after the operation.
-     */
-    constexpr P0gElement& operator=(const P0gElement& other)
-    {
-      Parent::operator=(other);
-      return *this;
-    }
-
-    constexpr ~P0gElement() override = default;
-
-    /**
-     * @brief Gets the number of degrees of freedom of the element.
-     * @returns The number of degrees of freedom of the element.
-     */
-    constexpr size_t getCount() const { return 1; }
-
-    /**
-     * @brief Gets the node of a local degree of freedom.
-     * @param i Index of the requested entry.
-     * @returns The node of a local degree of freedom.
-     */
-    const Math::SpatialVector<Real>& getNode(size_t i) const
-    {
-      assert(i == 0);
-      switch (this->getGeometry())
+      /**
+       * @brief Gets the degree-of-freedom functional of a local degree of freedom.
+       * @returns The degree-of-freedom functional of a local degree of freedom.
+       * @param local Local degree-of-freedom index; unused by this constant element.
+       */
+      constexpr LinearForm getLinearForm([[maybe_unused]] size_t local) const
       {
-        case G::Point:
-        {
-          static const Math::SpatialVector<Real> s_node{};
-          return s_node;
-        }
-        case G::Segment:
-        {
-          static const Math::SpatialVector<Real> s_node{ 0.5 };
-          return s_node;
-        }
-        case G::Triangle:
-        {
-          static const Math::SpatialVector<Real> s_node{
-            { Real(1) / Real(3), Real(1) / Real(3) }
-          };
-          return s_node;
-        }
-        case G::Quadrilateral:
-        {
-          static const Math::SpatialVector<Real> s_node{ { 0.5, 0.5 } };
-          return s_node;
-        }
-        case G::Tetrahedron:
-        {
-          static const Math::SpatialVector<Real> s_node{ { 0.25, 0.25, 0.25 } };
-          return s_node;
-        }
-        case G::Pyramid:
-        {
-          static const Math::SpatialVector<Real> s_node{{0.375, 0.375, 0.25}};
-          return s_node;
-        }
-        case G::Wedge:
-        {
-          static const Math::SpatialVector<Real> s_node{
-            { Real(1) / Real(3), Real(1) / Real(3), 0.5 }
-          };
-          return s_node;
-        }
-        case G::Hexahedron:
-        {
-          static const Math::SpatialVector<Real> s_node{ { 0.5, 0.5, 0.5 } };
-          return s_node;
-        }
+        return LinearForm(this->getGeometry());
       }
-      assert(false);
-      static const Math::SpatialVector<Real> s_null{};
-      return s_null;
-    }
 
-    /**
-     * @brief Gets the degree-of-freedom functional of a local degree of freedom.
-     * @returns The degree-of-freedom functional of a local degree of freedom.
-     * @param local Local degree-of-freedom index; unused by this constant element.
-     */
-    constexpr LinearForm getLinearForm([[maybe_unused]] size_t local) const
-    {
-      return LinearForm(this->getGeometry());
-    }
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @returns Value of the selected local basis function at the evaluation point.
+       * @param local Local degree-of-freedom index; unused by this constant element.
+       */
+      constexpr BasisFunction getBasis([[maybe_unused]] size_t local) const
+      {
+        return BasisFunction();
+      }
 
-    /**
-     * @brief Gets the basis function of a local degree of freedom.
-     * @returns Value of the selected local basis function at the evaluation point.
-     * @param local Local degree-of-freedom index; unused by this constant element.
-     */
-    constexpr BasisFunction getBasis([[maybe_unused]] size_t local) const
-    {
-      return BasisFunction();
-    }
-
-    /**
-     * @brief Returns the polynomial order.
-     * @returns Polynomial order of the finite element.
-     */
-    constexpr size_t getOrder() const { return 0; }
+      /**
+       * @brief Returns the polynomial order.
+       * @returns Polynomial order of the finite element.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 0;
+      }
   };
 
   // ----------------------------------------------------------------------------
@@ -309,299 +320,315 @@ namespace Rodin::Variational
   {
     using G = Geometry::Polytope::Type;
 
-  public:
-    /// @brief Parent class type.
-    using Parent = FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>;
-    /// @brief Scalar value type.
-    using ScalarType = Scalar;
-    /// @brief Range (evaluation value) type.
-    using RangeType = Math::SpatialVector<Scalar>;
-
-    /// @brief Degree-of-freedom functional of the vector-valued P0g element.
-    class LinearForm
-    {
     public:
-      constexpr LinearForm()
-        : m_vdim(0), m_local(0), m_g(G::Point)
-      {}
+      /// @brief Parent class type.
+      using Parent = FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>;
 
-      /**
-       * @brief Constructs the functional of a local degree of freedom.
-       * @param vdim Number of components in the value range.
-       * @param local Index in the local numbering.
-       * @param g Reference-cell geometry.
-       */
-      constexpr LinearForm(size_t vdim, size_t local, G g)
-        : m_vdim(vdim), m_local(local), m_g(g)
-      {}
+      /// @brief Scalar value type.
+      using ScalarType = Scalar;
 
-      /**
-       * @brief Copy constructor.
-       * @param other Object to copy from.
-       */
-      constexpr LinearForm(const LinearForm& other) = default;
+      /// @brief Range (evaluation value) type.
+      using RangeType = Math::SpatialVector<Scalar>;
 
-      /**
-       * @brief Applies the functional to a callable.
-       * @returns Value of the nodal functional applied to the selected component of the callable.
-       * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
-       */
-      template <class T>
-      ScalarType operator()(const T& v) const
+      /// @brief Degree-of-freedom functional of the vector-valued P0g element.
+      class LinearForm
       {
-        const auto& xi = P0gElement<ScalarType>(m_g).getNode(m_local / m_vdim);
-        const auto value = v(xi);
-        return value(static_cast<std::uint8_t>(m_local % m_vdim));
-      }
+        public:
+          constexpr LinearForm()
+            : m_vdim(0),
+              m_local(0),
+              m_g(G::Point)
+          {}
 
-    private:
-      const size_t m_vdim;
-      const size_t m_local;
-      const G m_g;
-    };
+          /**
+           * @brief Constructs the functional of a local degree of freedom.
+           * @param vdim Number of components in the value range.
+           * @param local Index in the local numbering.
+           * @param g Reference-cell geometry.
+           */
+          constexpr LinearForm(size_t vdim, size_t local, G g)
+            : m_vdim(vdim),
+              m_local(local),
+              m_g(g)
+          {}
 
-    /// @brief Basis function of the vector-valued P0g element.
-    class BasisFunction
-    {
-    public:
-      /// @brief Type returned by the callable.
-      using ReturnType = RangeType;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          constexpr LinearForm(const LinearForm& other) = default;
 
-      /// @brief Derivative of a vector-valued P0g basis function, identically zero.
-      template <size_t Order>
-      class DerivativeFunction
-      {
-      public:
-        /**
-         * @brief Constructs the derivative of a local basis function.
-         * @param i First differentiation direction; unused because the derivative is zero.
-         * @param j Second differentiation direction; unused because the derivative is zero.
-         * @param vdim Value-range dimension; unused because the derivative is zero.
-         * @param local Local basis index; unused because the derivative is zero.
-         * @param geometry Reference geometry; unused because the derivative is zero.
-         */
-        constexpr DerivativeFunction([[maybe_unused]] size_t i, [[maybe_unused]] size_t j,
-          [[maybe_unused]] size_t vdim, [[maybe_unused]] size_t local,
-          [[maybe_unused]] G geometry)
-        {}
-        /**
-         * @brief Copy constructor.
-         * @param other Object to copy from.
-         */
-        constexpr DerivativeFunction(const DerivativeFunction& other) = default;
+          /**
+           * @brief Applies the functional to a callable.
+           * @returns Value of the nodal functional applied to the selected component of the callable.
+           * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
+           */
+          template <class T>
+          ScalarType operator()(const T& v) const
+          {
+            const auto& xi = P0gElement<ScalarType>(m_g).getNode(m_local / m_vdim);
+            const auto value = v(xi);
+            return value(static_cast<std::uint8_t>(m_local % m_vdim));
+          }
 
-        /**
-         * @brief Evaluates at a point on the reference element.
-         * @returns Zero, since the basis function is constant.
-         * @param xi Reference coordinates; the constant result is independent of this argument.
-         */
-        constexpr ScalarType operator()(
-          [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
-        {
-          return ScalarType(0);
-        }
+        private:
+          const size_t m_vdim;
+          const size_t m_local;
+          const G m_g;
       };
 
-      constexpr BasisFunction()
-        : m_vdim(0), m_local(0), m_g(G::Point)
+      /// @brief Basis function of the vector-valued P0g element.
+      class BasisFunction
+      {
+        public:
+          /// @brief Type returned by the callable.
+          using ReturnType = RangeType;
+
+          /// @brief Derivative of a vector-valued P0g basis function, identically zero.
+          template <size_t Order>
+          class DerivativeFunction
+          {
+            public:
+              /**
+               * @brief Constructs the derivative of a local basis function.
+               * @param i First differentiation direction; unused because the derivative is zero.
+               * @param j Second differentiation direction; unused because the derivative is zero.
+               * @param vdim Value-range dimension; unused because the derivative is zero.
+               * @param local Local basis index; unused because the derivative is zero.
+               * @param geometry Reference geometry; unused because the derivative is zero.
+               */
+              constexpr DerivativeFunction([[maybe_unused]] size_t i,
+                [[maybe_unused]] size_t j, [[maybe_unused]] size_t vdim,
+                [[maybe_unused]] size_t local, [[maybe_unused]] G geometry)
+              {}
+
+              /**
+               * @brief Copy constructor.
+               * @param other Object to copy from.
+               */
+              constexpr DerivativeFunction(const DerivativeFunction& other) = default;
+
+              /**
+               * @brief Evaluates at a point on the reference element.
+               * @returns Zero, since the basis function is constant.
+               * @param xi Reference coordinates; the constant result is independent of this argument.
+               */
+              constexpr ScalarType operator()(
+                [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
+              {
+                return ScalarType(0);
+              }
+          };
+
+          constexpr BasisFunction()
+            : m_vdim(0),
+              m_local(0),
+              m_g(G::Point)
+          {}
+
+          /**
+           * @brief Constructs the basis function of a local degree of freedom.
+           * @param vdim Number of components in the value range.
+           * @param local Index in the local numbering.
+           * @param g Reference-cell geometry.
+           */
+          constexpr BasisFunction(size_t vdim, size_t local, G g)
+            : m_vdim(vdim),
+              m_local(local),
+              m_g(g)
+          {}
+
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          constexpr BasisFunction(const BasisFunction& other) = default;
+
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @returns Reference to the thread-local vector basis value, overwritten by the next evaluation in this thread.
+           * @param xi Reference coordinates; the constant result is independent of this argument.
+           */
+          const ReturnType& operator()(
+            [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
+          {
+            static thread_local ReturnType s_out;
+            s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
+            s_out.setZero();
+            s_out[static_cast<std::uint8_t>(m_local % m_vdim)] = ScalarType(1);
+            return s_out;
+          }
+
+          /**
+           * @brief Gets the derivative of the basis function.
+           * @param i Index of the requested entry.
+           * @param j Index of the second coordinate.
+           * @returns Reference-coordinate derivative function for the basis.
+           */
+          template <size_t Order>
+          constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+          {
+            return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
+          }
+
+        private:
+          const size_t m_vdim;
+          const size_t m_local;
+          const G m_g;
+      };
+
+      P0gElement()
+        : Parent(G::Point),
+          m_vdim(0)
       {}
 
       /**
-       * @brief Constructs the basis function of a local degree of freedom.
-       * @param vdim Number of components in the value range.
-       * @param local Index in the local numbering.
-       * @param g Reference-cell geometry.
+       * Backward-compatible: vdim defaults to spatial dimension of geometry
+       * @param geometry Reference geometry.
        */
-      constexpr BasisFunction(size_t vdim, size_t local, G g)
-        : m_vdim(vdim), m_local(local), m_g(g)
+      constexpr explicit P0gElement(G geometry)
+        : P0gElement(geometry, Geometry::Polytope::Traits(geometry).getDimension())
       {}
+
+      /**
+       * @brief Constructs the P0gElement from the given arguments.
+       * @param geometry Reference geometry.
+       * @param vdim Number of components in the value range.
+       */
+      constexpr P0gElement(G geometry, size_t vdim)
+        : Parent(geometry),
+          m_vdim(vdim)
+      {
+        const size_t count = getCount();
+        m_lfs.reserve(count);
+        m_bs.reserve(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+          m_lfs.emplace_back(vdim, i, geometry);
+          m_bs.emplace_back(vdim, i, geometry);
+        }
+      }
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr BasisFunction(const BasisFunction& other) = default;
+      constexpr P0gElement(const P0gElement& other)
+        : Parent(other),
+          m_vdim(other.m_vdim),
+          m_lfs(other.m_lfs),
+          m_bs(other.m_bs)
+      {}
 
       /**
-       * @brief Evaluates at a point on the reference element.
-       * @returns Reference to the thread-local vector basis value, overwritten by the next evaluation in this thread.
-       * @param xi Reference coordinates; the constant result is independent of this argument.
+       * @brief Move constructor.
+       * @param other Object to move from.
        */
-      const ReturnType& operator()(
-        [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
+      constexpr P0gElement(P0gElement&& other)
+        : Parent(std::move(other)),
+          m_vdim(std::exchange(other.m_vdim, 0)),
+          m_lfs(std::move(other.m_lfs)),
+          m_bs(std::move(other.m_bs))
+      {}
+
+      constexpr ~P0gElement() override = default;
+
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
+      constexpr P0gElement& operator=(const P0gElement& other)
       {
-        static thread_local ReturnType s_out;
-        s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
-        s_out.setZero();
-        s_out[static_cast<std::uint8_t>(m_local % m_vdim)] = ScalarType(1);
-        return s_out;
+        Parent::operator=(other);
+        m_vdim = other.m_vdim;
+        m_lfs = other.m_lfs;
+        m_bs = other.m_bs;
+        return *this;
       }
 
       /**
-       * @brief Gets the derivative of the basis function.
-       * @param i Index of the requested entry.
-       * @param j Index of the second coordinate.
-       * @returns Reference-coordinate derivative function for the basis.
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
-      template <size_t Order>
-      constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+      constexpr P0gElement& operator=(P0gElement&& other)
       {
-        return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
+        Parent::operator=(std::move(other));
+        m_vdim = std::exchange(other.m_vdim, 0);
+        m_lfs = std::move(other.m_lfs);
+        m_bs = std::move(other.m_bs);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the number of degrees of freedom of the element.
+       * @returns The number of degrees of freedom of the element.
+       */
+      constexpr size_t getCount() const
+      {
+        return m_vdim;
+      }
+
+      /**
+       * @brief Gets the degree-of-freedom functional of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns The degree-of-freedom functional of a local degree of freedom.
+       */
+      constexpr auto getLinearForm(size_t local) const
+      {
+        return m_lfs.at(local);
+      }
+
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      constexpr BasisFunction getBasis(size_t local) const
+      {
+        return m_bs.at(local);
+      }
+
+      /**
+       * @brief Gets the node of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns The node of a local degree of freedom.
+       */
+      constexpr const Math::SpatialVector<Real>& getNode(size_t local) const
+      {
+        // All components share the same barycentric node
+        return P0gElement<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
+      }
+
+      /**
+       * @brief Evaluates the integrand into the output argument.
+       * @param out Storage for the computed result.
+       * @param coefficient Coefficient multiplying the expression.
+       * @param xi Reference coordinates; the constant result is independent of this argument.
+       */
+      template <class Coefficient>
+      constexpr void evaluate(RangeType& out, Coefficient&& coefficient,
+        [[maybe_unused]] const Math::SpatialPoint& xi) const
+      {
+        out.resize(m_vdim);
+        for (size_t component = 0; component < m_vdim; ++component)
+          out(component) = coefficient(component);
+      }
+
+      /**
+       * @brief Returns the polynomial order.
+       * @returns Polynomial order of the finite element.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 0;
       }
 
     private:
-      const size_t m_vdim;
-      const size_t m_local;
-      const G m_g;
-    };
-
-    P0gElement()
-      : Parent(G::Point), m_vdim(0)
-    {}
-
-    /**
-     * Backward-compatible: vdim defaults to spatial dimension of geometry
-     * @param geometry Reference geometry.
-     */
-    constexpr explicit P0gElement(G geometry)
-      : P0gElement(geometry, Geometry::Polytope::Traits(geometry).getDimension())
-    {}
-
-    /**
-     * @brief Constructs the P0gElement from the given arguments.
-     * @param geometry Reference geometry.
-     * @param vdim Number of components in the value range.
-     */
-    constexpr P0gElement(G geometry, size_t vdim)
-      : Parent(geometry), m_vdim(vdim)
-    {
-      const size_t count = getCount();
-      m_lfs.reserve(count);
-      m_bs.reserve(count);
-      for (size_t i = 0; i < count; ++i)
-      {
-        m_lfs.emplace_back(vdim, i, geometry);
-        m_bs.emplace_back(vdim, i, geometry);
-      }
-    }
-
-    /**
-     * @brief Copy constructor.
-     * @param other Object to copy from.
-     */
-    constexpr P0gElement(const P0gElement& other)
-      : Parent(other)
-      , m_vdim(other.m_vdim)
-      , m_lfs(other.m_lfs)
-      , m_bs(other.m_bs)
-    {}
-
-    /**
-     * @brief Move constructor.
-     * @param other Object to move from.
-     */
-    constexpr P0gElement(P0gElement&& other)
-      : Parent(std::move(other))
-      , m_vdim(std::exchange(other.m_vdim, 0))
-      , m_lfs(std::move(other.m_lfs))
-      , m_bs(std::move(other.m_bs))
-    {}
-
-    constexpr ~P0gElement() override = default;
-
-    /**
-     * @brief Copy assignment.
-     * @param other Object to copy from.
-     * @returns Reference to this object after the operation.
-     */
-    constexpr P0gElement& operator=(const P0gElement& other)
-    {
-      Parent::operator=(other);
-      m_vdim = other.m_vdim;
-      m_lfs  = other.m_lfs;
-      m_bs   = other.m_bs;
-      return *this;
-    }
-
-    /**
-     * @brief Move assignment.
-     * @param other Object to move from.
-     * @returns Reference to this object after the operation.
-     */
-    constexpr P0gElement& operator=(P0gElement&& other)
-    {
-      Parent::operator=(std::move(other));
-      m_vdim = std::exchange(other.m_vdim, 0);
-      m_lfs  = std::move(other.m_lfs);
-      m_bs   = std::move(other.m_bs);
-      return *this;
-    }
-
-    /**
-     * @brief Gets the number of degrees of freedom of the element.
-     * @returns The number of degrees of freedom of the element.
-     */
-    constexpr size_t getCount() const
-    {
-      return m_vdim;
-    }
-
-    /**
-     * @brief Gets the degree-of-freedom functional of a local degree of freedom.
-     * @param local Index in the local numbering.
-     * @returns The degree-of-freedom functional of a local degree of freedom.
-     */
-    constexpr auto getLinearForm(size_t local) const
-    {
-      return m_lfs.at(local);
-    }
-
-    /**
-     * @brief Gets the basis function of a local degree of freedom.
-     * @param local Index in the local numbering.
-     * @returns Value of the selected local basis function at the evaluation point.
-     */
-    constexpr BasisFunction getBasis(size_t local) const
-    {
-      return m_bs.at(local);
-    }
-
-    /**
-     * @brief Gets the node of a local degree of freedom.
-     * @param local Index in the local numbering.
-     * @returns The node of a local degree of freedom.
-     */
-    constexpr const Math::SpatialVector<Real>& getNode(size_t local) const
-    {
-      // All components share the same barycentric node
-      return P0gElement<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
-    }
-
-    /**
-     * @brief Evaluates the integrand into the output argument.
-     * @param out Storage for the computed result.
-     * @param coefficient Coefficient multiplying the expression.
-     * @param xi Reference coordinates; the constant result is independent of this argument.
-     */
-    template <class Coefficient>
-    constexpr void evaluate(RangeType& out, Coefficient&& coefficient,
-      [[maybe_unused]] const Math::SpatialPoint& xi) const
-    {
-      out.resize(m_vdim);
-      for (size_t component = 0; component < m_vdim; ++component)
-        out(component) = coefficient(component);
-    }
-
-    /**
-     * @brief Returns the polynomial order.
-     * @returns Polynomial order of the finite element.
-     */
-    constexpr size_t getOrder() const { return 0; }
-
-  private:
-    size_t m_vdim;
-    std::vector<LinearForm>    m_lfs;
-    std::vector<BasisFunction> m_bs;
+      size_t m_vdim;
+      std::vector<LinearForm> m_lfs;
+      std::vector<BasisFunction> m_bs;
   };
 }
 
@@ -615,14 +642,19 @@ namespace Rodin::Variational
     public:
       /// @brief Scalar reference element for this family.
       using ScalarElement = P0gElement<Scalar>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<ScalarElement>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief CRTP or finite element base class.
       using Parent = FiniteElementBase<P0gElement<Math::SpatialMatrix<Scalar>>>;
+
       /// @brief Basis type of the underlying scalar element.
       using ScalarBasis = decltype(std::declval<ScalarElement>().getBasis(0));
+
       /// @brief Nodal functional type of the underlying scalar element.
       using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
 
@@ -640,16 +672,21 @@ namespace Rodin::Variational
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
-          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SpatialMatrix ranges require 1 to 3 rows and columns." << Alert::Raise;
+        }
       }
 
       /// @brief Copies the element and its component extents.
       P0gElement(const P0gElement&) = default;
+
       /// @brief Moves the element and its component extents.
       P0gElement(P0gElement&&) = default;
+
       /// @brief Copies the element and its component extents.
       P0gElement& operator=(const P0gElement&) = default;
+
       /// @brief Moves the element and its component extents.
       P0gElement& operator=(P0gElement&&) = default;
 
@@ -736,9 +773,11 @@ namespace Rodin::Variational
             return m_form([&](const Math::SpatialPoint& point) -> ScalarType {
               const auto value = function(point);
               if (value.rows() != m_rows || value.cols() != m_cols)
-                Alert::Exception()
+              {
+                Alert::MemberFunctionException(*this, __func__)
                   << "Matrix value does not match the finite element range."
                   << Alert::Raise;
+              }
               return value(m_component / m_cols, m_component % m_cols);
             });
           }
@@ -768,21 +807,25 @@ namespace Rodin::Variational
       {
         return m_scalar.getCount() * m_rows * m_cols;
       }
+
       /// @brief Returns the polynomial order when it is known.
       size_t getOrder() const
       {
         return m_scalar.getOrder();
       }
+
       /// @brief Returns the number of matrix rows.
       size_t getRows() const
       {
         return m_rows;
       }
+
       /// @brief Returns the number of matrix columns.
       size_t getColumns() const
       {
         return m_cols;
       }
+
       /// @brief Returns the scalar element whose basis is replicated for matrix entries.
       const ScalarElement& getScalarElement() const
       {

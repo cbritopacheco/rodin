@@ -24,7 +24,7 @@ $$
 n_p=\left\lceil\frac{p+1}{2}\right\rceil
 $$
 
-points. In integer arithmetic this is `(p + 2) / 2`.
+points. In integer arithmetic this is `p / 2 + 1`, avoiding overflow in the addition.
 
 ## Default dispatch
 
@@ -82,7 +82,7 @@ points than optimized tables.
 ## Runtime structure
 
 - `QuadratureFormulaBase` is the value-access interface: size, weight, point,
-  and polymorphic copy.
+  without polymorphic copying.
 - `XiaoGimbutas` and `WitherdenVincent` expose immutable tabulated rules.
 - `GaussLegendre` constructs one-dimensional Gaussian rules and the weighted
   conical products.
@@ -108,6 +108,13 @@ points than optimized tables.
 - `GrundmannMoller` remains an explicitly selectable simplex family. It is not
   a default because its weights are signed above degree one.
 - `PolytopeQuadratureFormula::build` constructs an owned formula.
+- Dispatcher construction uses the same family-selection implementation with
+  `make_shared`, combining the concrete generator and its ownership control block.
+  The public `build` operation retains unique ownership. With available FlatMap
+  capacity, publishing a one-point rule needs two allocations: the permanent
+  record and the shared generator. Other rules may also allocate sample arrays.
+  Cold dispatcher construction stays out of line where supported to avoid
+  adding register saves to the thread-local factory lookup.
 - `PolytopeQuadratureFormula::get` returns a canonical formula from a
   process-wide pool. An eight-entry thread-local cache serves repeated hot-path
   lookups without locking; cache misses enter the locked canonical pool.
@@ -121,18 +128,68 @@ calls still return mesh-owned, stable borrowed objects until geometry is
 flushed. Assembly does not evict these objects. Both lifetimes are
 backend-independent and introduce no MPI collective.
 
+Persistent APIs accept only `const QuadratureFormula&`, a final noncopyable,
+nonmovable value-access implementation. `QuadratureFormula::get<Family>(args...)`
+constructs the concrete family and its read-only interface together in one
+pool allocation outside its mutex, without copying reference samples, and
+publishes that record under a tuple key. Optional `getSamples()` views expose
+contiguous points and weights with a scalar stride (zero for uniform weights).
+Publication retains these views to avoid pointwise virtual dispatch; families
+without views retain ordinary pointwise access. Grundmann–Möller, Xiao–Gimbutas and Witherden–Vincent tables are
+retained throughout static destruction because published rules borrow them. Each family/key-type instantiation
+has its own shared FlatMap pool retained throughout static destruction. Integer
+and enum arguments are values; published-formula arguments use a private
+`Reference` containing a typed `pointer` and total pointer ordering. There are
+no per-family key specializations or identity methods. Argument value types
+matter; public family factories normalize orders/counts to `size_t`.
+
+The lookup capacity is `RODIN_QF_QUADRATUREFORMULA_LOOKUP_CAPACITY` (default eight,
+positive). Thread-local entries borrow shared published objects and require no
+lock. Shared map lookup/insertion require the pool mutex. Concurrent misses may
+build duplicate candidates but return the same retained object. Failed generation
+publishes nothing. Constructors must depend on their arguments and synchronize
+any shared state of their own; cyclic construction is unsupported.
+
+Mapped and basis caches use persistent formula addresses. A formula cannot be
+assigned, moved, destroyed with its producing thread, or reconstructed at a cached
+address. Local concrete generators implement `QuadratureFormulaBase` and remain
+usable by immediate `element.tabulate(table, generator)` operations, which retain
+no formula reference. IntegrationPoint construction from mapped quadrature
+establishes reference-chart association; raw point/formula/index construction
+records provenance without authorizing reference-table reuse.
+
 Mapped-quadrature construction prepares geometric Jacobians through the
 transformation's bulk `jacobian` overload. Parametric elements reuse their
-existing logical-identity reference tables, while generic transformations
+existing reference tables, while generic transformations
 retain the pointwise implementation. The resulting matrices belong to the
 mapped points; no borrowed reference-table storage escapes the bulk call.
 Temporary matrix storage is proportional to the current formula size, not
 the number of mesh cells. Copying or moving a point preserves its owned
 geometry, and rebinding it invalidates that geometry normally.
 
+`ReferenceTabulationCache<Element, Scalar>` owns the common bounded thread-local
+store used by scalar P1 and H1 elements. Each element type retains its own basis
+formulas and ordering, including the rational pyramid basis. The stored arrays
+contain only reference values and first derivatives; physical Jacobians are
+recomputed from each cell's control coordinates. The eight-entry eviction policy
+and persistent formula addresses apply equally to both element families. Warm
+hits compare the formula address and geometry without querying size or nodes;
+published immutability makes those queries redundant. Cold
+misses size and fill numerical storage before publishing an entry. The unit regressions
+count formula queries and verify that published samples remain stable across generator and producer-thread lifetimes, including real and complex H1 degrees one through six.
+
+Lookup and construction share one already obtained thread-local cache reference.
+The private formula search serves both public access operations; table filling
+and publication remain separate stages of this same owner. Replacement retires
+the selected entry's previous formula association before changing its storage and publishes
+the new formula association only after filling completes. Once replacement begins, the
+round-robin successor is selected before filling and is not rewound on failure.
+An interrupted fill therefore exposes neither formula association, while other entries remain
+unchanged. The regression checks these formula keys and exact surviving arrays.
+
 Physical-coordinate evaluation reuses the basis values from the same reference
 table without making coordinates eager. A mapped point owns its reference
-coordinates and stores only the formula identity and quadrature index. The
+coordinates and stores only a persistent formula pointer and quadrature index. The
 parametric transformation borrows a matching table during evaluation and
 accumulates
 
@@ -143,9 +200,9 @@ $$
 in the same local-basis order as direct evaluation. The table is never retained
 by the point. If the entry has been evicted or evaluation occurs on another
 thread, the direct map is evaluated at the owned reference coordinates instead.
-The identity is a logical lifetime/assignment identity, not a coordinate
-comparison or pointer-lifetime assumption. This preserves lazy evaluation for
-integrands that need Jacobians but not physical coordinates.
+The formula pointer remains valid until process termination. A missing table
+still selects direct evaluation, preserving lazy coordinates for integrands that
+need Jacobians but not physical coordinates.
 
 The Xiao--Gimbutas coefficients are taken from the authors' `triasymq`
 distribution. The Witherden--Vincent coefficients are taken from PyFR's

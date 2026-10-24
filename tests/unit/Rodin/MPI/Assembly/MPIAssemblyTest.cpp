@@ -105,8 +105,10 @@ namespace
     {
       auto localMesh = makeShardableMesh(type, shape);
       if (physicalBoundary)
+      {
         for (auto face = localMesh.getBoundary(); face; ++face)
           physicalBoundary->push_back(face->getIndex());
+      }
       BalancedCompactPartitioner partitioner(localMesh);
       partitioner.partition(static_cast<size_t>(comm.size()));
       sharder.shard(partitioner);
@@ -130,8 +132,10 @@ namespace
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
       if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
+      {
         for (Index dof : fes.getDOFs(mesh.getDimension(), cell->getIndex()))
           result.insert(dof);
+      }
     }
     return result;
   }
@@ -270,11 +274,15 @@ namespace Rodin::Tests::Unit
         if constexpr (scalar)
           check(H1<K, Range, decltype(mesh)>(std::integral_constant<size_t, K>{}, mesh));
         else if constexpr (matrix)
+        {
           check(H1<K, Range, decltype(mesh)>(
             std::integral_constant<size_t, K>{}, mesh, 2, 3));
+        }
         else
+        {
           check(
             H1<K, Range, decltype(mesh)>(std::integral_constant<size_t, K>{}, mesh, 3));
+        }
       };
       order.template operator()<1>();
       order.template operator()<2>();
@@ -545,6 +553,7 @@ namespace Rodin::Tests::Unit
       }();
       const auto exact = [&] {
         if constexpr (matrix)
+        {
           return MatrixFunction(size_t{2}, size_t{3}, [first](const Point&) {
             Math::SpatialMatrix<Scalar> value(2, 3);
             for (size_t r = 0; r < 2; ++r)
@@ -554,11 +563,14 @@ namespace Rodin::Tests::Unit
             }
             return value;
           });
+        }
         else if constexpr (vector)
+        {
           return VectorFunction(size_t{3}, [first](const Point&) {
             return Math::SpatialVector<Scalar>{
               first, first + Scalar(1), first + Scalar(2)};
           });
+        }
         else if constexpr (std::is_same_v<Scalar, Complex>)
           return ComplexFunction(first);
         else
@@ -588,8 +600,10 @@ namespace Rodin::Tests::Unit
           }
         }
         else if constexpr (vector)
+        {
           for (size_t component = 0; component < count; ++component)
             EXPECT_EQ(value(component), first + Scalar(component));
+        }
         else
           EXPECT_EQ(value, first);
       }
@@ -628,6 +642,7 @@ namespace Rodin::Tests::Unit
       };
       const auto affine = [&] {
         if constexpr (matrix)
+        {
           return MatrixFunction(size_t{2}, size_t{3}, [scalarTrace](const Point& point) {
             const Scalar base = scalarTrace(point);
             Math::SpatialMatrix<Scalar> value(2, 3);
@@ -638,11 +653,14 @@ namespace Rodin::Tests::Unit
             }
             return value;
           });
+        }
         else if constexpr (vector)
+        {
           return VectorFunction(size_t{3}, [scalarTrace](const Point& point) {
             const Scalar base = scalarTrace(point);
             return Math::SpatialVector<Scalar>{base, base + Scalar(1), base + Scalar(2)};
           });
+        }
         else if constexpr (std::is_same_v<Scalar, Complex>)
           return ComplexFunction(scalarTrace);
         else
@@ -671,8 +689,10 @@ namespace Rodin::Tests::Unit
             }
           }
           else if constexpr (vector)
+          {
             for (size_t component = 0; component < count; ++component)
               EXPECT_EQ(actual(component), expected(component));
+          }
           else
             EXPECT_EQ(actual, expected);
         }
@@ -768,8 +788,10 @@ namespace Rodin::Tests::Unit
         {
           EXPECT_LT(cell->getIndex(), cellParents.size());
           if (cell->getIndex() < cellParents.size())
+          {
             actualParents.push_back(immediateParent.getGlobalIndex(
               subDimension, cellParents[cell->getIndex()]));
+          }
         }
       }
       using Selection = std::pair<std::vector<Index>, std::vector<Index>>;
@@ -835,8 +857,10 @@ namespace Rodin::Tests::Unit
           const auto& ancestors = sub.getPolytopeMap(d).left;
           EXPECT_LT(entity, ancestors.size());
           if (entity < ancestors.size())
+          {
             ancestry.emplace_back(
               global, immediateParent.getGlobalIndex(d, ancestors[entity]));
+          }
           if (mesh.getShard().isOwned(d, entity))
             owned.push_back(global);
         }
@@ -943,8 +967,10 @@ namespace Rodin::Tests::Unit
         for (Index local = 0; local < space.getShard().getSize(); ++local)
         {
           if constexpr (requires { space.getLocalIndex(Index{}); })
+          {
             EXPECT_EQ(
               space.getLocalIndex(space.getGlobalIndex(local)), Optional<Index>(local));
+          }
           else
             // P0g has a replicated constant view, not a local inverse-map API.
             EXPECT_EQ(space.getGlobalIndex(local), local);
@@ -1436,11 +1462,13 @@ namespace Rodin::Tests::Unit
       {
         if (physical.contains(
               mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
+        {
           for (Index dof : fes.getDOFs(D - 1, face->getIndex()))
           {
             if (required.contains(dof))
               expected.insert(dof);
           }
+        }
       }
       EXPECT_EQ(values.size(), expected.size());
       for (Index dof : expected)
@@ -1603,11 +1631,13 @@ namespace Rodin::Tests::Unit
       {
         if (physical.contains(
               mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
+        {
           for (Index dof : fes.getDOFs(D - 1, face->getIndex()))
           {
             if (required.contains(dof))
               expected.insert(dof);
           }
+        }
       }
       if constexpr (std::is_same_v<typename Space::ElementType,
                       P0gElement<typename Space::RangeType>>)
@@ -1711,8 +1741,10 @@ namespace Rodin::Tests::Unit
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
         if (shard.isOwned(dim, cell->getIndex()))
+        {
           for (Index dof : space.getDOFs(dim, cell->getIndex()))
             required.insert(dof);
+        }
       }
 
       size_t falseFaces = 0, relevantFalseFaces = 0;
@@ -1767,10 +1799,12 @@ namespace Rodin::Tests::Unit
       const size_t globalFalse =
         boost::mpi::all_reduce(*g_world, falseFaces, std::plus<size_t>());
       if (g_world->rank() == 0)
+      {
         std::cout << "[halo-audit] " << polytopeName(GetParam()) << ' ' << name
                   << " missing incidences=" << globalMissing
                   << " DOFs missed by owned-face filter=" << globalFiltered
                   << " artificial shard-boundary faces=" << globalFalse << '\n';
+      }
     };
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     probe(p1, "P1");
@@ -2029,8 +2063,10 @@ namespace Rodin::Tests::Unit
       {
         if (mesh.getShard().isOwned(1, face->getIndex()) &&
           face->getAttribute() == selected)
+        {
           for (Index dof : fes.getDOFs(1, face->getIndex()))
             local.push_back(dof);
+        }
       }
       std::vector<std::vector<Index>> gathered;
       boost::mpi::all_gather(*g_world, local, gathered);

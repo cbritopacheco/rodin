@@ -1079,6 +1079,7 @@ class QuadraticShear : public PolytopeTransformation
       j(1, 0) = 4 - 8 * r[0];
       j(1, 1) = 1;
     }
+
     /// Counts dependency calls without altering the fixture map.
     mutable size_t jacobianCalls = 0;
 
@@ -1298,4 +1299,102 @@ TEST(Location_AABB, ProjectionPruningIsOptIn)
   locator.setProjectionPruning(false);
   ASSERT_TRUE(locator.locate(x).has_value());
   EXPECT_EQ(transformation.jacobianCalls, 0u);
+}
+
+/// @brief Near-boundary acceptance returns clipped, contained reference coordinates on every cell family.
+TEST(Location_AABB, ClipsReferenceBoundariesAcrossAllCellGeometries)
+{
+  constexpr Real displacement = 1e-9;
+  constexpr Real physicalTolerance = 1e-8;
+  constexpr Real referenceTolerance = 1e-7;
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const Polytope::Traits traits(geometry);
+    const size_t dimension = traits.getDimension();
+    LocalMesh::Builder builder;
+    builder.initialize(dimension).nodes(traits.getVertexCount());
+    IndexArray vertices(traits.getVertexCount());
+    for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+    {
+      builder.vertex(traits.getVertex(vertex));
+      vertices[vertex] = vertex;
+    }
+    builder.polytope(geometry, vertices);
+    auto mesh = builder.finalize();
+    AABB locator(mesh);
+    locator.setTolerance(physicalTolerance).setReferenceTolerance(referenceTolerance);
+    const auto cell = mesh.getCell(0);
+    auto verify = [&](const Math::SpatialPoint& outside,
+                    const Math::SpatialPoint& expected) {
+      Math::SpatialPoint physical;
+      cell->getTransformation().transform(physical, outside);
+      const auto located = locator.locate(dimension, physical);
+      ASSERT_TRUE(located);
+      const auto& reference = located->getReferenceCoordinates();
+      EXPECT_LT((reference - expected).norm(), 1e-12);
+      const auto& halfSpace = traits.getHalfSpace();
+      for (Eigen::Index plane = 0; plane < halfSpace.vector.size(); ++plane)
+      {
+        EXPECT_GE(halfSpace.vector[plane] -
+            reference.dot(halfSpace.matrix.row(plane).transpose()),
+          -1e-14);
+      }
+      Math::SpatialPoint mapped;
+      cell->getTransformation().transform(mapped, reference);
+      EXPECT_LE(
+        (mapped - physical).norm(), physicalTolerance * std::sqrt(Real(dimension)));
+    };
+    auto below = traits.getCentroid();
+    below[0] = -displacement;
+    auto clipped = below;
+    clipped[0] = 0;
+    verify(below, clipped);
+    auto above = traits.getCentroid();
+    if (geometry == Polytope::Type::Triangle || geometry == Polytope::Type::Tetrahedron ||
+      geometry == Polytope::Type::Wedge)
+    {
+      const size_t simplexDimension = geometry == Polytope::Type::Tetrahedron ? 3 : 2;
+      Real sum = 0;
+      for (size_t axis = 0; axis < simplexDimension; ++axis)
+        sum += above[axis];
+      for (size_t axis = 0; axis < simplexDimension; ++axis)
+        above[axis] *= (1 + displacement) / sum;
+      clipped = above;
+      for (size_t axis = 0; axis < simplexDimension; ++axis)
+        clipped[axis] /= 1 + displacement;
+    }
+    else if (geometry == Polytope::Type::Pyramid)
+    {
+      above[0] = 1 - above[2] + displacement;
+      clipped = above;
+      clipped[0] = 1 - above[2];
+    }
+    else
+    {
+      above[0] = 1 + displacement;
+      clipped = above;
+      clipped[0] = 1;
+    }
+    verify(above, clipped);
+    if (geometry == Polytope::Type::Wedge || geometry == Polytope::Type::Pyramid)
+    {
+      above = traits.getCentroid();
+      above[2] = 1 + displacement;
+      if (geometry == Polytope::Type::Pyramid)
+      {
+        above[0] = 0;
+        above[1] = 0;
+      }
+      clipped = above;
+      clipped[2] = 1;
+      verify(above, clipped);
+    }
+    below[0] = -referenceTolerance * 10;
+    Math::SpatialPoint farOutside;
+    cell->getTransformation().transform(farOutside, below);
+    EXPECT_FALSE(locator.locate(dimension, farOutside));
+  }
 }

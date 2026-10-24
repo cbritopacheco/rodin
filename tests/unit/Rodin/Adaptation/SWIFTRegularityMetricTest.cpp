@@ -208,3 +208,93 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric,
     EXPECT_LT((matrix - h * reference).norm(), Real(1e-12) * reference.norm());
   }
 }
+
+/// @brief Curved reference geometry does not change the zero energy of constant current strain.
+TEST(Rodin_Adaptation_SWIFTRegularityMetric, CurvedGeometryWithLowerOrderDisplacement)
+{
+  const auto check = []<size_t Degree>(
+                       Polytope::Type geometry, Real curvature, Real motion) {
+    auto mesh = [&] {
+      if (geometry == Polytope::Type::Triangle)
+      {
+        return LocalMesh::Builder()
+          .initialize(2)
+          .nodes(3)
+          .vertex({0, 0})
+          .vertex({1 + curvature, 0})
+          .vertex({0, 1})
+          .polytope(geometry, {0, 1, 2})
+          .finalize();
+      }
+      return LocalMesh::Builder()
+        .initialize(2)
+        .nodes(4)
+        .vertex({0, 0})
+        .vertex({1 + curvature, 0})
+        .vertex({1 + curvature, 1})
+        .vertex({0, 1})
+        .polytope(geometry, {0, 1, 2, 3})
+        .finalize();
+    }();
+    for (size_t from = 1; from <= 2; ++from)
+    {
+      for (size_t to = 0; to <= 2; ++to)
+      {
+        if (from != to)
+          mesh.getConnectivity().compute(from, to);
+      }
+    }
+    RealH1Element<2> element(geometry);
+    PointCloud nodes(2, element.getCount());
+    for (size_t local = 0; local < element.getCount(); ++local)
+    {
+      const auto r = element.getNode(local);
+      nodes(0, local) = r[0] + curvature * r[0] * r[0];
+      nodes(1, local) = r[1];
+    }
+    mesh.setPolytopeTransformation({2, 0},
+      new ParametricTransformation<RealH1Element<2>>(
+        std::move(nodes), std::move(element)));
+    auto space = [&] {
+      if constexpr (Degree == 1)
+        return P1<Math::SpatialVector<Real>>(mesh, 2);
+      else
+      {
+        return H1<Degree, Math::SpatialVector<Real>>(
+          std::integral_constant<size_t, Degree>{}, mesh, 2);
+      }
+    }();
+    TrialFunction trial(space);
+    TestFunction test(space);
+    GridFunction current(space), field(space);
+    current = VectorFunction(size_t(2),
+      [motion](const Point& p) { return Math::SpatialVector<Real>{0, motion * p.y()}; });
+    field = VectorFunction(
+      size_t(2), [](const Point& p) { return Math::SpatialVector<Real>{0, p.y()}; });
+    const Adaptation::SWIFT::Distribution distribution(trial, test, current, 1, 1, 12);
+    BilinearForm core(trial, test);
+    core = distribution;
+    core.assemble();
+    const auto coupling = distribution.getCentering();
+    Math::Matrix<Real> matrix = core.getOperator();
+    const auto coefficients = field.getData().eval();
+    const Real volume =
+      geometry == Polytope::Type::Triangle ? Real(0.5) + curvature / 3 : 1 + curvature;
+    EXPECT_NEAR(coefficients.dot(matrix * coefficients), volume / (1 + motion), 3e-12);
+    matrix -= coupling * coupling.transpose();
+    EXPECT_NEAR(coefficients.dot(matrix * coefficients), 0, 5e-12);
+    const Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigenvalues(matrix);
+    EXPECT_GT(eigenvalues.eigenvalues().minCoeff(), -1e-11);
+  };
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+  {
+    for (const Real curvature : {Real(-0.4), Real(1)})
+    {
+      for (const Real motion : {Real(0), Real(0.2)})
+      {
+        check.template operator()<1>(geometry, curvature, motion);
+        check.template operator()<2>(geometry, curvature, motion);
+      }
+    }
+  }
+}

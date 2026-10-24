@@ -74,3 +74,11 @@ part of the assembly contract (the regression tests above pin it).
 Note: further PETSc-backed adaptation solvers (e.g. for SWIFT in 3D)
 live on the `module/Adaptation` lineage, not on `develop` — verify
 presence before citing them.
+
+## Grid-function write completion
+
+Mutable `sync()` completes coefficient writes and refreshes ghosts under its
+existing collective contract. Const synchronization releases read access only;
+it diagnoses pending writes instead of committing them. A caller borrowing a
+const grid function must first complete writes through the mutable owner.
+Mutable reductions synchronize before delegating to read-only reductions.

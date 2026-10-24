@@ -64,10 +64,11 @@ namespace Rodin::QF
    */
   class GaussLegendre final : public QuadratureFormulaBase
   {
-      /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
-      static constexpr size_t DefaultRootMaxIterations = 100;
-      /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
-      static constexpr Real DefaultRootTolerance = 1e-14;
+    /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
+    static constexpr size_t DefaultRootMaxIterations = 100;
+
+    /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
+    static constexpr Real DefaultRootTolerance = 1e-14;
 
     public:
       /**
@@ -140,7 +141,6 @@ namespace Rodin::QF
           m_ny(order),
           m_nz(order)
       {
-        assert(order >= 1);
         build();
       }
 
@@ -159,7 +159,6 @@ namespace Rodin::QF
           m_ny(ny),
           m_nz(1)
       {
-        assert(nx >= 1 && ny >= 1);
         build();
       }
 
@@ -179,7 +178,6 @@ namespace Rodin::QF
           m_ny(nv),
           m_nz(nw)
       {
-        assert(nu >= 1 && nv >= 1 && nw >= 1);
         build();
       }
 
@@ -206,6 +204,12 @@ namespace Rodin::QF
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_weights.data(), 1};
       }
 
       /**
@@ -243,7 +247,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GaussLegendre instance
        */
-      GaussLegendre* copy() const noexcept override
+      GaussLegendre* copy() const noexcept
       {
         return new GaussLegendre(*this);
       }
@@ -252,7 +256,12 @@ namespace Rodin::QF
       /// @brief Builds the quadrature rule for the selected geometry.
       void build();
 
-      /// @brief Builds quadrature for a point (0D).
+      /**
+       * @brief Builds the unit-mass rule on a zero-dimensional point.
+       *
+       * The single reference sample is the empty tuple in
+       * @f$\mathbb{R}^0@f$, with weight one.
+       */
       void buildPoint();
 
       /**
@@ -285,10 +294,11 @@ namespace Rodin::QF
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a wedge (prism).
-       * @param ntri Number of points for the triangular cross-section
+       * @param nx Number of points in the first collapsed triangle direction
+       * @param ny Number of points in the second collapsed triangle direction
        * @param nz Number of points in the extrusion direction
        */
-      void buildWedge(size_t ntri, size_t nz);
+      void buildWedge(size_t nx, size_t ny, size_t nz);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a pyramid.

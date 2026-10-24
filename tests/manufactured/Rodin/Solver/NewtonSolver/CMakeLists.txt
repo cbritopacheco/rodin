@@ -7,7 +7,7 @@ target_link_libraries(RodinManufacturedNewtonSolverDenseMatrix
   Rodin::Rodin
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedNewtonSolverDenseMatrix
+rodin_discover_tests(RodinManufacturedNewtonSolverDenseMatrix
   PROPERTIES
     LABELS manufactured
 )
@@ -21,7 +21,7 @@ target_link_libraries(RodinManufacturedNewtonSolverSparseMatrix
   Rodin::Rodin
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedNewtonSolverSparseMatrix
+rodin_discover_tests(RodinManufacturedNewtonSolverSparseMatrix
   PROPERTIES
     LABELS manufactured
 )

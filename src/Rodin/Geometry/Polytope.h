@@ -96,14 +96,19 @@ namespace Rodin::Geometry
 
           /// @brief Iterator over the vertex indices.
           using iterator = Vertices::iterator;
+
           /// @brief Const iterator over the vertex indices.
           using const_iterator = Vertices::const_iterator;
+
           /// @brief Element type (a vertex index).
           using value_type = Index;
+
           /// @brief Reference to a vertex index.
           using reference = Index&;
+
           /// @brief Const reference to a vertex index.
           using const_reference = const Index&;
+
           /// @brief Type used for the vertex count.
           using size_type = std::uint8_t;
 
@@ -116,13 +121,13 @@ namespace Rodin::Geometry
            */
           struct SymmetricEquality
           {
-              /**
-               * @brief Returns whether two keys have the same vertex multiset.
-               * @returns Reference to this object after the operation.
-               * @param a First key.
-               * @param b Second key.
-               */
-              bool operator()(const Key& a, const Key& b) const;
+            /**
+             * @brief Returns whether two keys have the same vertex multiset.
+             * @returns Reference to this object after the operation.
+             * @param a First key.
+             * @param b Second key.
+             */
+            bool operator()(const Key& a, const Key& b) const;
           };
 
           /**
@@ -134,12 +139,12 @@ namespace Rodin::Geometry
            */
           struct SymmetricHash
           {
-              /**
-               * @brief Returns an order-independent hash of the key's vertices.
-               * @param poly Mesh entity used by this operation.
-               * @returns Reference to this object after the operation.
-               */
-              std::size_t operator()(const Key& poly) const;
+            /**
+             * @brief Returns an order-independent hash of the key's vertices.
+             * @param poly Mesh entity used by this operation.
+             * @returns Reference to this object after the operation.
+             */
+            std::size_t operator()(const Key& poly) const;
           };
 
           /**
@@ -147,8 +152,7 @@ namespace Rodin::Geometry
            * @param x Integer state to mix.
            * @returns Mixed 64-bit hash value.
            */
-          constexpr
-          static inline std::uint64_t sm64(std::uint64_t x)
+          constexpr static inline std::uint64_t sm64(std::uint64_t x)
           {
             // Fixed SplitMix64 increment and avalanche parameters. These define
             // the bit mixer; they are not numerical tolerances or tuning knobs.
@@ -170,8 +174,7 @@ namespace Rodin::Geometry
            * @param a Index updated by the conditional swap.
            * @param b Index updated by the conditional swap.
            */
-          constexpr
-          static inline void cswap(Index& a, Index& b)
+          constexpr static inline void cswap(Index& a, Index& b)
           {
             if (b < a)
               std::swap(a, b);
@@ -289,21 +292,21 @@ namespace Rodin::Geometry
        */
       enum class Type
       {
-        Point,          ///< 0D vertex element
-        Segment,        ///< 1D line element
-        Triangle,       ///< 2D triangular element
-        Quadrilateral,  ///< 2D quadrilateral element
-        Tetrahedron,    ///< 3D tetrahedral element
+        Point, ///< 0D vertex element
+        Segment, ///< 1D line element
+        Triangle, ///< 2D triangular element
+        Quadrilateral, ///< 2D quadrilateral element
+        Tetrahedron, ///< 3D tetrahedral element
         Pyramid, ///< 3D pyramidal element (quadrilateral base)
-        Hexahedron,     ///< 3D hexahedral element
-        Wedge           ///< 3D prismatic element (triangular prism)
+        Hexahedron, ///< 3D hexahedral element
+        Wedge ///< 3D prismatic element (triangular prism)
       };
 
       /**
        * @brief Projection operations for polytope sub-entities.
        *
-       * Provides methods to project points from one polytope's reference
-       * coordinates to another (e.g., from a face to its parent cell).
+       * Returns points on the requested reference-cell sub-entity in the
+       * parent reference coordinates; points already on it remain fixed.
        */
       struct Project
       {
@@ -334,7 +337,8 @@ namespace Rodin::Geometry
            * @param[out] out Output coordinates
            * @param[in] rc Reference coordinates
            */
-          void face(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void face(
+            size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
 
           /**
            * @brief Projects to a specific vertex.
@@ -342,7 +346,9 @@ namespace Rodin::Geometry
            * @param[out] out Output coordinates
            * @param[in] rc Reference coordinates
            */
-          void vertex(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+          void vertex(
+            size_t local, Math::SpatialPoint& out, const Math::SpatialPoint& rc) const;
+
         private:
           const Type m_g;
       };
@@ -439,7 +445,9 @@ namespace Rodin::Geometry
        * @param[in] mesh Reference to the containing mesh
        */
       Polytope(size_t dimension, Index index, const MeshBase& mesh)
-        : m_dimension(dimension), m_index(index), m_mesh(mesh)
+        : m_dimension(dimension),
+          m_index(index),
+          m_mesh(mesh)
       {}
 
       /**
@@ -540,7 +548,7 @@ namespace Rodin::Geometry
        *
        * | Dimension | Measure    |
        * |-----------|------------|
-       * | 0         | Always 0   |
+       * | 0         | Always 1   |
        * | 1         | Length     |
        * | 2         | Area       |
        * | 3         | Volume     |
@@ -548,6 +556,18 @@ namespace Rodin::Geometry
        * @returns The measure (length/area/volume) of the polytope
        */
       Real getMeasure() const;
+
+      /**
+       * @brief Integrates geometric measure with an explicitly selected quadrature order.
+       * @param order Reference polynomial degree requested from the quadrature dispatcher.
+       * @returns The integral of the positive geometric distortion.
+       *
+       * The default overload integrates the determinant degree on regular
+       * polynomial volume maps. Embedded and rational maps generally have
+       * nonpolynomial distortion; their default uses a conservative order
+       * policy, while this overload permits explicit accuracy studies.
+       */
+      Real getMeasure(size_t order) const;
 
       /**
        * @brief Gets the geometric transformation for this polytope.
@@ -614,7 +634,7 @@ namespace Rodin::Geometry
        * @param[in] qf Quadrature formula
        * @returns Cached quadrature for this polytope.
        */
-      const PolytopeQuadrature& getQuadrature(const QF::QuadratureFormulaBase& qf) const;
+      const PolytopeQuadrature& getQuadrature(const QF::QuadratureFormula& qf) const;
 
     private:
       size_t m_dimension;
@@ -679,7 +699,7 @@ namespace Rodin::Geometry
        * @param other Object to move from.
        */
       Cell(Cell&& other)
-        :  Polytope(std::move(other))
+        : Polytope(std::move(other))
       {}
   };
 
@@ -824,8 +844,7 @@ namespace Rodin::Geometry
        * @brief Gets the geometry type (always Point for vertices).
        * @returns Polytope::Type::Point
        */
-      constexpr
-      Type getGeometry() const
+      constexpr Type getGeometry() const
       {
         return Type::Point;
       }

@@ -174,7 +174,8 @@ namespace Rodin::Variational
       PeriodicBC(const PeriodicBC& other)
         : Parent(other),
           m_u(other.m_u),
-          m_adjacency(other.m_adjacency)
+          m_adjacency(other.m_adjacency),
+          m_dofs(other.m_dofs)
       {}
 
       /**
@@ -184,7 +185,8 @@ namespace Rodin::Variational
       PeriodicBC(PeriodicBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_adjacency(std::move(other.m_adjacency))
+          m_adjacency(std::move(other.m_adjacency)),
+          m_dofs(std::move(other.m_dofs))
       {}
 
       /**
@@ -202,8 +204,9 @@ namespace Rodin::Variational
           for (const auto& child : v)
             dofs.coeffRef(i++) = child;
           Math::Vector<ScalarType> coeffs(v.size());
+          coeffs.setOnes();
           coeffs.array() /= v.size();
-          m_dofs.emplace(k, std::pair{ std::move(dofs), std::move(coeffs) });
+          m_dofs.emplace(k, std::pair{std::move(dofs), std::move(coeffs)});
         }
       }
 

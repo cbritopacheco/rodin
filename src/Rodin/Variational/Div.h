@@ -27,6 +27,9 @@
 #ifndef RODIN_VARIATIONAL_DIV_H
 #define RODIN_VARIATIONAL_DIV_H
 
+#include "Rodin/Utility/OptionalReference.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Grad.h"
 
@@ -40,22 +43,22 @@
 namespace Rodin::Variational
 {
   /**
-    * @defgroup DivSpecializations Div Template Specializations
-    * @brief Template specializations of the Div class.
-    * @see @ref Div
-    *
-    * | Specialization | Description |
-    * |----------------|-------------|
+   * @defgroup DivSpecializations Div Template Specializations
+   * @brief Template specializations of the Div class.
+   * @see @ref Div
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
    * | @ref Div "Div<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
    * | @ref Div "Div<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
-    * | @ref DivBase "DivBase<GridFunction<FES, Data>, Derived>" | Generic divergence base for vector-valued grid functions. |
-    * | @ref Div "Div<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Divergence of a discontinuous P0g grid function. |
-    * | @ref Div "Div<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Divergence of a P0g shape-function expression. |
-    * | @ref Div "Div<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Divergence of an H1 grid function. |
-    * | @ref Div "Div<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Divergence of an H1 shape-function expression. |
-    * | @ref Div "Div<P1<Scalar, Mesh>, GridFunction<P1<Scalar, Mesh>, Data>>" | Divergence of a P1 grid function. |
-    * | @ref Div "Div<P1<Scalar, Mesh>, ShapeFunction<NestedDerived, P1<Scalar, Mesh>, Space>>" | Divergence of a P1 shape-function expression. |
-    */
+   * | @ref DivBase "DivBase<GridFunction<FES, Data>, Derived>" | Generic divergence base for vector-valued grid functions. |
+   * | @ref Div "Div<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Divergence of a discontinuous P0g grid function. |
+   * | @ref Div "Div<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Divergence of a P0g shape-function expression. |
+   * | @ref Div "Div<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Divergence of an H1 grid function. |
+   * | @ref Div "Div<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Divergence of an H1 shape-function expression. |
+   * | @ref Div "Div<P1<Scalar, Mesh>, GridFunction<P1<Scalar, Mesh>, Data>>" | Divergence of a P1 grid function. |
+   * | @ref Div "Div<P1<Scalar, Mesh>, ShapeFunction<NestedDerived, P1<Scalar, Mesh>, Space>>" | Divergence of a P1 shape-function expression. |
+   */
 
   /**
    * @ingroup RodinVariational
@@ -76,7 +79,8 @@ namespace Rodin::Variational
    */
   template <class FES, class Data, class Derived>
   class DivBase<GridFunction<FES, Data>, Derived>
-    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES, Data>, Derived>>
+    : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType,
+        DivBase<GridFunction<FES, Data>, Derived>>
   {
     public:
       /// @brief Finite element space type.
@@ -146,11 +150,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -186,11 +198,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -199,8 +219,7 @@ namespace Rodin::Variational
        * @brief Gets the operand grid function.
        * @return Reference to the vector-valued grid function
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -213,8 +232,7 @@ namespace Rodin::Variational
        * This virtual function is overridden in derived classes (e.g., P1::Div)
        * to provide finite element-specific divergence computation.
        */
-      constexpr
-      void interpolate(ScalarType& out, const Geometry::Point& p) const
+      constexpr void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
@@ -224,10 +242,10 @@ namespace Rodin::Variational
        * @param out Storage for the computed result.
        * @param ip Integration point at which the expression is evaluated.
        */
-      constexpr
-      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      constexpr void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, ScalarType& r, const IntegrationPoint& q) { f.interpolate(r, q); })
+        if constexpr (requires(const Derived& f, ScalarType& r,
+                        const IntegrationPoint& q) { f.interpolate(r, q); })
           static_cast<const Derived&>(*this).interpolate(out, ip);
         else
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
@@ -264,26 +282,32 @@ namespace Rodin::FormLanguage
     requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
   struct Traits<Variational::Div<Variational::GridFunction<FES, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = typename Traits<FES>::ScalarType;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialVector<ScalarType>;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = typename Traits<FES>::ScalarType;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialVector<ScalarType>;
   };
+
   /// @brief Type traits for the matrix or tensor expression specialization.
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
     requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
   struct Traits<Variational::Div<Variational::ShapeFunction<Derived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = typename Traits<FES>::ScalarType;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialVector<ScalarType>;
-      /// @brief Trial or test shape-function space.
-      static constexpr auto SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = typename Traits<FES>::ScalarType;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialVector<ScalarType>;
+
+    /// @brief Trial or test shape-function space.
+    static constexpr auto SpaceType = Space;
   };
 }
 namespace Rodin::Variational
@@ -301,12 +325,16 @@ namespace Rodin::Variational
     public:
       /// @brief CRTP or finite element base class.
       using Parent = FunctionBase<Div>;
+
       /// @brief Cloned or referenced expression operand type.
       using OperandType = GridFunction<FES, Data>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialVector<ScalarType>;
+
       /**
        * @brief Constructs row-wise divergence of a matrix field.
        * @param operand Operand expression.
@@ -314,6 +342,7 @@ namespace Rodin::Variational
       Div(const OperandType& operand)
         : m_gradient(operand)
       {}
+
       /**
        * @brief Constructs row-wise divergence of a matrix field.
        * @param other Object to copy from.
@@ -322,6 +351,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
+
       /**
        * @brief Constructs row-wise divergence of a matrix field.
        * @param other Object to move from.
@@ -330,6 +360,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
+
       /**
        * @brief Returns the differentiated or indexed operand.
        * @returns The differentiated or indexed operand.
@@ -338,6 +369,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getOperand();
       }
+
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @param point Point at which the operation is evaluated.
@@ -352,9 +384,11 @@ namespace Rodin::Variational
         RangeType value(gradient.getDimension(0));
         value.setZero();
         if (gradient.getDimension(1) != gradient.getDimension(2))
-          Alert::Exception()
+        {
+          Alert::MemberFunctionException(*this, __func__)
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
+        }
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
         {
           for (size_t k = 0; k < gradient.getDimension(2); ++k)
@@ -362,6 +396,7 @@ namespace Rodin::Variational
         }
         return value;
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -393,12 +428,16 @@ namespace Rodin::Variational
     public:
       /// @brief CRTP or finite element base class.
       using Parent = ShapeFunctionBase<Div, FES, Space>;
+
       /// @brief Cloned or referenced expression operand type.
       using OperandType = ShapeFunction<Derived, FES, Space>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialVector<ScalarType>;
+
       /**
        * @brief Constructs row-wise divergence of a matrix field.
        * @param operand Operand expression.
@@ -407,6 +446,7 @@ namespace Rodin::Variational
         : Parent(operand.getFiniteElementSpace()),
           m_gradient(operand)
       {}
+
       /**
        * @brief Constructs row-wise divergence of a matrix field.
        * @param other Object to copy from.
@@ -415,6 +455,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
+
       /**
        * @brief Constructs row-wise divergence of a matrix field.
        * @param other Object to move from.
@@ -423,6 +464,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
+
       /**
        * @brief Returns the differentiated or indexed operand.
        * @returns The differentiated or indexed operand.
@@ -431,6 +473,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getOperand();
       }
+
       /**
        * @brief Returns the leaf shape function used for assembly.
        * @returns The leaf shape function used for assembly.
@@ -439,6 +482,7 @@ namespace Rodin::Variational
       {
         return m_gradient.getLeaf();
       }
+
       /**
        * @brief Returns the local basis count for the selected polytope.
        * @param poly Mesh entity used by this operation.
@@ -448,6 +492,13 @@ namespace Rodin::Variational
       {
         return m_gradient.getDOFs(poly);
       }
+
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return m_gradient.getDOFIndices();
+      }
+
       /**
        * @brief Returns the currently bound integration point.
        * @returns The currently bound integration point.
@@ -456,6 +507,18 @@ namespace Rodin::Variational
       {
         return m_gradient.getIntegrationPoint();
       }
+
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Div& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_gradient.setPolytope(polytope);
+        return *this;
+      }
+
       /**
        * @brief Binds the integration point and prepares local basis values.
        * @param point Point at which the operation is evaluated.
@@ -466,6 +529,7 @@ namespace Rodin::Variational
         m_gradient.setIntegrationPoint(point);
         return *this;
       }
+
       /**
        * @brief Returns a basis value at the bound integration point.
        * @param local Index in the local numbering.
@@ -477,9 +541,11 @@ namespace Rodin::Variational
         RangeType value(gradient.getDimension(0));
         value.setZero();
         if (gradient.getDimension(1) != gradient.getDimension(2))
-          Alert::Exception()
+        {
+          Alert::MemberFunctionException(*this, __func__)
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
+        }
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
         {
           for (size_t k = 0; k < gradient.getDimension(2); ++k)
@@ -487,6 +553,7 @@ namespace Rodin::Variational
         }
         return value;
       }
+
       /**
        * @brief Returns the polynomial order when it is known.
        * @param poly Mesh entity used by this operation.
@@ -504,6 +571,7 @@ namespace Rodin::Variational
     private:
       Grad<OperandType> m_gradient;
   };
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param operand Operand expression.
@@ -512,6 +580,7 @@ namespace Rodin::Variational
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
   Div(const GridFunction<FES, Data>& operand) -> Div<GridFunction<FES, Data>>;
+
   /**
    * @brief Deduces the matrix space or coefficient type from constructor arguments.
    * @param operand Operand expression.

@@ -33,14 +33,14 @@ namespace Rodin::Solid
    * ## Usage
    * @code
    * NeoHookean law(lambda, mu);
-   * NeoHookean::Cache cache;
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
-   * law.setCache(cache, state);
+   * ConstitutivePoint point(state);
+   * law.setConstitutivePoint(point);
    *
    * FirstPiolaKirchhoffStress<NeoHookean> pk1(law);
-    * Math::SpatialMatrix<Real> P;
-   * pk1.getFirstPiolaKirchhoffStress(P, cache, state);
+   * Math::SpatialMatrix<Real> P;
+   * pk1.getFirstPiolaKirchhoffStress(P);
    * @endcode
    *
    * @tparam LawDerived The hyperelastic law type
@@ -51,12 +51,10 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = LawDerived;
-      /// @brief Cache type used by the constitutive law.
-      using CacheType = typename LawType::Cache;
 
       /**
        * @brief Constructs the stress evaluator.
-       * @param law Reference to the constitutive law
+       * @param law Reference to a prepared constitutive law
        */
       FirstPiolaKirchhoffStress(const LawType& law)
         : m_law(law)
@@ -67,6 +65,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       FirstPiolaKirchhoffStress(const FirstPiolaKirchhoffStress& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -76,22 +75,20 @@ namespace Rodin::Solid
       /**
        * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
        * @param[out] P Output stress tensor
-       * @param[in] cache Constitutive invariant cache populated by setCache().
-       * @param[in] cp Constitutive point
        */
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const CacheType& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
       {
-        m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+        m_law.getFirstPiolaKirchhoffStress(P);
       }
 
       /**
        * @brief Gets the constitutive law.
        * @returns The constitutive law.
        */
-      const LawType& getLaw() const { return m_law; }
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       const LawType& m_law;

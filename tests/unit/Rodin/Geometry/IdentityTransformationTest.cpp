@@ -13,6 +13,139 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Mutable affine map used to check geometric value semantics.
+  class StateTransformation final : public PolytopeTransformation
+  {
+    public:
+      /// @brief Constructs a unit-scale segment map.
+      constexpr StateTransformation()
+        : PolytopeTransformation(1, 1),
+          m_scale(1)
+      {}
+
+      /// @brief Preserves constant-evaluated destruction.
+      constexpr ~StateTransformation() override = default;
+
+      /**
+       * @brief Copies geometry into a fresh state.
+       * @param other Source map.
+       */
+      constexpr StateTransformation(const StateTransformation& other) = default;
+
+      /**
+       * @brief Moves geometry into a fresh state.
+       * @param other Source map.
+       */
+      constexpr StateTransformation(StateTransformation&& other) noexcept = default;
+
+      /**
+       * @brief Replaces the geometry state by move assignment.
+       * @param other Source map.
+       * @returns This map.
+       */
+      StateTransformation& operator=(StateTransformation&& other) noexcept = default;
+
+      /**
+       * @brief Changes scale and invalidates previous physical results.
+       * @param scale New scale factor.
+       */
+      void setScale(Real scale)
+      {
+        m_scale = scale;
+      }
+
+      /**
+       * @brief Returns the affine map order.
+       * @returns One.
+       */
+      size_t getOrder() const override
+      {
+        return 1;
+      }
+
+      /**
+       * @brief Applies the scalar dilation.
+       * @param pc Output physical coordinates.
+       * @param rc Reference coordinates.
+       */
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
+      {
+        pc = rc * m_scale;
+      }
+
+      /**
+       * @brief Evaluates the constant map derivative.
+       * @param jacobian Output derivative matrix.
+       * @param rc Unused reference coordinates.
+       */
+      void jacobian(Math::SpatialMatrix<Real>& jacobian,
+        [[maybe_unused]] const Math::SpatialPoint& rc) const override
+      {
+        jacobian.resize(1, 1);
+        jacobian(0, 0) = m_scale;
+      }
+
+      /**
+       * @brief Copies the map polymorphically.
+       * @returns A new map owned by the caller.
+       */
+      StateTransformation* copy() const noexcept override
+      {
+        return new StateTransformation(*this);
+      }
+
+    private:
+      Real m_scale;
+  };
+
+  /// @brief Transformations retain dimensions in constant-evaluated construction.
+  constexpr bool constantMapDimensions()
+  {
+    StateTransformation source;
+    StateTransformation moved(std::move(source));
+    return moved.getReferenceDimension() == 1 && moved.getPhysicalDimension() == 1;
+  }
+  static_assert(constantMapDimensions());
+  static_assert(std::is_nothrow_move_constructible_v<StateTransformation>);
+  static_assert(std::is_nothrow_move_assignable_v<StateTransformation>);
+
+  /// @brief Copying and moving preserve independently owned geometry parameters.
+  TEST(Geometry_IdentityTransformation, StateGeometryLifecycle)
+  {
+    StateTransformation source;
+    source.setScale(2);
+    StateTransformation copied(source);
+    source.setScale(4);
+    StateTransformation moved(std::move(copied));
+    Math::SpatialPoint result;
+    moved.transform(result, Math::SpatialPoint{Real(0.5)});
+    EXPECT_EQ(result(0), 1);
+    moved = std::move(source);
+    moved.transform(result, Math::SpatialPoint{Real(0.5)});
+    EXPECT_EQ(result(0), 2);
+  }
+
+  /// @brief Archive loading visits both geometric dimensions without runtime state tokens.
+  TEST(Geometry_IdentityTransformation, LoadingDimensions)
+  {
+    struct LoadingArchive
+    {
+      size_t visits = 0;
+      LoadingArchive& operator&(size_t& dimension)
+      {
+        dimension = 2;
+        ++visits;
+        return *this;
+      }
+    };
+    StateTransformation map;
+    LoadingArchive archive;
+    map.serialize(archive, 0);
+    EXPECT_EQ(archive.visits, 2);
+    EXPECT_EQ(map.getReferenceDimension(), 2);
+    EXPECT_EQ(map.getPhysicalDimension(), 2);
+  }
+
   // ---- IdentityTransformation basic properties ----
 
   /// @brief Verifies construction for geometry identity transformation by checking exact expected values.

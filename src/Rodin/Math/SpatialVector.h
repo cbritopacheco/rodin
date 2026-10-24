@@ -46,6 +46,7 @@ namespace Rodin::Math
     public:
       /// @brief The element scalar type.
       using Scalar = ScalarType;
+
       /// @brief Maximum storable dimension (RODIN_MAXIMAL_SPACE_DIMENSION, fixed at 3).
       static constexpr std::uint8_t MaxSize = RODIN_MAXIMAL_SPACE_DIMENSION;
 
@@ -55,8 +56,7 @@ namespace Rodin::Math
       static_assert(MaxSize == 3, "MaxSize must be equal to 3.");
 
       /// @brief Constructs an empty (size 0) spatial vector.
-      constexpr
-      SpatialVector() noexcept
+      constexpr SpatialVector() noexcept
         : m_size(0)
       {
         zeroStorage();
@@ -66,8 +66,7 @@ namespace Rodin::Math
        * @brief Constructs a zero-initialized spatial vector of the given size.
        * @param size Number of entries.
        */
-      constexpr
-      explicit SpatialVector(std::uint8_t size)
+      constexpr explicit SpatialVector(std::uint8_t size)
         : m_size(size)
       {
         assert(size <= MaxSize);
@@ -78,8 +77,7 @@ namespace Rodin::Math
        * @brief Constructs a spatial vector from an initializer list of components.
        * @param init Initial component values.
        */
-      constexpr
-      SpatialVector(std::initializer_list<ScalarType> init)
+      constexpr SpatialVector(std::initializer_list<ScalarType> init)
         : m_size(init.size())
       {
         assert(init.size() <= MaxSize);
@@ -107,8 +105,7 @@ namespace Rodin::Math
        * @param other Object to copy from.
        */
       template <class EigenDerived>
-      constexpr
-      SpatialVector(const Eigen::MatrixBase<EigenDerived>& other)
+      constexpr SpatialVector(const Eigen::MatrixBase<EigenDerived>& other)
         : m_size(static_cast<std::uint8_t>(other.size()))
       {
         assert(m_size <= MaxSize);
@@ -135,8 +132,7 @@ namespace Rodin::Math
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      SpatialVector(const SpatialVector& other) noexcept
+      constexpr SpatialVector(const SpatialVector& other) noexcept
         : m_size(other.m_size),
           m_data(other.m_data)
       {}
@@ -145,8 +141,7 @@ namespace Rodin::Math
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      SpatialVector(SpatialVector&& other) noexcept
+      constexpr SpatialVector(SpatialVector&& other) noexcept
         : m_size(std::move(other.m_size)),
           m_data(std::move(other.m_data))
       {}
@@ -184,8 +179,7 @@ namespace Rodin::Math
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      SpatialVector& operator=(const SpatialVector& other) noexcept
+      constexpr SpatialVector& operator=(const SpatialVector& other) noexcept
       {
         if (this != &other)
         {
@@ -200,8 +194,7 @@ namespace Rodin::Math
        * @param other Object to move from.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      SpatialVector& operator=(SpatialVector&& other) noexcept
+      constexpr SpatialVector& operator=(SpatialVector&& other) noexcept
       {
         if (this != &other)
         {
@@ -274,7 +267,7 @@ namespace Rodin::Math
        * @param s Scalar factor.
        * @returns Reference to this object after the operation.
        */
-      SpatialVector& operator*=(const ScalarType& s) noexcept
+      SpatialVector& operator*=(ScalarType s) noexcept
       {
         switch (m_size)
         {
@@ -301,7 +294,7 @@ namespace Rodin::Math
        * @param s Scalar factor.
        * @returns Reference to this object after the operation.
        */
-      SpatialVector& operator/=(const ScalarType& s) noexcept
+      SpatialVector& operator/=(ScalarType s) noexcept
       {
         switch (m_size)
         {
@@ -336,65 +329,32 @@ namespace Rodin::Math
 
       /**
        * @brief Assigns from an Eigen array expression, resizing to match.
+       *
+       * The expression is copied into fixed-capacity storage before the active
+       * coordinates are replaced, including when it references this vector.
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
       template <class EigenDerived>
-      constexpr
-      SpatialVector& operator=(const Eigen::ArrayBase<EigenDerived>& other)
+      constexpr SpatialVector& operator=(const Eigen::ArrayBase<EigenDerived>& other)
       {
-        const std::uint8_t n = static_cast<std::uint8_t>(other.size());
-        assert(n <= MaxSize);
-        m_size = n;
-        zeroStorage();
-        switch (m_size)
-        {
-          case 3:
-            m_data[2] = other(static_cast<Eigen::Index>(2));
-            [[fallthrough]];
-          case 2:
-            m_data[1] = other(static_cast<Eigen::Index>(1));
-            [[fallthrough]];
-          case 1:
-            m_data[0] = other(static_cast<Eigen::Index>(0));
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return *this;
+        const SpatialVector owned(other.matrix());
+        return *this = owned;
       }
 
       /**
        * @brief Assigns from an Eigen vector expression, resizing to match.
+       *
+       * The expression is copied into fixed-capacity storage before the active
+       * coordinates are replaced, including when it references this vector.
        * @returns Reference to this object after the operation.
        * @param v Value to assign.
        */
       template <class EigenDerived>
       SpatialVector& operator=(const Eigen::MatrixBase<EigenDerived>& v)
       {
-        const std::uint8_t n = static_cast<std::uint8_t>(v.size());
-        assert(n <= MaxSize);
-        m_size = n;
-        zeroStorage();
-        switch (m_size)
-        {
-          case 3:
-            m_data[2] = v(static_cast<Eigen::Index>(2));
-            [[fallthrough]];
-          case 2:
-            m_data[1] = v(static_cast<Eigen::Index>(1));
-            [[fallthrough]];
-          case 1:
-            m_data[0] = v(static_cast<Eigen::Index>(0));
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return *this;
+        const SpatialVector owned(v);
+        return *this = owned;
       }
 
       /**
@@ -457,8 +417,7 @@ namespace Rodin::Math
        * @brief Returns the number of active components.
        * @returns The number of active components.
        */
-      constexpr
-      std::uint8_t size() const noexcept
+      constexpr std::uint8_t size() const noexcept
       {
         return m_size;
       }
@@ -467,8 +426,7 @@ namespace Rodin::Math
        * @brief Sets the logical size (must not exceed MaxSize).
        * @param n Number of entries.
        */
-      constexpr
-      void resize(std::uint8_t n)
+      constexpr void resize(std::uint8_t n)
       {
         assert(n <= MaxSize);
         m_size = n;
@@ -479,8 +437,7 @@ namespace Rodin::Math
        * @param i Index of the requested entry.
        * @returns Reference to the entry at the supplied indices.
        */
-      constexpr
-      ScalarType& operator()(std::uint8_t i)
+      constexpr ScalarType& operator()(std::uint8_t i)
       {
         assert(i < m_size);
         return m_data[i];
@@ -491,8 +448,7 @@ namespace Rodin::Math
        * @param i Index of the requested entry.
        * @returns Reference to the entry at the supplied indices.
        */
-      constexpr
-      const ScalarType& operator()(std::uint8_t i) const
+      constexpr const ScalarType& operator()(std::uint8_t i) const
       {
         assert(i < m_size);
         return m_data[i];
@@ -503,8 +459,7 @@ namespace Rodin::Math
        * @param i Index of the requested entry.
        * @returns Entry at the supplied index.
        */
-      constexpr
-      ScalarType& operator[](std::uint8_t i)
+      constexpr ScalarType& operator[](std::uint8_t i)
       {
         assert(i < m_size);
         return m_data[i];
@@ -515,8 +470,7 @@ namespace Rodin::Math
        * @param i Index of the requested entry.
        * @returns Entry at the supplied index.
        */
-      constexpr
-      const ScalarType& operator[](std::uint8_t i) const
+      constexpr const ScalarType& operator[](std::uint8_t i) const
       {
         assert(i < m_size);
         return m_data[i];
@@ -527,8 +481,7 @@ namespace Rodin::Math
        * @param i Index of the requested entry.
        * @returns Reference to the entry at the supplied index.
        */
-      constexpr
-      ScalarType& coeffRef(std::size_t i)
+      constexpr ScalarType& coeffRef(std::size_t i)
       {
         assert(i < m_size);
         return m_data[static_cast<std::uint8_t>(i)];
@@ -539,8 +492,7 @@ namespace Rodin::Math
        * @param i Index of the requested entry.
        * @returns Reference to the entry at the supplied index.
        */
-      constexpr
-      const ScalarType& coeffRef(std::size_t i) const
+      constexpr const ScalarType& coeffRef(std::size_t i) const
       {
         assert(i < m_size);
         return m_data[static_cast<std::uint8_t>(i)];
@@ -550,8 +502,7 @@ namespace Rodin::Math
        * @brief Returns a reference to the first (x) component.
        * @returns A reference to the first (x) component.
        */
-      constexpr
-      ScalarType& x()
+      constexpr ScalarType& x()
       {
         assert(m_size >= 1);
         return m_data[0];
@@ -561,8 +512,7 @@ namespace Rodin::Math
        * @brief Returns a const reference to the first (x) component.
        * @returns A const reference to the first (x) component.
        */
-      constexpr
-      const ScalarType& x() const
+      constexpr const ScalarType& x() const
       {
         assert(m_size >= 1);
         return m_data[0];
@@ -572,8 +522,7 @@ namespace Rodin::Math
        * @brief Returns a reference to the second (y) component.
        * @returns A reference to the second (y) component.
        */
-      constexpr
-      ScalarType& y()
+      constexpr ScalarType& y()
       {
         assert(m_size >= 2);
         return m_data[1];
@@ -583,8 +532,7 @@ namespace Rodin::Math
        * @brief Returns a const reference to the second (y) component.
        * @returns A const reference to the second (y) component.
        */
-      constexpr
-      const ScalarType& y() const
+      constexpr const ScalarType& y() const
       {
         assert(m_size >= 2);
         return m_data[1];
@@ -594,8 +542,7 @@ namespace Rodin::Math
        * @brief Returns a reference to the third (z) component.
        * @returns A reference to the third (z) component.
        */
-      constexpr
-      ScalarType& z()
+      constexpr ScalarType& z()
       {
         assert(m_size >= 3);
         return m_data[2];
@@ -605,8 +552,7 @@ namespace Rodin::Math
        * @brief Returns a const reference to the third (z) component.
        * @returns A const reference to the third (z) component.
        */
-      constexpr
-      const ScalarType& z() const
+      constexpr const ScalarType& z() const
       {
         assert(m_size >= 3);
         return m_data[2];
@@ -632,8 +578,8 @@ namespace Rodin::Math
        * @param other Other operand.
        * @returns The cross product with another 3D spatial vector.
        */
-      [[nodiscard]] constexpr
-      SpatialVector cross(const SpatialVector& other) const noexcept
+      [[nodiscard]] constexpr SpatialVector cross(
+        const SpatialVector& other) const noexcept
       {
         assert(m_size == 3 && other.m_size == 3);
 
@@ -650,11 +596,12 @@ namespace Rodin::Math
        * @returns The cross product with a 3D Eigen vector expression.
        */
       template <class EigenDerived>
-      [[nodiscard]] constexpr
-      SpatialVector cross(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      [[nodiscard]] constexpr SpatialVector cross(
+        const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        static_assert(EigenDerived::ColsAtCompileTime == 1 || EigenDerived::RowsAtCompileTime == 1,
-                      "cross expects a vector expression");
+        static_assert(
+          EigenDerived::ColsAtCompileTime == 1 || EigenDerived::RowsAtCompileTime == 1,
+          "cross expects a vector expression");
         assert(m_size == 3);
         assert(other.size() == 3);
 
@@ -670,67 +617,31 @@ namespace Rodin::Math
       }
 
       /**
-       * @brief Returns the Euclidean dot product with another spatial vector.
-       * @param other Other operand.
-       * @returns The Euclidean dot product with another spatial vector.
+       * @brief Contracts active components, conjugating the right operand.
+       *
+       * Computes @f$\sum_i u_i\overline{v_i}@f$, as does Math::dot.
+       * Mixed supported scalar fields retain the promoted result type.
+       *
+       * @tparam OtherScalar Right operand's scalar type.
+       * @param other Right operand.
+       * @returns Right-conjugating scalar contraction.
        */
-      inline
-      constexpr
-      ScalarType dot(const SpatialVector& other) const noexcept
+      template <class OtherScalar>
+      constexpr auto dot(const SpatialVector<OtherScalar>& other) const noexcept
       {
-        assert(m_size == other.m_size);
-
-        const auto& a = m_data;
-        const auto& b = other.m_data;
-
-        ScalarType s = ScalarType(0);
-        switch (m_size)
-        {
-          case 3:
-            s += a[2] * b[2];
-            [[fallthrough]];
-          case 2:
-            s += a[1] * b[1];
-            [[fallthrough]];
-          case 1:
-            s += a[0] * b[0];
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return s;
+        return Math::dot(*this, other);
       }
 
       /**
-       * @brief Returns the Euclidean dot product with an Eigen vector expression.
-       * @param other Other operand.
-       * @returns The Euclidean dot product with an Eigen vector expression.
+       * @brief Contracts an Eigen vector, conjugating the right operand.
+       * @tparam EigenDerived Right Eigen vector expression type.
+       * @param other Right operand.
+       * @returns Right-conjugating contraction with scalar promotion.
        */
       template <class EigenDerived>
-      constexpr
-      ScalarType dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      constexpr auto dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        assert(static_cast<std::uint8_t>(other.size()) == m_size);
-        ScalarType s = ScalarType(0);
-        switch (m_size)
-        {
-          case 3:
-            s += m_data[2] * other(static_cast<Eigen::Index>(2));
-            [[fallthrough]];
-          case 2:
-            s += m_data[1] * other(static_cast<Eigen::Index>(1));
-            [[fallthrough]];
-          case 1:
-            s += m_data[0] * other(static_cast<Eigen::Index>(0));
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return s;
+        return Math::dot(*this, other);
       }
 
       /**
@@ -743,13 +654,13 @@ namespace Rodin::Math
         switch (m_size)
         {
           case 3:
-            m(0,2) = m_data[2];
+            m(0, 2) = m_data[2];
             [[fallthrough]];
           case 2:
-            m(0,1) = m_data[1];
+            m(0, 1) = m_data[1];
             [[fallthrough]];
           case 1:
-            m(0,0) = m_data[0];
+            m(0, 0) = m_data[0];
             break;
           case 0:
             break;
@@ -770,8 +681,7 @@ namespace Rodin::Math
       }
 
       /// @brief Normalizes this vector to unit Euclidean norm in place.
-      constexpr
-      void normalize() noexcept
+      constexpr void normalize() noexcept
       {
         const auto n = this->norm();
         switch (m_size)
@@ -847,6 +757,7 @@ namespace Rodin::Math
       /**
        * @brief Returns the @f$ \ell^P @f$ norm of this vector.
        *
+       * The case @f$P=2@f$ uses norm() directly.
        * Only active components contribute to
        * @f$\|v\|_P=(\sum_i |v_i|^P)^{1/P}@f$ over either scalar field.
        *
@@ -857,34 +768,38 @@ namespace Rodin::Math
       constexpr typename Eigen::NumTraits<ScalarType>::Real lpNorm() const noexcept
       {
         static_assert(P > 0);
-        using RealScalar = typename Eigen::NumTraits<ScalarType>::Real;
-        RealScalar s = RealScalar(0);
-        std::integral_constant<size_t, P> p;
-        switch (m_size)
+        if constexpr (P == 2)
+          return norm();
+        else
         {
-          case 3:
-            s += Math::pow(Math::abs(m_data[2]), p);
-            [[fallthrough]];
-          case 2:
-            s += Math::pow(Math::abs(m_data[1]), p);
-            [[fallthrough]];
-          case 1:
-            s += Math::pow(Math::abs(m_data[0]), p);
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
+          using RealScalar = typename Eigen::NumTraits<ScalarType>::Real;
+          RealScalar s = RealScalar(0);
+          std::integral_constant<size_t, P> p;
+          switch (m_size)
+          {
+            case 3:
+              s += Math::pow(Math::abs(m_data[2]), p);
+              [[fallthrough]];
+            case 2:
+              s += Math::pow(Math::abs(m_data[1]), p);
+              [[fallthrough]];
+            case 1:
+              s += Math::pow(Math::abs(m_data[0]), p);
+              [[fallthrough]];
+            case 0:
+              break;
+            default:
+              assert(false);
+          }
+          return Math::pow(s, RealScalar(1) / RealScalar(P));
         }
-        return Math::pow(s, RealScalar(1) / RealScalar(P));
       }
 
       /**
        * @brief Returns a unit-norm copy of this vector.
        * @returns A unit-norm copy of this vector.
        */
-      constexpr
-      SpatialVector normalized() const noexcept
+      constexpr SpatialVector normalized() const noexcept
       {
         SpatialVector v(*this);
         v.normalize();
@@ -904,8 +819,7 @@ namespace Rodin::Math
        * @brief Returns a reference to the underlying Eigen storage.
        * @returns A reference to the underlying Eigen storage.
        */
-      constexpr
-      auto& getData() noexcept
+      constexpr auto& getData() noexcept
       {
         return m_data;
       }
@@ -914,8 +828,7 @@ namespace Rodin::Math
        * @brief Returns a const reference to the underlying Eigen storage.
        * @returns A const reference to the underlying Eigen storage.
        */
-      constexpr
-      const auto& getData() const noexcept
+      constexpr const auto& getData() const noexcept
       {
         return m_data;
       }
@@ -927,9 +840,9 @@ namespace Rodin::Math
       SpatialVector conjugate() const noexcept
       {
         SpatialVector r(*this);
-        if constexpr (std::is_same_v<Scalar, std::complex<float>>
-                   || std::is_same_v<Scalar, std::complex<double>>
-                   || std::is_same_v<Scalar, std::complex<long double>>)
+        if constexpr (std::is_same_v<Scalar, std::complex<float>> ||
+          std::is_same_v<Scalar, std::complex<double>> ||
+          std::is_same_v<Scalar, std::complex<long double>>)
         {
           switch (m_size)
           {
@@ -961,7 +874,7 @@ namespace Rodin::Math
       {
         ar & m_size;
         for (std::uint8_t i = 0; i < m_size; i++)
-          ar & m_data[i];
+          ar& m_data[i];
       }
 
     private:
@@ -983,9 +896,8 @@ namespace Rodin::Math
    * @param b Right operand.
    */
   template <class Scalar>
-  [[nodiscard]] inline
-  SpatialVector<Scalar>
-  operator+(const SpatialVector<Scalar>& a, const SpatialVector<Scalar>& b) noexcept
+  [[nodiscard]] inline SpatialVector<Scalar> operator+(
+    const SpatialVector<Scalar>& a, const SpatialVector<Scalar>& b) noexcept
   {
     assert(a.size() == b.size());
     SpatialVector<Scalar> r(a.size());
@@ -1015,9 +927,8 @@ namespace Rodin::Math
    * @param b Right operand.
    */
   template <class Scalar>
-  [[nodiscard]] inline
-  SpatialVector<Scalar>
-  operator-(const SpatialVector<Scalar>& a, const SpatialVector<Scalar>& b) noexcept
+  [[nodiscard]] inline SpatialVector<Scalar> operator-(
+    const SpatialVector<Scalar>& a, const SpatialVector<Scalar>& b) noexcept
   {
     assert(a.size() == b.size());
     SpatialVector<Scalar> r(a.size());
@@ -1116,9 +1027,8 @@ namespace Rodin::Math
    * @returns Quotient of the operands.
    */
   template <class Scalar, class RHS>
-  [[nodiscard]] inline
-  SpatialVector<Scalar>
-  operator/(const SpatialVector<Scalar>& v, const RHS& s) noexcept
+  [[nodiscard]] inline SpatialVector<Scalar> operator/(
+    const SpatialVector<Scalar>& v, const RHS& s) noexcept
   {
     SpatialVector<Scalar> r(v.size());
     switch (v.size())
@@ -1148,8 +1058,7 @@ namespace Rodin::Math
    */
   template <class EigenDerived, class Scalar>
   SpatialVector<Scalar> operator+(
-    const Eigen::MatrixBase<EigenDerived>& a,
-    const SpatialVector<Scalar>& b)
+    const Eigen::MatrixBase<EigenDerived>& a, const SpatialVector<Scalar>& b)
   {
     assert(static_cast<std::uint8_t>(a.size()) == b.size());
     SpatialVector<Scalar> r(b.size());
@@ -1180,8 +1089,7 @@ namespace Rodin::Math
    */
   template <class Scalar, class EigenDerived>
   SpatialVector<Scalar> operator+(
-    const SpatialVector<Scalar>& a,
-    const Eigen::MatrixBase<EigenDerived>& b)
+    const SpatialVector<Scalar>& a, const Eigen::MatrixBase<EigenDerived>& b)
   {
     assert(static_cast<std::uint8_t>(b.size()) == a.size());
     SpatialVector<Scalar> r(a.size());
@@ -1211,9 +1119,7 @@ namespace Rodin::Math
    * @param b Right operand.
    */
   template <class EigenDerived, class Scalar>
-  auto operator-(
-    const Eigen::MatrixBase<EigenDerived>& a,
-    const SpatialVector<Scalar>& b)
+  auto operator-(const Eigen::MatrixBase<EigenDerived>& a, const SpatialVector<Scalar>& b)
   {
     using OutScalar =
       typename FormLanguage::Minus<typename EigenDerived::Scalar, Scalar>::Type;
@@ -1230,9 +1136,7 @@ namespace Rodin::Math
    * @param b Right operand.
    */
   template <class Scalar, class EigenDerived>
-  auto operator-(
-    const SpatialVector<Scalar>& a,
-    const Eigen::MatrixBase<EigenDerived>& b)
+  auto operator-(const SpatialVector<Scalar>& a, const Eigen::MatrixBase<EigenDerived>& b)
   {
     using OutScalar =
       typename FormLanguage::Minus<Scalar, typename EigenDerived::Scalar>::Type;
@@ -1249,9 +1153,7 @@ namespace Rodin::Math
    * @param m Matrix operand.
    */
   template <class Scalar, class EigenDerived>
-  auto operator*(
-      const SpatialVector<Scalar>& v,
-      const Eigen::MatrixBase<EigenDerived>& m)
+  auto operator*(const SpatialVector<Scalar>& v, const Eigen::MatrixBase<EigenDerived>& m)
   {
     using OutScalar =
       typename FormLanguage::Mult<Scalar, typename EigenDerived::Scalar>::Type;
@@ -1269,9 +1171,7 @@ namespace Rodin::Math
    * @param m Matrix operand.
    */
   template <class EigenDerived, class Scalar>
-  auto operator*(
-      const Eigen::MatrixBase<EigenDerived>& m,
-      const SpatialVector<Scalar>& v)
+  auto operator*(const Eigen::MatrixBase<EigenDerived>& m, const SpatialVector<Scalar>& v)
   {
     using OutScalar =
       typename FormLanguage::Mult<typename EigenDerived::Scalar, Scalar>::Type;
@@ -1289,11 +1189,8 @@ namespace Rodin::Math
    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class Scalar, class EigenDerived>
-  [[nodiscard]] inline
-  SpatialMatrix<Scalar>
-  operator-(
-    const SpatialMatrix<Scalar>& A,
-    const Eigen::MatrixBase<EigenDerived>& B)
+  [[nodiscard]] inline SpatialMatrix<Scalar> operator-(
+    const SpatialMatrix<Scalar>& A, const Eigen::MatrixBase<EigenDerived>& B)
   {
     assert(A.rows() == static_cast<std::uint8_t>(B.rows()));
     assert(A.cols() == static_cast<std::uint8_t>(B.cols()));
@@ -1316,11 +1213,8 @@ namespace Rodin::Math
    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class EigenDerived, class Scalar>
-  [[nodiscard]] inline
-  SpatialMatrix<Scalar>
-  operator-(
-    const Eigen::MatrixBase<EigenDerived>& A,
-    const SpatialMatrix<Scalar>& B)
+  [[nodiscard]] inline SpatialMatrix<Scalar> operator-(
+    const Eigen::MatrixBase<EigenDerived>& A, const SpatialMatrix<Scalar>& B)
   {
     assert(static_cast<std::uint8_t>(A.rows()) == B.rows());
     assert(static_cast<std::uint8_t>(A.cols()) == B.cols());
@@ -1364,8 +1258,8 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::SpatialVector<Number>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = Number;
+    /// @brief Scalar value type.
+    using ScalarType = Number;
   };
 }
 

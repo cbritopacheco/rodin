@@ -39,7 +39,7 @@ namespace Rodin::Tests::Convergence
     public:
       struct Result
       {
-          ErrorNorms field{0, 0}, geometry{0, 0}, total{0, 0};
+        ErrorNorms field{0, 0}, geometry{0, 0}, total{0, 0};
       };
       template <class Mesh, class GF, class Data, class Map>
       static Result compute(const Mesh& reference, const Mesh& represented, const GF& uh,
@@ -78,8 +78,10 @@ namespace Rodin::Tests::Convergence
         for (auto cell = reference.getCell(); cell; ++cell)
         {
           if constexpr (requires { reference.getShard(); })
+          {
             if (!reference.getShard().isOwned(dim, cell->getIndex()))
               continue;
+          }
           const auto mapped = represented.getCell(cell->getIndex());
           assert(mapped->getGeometry() == cell->getGeometry());
           [[maybe_unused]] const auto vertices = cell->getVertices(),
@@ -94,7 +96,7 @@ namespace Rodin::Tests::Convergence
           {
             const auto& original = originalQuadrature.getPoint(qp);
             const auto& point = mappedQuadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(point, &qf, qp);
+            const Variational::IntegrationPoint ip(mappedQuadrature, qp);
             const auto exactPosition = exactMap(original.getPhysicalCoordinates());
             const auto exactJacobian =
               exactMap.getJacobian(original.getPhysicalCoordinates());
@@ -135,11 +137,13 @@ namespace Rodin::Tests::Convergence
         }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { reference.getShard(); })
+        {
           for (Real& value : squared)
           {
             value = boost::mpi::all_reduce(
               reference.getContext().getCommunicator(), value, std::plus<Real>());
           }
+        }
 #endif
         return {{std::sqrt(squared[0]), std::sqrt(squared[1])},
           {std::sqrt(squared[2]), std::sqrt(squared[3])},

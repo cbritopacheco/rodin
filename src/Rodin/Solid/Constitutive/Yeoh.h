@@ -55,15 +55,6 @@ namespace Rodin::Solid
   class Yeoh final : public HyperElasticLaw<Yeoh>
   {
     public:
-      /// Precomputed cache for the Yeoh law.
-      struct Cache
-      {
-          Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
-          Real J;       ///< Jacobian
-          Real Jm2d;    ///< @f$ J^{-2/d} @f$
-          Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
-      };
-
       /**
        * @brief Constructs a Yeoh law.
        * @param c1 First material constant (small-strain: @f$ \mu = 2 c_1 @f$)
@@ -83,6 +74,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       Yeoh(const Yeoh& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -126,47 +118,54 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Populates the constitutive cache at the current state.
-       * @param cache Storage for the constitutive invariant cache.
-       * @param cp The constitutive point
+       * @brief Binds owned evaluation data, reusing unchanged constitutive inputs.
+       * @param cp Constitutive point supplying kinematics and law-specific inputs.
+       * @returns This law after successful binding.
        */
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      Yeoh& setConstitutivePoint(const ConstitutivePoint& cp)
       {
-        const auto& state = cp.getKinematicState();
-        const auto& C = state.getRightCauchyGreenTensor();
-        const size_t d = state.getDimension();
-        const Real dd = static_cast<Real>(d);
-
-        cache.J = state.getJacobian();
-        cache.I1 = C.trace();
-        cache.Jm2d = std::pow(cache.J, -2.0 / dd);
-        cache.I1bar = cache.Jm2d * cache.I1;
+        if (m_state && hasSameKinematics(*m_state, cp.getKinematicState()))
+        {
+          return *this;
+        }
+        m_state.reset();
+        computeCache(m_cache, cp);
+        m_state.emplace(cp.getKinematicState());
+        return *this;
       }
 
       /**
-       * @brief Computes the strain-energy density.
-       * @param cache Constitutive invariant cache populated by setCache().
-       * @param cp The constitutive point
-       * @returns The stored energy density
+       * @brief Returns the owned kinematics of the prepared point.
+       * @returns Prepared kinematic state.
        */
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
+      const KinematicState& getKinematicState() const
       {
-        const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
+        this->require(m_state.has_value(), __func__);
+        return *m_state;
+      }
+
+      /**
+       * @brief Returns the strain-energy density at the prepared point.
+       * @returns Stored strain-energy density.
+       */
+      Real getStrainEnergyDensity() const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const Real dd = static_cast<Real>(state.getDimension());
         const Real x = cache.I1bar - dd;
         return m_c1 * x + m_c2 * x * x + m_c3 * x * x * x +
           0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
       }
 
       /**
-       * @brief Computes the first Piola-Kirchhoff stress.
-       * @param[out] P The resulting stress tensor
-       * @param cache Constitutive invariant cache populated by setCache().
-       * @param cp The constitutive point
+       * @brief Computes stress at the prepared point.
+       * @param P Output first Piola-Kirchhoff stress.
        */
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
-        const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
         const size_t d = state.getDimension();
@@ -191,16 +190,15 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Applies the material tangent to a deformation-gradient increment.
-       * @param[out] dP The resulting stress increment
-       * @param cache Constitutive invariant cache populated by setCache().
-       * @param cp The constitutive point
-       * @param dF The deformation-gradient increment
+       * @brief Computes the tangent action at the prepared point.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
        */
-      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
-        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
         const size_t d = state.getDimension();
@@ -248,6 +246,39 @@ namespace Rodin::Solid
       }
 
     private:
+      /// Precomputed cache for the Yeoh law.
+      struct Cache
+      {
+        Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
+        Real J;       ///< Jacobian
+        Real Jm2d;    ///< @f$ J^{-2/d} @f$
+        Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
+      };
+
+      /**
+       * @brief Populates the constitutive cache at the current state.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp The constitutive point
+       */
+      void computeCache(Cache& cache, const ConstitutivePoint& cp) const
+      {
+        const auto& state = cp.getKinematicState();
+        const auto& C = state.getRightCauchyGreenTensor();
+        const size_t d = state.getDimension();
+        const Real dd = static_cast<Real>(d);
+
+        cache.J = state.getJacobian();
+        cache.I1 = C.trace();
+        cache.Jm2d = std::pow(cache.J, -2.0 / dd);
+        cache.I1bar = cache.Jm2d * cache.I1;
+      }
+
+      /// @brief Private intermediate values for the prepared input.
+      Cache m_cache{};
+
+      /// @brief Owned snapshot; empty until binding succeeds.
+      Optional<KinematicState> m_state;
+
       Real m_c1;
       Real m_c2;
       Real m_c3;

@@ -25,7 +25,7 @@ namespace Rodin::Tests::Convergence
         {}
 
         const Geometry::PolytopeQuadrature& getQuadrature(
-          size_t d, Index i, const QF::QuadratureFormulaBase& qf) const override
+          size_t d, Index i, const QF::QuadratureFormula& qf) const override
         {
           ++requests;
           return Geometry::LocalMesh::getQuadrature(d, i, qf);
@@ -118,38 +118,38 @@ namespace Rodin::Tests::Convergence
         using Scalar = typename FormLanguage::Traits<Range>::ScalarType;
         struct ConstantData
         {
-            size_t dim;
-            Range getSolution(const Math::SpatialPoint&) const
+          size_t dim;
+          Range getSolution(const Math::SpatialPoint&) const
+          {
+            if constexpr (FormLanguage::IsVectorRange<Range>::Value)
             {
-              if constexpr (FormLanguage::IsVectorRange<Range>::Value)
-              {
-                Range value(dim);
-                for (size_t j = 0; j < dim; ++j)
-                  value(j) = phase();
-                return value;
-              }
-              else
-                return phase();
-            }
-            Scalar phase() const
-            {
-              if constexpr (std::is_same_v<Scalar, Complex>)
-                return Scalar(1, 2);
-              else
-                return Scalar(1);
-            }
-            auto getGradient(const Math::SpatialPoint&) const
-            {
-              Math::SpatialVector<Scalar> value(dim);
-              value.setZero();
+              Range value(dim);
+              for (size_t j = 0; j < dim; ++j)
+                value(j) = phase();
               return value;
             }
-            auto getJacobian(const Math::SpatialPoint&) const
-            {
-              Math::SpatialMatrix<Scalar> value(dim, dim);
-              value.setZero();
-              return value;
-            }
+            else
+              return phase();
+          }
+          Scalar phase() const
+          {
+            if constexpr (std::is_same_v<Scalar, Complex>)
+              return Scalar(1, 2);
+            else
+              return Scalar(1);
+          }
+          auto getGradient(const Math::SpatialPoint&) const
+          {
+            Math::SpatialVector<Scalar> value(dim);
+            value.setZero();
+            return value;
+          }
+          auto getJacobian(const Math::SpatialPoint&) const
+          {
+            Math::SpatialMatrix<Scalar> value(dim, dim);
+            value.setZero();
+            return value;
+          }
         };
 
         ObservedMesh reference(UniformGrid(geometry).makeMesh(2));

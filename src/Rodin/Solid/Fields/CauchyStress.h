@@ -35,14 +35,14 @@ namespace Rodin::Solid
    * ## Usage
    * @code
    * NeoHookean law(lambda, mu);
-   * NeoHookean::Cache cache;
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
-   * law.setCache(cache, state);
+   * ConstitutivePoint point(state);
+   * law.setConstitutivePoint(point);
    *
    * CauchyStress<NeoHookean> cauchy(law);
-    * Math::SpatialMatrix<Real> sigma;
-   * cauchy.getCauchyStress(sigma, cache, state);
+   * Math::SpatialMatrix<Real> sigma;
+   * cauchy.getCauchyStress(sigma);
    * @endcode
    *
    * @tparam LawDerived The hyperelastic law type
@@ -53,12 +53,10 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = LawDerived;
-      /// @brief Cache type used by the constitutive law.
-      using CacheType = typename LawType::Cache;
 
       /**
        * @brief Constructs the Cauchy stress evaluator.
-       * @param law Reference to the constitutive law
+       * @param law Reference to a prepared constitutive law
        */
       CauchyStress(const LawType& law)
         : m_law(law)
@@ -69,6 +67,7 @@ namespace Rodin::Solid
        * @param other Object to copy from.
        */
       CauchyStress(const CauchyStress& other) = default;
+
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -78,17 +77,12 @@ namespace Rodin::Solid
       /**
        * @brief Computes @f$ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T @f$.
        * @param[out] sigma Output Cauchy stress tensor
-       * @param[in] cache Precomputed law cache
-       * @param[in] cp Constitutive point
        */
-      void getCauchyStress(
-          Math::SpatialMatrix<Real>& sigma,
-          const CacheType& cache,
-          const ConstitutivePoint& cp) const
+      void getCauchyStress(Math::SpatialMatrix<Real>& sigma) const
       {
-        const auto& state = cp.getKinematicState();
+        const auto& state = m_law.getKinematicState();
         Math::SpatialMatrix<Real> P;
-        m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+        m_law.getFirstPiolaKirchhoffStress(P);
         const auto& F = state.getDeformationGradient();
         const Real J = state.getJacobian();
         sigma = (1.0 / J) * P * F.transpose();
@@ -98,7 +92,10 @@ namespace Rodin::Solid
        * @brief Gets the constitutive law.
        * @returns The constitutive law.
        */
-      const LawType& getLaw() const { return m_law; }
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       const LawType& m_law;

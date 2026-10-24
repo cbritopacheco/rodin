@@ -41,8 +41,8 @@ namespace Rodin::Distance
    * the interface.
    *
    * ## Variants
-   * This class provides two operator() overloads:
-   * 1. Unsigned distance (full domain)
+   * Two mathematical variants are available:
+   * 1. Negative interior approximation (full domain)
    * 2. Signed distance (with specified interior/interface regions)
    *
    * ## Usage Example
@@ -57,10 +57,10 @@ namespace Rodin::Distance
   {
     public:
       /**
-       * @brief Computes the unsigned Poisson-based distance approximation.
+       * @brief Computes the negative full-domain Poisson approximation.
        *
        * Solves the Poisson equation over the entire domain with uniform
-       * forcing term.
+       * forcing term @f$ -\Delta u = -1 @f$ and zero boundary values.
        *
        * @tparam FES Finite element space type
        * @param[in] fes Finite element space on which to solve
@@ -73,12 +73,11 @@ namespace Rodin::Distance
         const auto& mdim = mesh.getDimension();
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, mdim - 1, mdim);
         Variational::TrialFunction u(fes);
-        Variational::TestFunction  v(fes);
+        Variational::TestFunction v(fes);
         Variational::RealFunction zero(0);
         Variational::Problem sp(u, v);
-        sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v))
-           + Variational::Integral(v)
-           + Variational::DirichletBC(u, zero);
+        sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v)) +
+          Variational::Integral(v) + Variational::DirichletBC(u, zero);
         Solver::CG(sp).solve();
         return u.getSolution();
       }
@@ -97,12 +96,10 @@ namespace Rodin::Distance
        */
       template <class FES>
       auto operator()(
-          Geometry::Attribute interface,
-          Geometry::Attribute region,
-          const FES& fes) const
+        Geometry::Attribute interface, Geometry::Attribute region, const FES& fes) const
       {
-        return operator()(
-            FlatSet<Geometry::Attribute>{interface}, FlatSet<Geometry::Attribute>{region}, fes);
+        return operator()(FlatSet<Geometry::Attribute>{interface},
+          FlatSet<Geometry::Attribute>{region}, fes);
       }
 
       /**
@@ -118,20 +115,17 @@ namespace Rodin::Distance
        * @return Grid function containing the signed distance approximation
        */
       template <class FES>
-      auto operator()(
-          const FlatSet<Geometry::Attribute>& interface,
-          const FlatSet<Geometry::Attribute>& region,
-          const FES& fes) const
+      auto operator()(const FlatSet<Geometry::Attribute>& interface,
+        const FlatSet<Geometry::Attribute>& region, const FES& fes) const
       {
         const auto& mesh = fes.getMesh();
         Variational::TrialFunction u(fes);
-        Variational::TestFunction  v(fes);
+        Variational::TestFunction v(fes);
         Variational::RealFunction zero = 0;
         Variational::Problem sp(u, v);
-        sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v))
-           + Variational::Integral(2 * v).over(region)
-           - Variational::Integral(v)
-           + Variational::DirichletBC(u, zero).on(interface);
+        sp = Variational::Integral(Variational::Grad(u), Variational::Grad(v)) +
+          Variational::Integral(2 * v).over(region) - Variational::Integral(v) +
+          Variational::DirichletBC(u, zero).on(interface);
         Solver::CG(sp).solve();
         return u.getSolution();
       }
@@ -139,4 +133,3 @@ namespace Rodin::Distance
 }
 
 #endif
-

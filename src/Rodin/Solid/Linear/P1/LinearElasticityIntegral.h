@@ -81,26 +81,31 @@ namespace Rodin::Variational
 
       /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
+
       /// @brief Test finite element space type.
-      using TestFESType  = P1<Range, Mesh>;
+      using TestFESType = P1<Range, Mesh>;
 
       /// @brief Shear modulus function type.
-      using MuType     = FunctionBase<MuDerived>;
+      using MuType = FunctionBase<MuDerived>;
+
       /// @brief First Lamé parameter function type.
       using LambdaType = FunctionBase<LambdaDerived>;
 
       /// @brief Parent class type.
-      using Parent =
-        LocalBilinearFormIntegratorBase<ScalarType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
     private:
-      using MuRangeType =
-        typename FormLanguage::Traits<MuType>::RangeType;
+      using MuRangeType = typename FormLanguage::Traits<MuType>::RangeType;
 
-      using LambdaRangeType =
-        typename FormLanguage::Traits<LambdaType>::RangeType;
+      using LambdaRangeType = typename FormLanguage::Traits<LambdaType>::RangeType;
 
       static_assert(FormLanguage::IsVectorRange<Range>::Value);
+      static_assert(
+        std::is_same_v<typename FormLanguage::Mult<MuRangeType, ScalarType>::Type,
+          ScalarType>);
+      static_assert(
+        std::is_same_v<typename FormLanguage::Mult<LambdaRangeType, ScalarType>::Type,
+          ScalarType>);
 
     public:
       /**
@@ -110,11 +115,8 @@ namespace Rodin::Variational
        * @param lambda First Lame parameter field.
        * @param mu Shear-modulus field.
        */
-      LinearElasticityIntegrator(
-          const TrialFunction<Solution, TrialFESType>& u,
-          const TestFunction<TestFESType>& v,
-          const LambdaType& lambda,
-          const MuType& mu)
+      LinearElasticityIntegrator(const TrialFunction<Solution, TrialFESType>& u,
+        const TestFunction<TestFESType>& v, const LambdaType& lambda, const MuType& mu)
         : Parent(u, v),
           m_lambda(lambda.copy()),
           m_mu(mu.copy()),
@@ -167,22 +169,29 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the current polytope and assembles the local matrix.
+       *
+       * Hermitian reconstruction is used only for coincident spaces with
+       * real-valued Lamé parameter ranges. Complex parameter ranges evaluate
+       * both triangles. Scalar promotion admits real parameters on complex
+       * fields without permitting complex values to be narrowed into real storage.
+       *
        * @param polytope Mesh entity used by this operation.
        * @returns Reference to this object after the operation.
        */
-      LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
+      LinearElasticityIntegrator& setPolytope(
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
-        const size_t d      = polytope.getDimension();
-        const Index idx     = polytope.getIndex();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
         const auto geometry = polytope.getGeometry();
 
         const auto& trialfes = m_trialfes.get();
-        const auto& testfes  = m_testfes.get();
+        const auto& testfes = m_testfes.get();
 
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe  = testfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
 
         const size_t ntr = trialfe.getCount();
         const size_t nte = testfe.getCount();
@@ -190,8 +199,7 @@ namespace Rodin::Variational
         const size_t lambdaOrder =
           getLameFirstParameter().getOrder(polytope).value_or(size_t(0));
 
-        const size_t muOrder =
-          getShearModulus().getOrder(polytope).value_or(size_t(0));
+        const size_t muOrder = getShearModulus().getOrder(polytope).value_or(size_t(0));
 
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
@@ -199,26 +207,25 @@ namespace Rodin::Variational
         m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
-        m_matrix.resize(
-          static_cast<Eigen::Index>(nte),
-          static_cast<Eigen::Index>(ntr));
+        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
 
-        const bool symmetric = (trialfes == testfes);
+        const bool symmetric = (trialfes == testfes) &&
+          std::is_same_v<LambdaRangeType, Real> && std::is_same_v<MuRangeType, Real>;
 
         if (symmetric)
         {
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
-            const auto& p  = m_quadrature->getPoint(qp);
-            const Variational::IntegrationPoint ip(p, m_qf, qp);
+            const auto& p = m_quadrature->getPoint(qp);
+            const Variational::IntegrationPoint ip(*m_quadrature, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
             const auto lambda = getLameFirstParameter().getValue(ip);
-            const auto mu     = getShearModulus().getValue(ip);
+            const auto mu = getShearModulus().getValue(ip);
 
             for (size_t i = 0; i < nte; ++i)
             {
@@ -231,7 +238,10 @@ namespace Rodin::Variational
                 for (size_t c = 0; c < d; ++c)
                   jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
               }
-              jacI *= p.getJacobianInverse();
+              if constexpr (std::is_same_v<ScalarType, Complex>)
+                jacI = jacI * p.getJacobianInverse();
+              else
+                jacI *= p.getJacobianInverse();
 
               const auto symI = jacI + jacI.adjoint();
               const ScalarType divI = jacI.trace();
@@ -251,7 +261,10 @@ namespace Rodin::Variational
                   for (size_t c = 0; c < d; ++c)
                     jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
                 }
-                jacJ *= p.getJacobianInverse();
+                if constexpr (std::is_same_v<ScalarType, Complex>)
+                  jacJ = jacJ * p.getJacobianInverse();
+                else
+                  jacJ *= p.getJacobianInverse();
 
                 const auto symJ = jacJ + jacJ.adjoint();
                 const ScalarType divJ = jacJ.trace();
@@ -263,22 +276,21 @@ namespace Rodin::Variational
             }
           }
 
-          m_matrix.template triangularView<Eigen::Upper>() =
-            m_matrix.adjoint();
+          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
         }
         else
         {
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
-            const auto& p  = m_quadrature->getPoint(qp);
-            const Variational::IntegrationPoint ip(p, m_qf, qp);
+            const auto& p = m_quadrature->getPoint(qp);
+            const Variational::IntegrationPoint ip(*m_quadrature, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
             const auto lambda = getLameFirstParameter().getValue(ip);
-            const auto mu     = getShearModulus().getValue(ip);
+            const auto mu = getShearModulus().getValue(ip);
 
             for (size_t i = 0; i < nte; ++i)
             {
@@ -291,7 +303,10 @@ namespace Rodin::Variational
                 for (size_t c = 0; c < d; ++c)
                   jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
               }
-              jacI *= p.getJacobianInverse();
+              if constexpr (std::is_same_v<ScalarType, Complex>)
+                jacI = jacI * p.getJacobianInverse();
+              else
+                jacI *= p.getJacobianInverse();
 
               const auto symI = jacI + jacI.adjoint();
               const ScalarType divI = jacI.trace();
@@ -307,7 +322,10 @@ namespace Rodin::Variational
                   for (size_t c = 0; c < d; ++c)
                     jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
                 }
-                jacJ *= p.getJacobianInverse();
+                if constexpr (std::is_same_v<ScalarType, Complex>)
+                  jacJ = jacJ * p.getJacobianInverse();
+                else
+                  jacJ *= p.getJacobianInverse();
 
                 const auto symJ = jacJ + jacJ.adjoint();
                 const ScalarType divJ = jacJ.trace();
@@ -338,8 +356,7 @@ namespace Rodin::Variational
        * @brief Gets the shear modulus function.
        * @returns Reference to shear modulus (second Lamé parameter) function
        */
-      constexpr
-      const MuType& getShearModulus() const
+      constexpr const MuType& getShearModulus() const
       {
         assert(m_mu);
         return *m_mu;
@@ -349,8 +366,7 @@ namespace Rodin::Variational
        * @brief Gets the first Lamé parameter function.
        * @returns Reference to first Lamé parameter function
        */
-      constexpr
-      const LambdaType& getLameFirstParameter() const
+      constexpr const LambdaType& getLameFirstParameter() const
       {
         assert(m_lambda);
         return *m_lambda;
@@ -379,11 +395,11 @@ namespace Rodin::Variational
       std::unique_ptr<MuType> m_mu;
 
       std::reference_wrapper<const TrialFESType> m_trialfes;
-      std::reference_wrapper<const TestFESType>  m_testfes;
+      std::reference_wrapper<const TestFESType> m_testfes;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
 
-      const QF::QuadratureFormulaBase* m_qf;
+      const QF::QuadratureFormula* m_qf;
       const Geometry::PolytopeQuadrature* m_quadrature;
 
       Math::Matrix<ScalarType> m_matrix;

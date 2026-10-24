@@ -4,7 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <array>
 #include <cstdio>
+#include <limits>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -28,12 +31,51 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Linear visualization nodes match reference vertices for every supported geometry.
+  TEST(Rodin_IO_HDF5, VisualizationReferenceNodesAndGeometryValidation)
+  {
+    for (const auto geometry : Polytope::Types)
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const Polytope::Traits traits(geometry);
+      for (const size_t order : {0u, 1u})
+      {
+        const auto nodes = HDF5::getXDMFReferenceNodes(geometry, order);
+        ASSERT_EQ(nodes.size(), traits.getVertexCount());
+        if (geometry == Polytope::Type::Point)
+        {
+          EXPECT_EQ(nodes[0].size(), 0);
+          continue;
+        }
+        for (size_t vertex = 0; vertex < nodes.size(); ++vertex)
+        {
+          const auto& expected = traits.getVertex(vertex);
+          ASSERT_EQ(nodes[vertex].size(), expected.size());
+          for (Index component = 0; component < expected.size(); ++component)
+            EXPECT_EQ(nodes[vertex][component], expected[component]);
+        }
+      }
+    }
+    const auto pointNodes = HDF5::getXDMFReferenceNodes(Polytope::Type::Point, 2);
+    ASSERT_EQ(pointNodes.size(), 1u);
+    EXPECT_EQ(pointNodes[0].size(), 0);
+    EXPECT_EQ(HDF5::getXDMFQuadraticMixedTopologyId(Polytope::Type::Point), 1u);
+    EXPECT_STREQ(HDF5::getXDMFQuadraticTopologyName(Polytope::Type::Point), "Polyvertex");
+
+    const auto invalid = static_cast<Polytope::Type>(255);
+    EXPECT_THROW(HDF5::getXDMFMixedTopologyId(invalid), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFQuadraticMixedTopologyId(invalid), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFQuadraticTopologyName(invalid), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFReferenceNodes(invalid, 1), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFReferenceNodes(invalid, 2), Alert::Exception);
+  }
+
   /// @brief Verifies mesh round trip for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, MeshRoundTrip)
   {
     const std::string meshFile = "/tmp/rodin_hdf5_mesh_rt.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 2);
@@ -65,9 +107,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
     EXPECT_EQ(loaded.getPolytopeCount(0), mesh.getPolytopeCount(0));
-    EXPECT_EQ(
-        loaded.getPolytopeCount(mesh.getDimension()),
-        mesh.getPolytopeCount(mesh.getDimension()));
+    EXPECT_EQ(loaded.getPolytopeCount(mesh.getDimension()),
+      mesh.getPolytopeCount(mesh.getDimension()));
 
     std::remove(meshFile.c_str());
   }
@@ -79,7 +120,7 @@ namespace Rodin::Tests::Unit
     // Those are only written by the XDMF visualization pipeline.
     const std::string meshFile = "/tmp/rodin_hdf5_no_xdmf.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.save(meshFile, FileFormat::HDF5);
 
     hid_t h5 = H5Fopen(meshFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -114,7 +155,7 @@ namespace Rodin::Tests::Unit
     // path is separate from the visualization path.
     const std::string gfFile = "/tmp/rodin_hdf5_gf_rawdofs.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() * p.x() + p.y(); };
@@ -171,7 +212,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
 
     {
       XDMF xdmf(stem);
@@ -357,9 +398,9 @@ namespace Rodin::Tests::Unit
 
   struct QuadraticXDMFCase
   {
-      Polytope::Type type;
-      unsigned long long topologyId;
-      size_t nodesPerCell;
+    Polytope::Type type;
+    unsigned long long topologyId;
+    size_t nodesPerCell;
   };
 
   class Rodin_IO_HDF5_QuadraticXDMF : public testing::TestWithParam<QuadraticXDMFCase>
@@ -559,12 +600,12 @@ namespace Rodin::Tests::Unit
       H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, nodeValues.data()),
       0);
     const auto nodes = HDF5::getXDMFReferenceNodes(Polytope::Type::Triangle, 2);
-    const auto& trans = mesh.getPolytopeTransformation(2, 0);
     for (size_t i = 0; i < nodes.size(); ++i)
     {
-      Math::SpatialPoint pc;
-      trans.transform(pc, nodes[i]);
-      EXPECT_NEAR(nodeValues[i], 2.0 * pc(0) + 3.0 * pc(1), 1e-14);
+      // The affine triangle maps (r, s) to (2r, 3s); use its exact field
+      // rather than reevaluating the quadratic transformation under test.
+      const Real expected = 4 * nodes[i][0] + 9 * nodes[i][1];
+      EXPECT_NEAR(nodeValues[i], expected, 1e-14);
     }
     H5Sclose(dspace);
     H5Dclose(dset);
@@ -663,7 +704,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf.setName("field");
@@ -714,7 +755,7 @@ namespace Rodin::Tests::Unit
   {
     const std::string gfFile = "/tmp/rodin_hdf5_gf_sa.h5";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
@@ -753,7 +794,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 2);
@@ -798,8 +839,10 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
-  /// @brief Verifies disabling mesh attribute export omits the built-in cell-centered mesh
-  /// attribute field from generated XDMF output for IO HDF 5.
+  /**
+   * @brief Verifies disabling mesh attribute export omits the built-in cell-centered mesh
+   * attribute field from generated XDMF output for IO HDF 5.
+   */
   TEST(Rodin_IO_HDF5, XDMFMeshAttributeCanBeDisabled)
   {
     const boost::filesystem::path testDir = "/tmp/rodin_xdmf_no_mesh_attribute";
@@ -848,22 +891,18 @@ namespace
       case Polytope::Type::Point:
       {
         Mesh<Context::Local>::Builder builder;
-        return builder
-          .initialize(1)
-          .nodes(1)
-          .vertex({ 0.0 })
-          .finalize();
+        return builder.initialize(1).nodes(1).vertex({0.0}).finalize();
       }
       case Polytope::Type::Segment:
-        return LocalMesh::UniformGrid(type, { 11 });
+        return LocalMesh::UniformGrid(type, {11});
       case Polytope::Type::Triangle:
       case Polytope::Type::Quadrilateral:
-        return LocalMesh::UniformGrid(type, { 4, 4 });
+        return LocalMesh::UniformGrid(type, {4, 4});
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Pyramid:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Wedge:
-        return LocalMesh::UniformGrid(type, { 3, 3, 3 });
+        return LocalMesh::UniformGrid(type, {3, 3, 3});
       default:
         ADD_FAILURE() << "Unsupported polytope type for makeMesh";
         return Geometry::Mesh<Context::Local>();
@@ -961,20 +1000,29 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Point:         return "Point0D";
-      case Polytope::Type::Segment:       return "Segment1D";
-      case Polytope::Type::Triangle:      return "Triangle2D";
-      case Polytope::Type::Quadrilateral: return "Quad2D";
-      case Polytope::Type::Tetrahedron:   return "Tet3D";
+      case Polytope::Type::Point:
+        return "Point0D";
+      case Polytope::Type::Segment:
+        return "Segment1D";
+      case Polytope::Type::Triangle:
+        return "Triangle2D";
+      case Polytope::Type::Quadrilateral:
+        return "Quad2D";
+      case Polytope::Type::Tetrahedron:
+        return "Tet3D";
       case Polytope::Type::Pyramid:
         return "Pyramid3D";
-      case Polytope::Type::Hexahedron:    return "Hex3D";
-      case Polytope::Type::Wedge:         return "Wedge3D";
-      default:                            return "Unknown";
+      case Polytope::Type::Hexahedron:
+        return "Hex3D";
+      case Polytope::Type::Wedge:
+        return "Wedge3D";
+      default:
+        return "Unknown";
     }
   }
   // Parameterized test fixture
-  class HDF5MultiDim : public ::testing::TestWithParam<Polytope::Type> {};
+  class HDF5MultiDim : public ::testing::TestWithParam<Polytope::Type>
+  {};
   class HDF5AttributeRegression : public ::testing::TestWithParam<size_t>
   {};
 
@@ -984,8 +1032,7 @@ namespace
   TEST_P(HDF5MultiDim, MeshRoundTrip)
   {
     const auto type = GetParam();
-    const std::string meshFile =
-        "/tmp/rodin_hdf5_rt_" + polytopeLabel(type) + ".h5";
+    const std::string meshFile = "/tmp/rodin_hdf5_rt_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     ASSERT_GT(mesh.getVertexCount(), 0u);
@@ -1016,9 +1063,8 @@ namespace
     EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
     EXPECT_EQ(loaded.getPolytopeCount(0), mesh.getPolytopeCount(0));
-    EXPECT_EQ(
-        loaded.getPolytopeCount(mesh.getDimension()),
-        mesh.getPolytopeCount(mesh.getDimension()));
+    EXPECT_EQ(loaded.getPolytopeCount(mesh.getDimension()),
+      mesh.getPolytopeCount(mesh.getDimension()));
 
     std::remove(meshFile.c_str());
   }
@@ -1047,8 +1093,7 @@ namespace
   TEST_P(HDF5MultiDim, MeshPersistenceNoXDMF)
   {
     const auto type = GetParam();
-    const std::string meshFile =
-        "/tmp/rodin_hdf5_noxdmf_" + polytopeLabel(type) + ".h5";
+    const std::string meshFile = "/tmp/rodin_hdf5_noxdmf_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     mesh.save(meshFile, FileFormat::HDF5);
@@ -1083,8 +1128,7 @@ namespace
   TEST_P(HDF5MultiDim, GridFunctionPersistenceRawDOFs)
   {
     const auto type = GetParam();
-    const std::string gfFile =
-        "/tmp/rodin_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
+    const std::string gfFile = "/tmp/rodin_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     if (type == Polytope::Type::Point)
@@ -1139,7 +1183,7 @@ namespace
     for (size_t i = 0; i < saved.size(); ++i)
     {
       EXPECT_DOUBLE_EQ(saved[i], static_cast<double>(dofs[static_cast<Eigen::Index>(i)]))
-          << "DOF mismatch at index " << i;
+        << "DOF mismatch at index " << i;
     }
 
     H5Sclose(dspace);
@@ -1153,7 +1197,7 @@ namespace
     for (Eigen::Index i = 0; i < gf.getData().size(); ++i)
     {
       EXPECT_DOUBLE_EQ(loaded.getData()[i], gf.getData()[i])
-          << "Round-trip DOF mismatch at index " << i;
+        << "Round-trip DOF mismatch at index " << i;
     }
 
     std::remove(gfFile.c_str());
@@ -1165,8 +1209,7 @@ namespace
   TEST_P(HDF5MultiDim, GridFunctionStandalone)
   {
     const auto type = GetParam();
-    const std::string gfFile =
-        "/tmp/rodin_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
+    const std::string gfFile = "/tmp/rodin_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
     if (type == Polytope::Type::Point)
@@ -1240,8 +1283,7 @@ namespace
   TEST_P(HDF5MultiDim, XDMFVisualizationTopology)
   {
     const auto type = GetParam();
-    const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_topo_" + polytopeLabel(type);
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_topo_" + polytopeLabel(type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
@@ -1295,8 +1337,7 @@ namespace
   TEST_P(HDF5MultiDim, XDMFVisualizationEvaluatedAttributes)
   {
     const auto type = GetParam();
-    const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_eval_" + polytopeLabel(type);
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_eval_" + polytopeLabel(type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
@@ -1370,8 +1411,7 @@ namespace
   TEST_P(HDF5MultiDim, XDMFWriteAndClose)
   {
     const auto type = GetParam();
-    const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_wc_" + polytopeLabel(type);
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_wc_" + polytopeLabel(type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
 
@@ -1467,4 +1507,665 @@ namespace
     ::testing::Values(1, 2, 3), [](const ::testing::TestParamInfo<size_t>& info) {
       return "Dim" + std::to_string(info.param) + "D";
     });
+}
+
+namespace Rodin::Tests::Unit
+{
+  class HDF5InvalidPayload : public ::testing::Test
+  {
+    protected:
+      boost::filesystem::path filename;
+
+      void SetUp() override
+      {
+        filename = boost::filesystem::temp_directory_path() /
+          boost::filesystem::unique_path("rodin-invalid-%%%%-%%%%.h5");
+      }
+
+      void TearDown() override
+      {
+        boost::filesystem::remove(filename);
+      }
+
+      template <class T>
+      void replace(const std::string& path, const std::vector<T>& values)
+      {
+        auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
+        ASSERT_TRUE(file);
+        ASSERT_GE(H5Ldelete(file.get(), path.c_str(), H5P_DEFAULT), 0);
+        HDF5::writeVectorDataset(file.get(), path, values);
+      }
+  };
+
+  /// @brief A linear segment retains its node count in a mixed curved topology stream.
+  TEST_F(HDF5InvalidPayload, MixedLinearAndQuadraticSegmentsKeepNodeCounts)
+  {
+    auto mesh = LocalMesh::Builder()
+                  .initialize(1)
+                  .nodes(3)
+                  .vertex({0})
+                  .vertex({1})
+                  .vertex({2})
+                  .polytope(Polytope::Type::Segment, {0, 1})
+                  .polytope(Polytope::Type::Segment, {1, 2})
+                  .finalize();
+    RealH1Element<2> element(Polytope::Type::Segment);
+    PointCloud nodes(1, element.getCount());
+    const auto& original = mesh.getPolytopeTransformation(1, 0);
+    for (size_t i = 0; i < element.getCount(); ++i)
+    {
+      Math::SpatialPoint physical;
+      original.transform(physical, element.getNode(i));
+      nodes(0, i) = physical(0);
+    }
+    mesh.setPolytopeTransformation(
+      {1, 0}, new ParametricTransformation<RealH1Element<2>>(nodes, element));
+
+    // XDMF Edge_3 has three node indices; Polyline also stores its node count.
+    const std::vector<HDF5::U64> expected{34, 0, 1, 2, 2, 2, 3, 4};
+    EXPECT_EQ(HDF5::getXDMFMixedTopologySize(mesh), expected.size());
+    HDF5::writeXDMFMesh(filename, mesh, false);
+    const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    EXPECT_EQ(
+      HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology),
+      expected);
+    EXPECT_EQ(
+      HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize),
+      expected.size());
+  }
+
+  /// @brief Truncated connectivity and attribute arrays are rejected during mesh loading.
+  TEST_F(HDF5InvalidPayload, TruncatedMeshDatasets)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 2);
+    mesh.setAttribute({2, 0}, 7);
+    const std::vector<std::string> paths{HDF5::Path::MeshGeometryVertices,
+      HDF5::Path::MeshConnectivityCountsByDimension, HDF5::entityTypesPath(2),
+      HDF5::entityOffsetsPath(2), HDF5::Path::MeshConnectivityStatePresent,
+      HDF5::Path::MeshConnectivityStateDirty, HDF5::incidenceOffsetsPath(2, 1),
+      HDF5::attributePath(2)};
+    for (const auto& path : paths)
+    {
+      SCOPED_TRACE(path);
+      mesh.save(filename, FileFormat::HDF5);
+      replace<HDF5::U64>(path, {});
+      LocalMesh loaded;
+      EXPECT_THROW(loaded.load(filename, FileFormat::HDF5), Alert::Exception);
+    }
+  }
+
+  /// @brief CSR rows extending beyond their payload are rejected before indexing.
+  TEST_F(HDF5InvalidPayload, OutOfBoundsConnectivityOffsets)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    for (const auto& path :
+      {HDF5::entityOffsetsPath(2), HDF5::incidenceOffsetsPath(2, 1)})
+    {
+      SCOPED_TRACE(path);
+      mesh.save(filename, FileFormat::HDF5);
+      auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      auto offsets = HDF5::readVectorDataset<HDF5::U64>(file.get(), path);
+      file.reset();
+      ASSERT_GT(offsets.size(), 1);
+      offsets[1] = std::numeric_limits<HDF5::U64>::max();
+      replace(path, offsets);
+      LocalMesh loaded;
+      EXPECT_THROW(loaded.load(filename, FileFormat::HDF5), Alert::Exception);
+    }
+  }
+
+  /// @brief Raw field payload, DOF count and vector dimension must agree with the space.
+  TEST_F(HDF5InvalidPayload, InconsistentFieldMetadata)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction field(fes), loaded(fes);
+    field = RealFunction(3);
+    for (const auto* path : {HDF5::Path::GridFunctionValuesData,
+           HDF5::Path::GridFunctionMetaSize, HDF5::Path::GridFunctionMetaDimension})
+    {
+      SCOPED_TRACE(path);
+      field.save(filename, FileFormat::HDF5);
+      replace<HDF5::U64>(path, {999});
+      EXPECT_THROW(loaded.load(filename, FileFormat::HDF5), Alert::Exception);
+    }
+  }
+
+  /// @brief Complex coefficients cannot silently lose their imaginary component.
+  TEST_F(HDF5InvalidPayload, ComplexFieldCannotBeLoadedAsReal)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Complex> complexSpace(mesh);
+    P1 realSpace(mesh);
+    GridFunction complexField(complexSpace);
+    GridFunction realField(realSpace);
+    complexField = Complex(2, 3);
+    complexField.save(filename, FileFormat::HDF5);
+    EXPECT_THROW(realField.load(filename, FileFormat::HDF5), Alert::Exception);
+    replace<HDF5::F64>("/GridFunction/Values/ImaginaryData", {});
+    EXPECT_THROW(complexField.load(filename, FileFormat::HDF5), Alert::Exception);
+  }
+
+  /// @brief A matrix field with equal component count still requires the correct shape.
+  TEST_F(HDF5InvalidPayload, MatrixFieldShapeMismatch)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh, 2, 3);
+    GridFunction field(fes);
+    field = Math::SpatialMatrix<Real>::Identity(2, 3);
+    field.save(filename, FileFormat::HDF5);
+    replace<HDF5::U64>("/GridFunction/Meta/Rows", {3});
+    replace<HDF5::U64>("/GridFunction/Meta/Columns", {2});
+    EXPECT_THROW(field.load(filename, FileFormat::HDF5), Alert::Exception);
+  }
+
+  /// @brief File-only HDF5 operations reject streams and missing files.
+  TEST_F(HDF5InvalidPayload, FileOnlyInterfacesRejectInvalidInputs)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction field(fes);
+    std::stringstream stream;
+    MeshLoader<FileFormat::HDF5, Context::Local> meshLoader(mesh);
+    MeshPrinter<FileFormat::HDF5, Context::Local> meshPrinter(mesh);
+    GridFunctionLoader<FileFormat::HDF5, decltype(fes), Math::Vector<Real>> fieldLoader(
+      field);
+    GridFunctionPrinter<FileFormat::HDF5, decltype(fes), Math::Vector<Real>> fieldPrinter(
+      field);
+    EXPECT_THROW(meshLoader.load(stream), Alert::Exception);
+    EXPECT_THROW(meshPrinter.print(stream), Alert::Exception);
+    EXPECT_THROW(fieldLoader.load(stream), Alert::Exception);
+    EXPECT_THROW(fieldPrinter.print(stream), Alert::Exception);
+    EXPECT_THROW(mesh.load(filename, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(field.load(filename, FileFormat::HDF5), Alert::Exception);
+  }
+
+  /// @brief Moved HDF5 handles transfer ownership and close the replaced identifier.
+  TEST_F(HDF5InvalidPayload, HandleOwnershipTransfer)
+  {
+    const hid_t first = H5Screate(H5S_SCALAR);
+    const hid_t second = H5Screate(H5S_SCALAR);
+    ASSERT_GE(first, 0);
+    ASSERT_GE(second, 0);
+    HDF5::Handle owner = HDF5::Space(first);
+    HDF5::Handle moved(std::move(owner));
+    EXPECT_FALSE(owner);
+    EXPECT_EQ(moved.get(), first);
+    HDF5::Handle replacement = HDF5::Space(second);
+    replacement = std::move(moved);
+    EXPECT_FALSE(moved);
+    EXPECT_EQ(H5Iis_valid(second), 0);
+    EXPECT_GT(H5Iis_valid(first), 0);
+    auto& alias = replacement;
+    replacement = std::move(alias);
+    EXPECT_EQ(replacement.get(), first);
+    replacement.reset();
+    EXPECT_EQ(H5Iis_valid(first), 0);
+    replacement.reset();
+    EXPECT_FALSE(replacement);
+  }
+
+  /// @brief Scalar and matrix readers reject absent datasets and incorrect ranks/cardinalities.
+  TEST_F(HDF5InvalidPayload, DatasetShapeContracts)
+  {
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    HDF5::writeVectorDataset<HDF5::I32>(file.get(), "/Vector", {1, -2});
+    HDF5::writeMatrixDataset<HDF5::F64>(
+      file.get(), "/Tensor", {1, 2, 3, 4, 5, 6}, 1, 2, 3);
+    EXPECT_THROW(
+      HDF5::readScalarDataset<HDF5::I32>(file.get(), "/Vector"), Alert::Exception);
+    EXPECT_THROW(HDF5::readMatrixShape(file.get(), "/Vector"), Alert::Exception);
+    EXPECT_THROW(HDF5::readMatrixShape(file.get(), "/Tensor"), Alert::Exception);
+    EXPECT_THROW(HDF5::readMatrixShape(file.get(), "/Missing"), Alert::Exception);
+    EXPECT_THROW(HDF5::readDatasetShape(file.get(), "/Missing"), Alert::Exception);
+    EXPECT_THROW(
+      HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Missing"), Alert::Exception);
+    EXPECT_EQ(
+      HDF5::readDatasetShape(file.get(), "/Tensor"), (std::vector<hsize_t>{1, 2, 3}));
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Bad", {1}, 2, 3),
+      Alert::Exception);
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Bad", {1, 2}, 1, 1, 3),
+      Alert::Exception);
+    EXPECT_THROW(
+      HDF5::writeVectorDataset<HDF5::I32>(file.get(), "/Vector", {3}), Alert::Exception);
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Tensor", {1}, 1, 1),
+      Alert::Exception);
+    HDF5::writeVectorDataset<HDF5::U8>(file.get(), "/Empty", {});
+    EXPECT_TRUE(HDF5::readVectorDataset<HDF5::U8>(file.get(), "/Empty").empty());
+    const auto scalarSpace = HDF5::Space(H5Screate(H5S_SCALAR));
+    const auto scalar = HDF5::DataSet(H5Dcreate2(file.get(), "/Scalar", H5T_NATIVE_UINT64,
+      scalarSpace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+    EXPECT_TRUE(HDF5::readDatasetShape(file.get(), "/Scalar").empty());
+  }
+
+  /// @brief Read-only files reject writes, and nonnumeric datasets reject numeric reads.
+  TEST_F(HDF5InvalidPayload, DatasetAccessContracts)
+  {
+    {
+      auto file =
+        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(file);
+      const auto space = HDF5::Space(H5Screate(H5S_SCALAR));
+      const auto text = HDF5::DataSet(H5Dcreate2(file.get(), "/Text", H5T_C_S1,
+        space.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(text);
+      const char value = 'x';
+      ASSERT_GE(H5Dwrite(text.get(), H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value), 0);
+      EXPECT_THROW(
+        HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Text"), Alert::Exception);
+    }
+    auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    EXPECT_THROW(
+      HDF5::writeVectorDataset<HDF5::F64>(file.get(), "/New", {1}), Alert::Exception);
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/New", {1}, 1, 1),
+      Alert::Exception);
+  }
+
+  void expectRawAttribute(const boost::filesystem::path& path,
+    const std::vector<hsize_t>& shape, const std::vector<Real>& expected)
+  {
+    auto file = HDF5::File(H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto dataset =
+      HDF5::DataSet(H5Dopen2(file.get(), "/GridFunction/Values/Data", H5P_DEFAULT));
+    ASSERT_TRUE(dataset);
+    const auto space = HDF5::Space(H5Dget_space(dataset.get()));
+    ASSERT_EQ(H5Sget_simple_extent_ndims(space.get()), static_cast<int>(shape.size()));
+    std::vector<hsize_t> actual(shape.size());
+    ASSERT_GE(H5Sget_simple_extent_dims(space.get(), actual.data(), nullptr), 0);
+    ASSERT_EQ(actual, shape);
+    ASSERT_EQ(
+      static_cast<size_t>(H5Sget_simple_extent_npoints(space.get())), expected.size());
+    std::vector<Real> values(expected.size());
+    ASSERT_GE(H5Dread(dataset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                values.data()),
+      0);
+    for (size_t i = 0; i < values.size(); ++i)
+      EXPECT_NEAR(values[i], expected[i], 1e-12) << "entry=" << i;
+  }
+
+  /// @brief Vector visualization uses evaluated node/cell values and entity-major component layout.
+  TEST_F(HDF5InvalidPayload, VectorVisualizationValuesAndLayout)
+  {
+    for (bool quadratic : {false, true})
+    {
+      auto mesh = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({2, 0})
+                    .vertex({0, 3})
+                    .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                    .finalize();
+      if (quadratic)
+        setQuadraticCellTransformations(mesh);
+      P1<Math::SpatialVector<Real>> space(mesh, 2);
+      GridFunction field(space);
+      field = [](const Point& p) {
+        Math::SpatialVector<Real> value(2);
+        value[0] = 1 + 2 * p.x() + 3 * p.y();
+        value[1] = -2 - p.x() + 4 * p.y();
+        return value;
+      };
+      const std::vector<Real> nodal = quadratic
+        ? std::vector<Real>{1, -2, 5, -4, 10, 10, 3, -3, 7.5, 3, 5.5, 4}
+        : std::vector<Real>{1, -2, 5, -4, 10, 10};
+      HDF5::writeXDMFNodeAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2}, nodal);
+      HDF5::writeXDMFNodeAttribute(field, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2}, nodal);
+      HDF5::writeXDMFCellAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {1, 2}, {16.0 / 3, 4.0 / 3});
+      HDF5::writeXDMFCellAttribute(field, filename);
+      expectRawAttribute(filename, {1, 2}, {16.0 / 3, 4.0 / 3});
+    }
+  }
+
+  /// @brief Matrix visualization preserves rectangular rank-three layout and row-major components.
+  TEST_F(HDF5InvalidPayload, MatrixVisualizationValuesAndLayout)
+  {
+    for (bool quadratic : {false, true})
+    {
+      auto mesh = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({2, 0})
+                    .vertex({0, 3})
+                    .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                    .finalize();
+      if (quadratic)
+        setQuadraticCellTransformations(mesh);
+      P1<Math::SpatialMatrix<Real>> space(mesh, 2, 3);
+      GridFunction field(space);
+      field = [](const Point& p) {
+        Math::SpatialMatrix<Real> value(2, 3);
+        for (size_t r = 0; r < 2; ++r)
+        {
+          for (size_t c = 0; c < 3; ++c)
+            value(r, c) = 10 * r + c + p.x() + 2 * p.y();
+        }
+        return value;
+      };
+      // Values at vertices and edge midpoints of the physical triangle.
+      const Real affineValues[] = {0, 2, 6, 1, 4, 3};
+      std::vector<Real> nodal, cell;
+      const Real offsets[] = {0, 1, 2, 10, 11, 12};
+      for (size_t node = 0; node < (quadratic ? 6u : 3u); ++node)
+      {
+        for (Real offset : offsets)
+          nodal.push_back(offset + affineValues[node]);
+      }
+      for (Real offset : offsets)
+        cell.push_back(offset + 8.0 / 3);
+      HDF5::writeXDMFNodeAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2, 3}, nodal);
+      HDF5::writeXDMFNodeAttribute(field, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2, 3}, nodal);
+      HDF5::writeXDMFCellAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {1, 2, 3}, cell);
+      HDF5::writeXDMFCellAttribute(field, filename);
+      expectRawAttribute(filename, {1, 2, 3}, cell);
+    }
+  }
+
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Scalar convenience exporters preserve affine values and curved node counts.
+  TEST_F(HDF5InvalidPayload, ScalarConvenienceVisualizationValues)
+  {
+    for (const bool quadratic : {false, true})
+    {
+      auto mesh = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({2, 0})
+                    .vertex({0, 3})
+                    .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                    .finalize();
+      if (quadratic)
+        setQuadraticCellTransformations(mesh);
+      P1<Real> space(mesh);
+      GridFunction field(space);
+      field = [](const Point& p) { return 1 + 2 * p(0) + 3 * p(1); };
+      const std::vector<Real> nodal = quadratic ? std::vector<Real>{1, 5, 10, 3, 7.5, 5.5}
+                                                : std::vector<Real>{1, 5, 10};
+      HDF5::writeXDMFNodeAttribute(field, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u}, nodal);
+      HDF5::writeXDMFCellAttribute(field, filename);
+      expectRawAttribute(filename, {1}, {16.0 / 3});
+    }
+  }
+
+  /// @brief Missing output parents reject persistence and visualization without side effects.
+  TEST_F(HDF5InvalidPayload, FailedOutputOpensPreserveFieldsAndFilesystem)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Real> scalarSpace(mesh);
+    P1<Math::SpatialVector<Real>> vectorSpace(mesh, 2);
+    GridFunction scalar(scalarSpace);
+    GridFunction vector(vectorSpace);
+    scalar = [](const Point& point) { return 1 + point(0) - 2 * point(1); };
+    vector = [](const Point& point) {
+      Math::SpatialVector<Real> value(2);
+      value[0] = 1 + point(0);
+      value[1] = -2 + 3 * point(1);
+      return value;
+    };
+    const auto scalarBefore = scalar.getData().eval();
+    const auto vectorBefore = vector.getData().eval();
+    const auto missing = filename / "missing-parent";
+    const auto output = missing / "output.h5";
+    ASSERT_FALSE(boost::filesystem::exists(filename));
+    EXPECT_THROW(mesh.save(output, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(scalar.save(output, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(vector.save(output, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFMesh(output, mesh), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFNodeAttribute(scalar, output), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFCellAttribute(scalar, output), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFNodeAttribute(vector, output), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFCellAttribute(vector, output), Alert::Exception);
+    EXPECT_EQ((scalar.getData() - scalarBefore).norm(), 0);
+    EXPECT_EQ((vector.getData() - vectorBefore).norm(), 0);
+    EXPECT_FALSE(boost::filesystem::exists(filename));
+    EXPECT_FALSE(boost::filesystem::exists(missing));
+    EXPECT_FALSE(boost::filesystem::exists(output));
+  }
+
+  /// @brief Invalid current extents preserve existing data and permit subsequent writes.
+  TEST_F(HDF5InvalidPayload, InvalidMatrixExtentsPreserveDataAndHandles)
+  {
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const std::vector<HDF5::F64> original{2, -3, 5, 7};
+    HDF5::writeMatrixDataset(file.get(), "/Original", original, 2, 2);
+    const auto handles = H5Fget_obj_count(file.get(), H5F_OBJ_ALL);
+    ASSERT_GE(handles, 0);
+    for (const auto shape : {std::array<hsize_t, 3>{H5S_UNLIMITED, 0, 0},
+           {0, H5S_UNLIMITED, 0}, {0, 2, H5S_UNLIMITED}})
+    {
+      SCOPED_TRACE(
+        ::testing::Message() << shape[0] << ':' << shape[1] << ':' << shape[2]);
+      try
+      {
+        HDF5::writeMatrixDataset<HDF5::F64>(
+          file.get(), "/Invalid", {}, shape[0], shape[1], shape[2]);
+        FAIL() << "An unlimited current extent must be rejected.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        EXPECT_NE(std::string(error.what())
+                    .find("Failed to create HDF5 dataspace for dataset: /Invalid"),
+          std::string::npos);
+      }
+      EXPECT_EQ(H5Lexists(file.get(), "/Invalid", H5P_DEFAULT), 0);
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      EXPECT_EQ(HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Original"), original);
+      EXPECT_EQ(HDF5::readMatrixShape(file.get(), "/Original"),
+        (std::pair<hsize_t, hsize_t>{2, 2}));
+    }
+    HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Recovery", {11, -13}, 1, 2);
+    EXPECT_EQ(HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Recovery"),
+      (std::vector<HDF5::F64>{11, -13}));
+    EXPECT_EQ(HDF5::readMatrixShape(file.get(), "/Recovery"),
+      (std::pair<hsize_t, hsize_t>{1, 2}));
+    EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+  }
+
+  /// @brief Native dataset helpers preserve schema, boundary values and handle ownership.
+  TEST_F(HDF5InvalidPayload, NativeDatasetTypesAndEmptyShapes)
+  {
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto verify = [&]<class T>(const std::string& name, hid_t nativeType) {
+      SCOPED_TRACE(name);
+      const std::string base = "/" + name;
+      const auto group = HDF5::Group(
+        H5Gcreate2(file.get(), base.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(group);
+      const auto handles = H5Fget_obj_count(file.get(), H5F_OBJ_ALL);
+      ASSERT_GE(handles, 0);
+      const T lowest = std::numeric_limits<T>::lowest();
+      const T highest = std::numeric_limits<T>::max();
+      const std::vector<T> values{lowest, highest, T(0), T(1), T(2), T(3)};
+      const auto inspect = [&](const std::string& path, const std::vector<hsize_t>& shape,
+                             const std::vector<T>& expected) {
+        SCOPED_TRACE(path);
+        const auto dataset =
+          HDF5::DataSet(H5Dopen2(file.get(), path.c_str(), H5P_DEFAULT));
+        ASSERT_TRUE(dataset);
+        const auto type = HDF5::Handle(H5Dget_type(dataset.get()), H5Tclose);
+        ASSERT_TRUE(type);
+        EXPECT_GT(H5Tequal(type.get(), nativeType), 0);
+        const auto space = HDF5::Space(H5Dget_space(dataset.get()));
+        ASSERT_TRUE(space);
+        ASSERT_EQ(
+          H5Sget_simple_extent_ndims(space.get()), static_cast<int>(shape.size()));
+        std::vector<hsize_t> actualShape(shape.size());
+        ASSERT_EQ(H5Sget_simple_extent_dims(space.get(), actualShape.data(), nullptr),
+          static_cast<int>(shape.size()));
+        EXPECT_EQ(actualShape, shape);
+        EXPECT_EQ(H5Sget_simple_extent_npoints(space.get()),
+          static_cast<hssize_t>(expected.size()));
+        std::vector<T> actual(expected.size());
+        if (!actual.empty())
+        {
+          ASSERT_GE(H5Dread(dataset.get(), nativeType, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                      actual.data()),
+            0);
+        }
+        EXPECT_EQ(actual, expected);
+        EXPECT_EQ(HDF5::readDatasetShape(file.get(), path), shape);
+        EXPECT_EQ(HDF5::readVectorDataset<T>(file.get(), path), expected);
+      };
+      HDF5::writeVectorDataset<T>(file.get(), base + "/Empty", {});
+      inspect(base + "/Empty", {0}, {});
+      HDF5::writeVectorDataset<T>(file.get(), base + "/One", {highest});
+      inspect(base + "/One", {1}, {highest});
+      EXPECT_EQ(HDF5::readScalarDataset<T>(file.get(), base + "/One"), highest);
+      HDF5::writeVectorDataset<T>(file.get(), base + "/Vector", values);
+      inspect(base + "/Vector", {6}, values);
+      HDF5::writeScalarDataset<T>(file.get(), base + "/Scalar", lowest);
+      inspect(base + "/Scalar", {1}, {lowest});
+      EXPECT_EQ(HDF5::readScalarDataset<T>(file.get(), base + "/Scalar"), lowest);
+      for (const auto shape : {std::array<hsize_t, 2>{0, 3}, {2, 0}, {2, 3}})
+      {
+        const auto path =
+          base + "/Matrix" + std::to_string(shape[0]) + "x" + std::to_string(shape[1]);
+        const auto data = shape[0] * shape[1] == 0 ? std::vector<T>{} : values;
+        HDF5::writeMatrixDataset<T>(file.get(), path, data, shape[0], shape[1]);
+        inspect(path, {shape[0], shape[1]}, data);
+        EXPECT_EQ(
+          HDF5::readMatrixShape(file.get(), path), std::make_pair(shape[0], shape[1]));
+      }
+      for (const hsize_t rows : {hsize_t(0), hsize_t(2)})
+      {
+        const auto path = base + "/Tensor" + std::to_string(rows);
+        const auto data = rows == 0 ? std::vector<T>{} : values;
+        HDF5::writeMatrixDataset<T>(file.get(), path, data, rows, 1, 3);
+        inspect(path, {rows, 1, 3}, data);
+      }
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      EXPECT_THROW(
+        HDF5::readScalarDataset<T>(file.get(), base + "/Empty"), Alert::Exception);
+      EXPECT_THROW(
+        HDF5::readScalarDataset<T>(file.get(), base + "/Vector"), Alert::Exception);
+      EXPECT_THROW(HDF5::writeVectorDataset<T>(file.get(), base + "/Vector", {T(7)}),
+        Alert::Exception);
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      inspect(base + "/Vector", {6}, values);
+      EXPECT_THROW(HDF5::writeMatrixDataset<T>(
+                     file.get(), base + "/Matrix2x3", std::vector<T>(6, T(7)), 2, 3),
+        Alert::Exception);
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      inspect(base + "/Matrix2x3", {2, 3}, values);
+    };
+    verify.template operator()<HDF5::U64>("U64", H5T_NATIVE_ULLONG);
+    verify.template operator()<HDF5::I32>("I32", H5T_NATIVE_INT);
+    verify.template operator()<HDF5::F64>("F64", H5T_NATIVE_DOUBLE);
+    verify.template operator()<HDF5::U8>("U8", H5T_NATIVE_UCHAR);
+    EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), 1);
+  }
+
+  /// @brief Direct visualization writers reject duplicate groups without replacing data.
+  TEST_F(HDF5InvalidPayload, DuplicateVisualizationGroupsPreserveExistingData)
+  {
+    auto original = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    auto replacement = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {3, 2});
+    for (auto* mesh : {&original, &replacement})
+    {
+      mesh->getConnectivity().compute(2, 1);
+      for (Index cell = 0; cell < mesh->getCellCount(); ++cell)
+        mesh->setAttribute({2, cell}, mesh == &original ? 11 : 22);
+    }
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto parent = HDF5::Group(
+      H5Gcreate2(file.get(), HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(parent);
+    HDF5::writeVectorDataset<HDF5::U64>(file.get(), "/Mesh/Keep", {12345});
+    HDF5::writeXDMFTopology(file.get(), original);
+    HDF5::writeXDMFVertices(file.get(), original);
+    HDF5::writeXDMFRegionAttribute(file.get(), original);
+    const auto topology =
+      HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology);
+    const auto topologySize =
+      HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize);
+    const auto vertices =
+      HDF5::readVectorDataset<HDF5::F64>(file.get(), HDF5::Path::MeshGeometryVertices);
+    const auto vertexShape =
+      HDF5::readMatrixShape(file.get(), HDF5::Path::MeshGeometryVertices);
+    std::array<std::vector<HDF5::U64>, 3> attributes;
+    for (size_t dimension = 0; dimension < attributes.size(); ++dimension)
+    {
+      attributes[dimension] =
+        HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::attributePath(dimension));
+    }
+    ASSERT_FALSE(topology.empty());
+    ASSERT_EQ(topologySize, topology.size());
+    ASSERT_EQ(vertexShape.first, original.getVertexCount());
+    ASSERT_EQ(vertexShape.second, original.getSpaceDimension());
+    ASSERT_EQ(attributes[2], std::vector<HDF5::U64>(original.getCellCount(), 11));
+    const auto handles = H5Fget_obj_count(file.get(), H5F_OBJ_ALL);
+    ASSERT_GE(handles, 0);
+    const std::array<std::string, 3> groups{
+      HDF5::Path::MeshXDMF, HDF5::Path::MeshGeometry, HDF5::Path::MeshAttributes};
+    for (size_t operation = 0; operation < groups.size(); ++operation)
+    {
+      SCOPED_TRACE(groups[operation]);
+      try
+      {
+        if (operation == 0)
+          HDF5::writeXDMFTopology(file.get(), replacement);
+        else if (operation == 1)
+          HDF5::writeXDMFVertices(file.get(), replacement);
+        else
+          HDF5::writeXDMFRegionAttribute(file.get(), replacement);
+        FAIL() << "A visualization writer accepted a duplicate group";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("Failed to create " + groups[operation] + " group."),
+          std::string::npos);
+      }
+      catch (const std::exception& error)
+      {
+        ADD_FAILURE() << "Expected a native group-creation diagnostic: " << error.what();
+      }
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      EXPECT_EQ(
+        HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology),
+        topology);
+      EXPECT_EQ(
+        HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize),
+        topologySize);
+      EXPECT_EQ(
+        HDF5::readVectorDataset<HDF5::F64>(file.get(), HDF5::Path::MeshGeometryVertices),
+        vertices);
+      EXPECT_EQ(
+        HDF5::readMatrixShape(file.get(), HDF5::Path::MeshGeometryVertices), vertexShape);
+      for (size_t dimension = 0; dimension < attributes.size(); ++dimension)
+      {
+        EXPECT_EQ(
+          HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::attributePath(dimension)),
+          attributes[dimension]);
+      }
+      EXPECT_EQ(HDF5::readVectorDataset<HDF5::U64>(file.get(), "/Mesh/Keep"),
+        std::vector<HDF5::U64>{12345});
+    }
+  }
 }

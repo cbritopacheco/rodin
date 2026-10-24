@@ -1,0 +1,131 @@
+# Shared implementation for the directory-based Tests matrix.
+name: Tests / Group
+'on':
+  workflow_call:
+    inputs:
+      family:
+        type: string
+        required: true
+      profile:
+        type: string
+        required: true
+      backend:
+        type: string
+        required: true
+      group:
+        type: string
+        required: true
+      build_type:
+        type: string
+        required: true
+      multithreaded:
+        type: string
+        required: true
+      asan:
+        type: string
+        required: true
+      ubsan:
+        type: string
+        required: true
+      id:
+        type: string
+        required: true
+      name:
+        type: string
+        required: true
+      baseline:
+        type: boolean
+        required: true
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  Run:
+    name: GCC-14, ${{ inputs.backend == 'optional' && 'Optional' || inputs.backend == 'default' && 'Default' || 'Baseline' }}, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      MAKEFLAGS: ${{ inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '-j1' || '-j2'
+        }}
+      OMP_NUM_THREADS: 2
+      CTEST_PARALLEL_LEVEL: 1
+      GCOV: gcov-14
+      RODIN_COVERAGE: ${{ inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && 'ON' || 'OFF' }}
+      SUITESPARSE_VERSION: 7.14.1
+      SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Hydrate test resources
+        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+      - name: Check execution disk headroom
+        run: python3 dev/ci_environment.py disk
+      - name: Preserve slow-lane execution environment
+        if: inputs.profile == 'slow'
+        run: |
+          cat >> "$GITHUB_ENV" <<'ENV'
+          OMP_WAIT_POLICY=PASSIVE
+          OPENBLAS_NUM_THREADS=1
+          OMPI_MCA_hwloc_base_binding_policy=none
+          ENV
+      - name: Restore directory-owned test build
+        id: build
+        uses: ./.github/actions/test-build
+        with:
+          job: Ordinary
+          matrix: ${{ toJSON(inputs) }}
+          environment: 'true'
+      - name: Inspect restored selection
+        id: selection
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          from pathlib import Path
+          if json.loads(Path('build/ci-built-targets.json').read_text()):
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  output.write('has_targets=true\n')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('common=' + json.loads(Path('build/ci-build-binding.json').read_text())['common'] + '\n')
+          PYTHON
+      - name: Run group serially
+        id: tests
+        if: ${{ !inputs.baseline }}
+        env:
+          GROUP: ${{ inputs.group }}
+          PROFILE: ${{ inputs.profile }}
+          BACKEND: ${{ inputs.backend }}
+        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND"
+      - name: Capture production coverage
+        id: capture
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.selection.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}
+        env:
+          BASELINE: ${{ inputs.baseline }}
+        run: |
+          if [ "$BASELINE" = true ] || ! find build -name '*.gcda' -print -quit | grep -q .; then
+            cmake --build build --target RodinCoverageInitial
+            cp build/RodinCoverage.initial.info build/RodinCoverage.info
+          else
+            cmake --build build --target RodinCoverage
+          fi
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+      - name: Record producer outcome
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          CI_TEST_DEFINITION: ${{ toJSON(inputs) }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          TEST_OUTCOME: ${{ steps.tests.outcome }}
+          CAPTURE_OUTCOME: ${{ steps.capture.outcome }}
+        run: python3 dev/ci_coverage.py record --output ci-result
+      - name: Save invocation and coverage records
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-result-${{ inputs.family }}-${{ steps.selection.outputs.common }}-${{ inputs.id }}
+          path: ci-result/
+          if-no-files-found: error

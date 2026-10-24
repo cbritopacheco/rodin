@@ -11,12 +11,12 @@ set(RodinManufacturedStokes_SLOW_TESTS
   "*Manufactured_Stokes_Test_64x64.Stokes_TaylorGreen*"
   "*Manufactured_Stokes_Test_32x32.NavierStokes_Picard_TaylorGreen*")
 list(JOIN RodinManufacturedStokes_SLOW_TESTS ":" RodinManufacturedStokes_SLOW_TESTS)
-gtest_discover_tests(RodinManufacturedStokes
+rodin_discover_tests(RodinManufacturedStokes
   TEST_FILTER
     "-${RodinManufacturedStokes_SLOW_TESTS}"
   PROPERTIES
     LABELS manufactured)
-gtest_discover_tests(RodinManufacturedStokes
+rodin_discover_tests(RodinManufacturedStokes
   TEST_FILTER
     "${RodinManufacturedStokes_SLOW_TESTS}"
   PROPERTIES
@@ -31,7 +31,7 @@ target_link_libraries(RodinManufacturedStokes3D
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(RodinManufacturedStokes3D
+rodin_discover_tests(RodinManufacturedStokes3D
   PROPERTIES
     LABELS manufactured)
 
@@ -44,7 +44,7 @@ target_link_libraries(RodinManufacturedStokes3DSlow
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(RodinManufacturedStokes3DSlow
+rodin_discover_tests(RodinManufacturedStokes3DSlow
   PROPERTIES
     LABELS slow manufactured)
 
@@ -58,7 +58,7 @@ target_link_libraries(RodinManufacturedH1Poisson
   Rodin::Solver
   )
 
-gtest_discover_tests(RodinManufacturedH1Poisson
+rodin_discover_tests(RodinManufacturedH1Poisson
     PROPERTIES
     LABELS manufactured)
 
@@ -76,12 +76,12 @@ set(RodinManufacturedH1Poisson3D_SLOW_TESTS
   "*Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_5*"
   "*Manufactured_Poisson3D_H1_Test_16.Manufactured_Poisson3D_H1_2_RefinedMesh*")
 list(JOIN RodinManufacturedH1Poisson3D_SLOW_TESTS ":" RodinManufacturedH1Poisson3D_SLOW_TESTS)
-gtest_discover_tests(RodinManufacturedH1Poisson3D
+rodin_discover_tests(RodinManufacturedH1Poisson3D
     TEST_FILTER
       "-${RodinManufacturedH1Poisson3D_SLOW_TESTS}"
     PROPERTIES
     LABELS manufactured)
-gtest_discover_tests(RodinManufacturedH1Poisson3D
+rodin_discover_tests(RodinManufacturedH1Poisson3D
     TEST_FILTER
       "${RodinManufacturedH1Poisson3D_SLOW_TESTS}"
     PROPERTIES
@@ -100,12 +100,12 @@ set(RodinManufacturedH1LinearElasticity3D_SLOW_TESTS
   "*Manufactured_LinearElasticity3D_H1_Test_8.Manufactured_LinearElasticity3D_H1_2*"
   "*Constant_LinearElasticity3D_H1_Test_16.ConstantSolution_H1_2*")
 list(JOIN RodinManufacturedH1LinearElasticity3D_SLOW_TESTS ":" RodinManufacturedH1LinearElasticity3D_SLOW_TESTS)
-gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
+rodin_discover_tests(RodinManufacturedH1LinearElasticity3D
     TEST_FILTER
       "-${RodinManufacturedH1LinearElasticity3D_SLOW_TESTS}"
     PROPERTIES
     LABELS manufactured)
-gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
+rodin_discover_tests(RodinManufacturedH1LinearElasticity3D
     TEST_FILTER
       "${RodinManufacturedH1LinearElasticity3D_SLOW_TESTS}"
     PROPERTIES
@@ -120,7 +120,7 @@ target_link_libraries(RodinManufacturedH1NavierStokes
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(RodinManufacturedH1NavierStokes
+rodin_discover_tests(RodinManufacturedH1NavierStokes
     PROPERTIES
     LABELS manufactured)
 
@@ -137,12 +137,12 @@ set(RodinManufacturedH1NavierStokes3D_SLOW_TESTS
   "*Manufactured_NavierStokes3D_Test_8.NavierStokes3D_Picard_PolynomialVortex*"
   "*Manufactured_NavierStokes3D_Test_8.NavierStokes3D_Picard_TaylorGreen*")
 list(JOIN RodinManufacturedH1NavierStokes3D_SLOW_TESTS ":" RodinManufacturedH1NavierStokes3D_SLOW_TESTS)
-gtest_discover_tests(RodinManufacturedH1NavierStokes3D
+rodin_discover_tests(RodinManufacturedH1NavierStokes3D
     TEST_FILTER
     "-${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
     PROPERTIES
     LABELS manufactured)
-gtest_discover_tests(RodinManufacturedH1NavierStokes3D
+rodin_discover_tests(RodinManufacturedH1NavierStokes3D
     TEST_FILTER
     "${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
     PROPERTIES
@@ -151,4 +151,4 @@ gtest_discover_tests(RodinManufacturedH1NavierStokes3D
 add_executable(RodinManufacturedSpatialMatrix SpatialMatrix.cpp)
 target_link_libraries(RodinManufacturedSpatialMatrix
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational Rodin::Assembly Rodin::Solver)
-gtest_discover_tests(RodinManufacturedSpatialMatrix PROPERTIES LABELS manufactured)
+rodin_discover_tests(RodinManufacturedSpatialMatrix PROPERTIES LABELS manufactured)

@@ -1,0 +1,56 @@
+name: Restore independent test build
+description: Restore the current-commit build for one isolated execution lane.
+inputs:
+  job:
+    description: Existing test job family.
+    required: true
+  matrix:
+    description: Existing execution matrix coordinates.
+    required: true
+  environment:
+    description: Install the compatible environment before restoring.
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Install pinned lane selection dependency
+      shell: bash
+      run: python3 -m pip install PyYAML==6.0.2
+    - name: Identify build backend
+      id: configuration
+      shell: bash
+      env:
+        JOB: ${{ inputs.job }}
+        MATRIX: ${{ inputs.matrix }}
+      run: python3 dev/ci_build_graph.py mode --job "$JOB" --matrix "$MATRIX"
+    - uses: actions/download-artifact@v4
+      with:
+        name: ci-build-index-${{ steps.configuration.outputs.common }}
+        path: .
+    - name: Identify compatible build
+      id: build
+      shell: bash
+      env:
+        JOB: ${{ inputs.job }}
+        MATRIX: ${{ inputs.matrix }}
+      run: python3 dev/ci_build_graph.py identify --job "$JOB" --matrix "$MATRIX"
+    - uses: ./.github/actions/test-environment
+      if: inputs.environment == 'true'
+      with:
+        definition: ${{ steps.build.outputs.definition }}
+    - name: Download only this selection's required builds
+      uses: actions/download-artifact@v4
+      with:
+        pattern: ${{ steps.build.outputs.artifacts }}
+        path: ci-runtime-inputs
+    - name: Check restoration disk headroom
+      shell: bash
+      run: python3 dev/ci_environment.py disk
+    - name: Restore clean runner-local build
+      shell: bash
+      env:
+        JOB: ${{ inputs.job }}
+        MATRIX: ${{ inputs.matrix }}
+        CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
+        GH_TOKEN: ${{ github.token }}
+      run: python3 dev/ci_build_graph.py restore --job "$JOB" --matrix "$MATRIX"

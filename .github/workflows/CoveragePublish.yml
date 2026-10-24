@@ -1,0 +1,66 @@
+name: Tests / Coverage / Publish
+'on':
+  workflow_call:
+    inputs:
+      kind:
+        type: string
+        required: true
+      family:
+        type: string
+        required: true
+      common:
+        type: string
+        required: true
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  Publish:
+    name: Validate and publish every contribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ci-test-plan
+          path: .
+      - name: Download independent lane reports and receipts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.kind == 'ordinary' && 'ci-result' || 'ci-target' }}-${{ inputs.family }}-${{ inputs.common }}-*
+          path: ci-contributions
+      - name: Verify all producers and form production coverage union
+        env:
+          KIND: ${{ inputs.kind }}
+          FAMILY: ${{ inputs.family }}
+          COMMON: ${{ inputs.common }}
+        run: python3 dev/ci_coverage_publish.py collect --kind "$KIND" --family "$FAMILY" --common "$COMMON"
+      - name: Upload incremental coverage union
+        id: upload
+        uses: codecov/codecov-action@v5
+        with:
+          files: ci-publication/CombinedCoverage.info
+          disable_search: true
+          plugins: noop
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: ci-batch-${{ inputs.family }}-${{ inputs.common }}
+          flags: tests
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
+      - name: Record successful Codecov publication
+        env:
+          COVERAGE_UPLOADED: ${{ steps.upload.outcome }}
+        run: python3 dev/ci_coverage_publish.py record
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ci-publication-${{ inputs.family }}-${{ inputs.common }}
+          path: ci-publication/
+          if-no-files-found: error

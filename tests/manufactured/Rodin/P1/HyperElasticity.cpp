@@ -41,17 +41,17 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
     struct SolveResult
     {
-        Real l2ErrorSquared;
-        bool converged;
-        Real initialResidual;
-        Real finalResidual;
+      Real l2ErrorSquared;
+      bool converged;
+      Real initialResidual;
+      Real finalResidual;
     };
 
     auto makeUnitSquareMesh()
     {
       constexpr Real meshElementSize = 1.0 / 16.0;
       Mesh mesh;
-      mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 17, 17 });
+      mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {17, 17});
       mesh.scale(meshElementSize);
       mesh.getConnectivity().compute(1, 2);
       return mesh;
@@ -87,9 +87,11 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       return probe.test(1e-6);
     }
 
-    /// @brief Finite-difference probe of the active contraction tangent.
-    /// @param previousFiberStrain When set, supplies Tags::PreviousFiberStrain
-    ///   so the series law is evaluated at the midpoint fiber strain.
+    /**
+     * @brief Finite-difference probe of the active contraction tangent.
+     * @param previousFiberStrain When set, supplies Tags::PreviousFiberStrain
+     *   so the series law is evaluated at the midpoint fiber strain.
+     */
     template <class FES, class State>
     Rodin::Test::FDProbeReport checkActiveContractionInternalVirtualWorkFD(
       FES& Vh, State& uCurrent, std::optional<Real> previousFiberStrain)
@@ -105,7 +107,6 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       activeInput.contractility = 40.0;
       Solid::ActiveFiberLaw active(activeInput);
       Solid::ActiveContraction law(passive, active);
-      law.setLocalTolerance(1e-13).setLocalMaxIterations(80);
 
       auto setActiveInput = [dim, previousFiberStrain](Solid::ConstitutivePoint& cp) {
         Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(dim));
@@ -122,6 +123,9 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
         cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
         cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
         cp.set<Solid::Tags::ElectricalActivation>(1.1);
+        cp.set<Solid::Tags::ActiveExtension>(-0.025);
+        cp.set<Solid::Tags::ActiveGamma>(1.8);
+        cp.set<Solid::Tags::ActiveBeta>(0.95);
         if (previousFiberStrain)
           cp.set<Solid::Tags::PreviousFiberStrain>(*previousFiberStrain);
       };
@@ -319,9 +323,11 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
   }
 
-  /// @brief Verifies the ActiveContraction tangent stays consistent with a central
-  ///        finite difference of the residual when the series law is evaluated at
-  ///        the midpoint fiber strain (Tags::PreviousFiberStrain supplied).
+  /**
+   * @brief Verifies the ActiveContraction tangent stays consistent with a central
+   *        finite difference of the residual when the series law is evaluated at
+   *        the midpoint fiber strain (Tags::PreviousFiberStrain supplied).
+   */
   TEST(Rodin_Manufactured_P1,
     HyperElasticity_ActiveContraction_MidpointStrain_FDConsistency2D)
   {
@@ -344,8 +350,10 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
   }
 
-  /// @brief Verifies the midpoint-strain ActiveContraction tangent against a central
-  ///        finite difference of the residual in 3D.
+  /**
+   * @brief Verifies the midpoint-strain ActiveContraction tangent against a central
+   *        finite difference of the residual in 3D.
+   */
   TEST(Rodin_Manufactured_P1,
     HyperElasticity_ActiveContraction_MidpointStrain_FDConsistency3D)
   {
@@ -370,14 +378,16 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   // ========================================================================
   // InternalVirtualWork output / commit tests
   //
-  // commit() evaluates the law at every quadrature point and hands each cache
+  // commit() evaluates the law at every quadrature point and hands each prepared
   // to the output, without assembling. The point of the hook is that the input
   // and the output are driven by the same sweep, so their (cell, quadrature
   // point) indexing agrees by construction rather than by a matching guess.
   // ========================================================================
 
-  /// @brief Verifies commit() invokes the output exactly once per quadrature
-  ///        point, over the same points the input sees.
+  /**
+   * @brief Verifies commit() invokes the output exactly once per quadrature
+   *        point, over the same points the input sees.
+   */
   TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitVisitsEachQuadraturePointOnce)
   {
     Mesh mesh = makeUnitSquareMesh();
@@ -413,10 +423,12 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     EXPECT_EQ(inputSeen, outputSeen);
   }
 
-  /// @brief Verifies commit() runs the input before the law, so the output
-  ///        observes a cache built from the injected data. With the dynamic
-  ///        tags supplied, the active contraction cache must be dynamic.
-  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitOutputSeesInputDrivenCache)
+  /**
+   * @brief Verifies commit() runs the input before the law, so the output
+   *        observes a prepared built from the injected data. With the dynamic
+   *        tags supplied, the active contraction prepared must be dynamic.
+   */
+  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitOutputSeesInputDrivenLaw)
   {
     Mesh mesh = makeUnitSquareMesh();
     const size_t dim = mesh.getSpaceDimension();
@@ -445,16 +457,19 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
       cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
       cp.set<Solid::Tags::ElectricalActivation>(1.1);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
     });
 
     std::size_t calls = 0;
     bool allDynamic = true;
-    ivw.setOutput([&](const Solid::ConstitutivePoint&, const auto& cache) {
+    ivw.setOutput([&](const Solid::ConstitutivePoint&, const auto& prepared) {
       ++calls;
       // The dynamic branch is only taken when the input's tags are present,
       // so this proves input ran before the law and the output sees the
-      // resulting cache.
-      allDynamic = allDynamic && cache.dynamic;
+      // resulting prepared.
+      allDynamic = allDynamic && prepared.isDynamic();
     });
 
     ivw.commit();
@@ -463,8 +478,10 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     EXPECT_TRUE(allDynamic);
   }
 
-  /// @brief Verifies commit() is a no-op when no output has been set, rather
-  ///        than evaluating the law or faulting.
+  /**
+   * @brief Verifies commit() is a no-op when no output has been set, rather
+   *        than evaluating the law or faulting.
+   */
   TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitWithoutOutputIsANoOp)
   {
     Mesh mesh = makeUnitSquareMesh();

@@ -8,9 +8,11 @@
 /** @file @brief Exhaustive spatial tensor extents, arithmetic and contractions. */
 #include <cmath>
 #include <stdexcept>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <gtest/gtest.h>
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialTensor.h"
 
@@ -19,6 +21,41 @@ using namespace Rodin::Math;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Invalid axis diagnostics identify the member and preserve tensor state.
+  TEST(SpatialTensor, InvalidAxisReportsMemberContext)
+  {
+    SpatialTensor<Real> tensor(1, 2, 3);
+    const auto extents = tensor.getExtents();
+    try
+    {
+      tensor.getDimension(3);
+      FAIL() << "An invalid tensor axis must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      EXPECT_NE(std::string(error.what()).find("getDimension"), std::string::npos);
+    }
+    EXPECT_EQ(tensor.getExtents(), extents);
+  }
+
+  /// @brief Invalid resize diagnostics identify the member and preserve tensor state.
+  TEST(SpatialTensor, InvalidResizeReportsMemberContext)
+  {
+    SpatialTensor<Real> tensor(1, 2, 3);
+    const auto extents = tensor.getExtents();
+    try
+    {
+      tensor.resize({1, 4, 3});
+      FAIL() << "An extent above spatial capacity must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      EXPECT_NE(std::string(error.what()).find("resize"), std::string::npos);
+    }
+    EXPECT_EQ(tensor.getExtents(), extents);
+    EXPECT_EQ(tensor.size(), 6u);
+  }
+
   template <class Scalar, size_t Rank>
   void checkTensorExtents()
   {
@@ -42,7 +79,7 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(a.getExtents(), extents);
       for (size_t axis = 0; axis < Rank; ++axis)
         EXPECT_EQ(a.getDimension(axis), extents[axis]);
-      EXPECT_THROW(a.getDimension(Rank), std::out_of_range);
+      EXPECT_THROW(a.getDimension(Rank), Alert::Exception);
       Scalar expectedDot = 0;
       Real expectedSquaredNorm = 0;
       for (size_t i = 0; i < count; ++i)
@@ -58,8 +95,16 @@ namespace Rodin::Tests::Unit
           a[i] = Scalar(i + 1);
           b[i] = Scalar(i % 5 + 1);
         }
-        expectedDot += a[i] * Math::conj(b[i]);
-        expectedSquaredNorm += std::real(a[i] * Math::conj(a[i]));
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          expectedDot += a[i] * Scalar(b[i].real(), -b[i].imag());
+          expectedSquaredNorm += a[i].real() * a[i].real() + a[i].imag() * a[i].imag();
+        }
+        else
+        {
+          expectedDot += a[i] * b[i];
+          expectedSquaredNorm += a[i] * a[i];
+        }
         typename Tensor::Extents indices;
         size_t offset = i;
         for (size_t axis = Rank; axis-- > 0;)
@@ -72,12 +117,15 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(
           std::apply([&](auto... index) { return readOnly(index...); }, indices), a[i]);
       }
-      EXPECT_EQ(a.dot(b), expectedDot);
+      EXPECT_EQ(Math::dot(a, b), expectedDot);
       EXPECT_EQ(a.squaredNorm(), expectedSquaredNorm);
       EXPECT_EQ(a.norm(), std::sqrt(expectedSquaredNorm));
       const auto sum = a + b, difference = a - b, negative = -a;
       const auto scaled = 2 * a, divided = a / 2;
-      const auto conjugated = a.conjugate();
+      const auto conjugated = Math::conj(a);
+      const auto restored = Math::conj(conjugated);
+      EXPECT_EQ(conjugated.getExtents(), extents);
+      EXPECT_EQ(conjugated.size(), count);
       auto added = a, subtracted = a;
       added += b;
       subtracted -= b;
@@ -90,7 +138,15 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(negative[i], -a[i]);
         EXPECT_EQ(scaled[i], Scalar(2) * a[i]);
         EXPECT_EQ(divided[i], a[i] / Scalar(2));
-        EXPECT_EQ(conjugated[i], Math::conj(a[i]));
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          EXPECT_EQ(conjugated[i], Scalar(a[i].real(), -a[i].imag()));
+        }
+        else
+        {
+          EXPECT_EQ(conjugated[i], a[i]);
+        }
+        EXPECT_EQ(restored[i], a[i]);
       }
       EXPECT_EQ(sum.getExtents(), extents);
       const auto copy = a;
@@ -111,10 +167,10 @@ namespace Rodin::Tests::Unit
       {
         auto invalid = extents;
         invalid[axis] = Tensor::MaxSize + 1;
-        EXPECT_THROW(assigned.resize(invalid), std::exception);
+        EXPECT_THROW(assigned.resize(invalid), Alert::Exception);
         EXPECT_EQ(assigned.getExtents(), extents);
         EXPECT_EQ(assigned.size(), count);
-        EXPECT_THROW(Tensor bad(invalid), std::exception);
+        EXPECT_THROW(Tensor bad(invalid), Alert::Exception);
       }
 
       // Independent nested sums check every free and contracted axis, including zero.

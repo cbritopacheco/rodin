@@ -3,13 +3,16 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <cmath>
 #include <limits>
+#include <memory>
 #include <tuple>
 
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Adaptation/SWIFT/Hinge.h"
+#include "Rodin/Adaptation/SWIFT/Problem.h"
 #include "Rodin/Adaptation/SWIFT/HingeForce.h"
 #include "Rodin/Adaptation/SWIFT/HingeMetric.h"
 
@@ -18,25 +21,57 @@ using namespace Rodin::Adaptation;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Adaptation_SWIFTHingeState, DisplacementNormPreservesQuadratureAssociation)
+  {
+    auto mesh =
+      Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle, {2, 2});
+    Variational::P1<Math::SpatialVector<Real>> space(mesh, 2);
+    struct Displacement
+    {
+      size_t& points;
+      size_t& samples;
+      Math::SpatialVector<Real> getValue(const Geometry::Point&) const
+      {
+        ++points;
+        return {1, 2};
+      }
+      Math::SpatialVector<Real> getValue(const Variational::IntegrationPoint& ip) const
+      {
+        EXPECT_NE(ip.getReferenceQuadratureFormula(), nullptr);
+        ++samples;
+        return {1, 2};
+      }
+    };
+    size_t points = 0, samples = 0;
+    const Displacement displacement{points, samples};
+    const auto cell = mesh.getCell(0);
+    const auto& formula = QF::PolytopeQuadratureFormula::get(6, cell->getGeometry());
+    EXPECT_EQ(SWIFT::getPhysicalDisplacementNorm(
+                mesh, space, std::vector<Index>{cell->getIndex()}, displacement, 6),
+      Real(2));
+    EXPECT_EQ(points, Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount());
+    EXPECT_EQ(samples, formula.getSize());
+  }
+
   TEST(Rodin_Adaptation_SWIFTHingeState, AdaptiveMeasuresPreserveMassAcrossGeometries)
   {
     using namespace Geometry;
     struct Gradient
     {
-        bool zero = false;
-        Math::SpatialMatrix<Real> getValue(const Variational::IntegrationPoint& ip) const
+      bool zero = false;
+      Math::SpatialMatrix<Real> getValue(const Variational::IntegrationPoint& ip) const
+      {
+        const auto dim = ip.getPoint().getPolytope().getDimension();
+        Math::SpatialMatrix<Real> gradient(dim, dim);
+        gradient.setZero();
+        if (!zero)
         {
-          const auto dim = ip.getPoint().getPolytope().getDimension();
-          Math::SpatialMatrix<Real> gradient(dim, dim);
-          gradient.setZero();
-          if (!zero)
-          {
-            gradient(0, 0) = Real(-1.5) * ip.getPoint().getReferenceCoordinates()(0);
-            if (dim > 1)
-              gradient(0, 1) = Real(3) * ip.getPoint().getReferenceCoordinates()(1);
-          }
-          return gradient;
+          gradient(0, 0) = Real(-1.5) * ip.getPoint().getReferenceCoordinates()(0);
+          if (dim > 1)
+            gradient(0, 1) = Real(3) * ip.getPoint().getReferenceCoordinates()(1);
         }
+        return gradient;
+      }
     };
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
@@ -55,6 +90,11 @@ namespace Rodin::Tests::Unit
       size_t count = 0;
       std::vector<Math::SpatialVector<Real>> points;
       samples.forEach([&](const Variational::IntegrationPoint& ip, Real weight) {
+        ASSERT_NE(ip.getReferenceQuadratureFormula(), nullptr);
+        EXPECT_EQ((ip.getPoint().getReferenceCoordinates() -
+                    ip.getReferenceQuadratureFormula()->getPoint(ip.getIndex()))
+                    .norm(),
+          Real(0));
         measure += weight;
         points.push_back(ip.getPoint().getReferenceCoordinates());
         ++count;
@@ -66,6 +106,7 @@ namespace Rodin::Tests::Unit
         size_t index = 0;
         samples.forEachHinge(Gradient{true}, Gradient{zero},
           [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
+            ASSERT_NE(ip.getReferenceQuadratureFormula(), nullptr);
             ASSERT_LT(index, points.size());
             EXPECT_DOUBLE_EQ(
               (ip.getPoint().getReferenceCoordinates() - points[index++]).norm(),
@@ -107,8 +148,7 @@ namespace Rodin::Tests::Unit
     {
       const auto& covering = SWIFT::QualityCovering::get(geometry, subdivisions);
       EXPECT_EQ(&covering, &SWIFT::QualityCovering::get(geometry, subdivisions));
-      EXPECT_NE(covering.getCacheIdentity(),
-        SWIFT::QualityCovering::get(geometry, subdivisions + 1).getCacheIdentity());
+      EXPECT_NE(&covering, &SWIFT::QualityCovering::get(geometry, subdivisions + 1));
       ASSERT_EQ(covering.getSize(), count);
       const Real shift =
         geometry == G::Tetrahedron ? Real(1) / (2 * std::sqrt(Real(2))) : Real(0.5);
@@ -164,7 +204,8 @@ namespace Rodin::Tests::Unit
           ? m == 1 ? Real(1) / std::sqrt(Real(6))
                    : std::sqrt(Real(3)) / (2 * m + 3 / std::sqrt(Real(2)))
           : std::sqrt(Real(dimension)) / (2 * (m + 1));
-        EXPECT_DOUBLE_EQ(covering.getCoveringRadius(), expected);
+        EXPECT_DOUBLE_EQ(
+          SWIFT::QualityCovering(geometry, m).getCoveringRadius(), expected);
         const auto distance = [&](const Math::SpatialVector<Real>& point) {
           Real nearest = std::numeric_limits<Real>::infinity();
           for (size_t q = 0; q < covering.getSize(); ++q)
@@ -238,60 +279,111 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Rodin_Adaptation_SWIFTHingeState, AffineHingeDerivatives2D3D)
+  TEST(Rodin_Adaptation_SWIFTHingeState, ProductStrengthsPreserveEnergyAndNewtonSystem)
   {
     for (const std::size_t dimension : {2u, 3u})
     {
-      for (const Real amplitude : {Real(0), Real(1)})
+      CellDeformation deformation(dimension);
+      Math::SpatialMatrix<Real> F =
+        Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+      F(0, 0) = Real(1.4);
+      F(1, 1) = Real(0.7);
+      deformation.setDeformationGradient(F);
+      Math::SpatialMatrix<Real> gradient(dimension, dimension);
+      gradient.setZero();
+      gradient(0, 0) = Real(0.5);
+      gradient(1, 1) = Real(-0.9);
+      for (const Real overall : {Real(0), Real(1), Real(100)})
       {
-        CellDeformation deformation(dimension);
-        Math::SpatialMatrix<Real> F =
-          Math::SpatialMatrix<Real>::Identity(dimension, dimension);
-        F(0, 0) = Real(1.4);
-        F(1, 1) = Real(0.7);
-        deformation.setDeformationGradient(F);
-        Math::SpatialMatrix<Real> inner(dimension, dimension);
-        inner.setZero();
-        inner(0, 0) = amplitude * Real(0.5);
-        inner(1, 1) = amplitude * Real(-0.9);
-        Math::SpatialMatrix<Real> direction =
-          Math::SpatialMatrix<Real>::Identity(dimension, dimension);
-        direction(0, 1) = Real(0.2);
-        SWIFT::Parameters p;
-        p.model.distortion = Real(1.4);
-        constexpr Real mu = Real(0.02), eps = Real(1e-6);
-        const Real rowJ = -deformation.getJacobianAction(direction);
-        const Real rowQ = deformation.getRelativeDistortionAction(direction);
-        const auto scalarEnergy = [&](Real slack, Real delta) {
-          const Real violation = std::max(Real(0), Real(1) - slack / delta);
-          return mu * Real(0.5) * violation * violation;
-        };
-        const auto energy = [&](const Math::SpatialMatrix<Real>& v) {
-          SWIFT::HingeState s(deformation, v, p, mu);
-          const Real expected = scalarEnergy(s.getJacobianSlack(),
-                                  p.model.qualityGuard * (Real(1) - p.model.jacobian)) +
-            scalarEnergy(s.getDistortionSlack(),
-              p.model.qualityGuard * (p.model.distortion - Real(1)));
-          EXPECT_NEAR(s.getEnergy(p, mu), expected, Real(1e-12));
-          return s.getEnergy(p, mu);
-        };
-        const auto derivative = [&](const Math::SpatialMatrix<Real>& v) {
-          SWIFT::HingeState s(deformation, v, p, mu);
-          return (s.getJacobianHessian() * s.getJacobianAction() - s.getJacobianForce()) *
-            rowJ +
-            (s.getDistortionHessian() * s.getDistortionAction() -
-              s.getDistortionForce()) *
-            rowQ;
-        };
-        SWIFT::HingeState s(deformation, inner, p, mu);
-        ASSERT_TRUE(s.isAdmissible());
-        const Math::SpatialMatrix<Real> plus(inner + eps * direction),
-          minus(inner - eps * direction);
-        EXPECT_NEAR(derivative(inner), (energy(plus) - energy(minus)) / (Real(2) * eps),
-          Real(1e-7));
+        SWIFT::Parameters rows;
+        rows.model.distortion = Real(1.4);
+        rows.model.hinge = {.jacobian = Real(0.1), .distortion = Real(1)};
+        auto products = rows;
+        products.model.hinge.jacobian *= overall;
+        products.model.hinge.distortion *= overall;
+        constexpr Real scale = Real(0.02);
+        const SWIFT::HingeState previous(deformation, gradient, rows, scale * overall);
+        const SWIFT::HingeState current(deformation, gradient, products, scale);
+        EXPECT_NEAR(previous.getEnergy(rows, scale * overall),
+          current.getEnergy(products, scale), Real(1e-10));
         EXPECT_NEAR(
-          s.getJacobianHessian() * rowJ * rowJ + s.getDistortionHessian() * rowQ * rowQ,
-          (derivative(plus) - derivative(minus)) / (Real(2) * eps), Real(1e-7));
+          previous.getJacobianHessian(), current.getJacobianHessian(), Real(1e-10));
+        EXPECT_NEAR(
+          previous.getDistortionHessian(), current.getDistortionHessian(), Real(1e-10));
+        EXPECT_NEAR(previous.getJacobianForce(), current.getJacobianForce(), Real(1e-10));
+        EXPECT_NEAR(
+          previous.getDistortionForce(), current.getDistortionForce(), Real(1e-10));
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTHingeState, AffineHingeDerivatives2D3D)
+  {
+    const SWIFT::Parameters defaults;
+    for (const std::size_t dimension : {2u, 3u})
+    {
+      for (const auto& [weightJ, weightQ] :
+        {std::pair{defaults.model.hinge.jacobian, defaults.model.hinge.distortion},
+          std::pair{Real(1), Real(1)}, std::pair{Real(1), Real(0.25)},
+          std::pair{Real(0), Real(1)}, std::pair{Real(1), Real(0)}})
+      {
+        for (const Real amplitude : {Real(0), Real(1)})
+        {
+          CellDeformation deformation(dimension);
+          Math::SpatialMatrix<Real> F =
+            Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+          F(0, 0) = Real(1.4);
+          F(1, 1) = Real(0.7);
+          deformation.setDeformationGradient(F);
+          Math::SpatialMatrix<Real> inner(dimension, dimension);
+          inner.setZero();
+          inner(0, 0) = amplitude * Real(0.5);
+          inner(1, 1) = amplitude * Real(-0.9);
+          Math::SpatialMatrix<Real> direction =
+            Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+          direction(0, 1) = Real(0.2);
+          SWIFT::Parameters p;
+          p.model.distortion = Real(1.4);
+          p.model.hinge.jacobian = weightJ;
+          p.model.hinge.distortion = weightQ;
+          // Retain the pre-reparameterization finite-difference energy scale.
+          constexpr Real mu = Real(0.0002), eps = Real(1e-6);
+          const Real rowJ = -deformation.getJacobianAction(direction);
+          const Real rowQ = deformation.getRelativeDistortionAction(direction);
+          const auto scalarEnergy = [&](Real slack, Real delta) {
+            const Real violation = std::max(Real(0), Real(1) - slack / delta);
+            return mu * Real(0.5) * violation * violation;
+          };
+          const auto energy = [&](const Math::SpatialMatrix<Real>& v) {
+            SWIFT::HingeState s(deformation, v, p, mu);
+            const Real expected = p.model.hinge.jacobian *
+                scalarEnergy(s.getJacobianSlack(),
+                  p.model.qualityGuard * (Real(1) - p.model.jacobian)) +
+              p.model.hinge.distortion *
+                scalarEnergy(s.getDistortionSlack(),
+                  p.model.qualityGuard * (p.model.distortion - Real(1)));
+            EXPECT_NEAR(s.getEnergy(p, mu), expected, Real(1e-12));
+            return s.getEnergy(p, mu);
+          };
+          const auto derivative = [&](const Math::SpatialMatrix<Real>& v) {
+            SWIFT::HingeState s(deformation, v, p, mu);
+            return (s.getJacobianHessian() * s.getJacobianAction() -
+                     s.getJacobianForce()) *
+              rowJ +
+              (s.getDistortionHessian() * s.getDistortionAction() -
+                s.getDistortionForce()) *
+              rowQ;
+          };
+          SWIFT::HingeState s(deformation, inner, p, mu);
+          ASSERT_TRUE(s.isAdmissible());
+          const Math::SpatialMatrix<Real> plus(inner + eps * direction),
+            minus(inner - eps * direction);
+          EXPECT_NEAR(derivative(inner), (energy(plus) - energy(minus)) / (Real(2) * eps),
+            Real(1e-7));
+          EXPECT_NEAR(
+            s.getJacobianHessian() * rowJ * rowJ + s.getDistortionHessian() * rowQ * rowQ,
+            (derivative(plus) - derivative(minus)) / (Real(2) * eps), Real(1e-7));
+        }
       }
     }
   }
@@ -335,12 +427,14 @@ namespace Rodin::Tests::Unit
       predictor = inner;
       SWIFT::Parameters p;
       p.model.distortion = Real(1.4);
+      // Product strengths are 100 times the former relative row weights.
+      constexpr Real hingeScale = Real(0.0002);
       BilinearForm metric(trial, test);
       LinearForm force(test);
       const auto residual = [&]() {
         metric =
-          SWIFT::HingeMetric(trial, test, current, inner, predictor, p, Real(0.02));
-        force = SWIFT::HingeForce(test, current, inner, predictor, p, Real(0.02));
+          SWIFT::HingeMetric(trial, test, current, inner, predictor, p, hingeScale);
+        force = SWIFT::HingeForce(test, current, inner, predictor, p, hingeScale);
         metric.assemble();
         force.assemble();
         return Math::Vector<Real>(
@@ -362,8 +456,8 @@ namespace Rodin::Tests::Unit
               CellDeformation deformation(2);
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const SWIFT::HingeState state(
-                deformation, innerJacobian.getValue(ip), p, Real(0.02));
-              value += state.getEnergy(p, Real(0.02), weightJ, weightQ);
+                deformation, innerJacobian.getValue(ip), p, hingeScale);
+              value += state.getEnergy(p, hingeScale, weightJ, weightQ);
             });
         }
         return value;
@@ -385,6 +479,176 @@ namespace Rodin::Tests::Unit
     };
     check.template operator()<1>();
     check.template operator()<2>();
+  }
+
+  /// @brief Mixed P1/P2 loads and tangents differentiate a shared discrete hinge energy.
+  TEST(Rodin_Adaptation_SWIFTHingeState, RectangularP1P2EnergyDerivativesAndBoundCopies)
+  {
+    using namespace Geometry;
+    using namespace Variational;
+    for (size_t dimension : {2u, 3u})
+    {
+      auto mesh = dimension == 2
+        ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2})
+        : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+      for (size_t d = 1; d <= dimension; ++d)
+      {
+        for (size_t dp = 0; dp <= dimension; ++dp)
+          mesh.getConnectivity().compute(d, dp);
+      }
+      P1<Math::SpatialVector<Real>, LocalMesh> trialSpace(mesh, dimension);
+      H1 testSpace(std::integral_constant<size_t, 2>{}, mesh, dimension);
+      EXPECT_FALSE(trialSpace == testSpace);
+      TrialFunction trial(trialSpace);
+      TestFunction test(testSpace);
+      GridFunction current(trialSpace), inner(trialSpace), predictor(trialSpace),
+        direction(trialSpace);
+      GridFunction testDirection(testSpace);
+      current = VectorFunction(dimension, [dimension](const Point& point) {
+        Math::SpatialVector<Real> value(dimension);
+        value(0) = Real(0.4) * point.getCoordinates()(0);
+        for (size_t d = 1; d < dimension; ++d)
+          value(d) = Real(-0.3) * point.getCoordinates()(d);
+        return value;
+      });
+      inner = VectorFunction(dimension, [dimension](const Point& point) {
+        Math::SpatialVector<Real> value(dimension);
+        value.setZero();
+        value(0) = Real(0.5) * point.getCoordinates()(0);
+        value(1) = Real(-0.9) * point.getCoordinates()(1);
+        return value;
+      });
+      predictor = inner;
+      direction = VectorFunction(dimension, [dimension](const Point& point) {
+        Math::SpatialVector<Real> value(dimension);
+        for (size_t d = 0; d < dimension; ++d)
+          value(d) = point.getCoordinates()(d);
+        value(0) += Real(0.2) * point.getCoordinates()(1);
+        return value;
+      });
+      testDirection = VectorFunction(dimension, [dimension](const Point& point) {
+        Math::SpatialVector<Real> value(dimension);
+        for (size_t d = 0; d < dimension; ++d)
+          value(d) = point.getCoordinates()(d) * point.getCoordinates()(d);
+        value(0) += Real(0.1) * point.getCoordinates()(1);
+        value(1) += Real(0.2) * point.getCoordinates()(0);
+        return value;
+      });
+      SWIFT::Parameters parameters;
+      parameters.model.distortion = Real(1.4);
+      // Both polynomial orders differentiate the same frozen witness measure.
+      parameters.sampling.subdivision = 2;
+      constexpr Real hingeScale = Real(0.0002);
+      BilinearForm metric(trial, test);
+      LinearForm force(test);
+      metric = SWIFT::HingeMetric(
+        trial, test, current, inner, predictor, parameters, hingeScale);
+      force = SWIFT::HingeForce(test, current, inner, predictor, parameters, hingeScale);
+      metric.assemble();
+      force.assemble();
+      ASSERT_EQ(metric.getOperator().cols(), trialSpace.getSize());
+      ASSERT_EQ(metric.getOperator().rows(), testSpace.getSize());
+      ASSERT_GT(metric.getOperator().rows(), metric.getOperator().cols());
+      const Math::Vector<Real> tangent(metric.getOperator() * direction.getData());
+      const Math::Vector<Real> residual(
+        metric.getOperator() * inner.getData() - force.getVector());
+      auto currentJacobian = Jacobian(current);
+      auto innerJacobian = Jacobian(inner);
+      auto predictorJacobian = Jacobian(predictor);
+      auto directionJacobian = Jacobian(direction);
+      auto testDirectionJacobian = Jacobian(testDirection);
+      const auto energy = [&](Real trialStep, Real testStep) {
+        Real value = 0;
+        for (Index index = 0; index < mesh.getCellCount(); ++index)
+        {
+          const auto cell = mesh.getCell(index);
+          const SWIFT::QualitySamples samples(*cell, 1, parameters);
+          samples.forEachHinge(currentJacobian, predictorJacobian,
+            [&](const IntegrationPoint& ip, Real weightJ, Real weightQ) {
+              CellDeformation deformation(dimension);
+              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+              EXPECT_TRUE(deformation.isAdmissible());
+              EXPECT_LT(deformation.getRelativeDistortion(), parameters.model.distortion);
+              const Math::SpatialMatrix<Real> gradient(innerJacobian.getValue(ip) +
+                trialStep * directionJacobian.getValue(ip) +
+                testStep * testDirectionJacobian.getValue(ip));
+              const SWIFT::HingeState state(
+                deformation, gradient, parameters, hingeScale);
+              EXPECT_GT(state.getJacobianHessian(), Real(0));
+              EXPECT_GT(state.getDistortionHessian(), Real(0));
+              value += state.getEnergy(parameters, hingeScale, weightJ, weightQ);
+            });
+        }
+        return value;
+      };
+      constexpr Real firstStep = Real(1e-5), secondStep = Real(1e-4);
+      const Real first = (energy(0, firstStep) - energy(0, -firstStep)) / (2 * firstStep);
+      const Real second =
+        (energy(secondStep, secondStep) - energy(secondStep, -secondStep) -
+          energy(-secondStep, secondStep) + energy(-secondStep, -secondStep)) /
+        (4 * secondStep * secondStep);
+      ASSERT_TRUE(std::isfinite(first));
+      ASSERT_TRUE(std::isfinite(second));
+      ASSERT_GT(std::abs(second), Real(1e-5));
+      EXPECT_NEAR(testDirection.getData().dot(residual), first,
+        Real(1e-6) * std::max(Real(1), std::abs(first)));
+      EXPECT_NEAR(testDirection.getData().dot(tangent), second,
+        Real(1e-5) * std::max(Real(1), std::abs(second)));
+
+      const auto cell = mesh.getCell(0);
+      SWIFT::HingeMetric localMetric(
+        trial, test, current, inner, predictor, parameters, hingeScale);
+      SWIFT::HingeForce localForce(
+        test, current, inner, predictor, parameters, hingeScale);
+      localMetric.setPolytope(*cell);
+      localForce.setPolytope(*cell);
+      EXPECT_EQ(&localMetric.getPolytope(), &*cell);
+      EXPECT_EQ(&localForce.getPolytope(), &*cell);
+      EXPECT_EQ(localMetric.getRegion(), Region::Cells);
+      EXPECT_EQ(localForce.getRegion(), Region::Cells);
+      std::unique_ptr<decltype(localMetric)> metricCopy(localMetric.copy());
+      std::unique_ptr<decltype(localForce)> forceCopy(localForce.copy());
+      EXPECT_EQ(&metricCopy->getPolytope(), &*cell);
+      EXPECT_EQ(&forceCopy->getPolytope(), &*cell);
+      const auto& trialFE = trialSpace.getFiniteElement(dimension, 0);
+      const auto& testFE = testSpace.getFiniteElement(dimension, 0);
+      Math::Matrix<Real> storedMetric(testFE.getCount(), trialFE.getCount());
+      Math::Vector<Real> storedForce(testFE.getCount());
+      for (Index i = 0; i < testFE.getCount(); ++i)
+      {
+        storedForce(i) = localForce.integrate(i);
+        EXPECT_EQ(forceCopy->integrate(i), storedForce(i));
+        for (Index j = 0; j < trialFE.getCount(); ++j)
+        {
+          storedMetric(i, j) = localMetric.integrate(j, i);
+          EXPECT_EQ(metricCopy->integrate(j, i), storedMetric(i, j));
+        }
+      }
+      parameters.model.hinge.jacobian *= Real(2);
+      metricCopy->setPolytope(*cell);
+      forceCopy->setPolytope(*cell);
+      SWIFT::HingeMetric freshMetric(
+        trial, test, current, inner, predictor, parameters, hingeScale);
+      SWIFT::HingeForce freshForce(
+        test, current, inner, predictor, parameters, hingeScale);
+      freshMetric.setPolytope(*cell);
+      freshForce.setPolytope(*cell);
+      Real metricChange = 0, forceChange = 0;
+      for (Index i = 0; i < testFE.getCount(); ++i)
+      {
+        EXPECT_EQ(localForce.integrate(i), storedForce(i));
+        EXPECT_EQ(forceCopy->integrate(i), freshForce.integrate(i));
+        forceChange += std::abs(forceCopy->integrate(i) - storedForce(i));
+        for (Index j = 0; j < trialFE.getCount(); ++j)
+        {
+          EXPECT_EQ(localMetric.integrate(j, i), storedMetric(i, j));
+          EXPECT_EQ(metricCopy->integrate(j, i), freshMetric.integrate(j, i));
+          metricChange += std::abs(metricCopy->integrate(j, i) - storedMetric(i, j));
+        }
+      }
+      EXPECT_GT(metricChange, Real(1e-8));
+      EXPECT_GT(forceChange, Real(1e-8));
+    }
   }
 
   TEST(Rodin_Adaptation_SWIFTHingeState, P2CoveringHingeIsAssembled)

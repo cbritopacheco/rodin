@@ -75,7 +75,20 @@ Do not negate the residual twice.
 ## Real and complex form convention
 
 Rodin writes forms in trial-first, test-second order. `Math::dot(lhs, rhs)`
-conjugates `rhs`, so a complex-valued form has the discrete actions
+conjugates `rhs`. Every Rodin-defined `dot` member follows the same
+convention, including the Frobenius contraction of dense matrices.
+`Math::Vector`, `Math::FixedSizeVector`, `Math::Matrix` and
+`Math::FixedSizeMatrix` own Eigen storage without adding data members.
+Their inherited views, expressions and factory expressions retain Eigen
+types and Eigen member-dot semantics. Use `Math::dot` for those operands.
+The matrix classes derive from `Eigen::PlainObjectBase` with the Rodin
+owner as the CRTP argument. Deriving from a concrete `Eigen::Matrix` would
+retain Eigen's native derived type and can invalidate references inside
+explicit Eigen decomposition templates. Use `Eigen::MatrixBase` interfaces
+or `Eigen::Ref` to borrow a Rodin matrix in backend code. Constructing a native
+Eigen matrix copies its value; moving matching native dynamic storage into a
+Rodin matrix transfers the allocation.
+A complex-valued form has the discrete actions
 
 ```text
 L(v)   = v* b
@@ -91,15 +104,28 @@ ordinary linear and bilinear cases; the class names cover both scalar domains.
 Assembly stores `b[i] = L(psi_i)` and `A[i,j] = a(phi_j, psi_i)`. The local
 integrator returns this entry directly. Do not add a backend-level conjugation:
 `Integral(c * u, v)` represents `c * u * conj(v)`, not
-`conj(c) * conj(u) * v`. Eigen evaluates the action as `v.dot(A * u)` and
-PETSc as `VecDot(A * u, v)`. Eigen conjugates its first operand; PETSc
-conjugates its second operand. Their argument order therefore differs even
-though both evaluate the same action. Likewise, PETSc linear-form action
-uses `VecDot(b, v)`. Do not infer one backend's dot-product convention from
-the other backend's API spelling.
+`conj(c) * conj(u) * v`. The local backend evaluates the action as
+`Math::dot(A * u, v)` and PETSc as `VecDot(A * u, v)`. Both conjugate the
+second operand. Raw Eigen member dot conjugates its first operand and would
+instead require `v.dot(A * u)`. The corresponding linear-form actions are
+`Math::dot(b, v)` and `VecDot(b, v)`. Do not infer a backend's convention
+from a member method's spelling alone.
 
 Sesquilinearity is not Hermitian symmetry. Whether `A == A*` is a separate
 property of the particular weak form and coefficients.
+
+`LinearElasticityIntegral` admits Lamé parameter ranges whose multiplication
+preserves the field scalar type. Real parameters may therefore act on complex
+fields, but complex values must not be narrowed into real storage. Geometry
+inverses remain real; complex basis Jacobians use the existing promoted matrix
+product, while the established real in-place arithmetic is retained.
+
+For coincident trial/test spaces, triangular reconstruction is valid when both
+Lamé parameter ranges are real. Complex-valued material ranges do not establish
+$A=A^*$, even when the same space is used twice, so both matrix triangles are
+evaluated. For the currently real-valued basis functions, complex material
+parameters may yield $A^T=A$ without Hermitian symmetry. P1 and generic
+integrators follow the same rule; it is independent of the assembly backend.
 
 ## LinearSystem lifetime
 
@@ -111,6 +137,32 @@ layout/assembly.
 Warm starts are intentional. Reassembly zeroes the operator and right-hand
 side as needed but preserves the solution vector where the backend contract
 does so.
+
+## Physical differential dimensions
+
+Let a reference cell have dimension $d$, its physical embedding have dimension
+$s$, and a vector field have $m$ components. The geometric inverse has shape
+$d\times s$. Physical scalar gradients and vector Jacobians therefore have
+shapes $s$ and $m\times s$, respectively:
+
+$$
+\nabla_K u=(J_K^{\dagger})^T\widehat\nabla u,
+\qquad J_K(u)=\widehat J(u)J_K^{\dagger}.
+$$
+
+For an embedded cell these are tangential derivatives expressed in ambient
+coordinates. Reference-coordinate contractions still have $d$ terms; derivative
+outputs retain all $s$ ambient entries. Neither the field component count nor
+the integration entity's topological dimension determines the output width.
+Constant-space derivatives obey the same shape contract even though all entries
+are zero. On a point embedded in $\mathbb{R}^s$, the empty reference contraction
+produces a correctly shaped ambient zero, not an empty physical differential.
+Direct point evaluation, indexed integration points, shape-function evaluation
+and specialized local integrators must agree on these dimensions.
+
+Global-constant derivative nodes borrow immutable operands and update only their
+own cursor and zero storage. Their derivative does not require mutating the
+operand's evaluation cursor.
 
 ## Quadrature and exactness
 
@@ -143,3 +195,37 @@ Dirichlet conditions and identification conditions are structural constraints.
 Assembly eliminates or expands them through the constraint map. Do not replace
 them with penalty terms unless the mathematical model explicitly asks for a
 penalty method.
+
+### Targeted assembly with prescribed values
+
+For a square system with matching trial/test constraint indices, let
+\(P\) project onto unconstrained DOFs and let \(g\) contain the prescribed
+values, with zero entries on unconstrained DOFs. Full assembly produces
+
+$$
+A_D = PAP + (I-P), \qquad b_D = P(b-Ag)+g.
+$$
+
+An LHS-only update produces the same row-and-column-eliminated operator
+\(A_D\), leaving the stored right-hand side untouched. An RHS-only update
+produces \(b_D\), leaving the stored operator untouched. Its lifting uses
+the current unconstrained bilinear form, including local, nonlocal and
+preassembled contributions, rather than the entries of a previously
+eliminated or externally scaled stored matrix. Successive target updates
+therefore reconstruct the same constrained system as full assembly.
+
+
+### Affine identification over real and complex fields
+
+For an affine expansion \(x=T\hat{x}+d\), assembly distributes test rows
+through the conjugated expansion and trial columns through the original
+expansion. The constrained form and load are \(T^{*}AT\) and
+\(T^{*}(b-Ad)\), followed by explicit reconstruction rows for retained slave
+unknowns. Over real fields the adjoint reduces to the transpose. Reconstruction
+coefficients retain their original phase.
+
+PETSc targeted assembly rejects identification constraints before resetting
+any system output. For MPI assembly this rejection is collective: every rank
+rejects when any rank has identification rows, including ranks with empty
+shards. The collective belongs to the explicit partial-assembly operation;
+full assembly and local accessors do not gain this validation collective.

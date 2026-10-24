@@ -26,12 +26,14 @@ namespace Rodin::Adaptation::SWIFT
   /// @brief Sampled geometric admissibility diagnostics.
   struct AdmissibilityReport
   {
-      /// @brief Minimum sampled Jacobian determinant.
-      Real minJ = std::numeric_limits<Real>::infinity();
-      /// @brief Number of failed Jacobian or distortion validity checks.
-      std::size_t inadmissibleCount = 0;
-      /// @brief Maximum finite sampled relative distortion.
-      Real maxQRel = Real(0);
+    /// @brief Minimum sampled Jacobian determinant.
+    Real minJ = std::numeric_limits<Real>::infinity();
+
+    /// @brief Number of failed Jacobian or distortion validity checks.
+    std::size_t inadmissibleCount = 0;
+
+    /// @brief Maximum finite sampled relative distortion.
+    Real maxQRel = Real(0);
   };
 
   template <class Displacement>
@@ -54,8 +56,10 @@ namespace Rodin::Adaptation::SWIFT
     const std::size_t dim = mesh.getDimension();
     const std::size_t vdim = fes.getVectorDimension();
     if (dim != vdim)
+    {
       Alert::Exception() << "SWIFT displacement dimension must equal mesh dimension."
                          << Alert::Raise;
+    }
 
     auto gradU = Jacobian(u);
     Parameters parameters;

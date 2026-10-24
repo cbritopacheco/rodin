@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_H1_H1_H
 #define RODIN_VARIATIONAL_H1_H1_H
 
+#include "Rodin/Variational/IntegrationPoint.h"
 #include <map>
 #include <cstdint>
 #include <functional>
@@ -43,14 +44,17 @@ namespace Rodin::FormLanguage
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Scalar, Mesh>>
   {
-      /// @brief Mesh type.
-      using MeshType = Mesh;
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
-      /// @brief Finite element type.
-      using ElementType = Variational::H1Element<K, RangeType>;
+    /// @brief Mesh type.
+    using MeshType = Mesh;
+
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
+
+    /// @brief Finite element type.
+    using ElementType = Variational::H1Element<K, RangeType>;
   };
 
   /**
@@ -60,14 +64,17 @@ namespace Rodin::FormLanguage
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
-      /// @brief Mesh type.
-      using MeshType = Mesh;
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Range (evaluation value) type.
-      using RangeType = Math::SpatialVector<ScalarType>;
-      /// @brief Finite element type.
-      using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
+    /// @brief Mesh type.
+    using MeshType = Mesh;
+
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = Math::SpatialVector<ScalarType>;
+
+    /// @brief Finite element type.
+    using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -141,8 +148,8 @@ namespace Rodin::Variational
    */
   template <size_t K, class Scalar>
   class H1<K, Scalar, Geometry::Mesh<Context::Local>>
-    : public FiniteElementSpace<
-        Geometry::Mesh<Context::Local>, H1<K, Scalar, Geometry::Mesh<Context::Local>>>
+    : public FiniteElementSpace<Geometry::Mesh<Context::Local>,
+        H1<K, Scalar, Geometry::Mesh<Context::Local>>>
   {
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
@@ -199,7 +206,8 @@ namespace Rodin::Variational
            */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
-            : m_polytope(polytope), m_v(std::forward<Function>(v))
+            : m_polytope(polytope),
+              m_v(std::forward<Function>(v))
           {}
 
           /**
@@ -230,8 +238,7 @@ namespace Rodin::Variational
 
       /// @brief Inverse Pullback for the scalar/complex H1 space.
       template <class Callable>
-      class Pushforward
-        : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
           /// @brief Callable type evaluated on physical points.
@@ -257,10 +264,23 @@ namespace Rodin::Variational
            * @param p Point at which the operation is evaluated.
            * @returns Value of the expression at the supplied evaluation point.
            */
-          constexpr
-          auto operator()(const Geometry::Point& p) const
+          constexpr auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
+          }
+
+          /**
+           * @brief Evaluates a reference expansion at a certified quadrature sample.
+           * @param point Sample whose reference association is preserved by composition.
+           * @returns Mapped expansion value.
+           */
+          constexpr auto operator()(const IntegrationPoint& point) const
+          {
+            if constexpr (std::is_invocable_v<const CallableType&,
+                            const IntegrationPoint&>)
+              return m_v(point);
+            else
+              return (*this)(point.getPoint());
           }
 
         private:
@@ -525,7 +545,8 @@ namespace Rodin::Variational
        * @param[in] local Local DOF index within the polytope
        * @return Global DOF index
        */
-      Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
+      Index getGlobalIndex(
+        const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto& [d, i] = idx;
         return m_closure[d][i](local);
@@ -557,22 +578,6 @@ namespace Rodin::Variational
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 
-      /**
-       * @brief Evaluates the scalar expansion directly at reference coordinates.
-       *
-       * The scalar Lagrange pushforward is composition with the element map;
-       * therefore a point already carrying reference coordinates requires no
-       * range transformation.
-       */
-      template <class Coefficient>
-      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& fe = getFiniteElement(idx.first, idx.second);
-        fe.evaluate(
-          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
-      }
-
     private:
       std::reference_wrapper<const MeshType> m_mesh;
 
@@ -584,10 +589,12 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for H1 from mesh - deduces to RealH1
+   * @param order Compile-time polynomial degree.
+   * @param mesh Mesh supporting the scalar finite element space.
    */
   template <size_t K, class Context>
-  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&)
-    -> H1<K, Real, Geometry::Mesh<Context>>;
+  H1(std::integral_constant<size_t, K> order,
+    const Geometry::Mesh<Context>& mesh) -> H1<K, Real, Geometry::Mesh<Context>>;
 
   /// Alias for a scalar real-valued H1 finite element space
   template <size_t K, class Mesh>
@@ -613,8 +620,7 @@ namespace Rodin::Variational
    */
   template <size_t K, class Scalar>
   class H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<
-        Geometry::Mesh<Context::Local>,
+    : public FiniteElementSpace<Geometry::Mesh<Context::Local>,
         H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>>
   {
     public:
@@ -636,12 +642,12 @@ namespace Rodin::Variational
       using ElementType = H1Element<K, Math::SpatialVector<ScalarType>>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<MeshType, H1<K, Math::SpatialVector<Scalar>, MeshType>>;
+      using Parent =
+        FiniteElementSpace<MeshType, H1<K, Math::SpatialVector<Scalar>, MeshType>>;
 
       /// @brief Pullback of a vector-valued H1 function to the reference element.
       template <class Callable>
-      class Pullback :
-        public FiniteElementSpacePullbackBase<Pullback<Callable>>
+      class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
           /// @brief Callable type evaluated on physical points.
@@ -654,7 +660,8 @@ namespace Rodin::Variational
            */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
-            : m_polytope(polytope), m_v(std::forward<Function>(v))
+            : m_polytope(polytope),
+              m_v(std::forward<Function>(v))
           {}
 
           /**
@@ -685,8 +692,7 @@ namespace Rodin::Variational
 
       /// @brief Pushforward of a vector-valued H1 function to the physical element.
       template <class Callable>
-      class Pushforward :
-        public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
           /// @brief Callable type evaluated on physical points.
@@ -712,10 +718,23 @@ namespace Rodin::Variational
            * @param p Point at which the operation is evaluated.
            * @returns Transformed field value at the supplied evaluation point.
            */
-          constexpr
-          auto operator()(const Geometry::Point& p) const
+          constexpr auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
+          }
+
+          /**
+           * @brief Evaluates a reference expansion at a certified quadrature sample.
+           * @param point Sample whose reference association is preserved by composition.
+           * @returns Mapped expansion value.
+           */
+          constexpr auto operator()(const IntegrationPoint& point) const
+          {
+            if constexpr (std::is_invocable_v<const CallableType&,
+                            const IntegrationPoint&>)
+              return m_v(point);
+            else
+              return (*this)(point.getPoint());
           }
 
         private:
@@ -727,7 +746,8 @@ namespace Rodin::Variational
        * @param[in] mesh Mesh on which to build the finite element space
        * @param[in] vdim Vector dimension
        */
-      H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh, size_t vdim);
+      H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh,
+        size_t vdim);
 
       /// @brief Copy constructor.
       H1(const H1& other)
@@ -881,7 +901,8 @@ namespace Rodin::Variational
         return m_closure[d][i];
       }
 
-      Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
+      Index getGlobalIndex(
+        const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto& [d, i] = idx;
         return m_closure[d][i](local);
@@ -900,23 +921,8 @@ namespace Rodin::Variational
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
-        (void) idx;
+        (void)idx;
         return Pushforward<Callable>(std::forward<Callable>(v));
-      }
-
-      /**
-       * @brief Evaluates the vector expansion directly at reference coordinates.
-       *
-       * Vector H1 uses a componentwise Lagrange map and therefore requires no
-       * range transformation after the structured local contraction.
-       */
-      template <class Coefficient>
-      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& fe = getFiniteElement(idx.first, idx.second);
-        fe.evaluate(
-          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:
@@ -930,10 +936,13 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Vector H1 from mesh and vector dimension
+   * @param order Compile-time polynomial degree.
+   * @param mesh Mesh supporting the vector finite element space.
+   * @param vdim Number of vector components.
    */
   template <size_t K, class Context>
-  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&, size_t)
-    -> H1<K, Math::SpatialVector<Real>, Geometry::Mesh<Context>>;
+  H1(std::integral_constant<size_t, K> order, const Geometry::Mesh<Context>& mesh,
+    size_t vdim) -> H1<K, Math::SpatialVector<Real>, Geometry::Mesh<Context>>;
 
   /// Alias for a vector-valued real H1 finite element space
   template <size_t K, class Mesh>
@@ -948,16 +957,20 @@ namespace Rodin::FormLanguage
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialMatrix<Scalar>, Mesh>>
   {
-      /// @brief Mesh type supplying topology and physical transformations.
-      using MeshType = Mesh;
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = Scalar;
-      /// @brief Evaluated matrix, tensor, or scalar range type.
-      using RangeType = Math::SpatialMatrix<Scalar>;
-      /// @brief Local or distributed execution context.
-      using ContextType = typename Traits<Mesh>::ContextType;
-      /// @brief Reference finite element type.
-      using ElementType = Variational::H1Element<K, Math::SpatialMatrix<Scalar>>;
+    /// @brief Mesh type supplying topology and physical transformations.
+    using MeshType = Mesh;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = Scalar;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialMatrix<Scalar>;
+
+    /// @brief Local or distributed execution context.
+    using ContextType = typename Traits<Mesh>::ContextType;
+
+    /// @brief Reference finite element type.
+    using ElementType = Variational::H1Element<K, Math::SpatialMatrix<Scalar>>;
   };
 }
 
@@ -972,19 +985,26 @@ namespace Rodin::Variational
     public:
       /// @brief Mesh and execution context of this specialization.
       using MeshType = Geometry::Mesh<Context::Local>;
+
       /// @brief Scalar space supplying this family's DOF numbering.
       using ScalarSpace = H1<K, Scalar, Geometry::Mesh<Context::Local>>;
+
       /// @brief Matrix reference element for this family.
       using ElementType = H1Element<K, Math::SpatialMatrix<Scalar>>;
+
       /// @brief Existing finite-element-space interface.
       using Parent = FiniteElementSpace<MeshType,
         H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename ScalarSpace::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief Local or distributed execution context.
       using ContextType = typename ScalarSpace::ContextType;
+
       /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
       H1(std::integral_constant<size_t, K> degree, const MeshType& mesh, size_t rows,
         size_t cols)
@@ -994,8 +1014,10 @@ namespace Rodin::Variational
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
-          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SpatialMatrix ranges require 1 to 3 rows and columns." << Alert::Raise;
+        }
         // Distributed scalar spaces may compute their size collectively.
         // Resolve it at construction, never from a local evaluation loop.
         m_size = m_scalar.getSize() * rows * cols;
@@ -1021,10 +1043,13 @@ namespace Rodin::Variational
 
       /// @brief Copies the space and its DOF maps.
       H1(const H1&) = default;
+
       /// @brief Moves the space and its DOF maps.
       H1(H1&&) = default;
+
       /// @brief Copies the space and its DOF maps.
       H1& operator=(const H1&) = default;
+
       /// @brief Moves the space and its DOF maps.
       H1& operator=(H1&&) = default;
 
@@ -1036,11 +1061,13 @@ namespace Rodin::Variational
       {
         return m_rows * m_cols;
       }
+
       /// @brief Returns the number of matrix rows.
       size_t getRows() const
       {
         return m_rows;
       }
+
       /// @brief Returns the number of matrix columns.
       size_t getColumns() const
       {
@@ -1050,6 +1077,7 @@ namespace Rodin::Variational
       {
         return m_scalar.getMesh();
       }
+
       /// @brief Returns the scalar space supplying topology and component-independent maps.
       const ScalarSpace& getScalarSpace() const
       {

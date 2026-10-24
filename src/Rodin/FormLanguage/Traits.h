@@ -99,15 +99,21 @@ namespace Rodin::FormLanguage
     private:
       /**
        * @brief Deduces the derived parameter of a function base.
+       *
+       * A pointer return type permits abstract base parameters on compilers
+       * that reject abstract value returns during template substitution.
+       * The declaration is used only in an unevaluated expression; no pointer
+       * is constructed and no allocation is performed.
+       *
        * @param function Function whose base parameter is deduced.
-       * @returns The deduced derived type; used only in an unevaluated expression.
+       * @returns A pointer to the deduced derived type.
        */
       template <class D>
-      static D deduce(const Variational::FunctionBase<D>& function);
+      static D* deduce(const Variational::FunctionBase<D>& function);
 
     public:
       /// @brief The FunctionBase parameter of @c T.
-      using Type = decltype(deduce(std::declval<const T&>()));
+      using Type = std::remove_pointer_t<decltype(deduce(std::declval<const T&>()))>;
   };
 
   /**
@@ -126,8 +132,8 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsNamedForm : std::false_type
   {
-      /// @brief False for types that are not named forms.
-      static constexpr bool Value = false;
+    /// @brief False for types that are not named forms.
+    static constexpr bool Value = false;
   };
 }
 

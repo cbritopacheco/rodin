@@ -42,8 +42,10 @@ namespace Rodin::Tests::Convergence
           [dim = m_dimension, constant](const Geometry::Point& p) {
             Real value = 1;
             if (!constant)
+            {
               for (size_t d = 0; d < dim; ++d)
                 value += p(d);
+            }
             return value;
           });
       }
@@ -54,6 +56,7 @@ namespace Rodin::Tests::Convergence
           return data.getSolution(p.getPhysicalCoordinates());
         });
       }
+
       /** Analytic extension at arbitrary physical coordinates, including lifts. */
       Real getSolution(const Math::SpatialPoint& p) const
       {
@@ -88,6 +91,7 @@ namespace Rodin::Tests::Convergence
             return data.getGradient(p.getPhysicalCoordinates());
           });
       }
+
       /** Physical gradient of the same extension; no mesh point is fabricated. */
       Math::SpatialVector<Real> getGradient(const Math::SpatialPoint& p) const
       {
@@ -134,8 +138,10 @@ namespace Rodin::Tests::Convergence
             const auto derivative = gradient(p);
             Real source = -gamma(p) * laplacian;
             if (!constantCoefficient)
+            {
               for (size_t d = 0; d < dim; ++d)
                 source -= derivative(d);
+            }
             return source;
           });
       }

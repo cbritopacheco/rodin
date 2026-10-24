@@ -76,7 +76,7 @@ namespace Rodin::QF
        * @param g Polytope geometry type.
        * @return Reference to a cached quadrature formula.
        */
-      static const QuadratureFormulaBase& get(size_t order, Geometry::Polytope::Type g);
+      static const QuadratureFormula& get(size_t order, Geometry::Polytope::Type g);
 
       /**
        * @brief Builds a quadrature formula for a polytope geometry.
@@ -107,16 +107,27 @@ namespace Rodin::QF
        *
        * Automatically selects and constructs an appropriate quadrature
        * formula that is exact for all polynomials of degree up to @p order.
+       * Construction remains out of line where supported, keeping cold
+       * generator allocation from enlarging the hot factory lookup's
+       * register-save frame.
        */
+#if __has_cpp_attribute(gnu::noinline)
+      [[gnu::noinline]]
+#endif
       PolytopeQuadratureFormula(size_t order, Geometry::Polytope::Type g);
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies ownership of the immutable generated samples.
+       *
+       * Copies preserve the existing numerical samples without regenerating
+       * the rule or requiring a polymorphic clone operation. Ownership is
+       * shared only at the formula level, never at individual mapped points.
+       *
        * @param other PolytopeQuadratureFormula to copy from
        */
       PolytopeQuadratureFormula(const PolytopeQuadratureFormula& other)
         : Parent(other),
-          m_qf(other.m_qf->copy()),
+          m_qf(other.m_qf),
           m_order(other.m_order),
           m_geometry(other.m_geometry)
       {}
@@ -139,6 +150,12 @@ namespace Rodin::QF
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return m_qf->getSamples();
       }
 
       /**
@@ -174,13 +191,23 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new PolytopeQuadratureFormula instance
        */
-      inline PolytopeQuadratureFormula* copy() const noexcept override
+      inline PolytopeQuadratureFormula* copy() const noexcept
       {
         return new PolytopeQuadratureFormula(*this);
       }
 
     private:
-      std::unique_ptr<const QuadratureFormulaBase>
+      /**
+       * @brief Constructs the selected family with the requested ownership.
+       * @tparam Pointer Unique or shared pointer to const @ref QuadratureFormulaBase.
+       * @param order Desired polynomial degree of exactness.
+       * @param g Reference geometry type.
+       * @returns Ownership of the selected concrete quadrature formula.
+       */
+      template <class Pointer>
+      static Pointer buildFormula(size_t order, Geometry::Polytope::Type g);
+
+      std::shared_ptr<const QuadratureFormulaBase>
         m_qf; ///< Underlying quadrature formula
       const size_t m_order; ///< Polynomial degree of exactness
       const Geometry::Polytope::Type m_geometry; ///< Polytope geometry type

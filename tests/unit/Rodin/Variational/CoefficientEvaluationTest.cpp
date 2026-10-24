@@ -4,7 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Per-point coefficient evaluation and reassembly regressions. */
+/**
+ * @file
+ * @brief Per-point coefficient evaluation and reassembly regressions.
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
 #ifdef RODIN_USE_OPENMP
@@ -99,6 +102,11 @@ namespace
       {
         return m_expr.getIntegrationPoint();
       }
+      CountingShape& setPolytope(const Polytope& cell)
+      {
+        m_expr.setPolytope(cell);
+        return *this;
+      }
       CountingShape& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_expr.setIntegrationPoint(ip);
@@ -132,6 +140,7 @@ namespace
   template <class Expr>
   void checkExpression(Expr expr, const Polytope& cell, size_t& calls)
   {
+    expr.setPolytope(cell);
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
     const auto& q = cell.getQuadrature(qf);
     const auto count = expr.getDOFs(cell);

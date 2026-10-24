@@ -42,10 +42,9 @@ namespace Rodin::Geometry
   }
 
   PointBase::PointBase(const Math::SpatialMatrix<Real>& jacobian,
-    const Polytope& polytope, const QF::QuadratureFormulaBase& qf, size_t qp)
+    const Polytope& polytope, const QF::QuadratureFormula& qf, size_t qp)
     : m_polytope(polytope),
-      m_pc(std::in_place_type<Optional<ReferenceSample>>, std::in_place,
-        qf.getCacheIdentity(), qp),
+      m_pc(std::in_place_type<Optional<ReferenceSample>>, std::in_place, qf, qp),
       m_jacobian(jacobian)
   {
     assert(qp < qf.getSize());
@@ -63,7 +62,7 @@ namespace Rodin::Geometry
     {
       if (lhs(i) < rhs(i))
         return true;
-      if (rhs(i) > lhs(i))
+      if (rhs(i) < lhs(i))
         return false;
     }
     return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
@@ -124,8 +123,10 @@ namespace Rodin::Geometry
     Math::SpatialPoint pc;
     const auto& transformation = getPolytope().getTransformation();
     if (sample)
+    {
       transformation.transform(
-        pc, getReferenceCoordinates(), sample->identity, sample->index);
+        pc, getReferenceCoordinates(), *sample->formula, sample->index);
+    }
     else
       transformation.transform(pc, getReferenceCoordinates());
     return m_pc.emplace<Math::SpatialPoint>(std::move(pc));
@@ -136,7 +137,8 @@ namespace Rodin::Geometry
     if (!m_jacobian)
     {
       auto& jac = m_jacobian.emplace();
-      this->getPolytope().getTransformation().jacobian(jac, this->getReferenceCoordinates());
+      this->getPolytope().getTransformation().jacobian(
+        jac, this->getReferenceCoordinates());
       return jac;
     }
     assert(m_jacobian);
@@ -199,7 +201,7 @@ namespace Rodin::Geometry
             const Real E = a * i - c * g;
             const Real F = -(a * h - b * g);
             const Real G = b * f - c * e;
-            const Real H = - (a * f  - c * d);
+            const Real H = -(a * f - c * d);
             const Real I = a * e - b * d;
             const auto& det = m_jacobianDeterminant.emplace(a * A + b * B + c * C);
             assert(det != 0);
@@ -279,7 +281,7 @@ namespace Rodin::Geometry
       else
       {
         return m_jacobianDeterminant.emplace(
-            Math::sqrt((jac.transpose() * jac).determinant()));
+          Math::sqrt((jac.transpose() * jac).determinant()));
       }
     }
     assert(m_jacobianDeterminant);
@@ -386,7 +388,7 @@ namespace Rodin::Geometry
   {}
 
   Point::Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
-    const QF::QuadratureFormulaBase& qf, size_t qp)
+    const QF::QuadratureFormula& qf, size_t qp)
     : PointBase(jacobian, polytope, qf, qp),
       m_rc(qf.getPoint(qp))
   {}

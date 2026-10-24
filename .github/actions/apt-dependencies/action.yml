@@ -1,0 +1,34 @@
+name: Cached Ubuntu dependencies
+description: Install the exact requested package plan with cached downloads and bounded mirror fallback.
+inputs:
+  packages:
+    description: Whitespace-separated Debian package names or exact package versions.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Check dependency disk headroom
+      shell: bash
+      run: python3 dev/ci_environment.py disk
+    - name: Resolve signed package versions
+      id: plan
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: python3 dev/ci_environment.py prepare --packages "$PACKAGES"
+    - name: Restore downloaded package archives
+      id: archives
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ runner.temp }}/rodin-apt-archives/*.deb
+        key: ${{ steps.plan.outputs.key }}
+        restore-keys: ${{ steps.plan.outputs.restore-prefix }}
+    - name: Install resolved dependencies
+      shell: bash
+      run: python3 dev/ci_environment.py install
+    - name: Save validated package archives
+      if: steps.archives.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ runner.temp }}/rodin-apt-archives/*.deb
+        key: ${{ steps.plan.outputs.key }}

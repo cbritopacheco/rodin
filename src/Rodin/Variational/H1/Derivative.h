@@ -43,16 +43,17 @@ namespace Rodin::FormLanguage
    * element space, the operand type and the range type.
    */
   template <size_t K, class Scalar, class Mesh, class Data>
-  struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
+  struct Traits<Variational::Derivative<
+    Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Scalar, Mesh>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Scalar, Mesh>;
 
-      /// @brief Operand type.
-      using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = Scalar;
+    /// @brief Range (evaluation value) type.
+    using RangeType = Scalar;
   };
 }
 
@@ -132,15 +133,24 @@ namespace Rodin::Variational
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
+        if (!ip.getQuadratureFormula())
+        {
+          this->interpolate(out, p);
+          return;
+        }
         const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
         const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
+        const Index i = polytope.getIndex();
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, i);
-        const auto* qf = ip.getQuadratureFormula();
-        assert(qf);
+        const auto& fe = fes.getFiniteElement(d, i);
         const auto& tab = fe.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
@@ -179,7 +189,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // Evaluating on a face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
 
@@ -219,7 +229,7 @@ namespace Rodin::Variational
           }
 
           UndeterminedTraceDomainException(
-              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+            *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
             << Alert::Raise;
           return;
         }
@@ -251,8 +261,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
         return (k == 0) ? 0 : (k - 1);

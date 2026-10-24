@@ -31,7 +31,6 @@
  */
 #define RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER 2 * RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1
 
-
 #include <boost/multi_array.hpp>
 
 #include "QuadratureFormula.h"
@@ -68,6 +67,7 @@ namespace Rodin::QF
    *
    * ## Supported Geometries
    *
+   * - Point (0D simplex, one empty coordinate tuple with unit weight)
    * - Segment (1D simplex)
    * - Triangle (2D simplex)
    * - Tetrahedron (3D simplex)
@@ -87,7 +87,7 @@ namespace Rodin::QF
       /**
        * @brief Constructs the Grundmann-Möller quadrature formula.
        * @param s Parameter determining the degree @f$ d = 2s + 1 @f$
-       * @param geom Simplex geometry (Segment, Triangle, or Tetrahedron)
+       * @param geom Simplex geometry (Point, Segment, Triangle, or Tetrahedron)
        *
        * Creates a Grundmann-Möller quadrature rule for the specified simplex
        * geometry with degree of exactness @f$ 2s + 1 @f$.
@@ -126,8 +126,7 @@ namespace Rodin::QF
        * @brief Gets the degree of polynomial exactness.
        * @return Degree @f$ d = 2s + 1 @f$ for which this rule is exact
        */
-      inline
-      size_t getOrder() const
+      inline size_t getOrder() const
       {
         return m_order;
       }
@@ -139,6 +138,12 @@ namespace Rodin::QF
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{s_points[m_n][m_s], s_weights[m_n][m_s].data(), 1};
       }
 
       /**
@@ -165,8 +170,7 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new GrundmannMoller instance
        */
-      inline
-      GrundmannMoller* copy() const noexcept override
+      inline GrundmannMoller* copy() const noexcept
       {
         return new GrundmannMoller(*this);
       }
@@ -191,13 +195,14 @@ namespace Rodin::QF
 
     private:
       /// Static table: number of points for each [s][n] combination
-      static boost::multi_array<size_t, 2> s_sizes;
+      static const boost::multi_array<size_t, 2>& s_sizes;
 
       /// Static table: quadrature weights for each [s][n] combination
-      static boost::multi_array<Math::Vector<Real>, 2> s_weights;
+      static const boost::multi_array<Math::Vector<Real>, 2>& s_weights;
 
       /// Static table: quadrature points for each [s][n] combination
-      static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> s_points;
+      static const boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2>&
+        s_points;
 
       const Geometry::Polytope::Type m_geometry; ///< Simplex geometry type
       const size_t m_s;     ///< Parameter @f$ s @f$ determining degree @f$ 2s+1 @f$

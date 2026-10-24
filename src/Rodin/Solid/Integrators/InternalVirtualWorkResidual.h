@@ -79,17 +79,22 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief State finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
@@ -198,11 +203,12 @@ namespace Rodin::Solid
 
         auto stateGradient = Variational::Jacobian(m_displacement.get());
         auto testGradient = Variational::Jacobian(m_test.get());
+        testGradient.setPolytope(polytope);
 
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
@@ -220,11 +226,10 @@ namespace Rodin::Solid
           if (m_input)
             m_input(cp);
 
-          typename LawType::Cache cache;
-          m_law.setCache(cache, cp);
+          m_law.setConstitutivePoint(cp);
 
           Math::SpatialMatrix<ScalarType> P;
-          m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+          m_law.getFirstPiolaKirchhoffStress(P);
 
           // R_te += w P : grad v_te
           for (size_t te = 0; te < testDofs; ++te)
@@ -339,21 +344,28 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
       /// @brief Constitutive law type.
       using LawType = LawDerived;
+
       /// @brief Test function type.
       using TestType = TestFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
+
       /// @brief Current pressure state type.
       using PressureStateType = PressureType;
 
       /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
+
       /// @brief Pressure state finite element space type.
       using PressureFESType = typename FormLanguage::Traits<PressureStateType>::FESType;
 
@@ -481,11 +493,12 @@ namespace Rodin::Solid
 
         auto stateGradient = Variational::Jacobian(m_displacement.get());
         auto testGradient = Variational::Jacobian(m_test.get());
+        testGradient.setPolytope(polytope);
 
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
@@ -503,11 +516,10 @@ namespace Rodin::Solid
           if (m_input)
             m_input(cp);
 
-          typename LawType::Cache cache;
-          m_law.setCache(cache, cp);
+          m_law.setConstitutivePoint(cp);
 
           Math::SpatialMatrix<ScalarType> P;
-          m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
+          m_law.getFirstPiolaKirchhoffStress(P);
 
           const ScalarType p = m_pressure.get().getValue(ip);
           const ScalarType J = state.getJacobian();
@@ -625,15 +637,19 @@ namespace Rodin::Solid
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
       /// @brief Pressure test function type.
       using TestType = TestPressFunctionType;
+
       /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
       /// @brief Pressure test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+
       /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
@@ -729,7 +745,7 @@ namespace Rodin::Solid
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();

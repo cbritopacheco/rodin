@@ -16,8 +16,6 @@
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/Identifiable.h"
-#include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
 
@@ -102,7 +100,6 @@ namespace Rodin::FormLanguage
        * @note This is a CRTP function to be overridden in derived classes.
        */
       virtual Base* copy() const noexcept override = 0;
-
   };
 }
 

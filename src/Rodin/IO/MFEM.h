@@ -7,6 +7,7 @@
 #ifndef RODIN_IO_MFEM_H
 #define RODIN_IO_MFEM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <algorithm>
@@ -56,9 +57,7 @@ namespace Rodin::IO::MFEM
    * @param kw Keyword to convert
    * @return C-style string representation of the keyword
    */
-  inline
-  constexpr
-  const char* toCharString(Keyword kw)
+  inline constexpr const char* toCharString(Keyword kw)
   {
     switch (kw)
     {
@@ -73,6 +72,7 @@ namespace Rodin::IO::MFEM
     }
     return nullptr;
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param str Text to compare or convert to a format keyword.
@@ -80,11 +80,11 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(const std::string& str, Keyword kw)
+  inline bool operator==(const std::string& str, Keyword kw)
   {
     return str == toCharString(kw);
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param kw Format keyword to compare or write.
@@ -92,11 +92,11 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(Keyword kw, const std::string& str)
+  inline bool operator==(Keyword kw, const std::string& str)
   {
     return str == toCharString(kw);
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param kw Format keyword to compare or write.
@@ -104,11 +104,11 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(Keyword kw, const char* str)
+  inline bool operator==(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+
   /**
    * @brief Compares the operands for equality.
    * @param str Text to compare or convert to a format keyword.
@@ -116,11 +116,11 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare equal.
    */
 
-  inline
-  bool operator==(const char* str, Keyword kw)
+  inline bool operator==(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param str Text to compare or convert to a format keyword.
@@ -128,11 +128,11 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(const char* str, Keyword kw)
+  inline bool operator!=(const char* str, Keyword kw)
   {
     return !operator==(str, kw);
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param str Text to compare or convert to a format keyword.
@@ -140,11 +140,11 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(const std::string& str, Keyword kw)
+  inline bool operator!=(const std::string& str, Keyword kw)
   {
     return !operator==(str, kw);
   }
+
   /**
    * @brief Compares the operands for inequality.
    * @param kw Format keyword to compare or write.
@@ -152,8 +152,7 @@ namespace Rodin::IO::MFEM
    * @returns True when the operands compare unequal.
    */
 
-  inline
-  bool operator!=(Keyword kw, const std::string& str)
+  inline bool operator!=(Keyword kw, const std::string& str)
   {
     return !operator==(str, kw);
   }
@@ -164,8 +163,7 @@ namespace Rodin::IO::MFEM
    * @param kw Keyword to output
    * @return Reference to the output stream
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, Keyword kw)
+  inline std::ostream& operator<<(std::ostream& os, Keyword kw)
   {
     os << toCharString(kw);
     return os;
@@ -176,8 +174,7 @@ namespace Rodin::IO::MFEM
    * @param str String to convert
    * @return Optional keyword if conversion succeeds, empty otherwise
    */
-  inline
-  Optional<Keyword> toKeyword(const char* str)
+  inline Optional<Keyword> toKeyword(const char* str)
   {
     Keyword res;
     if (str == Keyword::Boundary)
@@ -224,14 +221,14 @@ namespace Rodin::IO::MFEM
   /// @internal
   enum GeometryType
   {
-    POINT       = 0,
-    SEGMENT     = 1,
-    TRIANGLE    = 2,
-    SQUARE      = 3,
+    POINT = 0,
+    SEGMENT = 1,
+    TRIANGLE = 2,
+    SQUARE = 3,
     TETRAHEDRON = 4,
-    CUBE        = 5,
-    PRISM       = 6,
-    PYRAMID     = 7
+    CUBE = 5,
+    PRISM = 6,
+    PYRAMID = 7
   };
 
   /**
@@ -278,17 +275,53 @@ namespace Rodin::IO::MFEM
    */
   struct GridFunctionHeader
   {
-    std::string fec;     ///< Finite element collection name (e.g., "H1_2D_P1")
-    size_t vdim;         ///< Vector dimension of the grid function
-    Ordering ordering;   ///< Data ordering (Nodes or VectorDimension)
+    std::string fec; ///< Finite element collection name (e.g., "H1_2D_P1")
+    size_t vdim; ///< Vector dimension of the grid function
+    Ordering ordering; ///< Data ordering (Nodes or VectorDimension)
   };
+
+  /**
+   * @brief Reads and validates the common MFEM field header.
+   * @param is Field input stream.
+   * @param lineNumber Running line counter used in diagnostics.
+   * @returns Initialized collection, component count and supported ordering.
+   */
+  inline GridFunctionHeader readGridFunctionHeader(std::istream& is, size_t& lineNumber)
+  {
+    GridFunctionHeader header{};
+    const auto line = [&] { return skipEmptyLinesAndComments(is, lineNumber); };
+    const auto fail = [&] {
+      Alert::Exception() << "Invalid MFEM field header on line " << lineNumber << "."
+                         << Alert::Raise;
+    };
+    std::string key;
+    std::istringstream space(line());
+    if (!(space >> key) || key != "FiniteElementSpace" || !(space >> std::ws).eof())
+      fail();
+    std::istringstream collection(line());
+    if (!(collection >> key >> header.fec) || key != "FiniteElementCollection:" ||
+      !(collection >> std::ws).eof())
+      fail();
+    std::istringstream dimension(line());
+    if (!(dimension >> key >> header.vdim) || key != "VDim:" || header.vdim == 0 ||
+      !(dimension >> std::ws).eof())
+      fail();
+    size_t ordering = 0;
+    std::istringstream order(line());
+    if (!(order >> key >> ordering) || key != "Ordering:" || ordering > 1 ||
+      !(order >> std::ws).eof())
+      fail();
+    header.ordering = static_cast<Ordering>(ordering);
+    return header;
+  }
 
   /// @brief Face index and vertex ordering used when emitting MFEM face DOFs.
   struct FaceOrderEntry
   {
-      Index index; ///< Face index in Rodin connectivity ordering.
-      std::vector<Index> vertices; ///< Face vertices in MFEM local ordering.
+    Index index; ///< Face index in Rodin connectivity ordering.
+    std::vector<Index> vertices; ///< Face vertices in MFEM local ordering.
   };
+
   /**
    * @brief Constructs an orientation-independent edge key.
    * @param v0 Vertex index of the entity.
@@ -296,13 +329,13 @@ namespace Rodin::IO::MFEM
    * @returns The two vertex indices in ascending order.
    */
 
-  inline
-  std::array<Index, 2> getSortedEdgeKey(Index v0, Index v1)
+  inline std::array<Index, 2> getSortedEdgeKey(Index v0, Index v1)
   {
     if (v1 < v0)
       std::swap(v0, v1);
-    return { v0, v1 };
+    return {v0, v1};
   }
+
   /**
    * @brief Constructs an orientation-independent triangular face key.
    * @param v0 Vertex index of the entity.
@@ -311,13 +344,13 @@ namespace Rodin::IO::MFEM
    * @returns The three vertex indices in ascending order.
    */
 
-  inline
-  std::array<Index, 3> getTriangleFaceKey(Index v0, Index v1, Index v2)
+  inline std::array<Index, 3> getTriangleFaceKey(Index v0, Index v1, Index v2)
   {
-    std::array<Index, 3> key{ v0, v1, v2 };
+    std::array<Index, 3> key{v0, v1, v2};
     std::sort(key.begin(), key.end());
     return key;
   }
+
   /**
    * @brief Constructs an orientation-independent quadrilateral face key.
    * @param v0 Vertex index of the entity.
@@ -327,13 +360,14 @@ namespace Rodin::IO::MFEM
    * @returns The three smallest vertex indices, in ascending order.
    */
 
-  inline
-  std::array<Index, 3> getQuadrilateralFaceKey(Index v0, Index v1, Index v2, Index v3)
+  inline std::array<Index, 3> getQuadrilateralFaceKey(
+    Index v0, Index v1, Index v2, Index v3)
   {
-    std::array<Index, 4> key{ v0, v1, v2, v3 };
+    std::array<Index, 4> key{v0, v1, v2, v3};
     std::sort(key.begin(), key.end());
-    return { key[0], key[1], key[2] };
+    return {key[0], key[1], key[2]};
   }
+
   /**
    * @brief Enumerates local edges in MFEM order.
    * @param geometry Reference-cell geometry whose local entities are enumerated.
@@ -341,8 +375,7 @@ namespace Rodin::IO::MFEM
    */
 
   template <class Callback>
-  inline
-  void forEachMFEMLocalEdge(Geometry::Polytope::Type geometry, Callback&& callback)
+  inline void forEachMFEMLocalEdge(Geometry::Polytope::Type geometry, Callback&& callback)
   {
     switch (geometry)
     {
@@ -423,6 +456,7 @@ namespace Rodin::IO::MFEM
       }
     }
   }
+
   /**
    * @brief Enumerates local faces in MFEM order.
    * @param geometry Reference-cell geometry whose local entities are enumerated.
@@ -430,26 +464,25 @@ namespace Rodin::IO::MFEM
    */
 
   template <class Callback>
-  inline
-  void forEachMFEMLocalFace(Geometry::Polytope::Type geometry, Callback&& callback)
+  inline void forEachMFEMLocalFace(Geometry::Polytope::Type geometry, Callback&& callback)
   {
     switch (geometry)
     {
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        callback(std::array<int, 3>{ 1, 2, 3 });
-        callback(std::array<int, 3>{ 0, 3, 2 });
-        callback(std::array<int, 3>{ 0, 1, 3 });
-        callback(std::array<int, 3>{ 0, 2, 1 });
+        callback(std::array<int, 3>{1, 2, 3});
+        callback(std::array<int, 3>{0, 3, 2});
+        callback(std::array<int, 3>{0, 1, 3});
+        callback(std::array<int, 3>{0, 2, 1});
         break;
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        callback(std::array<int, 3>{ 0, 2, 1 });
-        callback(std::array<int, 3>{ 3, 4, 5 });
-        callback(std::array<int, 4>{ 0, 1, 4, 3 });
-        callback(std::array<int, 4>{ 1, 2, 5, 4 });
-        callback(std::array<int, 4>{ 2, 0, 3, 5 });
+        callback(std::array<int, 3>{0, 2, 1});
+        callback(std::array<int, 3>{3, 4, 5});
+        callback(std::array<int, 4>{0, 1, 4, 3});
+        callback(std::array<int, 4>{1, 2, 5, 4});
+        callback(std::array<int, 4>{2, 0, 3, 5});
         break;
       }
       case Geometry::Polytope::Type::Pyramid:
@@ -463,12 +496,12 @@ namespace Rodin::IO::MFEM
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
-        callback(std::array<int, 4>{ 3, 2, 1, 0 });
-        callback(std::array<int, 4>{ 0, 1, 5, 4 });
-        callback(std::array<int, 4>{ 1, 2, 6, 5 });
-        callback(std::array<int, 4>{ 2, 3, 7, 6 });
-        callback(std::array<int, 4>{ 3, 0, 4, 7 });
-        callback(std::array<int, 4>{ 4, 5, 6, 7 });
+        callback(std::array<int, 4>{3, 2, 1, 0});
+        callback(std::array<int, 4>{0, 1, 5, 4});
+        callback(std::array<int, 4>{1, 2, 6, 5});
+        callback(std::array<int, 4>{2, 3, 7, 6});
+        callback(std::array<int, 4>{3, 0, 4, 7});
+        callback(std::array<int, 4>{4, 5, 6, 7});
         break;
       }
       default:
@@ -477,14 +510,14 @@ namespace Rodin::IO::MFEM
       }
     }
   }
+
   /**
    * @brief Orders mesh edges for MFEM output.
    * @param mesh Mesh whose entities are traversed.
    * @returns Rodin edge indices in first-encounter order under MFEM local edge traversal.
    */
 
-  inline
-  std::vector<Index> getMFEMEdgeOrder(const Geometry::Mesh<Context::Local>& mesh)
+  inline std::vector<Index> getMFEMEdgeOrder(const Geometry::Mesh<Context::Local>& mesh)
   {
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -515,33 +548,32 @@ namespace Rodin::IO::MFEM
     {
       const auto geometry = conn.getGeometry(D, c);
       const auto& cell = conn.getPolytope(D, c);
-      forEachMFEMLocalEdge(geometry,
-        [&](int a, int b)
-        {
-          assert(a < static_cast<int>(cell.size()));
-          assert(b < static_cast<int>(cell.size()));
-          const auto key = getSortedEdgeKey(cell[a], cell[b]);
-          const auto [seenIt, inserted] = seen.emplace(key, true);
-          (void) seenIt;
-          if (!inserted)
-            return;
-          const auto edgeIt = edgeIndex.find(key);
-          assert(edgeIt != edgeIndex.end());
-          out.push_back(edgeIt->second);
-        });
+      forEachMFEMLocalEdge(geometry, [&](int a, int b) {
+        assert(a < static_cast<int>(cell.size()));
+        assert(b < static_cast<int>(cell.size()));
+        const auto key = getSortedEdgeKey(cell[a], cell[b]);
+        const auto [seenIt, inserted] = seen.emplace(key, true);
+        (void)seenIt;
+        if (!inserted)
+          return;
+        const auto edgeIt = edgeIndex.find(key);
+        assert(edgeIt != edgeIndex.end());
+        out.push_back(edgeIt->second);
+      });
     }
 
     assert(out.size() == edgeCount);
     return out;
   }
+
   /**
    * @brief Orders mesh faces and their vertices for MFEM output.
    * @param mesh Mesh whose entities are traversed.
    * @returns Face indices and MFEM vertex orderings in first-encounter order over the cells.
    */
 
-  inline
-  std::vector<FaceOrderEntry> getMFEMFaceOrder(const Geometry::Mesh<Context::Local>& mesh)
+  inline std::vector<FaceOrderEntry> getMFEMFaceOrder(
+    const Geometry::Mesh<Context::Local>& mesh)
   {
     const auto& conn = mesh.getConnectivity();
     const size_t D = mesh.getDimension();
@@ -570,38 +602,40 @@ namespace Rodin::IO::MFEM
       const auto geometry = conn.getGeometry(D, c);
       const auto& cell = conn.getPolytope(D, c);
 
-      forEachMFEMLocalFace(geometry,
-        [&](const auto& localFace)
+      forEachMFEMLocalFace(geometry, [&](const auto& localFace) {
+        std::vector<Index> vertices;
+        vertices.reserve(localFace.size());
+        for (int localVertex : localFace)
         {
-          std::vector<Index> vertices;
-          vertices.reserve(localFace.size());
-          for (int localVertex : localFace)
-          {
-            assert(localVertex >= 0);
-            assert(localVertex < static_cast<int>(cell.size()));
-            vertices.push_back(cell[localVertex]);
-          }
+          assert(localVertex >= 0);
+          assert(localVertex < static_cast<int>(cell.size()));
+          vertices.push_back(cell[localVertex]);
+        }
 
-          std::array<Index, 3> key;
-          if (localFace.size() == 3)
-            key = getTriangleFaceKey(vertices[0], vertices[1], vertices[2]);
-          else
-            key = getQuadrilateralFaceKey(vertices[0], vertices[1], vertices[2], vertices[3]);
+        std::array<Index, 3> key;
+        if (localFace.size() == 3)
+          key = getTriangleFaceKey(vertices[0], vertices[1], vertices[2]);
+        else
+        {
+          key =
+            getQuadrilateralFaceKey(vertices[0], vertices[1], vertices[2], vertices[3]);
+        }
 
-          const auto [seenIt, inserted] = seen.emplace(key, true);
-          (void) seenIt;
-          if (!inserted)
-            return;
+        const auto [seenIt, inserted] = seen.emplace(key, true);
+        (void)seenIt;
+        if (!inserted)
+          return;
 
-          const auto faceIt = faceIndex.find(key);
-          assert(faceIt != faceIndex.end());
-          out.push_back({ faceIt->second, std::move(vertices) });
-        });
+        const auto faceIt = faceIndex.find(key);
+        assert(faceIt != faceIndex.end());
+        out.push_back({faceIt->second, std::move(vertices)});
+      });
     }
 
     assert(out.size() == faceCount);
     return out;
   }
+
   /**
    * @brief Flattens an integer barycentric triangle-node coordinate.
    * @param bary0 Integer barycentric coordinate; the coordinates sum to the polynomial order.
@@ -611,14 +645,14 @@ namespace Rodin::IO::MFEM
    */
 
   template <size_t K>
-  inline
-  size_t getTriangleNodeIndex(size_t bary0, size_t bary1, size_t bary2)
+  inline size_t getTriangleNodeIndex(size_t bary0, size_t bary1, size_t bary2)
   {
     assert(bary0 + bary1 + bary2 == K);
     const size_t i = bary1;
     const size_t j = bary2;
     return j * (K + 1) - (j * (j - 1)) / 2 + i;
   }
+
   /**
    * @brief Maps triangular node indices between vertex orderings.
    * @param sourceVertices Vertices in the source entity ordering.
@@ -627,10 +661,9 @@ namespace Rodin::IO::MFEM
    */
 
   template <size_t K>
-  inline
-  std::vector<size_t> getTriangleNodeMap(
-      const Geometry::Polytope::Key& sourceVertices,
-      const std::vector<Index>& targetVertices)
+  inline std::vector<size_t> getTriangleNodeMap(
+    const Geometry::Polytope::Key& sourceVertices,
+    const std::vector<Index>& targetVertices)
   {
     assert(sourceVertices.size() == 3);
     assert(targetVertices.size() == 3);
@@ -657,19 +690,22 @@ namespace Rodin::IO::MFEM
     {
       for (size_t i = 0; i <= K - j; ++i)
       {
-        const std::array<size_t, 3> targetBary{ K - i - j, i, j };
-        std::array<size_t, 3> sourceBary{ 0, 0, 0 };
+        const std::array<size_t, 3> targetBary{K - i - j, i, j};
+        std::array<size_t, 3> sourceBary{0, 0, 0};
         for (size_t t = 0; t < 3; ++t)
           sourceBary[static_cast<size_t>(targetToSource[t])] = targetBary[t];
 
-        const size_t target = getTriangleNodeIndex<K>(targetBary[0], targetBary[1], targetBary[2]);
-        const size_t source = getTriangleNodeIndex<K>(sourceBary[0], sourceBary[1], sourceBary[2]);
+        const size_t target =
+          getTriangleNodeIndex<K>(targetBary[0], targetBary[1], targetBary[2]);
+        const size_t source =
+          getTriangleNodeIndex<K>(sourceBary[0], sourceBary[1], sourceBary[2]);
         map[target] = source;
       }
     }
 
     return map;
   }
+
   /**
    * @brief Flattens an integer quadrilateral-node coordinate.
    * @param i First supporting vertex index.
@@ -678,13 +714,13 @@ namespace Rodin::IO::MFEM
    */
 
   template <size_t K>
-  inline
-  size_t getQuadrilateralNodeIndex(size_t i, size_t j)
+  inline size_t getQuadrilateralNodeIndex(size_t i, size_t j)
   {
     assert(i <= K);
     assert(j <= K);
     return j * (K + 1) + i;
   }
+
   /**
    * @brief Gets lattice coordinates of a quadrilateral corner.
    * @param vertex Local corner index, from zero to three.
@@ -692,20 +728,24 @@ namespace Rodin::IO::MFEM
    */
 
   template <size_t K>
-  inline
-  std::pair<size_t, size_t> getQuadrilateralCornerCoordinates(int vertex)
+  inline std::pair<size_t, size_t> getQuadrilateralCornerCoordinates(int vertex)
   {
     switch (vertex)
     {
-      case 0: return { 0, 0 };
-      case 1: return { K, 0 };
-      case 2: return { K, K };
-      case 3: return { 0, K };
+      case 0:
+        return {0, 0};
+      case 1:
+        return {K, 0};
+      case 2:
+        return {K, K};
+      case 3:
+        return {0, K};
       default:
         assert(false && "Invalid quadrilateral vertex.");
-        return { 0, 0 };
+        return {0, 0};
     }
   }
+
   /**
    * @brief Applies a quadrilateral rotation or reflection to lattice coordinates.
    * @param transform Quadrilateral symmetry index, from zero to seven.
@@ -715,24 +755,33 @@ namespace Rodin::IO::MFEM
    */
 
   template <size_t K>
-  inline
-  std::pair<size_t, size_t> applyQuadrilateralTransform(int transform, size_t i, size_t j)
+  inline std::pair<size_t, size_t> applyQuadrilateralTransform(
+    int transform, size_t i, size_t j)
   {
     switch (transform)
     {
-      case 0: return { i, j };
-      case 1: return { j, K - i };
-      case 2: return { K - i, K - j };
-      case 3: return { K - j, i };
-      case 4: return { i, K - j };
-      case 5: return { K - i, j };
-      case 6: return { j, i };
-      case 7: return { K - j, K - i };
+      case 0:
+        return {i, j};
+      case 1:
+        return {j, K - i};
+      case 2:
+        return {K - i, K - j};
+      case 3:
+        return {K - j, i};
+      case 4:
+        return {i, K - j};
+      case 5:
+        return {K - i, j};
+      case 6:
+        return {j, i};
+      case 7:
+        return {K - j, K - i};
       default:
         assert(false && "Invalid quadrilateral transform.");
-        return { i, j };
+        return {i, j};
     }
   }
+
   /**
    * @brief Maps quadrilateral node indices between vertex orderings.
    * @param sourceVertices Vertices in the source entity ordering.
@@ -741,10 +790,9 @@ namespace Rodin::IO::MFEM
    */
 
   template <size_t K>
-  inline
-  std::vector<size_t> getQuadrilateralNodeMap(
-      const Geometry::Polytope::Key& sourceVertices,
-      const std::vector<Index>& targetVertices)
+  inline std::vector<size_t> getQuadrilateralNodeMap(
+    const Geometry::Polytope::Key& sourceVertices,
+    const std::vector<Index>& targetVertices)
   {
     assert(sourceVertices.size() == 4);
     assert(targetVertices.size() == 4);
@@ -775,9 +823,9 @@ namespace Rodin::IO::MFEM
     for (int transform = 0; transform < 8; ++transform)
     {
       if (applyQuadrilateralTransform<K>(transform, 0, 0) == sourceCorners[0] &&
-          applyQuadrilateralTransform<K>(transform, K, 0) == sourceCorners[1] &&
-          applyQuadrilateralTransform<K>(transform, K, K) == sourceCorners[2] &&
-          applyQuadrilateralTransform<K>(transform, 0, K) == sourceCorners[3])
+        applyQuadrilateralTransform<K>(transform, K, 0) == sourceCorners[1] &&
+        applyQuadrilateralTransform<K>(transform, K, K) == sourceCorners[2] &&
+        applyQuadrilateralTransform<K>(transform, 0, K) == sourceCorners[3])
       {
         chosen = transform;
         break;
@@ -806,9 +854,7 @@ namespace Rodin::IO::MFEM
    *
    * Maps MFEM's internal geometry type enumeration to Rodin's polytope type system.
    */
-  inline
-  constexpr
-  Optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
+  inline constexpr Optional<Rodin::Geometry::Polytope::Type> getGeometry(GeometryType t)
   {
     switch (t)
     {
@@ -855,9 +901,7 @@ namespace Rodin::IO::MFEM
    *
    * Maps Rodin's polytope type system to MFEM's internal geometry type enumeration.
    */
-  inline
-  constexpr
-  Optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
+  inline constexpr Optional<GeometryType> getGeometry(Geometry::Polytope::Type t)
   {
     switch (t)
     {
@@ -898,8 +942,7 @@ namespace Rodin::IO::MFEM
      * @returns Optional unsigned integer if parsing succeeds, empty otherwise
      */
     template <class Iterator>
-    inline
-    Optional<unsigned int> operator()(Iterator begin, Iterator end) const
+    inline Optional<unsigned int> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -980,13 +1023,13 @@ namespace Rodin::IO::MFEM
    */
   struct ParseGeometry
   {
-      /// @brief Parsed geometry data.
-      struct Data
-      {
-          Geometry::Attribute attribute; ///< Element attribute (material ID)
-          Geometry::Polytope::Type geometry; ///< Element geometry type
-          Array<Index> vertices; ///< Vertex indices defining the element
-      };
+    /// @brief Parsed geometry data.
+    struct Data
+    {
+      Geometry::Attribute attribute; ///< Element attribute (material ID)
+      Geometry::Polytope::Type geometry; ///< Element geometry type
+      Array<Index> vertices; ///< Vertex indices defining the element
+    };
 
     /**
      * @brief Parses geometry data from an iterator range.
@@ -996,8 +1039,7 @@ namespace Rodin::IO::MFEM
      * @returns Optional geometry data if parsing succeeds, empty otherwise
      */
     template <class Iterator>
-    inline
-    Optional<Data> operator()(Iterator begin, Iterator end) const
+    inline Optional<Data> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -1021,11 +1063,11 @@ namespace Rodin::IO::MFEM
         return {};
       res.geometry = *g;
 
-     res.vertices.resize(Geometry::Polytope::Traits(res.geometry).getVertexCount());
-     size_t i = 0;
-     const auto getVertex = [&](auto& ctx) { res.vertices(i++) = _attr(ctx); };
-     const auto pvs = repeat(res.vertices.size())[uint_[getVertex]];
-     const bool rvs = boost::spirit::x3::phrase_parse(begin, end, pvs, space);
+      res.vertices.resize(Geometry::Polytope::Traits(res.geometry).getVertexCount());
+      size_t i = 0;
+      const auto getVertex = [&](auto& ctx) { res.vertices(i++) = _attr(ctx); };
+      const auto pvs = repeat(res.vertices.size())[uint_[getVertex]];
+      const bool rvs = boost::spirit::x3::phrase_parse(begin, end, pvs, space);
 
       if (begin != end)
         return {};
@@ -1052,8 +1094,7 @@ namespace Rodin::IO::MFEM
      * @returns True if line is empty or contains only whitespace, false otherwise
      */
     template <class Iterator>
-    inline
-    bool operator()(Iterator begin, Iterator end) const
+    inline bool operator()(Iterator begin, Iterator end) const
     {
       if (begin == end)
         return true;
@@ -1084,8 +1125,7 @@ namespace Rodin::IO::MFEM
      * @returns True if line is empty, whitespace, or comment, false otherwise
      */
     template <class Iterator>
-    inline
-    bool operator()(Iterator begin, Iterator end) const
+    inline bool operator()(Iterator begin, Iterator end) const
     {
       if (begin == end)
         return true;
@@ -1117,8 +1157,7 @@ namespace Rodin::IO::MFEM
      * @returns Optional keyword string if parsing succeeds, empty otherwise
      */
     template <class Iterator>
-    inline
-    Optional<std::string> operator()(Iterator begin, Iterator end) const
+    inline Optional<std::string> operator()(Iterator begin, Iterator end) const
     {
       using boost::spirit::x3::space;
       using boost::spirit::x3::blank;
@@ -1157,8 +1196,7 @@ namespace Rodin::IO::MFEM
        * @returns Optional mesh header if parsing succeeds, empty otherwise
        */
       template <class Iterator>
-      inline
-      Optional<MeshHeader> operator()(Iterator begin, Iterator end) const
+      inline Optional<MeshHeader> operator()(Iterator begin, Iterator end) const
       {
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
@@ -1219,26 +1257,27 @@ namespace Rodin::IO::MFEM
           s_nodes.reserve(Count);
           s_nodes.clear();
 
-          const auto& cp = Variational::GLL01<K>::getNodes(); // assumed in [0,1], as in MFEM
+          const auto& cp =
+            Variational::GLL01<K>::getNodes(); // assumed in [0,1], as in MFEM
           const int p = static_cast<int>(K);
 
           // Vertices
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[0]          }}); // (0,0)
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[p], cp[0]          }}); // (1,0)
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[p]          }}); // (0,1)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[0]}}); // (0,0)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[p], cp[0]}}); // (1,0)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[p]}}); // (0,1)
 
           // Edge nodes (same loops/order as MFEM)
           // Edge (0,1): (cp[i], cp[0])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[i], cp[0] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[i], cp[0]}});
 
           // Edge (1,2): (cp[p-i], cp[i])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[p - i], cp[i] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[p - i], cp[i]}});
 
           // Edge (2,0): (cp[0], cp[p-i])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[p - i] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[p - i]}});
 
           // Interior nodes
           for (int j = 1; j < p; ++j)
@@ -1248,12 +1287,12 @@ namespace Rodin::IO::MFEM
               const Real ci = cp[i];
               const Real cj = cp[j];
               const Real ck = cp[p - i - j];
-              const Real w  = ci + cj + ck;
+              const Real w = ci + cj + ck;
 
               const Real x = ci / w;
               const Real y = cj / w;
 
-              s_nodes.emplace_back(Math::SpatialPoint{{ x, y }});
+              s_nodes.emplace_back(Math::SpatialPoint{{x, y}});
             }
           }
 
@@ -1329,7 +1368,8 @@ namespace Rodin::IO::MFEM
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           s_inv = svd.solve(I);
@@ -1380,36 +1420,36 @@ namespace Rodin::IO::MFEM
           const int p = static_cast<int>(K);
 
           // Vertices
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[0], cp[0] }}); // (0,0,0)
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[p], cp[0], cp[0] }}); // (1,0,0)
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[p], cp[0] }}); // (0,1,0)
-          s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[0], cp[p] }}); // (0,0,1)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[0], cp[0]}}); // (0,0,0)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[p], cp[0], cp[0]}}); // (1,0,0)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[p], cp[0]}}); // (0,1,0)
+          s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[0], cp[p]}}); // (0,0,1)
 
           // Edges, in the same order as MFEM comments (0,1), (0,2), (0,3), (1,2), (1,3), (2,3)
 
           // (0,1): (cp[i], cp[0], cp[0])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[i], cp[0], cp[0] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[i], cp[0], cp[0]}});
 
           // (0,2): (cp[0], cp[i], cp[0])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[i], cp[0] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[i], cp[0]}});
 
           // (0,3): (cp[0], cp[0], cp[i])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[0], cp[i] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[0], cp[i]}});
 
           // (1,2): (cp[p-i], cp[i], cp[0])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[p - i], cp[i], cp[0] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[p - i], cp[i], cp[0]}});
 
           // (1,3): (cp[p-i], cp[0], cp[i])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[p - i], cp[0], cp[i] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[p - i], cp[0], cp[i]}});
 
           // (2,3): (cp[0], cp[p-i], cp[i])
           for (int i = 1; i < p; ++i)
-            s_nodes.emplace_back(Math::SpatialPoint{{ cp[0], cp[p - i], cp[i] }});
+            s_nodes.emplace_back(Math::SpatialPoint{{cp[0], cp[p - i], cp[i]}});
 
           // Faces
           // Face (1,2,3): barycentric (λ0, λ1, λ2, λ3) with λ0 = 0
@@ -1420,13 +1460,13 @@ namespace Rodin::IO::MFEM
               const Real ci = cp[i];
               const Real cj = cp[j];
               const Real ck = cp[p - i - j];
-              const Real w  = ci + cj + ck;
+              const Real w = ci + cj + ck;
 
               const Real x = cp[p - i - j] / w; // λ1
-              const Real y = cp[i]             / w; // λ2
-              const Real z = cp[j]             / w; // λ3
+              const Real y = cp[i] / w; // λ2
+              const Real z = cp[j] / w; // λ3
 
-              s_nodes.emplace_back(Math::SpatialPoint{{ x, y, z }});
+              s_nodes.emplace_back(Math::SpatialPoint{{x, y, z}});
             }
           }
 
@@ -1438,13 +1478,13 @@ namespace Rodin::IO::MFEM
               const Real ci = cp[i];
               const Real cj = cp[j];
               const Real ck = cp[p - i - j];
-              const Real w  = ci + cj + ck;
+              const Real w = ci + cj + ck;
 
-              const Real x = cp[0];            // λ0
-              const Real y = cp[j] / w;        // λ2
-              const Real z = cp[i] / w;        // λ3
+              const Real x = cp[0]; // λ0
+              const Real y = cp[j] / w; // λ2
+              const Real z = cp[i] / w; // λ3
 
-              s_nodes.emplace_back(Math::SpatialPoint{{ x, y, z }});
+              s_nodes.emplace_back(Math::SpatialPoint{{x, y, z}});
             }
           }
 
@@ -1456,13 +1496,13 @@ namespace Rodin::IO::MFEM
               const Real ci = cp[i];
               const Real cj = cp[j];
               const Real ck = cp[p - i - j];
-              const Real w  = ci + cj + ck;
+              const Real w = ci + cj + ck;
 
-              const Real x = cp[i] / w;        // λ0
-              const Real y = cp[0];            // λ1
-              const Real z = cp[j] / w;        // λ3
+              const Real x = cp[i] / w; // λ0
+              const Real y = cp[0]; // λ1
+              const Real z = cp[j] / w; // λ3
 
-              s_nodes.emplace_back(Math::SpatialPoint{{ x, y, z }});
+              s_nodes.emplace_back(Math::SpatialPoint{{x, y, z}});
             }
           }
 
@@ -1474,13 +1514,13 @@ namespace Rodin::IO::MFEM
               const Real ci = cp[i];
               const Real cj = cp[j];
               const Real ck = cp[p - i - j];
-              const Real w  = ci + cj + ck;
+              const Real w = ci + cj + ck;
 
-              const Real x = cp[j] / w;        // λ0
-              const Real y = cp[i] / w;        // λ1
-              const Real z = cp[0];            // λ2
+              const Real x = cp[j] / w; // λ0
+              const Real y = cp[i] / w; // λ1
+              const Real z = cp[0]; // λ2
 
-              s_nodes.emplace_back(Math::SpatialPoint{{ x, y, z }});
+              s_nodes.emplace_back(Math::SpatialPoint{{x, y, z}});
             }
           }
 
@@ -1495,13 +1535,13 @@ namespace Rodin::IO::MFEM
                 const Real cj = cp[j];
                 const Real ck = cp[k];
                 const Real cl = cp[p - i - j - k];
-                const Real w  = ci + cj + ck + cl;
+                const Real w = ci + cj + ck + cl;
 
                 const Real x = ci / w;
                 const Real y = cj / w;
                 const Real z = ck / w;
 
-                s_nodes.emplace_back(Math::SpatialPoint{{ x, y, z }});
+                s_nodes.emplace_back(Math::SpatialPoint{{x, y, z}});
               }
             }
           }
@@ -1582,7 +1622,8 @@ namespace Rodin::IO::MFEM
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           s_inv = svd.solve(I);
@@ -1606,6 +1647,7 @@ namespace Rodin::IO::MFEM
     public:
       /// @brief Number of triangular nodes per wedge layer.
       static constexpr size_t TriangleCount = TriangleNodes<K>::Count;
+
       /// @brief Number of MFEM H1 nodes on a wedge of order @p K.
       static constexpr size_t Count = TriangleCount * (K + 1);
 
@@ -1627,8 +1669,7 @@ namespace Rodin::IO::MFEM
           const auto& triNodes = TriangleNodes<K>::getNodes();
           const auto& cp = Variational::GLL01<K>::getNodes();
 
-          auto segmentNode = [&](int local) -> Real
-          {
+          auto segmentNode = [&](int local) -> Real {
             if (local == 0)
               return cp[0];
             if (local == 1)
@@ -1639,29 +1680,44 @@ namespace Rodin::IO::MFEM
           std::vector<int> tDof(Count, -1);
           std::vector<int> sDof(Count, -1);
 
-          tDof[0] = 0; sDof[0] = 0;
-          tDof[1] = 1; sDof[1] = 0;
-          tDof[2] = 2; sDof[2] = 0;
-          tDof[3] = 0; sDof[3] = 1;
-          tDof[4] = 1; sDof[4] = 1;
-          tDof[5] = 2; sDof[5] = 1;
+          tDof[0] = 0;
+          sDof[0] = 0;
+          tDof[1] = 1;
+          sDof[1] = 0;
+          tDof[2] = 2;
+          sDof[2] = 0;
+          tDof[3] = 0;
+          sDof[3] = 1;
+          tDof[4] = 1;
+          sDof[4] = 1;
+          tDof[5] = 2;
+          sDof[5] = 1;
 
           int offset = 6;
           for (int i = 1; i < p; ++i)
           {
             const int k = i - 1;
 
-            tDof[offset + 0 * ne + k] = 2 + 0 * ne + i; sDof[offset + 0 * ne + k] = 0;
-            tDof[offset + 1 * ne + k] = 2 + 1 * ne + i; sDof[offset + 1 * ne + k] = 0;
-            tDof[offset + 2 * ne + k] = 2 + 2 * ne + i; sDof[offset + 2 * ne + k] = 0;
+            tDof[offset + 0 * ne + k] = 2 + 0 * ne + i;
+            sDof[offset + 0 * ne + k] = 0;
+            tDof[offset + 1 * ne + k] = 2 + 1 * ne + i;
+            sDof[offset + 1 * ne + k] = 0;
+            tDof[offset + 2 * ne + k] = 2 + 2 * ne + i;
+            sDof[offset + 2 * ne + k] = 0;
 
-            tDof[offset + 3 * ne + k] = 2 + 0 * ne + i; sDof[offset + 3 * ne + k] = 1;
-            tDof[offset + 4 * ne + k] = 2 + 1 * ne + i; sDof[offset + 4 * ne + k] = 1;
-            tDof[offset + 5 * ne + k] = 2 + 2 * ne + i; sDof[offset + 5 * ne + k] = 1;
+            tDof[offset + 3 * ne + k] = 2 + 0 * ne + i;
+            sDof[offset + 3 * ne + k] = 1;
+            tDof[offset + 4 * ne + k] = 2 + 1 * ne + i;
+            sDof[offset + 4 * ne + k] = 1;
+            tDof[offset + 5 * ne + k] = 2 + 2 * ne + i;
+            sDof[offset + 5 * ne + k] = 1;
 
-            tDof[offset + 6 * ne + k] = 0; sDof[offset + 6 * ne + k] = i + 1;
-            tDof[offset + 7 * ne + k] = 1; sDof[offset + 7 * ne + k] = i + 1;
-            tDof[offset + 8 * ne + k] = 2; sDof[offset + 8 * ne + k] = i + 1;
+            tDof[offset + 6 * ne + k] = 0;
+            sDof[offset + 6 * ne + k] = i + 1;
+            tDof[offset + 7 * ne + k] = 1;
+            sDof[offset + 7 * ne + k] = i + 1;
+            tDof[offset + 8 * ne + k] = 2;
+            sDof[offset + 8 * ne + k] = i + 1;
           }
 
           offset += 9 * ne;
@@ -1672,8 +1728,10 @@ namespace Rodin::IO::MFEM
             for (int i = 1; i < p - j; ++i)
             {
               const int l = j - p + (((2 * p - 1) - i) * i) / 2;
-              tDof[offset + k]      = 3 * p + l; sDof[offset + k]      = 0;
-              tDof[offset + nt + k] = 3 * p + k; sDof[offset + nt + k] = 1;
+              tDof[offset + k] = 3 * p + l;
+              sDof[offset + k] = 0;
+              tDof[offset + nt + k] = 3 * p + k;
+              sDof[offset + nt + k] = 1;
               ++k;
             }
           }
@@ -1719,7 +1777,8 @@ namespace Rodin::IO::MFEM
           {
             assert(tDof[i] >= 0 && sDof[i] >= 0);
             const auto& pt = triNodes[static_cast<size_t>(tDof[i])];
-            s_nodes.emplace_back(Math::SpatialPoint{{ pt.x(), pt.y(), segmentNode(sDof[i]) }});
+            s_nodes.emplace_back(
+              Math::SpatialPoint{{pt.x(), pt.y(), segmentNode(sDof[i])}});
           }
 
           assert(s_nodes.size() == Count);
@@ -1758,7 +1817,10 @@ namespace Rodin::IO::MFEM
           for (size_t i = 0; i < N; ++i)
           {
             for (size_t j = 0; j < N; ++j)
-              s_change(static_cast<Index>(i), static_cast<Index>(j)) = fe.getBasis(j)(nodes[i]);
+            {
+              s_change(static_cast<Index>(i), static_cast<Index>(j)) =
+                fe.getBasis(j)(nodes[i]);
+            }
           }
         }
 
@@ -1780,7 +1842,8 @@ namespace Rodin::IO::MFEM
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(C);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(C, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            C, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(C.rows(), C.cols());
           s_inv = svd.solve(I);
@@ -1837,7 +1900,11 @@ namespace Rodin::IO
        * @param[in,out] mesh Mesh object to populate with loaded data
        */
       MeshLoader(ObjectType& mesh)
-        : MeshLoaderBase<Context::Local>(mesh)
+        : MeshLoaderBase<Context::Local>(mesh),
+          m_dimension(0),
+          m_spaceDimension(0),
+          m_currentLineNumber(0),
+          m_header()
       {}
 
       /**
@@ -2015,54 +2082,20 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::blank;
-        using boost::spirit::x3::uint_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
+        const auto header = MFEM::readGridFunctionHeader(is, m_currentLineNumber);
 
-        MFEM::GridFunctionHeader header;
-        const auto getFec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto getVdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto getOrdering = [&](auto& ctx) {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        auto it = line.begin();
-        const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        (void) rfes;
-        assert(it == line.end() && rfes);
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pfec =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[getFec];
-        const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        (void) rfec;
-        assert(it == line.end() && rfec);
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[getVdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        (void) rvdim;
-        assert(it == line.end() && rvdim);
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it = line.begin();
-        const auto pordering =
-          boost::spirit::x3::string("Ordering:") >> uint_[getOrdering];
-        const bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
-        (void) rordering;
-        assert(it == line.end() && rordering);
-
-        auto& gf  = this->getObject();
+        auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
 
         const size_t vdim = fes.getVectorDimension();
-        assert(header.vdim == vdim);
+        const std::string collection =
+          "H1_" + std::to_string(fes.getMesh().getDimension()) + "D_P1";
+        if (header.vdim != vdim || header.fec != collection)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM field collection or component count does not match its space."
+            << Alert::Raise;
+        }
 
         auto& data = gf.getData();
         const size_t n = static_cast<size_t>(data.size());
@@ -2076,10 +2109,15 @@ namespace Rodin::IO
         // Read all coefficients as they appear in the file
         std::vector<ScalarType> tmp(n);
 
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        tmp[0] = static_cast<ScalarType>(std::stod(line));
-        for (size_t i = 1; i < n; ++i)
-          is >> tmp[i];
+        for (size_t i = 0; i < n; ++i)
+        {
+          if (!(is >> tmp[i]))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Expected " << n << " MFEM coefficients; invalid or missing value at "
+              << i << "." << Alert::Raise;
+          }
+        }
 
         // Convert from MFEM file ordering -> Rodin internal (block-by-component):
         // internal index = v + c*vn
@@ -2146,18 +2184,22 @@ namespace Rodin::IO
   {
     public:
       /// @brief Finite element space type.
-      using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
       /// @brief Coefficient data storage type.
-      using DataType   = Math::Vector<ScalarType>;
+      using DataType = Math::Vector<ScalarType>;
+
       /**
        * @brief Grid function type being loaded.
        * @brief Grid function type being loaded.
        */
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+
       /// @brief Parent loader base type.
-      using Parent     = GridFunctionLoaderBase<FESType, DataType>;
+      using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
       /**
        * @brief Constructs an MFEM H1 grid-function loader.
@@ -2173,67 +2215,30 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::blank;
-        using boost::spirit::x3::uint_;
         using boost::spirit::x3::double_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
 
         // -------------------------------------------------------------
         // 1. Parse MFEM GridFunction header
         // -------------------------------------------------------------
-        MFEM::GridFunctionHeader header;
+        const auto header = MFEM::readGridFunctionHeader(is, m_currentLineNumber);
 
-        const auto getFec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto getVdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto getOrdering = [&](auto& ctx) {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-
-        auto it = line.begin();
-        const auto pfes  = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes  = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        (void) rfes;
-        assert(rfes && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pfec =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[getFec];
-        const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        (void) rfec;
-        assert(rfec && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[getVdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        (void) rvdim;
-        assert(rvdim && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pord = boost::spirit::x3::string("Ordering:") >> uint_[getOrdering];
-        const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
-        (void) rord;
-        assert(rord && it == line.end());
-
-        // -------------------------------------------------------------
-        // 2. Read coefficient data in MFEM order and map to Rodin DOFs
-        // -------------------------------------------------------------
-        auto& gf   = this->getObject();
-        const auto& fes  = gf.getFiniteElementSpace();
+        auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         auto& data = gf.getData();
 
-        const size_t vdim       = fes.getVectorDimension();
-        const size_t D          = mesh.getDimension();
+        const size_t vdim = fes.getVectorDimension();
+        const size_t D = mesh.getDimension();
         const size_t scalarSize = fes.getSize() / vdim;
 
-        assert(header.vdim == vdim);
+        const std::string collection = "H1_" +
+          std::to_string(fes.getMesh().getDimension()) + "D_P" + std::to_string(K);
+        if (header.vdim != vdim || header.fec != collection)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM field collection or component count does not match its space."
+            << Alert::Raise;
+        }
 
         data.resize(fes.getSize());
 
@@ -2245,8 +2250,12 @@ namespace Rodin::IO
         while (mfemValues.size() < fes.getSize() && (is >> value))
           mfemValues.push_back(value);
 
-        assert(mfemValues.size() == fes.getSize() &&
-          "Mismatch in number of coefficients read");
+        if (mfemValues.size() != fes.getSize())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Expected " << fes.getSize() << " MFEM coefficients, but found "
+            << mfemValues.size() << "." << Alert::Raise;
+        }
 
         // -------------------------------------------------------------
         // 2.a Normalize MFEM ordering into component-blocked storage:
@@ -2405,7 +2414,7 @@ namespace Rodin::IO
         //--------------------------------------------------------------------
         if (D >= 1)
         {
-          const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
+          const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
           const auto mfemEdges = MFEM::getMFEMEdgeOrder(mesh);
 
           std::vector<Index> interior;
@@ -2414,8 +2423,8 @@ namespace Rodin::IO
             const auto& edgeVerts = conn10[e];
             assert(edgeVerts.size() == 2);
 
-            const Index v0   = edgeVerts[0];
-            const Index v1   = edgeVerts[1];
+            const Index v0 = edgeVerts[0];
+            const Index v1 = edgeVerts[1];
             const Index vmin = std::min(v0, v1);
             const Index vmax = std::max(v0, v1);
 
@@ -2453,15 +2462,16 @@ namespace Rodin::IO
         //--------------------------------------------------------------------
         if (D >= 2)
         {
-          const size_t faceDim   = (D == 3) ? 2 : (D - 1);
-          [[maybe_unused]] const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+          const size_t faceDim = (D == 3) ? 2 : (D - 1);
+          [[maybe_unused]] const size_t faceCount =
+            mesh.getConnectivity().getCount(faceDim);
 
           if (D == 3)
           {
             // Triangle face parameters
             constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
             [[maybe_unused]] constexpr size_t QuadN = (K + 1) * (K + 1);
-            const int p  = static_cast<int>(K);
+            const int p = static_cast<int>(K);
             const int nV = 3;
             const int nE = 3 * (p - 1);
             const int triInteriorOffset = nV + nE;
@@ -2474,7 +2484,7 @@ namespace Rodin::IO
             {
               const Index f = mfemFace.index;
               const auto faceGeom = mesh.getGeometry(2, f);
-              const auto& fdofs   = fes.getDOFs(2, f);
+              const auto& fdofs = fes.getDOFs(2, f);
 
               switch (faceGeom)
               {
@@ -2482,7 +2492,8 @@ namespace Rodin::IO
                 {
                   assert(scalarLocalSize(fdofs) == TriN);
                   const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
-                  const auto faceNodeMap = MFEM::getTriangleNodeMap<K>(faceVertices, mfemFace.vertices);
+                  const auto faceNodeMap =
+                    MFEM::getTriangleNodeMap<K>(faceVertices, mfemFace.vertices);
                   const int numInterior = static_cast<int>(TriN) - triInteriorOffset;
 
                   if (numInterior > 0)
@@ -2555,7 +2566,8 @@ namespace Rodin::IO
                 {
                   assert(scalarLocalSize(fdofs) == QuadN);
                   const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
-                  const auto faceNodeMap = MFEM::getQuadrilateralNodeMap<K>(faceVertices, mfemFace.vertices);
+                  const auto faceNodeMap =
+                    MFEM::getQuadrilateralNodeMap<K>(faceVertices, mfemFace.vertices);
 
                   for (size_t j = 1; j < K; ++j)
                   {
@@ -2608,7 +2620,7 @@ namespace Rodin::IO
         if (D == 2)
         {
           constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-          const int p  = static_cast<int>(K);
+          const int p = static_cast<int>(K);
           const int nV = 3;
           const int nE = 3 * (p - 1);
           const int triInteriorOffset = nV + nE;
@@ -2715,9 +2727,9 @@ namespace Rodin::IO
           constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
           const int p = static_cast<int>(K);
 
-          const int nV    = 4;
-          const int nE    = 6 * (p - 1);
-          const int nF    = 2 * (p - 1) * (p - 2);
+          const int nV = 4;
+          const int nE = 6 * (p - 1);
+          const int nF = 2 * (p - 1) * (p - 2);
           const int tetInteriorOffset = nV + nE + nF;
 
           std::vector<Math::Vector<ScalarType>> uRElem(
@@ -2725,8 +2737,8 @@ namespace Rodin::IO
 
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
-            const auto  cellGeom = mesh.getGeometry(3, c);
-            const auto& cdofs    = fes.getDOFs(3, c);
+            const auto cellGeom = mesh.getGeometry(3, c);
+            const auto& cdofs = fes.getDOFs(3, c);
 
             switch (cellGeom)
             {
@@ -2987,61 +2999,24 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::uint_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
-
         // -------------------------------------------------------------
         // 1. Parse MFEM GridFunction header
         // -------------------------------------------------------------
-        MFEM::GridFunctionHeader header;
+        const auto header = MFEM::readGridFunctionHeader(is, m_currentLineNumber);
 
-        const auto getFec = [&](auto& ctx) { header.fec = _attr(ctx); };
-        const auto getVdim = [&](auto& ctx) { header.vdim = _attr(ctx); };
-        const auto getOrdering = [&](auto& ctx) {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-
-        auto it = line.begin();
-        const auto pfes  = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes  = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        (void) rfes;
-        assert(rfes && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pfec =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[getFec];
-        const bool rfec  = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        (void) rfec;
-        assert(rfec && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[getVdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        (void) rvdim;
-        assert(rvdim && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pord = boost::spirit::x3::string("Ordering:") >> uint_[getOrdering];
-        const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
-        (void) rord;
-        assert(rord && it == line.end());
-
-        // -------------------------------------------------------------
-        // 2. Read coefficient data
-        // -------------------------------------------------------------
-        auto& gf  = this->getObject();
+        auto& gf = this->getObject();
         auto& fes = gf.getFiniteElementSpace();
         auto& data = gf.getData();
 
         const size_t vdim = fes.getVectorDimension();
-        assert(header.vdim == vdim);
+        const std::string collection =
+          "L2_" + std::to_string(fes.getMesh().getDimension()) + "D_P0";
+        if (header.vdim != vdim || header.fec != collection)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM field collection or component count does not match its space."
+            << Alert::Raise;
+        }
 
         const size_t dofCount = fes.getSize();
         assert(dofCount % vdim == 0);
@@ -3060,8 +3035,8 @@ namespace Rodin::IO
         if (tmp.size() != dofCount)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Expected " << dofCount << " coefficient values, but found "
-            << tmp.size() << "." << Alert::Raise;
+            << "Expected " << dofCount << " coefficient values, but found " << tmp.size()
+            << "." << Alert::Raise;
         }
 
         if (header.ordering == MFEM::Ordering::Nodes)
@@ -3070,8 +3045,7 @@ namespace Rodin::IO
           {
             for (size_t i = 0; i < scalarDofCount; ++i)
             {
-              data(static_cast<Index>(i + c * scalarDofCount)) =
-                tmp[i + c * scalarDofCount];
+              data(static_cast<Index>(i * vdim + c)) = tmp[i + c * scalarDofCount];
             }
           }
         }
@@ -3081,8 +3055,7 @@ namespace Rodin::IO
           {
             for (size_t c = 0; c < vdim; ++c)
             {
-              data(static_cast<Index>(i + c * scalarDofCount)) =
-                tmp[c + i * vdim];
+              data(static_cast<Index>(i * vdim + c)) = tmp[c + i * vdim];
             }
           }
         }
@@ -3104,8 +3077,10 @@ namespace Rodin::IO
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <class Range, class Context, class Data>
-  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Context>>, Data>
-  : public Printer<Variational::GridFunction<Variational::P0<Range, Geometry::Mesh<Context>>, Data>>
+  class GridFunctionPrinterBase<FileFormat::MFEM,
+    Variational::P0<Range, Geometry::Mesh<Context>>, Data>
+    : public Printer<
+        Variational::GridFunction<Variational::P0<Range, Geometry::Mesh<Context>>, Data>>
   {
     public:
       /// @brief Range (evaluation value) type.
@@ -3151,10 +3126,10 @@ namespace Rodin::IO
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         os << "FiniteElementSpace\n"
-           << "FiniteElementCollection: " << "L2_" << fes.getMesh().getDimension() << "D_P0\n"
+           << "FiniteElementCollection: " << "L2_" << fes.getMesh().getDimension()
+           << "D_P0\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::Nodes
-           << "\n\n";
+           << "Ordering: " << MFEM::Ordering::Nodes << "\n\n";
         this->printData(os);
       }
 
@@ -3187,8 +3162,10 @@ namespace Rodin::IO
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <class Range, class Context, class Data>
-  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Context>>, Data>
-  : public Printer<Variational::GridFunction<Variational::P1<Range, Geometry::Mesh<Context>>, Data>>
+  class GridFunctionPrinterBase<FileFormat::MFEM,
+    Variational::P1<Range, Geometry::Mesh<Context>>, Data>
+    : public Printer<
+        Variational::GridFunction<Variational::P1<Range, Geometry::Mesh<Context>>, Data>>
   {
     public:
       /// @brief Range (evaluation value) type.
@@ -3234,10 +3211,10 @@ namespace Rodin::IO
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         os << "FiniteElementSpace\n"
-           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P1\n"
+           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension()
+           << "D_P1\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::Nodes
-           << "\n\n";
+           << "Ordering: " << MFEM::Ordering::Nodes << "\n\n";
         this->printData(os);
       }
 
@@ -3271,8 +3248,10 @@ namespace Rodin::IO
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <size_t K, class Range, class Context, class Data>
-  class GridFunctionPrinterBase<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context>>, Data>
-  : public Printer<Variational::GridFunction<Variational::H1<K, Range, Geometry::Mesh<Context>>, Data>>
+  class GridFunctionPrinterBase<FileFormat::MFEM,
+    Variational::H1<K, Range, Geometry::Mesh<Context>>, Data>
+    : public Printer<Variational::GridFunction<
+        Variational::H1<K, Range, Geometry::Mesh<Context>>, Data>>
   {
     public:
       /// @brief Range (evaluation value) type.
@@ -3318,10 +3297,10 @@ namespace Rodin::IO
         const auto& gf = this->getObject();
         const auto& fes = gf.getFiniteElementSpace();
         os << "FiniteElementSpace\n"
-           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P" << K << "\n"
+           << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension()
+           << "D_P" << K << "\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::Nodes
-           << "\n\n";
+           << "Ordering: " << MFEM::Ordering::Nodes << "\n\n";
         this->printData(os);
       }
 
@@ -3393,11 +3372,29 @@ namespace Rodin::IO
       void printData(std::ostream& os) override
       {
         const auto& gf = this->getObject();
-        const auto& vec = gf.getData();
-        const auto* data = vec.data();
-        assert(vec.size() >= 0);
-        for (size_t i = 0; i < static_cast<size_t>(vec.size()); i++)
-          os << data[i] << '\n';
+        const auto& fes = gf.getFiniteElementSpace();
+        using Range = typename FormLanguage::Traits<FES>::RangeType;
+        using Mesh = typename FES::MeshType;
+        using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+        os << std::setprecision(std::numeric_limits<RealScalar>::max_digits10);
+        if constexpr (std::is_same_v<FES, Variational::P0<Range, Mesh>>)
+        {
+          // MFEM Ordering::Nodes blocks components; P0 stores them per cell.
+          for (size_t component = 0; component < fes.getVectorDimension(); ++component)
+          {
+            for (auto cell = fes.getMesh().getCell(); cell; ++cell)
+            {
+              const auto& dofs = fes.getDOFs(cell->getDimension(), cell->getIndex());
+              os << gf.getData()[dofs[component]] << '\n';
+            }
+          }
+        }
+        else
+        {
+          const auto& data = gf.getData();
+          for (size_t i = 0; i < static_cast<size_t>(data.size()); ++i)
+            os << data[i] << '\n';
+        }
       }
   };
 
@@ -3421,13 +3418,16 @@ namespace Rodin::IO
   {
     public:
       /// @brief Finite element space type.
-      using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      using FESType = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+
       /// @brief Coefficient data storage type.
-      using DataType   = Math::Vector<Scalar>;
+      using DataType = Math::Vector<Scalar>;
+
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+
       /// @brief Parent printer base type.
-      using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
       /**
        * @brief Constructs an MFEM H1 grid-function printer.
@@ -3443,16 +3443,17 @@ namespace Rodin::IO
        */
       void printData(std::ostream& os) override
       {
-        // Set maximum precision for floating-point output to avoid precision loss
-        os << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
+        // Complex coefficients require the precision of their real component.
+        using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+        os << std::setprecision(std::numeric_limits<RealScalar>::max_digits10);
 
-        const auto& gf   = this->getObject();
-        const auto& fes  = gf.getFiniteElementSpace();
+        const auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
         const auto& data = gf.getData();
 
-        const size_t vdim       = fes.getVectorDimension();
-        const size_t D          = mesh.getDimension();
+        const size_t vdim = fes.getVectorDimension();
+        const size_t D = mesh.getDimension();
         const size_t scalarSize = fes.getSize() / vdim;
 
         // Track which "Rodin scalar DOFs" have already been emitted.
@@ -3544,92 +3545,194 @@ namespace Rodin::IO
           for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
             emitScalarDof(vertexScalarDof[v]);
 
-        //--------------------------------------------------------------------
-        // 2. Edges: interior DOFs, oriented vmin -> vmax
-        //--------------------------------------------------------------------
+          //--------------------------------------------------------------------
+          // 2. Edges: interior DOFs, oriented vmin -> vmax
+          //--------------------------------------------------------------------
 
-        if (D >= 1)
-        {
-          const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
-          const auto mfemEdges = MFEM::getMFEMEdgeOrder(mesh);
-
-          std::vector<Index> interior;
-          for (Index e : mfemEdges)
+          if (D >= 1)
           {
-            const auto& edgeVerts = conn10[e];
-            assert(edgeVerts.size() == 2);
+            const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
+            const auto mfemEdges = MFEM::getMFEMEdgeOrder(mesh);
 
-            const Index v0   = edgeVerts[0];
-            const Index v1   = edgeVerts[1];
-            const Index vmin = std::min(v0, v1);
-            const Index vmax = std::max(v0, v1);
-
-            const Index vminDof = vertexScalarDof[vmin];
-            const Index vmaxDof = vertexScalarDof[vmax];
-
-            const auto& edofs = fes.getDOFs(1, e);
-            const size_t edgeScalarDofs = scalarLocalSize(edofs);
-
-            interior.clear();
-            for (size_t k = 0; k < edgeScalarDofs; ++k)
+            std::vector<Index> interior;
+            for (Index e : mfemEdges)
             {
-              Index d = scalarLocalDof(edofs, k);
-              if (d != vminDof && d != vmaxDof)
-                interior.push_back(d);
+              const auto& edgeVerts = conn10[e];
+              assert(edgeVerts.size() == 2);
+
+              const Index v0 = edgeVerts[0];
+              const Index v1 = edgeVerts[1];
+              const Index vmin = std::min(v0, v1);
+              const Index vmax = std::max(v0, v1);
+
+              const Index vminDof = vertexScalarDof[vmin];
+              const Index vmaxDof = vertexScalarDof[vmax];
+
+              const auto& edofs = fes.getDOFs(1, e);
+              const size_t edgeScalarDofs = scalarLocalSize(edofs);
+
+              interior.clear();
+              for (size_t k = 0; k < edgeScalarDofs; ++k)
+              {
+                Index d = scalarLocalDof(edofs, k);
+                if (d != vminDof && d != vmaxDof)
+                  interior.push_back(d);
+              }
+
+              if (v0 > v1)
+                std::reverse(interior.begin(), interior.end());
+
+              for (Index d : interior)
+                emitScalarDof(d);
             }
-
-            if (v0 > v1)
-              std::reverse(interior.begin(), interior.end());
-
-            for (Index d : interior)
-              emitScalarDof(d);
           }
-        }
 
-        //--------------------------------------------------------------------
-        // 3. Faces (D >= 2)
-        //--------------------------------------------------------------------
+          //--------------------------------------------------------------------
+          // 3. Faces (D >= 2)
+          //--------------------------------------------------------------------
 
-        if (D >= 2)
-        {
-          const size_t faceDim   = (D == 3) ? 2 : (D - 1);
-          const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
-
-          if (D == 3)
+          if (D >= 2)
           {
-            // Triangle face size / offsets in MFEM ordering
+            const size_t faceDim = (D == 3) ? 2 : (D - 1);
+            const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+
+            if (D == 3)
+            {
+              // Triangle face size / offsets in MFEM ordering
+              constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
+              [[maybe_unused]] constexpr size_t QuadN = (K + 1) * (K + 1);
+              const int p = static_cast<int>(K);
+              const int nV = 3;
+              const int nE = 3 * (p - 1);
+              const int triInteriorOffset = nV + nE;
+
+              Math::Vector<Scalar> uRFace(TriN);
+              Math::Vector<Scalar> uMFace(TriN);
+              const auto mfemFaces = MFEM::getMFEMFaceOrder(mesh);
+
+              for (const auto& mfemFace : mfemFaces)
+              {
+                const Index f = mfemFace.index;
+                const auto faceGeom = mesh.getGeometry(2, f);
+                const auto& fdofs = fes.getDOFs(2, f);
+
+                switch (faceGeom)
+                {
+                  case Geometry::Polytope::Type::Triangle:
+                  {
+                    assert(scalarLocalSize(fdofs) == TriN);
+                    const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
+                    const auto faceNodeMap =
+                      MFEM::getTriangleNodeMap<K>(faceVertices, mfemFace.vertices);
+
+                    for (size_t k = 0; k < TriN; ++k)
+                    {
+                      const Index d = scalarLocalDof(fdofs, faceNodeMap[k]);
+                      uRFace(static_cast<Index>(k)) = data.coeffRef(
+                        d + static_cast<Index>(activeComponent * scalarSize));
+                    }
+                    uMFace = sTriChangeScalar * uRFace;
+
+                    int loc = 0;
+                    for (int j = 1; j < p; ++j)
+                    {
+                      for (int i = 1; i + j < p; ++i)
+                      {
+                        const int idx = triInteriorOffset + loc++;
+                        os << uMFace(static_cast<Index>(idx)) << '\n';
+                      }
+                    }
+                    for (size_t k = 0; k < TriN; ++k)
+                      written[static_cast<size_t>(scalarLocalDof(fdofs, k))] = true;
+                    break;
+                  }
+
+                  case Geometry::Polytope::Type::Quadrilateral:
+                  {
+                    assert(scalarLocalSize(fdofs) == QuadN);
+                    const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
+                    const auto faceNodeMap =
+                      MFEM::getQuadrilateralNodeMap<K>(faceVertices, mfemFace.vertices);
+
+                    for (size_t j = 1; j < K; ++j)
+                    {
+                      for (size_t i = 1; i < K; ++i)
+                      {
+                        const size_t targetLocal =
+                          MFEM::getQuadrilateralNodeIndex<K>(i, j);
+                        const Index sdof =
+                          scalarLocalDof(fdofs, faceNodeMap[targetLocal]);
+                        const size_t s = static_cast<size_t>(sdof);
+                        if (s < scalarSize && !written[s])
+                        {
+                          os << data.coeffRef(
+                                  sdof + static_cast<Index>(activeComponent * scalarSize))
+                             << '\n';
+                          written[s] = true;
+                        }
+                      }
+                    }
+                    break;
+                  }
+
+                  default:
+                  {
+                    const size_t nScalarLocal = scalarLocalSize(fdofs);
+                    for (size_t k = 0; k < nScalarLocal; ++k)
+                      emitScalarDof(scalarLocalDof(fdofs, k));
+                    break;
+                  }
+                }
+              }
+            }
+            else
+            {
+              // D == 2: faces are edges (already oriented above); keep DOF-based.
+              for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+              {
+                const auto& fdofs = fes.getDOFs(faceDim, f);
+                const size_t nScalarLocal = scalarLocalSize(fdofs);
+                for (size_t k = 0; k < nScalarLocal; ++k)
+                  emitScalarDof(scalarLocalDof(fdofs, k));
+              }
+            }
+          }
+
+          //--------------------------------------------------------------------
+          // 4. Element interiors
+          //--------------------------------------------------------------------
+
+          const size_t nCells = mesh.getConnectivity().getCount(D);
+
+          if (D == 2)
+          {
             constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-            [[maybe_unused]] constexpr size_t QuadN = (K + 1) * (K + 1);
-            const int p  = static_cast<int>(K);
+            const int p = static_cast<int>(K);
             const int nV = 3;
             const int nE = 3 * (p - 1);
             const int triInteriorOffset = nV + nE;
 
-            Math::Vector<Scalar> uRFace(TriN);
-            Math::Vector<Scalar> uMFace(TriN);
-            const auto mfemFaces = MFEM::getMFEMFaceOrder(mesh);
+            Math::Vector<Scalar> uRElem(TriN);
+            Math::Vector<Scalar> uMElem(TriN);
 
-            for (const auto& mfemFace : mfemFaces)
+            for (Index c = 0; c < static_cast<Index>(nCells); ++c)
             {
-              const Index f = mfemFace.index;
-              const auto faceGeom = mesh.getGeometry(2, f);
-              const auto& fdofs   = fes.getDOFs(2, f);
+              const auto geom = mesh.getGeometry(2, c);
+              const auto& cdofs = fes.getDOFs(2, c);
 
-              switch (faceGeom)
+              switch (geom)
               {
                 case Geometry::Polytope::Type::Triangle:
                 {
-                  assert(scalarLocalSize(fdofs) == TriN);
-                  const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
-                  const auto faceNodeMap = MFEM::getTriangleNodeMap<K>(faceVertices, mfemFace.vertices);
+                  assert(scalarLocalSize(cdofs) == TriN);
 
                   for (size_t k = 0; k < TriN; ++k)
                   {
-                    const Index d = scalarLocalDof(fdofs, faceNodeMap[k]);
-                    uRFace(static_cast<Index>(k)) =
+                    const Index d = scalarLocalDof(cdofs, k);
+                    uRElem(static_cast<Index>(k)) =
                       data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
                   }
-                  uMFace = sTriChangeScalar * uRFace;
+                  uMElem = sTriChangeScalar * uRElem;
 
                   int loc = 0;
                   for (int j = 1; j < p; ++j)
@@ -3637,32 +3740,7 @@ namespace Rodin::IO
                     for (int i = 1; i + j < p; ++i)
                     {
                       const int idx = triInteriorOffset + loc++;
-                      os << uMFace(static_cast<Index>(idx)) << '\n';
-                    }
-                  }
-                  for (size_t k = 0; k < TriN; ++k)
-                    written[static_cast<size_t>(scalarLocalDof(fdofs, k))] = true;
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Quadrilateral:
-                {
-                  assert(scalarLocalSize(fdofs) == QuadN);
-                  const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
-                  const auto faceNodeMap = MFEM::getQuadrilateralNodeMap<K>(faceVertices, mfemFace.vertices);
-
-                  for (size_t j = 1; j < K; ++j)
-                  {
-                    for (size_t i = 1; i < K; ++i)
-                    {
-                      const size_t targetLocal = MFEM::getQuadrilateralNodeIndex<K>(i, j);
-                      const Index sdof = scalarLocalDof(fdofs, faceNodeMap[targetLocal]);
-                      const size_t s = static_cast<size_t>(sdof);
-                      if (s < scalarSize && !written[s])
-                      {
-                        os << data.coeffRef(sdof + static_cast<Index>(activeComponent * scalarSize)) << '\n';
-                        written[s] = true;
-                      }
+                      os << uMElem(static_cast<Index>(idx)) << '\n';
                     }
                   }
                   break;
@@ -3670,9 +3748,92 @@ namespace Rodin::IO
 
                 default:
                 {
-                  const size_t nScalarLocal = scalarLocalSize(fdofs);
+                  const size_t nScalarLocal = scalarLocalSize(cdofs);
                   for (size_t k = 0; k < nScalarLocal; ++k)
-                    emitScalarDof(scalarLocalDof(fdofs, k));
+                    emitScalarDof(scalarLocalDof(cdofs, k));
+                  break;
+                }
+              }
+            }
+          }
+          else if (D == 3)
+          {
+            constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
+            const int p = static_cast<int>(K);
+
+            const int nV = 4;
+            const int nE = 6 * (p - 1);
+            const int nF = 2 * (p - 1) * (p - 2); // 4 faces × (p-1)(p-2)/2
+            const int tetInteriorOffset = nV + nE + nF;
+
+            Math::Vector<Scalar> uRElem(TetN);
+            Math::Vector<Scalar> uMElem(TetN);
+
+            for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+            {
+              const auto cellGeom = mesh.getGeometry(3, c);
+              const auto& cdofs = fes.getDOFs(3, c);
+
+              switch (cellGeom)
+              {
+                //---------------------------------------------------------------
+                // Tetrahedron: change-of-nodes for interior DOFs
+                //---------------------------------------------------------------
+                case Geometry::Polytope::Type::Tetrahedron:
+                {
+                  assert(scalarLocalSize(cdofs) == TetN);
+
+                  for (size_t k = 0; k < TetN; ++k)
+                  {
+                    const Index d = scalarLocalDof(cdofs, k);
+                    uRElem(static_cast<Index>(k)) =
+                      data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
+                  }
+                  uMElem = sTetChangeScalar * uRElem;
+
+                  for (int idx = tetInteriorOffset; idx < static_cast<int>(TetN); ++idx)
+                    os << uMElem(static_cast<Index>(idx)) << '\n';
+                  break;
+                }
+
+                //---------------------------------------------------------------
+                // Wedge / Prism: change-of-nodes for interior DOFs
+                //---------------------------------------------------------------
+                case Geometry::Polytope::Type::Wedge:
+                {
+                  constexpr size_t WedgeN = MFEM::WedgeNodes<K>::Count;
+                  const int ne = p - 1;
+                  const int nt = (p - 1) * (p - 2) / 2;
+                  const int nq = (p - 1) * (p - 1);
+                  const int wedgeInteriorOffset = 6 + 9 * ne + 2 * nt + 3 * nq;
+
+                  assert(scalarLocalSize(cdofs) == WedgeN);
+
+                  Math::Vector<Scalar> uRWedge(WedgeN);
+                  Math::Vector<Scalar> uMWedge(WedgeN);
+
+                  for (size_t k = 0; k < WedgeN; ++k)
+                  {
+                    const Index d = scalarLocalDof(cdofs, k);
+                    uRWedge(static_cast<Index>(k)) =
+                      data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
+                  }
+                  uMWedge = sWedgeChangeScalar * uRWedge;
+
+                  for (int idx = wedgeInteriorOffset; idx < static_cast<int>(WedgeN);
+                       ++idx)
+                    os << uMWedge(static_cast<Index>(idx)) << '\n';
+                  break;
+                }
+
+                //---------------------------------------------------------------
+                // Other 3D cell types (including Hexahedron): DOF-based interiors
+                //---------------------------------------------------------------
+                default:
+                {
+                  const size_t nScalarLocal = scalarLocalSize(cdofs);
+                  for (size_t k = 0; k < nScalarLocal; ++k)
+                    emitScalarDof(scalarLocalDof(cdofs, k));
                   break;
                 }
               }
@@ -3680,171 +3841,19 @@ namespace Rodin::IO
           }
           else
           {
-            // D == 2: faces are edges (already oriented above); keep DOF-based.
-            for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+            // Other dimensions: fallback DOF-based interiors
+            for (Index c = 0; c < static_cast<Index>(nCells); ++c)
             {
-              const auto& fdofs = fes.getDOFs(faceDim, f);
-              const size_t nScalarLocal = scalarLocalSize(fdofs);
+              const auto& cdofs = fes.getDOFs(D, c);
+              const size_t nScalarLocal = scalarLocalSize(cdofs);
               for (size_t k = 0; k < nScalarLocal; ++k)
-                emitScalarDof(scalarLocalDof(fdofs, k));
+                emitScalarDof(scalarLocalDof(cdofs, k));
             }
           }
-        }
-
-        //--------------------------------------------------------------------
-        // 4. Element interiors
-        //--------------------------------------------------------------------
-
-        const size_t nCells = mesh.getConnectivity().getCount(D);
-
-        if (D == 2)
-        {
-          constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-          const int p  = static_cast<int>(K);
-          const int nV = 3;
-          const int nE = 3 * (p - 1);
-          const int triInteriorOffset = nV + nE;
-
-          Math::Vector<Scalar> uRElem(TriN);
-          Math::Vector<Scalar> uMElem(TriN);
-
-          for (Index c = 0; c < static_cast<Index>(nCells); ++c)
-          {
-            const auto geom = mesh.getGeometry(2, c);
-            const auto& cdofs = fes.getDOFs(2, c);
-
-            switch (geom)
-            {
-              case Geometry::Polytope::Type::Triangle:
-              {
-                assert(scalarLocalSize(cdofs) == TriN);
-
-                for (size_t k = 0; k < TriN; ++k)
-                {
-                  const Index d = scalarLocalDof(cdofs, k);
-                  uRElem(static_cast<Index>(k)) =
-                    data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
-                }
-                uMElem = sTriChangeScalar * uRElem;
-
-                int loc = 0;
-                for (int j = 1; j < p; ++j)
-                {
-                  for (int i = 1; i + j < p; ++i)
-                  {
-                    const int idx = triInteriorOffset + loc++;
-                    os << uMElem(static_cast<Index>(idx)) << '\n';
-                  }
-                }
-                break;
-              }
-
-              default:
-              {
-                const size_t nScalarLocal = scalarLocalSize(cdofs);
-                for (size_t k = 0; k < nScalarLocal; ++k)
-                  emitScalarDof(scalarLocalDof(cdofs, k));
-                break;
-              }
-            }
-          }
-        }
-        else if (D == 3)
-        {
-          constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
-          const int p = static_cast<int>(K);
-
-          const int nV    = 4;
-          const int nE    = 6 * (p - 1);
-          const int nF    = 2 * (p - 1) * (p - 2); // 4 faces × (p-1)(p-2)/2
-          const int tetInteriorOffset = nV + nE + nF;
-
-          Math::Vector<Scalar> uRElem(TetN);
-          Math::Vector<Scalar> uMElem(TetN);
-
-          for (Index c = 0; c < static_cast<Index>(nCells); ++c)
-          {
-            const auto  cellGeom = mesh.getGeometry(3, c);
-            const auto& cdofs    = fes.getDOFs(3, c);
-
-            switch (cellGeom)
-            {
-              //---------------------------------------------------------------
-              // Tetrahedron: change-of-nodes for interior DOFs
-              //---------------------------------------------------------------
-              case Geometry::Polytope::Type::Tetrahedron:
-              {
-                assert(scalarLocalSize(cdofs) == TetN);
-
-                for (size_t k = 0; k < TetN; ++k)
-                {
-                  const Index d = scalarLocalDof(cdofs, k);
-                  uRElem(static_cast<Index>(k)) =
-                    data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
-                }
-                uMElem = sTetChangeScalar * uRElem;
-
-                for (int idx = tetInteriorOffset; idx < static_cast<int>(TetN); ++idx)
-                  os << uMElem(static_cast<Index>(idx)) << '\n';
-                break;
-              }
-
-              //---------------------------------------------------------------
-              // Wedge / Prism: change-of-nodes for interior DOFs
-              //---------------------------------------------------------------
-              case Geometry::Polytope::Type::Wedge:
-              {
-                constexpr size_t WedgeN = MFEM::WedgeNodes<K>::Count;
-                const int ne = p - 1;
-                const int nt = (p - 1) * (p - 2) / 2;
-                const int nq = (p - 1) * (p - 1);
-                const int wedgeInteriorOffset = 6 + 9 * ne + 2 * nt + 3 * nq;
-
-                assert(scalarLocalSize(cdofs) == WedgeN);
-
-                Math::Vector<Scalar> uRWedge(WedgeN);
-                Math::Vector<Scalar> uMWedge(WedgeN);
-
-                for (size_t k = 0; k < WedgeN; ++k)
-                {
-                  const Index d = scalarLocalDof(cdofs, k);
-                  uRWedge(static_cast<Index>(k)) =
-                    data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
-                }
-                uMWedge = sWedgeChangeScalar * uRWedge;
-
-                for (int idx = wedgeInteriorOffset; idx < static_cast<int>(WedgeN); ++idx)
-                  os << uMWedge(static_cast<Index>(idx)) << '\n';
-                break;
-              }
-
-              //---------------------------------------------------------------
-              // Other 3D cell types (including Hexahedron): DOF-based interiors
-              //---------------------------------------------------------------
-              default:
-              {
-                const size_t nScalarLocal = scalarLocalSize(cdofs);
-                for (size_t k = 0; k < nScalarLocal; ++k)
-                  emitScalarDof(scalarLocalDof(cdofs, k));
-                break;
-              }
-            }
-          }
-        }
-        else
-        {
-          // Other dimensions: fallback DOF-based interiors
-          for (Index c = 0; c < static_cast<Index>(nCells); ++c)
-          {
-            const auto& cdofs = fes.getDOFs(D, c);
-            const size_t nScalarLocal = scalarLocalSize(cdofs);
-            for (size_t k = 0; k < nScalarLocal; ++k)
-              emitScalarDof(scalarLocalDof(cdofs, k));
-          }
-        }
         }
       }
   };
+
   /** @brief MFEM matrix fields reuse the scalar family's node permutation.
    * Entries are separate components in row-major matrix order. MFEM does not
    * record matrix shape, so the destination space supplies it when loading.
@@ -3888,6 +3897,7 @@ namespace Rodin::IO
           os << stream.rdbuf();
         }
       }
+
       /**
        * @brief Provides the format-specific data-printer interface.
        * @param os Output stream required by the printer interface; unused by this implementation.
@@ -3923,12 +3933,18 @@ namespace Rodin::IO
         if (!(dimensionLine >> keyword >> vdim) || keyword != "VDim:" ||
           vdim != components || !(orderingLine >> keyword >> ordering) ||
           keyword != "Ordering:" || ordering > 1)
-          Alert::Exception() << "Invalid MFEM matrix field header." << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid MFEM matrix field header." << Alert::Raise;
+        }
         std::vector<Scalar> values(scalar.getSize() * components);
         for (auto& value : values)
         {
           if (!(is >> value))
-            Alert::Exception() << "Truncated MFEM matrix data." << Alert::Raise;
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Truncated MFEM matrix data." << Alert::Raise;
+          }
         }
         for (size_t c = 0; c < components; ++c)
         {

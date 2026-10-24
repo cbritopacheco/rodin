@@ -3,6 +3,9 @@
 #include <boost/archive/text_iarchive.hpp>
 #include "Rodin/Serialization/Export.h"
 #include "Rodin/Serialization/Optional.h"
+#include "Rodin/Serialization/FlatMap.h"
+#include "Rodin/Serialization/EigenMatrix.h"
+#include <boost/serialization/complex.hpp>
 
 #include "Rodin/Geometry/Mesh.h"
 
@@ -13,6 +16,74 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Loading replaces stale keys and preserves ordered key/value associations.
+  TEST(Rodin_Serialization_Containers, FlatMapReplacement)
+  {
+    using Map = boost::container::flat_map<int, int>;
+    for (const Map& original : {Map{}, Map{{7, 19}, {-2, 31}, {0, -5}}})
+    {
+      std::stringstream stream;
+      {
+        boost::archive::text_oarchive archive(stream);
+        archive << original;
+      }
+      Map loaded{{99, 101}, {7, -1}};
+      {
+        boost::archive::text_iarchive archive(stream);
+        archive >> loaded;
+      }
+      EXPECT_EQ(loaded, original);
+      EXPECT_EQ(loaded.count(99), 0u);
+    }
+  }
+
+  /// @brief Dense matrix archives preserve dimensions, storage order and complex coefficients.
+  TEST(Rodin_Serialization_Containers, EigenMatrixShapes)
+  {
+    const auto check = []<class Matrix>() {
+      using Scalar = typename Matrix::Scalar;
+      for (const auto& shape : {std::pair{0, 0}, {0, 3}, {2, 3}, {3, 1}})
+      {
+        SCOPED_TRACE(shape.first);
+        SCOPED_TRACE(shape.second);
+        Matrix original(shape.first, shape.second);
+        for (Eigen::Index row = 0; row < original.rows(); ++row)
+        {
+          for (Eigen::Index col = 0; col < original.cols(); ++col)
+          {
+            if constexpr (std::is_same_v<Scalar, Complex>)
+            {
+              original(row, col) = Complex(10 * row + col + 1, 2 * row - col);
+            }
+            else
+            {
+              original(row, col) = 10 * row + col + 1;
+            }
+          }
+        }
+        std::stringstream stream;
+        {
+          boost::archive::text_oarchive archive(stream);
+          archive << original;
+        }
+        Matrix loaded(1, 2);
+        loaded.setConstant(Scalar(-1));
+        {
+          boost::archive::text_iarchive archive(stream);
+          archive >> loaded;
+        }
+        ASSERT_EQ(loaded.rows(), original.rows());
+        ASSERT_EQ(loaded.cols(), original.cols());
+        EXPECT_EQ(loaded, original);
+      }
+    };
+    check.template operator()<Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>>();
+    using RowMajorMatrix =
+      Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    check.template operator()<RowMajorMatrix>();
+    check.template operator()<Eigen::Matrix<Complex, Eigen::Dynamic, Eigen::Dynamic>>();
+  }
+
   /// @brief Verifies to stringstream for serialization mesh by checking exact expected values, serialization round trips.
   TEST(Rodin_Serialization_Mesh, to_stringstream)
   {

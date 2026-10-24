@@ -1,19 +1,23 @@
 set(RodinGeometryEuclidean_HEADERS
+  Line.h
+  Sphere.h
+  Hyperplane.h
+  Box.h
   Base.h
   Circle.h
   Concepts.h
   ForwardDecls.h
   Line2D.h
   LineSegment2D.h
+  Point.h
+  LineSegment.h
   Point2D.h
   Rectangle.h)
 
 set(RodinGeometryEuclidean_SRCS
-  Circle.hpp
-  Line2D.hpp
-  LineSegment2D.hpp
-  Point2D.hpp
-  Rectangle.hpp)
+  Line.hpp
+  Point.hpp
+  LineSegment.hpp)
 
 # target_sources() does not resolve relative paths before 3.13
 if (${CMAKE_VERSION} VERSION_LESS 3.13)

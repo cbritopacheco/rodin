@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include "Rodin/Configure.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
@@ -95,6 +96,7 @@ namespace Rodin::Geometry
         private:
           /// Rank-local shard that will be moved into the finalized mesh.
           Shard m_shard;
+
           /// MPI context bound to the mesh being constructed.
           Context::MPI m_context;
       };
@@ -107,7 +109,7 @@ namespace Rodin::Geometry
        * @return Distributed uniform grid.
        */
       static Mesh UniformGrid(
-          const Context::MPI& context, Polytope::Type g, std::initializer_list<size_t> l)
+        const Context::MPI& context, Polytope::Type g, std::initializer_list<size_t> l)
       {
         Array<size_t> shape(l.size());
         std::copy(l.begin(), l.end(), shape.begin());
@@ -122,7 +124,7 @@ namespace Rodin::Geometry
        * @return Distributed uniform grid.
        */
       static Mesh UniformGrid(
-          const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape);
+        const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape);
 
       /**
        * @brief Constructs an empty distributed mesh associated with the given MPI context.
@@ -654,7 +656,8 @@ namespace Rodin::Geometry
        * @param[in] attr Attribute to assign to the polytope.
        * @return Reference to the mesh.
        */
-      Mesh& setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override;
+      Mesh& setAttribute(
+        const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override;
 
       /**
        * @brief Sets one coordinate of a local vertex.
@@ -673,7 +676,8 @@ namespace Rodin::Geometry
        * @param[in] coords New coordinates of the vertex.
        * @return Reference to the mesh.
        */
-      Mesh& setVertexCoordinates(Index localIdx, const Math::SpatialPoint& coords) override;
+      Mesh& setVertexCoordinates(
+        Index localIdx, const Math::SpatialPoint& coords) override;
 
       /**
        * @brief Returns the transformation associated with a local polytope.
@@ -682,7 +686,8 @@ namespace Rodin::Geometry
        * @param[in] localIdx Local index of the polytope in the shard.
        * @return Transformation associated with the polytope.
        */
-      virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index localIdx) const override;
+      virtual const PolytopeTransformation& getPolytopeTransformation(
+        size_t dimension, Index localIdx) const override;
 
       /**
        * @brief Returns cached quadrature associated with a local polytope.
@@ -696,8 +701,8 @@ namespace Rodin::Geometry
        * @param[in] qf Quadrature formula.
        * @return Cached quadrature associated with the polytope and formula.
        */
-      virtual const PolytopeQuadrature&
-      getQuadrature(size_t dimension, Index localIdx, const QF::QuadratureFormulaBase& qf) const override;
+      virtual const PolytopeQuadrature& getQuadrature(
+        size_t dimension, Index localIdx, const QF::QuadratureFormula& qf) const override;
 
       /**
        * @brief Sets the transformation associated with a local polytope.
@@ -709,7 +714,8 @@ namespace Rodin::Geometry
        * @param[in] trans Transformation assigned to the polytope.
        * @return Reference to the mesh.
        */
-      virtual Mesh& setPolytopeTransformation(const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
+      virtual Mesh& setPolytopeTransformation(
+        const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
 
       /**
        * @brief Loads the local shard of the distributed mesh from a file.
@@ -721,10 +727,10 @@ namespace Rodin::Geometry
        * @param[in] fmt File format used to read the mesh.
        * @return Reference to the mesh.
        */
-      MPIMesh& load(
-        const boost::filesystem::path& filename, IO::FileFormat fmt) override;
+      MPIMesh& load(const boost::filesystem::path& filename, IO::FileFormat fmt) override;
 
-      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      template <class Filename,
+        typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
       /**
        * @brief Rank-dependent overload for loading distributed shard files.
        *
@@ -751,7 +757,8 @@ namespace Rodin::Geometry
        * @param[in] filename Path to the output file.
        * @param[in] fmt File format used to write the mesh.
        */
-      void save(const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
+      void save(
+        const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
 
       /**
        * @brief Rank-dependent overload for saving distributed shard files.
@@ -763,7 +770,8 @@ namespace Rodin::Geometry
        * @param[in] filename Rank-dependent path generator.
        * @param[in] fmt File format used to write the shard file.
        */
-      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      template <class Filename,
+        typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
       void save(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
@@ -781,20 +789,24 @@ namespace Rodin::Geometry
 
       /**
        * @brief Submesh downcast is unsupported for distributed meshes.
-       * @throws std::runtime_error always.
+       * @throws Alert::Exception always.
        */
       SubMeshBase& asSubMesh() override
       {
-        throw std::runtime_error("asSubMesh() not implemented");
+        Alert::MemberFunctionException error(*this, __func__);
+        error << "Submesh downcast is unsupported for distributed meshes.";
+        throw error;
       }
 
       /**
        * @brief Const submesh downcast is unsupported for distributed meshes.
-       * @throws std::runtime_error always.
+       * @throws Alert::Exception always.
        */
       const SubMeshBase& asSubMesh() const override
       {
-        throw std::runtime_error("asSubMesh() not implemented");
+        Alert::MemberFunctionException error(*this, __func__);
+        error << "Submesh downcast is unsupported for distributed meshes.";
+        throw error;
       }
 
       /// @brief Returns mutable connectivity data of the local shard.
@@ -806,7 +818,6 @@ namespace Rodin::Geometry
       /// @brief Options controlling iterative reconciliation rounds.
       struct ReconcileOptions
       {
-
         /**
          * Maximum number of owner-convergence rounds.
          *
@@ -898,10 +909,13 @@ namespace Rodin::Geometry
     private:
       /// MPI execution context associated with this distributed mesh.
       Context::MPI m_context;
+
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
+
       /// Maximum shard dimension established during collective construction.
       size_t m_dimension;
+
       /// Mesh-level quadrature cache whose points are attached to this MPI mesh.
       mutable PolytopeQuadratureIndex m_quadratures;
   };

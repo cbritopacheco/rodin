@@ -28,14 +28,14 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static boost::mpi::environment*  g_env = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
   Mesh<Context::Local> makeShardableMesh()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {5, 5});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D, D);
     mesh.getConnectivity().compute(D, 0);
@@ -797,6 +797,341 @@ namespace
     (void)masterBegin;
     (void)masterEnd;
   }
+
+  /// @brief Mixed MPI nonlocal blocks match exact moments on an isolated communicator.
+  TEST(PETSc_MPI_Form, IsolatedMixedNonlocalBlocksMatchRestrictedMoments)
+  {
+    boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+    Context::MPI ctx(*g_env, self);
+    auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    local.setAttribute({1, 0}, 7);
+    local.setAttribute({1, 1}, 8);
+    local.getConnectivity().compute(1, 1);
+    BalancedCompactPartitioner partitioner(local);
+    partitioner.partition(1);
+    Sharder<Context::MPI> sharder(ctx);
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    P1<PetscScalar, Mesh<Context::MPI>> space(mesh);
+    PETSc::Variational::TrialFunction u(space), p(space);
+    PETSc::Variational::TestFunction v(space), q(space);
+    Problem problem(u, v, p, q);
+    const auto k00 = [](const Point&, const Point&) { return PetscScalar(2); };
+    const auto k01 = [](const Point&, const Point&) { return PetscScalar(-3); };
+    const auto k10 = [](const Point&, const Point&) { return PetscScalar(0.5); };
+    const auto k11 = [](const Point&, const Point&) { return PetscScalar(4); };
+    const PetscScalar coefficients[2][2] = {{2, -3}, {0.5, 4}};
+    const PetscInt indices[] = {0, 1, 2, 3, 4, 5};
+    ASSERT_EQ(space.getSize(), 3u);
+    for (size_t restriction = 0; restriction < 5; ++restriction)
+    {
+      SCOPED_TRACE(restriction);
+      const bool restrictTrial = restriction == 1 || restriction >= 3;
+      const bool restrictTest = restriction >= 2;
+      typename decltype(problem)::ProblemBodyType body;
+      body.getGlobalBFIs().add(Integral(Potential(k00, u), v));
+      body.getGlobalBFIs().add(Integral(Potential(k01, p), v));
+      body.getGlobalBFIs().add(Integral(Potential(k10, u), q));
+      body.getGlobalBFIs().add(Integral(Potential(k11, p), q));
+      for (auto& integral : body.getGlobalBFIs())
+      {
+        if (restrictTrial)
+          integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+        if (restrictTest)
+          integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+      }
+      problem = body;
+      PetscReal trialMoments[3] = {};
+      PetscReal testMoments[3] = {};
+      for (auto vertex = mesh.getShard().getVertex(); vertex; ++vertex)
+      {
+        const Point point(*vertex, Math::SpatialPoint{});
+        const PetscInt dof = space.getDOFs(0, vertex->getIndex())[0];
+        ASSERT_GE(dof, 0);
+        ASSERT_LT(dof, 3);
+        const Real x = point.x();
+        trialMoments[dof] = restrictTrial ? (x < 2 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        testMoments[dof] = restrictTest ? (x > 0 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+      }
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        SCOPED_TRACE(repeat);
+        problem.assemble();
+        PetscScalar entries[36];
+        ASSERT_EQ(MatGetValues(problem.getLinearSystem().getOperator(), 6, indices, 6,
+                    indices, entries),
+          PETSC_SUCCESS);
+        for (size_t row = 0; row < 6; ++row)
+        {
+          for (size_t col = 0; col < 6; ++col)
+          {
+            const PetscScalar expected = restriction == 4
+              ? PetscScalar(0)
+              : coefficients[row / 3][col / 3] * testMoments[row % 3] *
+                trialMoments[col % 3];
+            EXPECT_LT(PetscAbsScalar(entries[6 * row + col] - expected), 1e-12)
+              << "row=" << row << ", col=" << col;
+          }
+        }
+      }
+    }
+  }
+
+  /// @brief Single-pair MPI assembly preserves restricted nonlocal moments and targeted state.
+  TEST(PETSc_MPI_Form, IsolatedSinglePairNonlocalMomentsAndTargetedAssembly)
+  {
+    boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+    Context::MPI ctx(*g_env, self);
+    auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    local.setAttribute({1, 0}, 7);
+    local.setAttribute({1, 1}, 8);
+    local.getConnectivity().compute(1, 1);
+    BalancedCompactPartitioner partitioner(local);
+    partitioner.partition(1);
+    Sharder<Context::MPI> sharder(ctx);
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    P1<PetscScalar, Mesh<Context::MPI>> space(mesh);
+    PETSc::Variational::TrialFunction u(space);
+    PETSc::Variational::TestFunction v(space);
+    Problem problem(u, v);
+    LinearForm load(v);
+    load = Integral(PetscScalar(3) * v).over(7);
+    load.assemble();
+    const auto kernel = [](const Point&, const Point&) { return PetscScalar(2); };
+    const PetscInt indices[] = {0, 1, 2};
+    ASSERT_EQ(space.getSize(), 3u);
+    for (size_t restriction = 0; restriction < 5; ++restriction)
+    {
+      SCOPED_TRACE(restriction);
+      const bool restrictTrial = restriction == 1 || restriction >= 3;
+      const bool restrictTest = restriction >= 2;
+      typename decltype(problem)::ProblemBodyType body;
+      body.getGlobalBFIs().add(Integral(Potential(kernel, u), v));
+      body.getLFs().add(load);
+      for (auto& integral : body.getGlobalBFIs())
+      {
+        if (restrictTrial)
+          integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+        if (restrictTest)
+          integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+      }
+      problem = body;
+      PetscScalar trialMoments[3] = {};
+      PetscScalar testMoments[3] = {};
+      PetscScalar loadValues[3] = {};
+      for (auto vertex = mesh.getShard().getVertex(); vertex; ++vertex)
+      {
+        const Point point(*vertex, Math::SpatialPoint{});
+        const PetscInt dof = space.getDOFs(0, vertex->getIndex())[0];
+        ASSERT_GE(dof, 0);
+        ASSERT_LT(dof, 3);
+        const Real x = point.x();
+        trialMoments[dof] = restrictTrial ? (x < 2 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        testMoments[dof] = restrictTest ? (x > 0 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        loadValues[dof] = x < 2 ? 1.5 : 0;
+      }
+      const auto checkMatrix = [&](PetscScalar scale) {
+        PetscScalar entries[9];
+        ASSERT_EQ(MatGetValues(problem.getLinearSystem().getOperator(), 3, indices, 3,
+                    indices, entries),
+          PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          for (size_t col = 0; col < 3; ++col)
+          {
+            const PetscScalar expected = restriction == 4
+              ? PetscScalar(0)
+              : scale * PetscScalar(2) * testMoments[row] * trialMoments[col];
+            EXPECT_LT(PetscAbsScalar(entries[3 * row + col] - expected), 1e-12)
+              << "row=" << row << ", col=" << col;
+          }
+        }
+      };
+      const auto checkVector = [&](bool sentinel) {
+        PetscScalar entries[3];
+        ASSERT_EQ(
+          VecGetValues(problem.getLinearSystem().getVector(), 3, indices, entries),
+          PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          EXPECT_LT(
+            PetscAbsScalar(entries[row] - (sentinel ? PetscScalar(11) : loadValues[row])),
+            1e-12);
+        }
+      };
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        SCOPED_TRACE(repeat);
+        problem.assemble();
+        checkMatrix(1);
+        checkVector(false);
+      }
+      ASSERT_EQ(VecSet(problem.getLinearSystem().getVector(), 11), PETSC_SUCCESS);
+      problem.assemble(AssemblyTarget::LHS);
+      checkMatrix(1);
+      checkVector(true);
+      ASSERT_EQ(MatScale(problem.getLinearSystem().getOperator(), 3), PETSC_SUCCESS);
+      problem.assemble(AssemblyTarget::RHS);
+      checkMatrix(3);
+      checkVector(false);
+    }
+  }
+
+  /// @brief Standalone MPI forms assemble restricted global contributions after cloning.
+  TEST(PETSc_MPI_Form, IsolatedStandaloneNonlocalFormsMatchRestrictedMoments)
+  {
+    boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+    Context::MPI ctx(*g_env, self);
+    auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    local.setAttribute({1, 0}, 7);
+    local.setAttribute({1, 1}, 8);
+    local.getConnectivity().compute(1, 1);
+    BalancedCompactPartitioner partitioner(local);
+    partitioner.partition(1);
+    Sharder<Context::MPI> sharder(ctx);
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    P1<PetscScalar, Mesh<Context::MPI>> space(mesh);
+    PETSc::Variational::TrialFunction u(space);
+    PETSc::Variational::TestFunction v(space);
+    const auto kernel = [](const Point&, const Point&) { return PetscScalar(2); };
+    const PetscInt indices[] = {0, 1, 2};
+    ASSERT_EQ(space.getSize(), 3u);
+    for (size_t restriction = 0; restriction < 5; ++restriction)
+    {
+      SCOPED_TRACE(restriction);
+      const bool restrictTrial = restriction == 1 || restriction >= 3;
+      const bool restrictTest = restriction >= 2;
+      auto integral = Integral(Potential(kernel, u), v);
+      if (restrictTrial)
+        integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+      if (restrictTest)
+        integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+      BilinearForm form(u, v);
+      form += integral;
+      PetscScalar trialMoments[3] = {};
+      PetscScalar testMoments[3] = {};
+      for (auto vertex = mesh.getShard().getVertex(); vertex; ++vertex)
+      {
+        const Point point(*vertex, Math::SpatialPoint{});
+        const PetscInt dof = space.getDOFs(0, vertex->getIndex())[0];
+        ASSERT_GE(dof, 0);
+        ASSERT_LT(dof, 3);
+        const Real x = point.x();
+        trialMoments[dof] = restrictTrial ? (x < 2 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        testMoments[dof] = restrictTest ? (x > 0 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+      }
+      const auto checkMatrix = [&](::Mat matrix) {
+        PetscScalar entries[9];
+        ASSERT_EQ(MatGetValues(matrix, 3, indices, 3, indices, entries), PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          for (size_t col = 0; col < 3; ++col)
+          {
+            const PetscScalar expected = restriction == 4
+              ? PetscScalar(0)
+              : PetscScalar(2) * testMoments[row] * trialMoments[col];
+            EXPECT_LT(PetscAbsScalar(entries[3 * row + col] - expected), 1e-12)
+              << "row=" << row << ", col=" << col;
+          }
+        }
+      };
+      Assembly::MPI<::Mat, decltype(form)> assembler;
+      const typename decltype(assembler)::InputType input{
+        space, space, form.getLocalIntegrators(), form.getGlobalIntegrators()};
+      auto copied = assembler;
+      auto moved = std::move(copied);
+      std::unique_ptr<Assembly::AssemblyBase<::Mat, decltype(form)>> clone(
+        assembler.copy());
+      ::Mat matrix = nullptr;
+      ASSERT_EQ(MatCreate(MPI_COMM_SELF, &matrix), PETSC_SUCCESS);
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        SCOPED_TRACE(repeat);
+        form.assemble();
+        checkMatrix(form.getOperator());
+        moved.execute(matrix, input);
+        checkMatrix(matrix);
+        clone->execute(matrix, input);
+        checkMatrix(matrix);
+      }
+      ASSERT_EQ(MatDestroy(&matrix), PETSC_SUCCESS);
+    }
+  }
+
+  /// @brief Affine cross-field constraints recover independently prescribed constant fields.
+  TEST(PETSc_MPI_Form, IsolatedMixedAffineConstraintsRecoverConstantFields)
+  {
+    boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+    Context::MPI ctx(*g_env, self);
+    auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    local.getConnectivity().compute(1, 1);
+    local.getConnectivity().compute(0, 1);
+    BalancedCompactPartitioner partitioner(local);
+    partitioner.partition(1);
+    Sharder<Context::MPI> sharder(ctx);
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    P1<PetscScalar, Mesh<Context::MPI>> space(mesh);
+    PETSc::Variational::TrialFunction u(space), p(space);
+    PETSc::Variational::TestFunction v(space), q(space);
+    Problem problem(u, v, p, q);
+    const auto k00 = [](const Point&, const Point&) { return PetscScalar(2); };
+    const auto k01 = [](const Point&, const Point&) { return PetscScalar(-3); };
+    const auto k10 = [](const Point&, const Point&) { return PetscScalar(0.5); };
+    const auto k11 = [](const Point&, const Point&) { return PetscScalar(4); };
+    for (const auto& constants : {std::pair<Real, Real>{1, 2}, {-2, 3}})
+    {
+      const auto [a, b] = constants;
+      SCOPED_TRACE(a);
+      SCOPED_TRACE(b);
+      // On [0,2], the nonlocal integrals of constant fields are 2a and 2b.
+      problem = Integral(u, v) + Integral(p, q) + Integral(Potential(k00, u), v) +
+        Integral(Potential(k01, p), v) + Integral(Potential(k10, u), q) +
+        Integral(Potential(k11, p), q) - Integral(RealFunction(5 * a - 6 * b), v) -
+        Integral(RealFunction(a + 9 * b), q) + DirichletBC(u, -p, RealFunction(a + b)) +
+        DirichletBC(p, RealFunction(b));
+      const auto check = [&](auto& candidate) {
+        candidate.assemble();
+        PETSc::Solver::KSP solver(candidate);
+        solver.setType(KSPPREONLY);
+        ::PC preconditioner = nullptr;
+        ASSERT_EQ(KSPGetPC(solver.getHandle(), &preconditioner), PETSC_SUCCESS);
+        ASSERT_EQ(PCSetType(preconditioner, PCLU), PETSC_SUCCESS);
+        solver.solve();
+        const PetscInt indices[] = {0, 1, 2};
+        PetscScalar first[3], second[3];
+        ASSERT_EQ(
+          VecGetValues(u.getSolution().getData(), 3, indices, first), PETSC_SUCCESS);
+        ASSERT_EQ(
+          VecGetValues(p.getSolution().getData(), 3, indices, second), PETSC_SUCCESS);
+        for (size_t i = 0; i < 3; ++i)
+        {
+          EXPECT_LT(PetscAbsScalar(first[i] - a), 1e-11);
+          EXPECT_LT(PetscAbsScalar(second[i] - b), 1e-11);
+        }
+      };
+      check(problem);
+      auto copied = problem;
+      check(copied);
+      auto moved = std::move(copied);
+      check(moved);
+      decltype(problem) assigned(u, v, p, q);
+      assigned = moved;
+      check(assigned);
+      decltype(problem) moveAssigned(u, v, p, q);
+      moveAssigned = std::move(assigned);
+      check(moveAssigned);
+      std::unique_ptr<decltype(problem)> clone(moveAssigned.copy());
+      check(*clone);
+    }
+  }
+
 }
 
 int main(int argc, char** argv)

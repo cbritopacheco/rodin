@@ -51,7 +51,6 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <atomic>
-#include <cstring>
 #include <algorithm>
 #include <utility>
 #include <fstream>
@@ -79,27 +78,28 @@
 #include "Function.h"
 #include "Rodin/Math/Traits.h"
 
-
 namespace Rodin::FormLanguage
 {
   /// @brief Traits for GridFunctionBase: exposes the space and data types.
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Coefficient data storage type.
-      using DataType = Data;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Coefficient data storage type.
+    using DataType = Data;
   };
 
   /// @brief Traits for GridFunction: exposes the space and data types.
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Coefficient data storage type.
-      using DataType = Data;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Coefficient data storage type.
+    using DataType = Data;
   };
 }
 
@@ -176,8 +176,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      GridFunctionBaseReference(const GridFunctionBaseReference& other)
+      constexpr GridFunctionBaseReference(const GridFunctionBaseReference& other)
         : Parent(other),
           m_ref(other.m_ref)
       {}
@@ -186,11 +185,11 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      GridFunctionBaseReference(GridFunctionBaseReference&& other)
+      constexpr GridFunctionBaseReference(GridFunctionBaseReference&& other)
         : Parent(std::move(other)),
           m_ref(std::move(other.m_ref))
       {}
+
       /**
        * @brief Assigns the state of another object.
        * @param other Object to copy from.
@@ -198,6 +197,7 @@ namespace Rodin::Variational
 
       GridFunctionBaseReference& operator=(
         const GridFunctionBaseReference& other) = delete;
+
       /**
        * @brief Assigns the state of another object.
        * @param other Object to move from.
@@ -210,8 +210,7 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto operator()(const Geometry::Point& p) const
+      constexpr auto operator()(const Geometry::Point& p) const
       {
         return getReferencedGridFunction().getValue(p);
       }
@@ -221,8 +220,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto operator()(const IntegrationPoint& ip) const
+      constexpr auto operator()(const IntegrationPoint& ip) const
       {
         return getReferencedGridFunction().getValue(ip);
       }
@@ -232,8 +230,7 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         return getReferencedGridFunction().getValue(p);
       }
@@ -243,8 +240,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
         return getReferencedGridFunction().getValue(ip);
       }
@@ -253,8 +249,7 @@ namespace Rodin::Variational
        * @brief Gets the first component.
        * @returns The first component.
        */
-      constexpr
-      auto x() const
+      constexpr auto x() const
       {
         return getReferencedGridFunction().x();
       }
@@ -263,8 +258,7 @@ namespace Rodin::Variational
        * @brief Gets the second component.
        * @returns The second component.
        */
-      constexpr
-      auto y() const
+      constexpr auto y() const
       {
         return getReferencedGridFunction().y();
       }
@@ -273,8 +267,7 @@ namespace Rodin::Variational
        * @brief Gets the third component.
        * @returns The third component.
        */
-      constexpr
-      auto z() const
+      constexpr auto z() const
       {
         return getReferencedGridFunction().z();
       }
@@ -295,8 +288,7 @@ namespace Rodin::Variational
        * @brief Returns a constant reference to the GridFunction data.
        * @returns A constant reference to the GridFunction data.
        */
-      constexpr
-      const auto& getData()
+      constexpr const auto& getData()
       {
         return getReferencedGridFunction().getData();
       }
@@ -305,8 +297,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space.
        * @returns The finite element space.
        */
-      constexpr
-      const auto& getFiniteElementSpace() const
+      constexpr const auto& getFiniteElementSpace() const
       {
         return getReferencedGridFunction().getFiniteElementSpace();
       }
@@ -315,8 +306,7 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom.
        * @returns The number of degrees of freedom.
        */
-      constexpr
-      size_t getSize() const
+      constexpr size_t getSize() const
       {
         return getReferencedGridFunction().getSize();
       }
@@ -413,12 +403,9 @@ namespace Rodin::Variational
    * setData(), load()) requires exclusive access. See the
    * @ref guides-thread-safety "thread safety guide".
    */
-  template <
-    class Derived,
-    class FES = typename FormLanguage::Traits<Derived>::FESType,
+  template <class Derived, class FES = typename FormLanguage::Traits<Derived>::FESType,
     class Data = typename FormLanguage::Traits<Derived>::DataType>
-  class GridFunctionBase
-    : public GridFunctionBaseReference<Derived>
+  class GridFunctionBase : public GridFunctionBaseReference<Derived>
   {
     public:
       /// @brief Finite element space type.
@@ -520,8 +507,7 @@ namespace Rodin::Variational
        * For vector-valued functions @f$ \mathbf{u} = (u_x, u_y, u_z) @f$,
        * returns @f$ u_x @f$.
        */
-      constexpr
-      auto x() const
+      constexpr auto x() const
       {
         static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 1);
@@ -535,8 +521,7 @@ namespace Rodin::Variational
        * For vector-valued functions @f$ \mathbf{u} = (u_x, u_y, u_z) @f$,
        * returns @f$ u_y @f$.
        */
-      constexpr
-      auto y() const
+      constexpr auto y() const
       {
         static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 2);
@@ -550,8 +535,7 @@ namespace Rodin::Variational
        * For vector-valued functions @f$ \mathbf{u} = (u_x, u_y, u_z) @f$,
        * returns @f$ u_z @f$.
        */
-      constexpr
-      auto z() const
+      constexpr auto z() const
       {
         static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 3);
@@ -567,8 +551,7 @@ namespace Rodin::Variational
        * Copies the provided data into the internal DOF vector starting at
        * the specified offset.
        */
-      constexpr
-      Derived& setData(const DataType& data, size_t offset = 0)
+      constexpr Derived& setData(const DataType& data, size_t offset = 0)
       {
         return static_cast<Derived&>(*this).setData(data, offset);
       }
@@ -580,8 +563,7 @@ namespace Rodin::Variational
        * Provides access to the coefficient vector @f$ \mathbf{u} @f$ containing
        * the degrees of freedom.
        */
-      constexpr
-      auto& getData()
+      constexpr auto& getData()
       {
         return static_cast<Derived&>(*this).getData();
       }
@@ -590,8 +572,7 @@ namespace Rodin::Variational
        * @brief Gets the DOF data vector (const version).
        * @return Const reference to the DOF data
        */
-      constexpr
-      const DataType& getData() const
+      constexpr const DataType& getData() const
       {
         return static_cast<const Derived&>(*this).getData();
       }
@@ -600,8 +581,7 @@ namespace Rodin::Variational
        * @brief Gets the associated finite element space.
        * @return Reference to the finite element space
        */
-      constexpr
-      const FES& getFiniteElementSpace() const
+      constexpr const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
@@ -610,8 +590,7 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom.
        * @return Total number of DOFs
        */
-      constexpr
-      size_t getSize() const
+      constexpr size_t getSize() const
       {
         return m_fes.get().getSize();
       }
@@ -623,8 +602,7 @@ namespace Rodin::Variational
        * For scalar functions, returns 1. For vector-valued functions,
        * returns the space dimension.
        */
-      constexpr
-      size_t getDimension() const
+      constexpr size_t getDimension() const
       {
         return m_fes.get().getVectorDimension();
       }
@@ -658,9 +636,7 @@ namespace Rodin::Variational
        * Reads DOF data from a file in the specified format. Supported formats
        * include MFEM, and MEDIT.
        */
-      Derived& load(
-          const boost::filesystem::path& filename,
-          IO::FileFormat fmt)
+      Derived& load(const boost::filesystem::path& filename, IO::FileFormat fmt)
       {
         switch (fmt)
         {
@@ -670,13 +646,13 @@ namespace Rodin::Variational
             if (!input)
             {
               Alert::MemberFunctionException(*this, __func__)
-                << "Failed to open input file stream." << Alert::NewLine
-                << "Filename: \"" << filename << "\"" << Alert::NewLine
-                << "Please check if the file exists and is accessible."
-                << Alert::Raise;
+                << "Failed to open input file stream." << Alert::NewLine << "Filename: \""
+                << filename << "\"" << Alert::NewLine
+                << "Please check if the file exists and is accessible." << Alert::Raise;
             }
             IO::GridFunctionLoader<IO::FileFormat::MFEM, FESType, DataType>(
-              static_cast<Derived&>(*this)).load(input);
+              static_cast<Derived&>(*this))
+              .load(input);
             break;
           }
           case IO::FileFormat::MEDIT:
@@ -685,27 +661,27 @@ namespace Rodin::Variational
             if (!input)
             {
               Alert::MemberFunctionException(*this, __func__)
-                << "Failed to open input file stream." << Alert::NewLine
-                << "Filename: \"" << filename << "\"" << Alert::NewLine
-                << "Please check if the file exists and is accessible."
-                << Alert::Raise;
+                << "Failed to open input file stream." << Alert::NewLine << "Filename: \""
+                << filename << "\"" << Alert::NewLine
+                << "Please check if the file exists and is accessible." << Alert::Raise;
             }
             IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES, DataType>(
-              static_cast<Derived&>(*this)).load(input);
+              static_cast<Derived&>(*this))
+              .load(input);
             break;
           }
           case IO::FileFormat::HDF5:
           {
             IO::GridFunctionLoader<IO::FileFormat::HDF5, FESType, DataType>(
-              static_cast<Derived&>(*this)).load(filename);
+              static_cast<Derived&>(*this))
+              .load(filename);
             break;
           }
           default:
           {
             Alert::MemberFunctionException(*this, __func__)
               << "Unsupported file format for loading GridFunction." << Alert::NewLine
-              << "Format: \"" << fmt << "\""
-              << Alert::Raise;
+              << "Format: \"" << fmt << "\"" << Alert::Raise;
           }
         }
         return static_cast<Derived&>(*this);
@@ -716,9 +692,7 @@ namespace Rodin::Variational
        * @param[in] filename Path to the output file
        * @param[in] fmt File format to write
        */
-      void save(
-          const boost::filesystem::path& filename,
-          IO::FileFormat fmt) const
+      void save(const boost::filesystem::path& filename, IO::FileFormat fmt) const
       {
         switch (fmt)
         {
@@ -730,11 +704,11 @@ namespace Rodin::Variational
               Alert::MemberFunctionException(*this, __func__)
                 << "Failed to open output file stream." << Alert::NewLine
                 << "Filename: \"" << filename << "\"" << Alert::NewLine
-                << "Please check if the path is valid and writable."
-                << Alert::Raise;
+                << "Please check if the path is valid and writable." << Alert::Raise;
             }
             IO::GridFunctionPrinter<IO::FileFormat::MFEM, FESType, DataType>(
-              static_cast<const Derived&>(*this)).print(output);
+              static_cast<const Derived&>(*this))
+              .print(output);
             break;
           }
           case IO::FileFormat::MEDIT:
@@ -745,25 +719,25 @@ namespace Rodin::Variational
               Alert::MemberFunctionException(*this, __func__)
                 << "Failed to open output file stream." << Alert::NewLine
                 << "Filename: \"" << filename << "\"" << Alert::NewLine
-                << "Please check if the path is valid and writable."
-                << Alert::Raise;
+                << "Please check if the path is valid and writable." << Alert::Raise;
             }
             IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FESType, DataType>(
-              static_cast<const Derived&>(*this)).print(output);
+              static_cast<const Derived&>(*this))
+              .print(output);
             break;
           }
           case IO::FileFormat::HDF5:
           {
             IO::GridFunctionPrinter<IO::FileFormat::HDF5, FESType, DataType>(
-              static_cast<const Derived&>(*this)).print(filename);
+              static_cast<const Derived&>(*this))
+              .print(filename);
             break;
           }
           default:
           {
             Alert::MemberFunctionException(*this, __func__)
               << "Unsupported file format for saving GridFunction." << Alert::NewLine
-              << "Format: \"" << fmt << "\""
-              << Alert::Raise;
+              << "Format: \"" << fmt << "\"" << Alert::Raise;
           }
         }
       }
@@ -806,8 +780,7 @@ namespace Rodin::Variational
         else
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Point is not contained in the finite element space mesh."
-            << Alert::Raise;
+            << "Point is not contained in the finite element space mesh." << Alert::Raise;
         }
         return out;
       }
@@ -840,19 +813,25 @@ namespace Rodin::Variational
        * @param[out] res Storage for the interpolated value
        * @param[in] p Point at which to evaluate the basis expansion
        */
-      constexpr
-      void interpolate(RangeType& res, const Geometry::Point& p) const
+      constexpr void interpolate(RangeType& res, const Geometry::Point& p) const
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
+        const Index i = polytope.getIndex();
 
         const auto& dofs = getCachedDOFs(d, i);
         const auto coefficient = [&](size_t local) -> decltype(auto) {
           return this->operator[](dofs[local]);
         };
-        fes.evaluate(res, {d, i}, coefficient, p);
+        const auto& element = fes.getFiniteElement(d, i);
+        const auto expansion = [&](const Math::SpatialPoint& coordinates) {
+          RangeType value;
+          element.evaluate(value, coefficient, coordinates);
+          return value;
+        };
+        const auto mapping = fes.getPushforward({d, i}, expansion);
+        res = mapping(p);
       }
 
       /**
@@ -860,10 +839,9 @@ namespace Rodin::Variational
        * @param[out] res Storage for the interpolated value
        * @param[in] ip Integration point used for cached basis evaluation
        */
-      constexpr
-      void interpolate(RangeType& res, const IntegrationPoint& ip) const
+      constexpr void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
-        if (ip.getQuadratureFormula() == nullptr)
+        if (ip.getReferenceQuadratureFormula() == nullptr)
         {
           static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
           return;
@@ -871,25 +849,42 @@ namespace Rodin::Variational
         const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
+        const Index i = polytope.getIndex();
 
         const auto& dofs = getCachedDOFs(d, i);
-        const auto& basisValues = getCachedBasisValues(d, i, ip);
-        for (Index local = 0; local < basisValues.size(); ++local)
-        {
-          const auto k = [&] {
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& element = fes.getFiniteElement(d, i);
+        const auto coefficient = [&](size_t local) -> decltype(auto) {
+          return this->operator[](dofs[local]);
+        };
+        const auto expansion = [&](const auto& sample) {
+          RangeType value;
+          if constexpr (std::is_same_v<std::decay_t<decltype(sample)>, IntegrationPoint>)
+          {
+            const auto* formula = sample.getReferenceQuadratureFormula();
             if constexpr (requires {
-                            this->operator[](dofs[local]) * basisValues[local];
+                            element.evaluate(
+                              value, coefficient, *formula, sample.getIndex());
                           })
-              return this->operator[](dofs[local]) * basisValues[local];
-            else
-              return basisValues[local] * this->operator[](dofs[local]);
-          }();
-          if (local == 0)
-            res = k;
+            {
+              if (formula)
+              {
+                element.evaluate(value, coefficient, *formula, sample.getIndex());
+                return value;
+              }
+            }
+            element.evaluate(
+              value, coefficient, sample.getPoint().getReferenceCoordinates());
+          }
           else
-            res += k;
-        }
+            element.evaluate(value, coefficient, sample);
+          return value;
+        };
+        const auto mapping = fes.getPushforward({d, i}, expansion);
+        if constexpr (requires { mapping(ip); })
+          res = mapping(ip);
+        else
+          res = mapping(p);
       }
 
       /**
@@ -909,10 +904,10 @@ namespace Rodin::Variational
         const auto& fes = this->getFiniteElementSpace();
         const auto& [d, i] = p;
         const auto& fe = fes.getFiniteElement(d, i);
-        const auto mapping = fes.getPullback({ d, i }, fn);
+        const auto mapping = fes.getPullback({d, i}, fn);
         for (Index local = 0; local < fe.getCount(); local++)
         {
-          const Index global = fes.getGlobalIndex({ d, i }, local);
+          const Index global = fes.getGlobalIndex({d, i}, local);
           this->operator[](global) = fe.getLinearForm(local)(mapping);
         }
         return static_cast<Derived&>(*this);
@@ -931,7 +926,7 @@ namespace Rodin::Variational
       Derived& project(const std::pair<size_t, Index>& p, const RangeType& v)
       {
         return static_cast<Derived&>(*this).project(
-            p, [&](RangeType& out, const Geometry::Point&){ out = v; });
+          p, [&](RangeType& out, const Geometry::Point&) { out = v; });
       }
 
       /**
@@ -962,7 +957,7 @@ namespace Rodin::Variational
       Derived& project(const T& fn)
       {
         return static_cast<Derived&>(*this).project(
-            Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
+          Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
       }
 
       /**
@@ -978,8 +973,8 @@ namespace Rodin::Variational
       template <class T>
       Derived& project(const Geometry::Region& region, const T& fn)
       {
-        return static_cast<Derived&>(*this).project(region, fn,
-            [](const Geometry::Polytope&) { return true; });
+        return static_cast<Derived&>(*this).project(
+          region, fn, [](const Geometry::Polytope&) { return true; });
       }
 
       /**
@@ -996,11 +991,12 @@ namespace Rodin::Variational
        */
       template <class T>
       Derived& project(
-          const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
+        const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
       {
-        return static_cast<Derived&>(*this).project(region, fn,
-            [&](const Geometry::Polytope& polytope)
-            { return polytope.getAttribute() == attr; });
+        return static_cast<Derived&>(*this).project(
+          region, fn, [&](const Geometry::Polytope& polytope) {
+            return polytope.getAttribute() == attr;
+          });
       }
 
       /**
@@ -1017,13 +1013,13 @@ namespace Rodin::Variational
        * @param attrs Mesh attributes selecting the region.
        */
       template <class T>
-      Derived& project(
-          const Geometry::Region& region,
-          const T& fn, const FlatSet<Geometry::Attribute>& attrs)
+      Derived& project(const Geometry::Region& region, const T& fn,
+        const FlatSet<Geometry::Attribute>& attrs)
       {
-        return static_cast<Derived&>(*this).project(region, fn,
-            [&](const Geometry::Polytope& polytope)
-            { return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
+        return static_cast<Derived&>(*this).project(
+          region, fn, [&](const Geometry::Polytope& polytope) {
+            return attrs.size() == 0 || attrs.count(polytope.getAttribute());
+          });
       }
 
       /**
@@ -1039,12 +1035,11 @@ namespace Rodin::Variational
        * @param pred Predicate selecting the entities on which to project.
        */
       template <class Pred>
-      Derived& project(const Geometry::Region& region, const RangeType& fn, const Pred& pred)
+      Derived& project(
+        const Geometry::Region& region, const RangeType& fn, const Pred& pred)
       {
         return static_cast<Derived&>(*this).project(
-            region,
-            [&](const Geometry::Point&) -> RangeType
-            { return fn; }, pred);
+          region, [&](const Geometry::Point&) -> RangeType { return fn; }, pred);
       }
 
       /**
@@ -1055,7 +1050,8 @@ namespace Rodin::Variational
        * @returns Reference to this object after the operation.
        */
       template <class Function, class Pred>
-      Derived& project(const Geometry::Region& region, const Function& fn, const Pred& pred)
+      Derived& project(
+        const Geometry::Region& region, const Function& fn, const Pred& pred)
       {
         return static_cast<Derived&>(*this).project(region, fn, pred);
       }
@@ -1071,8 +1067,7 @@ namespace Rodin::Variational
        * The operation is linear in the size of the number of entries in the
        * underlying matrix.
        */
-      constexpr
-      ScalarType min() const
+      constexpr ScalarType min() const
       {
         Index unused;
         return static_cast<const Derived&>(*this).min(unused);
@@ -1089,8 +1084,7 @@ namespace Rodin::Variational
        * The operation is linear in the size of the number of entries in the
        * underlying matrix.
        */
-      constexpr
-      ScalarType max() const
+      constexpr ScalarType max() const
       {
         Index unused;
         return static_cast<const Derived&>(*this).max(unused);
@@ -1100,8 +1094,7 @@ namespace Rodin::Variational
        * @brief Returns the index of the smallest coefficient.
        * @returns Global DOF index attaining min()
        */
-      constexpr
-      Index argmin() const
+      constexpr Index argmin() const
       {
         Index idx = 0;
         static_cast<const Derived&>(*this).min(idx);
@@ -1112,8 +1105,7 @@ namespace Rodin::Variational
        * @brief Returns the index of the largest coefficient.
        * @returns Global DOF index attaining max()
        */
-      constexpr
-      Index argmax() const
+      constexpr Index argmax() const
       {
         Index idx;
         static_cast<const Derived&>(*this).max(idx);
@@ -1126,8 +1118,7 @@ namespace Rodin::Variational
        * @returns Minimum coefficient value
        * @note CRTP function to be overriden in Derived class.
        */
-      constexpr
-      ScalarType min(Index& idx) const
+      constexpr ScalarType min(Index& idx) const
       {
         return static_cast<const Derived&>(*this).min(idx);
       }
@@ -1138,8 +1129,7 @@ namespace Rodin::Variational
        * @returns Maximum coefficient value
        * @note CRTP function to be overriden in Derived class.
        */
-      constexpr
-      ScalarType max(Index& idx) const
+      constexpr ScalarType max(Index& idx) const
       {
         return static_cast<const Derived&>(*this).max(idx);
       }
@@ -1289,7 +1279,7 @@ namespace Rodin::Variational
 
     private:
       /**
-       * @brief Per-thread cache of the DOFs and basis values of the polytope
+       * @brief Per-thread cache of the DOFs of the polytope
        * last evaluated.
        *
        * The cache outlives the grid functions that fill it, so it cannot be
@@ -1301,37 +1291,27 @@ namespace Rodin::Variational
        */
       struct EvaluationCache
       {
-          EvaluationCache()
-            : owner(nullptr),
-              ownerIdentity(static_cast<size_t>(-1)),
-              fes(nullptr),
-              mesh(nullptr),
-              element(nullptr),
-              d(static_cast<size_t>(-1)),
-              i(static_cast<Index>(-1)),
-              hasBasisValues(false),
-              qf(nullptr),
-              qp(static_cast<size_t>(-1)),
-              qfIdentity(static_cast<size_t>(-1))
-          {}
+        EvaluationCache()
+          : owner(nullptr),
+            ownerIdentity(0),
+            fes(nullptr),
+            mesh(nullptr),
+            element(nullptr),
+            d(0),
+            i(0)
+        {}
 
-          const GridFunctionBase* owner;
-          size_t ownerIdentity;
-          const FES* fes;
-          const Geometry::MeshBase* mesh;
-          // Space assignments can change the element even with fixed connectivity.
-          const ElementType* element;
-          size_t d;
-          Index i;
-          std::vector<Index> dofs;
-
-          bool hasBasisValues;
-          const QF::QuadratureFormulaBase* qf;
-          size_t qp;
-          size_t qfIdentity;
-          Math::SpatialPoint referenceCoordinates;
-          std::vector<RangeType> basisValues;
+        const GridFunctionBase* owner;
+        size_t ownerIdentity;
+        const FES* fes;
+        const Geometry::MeshBase* mesh;
+        // Space assignments can change the element even with fixed connectivity.
+        const ElementType* element;
+        size_t d;
+        Index i;
+        std::vector<Index> dofs;
       };
+
       /**
        * @brief Gets the thread-local evaluation cache.
        * @returns Reference to the reusable evaluation cache.
@@ -1342,6 +1322,7 @@ namespace Rodin::Variational
         thread_local EvaluationCache cache;
         return cache;
       }
+
       /**
        * @brief Gets cached entity degree-of-freedom indices.
        * @param d Topological dimension of the evaluation entity.
@@ -1371,67 +1352,8 @@ namespace Rodin::Variational
           cache.dofs.resize(count);
           for (size_t local = 0; local < count; ++local)
             cache.dofs[local] = dofs[local];
-          cache.hasBasisValues = false;
         }
         return cache.dofs;
-      }
-      /**
-       * @brief Gets basis values cached for a quadrature point.
-       * @param d Topological dimension of the evaluation entity.
-       * @param i Index of the evaluation entity.
-       * @param ip Quadrature point identifying the cached basis values.
-       * @returns Reference to the cached local basis values at the integration point.
-       */
-
-      const std::vector<RangeType>& getCachedBasisValues(
-          size_t d, Index i, const IntegrationPoint& ip) const
-      {
-        auto& cache = getEvaluationCache();
-        const auto* fes = &this->getFiniteElementSpace();
-        const auto* element = &fes->getFiniteElement(d, i);
-        const auto* qf = ip.getQuadratureFormula();
-        const size_t qfIdentity = qf->getCacheIdentity();
-        const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
-        bool sameReferenceCoordinates =
-          cache.referenceCoordinates.size() == referenceCoordinates.size();
-        // Mapped face samples can share a formula/index but have different cell
-        // coordinates. Exact component representations prevent approximate hits
-        // and distinguish signed zeros without allocating coordinate storage.
-        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinates.size();
-             ++j)
-        {
-          sameReferenceCoordinates = std::memcmp(&cache.referenceCoordinates(j),
-                                       &referenceCoordinates(j), sizeof(Real)) == 0;
-        }
-        if (!cache.hasBasisValues || cache.owner != this ||
-          cache.ownerIdentity != m_identity || cache.fes != fes ||
-          cache.element != element || cache.d != d || cache.i != i || cache.qf != qf ||
-          cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
-          !sameReferenceCoordinates)
-        {
-          const auto& fe = *element;
-          const size_t count = fe.getCount();
-          const auto& p = ip.getPoint();
-
-          cache.owner = this;
-          cache.ownerIdentity = m_identity;
-          cache.fes = fes;
-          cache.element = element;
-          cache.d = d;
-          cache.i = i;
-          cache.qf = qf;
-          cache.qfIdentity = qfIdentity;
-          cache.qp = ip.getIndex();
-          cache.referenceCoordinates = referenceCoordinates;
-          cache.basisValues.resize(count);
-          for (Index local = 0; local < count; ++local)
-          {
-            const auto mapping = fes->getPushforward({d, i}, fe.getBasis(local));
-            cache.basisValues[local] = mapping(p);
-          }
-          cache.hasBasisValues = true;
-        }
-        return cache.basisValues;
       }
 
       Optional<std::string> m_name;
@@ -1447,7 +1369,8 @@ namespace Rodin::Variational
    * backend).
    */
   template <class FES>
-  class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>> final
+  class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    final
     : public GridFunctionBase<
         GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
@@ -1546,8 +1469,7 @@ namespace Rodin::Variational
        * @param[out] idx Global DOF index attaining the minimum
        * @returns Minimum coefficient value
        */
-      constexpr
-      ScalarType min(Index& idx) const
+      constexpr ScalarType min(Index& idx) const
       {
         return this->getData().minCoeff(&idx);
       }
@@ -1557,8 +1479,7 @@ namespace Rodin::Variational
        * @param[out] idx Global DOF index attaining the maximum
        * @returns Maximum coefficient value
        */
-      constexpr
-      ScalarType max(Index& idx) const
+      constexpr ScalarType max(Index& idx) const
       {
         return this->getData().maxCoeff(&idx);
       }
@@ -1687,7 +1608,7 @@ namespace Rodin::Variational
        */
       template <class Function, class Pred>
       GridFunction& project(
-          const Geometry::Region& region, const Function& v, const Pred& pred)
+        const Geometry::Region& region, const Function& v, const Pred& pred)
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
@@ -1721,7 +1642,7 @@ namespace Rodin::Variational
         {
           const auto& polytope = *it;
           if (pred(polytope))
-            this->project({ polytope.getDimension(), polytope.getIndex() }, v);
+            this->project({polytope.getDimension(), polytope.getIndex()}, v);
           ++it;
         }
 
@@ -1746,8 +1667,7 @@ namespace Rodin::Variational
        * @brief Gets the mutable coefficient vector.
        * @returns Reference to the dense coefficient vector
        */
-      constexpr
-      auto& getData()
+      constexpr auto& getData()
       {
         return m_data;
       }
@@ -1756,8 +1676,7 @@ namespace Rodin::Variational
        * @brief Gets the coefficient vector.
        * @returns Const reference to the dense coefficient vector
        */
-      constexpr
-      const DataType& getData() const
+      constexpr const DataType& getData() const
       {
         return m_data;
       }
@@ -1792,8 +1711,7 @@ namespace Rodin::Variational
    * @param data Data used by the operation.
    */
   template <class FES, class Data>
-  GridFunction(const FES& fes, Data&& data)
-    -> GridFunction<FES, Data>;
+  GridFunction(const FES& fes, Data&& data) -> GridFunction<FES, Data>;
 }
 
 #endif

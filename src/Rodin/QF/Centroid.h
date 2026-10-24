@@ -73,17 +73,23 @@ namespace Rodin::QF
        * @param g Geometry type (e.g., Triangle, Quadrilateral, Tetrahedron, etc.)
        */
       Centroid(Geometry::Polytope::Type g)
-        : m_geometry(g)
+        : m_geometry(g),
+          m_weight(getWeight(0))
       {}
 
       /**
        * @brief Gets the polytope geometry of this centroid rule.
        * @return Polytope geometry type.
        */
-      constexpr
-      Geometry::Polytope::Type getGeometry() const
+      constexpr Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{{&getPoint(0), 1}, &m_weight, 0};
       }
 
       /**
@@ -113,13 +119,16 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new Centroid instance (caller takes ownership)
        */
-      Centroid* copy() const noexcept override
+      Centroid* copy() const noexcept
       {
         return new Centroid(*this);
       }
 
     private:
       Geometry::Polytope::Type m_geometry;
+
+      /// @brief Uniform reference weight retained with the concrete rule.
+      Real m_weight;
   };
 }
 

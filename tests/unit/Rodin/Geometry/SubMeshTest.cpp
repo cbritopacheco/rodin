@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <limits>
+#include <string>
 
 #include <Rodin/Geometry.h>
 
@@ -13,6 +15,44 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Checked dimension queries preserve the realized submesh maps.
+  TEST(Geometry_SubMesh, CheckedMapDimensionUsesMemberContext)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+    mesh.getConnectivity().compute(1, 2);
+    SubMesh<Context::Local>::Builder builder;
+    builder.initialize(mesh);
+    for (auto it = mesh.getBoundary(); it; ++it)
+      builder.include(1, it->getIndex());
+    const auto boundary = builder.finalize();
+    const auto& map = boundary.getPolytopeMap(1);
+    const auto left = map.left;
+    const auto right = map.right;
+    EXPECT_TRUE(boundary.getPolytopeMap(mesh.getDimension()).left.empty());
+    for (size_t dimension : {mesh.getDimension() + 1, std::numeric_limits<size_t>::max()})
+    {
+      try
+      {
+        boundary.getPolytopeMap(dimension);
+        ADD_FAILURE() << "An unavailable map dimension must be rejected.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        EXPECT_NE(std::string(error.what()).find("getPolytopeMap"), std::string::npos);
+        EXPECT_NE(
+          std::string(error.what()).find("In member function"), std::string::npos);
+      }
+      catch (...)
+      {
+        ADD_FAILURE() << "Checked map access must raise an Alert exception.";
+      }
+    }
+    EXPECT_EQ(&boundary.getPolytopeMap(1), &map);
+    EXPECT_EQ(map.left, left);
+    EXPECT_EQ(map.right, right);
+    EXPECT_EQ(&boundary.getParent(), &mesh);
+  }
+
   // ---- Builder basic construction ----
 
   /// @brief Verifies build from boundary faces for geometry sub mesh by checking true predicates.
@@ -239,5 +279,36 @@ namespace Rodin::Tests::Unit
 
     const SubMeshBase& smBase = meshRef.asSubMesh();
     EXPECT_EQ(&smBase.getParent(), &mesh);
+  }
+}
+
+/// @brief Reinitialization clears counters and maps even without completing the old build.
+TEST(SubMeshBuilder, ReuseStartsFresh)
+{
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  auto parent = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  SubMesh<Context::Local>::Builder builder;
+  for (size_t repeat = 0; repeat < 3; ++repeat)
+  {
+    builder.initialize(parent).include(2, 0);
+    if (repeat == 1)
+      builder.initialize(parent).include(2, 1);
+    const auto submesh = builder.finalize();
+    EXPECT_EQ(submesh.getCellCount(), 1u);
+    EXPECT_EQ(submesh.getVertexCount(), 3u);
+    const Index selected = repeat == 1 ? 1 : 0;
+    const auto& vertices = parent.getPolytope(2, selected)->getVertices();
+    for (auto vertex = submesh.getVertex(); vertex; ++vertex)
+    {
+      bool found = false;
+      for (const Index original : vertices)
+      {
+        found |=
+          (vertex->getCoordinates() - parent.getVertexCoordinates(original)).norm() <
+          1e-14;
+      }
+      EXPECT_TRUE(found);
+    }
   }
 }

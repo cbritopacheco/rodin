@@ -92,8 +92,8 @@ namespace Rodin::Tests::Convergence
     public:
       struct Sample
       {
-          Real parameter;
-          ErrorNorms error;
+        Real parameter;
+        ErrorNorms error;
       };
 
       ErrorHistory& append(Real parameter, const ErrorNorms& error)
@@ -176,8 +176,8 @@ namespace Rodin::Tests::Convergence
     public:
       struct Sample
       {
-          Real parameter;
-          Real error;
+        Real parameter;
+        Real error;
       };
 
       NormHistory& append(Real parameter, Real error)
@@ -375,23 +375,27 @@ namespace Rodin::Tests::Convergence
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
+          }
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(p, &qf, qp);
+            const Variational::IntegrationPoint ip(quadrature, qp);
             squared += qf.getWeight(qp) * p.getDistortion() *
               squaredMagnitude(uh(ip) - evaluate(exact, ip));
           }
         }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { mesh.getShard(); })
+        {
           squared = boost::mpi::all_reduce(
             mesh.getContext().getCommunicator(), squared, std::plus<Real>());
+        }
 #endif
         return std::sqrt(squared);
       }
@@ -438,15 +442,17 @@ namespace Rodin::Tests::Convergence
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
+          }
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(p, &qf, qp);
+            const Variational::IntegrationPoint ip(quadrature, qp);
             const auto value = jacobian(ip);
             Real divergence = 0;
             const size_t dimension = std::min(
@@ -458,8 +464,10 @@ namespace Rodin::Tests::Convergence
         }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { mesh.getShard(); })
+        {
           squared = boost::mpi::all_reduce(
             mesh.getContext().getCommunicator(), squared, std::plus<Real>());
+        }
 #endif
         return std::sqrt(squared);
       }
@@ -476,15 +484,17 @@ namespace Rodin::Tests::Convergence
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if constexpr (requires { mesh.getShard(); })
+          {
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
+          }
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(p, &qf, qp);
+            const Variational::IntegrationPoint ip(quadrature, qp);
             const Real weight = qf.getWeight(qp) * p.getDistortion();
             const auto ev = uh(ip) - evaluate(exact, ip);
             const auto eg = derivative(ip) - evaluate(exactDerivative, ip);

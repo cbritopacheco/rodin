@@ -58,6 +58,7 @@
 
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
+#include "FaceNormal.h"
 
 namespace Rodin::Variational
 {
@@ -94,7 +95,8 @@ namespace Rodin::Variational
        */
       BoundaryNormal(const Geometry::MeshBase& mesh)
         : m_sdim(mesh.getSpaceDimension()),
-          m_mesh(mesh)
+          m_mesh(mesh),
+          m_normal(mesh)
       {
         assert(m_sdim > 0);
       }
@@ -106,7 +108,8 @@ namespace Rodin::Variational
       BoundaryNormal(const BoundaryNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim),
-          m_mesh(other.m_mesh)
+          m_mesh(other.m_mesh),
+          m_normal(other.m_normal)
       {}
 
       /**
@@ -116,15 +119,15 @@ namespace Rodin::Variational
       BoundaryNormal(BoundaryNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim)),
-          m_mesh(std::move(other.m_mesh))
+          m_mesh(std::move(other.m_mesh)),
+          m_normal(std::move(other.m_normal))
       {}
 
       /**
        * @brief Gets the topological dimension.
        * @returns The topological dimension.
        */
-      constexpr
-      size_t getDimension() const
+      constexpr size_t getDimension() const
       {
         return m_sdim;
       }
@@ -146,7 +149,8 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @param res Storage for the computed values.
        */
-      void interpolate(Math::SpatialVector<ScalarType>& res, const Geometry::Point& p) const
+      void interpolate(
+        Math::SpatialVector<ScalarType>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -158,7 +162,7 @@ namespace Rodin::Variational
         if (d == meshDim - 2) // Evaluating on a codimension-2 element
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 2, meshDim - 1 }, i);
+          const auto& inc = conn.getIncidence({meshDim - 2, meshDim - 1}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)
@@ -174,13 +178,13 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
                 << "No trace domain provided: "
                 << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
-                << ". BoundaryNormal at a codimension-2 element with no trace domain is undefined."
+                << ". BoundaryNormal at a codimension-2 element with no trace domain is "
+                   "undefined."
                 << Alert::Raise;
             }
             else
@@ -200,7 +204,8 @@ namespace Rodin::Variational
                 return;
               }
               UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+                << Alert::Raise;
             }
             return;
           }
@@ -209,6 +214,11 @@ namespace Rodin::Variational
         {
           assert(d == mesh.getDimension() - 1);
           assert(mesh.isBoundary(i));
+          if (meshDim == 2 && m_sdim == 3)
+          {
+            res = m_normal.getValue(p);
+            return;
+          }
           if (jacobian.rows() == 2)
           {
             res[0] = jacobian(1, 0);
@@ -216,25 +226,22 @@ namespace Rodin::Variational
           }
           else if (jacobian.rows() == 3)
           {
-            res[0] =
-              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-            res[1] =
-              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-            res[2] =
-              jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
+            res[0] = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+            res[1] = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+            res[2] = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
           else
           {
             Alert::MemberFunctionException(*this, __func__)
               << "Cannot compute BoundaryNormal from a boundary Jacobian with "
-              << jacobian.rows() << " rows on polytope (" << d << ", " << i << ")."
-              << Alert::Raise;
+              << static_cast<size_t>(jacobian.rows()) << " rows on polytope (" << d
+              << ", " << i << ")." << Alert::Raise;
             assert(false);
             res.setConstant(Math::nan<ScalarType>());
             return;
           }
 
-          const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
+          const auto& incidence = mesh.getConnectivity().getIncidence({d, d + 1}, i);
           assert(incidence.size() == 1);
 
           auto pit = mesh.getPolytope(d + 1, *incidence.begin());
@@ -258,8 +265,7 @@ namespace Rodin::Variational
           {
             Alert::MemberFunctionException(*this, __func__)
               << "Cannot normalize BoundaryNormal on polytope (" << d << ", " << i
-              << "). Computed norm is " << norm << "."
-              << Alert::Raise;
+              << "). Computed norm is " << norm << "." << Alert::Raise;
             assert(false);
             res.setConstant(Math::nan<ScalarType>());
             return;
@@ -330,6 +336,7 @@ namespace Rodin::Variational
     private:
       const size_t m_sdim;
       std::reference_wrapper<const Geometry::MeshBase> m_mesh;
+      FaceNormal m_normal;
   };
 }
 

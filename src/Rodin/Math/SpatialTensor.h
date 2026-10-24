@@ -16,7 +16,7 @@
 #include <cmath>
 #include <type_traits>
 
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "SpatialMatrix.h"
 
 namespace Rodin::Math
@@ -42,10 +42,13 @@ namespace Rodin::Math
     public:
       /// @brief Scalar entry type.
       using Scalar = ScalarType;
+
       /// @brief Runtime extent of each tensor axis.
       using Extents = std::array<size_t, Rank>;
+
       /// @brief Maximum extent of a spatial tensor axis.
       static constexpr size_t MaxSize = RODIN_MAXIMAL_SPACE_DIMENSION;
+
       /// @brief Maximum number of entries stored without allocation.
       static constexpr size_t Capacity = [] {
         size_t count = 1;
@@ -56,6 +59,7 @@ namespace Rodin::Math
       static_assert(Rank >= 3);
 
       SpatialTensor() = default;
+
       /**
        * @brief Constructs tensor storage with explicit runtime extents.
        * @param extents Extent of each tensor axis.
@@ -64,6 +68,7 @@ namespace Rodin::Math
       {
         resize(extents);
       }
+
       /**
        * @brief Constructs tensor storage with explicit runtime extents.
        * @param sizes Extents of the tensor axes.
@@ -84,8 +89,10 @@ namespace Rodin::Math
         for (auto extent : extents)
         {
           if (extent > MaxSize)
-            Alert::Exception() << "SpatialTensor extent exceeds spatial capacity."
-                               << Alert::Raise;
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "SpatialTensor extent exceeds spatial capacity." << Alert::Raise;
+          }
         }
         m_extents = extents;
         m_size = 1;
@@ -93,6 +100,7 @@ namespace Rodin::Math
           m_size *= extent;
         return *this;
       }
+
       /**
        * @brief Returns all active tensor axis extents.
        * @returns All active tensor axis extents.
@@ -101,6 +109,7 @@ namespace Rodin::Math
       {
         return m_extents;
       }
+
       /**
        * @brief Returns the active extent of the selected tensor axis.
        * @returns The active extent of the selected tensor axis.
@@ -108,8 +117,15 @@ namespace Rodin::Math
        */
       size_t getDimension(size_t axis) const
       {
-        return m_extents.at(axis);
+        if (axis >= Rank)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Tensor axis " << axis << " is outside rank " << Rank << '.'
+            << Alert::Raise;
+        }
+        return m_extents[axis];
       }
+
       /**
        * @brief Returns the number of active tensor entries.
        * @returns The number of active tensor entries.
@@ -118,6 +134,7 @@ namespace Rodin::Math
       {
         return m_size;
       }
+
       /**
        * @brief Accesses an active tensor entry with bounds assertions.
        * @param i Index of the requested entry.
@@ -128,6 +145,7 @@ namespace Rodin::Math
         assert(i < m_size);
         return m_data[i];
       }
+
       /**
        * @brief Accesses an active tensor entry with bounds assertions.
        * @param i Index of the requested entry.
@@ -138,6 +156,7 @@ namespace Rodin::Math
         assert(i < m_size);
         return m_data[i];
       }
+
       /**
        * @brief Accesses an active tensor entry with bounds assertions.
        * @returns Reference to the entry at the supplied indices.
@@ -149,6 +168,7 @@ namespace Rodin::Math
       {
         return m_data[getIndex({static_cast<size_t>(indices)...})];
       }
+
       /**
        * @brief Accesses an active tensor entry with bounds assertions.
        * @returns Reference to the entry at the supplied indices.
@@ -160,6 +180,7 @@ namespace Rodin::Math
       {
         return m_data[getIndex({static_cast<size_t>(indices)...})];
       }
+
       /**
        * @brief Sets every active entry to zero.
        * @returns Reference to this object after the operation.
@@ -170,6 +191,7 @@ namespace Rodin::Math
           m_data[i] = Scalar(0);
         return *this;
       }
+
       /**
        * @brief Sets every active entry to the supplied constant.
        * @param value Value to store or assign.
@@ -181,6 +203,7 @@ namespace Rodin::Math
           m_data[i] = value;
         return *this;
       }
+
       /**
        * @brief Adds matching active entries after checking extents.
        * @param other Other operand.
@@ -193,6 +216,7 @@ namespace Rodin::Math
           m_data[i] += other[i];
         return *this;
       }
+
       /**
        * @brief Subtracts matching entries, or negates active entries.
        * @param other Other operand.
@@ -205,6 +229,7 @@ namespace Rodin::Math
           m_data[i] -= other[i];
         return *this;
       }
+
       /**
        * @brief Contracts matching entries and conjugates the second operand.
        * @returns Scalar Frobenius contraction with the supplied tensor.
@@ -214,12 +239,13 @@ namespace Rodin::Math
       auto dot(const SpatialTensor<OtherScalar, Rank>& other) const
       {
         assert(m_extents == other.getExtents());
-        using Result = decltype(Scalar{} * OtherScalar{});
+        using Result = decltype(Math::dot(Scalar{}, OtherScalar{}));
         Result value = 0;
         for (size_t i = 0; i < m_size; ++i)
-          value += m_data[i] * Math::conj(other[i]);
+          value += Math::dot(m_data[i], other[i]);
         return value;
       }
+
       /**
        * @brief Returns the squared Frobenius norm of active entries.
        * @returns The squared Frobenius norm of active entries.
@@ -228,6 +254,7 @@ namespace Rodin::Math
       {
         return std::real(dot(*this));
       }
+
       /**
        * @brief Returns the Frobenius norm of active entries.
        * @returns The Frobenius norm of active entries.
@@ -236,6 +263,7 @@ namespace Rodin::Math
       {
         return std::sqrt(squaredNorm());
       }
+
       /**
        * @brief Returns entrywise complex conjugation.
        * @returns Entrywise complex conjugation.
@@ -247,6 +275,7 @@ namespace Rodin::Math
           value[i] = Math::conj(m_data[i]);
         return value;
       }
+
       /**
        * @brief Adds matching active entries after checking extents.
        * @param other Other operand.
@@ -261,6 +290,7 @@ namespace Rodin::Math
           value[i] = m_data[i] + other[i];
         return value;
       }
+
       /**
        * @brief Subtracts matching entries, or negates active entries.
        * @param other Other operand.
@@ -275,6 +305,7 @@ namespace Rodin::Math
           value[i] = m_data[i] - other[i];
         return value;
       }
+
       /**
        * @brief Subtracts matching entries, or negates active entries.
        * @returns Difference of the operands, or the negated operand for the unary overload.
@@ -283,6 +314,7 @@ namespace Rodin::Math
       {
         return (*this) * Scalar(-1);
       }
+
       /**
        * @brief Scales every active tensor entry with scalar type promotion.
        * @returns Product of the operands.
@@ -300,6 +332,7 @@ namespace Rodin::Math
         }
         return value;
       }
+
       /**
        * @brief Scales every active tensor entry with scalar type promotion.
        * @returns Quotient of the operands.
@@ -317,6 +350,7 @@ namespace Rodin::Math
         }
         return value;
       }
+
       /**
        * @brief Contracts the last tensor axis with a vector.
        * @returns Product of the operands.
@@ -340,6 +374,7 @@ namespace Rodin::Math
         }
         return value;
       }
+
       /**
        * @brief Rank-four contraction @f$ (CA)_{ij}=\sum_{kl}C_{ijkl}A_{kl} @f$.
        * @returns Product of the operands.
@@ -387,6 +422,7 @@ namespace Rodin::Math
       size_t m_size = 0;
       std::array<Scalar, Capacity> m_data{};
   };
+
   /**
    * @brief Scales every active tensor entry with scalar type promotion.
    * @returns Product of the operands.
@@ -407,8 +443,8 @@ namespace Rodin::FormLanguage
   template <class Scalar, size_t Rank>
   struct Traits<Math::SpatialTensor<Scalar, Rank>>
   {
-      /// @brief Scalar type of matrix or tensor entries.
-      using ScalarType = Scalar;
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = Scalar;
   };
 }
 #endif

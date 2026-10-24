@@ -30,6 +30,14 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Owned scalar basis values and reference derivatives.
+  template <class Scalar>
+  class ReferenceTabulation;
+
+  /// @brief Bounded reference-table reuse for an element and scalar type.
+  template <class Element, class Scalar>
+  class ReferenceTabulationCache;
+
   /// @brief Finite-element interpolation selected by the space's context.
   template <class FES>
   class Interpolation;
@@ -61,10 +69,11 @@ namespace Rodin::Variational
   };
 
   /// @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
-  static constexpr const ShapeFunctionSpaceType TrialSpace = ShapeFunctionSpaceType::Trial;
+  static constexpr const ShapeFunctionSpaceType TrialSpace =
+    ShapeFunctionSpaceType::Trial;
 
   /// @brief Shorthand variable for ShapeFunctionSpaceType::Test.
-  static constexpr const ShapeFunctionSpaceType TestSpace  = ShapeFunctionSpaceType::Test;
+  static constexpr const ShapeFunctionSpaceType TestSpace = ShapeFunctionSpaceType::Test;
 
   /**
    * @brief Base class for shape function objects.
@@ -111,7 +120,7 @@ namespace Rodin::Variational
   template <class Derived>
   class FunctionBase;
 
-  template <class ... Values>
+  template <class... Values>
   class Function;
 
   /// @brief Base class for objects representing boolean functions.
@@ -141,7 +150,7 @@ namespace Rodin::Variational
   template <class Scalar, class Derived>
   class ScalarFunctionBase;
 
-  template <class ... Values>
+  template <class... Values>
   class ScalarFunction;
 
   /// @brief Base class for real-valued functions defined on a mesh.
@@ -154,7 +163,7 @@ namespace Rodin::Variational
    *
    * @see RealFunctionSpecializations
    */
-  template <class ... Values>
+  template <class... Values>
   class RealFunction;
 
   /// @brief Base class for scalar-valued functions defined on a mesh.
@@ -167,7 +176,7 @@ namespace Rodin::Variational
    *
    * @see ComplexFunctionSpecializations
    */
-  template <class ... Values>
+  template <class... Values>
   class ComplexFunction;
 
   /**
@@ -185,7 +194,7 @@ namespace Rodin::Variational
    *
    * @see VectorFunctionSpecializations
    */
-  template <class ... Values>
+  template <class... Values>
   class VectorFunction;
 
   /// @brief Base class for matrix-valued functions defined on a mesh.
@@ -351,8 +360,23 @@ namespace Rodin::Variational
   template <class StrictType>
   class FunctionBaseCopy;
 
-  template <class ... Args>
+  template <class... Args>
   class Zero;
+
+  /**
+   * @brief Evaluation base for a two-sided shape trace.
+   * @tparam Derived Concrete average or jump expression.
+   * @tparam Operand Cell-local shape expression.
+   */
+  template <class Derived, class Operand>
+  class InterfaceShapeFunctionBase;
+
+  /**
+   * @brief Union numbering of two finite element supports.
+   * @tparam Enabled Whether union numbering is required.
+   */
+  template <bool Enabled>
+  class DOFMapping;
 
   template <class Operand>
   class Jump;
@@ -384,7 +408,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Sqrt;
 
-  template <class ... Args>
+  template <class... Args>
   class Component;
 
   /**
@@ -785,10 +809,10 @@ namespace Rodin::Variational
   template <class Kernel, class Operand>
   class Potential;
 
-  template <class ... Args>
+  template <class... Args>
   class Max;
 
-  template <class ... Args>
+  template <class... Args>
   class Min;
 
   /**
@@ -1079,7 +1103,7 @@ namespace Rodin::Variational
   template <class Operand, class Value>
   class DirichletBC;
 
-  template <class Operand, class ... Parameters>
+  template <class Operand, class... Parameters>
   class PeriodicBC;
 
   /**
@@ -1101,19 +1125,15 @@ namespace Rodin::Variational
    *
    * @see ProblemSpecializations
    */
-  template <class ... Parameters>
+  template <class... Parameters>
   class Problem;
 
   /// @brief Base class for variational problem objects.
   template <class LinearSystem>
   class ProblemBase;
 
-  template <
-    class Operand,
-    class VectorField,
-    class Step,
-    class BoundaryPolicy
-  > class Flow;
+  template <class Operand, class VectorField, class Step, class BoundaryPolicy>
+  class Flow;
 }
 
 #endif

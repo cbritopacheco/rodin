@@ -202,16 +202,16 @@ namespace
 
   struct Volume
   {
-      static constexpr Attribute Fluid = 1;
-      static constexpr Attribute Solid = 2;
+    static constexpr Attribute Fluid = 1;
+    static constexpr Attribute Solid = 2;
   };
 
   struct Boundary
   {
-      static constexpr Attribute FSI = 2;
-      static constexpr Attribute Inlet = 4;
-      static constexpr std::array<Attribute, 6> Outlets{{10, 15, 9, 14, 8, 7}};
-      static constexpr Attribute SolidRing = 17;
+    static constexpr Attribute FSI = 2;
+    static constexpr Attribute Inlet = 4;
+    static constexpr std::array<Attribute, 6> Outlets{{10, 15, 9, 14, 8, 7}};
+    static constexpr Attribute SolidRing = 17;
   };
 
   enum class FlowMode
@@ -222,52 +222,52 @@ namespace
 
   struct RCR
   {
-      Real Rp = 1.0e8;
-      Real C = 1.0e-11;
-      Real Rd = 1.0e9;
-      Real pd = 500.0;
-      Real pc = 10500.0;
-      Real pout = 11000.0;
-      Real qd = 0.0;
+    Real Rp = 1.0e8;
+    Real C = 1.0e-11;
+    Real Rd = 1.0e9;
+    Real pd = 500.0;
+    Real pc = 10500.0;
+    Real pout = 11000.0;
+    Real qd = 0.0;
   };
 
   struct CarreauYasuda
   {
-      Real mu0 = 0.0186058;
-      Real muInf = 0.0042963;
-      Real lambda = 0.2435;
-      Real n = 0.2079;
-      Real yasuda = 1.5410;
-      Real gammaRegularization = 1.0e-3;
+    Real mu0 = 0.0186058;
+    Real muInf = 0.0042963;
+    Real lambda = 0.2435;
+    Real n = 0.2079;
+    Real yasuda = 1.5410;
+    Real gammaRegularization = 1.0e-3;
   };
 
   struct Config
   {
-      std::string meshPath = "../resources/examples/Heart/CoronaryArtery/MergedFSI.mesh";
-      std::string xdmfBasename = "CoronaryArtery_FSI";
-      std::string csvPath = "CoronaryArtery_FSI.csv";
-      Real meshScale = 1.0e-3;
+    std::string meshPath = "../resources/examples/Heart/CoronaryArtery/MergedFSI.mesh";
+    std::string xdmfBasename = "CoronaryArtery_FSI";
+    std::string csvPath = "CoronaryArtery_FSI.csv";
+    Real meshScale = 1.0e-3;
 
-      Real dt = 1.0e-3;
-      size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+    Real dt = 1.0e-3;
+    size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
-      Real fluidDensity = 1060.0;
-      Real pressurePenalty = 1.0e-12;
-      Real inletBackflowStabilization = 1.0;
-      Real outletBackflowStabilization = 1.0;
-      FlowMode flowMode = FlowMode::Oseen;
-      CarreauYasuda viscosity;
+    Real fluidDensity = 1060.0;
+    Real pressurePenalty = 1.0e-12;
+    Real inletBackflowStabilization = 1.0;
+    Real outletBackflowStabilization = 1.0;
+    FlowMode flowMode = FlowMode::Oseen;
+    CarreauYasuda viscosity;
 
-      Real solidDensity = 1060.0;
-      Real solidYoungModulus = 5.0e4;
-      Real solidPoissonRatio = 0.3;
-      Real newmarkBeta = 0.25;
-      Real newmarkGamma = 0.5;
+    Real solidDensity = 1060.0;
+    Real solidYoungModulus = 5.0e4;
+    Real solidPoissonRatio = 0.3;
+    Real newmarkBeta = 0.25;
+    Real newmarkGamma = 0.5;
 
-      Real ringStiffness = 8.0e4;
-      Real ringDamping = 0;
-      Real inactiveRegularization = 1.0e-10;
-      PetscBool moveMeshDuringNewton = PETSC_FALSE;
+    Real ringStiffness = 8.0e4;
+    Real ringDamping = 0;
+    Real inactiveRegularization = 1.0e-10;
+    PetscBool moveMeshDuringNewton = PETSC_FALSE;
   };
 
   static Real periodic_activation(Real t)
@@ -573,8 +573,10 @@ namespace
       else if (mode == "oseen")
         cfg.flowMode = FlowMode::Oseen;
       else
+      {
         throw std::runtime_error(
           "Invalid -coronary_flow_mode. Expected newton or oseen.");
+      }
     }
 
     PetscReal dt = cfg.dt;
@@ -606,8 +608,10 @@ int main(int argc, char** argv)
   const bool isRoot = comm.rank() == RootRank;
 
   if (isRoot)
+  {
     std::cout << "Starting CoronaryArtery_FSI_PETSc_MPI on " << comm.size()
               << " processes." << std::endl;
+  }
 
   try
   {
@@ -1135,8 +1139,10 @@ int main(int argc, char** argv)
       if (!snes.converged())
       {
         if (isRoot)
+        {
           std::cerr << "SNES failed at step " << step << " after "
                     << snes.getIterationNumber() << " iterations.\n";
+        }
         break;
       }
 

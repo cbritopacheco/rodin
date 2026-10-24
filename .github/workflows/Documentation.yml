@@ -33,13 +33,9 @@ jobs:
           cache: 'pip'
       - run: pip install -r doc/requirements.txt
       - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          dvisvgm
-          texlive-base
-          texlive-latex-extra
-          texlive-fonts-extra
-          texlive-fonts-recommended
+        uses: ./.github/actions/apt-dependencies
+        with:
+          packages: dvisvgm texlive-base texlive-latex-extra texlive-fonts-extra texlive-fonts-recommended
       - name: Install pinned Doxygen
         # Use the same parser as the Style warning check.
         run: |

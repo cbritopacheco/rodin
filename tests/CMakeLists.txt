@@ -1,6 +1,60 @@
 enable_testing()
 include(GoogleTest)
 
+# Record which execution profiles can use each GoogleTest executable before
+# building it. Forward its registration unchanged, including filters/properties.
+function(rodin_discover_tests target)
+  cmake_parse_arguments(PARSE_ARGV 1 _registration
+    "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
+    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT;XML_OUTPUT_DIR;DISCOVERY_MODE"
+    "EXTRA_ARGS;DISCOVERY_EXTRA_ARGS;PROPERTIES;TEST_FILTER")
+  set(_labels)
+  list(FIND _registration_PROPERTIES LABELS _label_index)
+  if(NOT _label_index EQUAL -1)
+    math(EXPR _label_index "${_label_index} + 1")
+    list(GET _registration_PROPERTIES ${_label_index} _labels)
+  endif()
+  set(_profiles)
+  if("unit" IN_LIST _labels AND NOT "slow" IN_LIST _labels)
+    list(APPEND _profiles unit)
+  endif()
+  if("manufactured" IN_LIST _labels AND NOT "slow" IN_LIST _labels)
+    list(APPEND _profiles manufactured)
+  endif()
+  if("convergence" IN_LIST _labels)
+    list(APPEND _profiles convergence-baseline)
+  endif()
+  if("slow" IN_LIST _labels)
+    list(APPEND _profiles slow)
+  endif()
+  if(("unit" IN_LIST _labels AND NOT "distributed" IN_LIST _labels) OR
+      ("distributed" IN_LIST _labels AND NOT "slow" IN_LIST _labels) OR
+      ("manufactured" IN_LIST _labels AND NOT "slow" IN_LIST _labels))
+    list(APPEND _profiles coverage)
+  endif()
+  set_property(TARGET ${target} APPEND PROPERTY RODIN_TEST_PROFILES ${_profiles})
+  if(CMAKE_VERSION VERSION_LESS 3.18)
+    # CMake 3.16's GoogleTest module also expands ARGN as a list.
+    gtest_discover_tests(${target} ${ARGN})
+  else()
+    # Preserve argument boundaries, including semicolons and empty arguments.
+    # Expanding ARGN directly would alter modern GoogleTest registrations.
+    set(_call "gtest_discover_tests(")
+    math(EXPR _last "${ARGC} - 1")
+    foreach(_index RANGE 0 ${_last})
+      set(_value "${ARGV${_index}}")
+      set(_bracket "=")
+      string(FIND "${_value}" "]${_bracket}]" _position)
+      while(NOT _position EQUAL -1)
+        string(APPEND _bracket "=")
+        string(FIND "${_value}" "]${_bracket}]" _position)
+      endwhile()
+      string(APPEND _call " [${_bracket}[${_value}]${_bracket}]")
+    endforeach()
+    cmake_language(EVAL CODE "${_call})")
+  endif()
+endfunction()
+
 foreach(_cache_mode OFF ON)
   add_test(NAME CMake.ThirdPartyIsolation.${_cache_mode}
     COMMAND ${CMAKE_COMMAND}

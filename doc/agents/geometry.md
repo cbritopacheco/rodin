@@ -16,6 +16,11 @@ they curve) are separate layers throughout.
 - `Polytope::Type` enumerates reference geometries (Segment, Triangle,
   Quadrilateral, Tetrahedron, ...); reference nodes/centroids come from
   the type's traits.
+  Their reference-coordinate dimension is exactly the topological dimension
+  $d$, independently of physical embedding. In particular, the Point vertex
+  and centroid belong to $\mathbb{R}^0$: both are empty coordinate tuples.
+  `SpatialPoint{0}` instead constructs a one-dimensional coordinate and must
+  not represent the zero-dimensional reference point.
 
 ## Connectivity — incidence d → d′
 
@@ -47,19 +52,26 @@ compare coordinate/key sets in tests.
   reconstruct them from vertex coordinates in FES-generic code.
 - `mesh.setVertexCoordinates(...)` flushes/invalidates transformations;
   `mesh.flush()` demotes everything back to affine.
+- Transformations expose geometry, not evaluation-cache identity. A fresh
+  `setPolytope()` binding discards consumers' previous physical results even
+  for the same logical entity. Geometry must remain fixed during a binding;
+  changed geometry requires fresh points/quadrature and a new binding.
+  Native P1 derivatives retain constant affine-simplex results only within
+  that binding. Direct point evaluation without a matching explicit cell
+  binding prepares fresh physical data. Persistent formula addresses remain separate
+  and continue to protect reference tabulation and sample provenance.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
   Construction evaluates the cell's quadrature Jacobians in one bulk
   transformation call and stores them in the points' existing owned caches.
-  Parametric H1 geometry borrows its existing reference table only during this
-  call; neither points nor transformations retain a table or formula pointer.
+  Parametric P1 and H1 geometry borrow their reference tables only during this
+  call; neither points nor transformations retain borrowed table storage.
   Physical coordinates and derived metric quantities remain lazy. Mapped points
-  own their reference coordinates and retain only the formula's logical identity
+  own their reference coordinates and retain only the persistent formula pointer
   and sample index until physical evaluation. A parametric map may immediately
-  borrow an existing thread-local basis table by that identity; an absent or
-  evicted table uses direct evaluation at the owned reference point. Formula
-  destruction, assignment, cache eviction and transfer to another thread do not
+  borrow an existing thread-local basis table by that formula; an absent or
+  evicted table uses direct evaluation at the owned reference point. Mapped-owner destruction, cache eviction and transfer to another thread do not
   invalidate the owned sample. Rebinding clears provenance and geometric caches.
   Variational rules own only their bound polytope's mapped points. The explicit
   mesh cache is retained for callers requiring borrowed quadratures whose
