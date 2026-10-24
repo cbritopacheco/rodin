@@ -409,13 +409,19 @@ namespace Rodin::Math
         }
       }
 
-      /// @brief Stride between consecutive coefficients in the inner dimension.
+      /**
+       * @brief Stride between consecutive coefficients in the inner dimension.
+       * @returns One, since inner coefficients are contiguous.
+       */
       constexpr Eigen::Index innerStride() const noexcept
       {
         return 1;
       }
 
-      /// @brief Stride between consecutive columns, or rows for row-major storage.
+      /**
+       * @brief Stride between consecutive columns, or rows for row-major storage.
+       * @returns The number of coefficients in the inner dimension.
+       */
       constexpr Eigen::Index outerStride() const noexcept
       {
         return this->innerSize();
@@ -691,13 +697,19 @@ namespace Rodin::Math
         return *this = rotation.toRotationMatrix();
       }
 
-      /// @brief Stride between consecutive coefficients in the inner dimension.
+      /**
+       * @brief Stride between consecutive coefficients in the inner dimension.
+       * @returns One, since inner coefficients are contiguous.
+       */
       constexpr Eigen::Index innerStride() const noexcept
       {
         return 1;
       }
 
-      /// @brief Stride between consecutive columns, or rows for row-major storage.
+      /**
+       * @brief Stride between consecutive columns, or rows for row-major storage.
+       * @returns The number of coefficients in the inner dimension.
+       */
       constexpr Eigen::Index outerStride() const noexcept
       {
         return this->innerSize();
