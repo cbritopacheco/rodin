@@ -104,6 +104,30 @@ class EnvironmentTest(unittest.TestCase):
         self.assertTrue(run.call_args.kwargs['check'])
         self.assertFalse(any('AllowUnauthenticated' in x or 'allow-unauthenticated' in x for x in command))
 
+    def test_fallback_resolves_ubuntu_mirror_file_indirection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); system = root / 'etc'; parts = system / 'sources.list.d'
+            parts.mkdir(parents=True)
+            mirror_list = root / 'apt-mirrors.txt'
+            mirror_list.write_text('http://azure.archive.ubuntu.com/ubuntu/ priority:1\n'
+                                   'http://archive.ubuntu.com/ubuntu/ priority:2\n')
+            vendor_list = root / 'vendor-mirrors.txt'
+            vendor_list.write_text('https://vendor.example/packages\n')
+            original = ('Types: deb\nURIs: mirror+file:' + str(mirror_list) + '\n'
+                        'Suites: noble noble-updates noble-security\nComponents: main universe\n'
+                        'Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n')
+            (parts / 'ubuntu.sources').write_text(original)
+            vendor = 'deb mirror+file:' + str(vendor_list) + ' stable main\n'
+            (parts / 'vendor.list').write_text(vendor)
+            for i, mirror in enumerate(environment.MIRRORS):
+                destination = root / ('attempt-' + str(i))
+                environment.sources(destination, mirror, system)
+                text = (destination / 'sources.list.d/ubuntu.sources').read_text()
+                self.assertEqual(text, original if mirror is None else original.replace(
+                    'mirror+file:' + str(mirror_list), mirror + '/'))
+                self.assertEqual((destination / 'sources.list.d/vendor.list').read_text(), vendor)
+            self.assertEqual((parts / 'ubuntu.sources').read_text(), original)
+
     def test_prepare_pins_transitive_versions_and_cache_key_changes_with_plan(self):
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(environment, 'sources', return_value=[]), \

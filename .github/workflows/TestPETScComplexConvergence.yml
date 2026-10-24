@@ -94,8 +94,9 @@ jobs:
         if-no-files-found: ignore
     - name: Run curved complex PETSc Helmholtz boundary suite
       if: matrix.suite == 'curved_boundary'
-      run: ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETScHelmholtzBoundary_' --output-on-failure --no-tests=error
-        -j 1
+      run: "case \"${{ matrix.context }}\" in\n  local) context_pattern='' ;;\n  np1|np2|np3|np4) context_pattern='MPI_${{\
+        \ matrix.context }}_' ;;\n  *) exit 1 ;;\nesac\nctest --test-dir build/tests \\\n  -R \"^RodinConvergenceIsoparametricPETScHelmholtzBoundary_${context_pattern}[A-Za-z][A-Za-z0-9]*_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$\"\
+        \ \\\n  --output-on-failure --no-tests=error -j 1\n"
     - name: Publish independent production coverage
       id: coverage_record
       uses: ./.github/actions/coverage

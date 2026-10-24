@@ -105,6 +105,24 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
       endif()
     endforeach()
   endforeach()
+  # Pyramid local/MPI-1 complete rate histories exceeded 1800 seconds;
+  # MPI-2/3/4 finished those same histories. Allow three hours per complete
+  # history, with degree/context execution partitions retaining all families.
+  set(_RODIN_CURVED_NONLINEAR_PYRAMID_TIMEOUT 10800)
+  foreach(boundary MixedNeumann Robin PureNeumann)
+    foreach(degree 1 2 3)
+      set_tests_properties(
+        RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_${boundary}P${degree}Rates_Pyramid
+        PROPERTIES TIMEOUT ${_RODIN_CURVED_NONLINEAR_PYRAMID_TIMEOUT})
+      if (RODIN_USE_MPI)
+        foreach(np 1 2 3 4)
+          set_tests_properties(
+            RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_MPI_np${np}_${boundary}P${degree}Rates_Pyramid
+            PROPERTIES TIMEOUT ${_RODIN_CURVED_NONLINEAR_PYRAMID_TIMEOUT})
+        endforeach()
+      endif()
+    endforeach()
+  endforeach()
   target_compile_definitions(RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary
     PRIVATE RODIN_NONLINEAR_BOUNDARY_CURVED)
   add_executable(RodinConvergenceIsoparametricPETScNonlinearPoisson NonlinearPoisson.cpp)

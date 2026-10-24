@@ -21,7 +21,7 @@ GEOMETRIES = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", 
 
 
 class BackendRegistrationTest(unittest.TestCase):
-    def configure(self, directory, petsc=True):
+    def configure(self, directory, petsc=True, complex=False):
         temporary = tempfile.TemporaryDirectory(prefix="rodin-ci-registration-")
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
@@ -35,6 +35,7 @@ class BackendRegistrationTest(unittest.TestCase):
             + ''.join(f'add_library({target} INTERFACE IMPORTED)\n' for target in targets)
             + 'function(rodin_suppress_external_mpi_lsan_for_test name)\nendfunction()\n'
             + f'set(RODIN_USE_PETSC {"ON" if petsc else "OFF"})\nset(RODIN_USE_MPI ON)\n'
+            + f'set(RODIN_CONVERGENCE_PETSC_COMPLEX {"ON" if complex else "OFF"})\n'
             + 'set(MPIEXEC_EXECUTABLE /usr/bin/true)\nset(MPIEXEC_NUMPROC_FLAG -n)\n'
             + ''.join(f'add_subdirectory("{ROOT / entry}" {folder})\n' for entry, folder in zip(directories, folders)))
         build = source / "build"
@@ -192,6 +193,108 @@ class BackendRegistrationTest(unittest.TestCase):
                     if include.search(name):
                         counts[name] += 1
         self.assertEqual(counts, Counter({name: 1 for name in names}))
+
+    def test_aggregate_petsc_lanes_partition_registered_tests_without_overlap(self):
+        jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]
+        modules = ["Poisson", "MPIPoisson", "Conductivity", "LinearElasticity",
+                   "ReactionDiffusion", "NonlinearPoisson", "Stokes"]
+        real, _ = self.configure([f"tests/convergence/h/PETSc{m}" for m in modules])
+        real = {n for n in real if not re.search(r"Boundary_|StokesStability_", n)}
+        complex_tests, _ = self.configure("tests/convergence/isoparametric/Helmholtz", complex=True)
+        complex_tests = {n for n in complex_tests if n.startswith("RodinConvergenceIsoparametricPETScHelmholtzBoundary_")}
+        for family, suite, step_name, names in [
+            ("PETScConvergence", "bulk", "Run PETSc convergence suite", real),
+            ("PETScComplexConvergence", "curved_boundary", "Run curved complex PETSc Helmholtz boundary suite", complex_tests),
+        ]:
+            self.assertTrue(names)
+            job = jobs[family]
+            step = next(s["run"] for s in job["steps"] if s.get("name") == step_name)
+            with tempfile.TemporaryDirectory(prefix="rodin-ci-context-selectors-") as directory:
+                ctest = Path(directory) / "ctest"
+                ctest.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
+                ctest.chmod(0o755)
+                for mt in ["ON", "OFF"]:
+                    counts = Counter()
+                    for row in job["strategy"]["matrix"]["include"]:
+                        if row["multithreaded"] != mt or row["suite"] != suite:
+                            continue
+                        command = re.sub(r'\$\{\{\s*matrix\.(\w+)\s*\}\}', lambda m: str(row.get(m[1], "")), step)
+                        args = subprocess.check_output(["bash", "-ec", command], text=True,
+                            env=dict(os.environ, PATH=directory + os.pathsep + os.environ["PATH"])).splitlines()
+                        include = re.compile(args[args.index("-R") + 1])
+                        exclude = re.compile(args[args.index("-E") + 1]) if "-E" in args else None
+                        selected = {n for n in names if include.search(n) and not (exclude and exclude.search(n))}
+                        self.assertTrue(selected, row)
+                        counts.update(selected)
+                    self.assertEqual(counts, Counter({n: 1 for n in names}))
+
+    def test_curved_boundary_lanes_cover_configured_names_including_controls(self):
+        modules = ["Diffusion", "ReactionDiffusion", "LinearElasticity", "NonlinearPoisson", "Stokes"]
+        configured, _ = self.configure(["tests/convergence/isoparametric/" + m for m in modules])
+        names = {n for n in configured if re.match(r"^RodinConvergenceIsoparametricPETSc[A-Za-z]+Boundary_", n)}
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["PETScCurvedBoundaryConvergence"]
+        step = next(s["run"] for s in job["steps"] if s.get("name") == "Run curved boundary convergence partition")
+        # The dedicated tetrahedron family owns nonlinear tetrahedra.
+        names = {n for n in names if not ("NonlinearPoissonBoundary_" in n and n.endswith("_Tetrahedron"))}
+        with tempfile.TemporaryDirectory(prefix="rodin-ci-curved-boundary-selectors-") as directory:
+            ctest = Path(directory) / "ctest"
+            ctest.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
+            ctest.chmod(0o755)
+            for mt in ["ON", "OFF"]:
+                counts = Counter()
+                for row in job["strategy"]["matrix"]["include"]:
+                    if row["multithreaded"] != mt:
+                        continue
+                    command = re.sub(r'\$\{\{\s*matrix\.(\w+)\s*\}\}', lambda m: str(row.get(m[1], "")), step)
+                    args = subprocess.check_output(["bash", "-ec", command], text=True,
+                        env=dict(os.environ, PATH=directory + os.pathsep + os.environ["PATH"])).splitlines()
+                    include = re.compile(args[args.index("-R") + 1])
+                    selected = {n for n in names if include.search(n)}
+                    self.assertTrue(selected, row)
+                    counts.update(selected)
+                self.assertEqual(counts, Counter({n: 1 for n in names}))
+
+    def test_petsc_timeout_overrides_preserve_commands_ranks_and_other_budgets(self):
+        modules = ["p/PETScNonlinearPoisson", "hp/PETScNonlinearPoisson",
+                   "h/PETScNonlinearPoisson", "h/PETScStokes",
+                   "isoparametric/NonlinearPoisson", "isoparametric/ReactionDiffusion"]
+        tests, build = self.configure(["tests/convergence/" + m for m in modules])
+        properties = {}
+        for path in build.rglob("CTestTestfile.cmake"):
+            for command, args, *_ in ci.commands(path.read_text()):
+                if command != "set_tests_properties":
+                    continue
+                boundary = args.index("PROPERTIES")
+                values = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties.setdefault(name, {}).update(values)
+        checked = 0
+        for name, args in tests.items():
+            expected = None
+            if re.match(r"RodinConvergence(P|HP)PETScNonlinearPoisson_", name):
+                expected = 10800 if name.endswith("_Pyramid") else 1800
+            elif re.match(r"RodinConvergenceHPETSc(MPI)?NonlinearPoisson(_np[1-4])?_", name):
+                expected = 3600 if name.endswith("_Pyramid") else 600
+            elif name.startswith("RodinConvergenceHPETScStokesBoundary_"):
+                expected = 1800
+                if "_P3P2Rates_" in name and name.rsplit("_", 1)[-1] in ["Tetrahedron", "Pyramid", "Hexahedron", "Wedge"]:
+                    expected = 7200 if name.endswith("_Pyramid") else 3600
+            elif name.startswith("RodinConvergenceIsoparametricPETScReactionDiffusionBoundary_"):
+                expected = 14400 if name.endswith("_Pyramid") else 7200 if name.endswith(("_Tetrahedron", "_Hexahedron")) else 1800
+            elif name.startswith("RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_") and name.endswith("_Pyramid"):
+                expected = 10800 if "Rates_" in name else 1800
+            if expected is None:
+                continue
+            checked += 1
+            self.assertEqual(int(properties[name]["TIMEOUT"]), expected, name)
+            rank = re.search(r"(?:MPI_np|_np)([1-4])", name)
+            if rank:
+                self.assertIn(rank[1], args)
+                self.assertEqual(properties[name]["PROCESSORS"], rank[1])
+            filters = [a for a in args if a.startswith("--gtest_filter=")]
+            self.assertEqual(len(filters), 1, name)
+            self.assertIn("/" + name.rsplit("_", 1)[-1], filters[0])
+        self.assertGreater(checked, 200)
 
     def test_expanded_jobs_fit_github_matrix_limit(self):
         jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]

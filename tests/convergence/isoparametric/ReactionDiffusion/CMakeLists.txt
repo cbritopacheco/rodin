@@ -58,6 +58,21 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
         PROPERTIES TIMEOUT ${_RODIN_CURVED_REACTION_BOUNDARY_PYRAMID_TIMEOUT})
     endforeach()
   endif()
+  # Complete Tetrahedron and Hexahedron boundary groups exceed 30 minutes
+  # under coverage (MPI-2 Tetrahedron completed in 1755 seconds). Keep every
+  # boundary family and sensitivity check; allow two hours per context.
+  set(_RODIN_CURVED_REACTION_BOUNDARY_TIMEOUT 7200)
+  foreach(geometry Tetrahedron Hexahedron)
+    set_tests_properties(RodinConvergenceIsoparametricPETScReactionDiffusionBoundary_${geometry}
+      PROPERTIES TIMEOUT ${_RODIN_CURVED_REACTION_BOUNDARY_TIMEOUT})
+    if (RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        set_tests_properties(
+          RodinConvergenceIsoparametricPETScReactionDiffusionBoundary_MPI_np${np}_${geometry}
+          PROPERTIES TIMEOUT ${_RODIN_CURVED_REACTION_BOUNDARY_TIMEOUT})
+      endforeach()
+    endif()
+  endforeach()
   add_executable(RodinConvergenceIsoparametricPETScReactionDiffusion ReactionDiffusion.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScReactionDiffusion
     PRIVATE RODIN_CURVED_REACTION_DIFFUSION_PETSC)

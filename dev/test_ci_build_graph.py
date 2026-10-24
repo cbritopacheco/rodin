@@ -76,16 +76,16 @@ class BuildGraphPlanTest(unittest.TestCase):
 
     def test_all_execution_requests_have_one_common_configuration(self):
         ordinary, targeted = self.requests()
-        # Frozen before this architecture change: includes every configuration,
-        # rank/geometry partition, selection and baseline producer definition.
+        # Reviewed execution partition snapshot: numerical registrations and MPI
+        # ranks are independently checked by test_ci_backend_registration.py.
         for value, digest in [(ordinary, '009a23d4c5fc380bcca406302cfb7062208a2b14f3526f2ce6078cde95005c54'),
-                              (targeted, '9183bb9a371c3add0d878d27d6aa2c9117071d20eeb4a4dd4c8acf895d3ec66e')]:
+                              (targeted, 'b7f67cd76ea3c97eb5f7ea1a6525d094b1293c3f95e0e5050ed7c5f7166dc90f')]:
             self.assertEqual(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest(), digest)
         rows = graph.prepare(ordinary, targeted)
         self.assertEqual(len(rows), 46)
         requests = [r for row in rows for r in row['requests']]
-        self.assertEqual(len(requests), 1240)
-        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1240)
+        self.assertEqual(len(requests), 1354)
+        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1354)
         for row in rows:
             for request in row['requests']:
                 original = graph.specification(**request)
@@ -150,7 +150,7 @@ class BuildGraphPlanTest(unittest.TestCase):
         for name in executions:
             self.assertEqual(set(jobs[name]['needs']), {'Common', *executions[name]['dependencies']})
 
-    def test_targeted_numerical_commands_and_watchdogs_are_unchanged(self):
+    def test_reviewed_targeted_commands_and_watchdogs_match_snapshot(self):
         jobs = yaml.safe_load((tests.ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']
         snapshot = {}
         for name, job in jobs.items():
@@ -160,7 +160,7 @@ class BuildGraphPlanTest(unittest.TestCase):
             snapshot[name]['execution'] = [s for s in job['steps'] if s.get('name', '').startswith(
                 ('Run ', 'Discover ', 'Record native MPI CPU', 'Hydrate '))]
         digest = hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
-        self.assertEqual(digest, '4faba7a58f2b41983d322fe27f68fdddedef33c314d5168891eda4a069c27139')
+        self.assertEqual(digest, '3fce779995376f36c30a94b0e5359e33a2612a3a8db047f86ca725ac0cb9606c')
 
 
 class BuildGraphExecutionTest(unittest.TestCase):

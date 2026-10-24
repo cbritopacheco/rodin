@@ -200,6 +200,51 @@ class TestPlanTest(unittest.TestCase):
             self.assertEqual(len(selected), len(expected))
             self.assertEqual(set(selected), expected)
 
+    def test_curved_boundary_selector_keeps_degree_cases_and_rank_partitions(self):
+        import os
+        import subprocess
+        import tempfile
+        from collections import Counter
+        import yaml
+        from ci_tests import ROOT
+        job = yaml.safe_load((ROOT / '.github/ci/targeted-lanes.yml').read_text())['jobs']['PETScCurvedBoundaryConvergence']
+        command = next(s['run'] for s in job['steps'] if s.get('name') == 'Run curved boundary convergence partition')
+        geometries = ['Segment', 'Triangle', 'Quadrilateral', 'Tetrahedron', 'Pyramid', 'Hexahedron', 'Wedge']
+        degrees = {'LinearElasticity': ['MixedTractionP' + str(k) + 'Rates' for k in [1, 2, 3]] + ['Controls'],
+                   'NonlinearPoisson': [b + 'P' + str(k) + 'Rates' for b in ['MixedNeumann', 'Robin', 'PureNeumann']
+                                        for k in [1, 2, 3]] + ['Controls']}
+        with tempfile.TemporaryDirectory() as temporary:
+            ctest = Path(temporary) / 'ctest'
+            ctest.write_text('#!/bin/sh\nwhile [ "$1" != "-R" ]; do shift; done\nprintf "%s\\n" "$2"\n')
+            ctest.chmod(0o755)
+            counts = {mt: Counter() for mt in ['ON', 'OFF']}
+            for row in job['strategy']['matrix']['include']:
+                script = command
+                for name, value in row.items():
+                    script = script.replace('${{ matrix.' + name + ' }}', value)
+                pattern = subprocess.check_output(['bash', '-eu', '-c', script], text=True,
+                                                  env=dict(os.environ, PATH=temporary + ':' + os.environ['PATH'])).strip()
+                shapes = [g for g in geometries if g not in ['Tetrahedron', 'Pyramid']] if row['geometry'] == 'light' else [row['geometry'].capitalize()]
+                # Names reflect PETScRefinement.cmake's RATE_CASES and Controls
+                # registrations. Local selection must not capture an MPI rank.
+                ranks = [None, 1, 2, 3, 4] if row['selection'] == 'all' else [
+                    None if row['selection'] == 'local' else int(row['selection'].removeprefix('np'))]
+                prefix = 'RodinConvergenceIsoparametricPETSc' + row['physics'] + 'Boundary_'
+                names = {prefix + ('' if rank is None else 'MPI_np' + str(rank) + '_') +
+                         (case + '_' if case else '') + geometry
+                         for rank in [None, 1, 2, 3, 4] for geometry in geometries
+                         for case in degrees.get(row['physics'], [''])}
+                expected = {name for name in names if any(name.endswith('_' + shape) for shape in shapes)
+                            and any(name.startswith(prefix + ('MPI_np' + str(rank) + '_' if rank else ''))
+                                    and (rank is not None or not name.startswith(prefix + 'MPI_')) for rank in ranks)}
+                if row['study'] != 'all':
+                    expected = {name for name in expected if '_' + row['study'] + '_' in name}
+                actual = {name for name in names if re.fullmatch(pattern, name)}
+                self.assertTrue(expected)
+                self.assertEqual(actual, expected, row)
+                counts[row['multithreaded']].update(actual)
+            self.assertTrue(all(count == 1 for c in counts.values() for count in c.values()))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -75,6 +75,17 @@ def sources(directory, mirror, system=Path('/etc/apt')):
     for source in entries:
         text = source.read_text()
         if mirror:
+            # Hosted images can hide the selected archive behind APT's local
+            # mirror-list transport. Replacing direct URLs alone leaves those
+            # definitions downloading from the same stalled Azure endpoint.
+            for reference in re.findall(r'mirror\+file:(/[^\s]+)', text):
+                mirror_file = Path(reference)
+                if not mirror_file.is_file():
+                    continue
+                urls = [line.split()[0] for line in mirror_file.read_text().splitlines()
+                        if line.strip() and not line.lstrip().startswith('#')]
+                if urls and all(UBUNTU_URI.fullmatch(url) for url in urls):
+                    text = text.replace('mirror+file:' + reference, mirror.rstrip('/') + '/')
             text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
         target = directory / 'sources.list' if source == main else parts / source.name
         target.write_text(text)

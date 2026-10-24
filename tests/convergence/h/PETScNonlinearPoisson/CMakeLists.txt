@@ -59,3 +59,16 @@ if (RODIN_USE_MPI)
     endforeach()
   endforeach()
 endif()
+
+# The local Pyramid P1 history alone takes 456 seconds in coverage CI; the
+# complete six-case group cannot fit its old ten-minute watchdog. Retain all
+# hierarchy levels and allow one hour for the complete local/rank context.
+set(_RODIN_H_NONLINEAR_PYRAMID_TIMEOUT 3600)
+set_tests_properties(RodinConvergenceHPETScNonlinearPoisson_Pyramid
+  PROPERTIES TIMEOUT ${_RODIN_H_NONLINEAR_PYRAMID_TIMEOUT})
+if (RODIN_USE_MPI)
+  foreach(np 1 2 3 4)
+    set_tests_properties(RodinConvergenceHPETScMPINonlinearPoisson_np${np}_Pyramid
+      PROPERTIES TIMEOUT ${_RODIN_H_NONLINEAR_PYRAMID_TIMEOUT})
+  endforeach()
+endif()

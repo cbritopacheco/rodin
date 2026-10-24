@@ -60,6 +60,25 @@ rodin_add_petsc_refinement(RodinConvergenceHPETScStokesBoundary Traction.cpp
   GEOMETRIES Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge
   RATE_CASES P2P1Rates P3P2Rates)
 
+
+# Coverage CI exceeds 30 minutes for the complete degree-three Pyramid
+# hierarchy, and for threaded Tetrahedron/Hexahedron histories. These are
+# process budgets only: all three grids, norms and MUMPS checks are retained.
+foreach(geometry Tetrahedron Pyramid Hexahedron Wedge)
+  set(_stokes_boundary_timeout 3600)
+  if (geometry STREQUAL "Pyramid")
+    set(_stokes_boundary_timeout 7200)
+  endif()
+  set_tests_properties(RodinConvergenceHPETScStokesBoundary_P3P2Rates_${geometry}
+    PROPERTIES TIMEOUT ${_stokes_boundary_timeout})
+  if (RODIN_USE_MPI)
+    foreach(np 1 2 3 4)
+      set_tests_properties(RodinConvergenceHPETScStokesBoundary_MPI_np${np}_P3P2Rates_${geometry}
+        PROPERTIES TIMEOUT ${_stokes_boundary_timeout})
+    endforeach()
+  endif()
+endforeach()
+
 add_executable(RodinConvergenceHPETScStokes Stokes.cpp)
 target_link_libraries(RodinConvergenceHPETScStokes
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
