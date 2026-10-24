@@ -30,6 +30,10 @@ if(@RODIN_USE_MPI@)
   find_dependency(Boost 1.74 REQUIRED COMPONENTS mpi)
 endif()
 
+if(@RODIN_USE_KOKKOS@)
+  find_dependency(Kokkos 4.2 CONFIG REQUIRED)
+endif()
+
 if(@RODIN_USE_PETSC@)
   find_dependency(PETSc REQUIRED)
 endif()

@@ -40,7 +40,7 @@ Modules stack strictly; lower layers never include higher ones:
                      linear/nonlinear solver wrappers
 7. Domain modules    Solid, Heart, Distance/Eikonal/Advection/Hilbert,
                      Adaptation, Location
-8. Integrations      PETSc, MMG, MFEM, Scotch, MPI, IO, Serialization
+8. Integrations      PETSc, MMG, MFEM, Scotch, MPI, Kokkos, IO, Serialization
 ```
 
 ## Module inventory (src/Rodin/)
@@ -117,6 +117,13 @@ Assembly 7, FormLanguage 6, Distance 6, Test 6.
 - **Location/** — AABB bounding-volume-hierarchy point locator.
 - **PETSc/** — mirror of Math/Solver/Assembly/Variational/IO over PETSc
   objects. → petsc.md
+- **Kokkos/** — optional Context, Geometry and Assembly mirrors. Local MeshBase and
+  ConnectivityBase specializations own resident Kokkos arrays with device
+  geometry, mutations, measure reductions and device incidence discovery. Host iterators and reference
+  queries use compatibility adapters. CUDA and native execution spaces are
+  selectable. KokkosIteration retains indexed region traversal with a private
+  device handle. Device spaces, fields, operator assembly, solvers,
+  and MPI distribution are not implemented. → backend-support.md
 - **MMG/, Scotch/, MPI/, IO/, Serialization/, MFEM/** — integrations and
   persistence. MFEM/ is currently an empty stub (the MFEM *file format*
   lives in IO/). → integrations.md

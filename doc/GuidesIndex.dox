@@ -119,6 +119,9 @@
   - @subpage guides-backends — Local, OpenMP, MPI, and PETSc backend choices
     and what complete support means for each path
 
+  - @subpage guides-kokkos — Resident local meshes with Kokkos storage,
+    execution, geometry updates, and measure reductions
+
   - @subpage guides-mpi — Distributed mesh partitioning, sharding, and
     reconciliation with @ref Rodin::Context::MPI "Context::MPI",
     @ref Rodin::Geometry::MPIMesh "Mesh\<Context::MPI\>",

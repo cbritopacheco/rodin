@@ -74,6 +74,21 @@
   be used with local meshes or MPI meshes. For large distributed problems,
   PETSc is the standard solver backend.
 
+  @section guides-backends-kokkos Kokkos Local Mesh
+
+  The optional `Rodin::Kokkos` target provides
+  `Context::Kokkos<Context::Local, Backend>` and resident mesh/connectivity
+  specializations. `Context::CUDA` selects CUDA execution and device memory.
+  The mesh implements MeshBase directly; its owned Kokkos arrays support
+  device traversal, geometry evaluation, updates, measure reductions, and
+  incidence computation including discovery of missing entities.
+  Host iterators and reference-returning accessors use compatibility adapters.
+
+  Device finite element spaces, grid functions, form evaluation, assembly,
+  solvers and MPI distribution are not provided.
+  See @ref guides-kokkos "Kokkos local mesh" for supported geometry,
+  ownership, host interfaces and CUDA build setup.
+
   @section guides-backends-support What Complete Support Means
 
   A feature may support only part of the backend matrix. That is fine, but the

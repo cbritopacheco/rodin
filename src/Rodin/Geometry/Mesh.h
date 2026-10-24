@@ -290,6 +290,7 @@ namespace Rodin::Geometry
    * |----------------|-------------|
    * | [Mesh<Context::Local>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html) | Sequential mesh storing the full incidence complex and geometry in a single process. |
    * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local shard, global/local index maps, and MPI context for parallel assembly. |
+   * | [Mesh<Context::Kokkos<Context::Local, Backend>>](class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html) | Local mesh with resident Kokkos storage, device incidence discovery, geometry and measure reductions. |
    *
    * @see @ref Mesh
    */

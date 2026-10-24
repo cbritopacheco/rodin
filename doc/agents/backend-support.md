@@ -31,6 +31,43 @@ A feature can deliberately support only one column. Say that explicitly in the
 class docs, guides, tests, and PR notes. Do not imply backend parity merely
 because the primary template compiles.
 
+## Kokkos local mesh support
+
+| Backend | Context | Current support |
+| --- | --- | --- |
+| Kokkos | `Context::Kokkos<Context::Local, Backend>` | MeshBase and ConnectivityBase specializations with resident arrays, coordinate/attribute/map updates, device traversal and geometry, quadrature measure reductions, indexed assembly region traversal, host compatibility adapters |
+
+The optional `Rodin::Kokkos` target requires `RODIN_USE_KOKKOS=ON` and an
+external Kokkos installation (4.2 or newer). `Context::CUDA` requires Kokkos built with CUDA;
+there is no implicit host fallback. Native execution spaces can exercise the
+same specialization on the host without establishing CUDA correctness.
+
+The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
+host builders/loaders create independently owned Kokkos arrays. Reference-
+returning host queries materialize compatibility entries; those are never
+authoritative. Copies deep-copy resident storage. Updates execute through
+Kokkos before returning; geometry edits invalidate caches with LocalMesh
+flush semantics. Default real P1 maps use resident vertices. Independent P1
+and identity maps are supported; custom and higher-order maps are rejected.
+
+Connectivity compute/discover/restrict operate directly on resident arrays,
+using device sorting and scans. Existing IDs, reference orientation and CPU
+traversal order are preserved. Missing edges/faces are discovered from cell
+keys; relation arrays are independently owned CSR tables. Mesh attribute/map
+slots grow lazily in resident memory while retaining existing entity data.
+Only small sizes and reference-cell constants cross the host boundary during
+computation. Device views
+borrow resident arrays and require completed kernels before mutation, owner
+replacement or destruction. Existing host iterators and caches remain host
+interfaces, with transfers as necessary. KokkosIteration follows the existing
+indexed assembly region contract and keeps device handles private. Boundary
+and Interface require explicit face-to-cell incidence; their counts include
+all face candidates, and filtering uses exactly one or more than one incident
+cell respectively. Launching kernels remains the assembly backend's concern.
+Device spaces, fields, operator assembly,
+solvers, SubMesh and MPI distribution are not provided.
+See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
+
 ## Common extension decisions
 
 - If the math is backend-independent, implement the core expression or

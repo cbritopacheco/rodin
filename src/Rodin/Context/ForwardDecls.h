@@ -18,6 +18,11 @@ namespace Rodin::Context
   class Local;
 
   class MPI;
+
+  class CUDA;
+
+  template <class Distribution, class Backend>
+  class Kokkos;
 }
 
 #endif
