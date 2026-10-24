@@ -16,6 +16,13 @@ for mirror deadlines, exact-version fallback and conditional cleanup. Validate
 changes with `test_ci_environment.py`, the full serial CI guard suite and the
 generated-workflow consistency check.
 
+When diagnosing a timeout, distinguish the CTest process watchdog from the
+workflow job allowance. Compare matched configurations and complete histories;
+a terminated test supplies only a runtime lower bound. Preserve every level,
+control, quadrature order and rank when splitting execution. See the
+[PETSc timing investigation](petsc-ci-timings.md) for the current measurements
+and bounded scheduling policy.
+
 ## Choose the scope of the change
 
 | Change | Owning files and checks |

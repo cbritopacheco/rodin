@@ -27,6 +27,10 @@ suites in `tests/`.
 | `test_*.py` | Regression tests for the developer tools. |
 | `Requirements.txt` | Dependencies for the developer utilities that use them. |
 
+The [PETSc CI timing investigation](petsc-ci-timings.md) records geometry costs,
+local/runner comparison limits and the timeout/partition policy. Consult it
+before changing numerical workloads to address a scheduling timeout.
+
 ## Relationships
 
 The CI planner reads test registration directories; configured CMake manifests

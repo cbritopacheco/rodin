@@ -53,7 +53,9 @@ Index attempts have a 90-second budget and complete package-download attempts a
 300-second budget. GNU `timeout` terminates the privileged APT process group
 before fallback. After the runner's original sources, fallback uses the official
 Ubuntu archive and then its kernel.org mirror, retaining suites, components,
-signing keys and exact resolved versions. Third-party source definitions remain
+signing keys and exact resolved versions. Ubuntu `mirror+file:` source indirection
+is resolved to the selected fallback transport; otherwise all attempts would
+keep consulting the original failing mirror list. Third-party source definitions remain
 unchanged. Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
@@ -177,8 +179,12 @@ as well as every eligible coverage contribution and the compilation baseline.
 
 The queue initially contains planning, installation checks and common builds.
 Directory and execution matrices appear as their prerequisites finish, so the
-currently queued job count is not the total test campaign. All 1,240 execution
-requests across 46 compatible configurations remain mandatory.
+currently queued job count is not the total test campaign. All 1,354 execution
+requests across 46 compatible configurations remain mandatory. The 114 added
+partitions separate previously oversized PETSc aggregate selections by context
+and complete rate history; they reuse the same builds and retain the same tests.
+See the [PETSc timing investigation](../../dev/petsc-ci-timings.md) for measured
+runner costs, process/job timeout policies and the preservation checks.
 
 Display names capitalize hierarchy segments and preserve established spellings:
 `Tests / Complex`, `Tests / MPI`, `Tests / PETSc`, `Unit / Rodin / Geometry`,
