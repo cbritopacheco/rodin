@@ -129,13 +129,17 @@ namespace Rodin::Tests::Unit
     Matrix converted(std::move(native));
     EXPECT_EQ(converted(0, 0), Scalar(9));
     if constexpr (Matrix::SizeAtCompileTime == Eigen::Dynamic)
+    {
       EXPECT_EQ(converted.data(), data);
+    }
     Parent assigned = Parent::Constant(Rows, Cols, Scalar(11));
     data = assigned.data();
     converted = std::move(assigned);
     EXPECT_EQ(converted(0, 0), Scalar(11));
     if constexpr (Matrix::SizeAtCompileTime == Eigen::Dynamic)
+    {
       EXPECT_EQ(converted.data(), data);
+    }
     Math::Matrix<Scalar> identity = Math::Matrix<Scalar>::Identity(Rows, Rows);
     Matrix solution = identity.fullPivLu().solve(right);
     EXPECT_EQ(solution, right);

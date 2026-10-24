@@ -55,11 +55,17 @@ namespace Rodin::Tests::Unit
           magnitude;
         const auto scalar = [&](Real a, Real b) {
           if (std::isnan(b))
+          {
             EXPECT_TRUE(std::isnan(a));
+          }
           else if (!std::isfinite(b) || magnitude == 0)
+          {
             EXPECT_EQ(a, b);
+          }
           else
+          {
             EXPECT_NEAR(a, b, tolerance);
+          }
         };
         if constexpr (std::is_same_v<std::decay_t<decltype(actual)>, Complex>)
         {
@@ -156,11 +162,17 @@ namespace Rodin::Tests::Unit
           magnitude;
         const auto component = [&](Real a, Real b) {
           if (std::isnan(b))
+          {
             EXPECT_TRUE(std::isnan(a));
+          }
           else if (!std::isfinite(b) || magnitude == 0)
+          {
             EXPECT_EQ(a, b);
+          }
           else
+          {
             EXPECT_NEAR(a, b, tolerance);
+          }
         };
         if constexpr (std::is_same_v<std::decay_t<decltype(actual)>, Complex>)
         {

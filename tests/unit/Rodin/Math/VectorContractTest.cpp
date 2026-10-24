@@ -119,13 +119,17 @@ namespace Rodin::Tests::Unit
     Vector converted(std::move(native));
     EXPECT_EQ(converted(0), Scalar(9));
     if constexpr (Vector::SizeAtCompileTime == Eigen::Dynamic)
+    {
       EXPECT_EQ(converted.data(), data);
+    }
     Parent assigned = Parent::Constant(3, Scalar(11));
     const auto* assignedData = assigned.data();
     converted = std::move(assigned);
     EXPECT_EQ(converted(0), Scalar(11));
     if constexpr (Vector::SizeAtCompileTime == Eigen::Dynamic)
+    {
       EXPECT_EQ(converted.data(), assignedData);
+    }
   }
 
   /// @brief Mixed scalar fields use a common precision without losing conjugation.

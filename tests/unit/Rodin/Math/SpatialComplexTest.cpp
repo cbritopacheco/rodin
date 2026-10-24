@@ -222,7 +222,9 @@ namespace Rodin::Tests::Unit
       }
       EXPECT_NEAR(std::abs(Math::dot(v, v) - Complex(v.squaredNorm())), 0, 1e-13);
       if (rows)
+      {
         EXPECT_NEAR(v.normalized().norm(), 1, 1e-13);
+      }
     }
   }
 
