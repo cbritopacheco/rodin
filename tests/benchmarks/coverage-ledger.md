@@ -8,7 +8,7 @@ executable does not close them.
 
 | Layer / owning module | Available measurement scopes | Principal remaining coverage |
 | --- | --- | --- |
-| Spatial and sparse algebra / Math | Scalar, vector and matrix contractions; mixed-scalar products; storage lifecycles; sparse products, dots and norms | Broader assembly-consumer attribution, mixed operators and distributed representations |
+| Spatial and sparse algebra / Math | Matched spatial arithmetic with owned results and prepared destinations; explicit real/complex conjugation contracts; norms, small solves and matrix products; mixed-scalar products, storage lifecycles and sparse algebra | Broader assembly-consumer attribution, mixed operators and distributed representations |
 | Reference quadrature / QF | Construction, copying, traversal, repeated lookup and changes of rule identity/order | Process-first allocation, concurrent access and systematic order-dependent profiles |
 | Reference elements / Variational, P1, H1 | Values and derivatives; scalar/vector/matrix basis production; prepared reference consumption; first binding and changing working sets | Complete controlled degree/order profiles, DOF functionals and component-expansion attribution |
 | Transformations / Geometry | Pointwise and bulk Jacobians; construction, copy, move and rebinding; mapped coordinates, inverse and measure; mapped-quadrature lookup | Independent geometry-degree, curvature and embedding matrix; inverse-map stages |

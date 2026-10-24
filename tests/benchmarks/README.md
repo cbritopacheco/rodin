@@ -54,6 +54,89 @@ support, not a production Stokes solver. A root-owned spectral calculation and
 its result communication must not be interpreted as distributed assembly
 imbalance. Such measurements do not count as production solver coverage.
 
+## Spatial vector and matrix arithmetic
+
+`RodinMathSpatialVectorBenchmarks` and `RodinMathSpatialMatrixBenchmarks` compare the
+public spatial APIs (including `Math::sum`, `Math::minus`, `Math::mult`,
+`Math::division`, `Math::conj` and `Math::dot`) with bounded-capacity Eigen values, dynamic `Math::Vector`
+/ `Math::Matrix` representations, and selected compile-time fixed Eigen values.
+`SpatialArithmetic.h` owns the common input, execution and numerical guards.
+These opt-in executables are separate from the historical publication suite.
+
+The vector suite covers zero construction, copying, arithmetic and compound
+assignments, scalar multiplication in both orders, division, conjugation,
+transpose, dot conventions, ordinary/stable/Blue/p-norms, normalization and
+cross products. The matrix suite covers all supported rectangular shapes,
+arithmetic, norms, contractions, conjugation, transpose/adjoint, row/column
+extraction, matrix/vector products, trace, determinant, inverse, solve and
+full-rank pseudoinverse. Empty shapes are included where the operation is
+defined; solve/inverse require nonempty square matrices, row/column extraction
+requires nonempty shapes, and normalization requires nonempty vectors.
+The `ScalarDot` comparator uses a transparent scalar loop and the same right
+conjugation as `MathDot`. It supplies an algorithm comparison without changing
+production arithmetic. Fixed comparisons cover selected operations on dimensions one through three
+(square matrices). Rectangular and empty shapes retain runtime extents in the
+other three representations. Each case uses either one or 32 independent inputs.
+The matched `MatrixProduct` cases multiply $r\times k$ and $k\times r$
+operands with independently populated entries. The existing
+`RodinSpatialMatrixProductBenchmarks` supplies the complete $r,k,c$ shape
+sweep, including mixed scalar fields; these scopes complement one another.
+
+The names identify different mathematical contracts explicitly:
+
+| Operation | Definition | Implementation distinction |
+| --- | --- | --- |
+| `ScalarDot` | $\sum_i u_i\overline{v_i}$ | Explicit scalar-loop comparator |
+| `MathDot` | $\sum_i u_i\overline{v_i}$ | `Math::dot`, including Eigen-backed values |
+| `RightDot` | $\sum_i u_i\overline{v_i}$ | Spatial vector `u.dot(v.conjugate())`, spatial matrix member dot, or Eigen vector `v.dot(u)` |
+| `BilinearDot` | $\sum_i u_i v_i$ | Spatial vector member dot or Eigen entrywise reduction |
+| `Cross` | Ordinary bilinear cross product | Eigen's complex cross is conjugated back to match this contract |
+| `MatrixProduct` | $C=AB$ | Ordinary product without conjugation |
+| `Adjoint` | $A^*=\overline{A}^{\mathsf T}$ | Distinct from transpose |
+
+Real and complex inputs have nonuniform bounded coefficients. Independent
+scalar-loop oracles check contractions, products and conjugation. Full-pivot LU
+checks solves/inverses, and complete orthogonal decomposition checks full-rank
+pseudoinverses outside timing. NaN padding detects inactive spatial reads;
+perturbation checks verify that the guard rejects changed results. All outputs
+are checked before and after timing; numerical failures return a nonzero status.
+
+Timing includes an owned result and assignment into retained output. Compound
+assignments include copying their left value; dynamic result allocations are
+included. Setup, reference calculations and array allocation are excluded.
+The `BoundedDestination`, `DynamicDestination` and `FixedDestination` variants
+instead evaluate safe arithmetic/product expressions directly into prepared,
+disjoint output via Eigen's `noalias()` assignment. They include expression
+construction and evaluation but avoid an explicitly materialized intermediate.
+They are a different output-lifecycle contract from the owned-result cases;
+compare them separately. Spatial operations always produce their public owned
+result. This distinguishes allocation/temporary costs from arithmetic costs.
+
+Pseudoinverse comparators retain the same normal-equation algorithm, rather
+than comparing it with a more general rank-revealing algorithm inside timing.
+Results report calling-thread CPU time per sweep: divide by the `operations`
+counter for time per value. Counts one and 32 expose barrier/loop overhead.
+Fixed shapes give the compiler additional information and must be identified
+when comparing them with runtime dimensions. Run optimized, uninstrumented
+builds for performance conclusions and retain repetition/dispersion data outside
+the repository. No timing or investigation reports belong in version control.
+
+```sh
+cmake --build build --target RodinMathSpatialVectorBenchmarks RodinMathSpatialMatrixBenchmarks
+build/tests/benchmarks/RodinMathSpatialVectorBenchmarks \
+  --benchmark_filter='/rows:3/count:32$' \
+  --benchmark_min_time=0.1s --benchmark_repetitions=5
+build/tests/benchmarks/RodinMathSpatialMatrixBenchmarks \
+  --benchmark_filter='/rows:3/cols:3/count:32$' \
+  --benchmark_min_time=0.1s --benchmark_repetitions=5
+```
+
+Run these commands sequentially. The existing scalar-dot, spatial-dot,
+matrix-contraction, matrix/vector-product, matrix-product and vector-storage
+executables retain mixed scalar orders, basis-sized batches and storage
+lifecycles. They complement the matched API suite; a primitive speedup still
+requires confirmation in its assembly consumer.
+
 ## Sparse elimination
 
 `RodinSparseEliminationBenchmarks` measures the public native sparse
