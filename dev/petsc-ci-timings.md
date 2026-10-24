@@ -229,12 +229,18 @@ confirms the three official Ubuntu endpoints and priority annotations handled
 by this detection. Source suites, components, signing keys, exact package
 versions and third-party definitions are retained.
 The new regression reproduces the failure before the change and checks all
-fallback attempts afterwards.
+fallback attempts afterwards. A separate isolated, offline APT fixture confirmed
+that an index fetched through fallback is invisible to `apt-cache policy` when
+it still reads the original source definitions. Candidate discovery now receives
+the selected source options, just like update, simulation and installation.
+No fixture packages are installed and no system source/trust file is changed.
 
-The serial Linux infrastructure campaign passes 86 checks, followed by the
-additional actual-registration selector check (87 unique checks in total). The
-four numerical invocations above also pass, comprising ten GoogleTest cases.
-The complete production test matrix remains the responsibility of CI. Workflow regeneration and
+The complete host infrastructure suite passes 88 serial checks. Linux validation
+includes the complete 87-check suite before the final candidate-policy correction,
+then the affected 16-check environment suite and a real offline APT probe after
+that correction. The four numerical invocations above also pass, comprising ten
+GoogleTest cases. The complete production test matrix remains the responsibility
+of CI. Workflow regeneration and
 `actionlint` pass; the pre-existing `peaceiris/actions-gh-pages@v3` legacy-runtime
 diagnostic is excluded from the latter check. The configured-manifest comparison
 preserves executable sets and compile flags. Other workers' resource files are

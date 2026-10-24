@@ -55,7 +55,9 @@ before fallback. After the runner's original sources, fallback uses the official
 Ubuntu archive and then its kernel.org mirror, retaining suites, components,
 signing keys and exact resolved versions. Ubuntu `mirror+file:` source indirection
 is resolved to the selected fallback transport; otherwise all attempts would
-keep consulting the original failing mirror list. Third-party source definitions remain
+keep consulting the original failing mirror list. Candidate-version discovery
+and installation-plan simulation use those same selected source definitions.
+Third-party source definitions remain
 unchanged. Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.

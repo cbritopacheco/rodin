@@ -110,15 +110,15 @@ def apt(arguments, source_options, archives, timeout, capture=False):
     return result.stdout if capture else None
 
 
-def candidates(requested):
-    """Pin requested packages before resolving the complete installation plan."""
+def candidates(requested, source_options):
+    """Pin candidates from the selected source before resolving the full plan."""
     result = {}
     for package in requested:
         if '=' in package:
             name, version = package.split('=', 1)
         else:
             name = package
-            policy = subprocess.check_output(['apt-cache', 'policy', name], text=True,
+            policy = subprocess.check_output(['apt-cache', *source_options, 'policy', name], text=True,
                                              env=dict(os.environ, LC_ALL='C'))
             match = re.search(r'^\s*Candidate: (\S+)', policy, re.M)
             if not match or match[1] == '(none)':
@@ -143,7 +143,7 @@ def prepare(requested, archives, state):
             print('APT index attempt failed:', mirror or 'runner sources', flush=True)
     else:
         raise RuntimeError('All signed APT index sources failed') from last_error
-    versions = candidates(requested)
+    versions = candidates(requested, options)
     pinned = [name + '=' + version for name, version in sorted(versions.items())]
     simulation = apt(['--simulate', '--no-remove', 'install', *pinned], options,
                      archives, INDEX_TIMEOUT, capture=True)

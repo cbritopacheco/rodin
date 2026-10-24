@@ -146,15 +146,26 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual(prefixes[0], prefixes[1])
 
     def test_index_failure_retries_another_signed_mirror(self):
+        original = ['-o', 'Dir::Etc::sourcelist=original.list']
+        fallback = ['-o', 'Dir::Etc::sourcelist=fallback.list']
         with tempfile.TemporaryDirectory() as tmp, \
-                patch.object(environment, 'sources', return_value=[]), \
-                patch.object(environment, 'candidates', return_value={'lcov': '2.0-1'}), \
+                patch.object(environment, 'sources', side_effect=[original, fallback]), \
+                patch.object(environment, 'candidates', return_value={'lcov': '2.0-1'}) as candidates, \
                 patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
                 patch.object(environment, 'apt', side_effect=[subprocess.CalledProcessError(100, 'apt'), None, '']) as apt:
             root = Path(tmp)
             plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
             self.assertEqual(plan['source_index'], 1)
             self.assertEqual([c.args[0][0] for c in apt.call_args_list], ['update', 'update', '--simulate'])
+            candidates.assert_called_once_with(['lcov'], fallback)
+
+    def test_candidate_policy_reads_the_selected_source_definitions(self):
+        options = ['-o', 'Dir::Etc::sourcelist=fallback.list',
+                   '-o', 'Dir::Etc::sourceparts=fallback.parts']
+        with patch.object(environment.subprocess, 'check_output',
+                          return_value='  Candidate: 2.0-1\n') as policy:
+            self.assertEqual(environment.candidates(['lcov'], options), {'lcov': '2.0-1'})
+        self.assertEqual(policy.call_args.args[0], ['apt-cache', *options, 'policy', 'lcov'])
 
     def test_download_fallback_keeps_the_same_exact_versions_and_installs_offline(self):
         with tempfile.TemporaryDirectory() as tmp, \
