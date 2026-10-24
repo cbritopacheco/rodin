@@ -1189,6 +1189,26 @@ namespace Rodin::Variational
                 return out;
               }
 
+              /**
+               * @brief Evaluates the reference basis Jacobian at a formula sample.
+               * @param formula Immutable formula defining the reference coordinates.
+               * @param sample Index of the formula sample.
+               * @returns Owned reference Jacobian of this vector basis.
+               */
+              ReturnType operator()(
+                const QF::QuadratureFormula& formula, size_t sample) const
+              {
+                const size_t dimension = Geometry::Polytope::Traits(m_g).getDimension();
+                ReturnType out(m_vdim, dimension);
+                out.setZero();
+                const H1Element<K, ScalarType> scalar(m_g);
+                const auto gradient =
+                  scalar.getTabulation(formula).getGradient(sample, m_local / m_vdim);
+                for (size_t axis = 0; axis < dimension; ++axis)
+                  out(m_local % m_vdim, axis) = gradient[axis];
+                return out;
+              }
+
             private:
               const size_t m_vdim;
               const size_t m_local;

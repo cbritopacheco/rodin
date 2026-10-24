@@ -217,6 +217,20 @@ points retain the existing reference-table path. A pointwise-gradient improvemen
 must therefore be attributed separately from warm assembly that already uses
 reference association. Neither operation introduces communication.
 
+Certified local cell samples also reach native P1 field derivatives and matrix-valued
+P1/H1 field and shape gradients. Matrix Jacobian, divergence and directional
+expressions delegate to the same gradient. Plain-point and provenance-only queries,
+facet-to-volume traces and cross-mesh remapping retain direct coordinate evaluation.
+Callable MatrixFunction retains its Point callback contract, including generic
+callables that use Point-specific members. MassForm coefficients and
+SWIFT quality, displacement and source-sampling loops retain owner/index association.
+Moved target points still carry their actual new coordinates without association.
+Vector P1/H1 basis Jacobians accept a formula and sample index for reference
+contractions; the element owns its component ordering. SWIFT surface-map validation
+uses that operation when available and retains the public directional-basis fallback
+for other elements. This computes facet-reference derivatives, not a volume trace.
+No additional cache, mutable cell binding or coefficient snapshot is introduced.
+
 Matrix-valued H1 shape leaves may borrow an already prepared scalar reference
 table while filling their owned component basis. Reference association is
 required; formula provenance alone does not authorize indexed substitution.

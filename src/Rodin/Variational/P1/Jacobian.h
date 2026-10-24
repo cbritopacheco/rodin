@@ -156,7 +156,50 @@ namespace Rodin::Variational
        */
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
-        interpolate(out, ip.getPoint());
+        const auto& p = ip.getPoint();
+        if (!ip.getReferenceQuadratureFormula() ||
+          p.getPolytope().getDimension() != p.getPolytope().getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto feS = P1Element<ScalarType>(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        assert(qf);
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        Math::SpatialVector<ScalarType> ref(d);
+        Math::SpatialVector<ScalarType> phys(spaceDimension);
+
+        out.resize(vdim, spaceDimension);
+        out.setZero();
+
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = feS.getTabulation(*qf).getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            ref(j) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+            for (size_t j = 0; j < spaceDimension; ++j)
+              out(comp, j) += uval * phys(j);
+          }
+        }
       }
 
       /**

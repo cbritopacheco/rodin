@@ -95,7 +95,34 @@ namespace Rodin::Variational
        */
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
-        interpolate(out, ip.getPoint());
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+          const auto gref = fe.getTabulation(*qf).getGradient(ip.getIndex(), local);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        out = JinvT * ref;
       }
 
       /**
@@ -755,7 +782,34 @@ namespace Rodin::Variational
        */
       RangeType getValue(const IntegrationPoint& point) const
       {
-        return getValue(point.getPoint());
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto& p = point.getPoint();
+        const auto& poly = p.getPolytope();
+        const auto* formula = point.getReferenceQuadratureFormula();
+        if (!formula || !fes.getMesh().isLocalPoint(p) ||
+          poly.getDimension() != fes.getMesh().getDimension())
+          return getValue(p);
+        const auto& dofs = fes.getDOFs(poly.getDimension(), poly.getIndex());
+        RangeType value(
+          fes.getRows(), fes.getColumns(), fes.getMesh().getSpaceDimension());
+        value.setZero();
+        const auto& fe = fes.getFiniteElement(poly.getDimension(), poly.getIndex());
+        const auto& inverse = p.getJacobianInverse();
+        const size_t components = fes.getRows() * fes.getColumns();
+        for (size_t a = 0; a < static_cast<size_t>(dofs.size()); ++a)
+        {
+          const auto coefficient = getOperand()[dofs[a]];
+          const auto gradient = fe.getScalarElement().getTabulation(*formula).getGradient(
+            point.getIndex(), a / components);
+          const size_t row = (a % components) / fes.getColumns();
+          const size_t column = a % fes.getColumns();
+          for (size_t l = 0; l < poly.getDimension(); ++l)
+          {
+            for (size_t k = 0; k < fes.getMesh().getSpaceDimension(); ++k)
+              value(row, column, k) += coefficient * gradient[l] * inverse(l, k);
+          }
+        }
+        return value;
       }
 
       /**
@@ -938,6 +992,9 @@ namespace Rodin::Variational
         const auto& fe = fes.getFiniteElement(poly.getDimension(), poly.getIndex());
         const auto& inverse = p.getJacobianInverse();
         const size_t components = fes.getRows() * fes.getColumns();
+        const auto* formula = point.getReferenceQuadratureFormula();
+        const auto* table =
+          formula ? &fe.getScalarElement().getTabulation(*formula) : nullptr;
         for (size_t a = 0; a < count; ++a)
         {
           auto& gradient = m_basis[a];
@@ -949,8 +1006,9 @@ namespace Rodin::Variational
           const size_t column = a % fes.getColumns();
           for (size_t l = 0; l < poly.getDimension(); ++l)
           {
-            const auto derivative =
-              basis.template getDerivative<1>(l)(p.getReferenceCoordinates());
+            const auto derivative = table
+              ? table->getGradient(point.getIndex(), a / components)[l]
+              : basis.template getDerivative<1>(l)(p.getReferenceCoordinates());
             for (size_t k = 0; k < fes.getMesh().getSpaceDimension(); ++k)
               gradient(row, column, k) += derivative * inverse(l, k);
           }

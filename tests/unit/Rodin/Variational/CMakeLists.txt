@@ -1,3 +1,8 @@
+add_executable(RodinVariationalQuadratureEvaluationTest QuadratureEvaluationTest.cpp)
+target_link_libraries(RodinVariationalQuadratureEvaluationTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+rodin_discover_tests(RodinVariationalQuadratureEvaluationTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalGridFunctionEvaluationTest GridFunctionEvaluationTest.cpp)
 target_link_libraries(RodinVariationalGridFunctionEvaluationTest
   PRIVATE GTest::gtest_main Rodin::Variational)

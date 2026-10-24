@@ -64,8 +64,8 @@ namespace Rodin::Adaptation::SWIFT
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);
-          evaluate(Variational::IntegrationPoint(point, &formula, q),
-            weight * point.getDistortion());
+          evaluate(
+            Variational::IntegrationPoint(quadrature, q), weight * point.getDistortion());
         }
       }
 

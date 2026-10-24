@@ -12,6 +12,7 @@
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Adaptation/SWIFT/Hinge.h"
+#include "Rodin/Adaptation/SWIFT/Problem.h"
 #include "Rodin/Adaptation/SWIFT/HingeForce.h"
 #include "Rodin/Adaptation/SWIFT/HingeMetric.h"
 
@@ -20,6 +21,38 @@ using namespace Rodin::Adaptation;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Adaptation_SWIFTHingeState, DisplacementNormPreservesQuadratureAssociation)
+  {
+    auto mesh =
+      Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle, {2, 2});
+    Variational::P1<Math::SpatialVector<Real>> space(mesh, 2);
+    struct Displacement
+    {
+      size_t& points;
+      size_t& samples;
+      Math::SpatialVector<Real> getValue(const Geometry::Point&) const
+      {
+        ++points;
+        return {1, 2};
+      }
+      Math::SpatialVector<Real> getValue(const Variational::IntegrationPoint& ip) const
+      {
+        EXPECT_NE(ip.getReferenceQuadratureFormula(), nullptr);
+        ++samples;
+        return {1, 2};
+      }
+    };
+    size_t points = 0, samples = 0;
+    const Displacement displacement{points, samples};
+    const auto cell = mesh.getCell(0);
+    const auto& formula = QF::PolytopeQuadratureFormula::get(6, cell->getGeometry());
+    EXPECT_EQ(SWIFT::getPhysicalDisplacementNorm(
+                mesh, space, std::vector<Index>{cell->getIndex()}, displacement, 6),
+      Real(2));
+    EXPECT_EQ(points, Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount());
+    EXPECT_EQ(samples, formula.getSize());
+  }
+
   TEST(Rodin_Adaptation_SWIFTHingeState, AdaptiveMeasuresPreserveMassAcrossGeometries)
   {
     using namespace Geometry;
@@ -57,6 +90,11 @@ namespace Rodin::Tests::Unit
       size_t count = 0;
       std::vector<Math::SpatialVector<Real>> points;
       samples.forEach([&](const Variational::IntegrationPoint& ip, Real weight) {
+        ASSERT_NE(ip.getReferenceQuadratureFormula(), nullptr);
+        EXPECT_EQ((ip.getPoint().getReferenceCoordinates() -
+                    ip.getReferenceQuadratureFormula()->getPoint(ip.getIndex()))
+                    .norm(),
+          Real(0));
         measure += weight;
         points.push_back(ip.getPoint().getReferenceCoordinates());
         ++count;
@@ -68,6 +106,7 @@ namespace Rodin::Tests::Unit
         size_t index = 0;
         samples.forEachHinge(Gradient{true}, Gradient{zero},
           [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
+            ASSERT_NE(ip.getReferenceQuadratureFormula(), nullptr);
             ASSERT_LT(index, points.size());
             EXPECT_DOUBLE_EQ(
               (ip.getPoint().getReferenceCoordinates() - points[index++]).norm(),

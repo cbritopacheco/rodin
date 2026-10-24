@@ -141,7 +141,35 @@ namespace Rodin::Variational
        */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
-        interpolate(out, ip.getPoint());
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+          const auto gref = fe.getTabulation(*qf).getGradient(ip.getIndex(), local);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        const auto phys = JinvT * ref;
+        out = phys(static_cast<std::uint8_t>(m_i));
       }
 
       /**
