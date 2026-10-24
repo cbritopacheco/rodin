@@ -385,7 +385,7 @@ namespace Rodin::Tests::Convergence
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(p, &qf, qp);
+            const Variational::IntegrationPoint ip(quadrature, qp);
             squared += qf.getWeight(qp) * p.getDistortion() *
               squaredMagnitude(uh(ip) - evaluate(exact, ip));
           }
@@ -452,7 +452,7 @@ namespace Rodin::Tests::Convergence
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(p, &qf, qp);
+            const Variational::IntegrationPoint ip(quadrature, qp);
             const auto value = jacobian(ip);
             Real divergence = 0;
             const size_t dimension = std::min(
@@ -494,7 +494,7 @@ namespace Rodin::Tests::Convergence
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
-            const Variational::IntegrationPoint ip(p, &qf, qp);
+            const Variational::IntegrationPoint ip(quadrature, qp);
             const Real weight = qf.getWeight(qp) * p.getDistortion();
             const auto ev = uh(ip) - evaluate(exact, ip);
             const auto eg = derivative(ip) - evaluate(exactDerivative, ip);

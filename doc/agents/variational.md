@@ -137,10 +137,23 @@ without a matching cell binding always refresh. Copies start unbound. Reference
 basis tables may survive bindings because they depend on the reference formula,
 not physical geometry. Custom cell integrators establish the same lifecycle.
 
-GridFunction retains DOF/scratch allocation reuse but recomputes pushed-forward
-basis values on each direct integration-point evaluation. Caller-owned
-FunctionBase::Cache retains the resulting field value across basis indices for
-the current point binding. Shared fields acquire no mutable cell binding.
+GridFunction owns expansion evaluation and interpolation. It obtains element
+association and local DOF indexing from the FES, reads current coefficients,
+contracts the reference expansion and applies the supplied pushforward using
+current geometry. FES classes have no `evaluate` operation. Generic evaluation
+must not assume nodal coefficients or a component layout: those details remain
+inside each element's basis/expansion implementation.
+
+Composition pushforwards can forward a certified IntegrationPoint to the
+reference expansion. H1 elements then contract against immutable reference
+tabulation, including scalar, vector and matrix ranges. Other pushforwards
+continue requesting their actual reference coordinates; transformed or
+resampled coordinates never inherit an unrelated sample's certification.
+Reference tables are borrowed only after coefficient callbacks, which may
+insert and evict tables. No coefficients or mapped values are retained in the
+reference cache. GridFunction retains DOF allocation reuse; caller-owned
+FunctionBase::Cache retains field values for an explicit point binding.
+Shared fields acquire no mutable cell binding.
 DeformationMap owns one explicitly prepared moved point: point binding locates
 once, parameterless access reuses it, cell binding clears it, and direct point
 queries always locate afresh. No transformation token, UUID or revision is used.

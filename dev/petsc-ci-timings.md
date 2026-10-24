@@ -258,3 +258,126 @@ bound. Run longer diagnostic studies directly with the same GoogleTest filter;
 do not change the numerical parameters. PETSc `-log_view :FILE` records nested
 events. Python `resource.getrusage(resource.RUSAGE_CHILDREN)` before/after the
 single subprocess supplies user/system CPU time separately from elapsed time.
+
+## GridFunction evaluation repair and arithmetic validation
+
+This later, authorized production rework is measured against
+`e98f88bd36c0c673d0f5817986d1e40dc52c4224`; the preceding sections describe
+the earlier CI-only fixes. The [evaluation measurement data](grid-function-evaluation-timings.json)
+retain the workload drivers, individual CPU/wall samples, solver event counts,
+error norms, point benchmarks and kernel diagnostics.
+
+GridFunction owns reference expansion evaluation and application of the supplied
+pushforward. The FES provides the element association, DOF indexing and existing
+mapping factory, without an `evaluate` operation. The former private
+`getBasisValues` loop and its physical-basis scratch storage are removed. Certified
+H1 samples contract current coefficients against immutable reference tabulation.
+Scalar, vector and matrix element implementations retain their own basis layout;
+GridFunction assumes neither nodal coefficients nor component ordering.
+Composition mappings forward certified samples, while other mappings retain their
+actual reference-coordinate evaluation. Coefficient callbacks can evict reference
+tables, so each table borrow follows the corresponding coefficient read. No
+mapped values or coefficients are retained in the reference cache.
+
+Owned quadrature loops in `Convergence.h` and `LiftedErrorNorm.h` now construct
+`IntegrationPoint(quadrature, index)`. The samples, weights, orders and checks are
+unchanged; certification allows the existing derivative tabulation paths to run.
+Real bounded-vector and matrix contractions avoid nested Eigen reductions. Matrix
+rows and columns are explicitly unrolled across the supported active sizes;
+inactive storage is not read, and empty products remain zero. Non-real and mixed
+arithmetic retain their original implementations. No global fast-math option is
+introduced. Finite reduction comparisons use a machine-precision, term-count and
+product-magnitude error budget instead of bitwise equality; solver tolerances,
+convergence checks, conjugation and non-finite classifications are preserved.
+
+### Matched complete solves
+
+Both workloads use the same 48-cell Pyramid mesh, GCC 14, PETSc 3.19.6,
+RelWithDebInfo optimization and atomic coverage in the ARM64 container described
+above. Nonlinear Poisson has degree four and 1241 DOFs. Stokes has degree-three
+velocity (1677 DOFs), degree-two pressure (189 DOFs) and mixed boundary data.
+Assembly order is 16 (729 reference points per cell); norm order is 18 (1000
+points). The Stokes viscous term has 90 local velocity basis functions, hence
+283,435,200 basis-pair/sample contractions before other terms are counted.
+Compilation finishes before timing, and workloads run sequentially.
+
+| Workload | Baseline wall / CPU | Final median wall / CPU | CPU speedup |
+| --- | ---: | ---: | ---: |
+| Nonlinear Poisson | 125.35 / 124.54 s | 4.22 / 3.98 s | 31.30 times |
+| Stokes traction | 11.09 / 10.61 s | 5.49 / 5.25 s | 2.02 times |
+
+The fresh baseline has one sample; each final workload has three. These are
+coverage-build measurements, not x86-64 runner predictions or complete
+convergence-history runtimes. Nonlinear Poisson retains three Newton/Jacobian
+steps and four residual evaluations. Its baseline $L^2$ error is
+`9.1152592693248115e-05`, versus `9.1152592693249728e-05` after repair; $H^1$ seminorm
+is `0.0035470001778623353`, versus `0.0035470001778623275`. Stokes velocity $L^2$,
+velocity $H^1$ seminorm and pressure $L^2$ errors likewise agree to rounding precision;
+the independent residual, factorization and convergence checks pass unchanged.
+
+Stokes assembly plus solve falls from 7.84 s to a median 4.87 s, while norms and
+pressure integration fall from 2.65 s to 0.333 s. A rejected loop-based matrix
+contraction slowed assembly to 11.00 s while faster norms concealed most of that
+regression in the total. This was diagnosed before selecting the final kernel.
+
+### Compiler-dependent contraction cost
+
+A bounded native Instruments sample placed 84% of Stokes assembly samples in the
+old matrix dot reduction. That sample was stopped during assembly and is not a
+whole-solve timing. Controlled three-by-three kernel measurements explain why a
+simple loop was insufficient on GCC:
+
+| Atomic-coverage kernel, one million calls | GCC CPU | Native Clang CPU |
+| --- | ---: | ---: |
+| Original Eigen blocks | 22.87 ms | 389.38 ms |
+| Rejected nested loop | 31.99 ms | 29.35 ms |
+| Strided Eigen maps | 23.95 ms | 426.96 ms |
+| Unrolled contraction | 13.51 ms | 26.31 ms |
+
+These are medians of three samples with matched inputs. Coverage code generation
+is compiler dependent: Clang's nested Eigen reductions carry much greater
+instrumentation overhead here. Unrolling also improves the kernel-only diagnostic
+with instrumentation removed from its translation unit: the production
+contraction takes 2.38 ms versus 6.11 ms on GCC, and 1.98 ms versus 8.10 ms on
+Clang. Linked libraries remain instrumented in this diagnostic; it is not an
+uninstrumented application comparison. Kernel setup and process startup are
+outside these CPU intervals.
+
+### Pointwise cost and validation
+
+The degree-four Triangle quadrature benchmark improves from 159.50 to 10.62
+microseconds per 53-point pass, about 15 times. P1 and degree-two direct-point
+benchmarks stay within approximately two percent in the sampled comparison.
+The uncached degree-four scalar direct-point path has a small measured cost:
+alternating baseline/current order yields medians of 154.07 and 158.93
+microseconds per pass across nine samples each, a 3.2% increase, or about 92 ns
+per point. This is recorded separately from the much faster certified path.
+
+The direct-point path now evaluates a value-returning reference expansion through
+the supplied mapping rather than H1's former direct FES output-parameter shortcut.
+Inspection of the emitted GCC point routine shows the mapping calls are inlined:
+there is no added virtual call or quadrature lookup. The compiler changes the
+accumulator from output-memory updates to a register across basis calls and
+changes the saved-register frame from 112 to 128 bytes. The small timing cost is
+consistent with this changed evaluation boundary and generated code; individual
+instruction costs are not established by these measurements. No H1-only bypass
+or output/input aliasing assumption is introduced to remove that small cost.
+
+Validation runs one case at a time: 73 native Clang unit cases, all nine GCC
+scalar-product cases, and all eight MPI interpolation/matrix-range registrations
+at their original one-, two-, three- and four-rank configurations pass. New
+regressions cover coupled non-nodal modes with permuted DOFs, contravariant and
+covariant Piola maps, reference-coordinate resampling, live coefficients and
+geometry, table eviction during coefficient callbacks, and real/complex
+scalar/vector/matrix contraction across all seven geometries. Existing tests
+and all CI configurations remain registered. The GridFunction benchmark calls
+GridFunction instead of the removed FES operation and includes explicit
+pointwise/quadrature degree-four cases.
+
+Native validation uses PETSc 3.22.1. Existing Clang unused-capture and PETSc/MPICH
+type-tag diagnostics were made nonfatal only in the temporary local build's
+generated flags; repository warning policy is unchanged. A concurrent pair of
+large GCC compilations exceeded the container's 6 GiB cap; the final Stokes and
+unit builds complete serially at the original optimization and coverage settings.
+Local diagnostic counters are not submitted to Codecov. These results do not
+claim a complete current-commit CI coverage percentage.

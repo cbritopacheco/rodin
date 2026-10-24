@@ -1,0 +1,2488 @@
+{
+  "baseline_commit": "e98f88bd36c0c673d0f5817986d1e40dc52c4224",
+  "environment": {
+    "host": "Apple M1 Pro",
+    "container": "Ubuntu 24.04 aarch64",
+    "compiler": "GCC 14",
+    "petsc": "3.19.6",
+    "optimization": "O2 RelWithDebInfo",
+    "coverage": "atomic",
+    "rodin_multithreaded": false,
+    "blas_threads": 1
+  },
+  "workloads": {
+    "nonlinear": {
+      "geometry": "Pyramid",
+      "cells": 48,
+      "degree": 4,
+      "dofs": 1241,
+      "assembly_order": 16,
+      "norm_order": 18,
+      "newton_tolerance": 1e-11
+    },
+    "stokes": {
+      "geometry": "Pyramid",
+      "cells": 48,
+      "velocity_degree": 3,
+      "pressure_degree": 2,
+      "velocity_dofs": 1677,
+      "pressure_dofs": 189,
+      "assembly_order": 16,
+      "norm_order": 18
+    }
+  },
+  "drivers": {
+    "nonlinear": "#include \"PETScNonlinearPoisson.h\"\n#include \"Convergence.h\"\n#include <chrono>\n#include <iostream>\nint main(int argc,char** argv) {\n if(PetscInitialize(&argc,&argv,nullptr,nullptr)) return 1;\n ::testing::InitGoogleTest(&argc,argv);\n {\n using namespace Rodin; using namespace Rodin::Tests::Convergence;\n auto geometry=Geometry::Polytope::Type::Pyramid;\n if(argc>1 && std::string(argv[1])==\"Tetrahedron\") geometry=Geometry::Polytope::Type::Tetrahedron;\n if(argc>1 && std::string(argv[1])==\"Hexahedron\") geometry=Geometry::Polytope::Type::Hexahedron;\n auto mesh=UniformGrid(geometry).makeMesh(argc>2 ? std::stoul(argv[2]) : 3);\n const auto start=std::chrono::steady_clock::now();\n PETScNonlinearPoissonProblem<4,decltype(mesh)> problem(mesh,16);\n auto errors=problem.solve(1e-11,18,[](const auto&,const auto&){});\n std::cout.precision(17); std::cout<<\"ERRORS \"<<errors.getL2()<<\" \"<<errors.getH1Seminorm()<<\" SECONDS \"<<std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count()<<std::endl;\n }\n bool failed=::testing::Test::HasFailure();\n return PetscFinalize()?1:failed;\n}\n",
+    "stokes": "#include \"PETScStokesTractionProblem.h\"\n#include \"Convergence.h\"\n#include <chrono>\n#include <iostream>\nint main(int argc,char** argv) {\n if(PetscInitialize(&argc,&argv,nullptr,nullptr)) return 1;\n ::testing::InitGoogleTest(&argc,argv);\n {\n using namespace Rodin; using namespace Rodin::Tests::Convergence;\n auto mesh=UniformGrid(Geometry::Polytope::Type::Pyramid).makeMesh(3);\n using Problem=PETScStokesTractionProblem<decltype(mesh)>;\n UnitBoxBoundary::labelCoordinatePartition(mesh,0,Problem::DirichletAttribute,Problem::TractionAttribute,Problem::TractionAttribute);\n const StokesData data(mesh.getDimension(),StokesData::Field::Quartic,1,2);\n const auto start=std::chrono::steady_clock::now();\n auto result=Problem(mesh,data).solve<3>();\n std::cout.precision(17);std::cout<<\"STOKES \"<<result.fields.velocity.getL2()<<\" \"<<result.fields.velocity.getH1Seminorm()<<\" \"<<result.fields.pressure.getL2()<<\" SECONDS \"<<std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count()<<std::endl;\n }\n bool failed=::testing::Test::HasFailure(); return PetscFinalize()?1:failed;\n}\n",
+    "matrix-kernels": "#include \"Rodin/Math/SpatialMatrix.h\"\n#include <chrono>\n#include <ctime>\n#include <iostream>\n#include <string>\nusing namespace Rodin;\nusing Matrix = Math::SpatialMatrix<Real>;\ntemplate<class Kernel> void run(Kernel kernel, int rows, int columns) {\n Matrix a(rows,columns),b(rows,columns);\n for(int j=0;j<columns;++j) for(int i=0;i<rows;++i) {a(i,j)=Real(1+i+j)/7; b(i,j)=Real(2+i+2*j)/11;}\n double total=0;const auto start=std::clock();\n for(size_t i=0;i<1000000;++i) {\n  asm volatile(\"\" : \"+m\"(a), \"+m\"(b));\n  total+=kernel(a,b);\n }\n std::cout.precision(17); std::cout<<double(std::clock()-start)/CLOCKS_PER_SEC<<\" \"<<total<<std::endl;\n}\nint main(int argc,char**argv) {\n const std::string mode=argc>1?argv[1]:\"direct\"; const int rows=argc>2?std::stoi(argv[2]):3;const int columns=argc>3?std::stoi(argv[3]):3;\n if(mode==\"direct\") run([](const Matrix&a,const Matrix&b){return Math::dot(a,b);},rows,columns);\n else if(mode==\"original\") run([](const Matrix&a,const Matrix&b){return Math::dot(a.getData().topLeftCorner(a.rows(),a.cols()),b.getData().topLeftCorner(b.rows(),b.cols()));},rows,columns);\n else if(mode==\"map\") run([](const Matrix&a,const Matrix&b){using Storage=Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic,Eigen::ColMajor,3,3>;using View=Eigen::Map<const Storage,Eigen::Unaligned,Eigen::OuterStride<3>>;return Math::dot(View(a.getData().data(),a.rows(),a.cols()),View(b.getData().data(),b.rows(),b.cols()));},rows,columns);\n else if(mode==\"unrolled\") run([](const Matrix&a,const Matrix&b){const auto column=[&](size_t j){const auto*left=a.getData().data()+3*j;const auto*right=b.getData().data()+3*j;switch(a.rows()){case 1:return left[0]*right[0];case 2:return left[0]*right[0]+left[1]*right[1];case 3:return left[0]*right[0]+left[1]*right[1]+left[2]*right[2];default:return Real(0);}};switch(a.cols()){case 1:return column(0);case 2:return column(0)+column(1);case 3:return column(0)+column(1)+column(2);default:return Real(0);}},rows,columns);\n}\n"
+  },
+  "production_math_header_sha256": "338e441be87ea00ad51cc808152028fbee234f65f6253c3ebaf15aa87104b79e",
+  "limitations": [
+    "One fresh baseline sample and three final samples per complete solve; ARM64 results are not x86-64 CI predictions.",
+    "Only one numerical workload runs at a time; all compilation completes before timing. Other host processes are not controlled.",
+    "Atomic coverage remains enabled in every complete solve and GridFunction benchmark.",
+    "The kernel-only uncovered diagnostic removes instrumentation from its translation unit; linked libraries remain covered. It is not an uninstrumented application benchmark.",
+    "The nonlinear executable uses identical final real arithmetic; its unused non-real fallback was subsequently restored to the original implementation."
+  ],
+  "complete_solves": {
+    "nonlinear": {
+      "baseline": {
+        "returncode": 0,
+        "wall_seconds": 125.35150868189521,
+        "user_seconds": 124.236678,
+        "system_seconds": 0.30574399999999996,
+        "maxrss_kib": 52388,
+        "command": [
+          "/build/ci-petsc-timeout-study-results/instruments-followup/baseline",
+          "Pyramid",
+          "3"
+        ],
+        "cpu_seconds": 124.542422,
+        "numerical_output": "ERRORS 9.1152592693248115e-05 0.0035470001778623353 SECONDS 124.309817474",
+        "stages": [
+          "STUDY_NONLINEAR_INIT degree=4 order=16 cells=48 dofs=1241 initial_assembly_s=21.8309",
+          "STUDY_NONLINEAR_SOLVE degree=4 order=16 iterations=3 snes_s=82.1749 independent_residual_s=14.5186 norms_s=5.7303"
+        ],
+        "petsc_event_counts": {
+          "KSPSolve": 3,
+          "SNESFunctionEval": 4,
+          "SNESJacobianEval": 3
+        }
+      },
+      "final": [
+        {
+          "returncode": 0,
+          "wall_seconds": 4.22349708492402,
+          "user_seconds": 3.897709,
+          "system_seconds": 0.068012,
+          "maxrss_kib": 53520,
+          "command": [
+            "/build/ci-petsc-timeout-study-results/instruments-followup/nonlinear-current",
+            "Pyramid",
+            "3"
+          ],
+          "cpu_seconds": 3.965721,
+          "numerical_output": "ERRORS 9.1152592693249728e-05 0.0035470001778623275 SECONDS 3.881907043",
+          "stages": [],
+          "petsc_event_counts": {
+            "KSPSolve": 3,
+            "SNESFunctionEval": 4,
+            "SNESJacobianEval": 3
+          }
+        },
+        {
+          "returncode": 0,
+          "wall_seconds": 4.28154962696135,
+          "user_seconds": 3.9915339999999997,
+          "system_seconds": 0.029105,
+          "maxrss_kib": 53412,
+          "command": [
+            "/build/ci-petsc-timeout-study-results/instruments-followup/nonlinear-current",
+            "Pyramid",
+            "3"
+          ],
+          "cpu_seconds": 4.020639,
+          "numerical_output": "ERRORS 9.1152592693249728e-05 0.0035470001778623275 SECONDS 3.960489419",
+          "stages": [],
+          "petsc_event_counts": {
+            "KSPSolve": 3,
+            "SNESFunctionEval": 4,
+            "SNESJacobianEval": 3
+          }
+        },
+        {
+          "returncode": 0,
+          "wall_seconds": 4.217803044011816,
+          "user_seconds": 3.953294,
+          "system_seconds": 0.025065,
+          "maxrss_kib": 53536,
+          "command": [
+            "/build/ci-petsc-timeout-study-results/instruments-followup/nonlinear-current",
+            "Pyramid",
+            "3"
+          ],
+          "cpu_seconds": 3.978359,
+          "numerical_output": "ERRORS 9.1152592693249728e-05 0.0035470001778623275 SECONDS 3.9190536680000001",
+          "stages": [],
+          "petsc_event_counts": {
+            "KSPSolve": 3,
+            "SNESFunctionEval": 4,
+            "SNESJacobianEval": 3
+          }
+        }
+      ],
+      "median_cpu_seconds": 3.978359,
+      "median_wall_seconds": 4.22349708492402,
+      "cpu_speedup": 31.30497323142532,
+      "wall_speedup": 29.679553735065564
+    },
+    "stokes": {
+      "baseline": {
+        "returncode": 0,
+        "wall_seconds": 11.092565214028582,
+        "user_seconds": 10.477735,
+        "system_seconds": 0.128131,
+        "maxrss_kib": 70864,
+        "command": [
+          "/build/ci-petsc-timeout-study-results/instruments-followup/stokes-baseline"
+        ],
+        "cpu_seconds": 10.605865999999999,
+        "numerical_output": "STOKES 0.00029342333800041239 0.0061231560290840115 0.0027508421004179889 SECONDS 10.515569671",
+        "stages": [
+          "STUDY_STOKES degree=3 cells=48 velocity_dofs=1677 pressure_dofs=189 setup_s=0.014588 assembly_and_solve_s=7.8407 residual_s=0.000293375 norms_s=2.65165"
+        ],
+        "petsc_event_counts": {
+          "KSPSolve": 1
+        }
+      },
+      "final": [
+        {
+          "returncode": 0,
+          "wall_seconds": 5.850564960041083,
+          "user_seconds": 5.188008,
+          "system_seconds": 0.153384,
+          "maxrss_kib": 71412,
+          "command": [
+            "/build/ci-petsc-timeout-study-results/instruments-followup/stokes-timed"
+          ],
+          "cpu_seconds": 5.341392,
+          "numerical_output": "STOKES 0.00029342333800041223 0.0061231560290839517 0.0027508421004177421 SECONDS 5.2231158349999998",
+          "stages": [
+            "STUDY_STOKES degree=3 cells=48 velocity_dofs=1677 pressure_dofs=189 setup_s=0.0115233 assembly_and_solve_s=4.86871 residual_s=0.0009405 norms_s=0.334516"
+          ],
+          "petsc_event_counts": {
+            "KSPSolve": 1
+          }
+        },
+        {
+          "returncode": 0,
+          "wall_seconds": 5.333716919994913,
+          "user_seconds": 5.031831,
+          "system_seconds": 0.047091999999999995,
+          "maxrss_kib": 69692,
+          "command": [
+            "/build/ci-petsc-timeout-study-results/instruments-followup/stokes-timed"
+          ],
+          "cpu_seconds": 5.0789230000000005,
+          "numerical_output": "STOKES 0.00029342333800041223 0.0061231560290839517 0.0027508421004177421 SECONDS 5.0341880440000004",
+          "stages": [
+            "STUDY_STOKES degree=3 cells=48 velocity_dofs=1677 pressure_dofs=189 setup_s=0.00168208 assembly_and_solve_s=4.69992 residual_s=0.000245542 norms_s=0.327887"
+          ],
+          "petsc_event_counts": {
+            "KSPSolve": 1
+          }
+        },
+        {
+          "returncode": 0,
+          "wall_seconds": 5.493363793939352,
+          "user_seconds": 5.210838,
+          "system_seconds": 0.040067,
+          "maxrss_kib": 71484,
+          "command": [
+            "/build/ci-petsc-timeout-study-results/instruments-followup/stokes-timed"
+          ],
+          "cpu_seconds": 5.2509049999999995,
+          "numerical_output": "STOKES 0.00029342333800041223 0.0061231560290839517 0.0027508421004177421 SECONDS 5.2134210440000004",
+          "stages": [
+            "STUDY_STOKES degree=3 cells=48 velocity_dofs=1677 pressure_dofs=189 setup_s=0.00115742 assembly_and_solve_s=4.87413 residual_s=0.000249791 norms_s=0.332936"
+          ],
+          "petsc_event_counts": {
+            "KSPSolve": 1
+          }
+        }
+      ],
+      "median_cpu_seconds": 5.2509049999999995,
+      "median_wall_seconds": 5.493363793939352,
+      "cpu_speedup": 2.0198167744417392,
+      "wall_speedup": 2.019266451325624
+    }
+  },
+  "gridfunction_benchmarks": {
+    "baseline": {
+      "context": {
+        "date": "2026-10-24T12:19:26+00:00",
+        "host_name": "ffcc92176343",
+        "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-baseline",
+        "num_cpus": 8,
+        "mhz_per_cpu": 48,
+        "cpu_scaling_enabled": false,
+        "aslr_enabled": false,
+        "caches": [],
+        "load_avg": [
+          0.169922,
+          0.416992,
+          0.632324
+        ],
+        "library_version": "v1.9.4",
+        "library_build_type": "release",
+        "json_schema_version": 1
+      },
+      "benchmarks": [
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 3458697,
+          "real_time": 80.87490519476155,
+          "cpu_time": 80.87819343527346,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 3458697,
+          "real_time": 81.04474259719535,
+          "cpu_time": 81.04513983156086,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 3458697,
+          "real_time": 106.8669308008303,
+          "cpu_time": 106.86053331644834,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_mean",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 89.59552619759573,
+          "cpu_time": 89.59462219442753,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_median",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 81.04474259719537,
+          "cpu_time": 81.04513983156086,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_stddev",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 14.95771619975096,
+          "cpu_time": 14.95295064293171,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_cv",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.16694713268118902,
+          "cpu_time": 0.16689562695495944,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 3627409,
+          "real_time": 75.68945904251214,
+          "cpu_time": 75.6899643795337,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 3627409,
+          "real_time": 75.60706554390984,
+          "cpu_time": 75.60564055500774,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 3627409,
+          "real_time": 75.15250553432601,
+          "cpu_time": 75.15329784978753,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_mean",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 75.48301004024934,
+          "cpu_time": 75.48296759477633,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_median",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 75.60706554390985,
+          "cpu_time": 75.60564055500774,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_stddev",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 0.28917484932139914,
+          "cpu_time": 0.2885987394582183,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_cv",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.0038309925527241725,
+          "cpu_time": 0.003823362390937453,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 580967,
+          "real_time": 368.0634321041079,
+          "cpu_time": 368.0665872588292,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 580967,
+          "real_time": 358.43896303668413,
+          "cpu_time": 358.44261722266475,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 580967,
+          "real_time": 367.69687433724437,
+          "cpu_time": 367.7010329330244,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_mean",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 364.7330898260121,
+          "cpu_time": 364.73674580483936,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_median",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 367.6968743372444,
+          "cpu_time": 367.7010329330244,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_stddev",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 5.453954086645513,
+          "cpu_time": 5.453938801268898,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_cv",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.014953274706298796,
+          "cpu_time": 0.014953082912537557,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 768833,
+          "real_time": 401.61522977144136,
+          "cpu_time": 401.61674511890067,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 768833,
+          "real_time": 337.34444549444925,
+          "cpu_time": 337.348454085608,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 768833,
+          "real_time": 341.42302947016174,
+          "cpu_time": 341.42703812141264,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_mean",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 360.1275682453508,
+          "cpu_time": 360.13074577530705,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_median",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 341.42302947016174,
+          "cpu_time": 341.42703812141264,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_stddev",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 35.9871957227749,
+          "cpu_time": 35.98575854538523,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_cv",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.09992902209101981,
+          "cpu_time": 0.09992414968045377,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 1743,
+          "real_time": 160744.1910549494,
+          "cpu_time": 160745.24211130233,
+          "time_unit": "ns",
+          "items_per_second": 329714.2690127154
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 1743,
+          "real_time": 158527.5151569672,
+          "cpu_time": 158529.02008032083,
+          "time_unit": "ns",
+          "items_per_second": 334323.64606270095
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 1743,
+          "real_time": 159509.4899512823,
+          "cpu_time": 159496.0309810671,
+          "time_unit": "ns",
+          "items_per_second": 332296.6701678699
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_mean",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 159593.73205439962,
+          "cpu_time": 159590.09772423006,
+          "time_unit": "ns",
+          "items_per_second": 332111.5284144287
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_median",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 159509.4899512823,
+          "cpu_time": 159496.03098106707,
+          "time_unit": "ns",
+          "items_per_second": 332296.6701678699
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_stddev",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 1110.736493565247,
+          "cpu_time": 1111.1014520650217,
+          "time_unit": "ns",
+          "items_per_second": 2310.2591410728132
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_cv",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.006959775169532585,
+          "cpu_time": 0.006962220513110987,
+          "time_unit": "ns",
+          "items_per_second": 0.006956275056462157
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 1834,
+          "real_time": 153382.63358878158,
+          "cpu_time": 153384.17775354418,
+          "time_unit": "ns",
+          "items_per_second": 345537.5957040351
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 1834,
+          "real_time": 157331.4247378671,
+          "cpu_time": 157333.8778625953,
+          "time_unit": "ns",
+          "items_per_second": 336863.2408989918
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 1834,
+          "real_time": 152478.3942072511,
+          "cpu_time": 152479.68865866936,
+          "time_unit": "ns",
+          "items_per_second": 347587.27845150704
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 154397.48417796657,
+          "cpu_time": 154399.24809160293,
+          "time_unit": "ns",
+          "items_per_second": 343329.3716848446
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 153382.63358878155,
+          "cpu_time": 153384.17775354418,
+          "time_unit": "ns",
+          "items_per_second": 345537.5957040351
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 2580.778491378803,
+          "cpu_time": 2581.3880084720954,
+          "time_unit": "ns",
+          "items_per_second": 5692.840709713733
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.016715158962072617,
+          "cpu_time": 0.01671891567075893,
+          "time_unit": "ns",
+          "items_per_second": 0.016581280773552382
+        }
+      ]
+    },
+    "current": {
+      "context": {
+        "date": "2026-10-24T12:19:32+00:00",
+        "host_name": "ffcc92176343",
+        "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-current",
+        "num_cpus": 8,
+        "mhz_per_cpu": 48,
+        "cpu_scaling_enabled": false,
+        "aslr_enabled": false,
+        "caches": [],
+        "load_avg": [
+          0.236816,
+          0.426758,
+          0.634766
+        ],
+        "library_version": "v1.9.4",
+        "library_build_type": "release",
+        "json_schema_version": 1
+      },
+      "benchmarks": [
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 3430294,
+          "real_time": 81.61545336763061,
+          "cpu_time": 81.61020542262558,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 3430294,
+          "real_time": 81.4131505854674,
+          "cpu_time": 81.41357533785735,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 3430294,
+          "real_time": 80.53328168436876,
+          "cpu_time": 80.53214010227694,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_mean",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 81.1872952124889,
+          "cpu_time": 81.18530695425329,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_median",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 81.4131505854674,
+          "cpu_time": 81.41357533785735,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_stddev",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 0.5753536956893303,
+          "cpu_time": 0.5741393994052025,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion_cv",
+          "family_index": 0,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.00708674545916914,
+          "cpu_time": 0.00707196192198573,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 3642808,
+          "real_time": 75.38246152695334,
+          "cpu_time": 75.38286151781814,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 3642808,
+          "real_time": 75.47949051893968,
+          "cpu_time": 75.48023365491676,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 3642808,
+          "real_time": 73.45159065516901,
+          "cpu_time": 73.45229943494141,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_mean",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 74.77118090035401,
+          "cpu_time": 74.77179820255877,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_median",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 75.38246152695332,
+          "cpu_time": 75.38286151781814,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_stddev",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 1.143827988690358,
+          "cpu_time": 1.1437561285429234,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion_cv",
+          "family_index": 1,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.015297711964917523,
+          "cpu_time": 0.015296624610317087,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 775707,
+          "real_time": 361.0748002269342,
+          "cpu_time": 361.06104753470044,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 775707,
+          "real_time": 355.8170701003472,
+          "cpu_time": 355.80976322245374,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 775707,
+          "real_time": 359.4452118865071,
+          "cpu_time": 359.44816406194616,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_mean",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 358.7790274045961,
+          "cpu_time": 358.7729916063668,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_median",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 359.44521188650714,
+          "cpu_time": 359.4481640619462,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_stddev",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 2.69142765906936,
+          "cpu_time": 2.689960987744909,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion_cv",
+          "family_index": 2,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.00750163040058144,
+          "cpu_time": 0.00749766858341511,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 828458,
+          "real_time": 335.1551423755819,
+          "cpu_time": 335.1380395867987,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 828458,
+          "real_time": 337.58571231567646,
+          "cpu_time": 337.58797307769373,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 828458,
+          "real_time": 335.8813397473713,
+          "cpu_time": 335.8877263542631,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_mean",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 336.20739814620987,
+          "cpu_time": 336.20457967291844,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_median",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 335.8813397473713,
+          "cpu_time": 335.8877263542631,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_stddev",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 1.2476590551891307,
+          "cpu_time": 1.2553248769333158,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion_cv",
+          "family_index": 3,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.0037109803712485493,
+          "cpu_time": 0.003733812544000968,
+          "time_unit": "ns"
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 26542,
+          "real_time": 10560.680583500314,
+          "cpu_time": 10560.005500715857,
+          "time_unit": "ns",
+          "items_per_second": 5018936.7795695895
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 26542,
+          "real_time": 10634.254202837277,
+          "cpu_time": 10634.351480672158,
+          "time_unit": "ns",
+          "items_per_second": 4983848.812626425
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 26542,
+          "real_time": 10620.158619705144,
+          "cpu_time": 10618.692374350087,
+          "time_unit": "ns",
+          "items_per_second": 4991198.363371351
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_mean",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 10605.031135347577,
+          "cpu_time": 10604.349785246035,
+          "time_unit": "ns",
+          "items_per_second": 4997994.651855787
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_median",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 10620.158619705142,
+          "cpu_time": 10618.692374350088,
+          "time_unit": "ns",
+          "items_per_second": 4991198.363371351
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_stddev",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 39.049967385653126,
+          "cpu_time": 39.19328489101195,
+          "time_unit": "ns",
+          "items_per_second": 18504.95903636031
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature_cv",
+          "family_index": 4,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarQuadrature",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.003682211479370001,
+          "cpu_time": 0.003695963042028476,
+          "time_unit": "ns",
+          "items_per_second": 0.0037024767582512917
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 0,
+          "threads": 1,
+          "iterations": 1763,
+          "real_time": 161889.08564333577,
+          "cpu_time": 161891.44866704455,
+          "time_unit": "ns",
+          "items_per_second": 327379.8612365432
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 1,
+          "threads": 1,
+          "iterations": 1763,
+          "real_time": 173495.5570044052,
+          "cpu_time": 173430.68065796938,
+          "time_unit": "ns",
+          "items_per_second": 305597.6012948006
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "iteration",
+          "repetitions": 3,
+          "repetition_index": 2,
+          "threads": 1,
+          "iterations": 1763,
+          "real_time": 159236.12645678793,
+          "cpu_time": 159237.2370958594,
+          "time_unit": "ns",
+          "items_per_second": 332836.7219037748
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "mean",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 164873.5897015096,
+          "cpu_time": 164853.12214029106,
+          "time_unit": "ns",
+          "items_per_second": 321938.06147837284
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "median",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 161889.08564333577,
+          "cpu_time": 161891.44866704452,
+          "time_unit": "ns",
+          "items_per_second": 327379.8612365432
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "stddev",
+          "aggregate_unit": "time",
+          "iterations": 3,
+          "real_time": 7583.751594067516,
+          "cpu_time": 7545.998433560867,
+          "time_unit": "ns",
+          "items_per_second": 14411.880909291083
+        },
+        {
+          "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+          "family_index": 5,
+          "per_family_instance_index": 0,
+          "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+          "run_type": "aggregate",
+          "repetitions": 3,
+          "threads": 1,
+          "aggregate_name": "cv",
+          "aggregate_unit": "percentage",
+          "iterations": 3,
+          "real_time": 0.04599737051760254,
+          "cpu_time": 0.045774070491301784,
+          "time_unit": "ns",
+          "items_per_second": 0.044766005122569966
+        }
+      ]
+    }
+  },
+  "pointwise_alternating": {
+    "baseline": [
+      {
+        "context": {
+          "date": "2026-10-24T12:57:23+00:00",
+          "host_name": "ffcc92176343",
+          "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-baseline",
+          "num_cpus": 8,
+          "mhz_per_cpu": 48,
+          "cpu_scaling_enabled": false,
+          "aslr_enabled": false,
+          "caches": [],
+          "load_avg": [
+            0.352051,
+            0.857422,
+            1.4248
+          ],
+          "library_version": "v1.9.4",
+          "library_build_type": "release",
+          "json_schema_version": 1
+        },
+        "benchmarks": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 4567,
+            "real_time": 158165.72694793483,
+            "cpu_time": 158166.32844317934,
+            "time_unit": "ns",
+            "items_per_second": 335090.284523106
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 1,
+            "threads": 1,
+            "iterations": 4567,
+            "real_time": 157353.99800931694,
+            "cpu_time": 157329.30917451277,
+            "time_unit": "ns",
+            "items_per_second": 336873.02307551197
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 2,
+            "threads": 1,
+            "iterations": 4567,
+            "real_time": 154242.24526119954,
+            "cpu_time": 154229.19794175605,
+            "time_unit": "ns",
+            "items_per_second": 343644.39877341
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "mean",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 156587.32340615045,
+            "cpu_time": 156574.9451864827,
+            "time_unit": "ns",
+            "items_per_second": 338535.9021240093
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "median",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 157353.99800931694,
+            "cpu_time": 157329.30917451277,
+            "time_unit": "ns",
+            "items_per_second": 336873.02307551197
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "stddev",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 2071.055189243909,
+            "cpu_time": 2074.137872984775,
+            "time_unit": "ns",
+            "items_per_second": 4512.991546551728
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "cv",
+            "aggregate_unit": "percentage",
+            "iterations": 3,
+            "real_time": 0.013226199568352555,
+            "cpu_time": 0.013246933412714604,
+            "time_unit": "ns",
+            "items_per_second": 0.01333090971514912
+          }
+        ]
+      },
+      {
+        "context": {
+          "date": "2026-10-24T12:57:31+00:00",
+          "host_name": "ffcc92176343",
+          "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-baseline",
+          "num_cpus": 8,
+          "mhz_per_cpu": 48,
+          "cpu_scaling_enabled": false,
+          "aslr_enabled": false,
+          "caches": [],
+          "load_avg": [
+            0.404297,
+            0.859863,
+            1.42236
+          ],
+          "library_version": "v1.9.4",
+          "library_build_type": "release",
+          "json_schema_version": 1
+        },
+        "benchmarks": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 4495,
+            "real_time": 154071.96886825052,
+            "cpu_time": 154069.96596218023,
+            "time_unit": "ns",
+            "items_per_second": 343999.55675339076
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 1,
+            "threads": 1,
+            "iterations": 4495,
+            "real_time": 155450.66762549826,
+            "cpu_time": 155448.36818687432,
+            "time_unit": "ns",
+            "items_per_second": 340949.2207488814
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 2,
+            "threads": 1,
+            "iterations": 4495,
+            "real_time": 153783.1572948378,
+            "cpu_time": 153785.40912124584,
+            "time_unit": "ns",
+            "items_per_second": 344636.0763537346
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "mean",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 154435.2645961955,
+            "cpu_time": 154434.5810901001,
+            "time_unit": "ns",
+            "items_per_second": 343194.9512853356
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "median",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 154071.96886825052,
+            "cpu_time": 154069.96596218023,
+            "time_unit": "ns",
+            "items_per_second": 343999.55675339076
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "stddev",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 891.1428141253031,
+            "cpu_time": 889.419112183699,
+            "time_unit": "ns",
+            "items_per_second": 1970.7279193665925
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "cv",
+            "aggregate_unit": "percentage",
+            "iterations": 3,
+            "real_time": 0.005770332420224028,
+            "cpu_time": 0.005759196586059924,
+            "time_unit": "ns",
+            "items_per_second": 0.005742298690542537
+          }
+        ]
+      },
+      {
+        "context": {
+          "date": "2026-10-24T12:57:33+00:00",
+          "host_name": "ffcc92176343",
+          "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-baseline",
+          "num_cpus": 8,
+          "mhz_per_cpu": 48,
+          "cpu_scaling_enabled": false,
+          "aslr_enabled": false,
+          "caches": [],
+          "load_avg": [
+            0.404297,
+            0.859863,
+            1.42236
+          ],
+          "library_version": "v1.9.4",
+          "library_build_type": "release",
+          "json_schema_version": 1
+        },
+        "benchmarks": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 4583,
+            "real_time": 152615.47219113066,
+            "cpu_time": 152615.97141610298,
+            "time_unit": "ns",
+            "items_per_second": 347276.89053917595
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 1,
+            "threads": 1,
+            "iterations": 4583,
+            "real_time": 152678.16756998486,
+            "cpu_time": 152677.3759546149,
+            "time_unit": "ns",
+            "items_per_second": 347137.22101010475
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 2,
+            "threads": 1,
+            "iterations": 4583,
+            "real_time": 153239.6720447981,
+            "cpu_time": 153239.2166703033,
+            "time_unit": "ns",
+            "items_per_second": 345864.467018455
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "mean",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 152844.43726863788,
+            "cpu_time": 152844.18801367373,
+            "time_unit": "ns",
+            "items_per_second": 346759.52618924517
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "median",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 152678.1675699849,
+            "cpu_time": 152677.3759546149,
+            "time_unit": "ns",
+            "items_per_second": 347137.22101010475
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "stddev",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 343.7158330006173,
+            "cpu_time": 343.47977961998544,
+            "time_unit": "ns",
+            "items_per_second": 778.2834212491342
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "cv",
+            "aggregate_unit": "percentage",
+            "iterations": 3,
+            "real_time": 0.002248795174642213,
+            "cpu_time": 0.002247254436585165,
+            "time_unit": "ns",
+            "items_per_second": 0.0022444471239252512
+          }
+        ]
+      }
+    ],
+    "current": [
+      {
+        "context": {
+          "date": "2026-10-24T12:57:26+00:00",
+          "host_name": "ffcc92176343",
+          "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-current",
+          "num_cpus": 8,
+          "mhz_per_cpu": 48,
+          "cpu_scaling_enabled": false,
+          "aslr_enabled": false,
+          "caches": [],
+          "load_avg": [
+            0.352051,
+            0.857422,
+            1.4248
+          ],
+          "library_version": "v1.9.4",
+          "library_build_type": "release",
+          "json_schema_version": 1
+        },
+        "benchmarks": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 4378,
+            "real_time": 158575.12950973798,
+            "cpu_time": 158575.51895842853,
+            "time_unit": "ns",
+            "items_per_second": 334225.612806566
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 1,
+            "threads": 1,
+            "iterations": 4378,
+            "real_time": 158925.63200551062,
+            "cpu_time": 158925.31726815898,
+            "time_unit": "ns",
+            "items_per_second": 333489.97448009916
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 2,
+            "threads": 1,
+            "iterations": 4378,
+            "real_time": 162048.42392656425,
+            "cpu_time": 162047.38602101416,
+            "time_unit": "ns",
+            "items_per_second": 327064.8253044144
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "mean",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 159849.7284806043,
+            "cpu_time": 159849.4074158672,
+            "time_unit": "ns",
+            "items_per_second": 331593.47086369316
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "median",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 158925.63200551065,
+            "cpu_time": 158925.317268159,
+            "time_unit": "ns",
+            "items_per_second": 333489.97448009916
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "stddev",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 1912.1739586001056,
+            "cpu_time": 1911.5235221946896,
+            "time_unit": "ns",
+            "items_per_second": 3939.1323775711676
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "cv",
+            "aggregate_unit": "percentage",
+            "iterations": 3,
+            "real_time": 0.011962322218345983,
+            "cpu_time": 0.011958277187863664,
+            "time_unit": "ns",
+            "items_per_second": 0.011879402713542606
+          }
+        ]
+      },
+      {
+        "context": {
+          "date": "2026-10-24T12:57:28+00:00",
+          "host_name": "ffcc92176343",
+          "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-current",
+          "num_cpus": 8,
+          "mhz_per_cpu": 48,
+          "cpu_scaling_enabled": false,
+          "aslr_enabled": false,
+          "caches": [],
+          "load_avg": [
+            0.404297,
+            0.859863,
+            1.42236
+          ],
+          "library_version": "v1.9.4",
+          "library_build_type": "release",
+          "json_schema_version": 1
+        },
+        "benchmarks": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 4253,
+            "real_time": 159021.6809140495,
+            "cpu_time": 159019.59322830942,
+            "time_unit": "ns",
+            "items_per_second": 333292.26244407654
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 1,
+            "threads": 1,
+            "iterations": 4253,
+            "real_time": 160996.85517177178,
+            "cpu_time": 160960.0472607571,
+            "time_unit": "ns",
+            "items_per_second": 329274.25719588296
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 2,
+            "threads": 1,
+            "iterations": 4253,
+            "real_time": 158335.8610358528,
+            "cpu_time": 158333.28379967078,
+            "time_unit": "ns",
+            "items_per_second": 334736.9468257703
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "mean",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 159451.46570722468,
+            "cpu_time": 159437.6414295791,
+            "time_unit": "ns",
+            "items_per_second": 332434.48882190994
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "median",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 159021.6809140495,
+            "cpu_time": 159019.5932283094,
+            "time_unit": "ns",
+            "items_per_second": 333292.26244407654
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "stddev",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 1381.57832719857,
+            "cpu_time": 1362.3673491628103,
+            "time_unit": "ns",
+            "items_per_second": 2830.5611083778717
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "cv",
+            "aggregate_unit": "percentage",
+            "iterations": 3,
+            "real_time": 0.008664569629829193,
+            "cpu_time": 0.008544828792920553,
+            "time_unit": "ns",
+            "items_per_second": 0.008514643346449666
+          }
+        ]
+      },
+      {
+        "context": {
+          "date": "2026-10-24T12:57:36+00:00",
+          "host_name": "ffcc92176343",
+          "executable": "/build/ci-petsc-timeout-study-results/instruments-followup/gridfunction-current",
+          "num_cpus": 8,
+          "mhz_per_cpu": 48,
+          "cpu_scaling_enabled": false,
+          "aslr_enabled": false,
+          "caches": [],
+          "load_avg": [
+            0.452148,
+            0.862305,
+            1.41992
+          ],
+          "library_version": "v1.9.4",
+          "library_build_type": "release",
+          "json_schema_version": 1
+        },
+        "benchmarks": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 0,
+            "threads": 1,
+            "iterations": 4413,
+            "real_time": 159259.32856039843,
+            "cpu_time": 159239.17901654204,
+            "time_unit": "ns",
+            "items_per_second": 332832.66296226176
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 1,
+            "threads": 1,
+            "iterations": 4413,
+            "real_time": 158911.98346481225,
+            "cpu_time": 158912.31316564695,
+            "time_unit": "ns",
+            "items_per_second": 333517.2646109171
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "iteration",
+            "repetitions": 3,
+            "repetition_index": 2,
+            "threads": 1,
+            "iterations": 4413,
+            "real_time": 156735.26149005062,
+            "cpu_time": 156736.13890777246,
+            "time_unit": "ns",
+            "items_per_second": 338147.9240801418
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_mean",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "mean",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 158302.19117175374,
+            "cpu_time": 158295.87702998714,
+            "time_unit": "ns",
+            "items_per_second": 334832.6172177736
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_median",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "median",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 158911.98346481225,
+            "cpu_time": 158912.31316564695,
+            "time_unit": "ns",
+            "items_per_second": 333517.2646109171
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_stddev",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "stddev",
+            "aggregate_unit": "time",
+            "iterations": 3,
+            "real_time": 1368.0693054115036,
+            "cpu_time": 1360.6239666219585,
+            "time_unit": "ns",
+            "items_per_second": 2891.4727299546003
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise_cv",
+            "family_index": 0,
+            "per_family_instance_index": 0,
+            "run_name": "GridFunctionEvaluationBenchmark/H1P4ScalarPointwise",
+            "run_type": "aggregate",
+            "repetitions": 3,
+            "threads": 1,
+            "aggregate_name": "cv",
+            "aggregate_unit": "percentage",
+            "iterations": 3,
+            "real_time": 0.008642137517396611,
+            "cpu_time": 0.008595447917851997,
+            "time_unit": "ns",
+            "items_per_second": 0.008635576647163976
+          }
+        ]
+      }
+    ]
+  },
+  "matrix_kernels": {
+    "gcc": {
+      "covered": [
+        {
+          "kernel": "original",
+          "samples": [
+            "0.021989000000000002 1987012.9870241701",
+            "0.022873999999999999 1987012.9870241701",
+            "0.027601000000000001 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "direct",
+          "samples": [
+            "0.033300000000000003 1987012.9870241701",
+            "0.031987000000000002 1987012.9870241701",
+            "0.030127999999999999 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "map",
+          "samples": [
+            "0.023949999999999999 1987012.9870241701",
+            "0.023939999999999999 1987012.9870241701",
+            "0.024541 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "unrolled",
+          "samples": [
+            "0.014178 1987012.9870241701",
+            "0.013506000000000001 1987012.9870241701",
+            "0.012174000000000001 1987012.9870241701"
+          ]
+        }
+      ],
+      "uncovered_translation_unit": [
+        {
+          "kernel": "original",
+          "samples": [
+            "0.0093120000000000008 1987012.9870241701",
+            "0.005463 1987012.9870241701",
+            "0.0061060000000000003 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "direct",
+          "samples": [
+            "0.0023679999999999999 1987012.9870241701",
+            "0.0026849999999999999 1987012.9870241701",
+            "0.0023809999999999999 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "map",
+          "samples": [
+            "0.0063160000000000004 1987012.9870241701",
+            "0.0067369999999999999 1987012.9870241701",
+            "0.0068580000000000004 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "unrolled",
+          "samples": [
+            "0.002281 1987012.9870241701",
+            "0.0024320000000000001 1987012.9870241701",
+            "0.002173 1987012.9870241701"
+          ]
+        }
+      ]
+    },
+    "clang": {
+      "covered": [
+        {
+          "kernel": "original",
+          "samples": [
+            "0.39433000000000001 1987012.9870241701",
+            "0.38938499999999998 1987012.9870241701",
+            "0.387652 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "direct",
+          "samples": [
+            "0.029111000000000001 1987012.9870241701",
+            "0.029354000000000002 1987012.9870241701",
+            "0.029374999999999998 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "map",
+          "samples": [
+            "0.42696499999999998 1987012.9870241701",
+            "0.42765199999999998 1987012.9870241701",
+            "0.42676599999999998 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "unrolled",
+          "samples": [
+            "0.026481000000000001 1987012.9870241701",
+            "0.026214999999999999 1987012.9870241701",
+            "0.026311999999999999 1987012.9870241701"
+          ]
+        }
+      ],
+      "uncovered_translation_unit": [
+        {
+          "kernel": "original",
+          "samples": [
+            "0.0081880000000000008 1987012.9870241701",
+            "0.0079909999999999998 1987012.9870241701",
+            "0.0080999999999999996 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "direct",
+          "samples": [
+            "0.0019919999999999998 1987012.9870241701",
+            "0.001977 1987012.9870241701",
+            "0.0019430000000000001 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "map",
+          "samples": [
+            "0.0077590000000000003 1987012.9870241701",
+            "0.0078069999999999997 1987012.9870241701",
+            "0.0078729999999999998 1987012.9870241701"
+          ]
+        },
+        {
+          "kernel": "unrolled",
+          "samples": [
+            "0.0016490000000000001 1987012.9870241701",
+            "0.001591 1987012.9870241701",
+            "0.0016050000000000001 1987012.9870241701"
+          ]
+        }
+      ]
+    }
+  },
+  "matrix_kernel_notes": {
+    "covered_direct_label": "Rejected loop-based real contraction.",
+    "uncovered_direct_label": "Final production unrolled real contraction.",
+    "unrolled_label": "Standalone equivalent unrolled contraction, without the production empty-shape guard.",
+    "samples": "CPU seconds and checksum for one million three-by-three contractions."
+  },
+  "validation": {
+    "native_unit_cases": 73,
+    "gcc_scalar_product_cases": 9,
+    "mpi_interpolation_ranks": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "mpi_matrix_range_ranks": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "mpi_matrix_range_ctest_seconds": [
+      113.82,
+      71.36,
+      74.3,
+      55.11
+    ],
+    "numerical_policy": "Roundoff-scaled contractions; unchanged solver/convergence checks",
+    "local_warning_overrides": [
+      "MPIInterpolationTest: unused-lambda-capture is nonfatal",
+      "MPIMatrixRangeTest: PETSc/MPICH type-safety annotation is nonfatal"
+    ],
+    "production_changes_to_warning_policy": false,
+    "final_mpi_output": "Internal ctest changing into directory: /tmp/rodin-instruments-study/build/tests\nTest project /tmp/rodin-instruments-study/build/tests\n    Start 480: RodinMPIMatrixRangeTest_np1\n1/8 Test #480: RodinMPIMatrixRangeTest_np1 ......   Passed  113.82 sec\n    Start 482: RodinMPIInterpolationTest_np1\n2/8 Test #482: RodinMPIInterpolationTest_np1 ....   Passed    2.13 sec\n    Start 486: RodinMPIMatrixRangeTest_np2\n3/8 Test #486: RodinMPIMatrixRangeTest_np2 ......   Passed   72.01 sec\n    Start 488: RodinMPIInterpolationTest_np2\n4/8 Test #488: RodinMPIInterpolationTest_np2 ....   Passed    1.05 sec\n    Start 492: RodinMPIMatrixRangeTest_np3\n5/8 Test #492: RodinMPIMatrixRangeTest_np3 ......   Passed   60.45 sec\n    Start 494: RodinMPIInterpolationTest_np3\n6/8 Test #494: RodinMPIInterpolationTest_np3 ....   Passed    0.97 sec\n    Start 498: RodinMPIMatrixRangeTest_np4\n7/8 Test #498: RodinMPIMatrixRangeTest_np4 ......   Passed   54.24 sec\n    Start 500: RodinMPIInterpolationTest_np4\n8/8 Test #500: RodinMPIInterpolationTest_np4 ....   Passed    1.01 sec\n\n100% tests passed, 0 tests failed out of 8\n\nLabel Time Summary:\ndistributed    = 661.30 sec*proc (8 tests)\nunit           = 661.30 sec*proc (8 tests)\n\nTotal Test time (real) = 305.90 sec\n",
+    "all_tests_run_sequentially": true
+  }
+}

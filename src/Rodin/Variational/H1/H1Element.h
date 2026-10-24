@@ -380,6 +380,31 @@ namespace Rodin::Variational
        */
       const Tabulation& getTabulation(const QF::QuadratureFormula& qf) const;
 
+      using Parent::evaluate;
+
+      /**
+       * @brief Contracts current coefficients with tabulated reference basis values.
+       * @param out Reference expansion value.
+       * @param coefficient Local coefficient accessor in element basis order.
+       * @param formula Immutable formula defining the reference samples.
+       * @param quadratureIndex Index of the reference sample.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, Coefficient&& coefficient,
+        const QF::QuadratureFormula& formula, size_t quadratureIndex) const
+      {
+        assert(quadratureIndex < formula.getSize());
+        const size_t count = getCount();
+        const auto first = coefficient(size_t(0));
+        out = first * getTabulation(formula).getBasis(quadratureIndex, 0);
+        for (size_t local = 1; local < count; ++local)
+        {
+          // A coefficient callback can evict reference tables. Borrow after it.
+          const auto value = coefficient(local);
+          out += value * getTabulation(formula).getBasis(quadratureIndex, local);
+        }
+      }
+
       /**
        * @brief Borrows an existing reference table for a persistent formula.
        *
@@ -1372,6 +1397,34 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Contracts the component basis using the scalar reference table.
+       * @param out Reference vector expansion value.
+       * @param coefficient Local coefficient accessor in this element's ordering.
+       * @param formula Immutable reference formula.
+       * @param quadratureIndex Reference sample index.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, Coefficient&& coefficient,
+        const QF::QuadratureFormula& formula, size_t quadratureIndex) const
+      {
+        out.resize(m_vdim);
+        out.setZero();
+        if (m_vdim == 0)
+          return;
+        const H1Element<K, ScalarType> scalar(this->getGeometry());
+        assert(quadratureIndex < formula.getSize());
+        for (size_t basis = 0; basis < scalar.getCount(); ++basis)
+        {
+          for (size_t component = 0; component < m_vdim; ++component)
+          {
+            const auto value = coefficient(basis * m_vdim + component);
+            out(component) +=
+              value * scalar.getTabulation(formula).getBasis(quadratureIndex, basis);
+          }
+        }
+      }
+
+      /**
        * @brief Evaluates the integrand into the output argument.
        * @param out Storage for the computed result.
        * @param coefficient Coefficient multiplying the expression.
@@ -1615,6 +1668,28 @@ namespace Rodin::Variational
           ScalarLinearForm m_form;
           size_t m_rows, m_cols, m_component;
       };
+
+      /**
+       * @brief Contracts the matrix basis using the scalar reference table.
+       * @param out Reference matrix expansion value.
+       * @param coefficient Local coefficient accessor in this element's ordering.
+       * @param formula Immutable reference formula.
+       * @param quadratureIndex Reference sample index.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, Coefficient&& coefficient,
+        const QF::QuadratureFormula& formula, size_t quadratureIndex) const
+      {
+        out.resize(m_rows, m_cols);
+        const size_t components = m_rows * m_cols;
+        for (size_t component = 0; component < components; ++component)
+        {
+          m_scalar.evaluate(
+            out(component / m_cols, component % m_cols),
+            [&](size_t basis) { return coefficient(basis * components + component); },
+            formula, quadratureIndex);
+        }
+      }
 
       /// @brief Contracts each matrix entry with the scalar reference element.
       template <class Coefficient>

@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_H1_H1_H
 #define RODIN_VARIATIONAL_H1_H1_H
 
+#include "Rodin/Variational/IntegrationPoint.h"
 #include <map>
 #include <cstdint>
 #include <functional>
@@ -266,6 +267,20 @@ namespace Rodin::Variational
           constexpr auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
+          }
+
+          /**
+           * @brief Evaluates a reference expansion at a certified quadrature sample.
+           * @param point Sample whose reference association is preserved by composition.
+           * @returns Mapped expansion value.
+           */
+          constexpr auto operator()(const IntegrationPoint& point) const
+          {
+            if constexpr (std::is_invocable_v<const CallableType&,
+                            const IntegrationPoint&>)
+              return m_v(point);
+            else
+              return (*this)(point.getPoint());
           }
 
         private:
@@ -563,22 +578,6 @@ namespace Rodin::Variational
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 
-      /**
-       * @brief Evaluates the scalar expansion directly at reference coordinates.
-       *
-       * The scalar Lagrange pushforward is composition with the element map;
-       * therefore a point already carrying reference coordinates requires no
-       * range transformation.
-       */
-      template <class Coefficient>
-      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& fe = getFiniteElement(idx.first, idx.second);
-        fe.evaluate(
-          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
-      }
-
     private:
       std::reference_wrapper<const MeshType> m_mesh;
 
@@ -722,6 +721,20 @@ namespace Rodin::Variational
           constexpr auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
+          }
+
+          /**
+           * @brief Evaluates a reference expansion at a certified quadrature sample.
+           * @param point Sample whose reference association is preserved by composition.
+           * @returns Mapped expansion value.
+           */
+          constexpr auto operator()(const IntegrationPoint& point) const
+          {
+            if constexpr (std::is_invocable_v<const CallableType&,
+                            const IntegrationPoint&>)
+              return m_v(point);
+            else
+              return (*this)(point.getPoint());
           }
 
         private:
@@ -910,21 +923,6 @@ namespace Rodin::Variational
       {
         (void)idx;
         return Pushforward<Callable>(std::forward<Callable>(v));
-      }
-
-      /**
-       * @brief Evaluates the vector expansion directly at reference coordinates.
-       *
-       * Vector H1 uses a componentwise Lagrange map and therefore requires no
-       * range transformation after the structured local contraction.
-       */
-      template <class Coefficient>
-      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& fe = getFiniteElement(idx.first, idx.second);
-        fe.evaluate(
-          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:

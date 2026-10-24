@@ -1,3 +1,8 @@
+add_executable(RodinVariationalGridFunctionEvaluationTest GridFunctionEvaluationTest.cpp)
+target_link_libraries(RodinVariationalGridFunctionEvaluationTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+rodin_discover_tests(RodinVariationalGridFunctionEvaluationTest PROPERTIES LABELS unit)
+
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
 add_executable(RodinVariationalGridFunctionRegionInterpolationTest

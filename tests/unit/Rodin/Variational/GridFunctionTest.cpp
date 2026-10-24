@@ -187,7 +187,7 @@ namespace Rodin::Tests::Unit
   };
 
   /// @brief Verifies that a nontrivial range pushforward is applied once to an expansion.
-  TEST(Rodin_Variational_FiniteElementSpace, RangeTransformingPushforwardIsApplied)
+  TEST(Rodin_Variational_GridFunction, RangeTransformingPushforwardIsApplied)
   {
     LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     RangeTransformingSpace fes(mesh);
@@ -196,9 +196,10 @@ namespace Rodin::Tests::Unit
     const std::array<Real, 6> coefficients{1.0, 2.0, 4.0, -1.0, 3.0, 5.0};
     Math::SpatialVector<Real> value;
 
-    fes.evaluate(
-      value, {mesh.getDimension(), 0}, [&](size_t local) { return coefficients[local]; },
-      p);
+    GridFunction field(fes);
+    for (size_t local = 0; local < coefficients.size(); ++local)
+      field.getData()(local) = coefficients[local];
+    value = field.getValue(p);
 
     const auto& fe = fes.getFiniteElement(mesh.getDimension(), 0);
     Math::SpatialVector<Real> referenceValue;
@@ -1134,16 +1135,16 @@ namespace Rodin::Tests::Unit
     ASSERT_GT(original.norm(), 0);
     const size_t calls = fes.getPushforwardEvaluationCount();
     field.getValue(first);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 1);
     mesh.scale(2);
     const PolytopeQuadrature after(cell, formula);
     const IntegrationPoint second(after, 0);
     const auto actual = field.getValue(second);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 2 * fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 2);
     for (size_t i = 0; i < actual.size(); ++i)
       EXPECT_EQ(actual(i), 4 * original(i));
     field.getValue(second);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 3 * fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + 3);
     typename decltype(field)::Cache binding(field);
     const auto beforeBinding = fes.getPushforwardEvaluationCount();
     binding.setPolytope(cell);
@@ -1151,10 +1152,10 @@ namespace Rodin::Tests::Unit
     binding.setIntegrationPoint(second);
     const auto* value = binding.get();
     ASSERT_NE(value, nullptr);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + 1);
     EXPECT_EQ(binding.get(), value);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + 1);
     binding.setIntegrationPoint(second);
-    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + 2 * fes.getSize());
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), beforeBinding + 2);
   }
 }

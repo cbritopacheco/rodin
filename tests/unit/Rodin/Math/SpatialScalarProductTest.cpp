@@ -25,14 +25,14 @@ using namespace Rodin::Math;
 namespace Rodin::Tests::Unit
 {
   /**
-   * @brief Retains the original spatial dot reduction and ignores inactive storage.
+   * @brief Checks roundoff-scaled agreement and exclusion of inactive storage.
    *
-   * Real, complex and both mixed scalar orders are compared bit-for-bit with
-   * the original dynamic Eigen reduction in dimensions zero through three.
-   * Random non-dyadic values expose rounding changes; cancellation distinguishes
-   * left-associated and reassociated sums. NaN padding detects inactive reads.
+   * Float, real, complex and mixed scalar products are compared with the
+   * dynamic Eigen reduction. The error budget scales with machine precision,
+   * active term count and the sum of product magnitudes, including cancellation.
+   * NaN padding detects inactive reads; non-finite classifications are preserved.
    */
-  TEST(SpatialScalarProductTest, SpatialDotMatchesOriginalReductionExactly)
+  TEST(SpatialScalarProductTest, SpatialDotMatchesReferenceReduction)
   {
     const auto check = []<class LHS, class RHS>() {
       SCOPED_TRACE((std::is_same_v<LHS, Complex> ? "Complex" : "Real"));
@@ -45,12 +45,21 @@ namespace Rodin::Tests::Unit
         else
           return sample(generator);
       };
-      const auto sameBits = [](const auto& actual, const auto& expected) {
-        const auto scalar = [](Real a, Real b) {
+      const auto sameValue = [](const auto& actual, const auto& expected, Real magnitude,
+                               size_t count) {
+        using Component = typename Eigen::NumTraits<std::decay_t<decltype(actual)>>::Real;
+        // Covers product and accumulation rounding, including complex products.
+        constexpr Real RoundoffAllowance = 8;
+        const Real tolerance = RoundoffAllowance *
+          std::numeric_limits<Component>::epsilon() * Real(std::max(size_t(1), count)) *
+          magnitude;
+        const auto scalar = [&](Real a, Real b) {
           if (std::isnan(b))
             EXPECT_TRUE(std::isnan(a));
+          else if (!std::isfinite(b) || magnitude == 0)
+            EXPECT_EQ(a, b);
           else
-            EXPECT_EQ(std::memcmp(&a, &b, sizeof(Real)), 0) << a << " != " << b;
+            EXPECT_NEAR(a, b, tolerance);
         };
         if constexpr (std::is_same_v<std::decay_t<decltype(actual)>, Complex>)
         {
@@ -76,7 +85,10 @@ namespace Rodin::Tests::Unit
           const auto n = static_cast<Eigen::Index>(dim);
           const auto original =
             Math::dot(left.getData().head(n), right.getData().head(n));
-          sameBits(Math::dot(lhs, rhs), original);
+          Real magnitude = 0;
+          for (size_t i = 0; i < dim; ++i)
+            magnitude += std::abs(left(i)) * std::abs(right(i));
+          sameValue(Math::dot(lhs, rhs), original, magnitude, dim);
         };
         for (size_t trial = 0; trial < 1000; ++trial)
         {
@@ -106,6 +118,7 @@ namespace Rodin::Tests::Unit
         }
       }
     };
+    check.template operator()<Float, Float>();
     check.template operator()<Real, Real>();
     check.template operator()<Real, Complex>();
     check.template operator()<Complex, Real>();
@@ -113,15 +126,14 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Preserves matrix reduction order for every bounded rectangular shape.
+   * @brief Checks every bounded matrix shape against a roundoff-scaled reference.
    *
-   * Finite results and signed zeros for all four scalar pairs are compared
-   * bit-for-bit with the original const dynamic Eigen blocks. NaNs are checked
-   * by classification, not payload. Non-dyadic samples and cancellation expose changes
-   * in reduction strategy. Empty shapes, signed zeros and infinities exercise
-   * boundary behavior; NaN padding must never enter the active contraction.
+   * Finite products use a machine-precision and magnitude-scaled error budget.
+   * Empty shapes, zeros and non-finite classifications remain exact. Random
+   * non-dyadic samples and cancellation exercise differing reduction orders;
+   * NaN padding must never enter the active contraction.
    */
-  TEST(SpatialScalarProductTest, MatrixDotMatchesOriginalReductionExactly)
+  TEST(SpatialScalarProductTest, MatrixDotMatchesReferenceReduction)
   {
     const auto check = []<class Left, class Right>() {
       SCOPED_TRACE((std::is_same_v<Left, Complex>));
@@ -134,12 +146,21 @@ namespace Rodin::Tests::Unit
         else
           return sample(generator);
       };
-      const auto sameBits = [](const auto& actual, const auto& expected) {
-        const auto component = [](Real a, Real b) {
+      const auto sameValue = [](const auto& actual, const auto& expected, Real magnitude,
+                               size_t count) {
+        using Component = typename Eigen::NumTraits<std::decay_t<decltype(actual)>>::Real;
+        // Covers product and accumulation rounding, including complex products.
+        constexpr Real RoundoffAllowance = 8;
+        const Real tolerance = RoundoffAllowance *
+          std::numeric_limits<Component>::epsilon() * Real(std::max(size_t(1), count)) *
+          magnitude;
+        const auto component = [&](Real a, Real b) {
           if (std::isnan(b))
             EXPECT_TRUE(std::isnan(a));
+          else if (!std::isfinite(b) || magnitude == 0)
+            EXPECT_EQ(a, b);
           else
-            EXPECT_EQ(std::memcmp(&a, &b, sizeof(Real)), 0) << a << " != " << b;
+            EXPECT_NEAR(a, b, tolerance);
         };
         if constexpr (std::is_same_v<std::decay_t<decltype(actual)>, Complex>)
         {
@@ -166,14 +187,20 @@ namespace Rodin::Tests::Unit
           const auto compare = [&] {
             const auto original = Math::dot(left.getData().topLeftCorner(rows, columns),
               right.getData().topLeftCorner(rows, columns));
-            sameBits(Math::dot(left, right), original);
+            Real magnitude = 0;
+            for (Eigen::Index column = 0; column < columns; ++column)
+            {
+              for (Eigen::Index row = 0; row < rows; ++row)
+                magnitude += std::abs(left(row, column)) * std::abs(right(row, column));
+            }
+            sameValue(Math::dot(left, right), original, magnitude, rows * columns);
             if (columns == 3)
             {
-              sameBits(
+              sameValue(
                 Math::dot(
                   left.getData().template topLeftCorner<Eigen::Dynamic, 3>(rows, 3),
                   right.getData().template topLeftCorner<Eigen::Dynamic, 3>(rows, 3)),
-                original);
+                original, magnitude, rows * columns);
             }
           };
           for (size_t trial = 0; trial < 1000; ++trial)
@@ -221,6 +248,7 @@ namespace Rodin::Tests::Unit
         }
       }
     };
+    check.template operator()<Float, Float>();
     check.template operator()<Real, Real>();
     check.template operator()<Real, Complex>();
     check.template operator()<Complex, Real>();

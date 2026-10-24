@@ -613,12 +613,10 @@ namespace Rodin::Math
    * @brief Computes the dot product of two SpatialVector objects.
    *
    * For logical dimension @f$d\le3@f$, computes
-   * @f$\sum_{i=0}^{d-1}u_i\overline{v_i}@f$. Fixed-extent Eigen blocks avoid
-   * a dynamic reduction for same-scalar bounded vectors. Mixed scalar products
-   * retain the dynamic reduction: fixed blocks can change their packetization
-   * and floating-point contraction on GCC. Three same-scalar entries are grouped
-   * as the first two followed by the third, retaining the dynamic reduction's
-   * accumulation order rather than introducing a reassociated three-term sum.
+   * @f$\sum_{i=0}^{d-1}u_i\overline{v_i}@f$. Real operands use scalar
+   * contractions; complex operands retain fixed-extent reductions with right
+   * conjugation. Mixed scalar products retain their dynamic reduction. Fused
+   * arithmetic and reduction order may differ within floating-point rounding.
    * Inactive storage is never read; the empty product is zero.
    *
    * @tparam LHSScalar Scalar type of left-hand side
@@ -641,6 +639,26 @@ namespace Rodin::Math
     {
       using Result =
         decltype(dot(lhs.getData().template head<1>(), rhs.getData().template head<1>()));
+      if constexpr (std::is_same_v<LHSScalar, Real>)
+      {
+        const auto* left = lhs.getData().data();
+        const auto* right = rhs.getData().data();
+        switch (lhs.size())
+        {
+          case 0:
+            return Result(0);
+          case 1:
+            return left[0] * right[0];
+          case 2:
+            return left[0] * right[0] + left[1] * right[1];
+          case 3:
+            return (left[0] * right[0] + left[1] * right[1]) + left[2] * right[2];
+          default:
+            assert(false);
+            return Result(0);
+        }
+      }
+
       switch (lhs.size())
       {
         case 0:
@@ -676,6 +694,42 @@ namespace Rodin::Math
     assert(lhs.cols() == rhs.cols());
     const auto rows = static_cast<Eigen::Index>(lhs.rows());
     const auto cols = static_cast<Eigen::Index>(lhs.cols());
+    if constexpr (std::is_same_v<LHSScalar, Real> && std::is_same_v<RHSScalar, Real>)
+    {
+      if (rows == 0 || cols == 0)
+        return Real(0);
+      const auto* left = lhs.getData().data();
+      const auto* right = rhs.getData().data();
+      const auto stride = lhs.getData().outerStride();
+      const auto contractColumn = [&](Eigen::Index column) {
+        const auto* l = left + column * stride;
+        const auto* r = right + column * stride;
+        switch (rows)
+        {
+          case 1:
+            return l[0] * r[0];
+          case 2:
+            return l[0] * r[0] + l[1] * r[1];
+          case 3:
+            return (l[0] * r[0] + l[1] * r[1]) + l[2] * r[2];
+          default:
+            assert(false);
+            return Real(0);
+        }
+      };
+      switch (cols)
+      {
+        case 1:
+          return contractColumn(0);
+        case 2:
+          return contractColumn(0) + contractColumn(1);
+        case 3:
+          return (contractColumn(0) + contractColumn(1)) + contractColumn(2);
+        default:
+          assert(false);
+          return Real(0);
+      }
+    }
     return dot(
       lhs.getData().topLeftCorner(rows, cols), rhs.getData().topLeftCorner(rows, cols));
   }
