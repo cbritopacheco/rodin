@@ -36,6 +36,10 @@
  *   outlet_conformation_inflow (bool), psi_skew (bool)  psi outlet inflow; skew advection
  *   formulation (psi_rb|exp|psi), c1, c2, c3, c4, dynamic_subscales (bool)
  *                                                  constitutive form and stabilisation (header)
+ *   fluid (sptt|gsptt|cy|owens)                    owens: Owens (2006) aggregating blood,
+ *   owens_lambda_h, owens_eta_plasma, owens_a0, owens_a_crit, owens_gd_crit, owens_gd_max,
+ *   owens_b_floor (bool), owens_epsilon, owens_n0, owens_n_inlet
+ *                                                  (Config::Owens); its CSV columns nMin, nMax, lambdaMax
  *
  * The CSV ends with maxTAWSSLesion, maxOSILesion (tag 5 only) and uyMean,
  * uzMean, the volume means of u_y and u_z over Ubar: both vanish for an
@@ -294,6 +298,19 @@ namespace Rodin::Examples::ViscoelasticFluids
         Real dtM = 1.0;
     };
 
+    /// @brief The model at a point: lambda (= lambda0) from the Owens field
+    ///        by cell when there is one, the constants otherwise.
+    LogModel pointModel(const LogModel& m,
+      const ArterialLesion3DViscousLogImplicit::CellGridFunctionType* lambda, const Point& p)
+    {
+      if (!lambda)
+        return m;
+      LogModel out = m;
+      out.lambda = lambda->getValue(p);
+      out.lambda0 = out.lambda;
+      return out;
+    }
+
     /// @brief What the forms read at one quadrature point, from (psi^k, L^k =
     ///        grad u^k): exp(psi) and Dexp[E_j] (momentum, S1), and the Newton
     ///        data of the psi equation paired against the test blocks.
@@ -513,6 +530,8 @@ namespace Rodin::Examples::ViscoelasticFluids
         const GF* psiNO = nullptr;
         const GF* psiNm1D = nullptr;
         const GF* psiNm1O = nullptr;
+        /// @brief Owens: lambda by cell (nullptr: LogModel::lambda).
+        const ArterialLesion3DViscousLogImplicit::CellGridFunctionType* lambda = nullptr;
     };
 
     /// @brief logPoint(psi(x), grad u(x)) at every quadrature point of the
@@ -586,6 +605,7 @@ namespace Rodin::Examples::ViscoelasticFluids
           // The Newton part reads exp, so it brings the Dexp part along.
           const Eigen::Matrix3d psi = unpack(s.psiD->getValue(p), s.psiO->getValue(p));
           const LogEig eig = logEig(psi);
+          const LogModel md = pointModel(s.model, s.lambda, p);
           if (!(e.have & LogDexp))
           {
             logPointDexp(e.value, eig);
@@ -598,7 +618,7 @@ namespace Rodin::Examples::ViscoelasticFluids
             for (int a = 0; a < 3; ++a)
               for (int b = 0; b < 3; ++b)
                 L(a, b) = J(a, b);
-            logPointNewton(e.value, eig, psi, L, s.model);
+            logPointNewton(e.value, eig, psi, L, md);
             e.have |= LogNewton;
           }
           const bool wantD2 = need & LogD2 & ~e.have;
@@ -657,7 +677,6 @@ namespace Rodin::Examples::ViscoelasticFluids
               e.have |= LogD2;
             if (wantExp)
             {
-              const LogModel& md = s.model;
               const Eigen::Matrix3d Id = Eigen::Matrix3d::Identity();
               const Eigen::Matrix3d& E = e.value.exp;
               const Real ka = md.lambda / (2.0 * md.lambda0);
@@ -1285,6 +1304,14 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_piRO(m_tauh, "al_proj_"),
       m_alpha3Dyn(m_ch),
       m_pttN(m_ch),
+      m_n(m_sh),
+      m_nTest(m_sh),
+      m_nOld(m_sh),
+      m_nNm1(m_sh),
+      m_nHist(m_sh),
+      m_lambdaCell(m_ch),
+      m_structure(m_n, m_nTest),
+      m_structureKSP(m_structure),
       m_wss(m_vh),
       m_symRec0(m_vh),
       m_symRec1(m_vh),
@@ -1373,15 +1400,58 @@ namespace Rodin::Examples::ViscoelasticFluids
       throw std::runtime_error("formulation must be psi_rb, exp or psi.");
     if (m_cfg.formulation != "psi" && m_cfg.psiSkewAdvection)
       throw std::runtime_error("psi_skew is a term of the psi formulation only.");
-    if (m_cfg.fluid != "sptt" && m_cfg.fluid != "cy" && m_cfg.fluid != "gsptt")
-      throw std::runtime_error("fluid must be sptt, cy or gsptt.");
+    if (m_cfg.fluid != "sptt" && m_cfg.fluid != "cy" && m_cfg.fluid != "gsptt" &&
+        m_cfg.fluid != "owens")
+      throw std::runtime_error("fluid must be sptt, cy, gsptt or owens.");
+    if (m_cfg.fluid == "owens")
+    {
+      // Plasma solvent; the polymer at infinite shear, eta_p,inf = eta_CY(inf)
+      // - eta_plasma, relaxes in lambda_H: G = eta_p/lambda = eta_p,inf/lambda_H
+      // is the (constant) modulus, so sigma = G (exp(psi) - I) as for gsptt
+      // and only lambda varies, by cell (Config::Owens).
+      const auto& ow = m_cfg.owens;
+      if (!(ow.lambdaH > 0.0))
+        throw std::runtime_error("owens: lambda_H must be positive.");
+      ob.etaS = ow.etaPlasma;
+      ob.etaP = m_cfg.carreauYasuda.etaInf - ow.etaPlasma;
+      if (!(ob.etaP > 0.0))
+        throw std::runtime_error("owens: eta_CY(inf) - eta_plasma must be positive.");
+      ob.lambda = ow.lambdaH;
+      ob.pttEpsilon = ow.epsilon;
+      ob.lambda0Factor = 1.0;
+      ob.lambda0Min = 0.0;
+      if (isRoot() && (m_cfg.deborah > 0.0 || m_cfg.weissenberg > 0.0))
+        Alert::Warning() << "[fluid] owens: Wi and De are ignored; lambda_H = " << ow.lambdaH
+                         << " s is the single-cell time." << Alert::Raise;
+      m_cfg.deborah = 0.0;
+      m_cfg.weissenberg = 0.0;
+      if (!(ow.gdCrit > 0.0 && ow.gdMax > ow.gdCrit && ow.a0 >= 0.0))
+        throw std::runtime_error("owens: need 0 < gd_crit < gd_max and a0 >= 0.");
+      // The peak of b(gd) (bFloor), on a log grid up to gd_max.
+      m_owensBPeak = 0.0;
+      m_owensGdPeak = std::numeric_limits<Real>::infinity();
+      for (Real gd = 1.0e-2; gd <= ow.gdMax; gd *= 1.02)
+      {
+        const Real b = owensBRaw(gd);
+        if (b > m_owensBPeak)
+        {
+          m_owensBPeak = b;
+          m_owensGdPeak = gd;
+        }
+      }
+    }
     if (m_cfg.fluid == "cy")
     {
       // Carreau-Yasuda as "gsptt" with a vanishing polymer (file header).
+      // The polymer must stay passive: with De = 1e-3 (lambda ~ 1 ms) and
+      // epsilon = 0 it was an Oldroyd-B with lambda eps_dot > 1/2 in the
+      // throat at peak systole, psi grew without bound (run 11: psi ~ 27 at
+      // t = 1.22 s) and s exp(psi) reached the momentum. De = 1e-5 keeps
+      // lambda gd < 0.1 up to gd = 1e4 1/s, and epsilon = 0.5 bounds psi.
       ob.etaP = 1.0e-6 * m_cfg.carreauYasuda.etaInf;
-      m_cfg.deborah = 1.0e-3;
+      m_cfg.deborah = 1.0e-5;
       m_cfg.weissenberg = 0.0;
-      ob.pttEpsilon = 0.0;
+      ob.pttEpsilon = 0.5;
       ob.lambda0Factor = 1.0;
       ob.lambda0Min = 0.0;
     }
@@ -1430,10 +1500,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_inflow.setFluid(rho, m_cfg.carreauYasuda.etaInf, ob.etaP, ob.lambda, omega, 0.5 * D);
       computeDevelopedProfile();
       m_inflow.setMeanProfile(m_inletR, m_inletPhi);
-      for (Real gd = 1.0e-3; gd < 1.0e5; gd *= 1.5)
-        if (!(solventViscosity(gd) > 0.0))
-          throw std::runtime_error("gsptt: eta_CY(gd) - eta_p/f(gd) <= 0 at gd = " +
-            std::to_string(gd) + " 1/s; lower eta_p or epsilon.");
+      if (!isOwens())
+        for (Real gd = 1.0e-3; gd < 1.0e5; gd *= 1.5)
+          if (!(solventViscosity(gd) > 0.0))
+            throw std::runtime_error("gsptt: eta_CY(gd) - eta_p/f(gd) <= 0 at gd = " +
+              std::to_string(gd) + " 1/s; lower eta_p or epsilon.");
     }
 
     if (isRoot())
@@ -1455,6 +1526,33 @@ namespace Rodin::Examples::ViscoelasticFluids
                       << solventViscosity(1.0) << ", " << solventViscosity(10.0) << ", "
                       << solventViscosity(100.0) << ", " << solventViscosity(1000.0) << " Pa s"
                       << Alert::Raise;
+        if (isOwens())
+        {
+          const auto& ow = m_cfg.owens;
+          const Real G = ob.etaP / ob.lambda;
+          Alert::Info() << "[fluid] Owens: lambda_H=" << ow.lambdaH << " s  eta_plasma=" << ob.etaS
+                        << "  eta_p,inf=" << ob.etaP << " Pa s  G=" << G << " Pa  epsilon="
+                        << ob.pttEpsilon << "  aN0: a0=" << ow.a0 << " ac="
+                        << owensA(ow.gdCrit) << " 1/s at gd_c=" << ow.gdCrit << ", 0 above gd_max="
+                        << ow.gdMax << " 1/s  b floor=" << (ow.bFloor ? m_owensBPeak : 0.0)
+                        << " 1/s above " << m_owensGdPeak << " 1/s  n(t=0)="
+                        << (ow.nInitial > 0.0 ? ow.nInitial : ow.nInitial == 0.0 ? -1.0 : owensNst(0.0))
+                        << (ow.nInitial == 0.0 ? " (developed profile)" : "") << Alert::Raise;
+          std::ostringstream table;
+          table << "[fluid] Owens steady shear, gd: n_st  mu_st (s)  G mu_st/(eta_CY - eta_s)  "
+                   "relaxation time of n 2/(b (2 n_st - 1)) (s) |";
+          for (const Real gd : { 0.0, 1.0, 10.0, 100.0, 300.0, 1000.0, 5000.0 })
+          {
+            const Real nst = owensNst(gd);
+            const Real lam = owensLambda(nst, gd);
+            const Real b = owensB(gd);
+            table << "  " << gd << ": " << nst << "  " << lam << "  "
+                  << (G * lam / std::max<Real>(carreauYasuda(gd) - ob.etaS, 1.0e-300)) << "  "
+                  << (b > 0.0 ? 2.0 / (b * (2.0 * nst - 1.0)) : std::numeric_limits<Real>::infinity())
+                  << " |";
+          }
+          Alert::Info() << table.str() << Alert::Raise;
+        }
       }
       Alert::Info() << "[inflow] D=" << D << " m  Ubar=" << m_meanVelocity
                     << " m/s  T=" << m_period << " s  lambda=" << ob.lambda
@@ -1557,7 +1655,8 @@ namespace Rodin::Examples::ViscoelasticFluids
   ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::steadyPTTFactor(Real gammaDot) const
   {
     const auto& ob = m_cfg.oldroydB;
-    const Real c = 2.0 * ob.pttEpsilon * ob.lambda * ob.lambda * gammaDot * gammaDot;
+    const Real lam = steadyLambda(gammaDot);
+    const Real c = 2.0 * ob.pttEpsilon * lam * lam * gammaDot * gammaDot;
     if (c <= 0.0)
       return 1.0;
     // f^3 - f^2 - c = 0 has one root f >= 1; Newton from above converges
@@ -1577,7 +1676,7 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::solventViscosity(Real gammaDot) const
   {
-    if (m_cfg.fluid == "sptt")
+    if (constantSolvent())
       return m_cfg.oldroydB.etaS;
     const Real etaCY = carreauYasuda(gammaDot);
     if (m_cfg.fluid == "cy")
@@ -1601,7 +1700,7 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::solventViscosityAt(const Point& p) const
   {
-    if (m_cfg.fluid == "sptt")
+    if (constantSolvent())
       return m_cfg.oldroydB.etaS;
     return solventViscosity(shearRateAt(p));
   }
@@ -1690,7 +1789,10 @@ namespace Rodin::Examples::ViscoelasticFluids
                                            : -interpolateInlet(m_inletShear, r);
     // Steady simple shear of the sPTT mode (lambda0 = lambda), in (x, r):
     // c = [[1 + 2 a^2, a], [a, 1]], a = lambda du_x/dr / f; c_tt = 1.
-    const Real a = m_cfg.oldroydB.lambda * dudr / steadyPTTFactor(std::abs(dudr));
+    // Owens with a fixed inlet n: the relaxation time of that n, not n_st.
+    const Real lamIn = (isOwens() && m_cfg.owens.nInlet > 0.0)
+      ? owensLambda(m_cfg.owens.nInlet, std::abs(dudr)) : steadyLambda(std::abs(dudr));
+    const Real a = lamIn * dudr / steadyPTTFactor(std::abs(dudr));
     Eigen::Matrix2d cm;
     cm << 1.0 + 2.0 * a * a, a, a, 1.0;
     const Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(cm);
@@ -1722,10 +1824,191 @@ namespace Rodin::Examples::ViscoelasticFluids
     const Real h = cellSize(p);
     const Real speed = std::sqrt(Math::dot(uc, uc));
     const Real gradNorm = Jacobian(m_uOld).getValue(p).norm();
-    const Real f = pttFactor(
+    const Real f = (isOwens() ? ob.lambda / m_lambdaCell.getValue(p) : 1.0) * pttFactor(
       logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp().trace());
     return 1.0 / (4.0 * f / (2.0 * ob.etaP) +
       0.25 * (ob.lambda * speed / (2.0 * ob.etaP * h) + ob.lambda * gradNorm / ob.etaP));
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::steadyLambda(Real gammaDot) const
+  {
+    const auto& ob = m_cfg.oldroydB;
+    if (!isOwens())
+      return ob.lambda;
+    // G lambda_st = eta_CY - eta_plasma: the steady shear viscosity of a
+    // Hookean mode is eta_p = G lambda whatever the rate.
+    const Real G = ob.etaP / ob.lambda;
+    return std::max<Real>(carreauYasuda(gammaDot) - ob.etaS, 1.0e-12 * ob.etaP) / G;
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::owensA(Real gammaDot) const
+  {
+    // C1 cubics with zero slope at 0, gd_c and gd_max (Config::Owens).
+    const auto& ow = m_cfg.owens;
+    const Real gd = std::abs(gammaDot);
+    const Real ac = ow.aCrit >= 0.0 ? ow.aCrit : 2.0 * ow.a0;
+    const auto h = [](Real s) { return s * s * (3.0 - 2.0 * s); };
+    if (gd <= ow.gdCrit)
+      return ow.a0 + (ac - ow.a0) * h(gd / ow.gdCrit);
+    if (gd <= ow.gdMax)
+      return ac * (1.0 - h((gd - ow.gdCrit) / (ow.gdMax - ow.gdCrit)));
+    return 0.0;
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::owensBRaw(Real gammaDot) const
+  {
+    // Eq. (28), b = aN0/(n_st (n_st - 1)).
+    const Real a = owensA(gammaDot);
+    const Real nst = owensNst(gammaDot);
+    return (a > 0.0 && nst > 1.0) ? a / (nst * (nst - 1.0)) : 0.0;
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::owensB(Real gammaDot) const
+  {
+    const Real b = owensBRaw(gammaDot);
+    if (m_cfg.owens.bFloor && std::abs(gammaDot) >= m_owensGdPeak)
+      return std::max(b, m_owensBPeak);
+    return b;
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::owensNst(Real gammaDot) const
+  {
+    // Eq. (27) with eta(gd) - eta_s for the polymer: n_st >= 1.
+    const auto& ob = m_cfg.oldroydB;
+    const Real r = std::max<Real>((carreauYasuda(gammaDot) - ob.etaS) / ob.etaP, 1.0);
+    return r * (1.0 + 1.5 * owensA(gammaDot) * m_cfg.owens.lambdaH);
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::owensLambda(Real n, Real gammaDot) const
+  {
+    // Eq. (23): mu = n lambda_H/(1 + g_n n lambda_H), g_n n = b n (n - 1)/2 + aN0.
+    const auto& ow = m_cfg.owens;
+    n = std::max<Real>(n, 1.0);
+    const Real gn = 0.5 * owensB(gammaDot) * n * (n - 1.0) + owensA(gammaDot);
+    return n * ow.lambdaH / (1.0 + gn * ow.lambdaH);
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::shearRateOf(
+    const VectorGridFunctionType& u, const Point& p) const
+  {
+    const auto J = Jacobian(u).getValue(p);
+    Real s2 = 0.0;
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+      {
+        const Real e = 0.5 * (J(i, j) + J(j, i));
+        s2 += e * e;
+      }
+    return std::sqrt(2.0 * s2);
+  }
+
+  ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::inletAggregateSize(const Point& p) const
+  {
+    // The steady value at the shear rate of the developed mean profile, as
+    // the inlet conformation of inletDevelopedConformation.
+    const auto& x = p.getPhysicalCoordinates();
+    const Real r = std::sqrt(x(1) * x(1) + x(2) * x(2));
+    const Real D = m_cfg.diameter;
+    if (m_cfg.owens.nInlet > 0.0)
+      return m_cfg.owens.nInlet;
+    const Real gd = m_inletShear.empty() ? 16.0 * m_meanVelocity * r / (D * D)
+                                         : interpolateInlet(m_inletShear, r);
+    return owensNst(gd);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::updateStructureFields()
+  {
+    m_lambdaCell.project(RealFunction([this](const Point& p) {
+      return owensLambda(m_nOld.getValue(p), shearRateOf(m_uOld, p)); }));
+    m_nMin = m_nOld.min();
+    m_nMax = m_nOld.max();
+    m_lambdaMax = m_lambdaCell.max();
+  }
+
+  void ArterialLesion3DViscousLogImplicit::setupStructure()
+  {
+    // D n/Dt = -(1/2) b (n - n_st)(n + n_st - 1): BDF with the mass step of the
+    // flow (n_hist as x_hist in prepareStep), advected by u^{n+1}, the reaction
+    // linearised about n^n, c = (1/2) b(gd) (n^n + n_st - 1) > 0:
+    //   (n - n_hist)/dtM + u.grad n + c n = c n_st,
+    // SUPG with tau = [(2/dtM)^2 + (2 |u|/h)^2 + c^2]^-1/2. Pure advection: n
+    // is imposed on the inlet (the steady value of the developed profile).
+    // The coefficients read dt and the fields when assembled, so the form is
+    // built once. It is solved after the flow step is accepted, with u^{n+1}
+    // in m_uOld and n^n in m_nOld.
+    const auto reaction = [this](const Point& p) -> Real {
+      const Real gd = shearRateOf(m_uOld, p);
+      return 0.5 * owensB(gd) * (m_nOld.getValue(p) + owensNst(gd) - 1.0);
+    };
+    const auto tau = [this, reaction](const Point& p) -> Real {
+      const auto uc = m_uOld.getValue(p);
+      const Real a = 2.0 / massStep();
+      const Real b = 2.0 * std::sqrt(Math::dot(uc, uc)) / cellSize(p);
+      const Real c = reaction(p);
+      return 1.0 / std::sqrt(a * a + b * b + c * c);
+    };
+    const auto known = [this, reaction](const Point& p) -> Real {
+      return m_nHist.getValue(p) / massStep() + reaction(p) * owensNst(shearRateOf(m_uOld, p));
+    };
+    RealFunction massFn = [this](const Point&) { return 1.0 / massStep(); };
+    RealFunction reactionFn = [reaction](const Point& p) { return reaction(p); };
+    RealFunction tauFn = [tau](const Point& p) { return tau(p); };
+    RealFunction tauMassFn = [this, tau](const Point& p) { return tau(p) / massStep(); };
+    RealFunction tauReactionFn = [tau, reaction](const Point& p) { return tau(p) * reaction(p); };
+    RealFunction knownFn = [known](const Point& p) { return known(p); };
+    RealFunction tauKnownFn = [tau, known](const Point& p) { return tau(p) * known(p); };
+    RealFunction inletN = [this](const Point& p) { return inletAggregateSize(p); };
+
+    const auto adv = Dot(m_uOld, Grad(m_n));
+    const auto advTest = Dot(m_uOld, Grad(m_nTest));
+    m_structure =
+        Integral(massFn * m_n, m_nTest)
+      + Integral(adv, m_nTest)
+      + Integral(reactionFn * m_n, m_nTest)
+      - Integral(knownFn, m_nTest)
+      + Integral(tauMassFn * m_n, advTest)
+      + Integral(tauFn * adv, advTest)
+      + Integral(tauReactionFn * m_n, advTest)
+      - Integral(tauKnownFn, advTest)
+      + DirichletBC(m_n, inletN).on(m_cfg.labels.inlet);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::solveStructure()
+  {
+    // n_hist as x_hist in prepareStep, with this step's dt ratio.
+    if (m_cfg.timeOrder == 2)
+    {
+      const Real w = bdfRatio();
+      const Real a = (1.0 + w) * (1.0 + w) / (1.0 + 2.0 * w);
+      const Real b = -w * w / (1.0 + 2.0 * w);
+      combine(a, m_nOld.getData(), b, m_nNm1.getData(), m_nHist.getData());
+    }
+    else
+      m_nHist.setData(m_nOld.getData());
+
+    m_structure.assemble();
+    m_structure.solve(m_structureKSP);
+
+    // SUPG is not monotone: n stays within [1, n_st(0)], the single cell and
+    // the rest state.
+    {
+      ::Vec v = m_n.getSolution().getData();
+      PetscInt size = 0;
+      PetscScalar* data = nullptr;
+      PetscErrorCode ierr = VecGetLocalSize(v, &size);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecGetArray(v, &data);
+      assert(ierr == PETSC_SUCCESS);
+      const Real nMax = owensNst(0.0);
+      for (PetscInt i = 0; i < size; ++i)
+        data[i] = std::isfinite(data[i]) ? std::clamp<Real>(data[i], 1.0, nMax) : 1.0;
+      ierr = VecRestoreArray(v, &data);
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+    }
+    m_nNm1.setData(m_nOld.getData());
+    m_nOld.setData(m_n.getSolution().getData());
+    updateStructureFields();
   }
 
   ArterialLesion3DViscousLogImplicit::Real ArterialLesion3DViscousLogImplicit::lambda0() const
@@ -1882,6 +2165,8 @@ namespace Rodin::Examples::ViscoelasticFluids
   {
     setupSpaces();
     setupFlow();
+    if (isOwens())
+      setupStructure();
     setupWallShear();
 
     if (isRoot())
@@ -1914,6 +2199,26 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_piRO.get() = zero;
     m_pttN = Real(1);
     m_alpha3Dyn = Real(0);
+    if (isOwens())
+    {
+      const auto& ow = m_cfg.owens;
+      if (ow.nInitial == 0.0)
+        m_nOld.project(RealFunction([this](const Point& p) { return inletAggregateSize(p); }));
+      else
+        m_nOld = Real(ow.nInitial > 0.0 ? ow.nInitial : owensNst(0.0));
+      m_nNm1.setData(m_nOld.getData());
+      m_nHist.setData(m_nOld.getData());
+      m_n.getSolution().setData(m_nOld.getData());
+      updateStructureFields();
+    }
+    else
+    {
+      m_nOld = Real(1);
+      m_nNm1 = Real(1);
+      m_nHist = Real(1);
+      m_lambdaCell = Real(m_cfg.oldroydB.lambda);
+      m_lambdaMax = m_cfg.oldroydB.lambda;
+    }
     m_psiOldD = zero;
     m_psiOldO = zero;
     m_psiNm1D = zero;
@@ -1939,6 +2244,11 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     configureMassSolver(m_vectorProjectionKSP, "al_vproj_");
     configureMassSolver(m_wssKSP, "al_wss_");
+    // The aggregate-size transport is not symmetric: GMRES + block Jacobi (ILU).
+    setPrefixedDefault("al_struct_", "ksp_type", "gmres");
+    setPrefixedDefault("al_struct_", "pc_type", "bjacobi");
+    setPrefixedDefault("al_struct_", "ksp_rtol", "1e-10");
+    m_structureKSP.setPrefix("al_struct_");
 
     updateConformation();  // psi = 0: tau = I, sigma = 0
 
@@ -1963,6 +2273,11 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_xdmf.add("TAWSS", m_tawss);
     m_xdmf.add("OSI", m_osi);
     m_xdmf.add("shearStress", m_wss);
+    if (isOwens())
+    {
+      m_nOld.setName("aggregateSize");
+      m_xdmf.add("aggregateSize", m_nOld);
+    }
 
     // In 3D these are areas. The inlet must measure pi D^2/4, up to the
     // polygonal approximation of the circle.
@@ -2028,7 +2343,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_formMassStep = dtM;
     const auto& ob = m_cfg.oldroydB;
     const auto etaS = PointwiseScalar([this](const Point& p) -> Real {
-      return solventViscosityAt(p); }, m_cfg.fluid == "sptt" ? size_t(0) : size_t(2));
+      return solventViscosityAt(p); }, constantSolvent() ? size_t(0) : size_t(2));
     const Real l0 = lambda0();
     const Real s = ob.etaP / l0;                     // sigma = s (E - I)
     const Real ka = ob.lambda / (2.0 * l0);          // lambda/(2 lambda0)
@@ -2080,8 +2395,9 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto I = MatrixFunction<Math::Matrix<Real>>(Math::Matrix<Real>::Identity(3, 3));
 
     // Pointwise data at the Newton point (psi^k, u^k); E_hist from psi^n, psi^{n-1}.
-    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
+    LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
       &m_psiOldD, &m_psiOldO, &m_psiNm1D, &m_psiNm1O };
+    at.lambda = lambdaField();
 
     // Momentum: exp(psi) ~ exp(psi^k) + Dexp[psi - psi^k].
     const auto Tn = fromPoint(at, LogDexp, [](const LogPoint& q) { return q.exp; });
@@ -2257,7 +2573,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_formMassStep = dtM;
     const auto& ob = m_cfg.oldroydB;
     const auto etaS = PointwiseScalar([this](const Point& p) -> Real {
-      return solventViscosityAt(p); }, m_cfg.fluid == "sptt" ? size_t(0) : size_t(2));
+      return solventViscosityAt(p); }, constantSolvent() ? size_t(0) : size_t(2));
     const Real l0 = lambda0();
     const Real s = ob.etaP / l0;                     // sigma = s (exp(psi) - I)
     const Real kB = ob.lambda / (2.0 * ob.etaP);     // tau_psi = kB alpha3
@@ -2298,7 +2614,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto I = MatrixFunction<Math::Matrix<Real>>(Math::Matrix<Real>::Identity(3, 3));
 
     // Pointwise data at the Newton point (psi^k, u^k).
-    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision };
+    LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision };
+    at.lambda = lambdaField();
 
     // Momentum: exp(psi) ~ exp(psi^k) + Dexp[psi - psi^k].
     const auto Tn = fromPoint(at, LogDexp, [](const LogPoint& q) { return q.exp; });
@@ -2340,7 +2657,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     // of block B (paired with weight w_B) tested with chi_C. Like the rest of
     // the adjoint (u^n, alpha^n), JN is taken at step n, (psi^n, grad u^n):
     // the term stays linear in the unknowns and Newton exact.
-    const LogFields<VectorGridFunctionType> atN{ &m_psiOldD, &m_psiOldO, &m_uOld, model, &m_stepRevision };
+    LogFields<VectorGridFunctionType> atN{ &m_psiOldD, &m_psiOldO, &m_uOld, model, &m_stepRevision };
+    atN.lambda = lambdaField();
     const auto adjointJN = [&atN](size_t c, size_t b, Real w) {
       return fromPoint(atN, LogNewton, [c, b, w](const LogPoint& q) -> Eigen::Matrix3d {
         return q.A[c][b].transpose() / w; });
@@ -2530,8 +2848,11 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     // f(psi^n) by cell: the reaction of alpha3 and of the adjoint, and the
     // polymer viscosity eta_p/f of eta_0.
+    // Owens: eta_p = G lambda(p), G = eta_p,inf/lambda_H, so f/(2 eta_p) = (f
+    // lambda_H/lambda(p))/(2 eta_p,inf) and eta_p/f likewise: the factor rides on f.
     m_pttN.project(RealFunction([this](const Point& p) {
-      return pttFactor(logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp().trace());
+      const Real f = pttFactor(logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp().trace());
+      return isOwens() ? f * m_cfg.oldroydB.lambda / m_lambdaCell.getValue(p) : f;
     }));
     // alpha1 = [c1 eta_0/h1^2 + c2 rho |u|/h2]^-1, eta_0 = eta_s + eta_p/f.
     m_alpha1.project(RealFunction([this, rho](const Point& p) {
@@ -2594,8 +2915,9 @@ namespace Rodin::Examples::ViscoelasticFluids
     // BDF history and mass step, so R is the residual the step solved.
     const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda),
       bdfA, bdfB, massStep() };
-    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
+    LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision,
       &m_psiOldD, &m_psiOldO, &m_psiNm1D, &m_psiNm1O };
+    at.lambda = lambdaField();
     const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
     const Real cT = m_cfg.subscaleTimeResidual ? 0.0 : 1.0;   // d_t E_h out of R (setupFlowExp)
 
@@ -2679,7 +3001,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       StepPoint out;
       // d_t psi_h only with Config::subscaleTimeResidual (P^perp[d_t psi_h] = 0).
       out.R = (hT / dtM) * (psi - unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p))) +
-        nonlinearMap(psi, L, model);
+        nonlinearMap(psi, L, pointModel(model, lambdaField(), p));
       out.divE.setZero();
       for (int j = 0; j < 3; ++j)
       {
@@ -2751,7 +3073,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     // eta_s(gd(u^n or u*)); constant (order 0) for "sptt", so that assembly is
     // the parent one.
     const auto etaS = PointwiseScalar([this](const Point& p) -> Real {
-      return solventViscosityAt(p); }, m_cfg.fluid == "sptt" ? size_t(0) : size_t(2));
+      return solventViscosityAt(p); }, constantSolvent() ? size_t(0) : size_t(2));
     const Real l0 = lambda0();
     const Real s = ob.etaP / l0;                  // sigma = s (exp(psi) - I)
     /// The psi equation is 2x the sigma equation of the exp form (2D header).
@@ -2795,7 +3117,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto I = MatrixFunction<Math::Matrix<Real>>(Math::Matrix<Real>::Identity(3, 3));
 
     // Everything pointwise is at (psi^k, u^k), the Newton linearisation point.
-    const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision };
+    LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision };
+    at.lambda = lambdaField();
 
     // Momentum: exp(psi) ~ exp(psi^k) + Dexp[psi - psi^k], all at psi^k.
     const auto Tn = fromPoint(at, LogDexp, [](const LogPoint& q) { return q.exp; });
@@ -3051,8 +3374,9 @@ namespace Rodin::Examples::ViscoelasticFluids
     const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda) };
     // At the iterate the pointwise data are those of the assembly (same key);
     // step data (psi^n, u^n) are keyed by the step revision, as in setupFlowPsiRB.
-    const LogFields<VectorGridFunctionType> atX{ &psiSD, &psiSO, &uS, model,
+    LogFields<VectorGridFunctionType> atX{ &psiSD, &psiSO, &uS, model,
       sigmaIt ? &m_psiRevision : &m_stepRevision };
+    atX.lambda = lambdaField();
     m_piDivSigma.project(s * (divExp<Block::D>(atX, psiSD) + divExp<Block::O>(atX, psiSO)));
     // Nothing else reads psi^n pointwise this step: free its points.
     if (!sigmaIt)
@@ -3541,7 +3865,8 @@ namespace Rodin::Examples::ViscoelasticFluids
   void ArterialLesion3DViscousLogImplicit::writeCSVHeader()
   {
     m_csv << "t,cycle,qTarget,qIn,qOut,pInletMean,pOutletMean,dp,maxU,maxSigma,"
-          << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion,uyMean,uzMean,dt,retries\n";
+          << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion,uyMean,uzMean,dt,retries,"
+          << "nMin,nMax,lambdaMax\n";
   }
 
   void ArterialLesion3DViscousLogImplicit::writeCSVRow(int cycle)
@@ -3562,7 +3887,8 @@ namespace Rodin::Examples::ViscoelasticFluids
           << (m_inletPressure - m_outletMeanPressure) << ',' << m_speed << ',' << m_stress
           << ',' << m_conformationIts << ',' << m_psiIncrement << ',' << tawss << ',' << osi
           << ',' << tawssLesion << ',' << osiLesion << ',' << m_uyMean << ',' << m_uzMean
-          << ',' << m_dt << ',' << m_timing.retries << '\n';
+          << ',' << m_dt << ',' << m_timing.retries << ',' << m_nMin << ',' << m_nMax << ','
+          << m_lambdaMax << '\n';
     m_csv.flush();
   }
 
@@ -3656,6 +3982,9 @@ namespace Rodin::Examples::ViscoelasticFluids
         if (!m_cfg.adaptiveTimeStep || retries >= m_cfg.maxStepRetries ||
             next < (1.0 - TimeRoundoff) * dtMin)
         {
+          // The last accepted state (rejectStep restored it), for locate_blowup.py.
+          m_t = tStart;
+          m_xdmf.write(m_t).flush();
           Alert::Exception() << "[flow] diverged at step " << (step + 1) << ", t = " << m_t
                              << " s, dt = " << m_dt << " s: " << m_failure << Alert::Raise;
           return 1;
@@ -3667,6 +3996,8 @@ namespace Rodin::Examples::ViscoelasticFluids
         ++m_timing.retries;
         dt = next;
       }
+      if (isOwens())
+        solveStructure();
       m_dtPrev = m_dt;
       ++m_history;
       ++step;
@@ -3698,6 +4029,13 @@ namespace Rodin::Examples::ViscoelasticFluids
       writeCSVRow(cycle);
 
       bool output = endOfCycle;
+      // Diagnostic dumps: every accepted step whose max|sigma| exceeds
+      // dumpStress, at most dumpMax of them (locate_blowup.py --last N).
+      if (m_cfg.dumpStress > 0.0 && m_stress > m_cfg.dumpStress && m_dumps < m_cfg.dumpMax)
+      {
+        output = true;
+        ++m_dumps;
+      }
       if (outputInterval > 0.0 && m_t >= nextOutput - TimeRoundoff * m_dtNominal)
       {
         output = true;
@@ -3891,6 +4229,8 @@ int main(int argc, char** argv)
       getReal("-al_conformation_tol", cfg.conformationTolerance);
       getReal("-al_newton_max_step", cfg.newtonMaxStep);
       getReal("-al_max_velocity_factor", cfg.maxVelocityFactor);
+      getReal("-al_dump_stress", cfg.dumpStress);
+      getInt("-al_dump_max", cfg.dumpMax);
       getBool("-al_vms", cfg.useVMS);
       getBool("-al_inlet_conformation", cfg.inletConformation);
       getBool("-al_trace_newton", cfg.traceNewton);
@@ -3912,6 +4252,16 @@ int main(int argc, char** argv)
       getReal("-al_pc_reuse_growth", cfg.pcReuseGrowth);
       getBool("-al_outlet_conformation_inflow", cfg.outletConformationInflow);
       getBool("-al_psi_skew", cfg.psiSkewAdvection);
+      getReal("-al_owens_lambda_h", cfg.owens.lambdaH);
+      getReal("-al_owens_eta_plasma", cfg.owens.etaPlasma);
+      getReal("-al_owens_a0", cfg.owens.a0);
+      getReal("-al_owens_a_crit", cfg.owens.aCrit);
+      getReal("-al_owens_gd_crit", cfg.owens.gdCrit);
+      getReal("-al_owens_gd_max", cfg.owens.gdMax);
+      getBool("-al_owens_b_floor", cfg.owens.bFloor);
+      getReal("-al_owens_n_inlet", cfg.owens.nInlet);
+      getReal("-al_owens_epsilon", cfg.owens.epsilon);
+      getReal("-al_owens_n0", cfg.owens.nInitial);
 
       // The XDMF and CSV writers do not create directories.
       if (world.rank() == 0)

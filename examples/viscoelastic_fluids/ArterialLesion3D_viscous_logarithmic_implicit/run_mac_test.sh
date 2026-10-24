@@ -23,6 +23,9 @@
 #     R01     fluid R with lambda 0.1 s and eta_p 0.0104 (the largest with a
 #             positive solvent): De 0.39, lambda gd ~ 1e3 at the wall, beta 0.81,
 #             the same N1 at the wall (~40 Pa) as R at 4.83 s
+#     O       fluid O, the Owens (2006) aggregating blood (run_3d.sh): lambda_H
+#             5 ms in the jet (lambda gd ~ 25 at the throat wall), ~0.1 s in
+#             the recirculation; results in <variant>/Re600_Wo5.5/S75/O
 #  The flow peaks at t = T/2 = 0.128 s and the former failures came after it,
 #  in the deceleration: one cycle (CYCLES=1, the ramp cycle) is enough.
 #
@@ -122,6 +125,7 @@ for V in $VARIANTS; do
     oldbdf1) FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; TO=1 ;;
     D)      FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; FL=D ;;
     R01)    FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; LR=0.1; EP=0.0104 ;;
+    O)      FORM=psi_rb; EXTRA="-al_subscale_time_residual 1"; FL=O ;;
     *) echo "unknown variant $V"; exit 1 ;;
   esac
   rm -rf "$OUT/$MESH_LEVEL/$V"
@@ -130,6 +134,7 @@ for V in $VARIANTS; do
       CYCLES_R="$CYCLES" CYCLES="$CYCLES" SOLVER="$SOLVER" FORMULATION="$FORM" PETSC_EXTRA="$EXTRA -al_trace_newton 1" \
       EXE3D="$EXE" MPIRUN="$MPIRUN" OUT3D="$OUT/$MESH_LEVEL/$V" RETRY=0 bash "$HERE/run_3d.sh" 600 S75
     d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"; [[ "$FL" == D ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/Wi2"
+    [[ "$FL" == O ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/O"
     if "$PY" -c "import numpy, h5py" 2> /dev/null && [[ -f "$d/case.xdmf" ]]; then
       "$PY" "$HERE/locate_blowup.py" "$d" --last 8 > "$OUT/$MESH_LEVEL/$V/blowup.txt" 2>&1
     fi
@@ -144,6 +149,7 @@ done
     echo "variant      status  t_end      max|sigma|  max|u|   retries  Newton(max)"
     for V in $VARIANTS; do
       d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/R"; [[ "$V" == D ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/Wi2"
+      [[ "$V" == O ]] && d="$OUT/$MESH_LEVEL/$V/Re600_Wo5.5/S75/O"
       st=RUNNING; [[ -f "$d/DONE" ]] && st=DONE; [[ -f "$d/FAILED" ]] && st=FAILED
       awk -F, -v v="$V" -v st="$st" 'NR == 1 { for (i = 1; i <= NF; i++) c[$i] = i; next }
         { t = $c["t"]; s = $c["maxSigma"] + 0; u = $c["maxU"] + 0; r += $c["retries"];

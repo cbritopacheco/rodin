@@ -9,6 +9,9 @@
 #  Fluids (the same steady shear viscosity, Carreau-Yasuda, for all three):
 #     N   Newtonian at eta_inf (sPTT at Wi 0.01)
 #     CY  Carreau-Yasuda, no memory
+#     O   Owens (2006) aggregating blood (run_3d.sh; LAMBDA_H, ETA_PLASMA, A0_O,
+#         ACRIT_O, EPS_O, N0_O, NIN_O): lambda = n lambda_H in rouleaux of size n(x, t),
+#         lambda_H at high shear; add it with FLUIDS3D="O R CY N"
 #     R   gsPTT: sPTT polymer (lambda 0.1 s, eta_p 0.0104 Pa s, eps 0.2) plus the
 #         solvent eta_CY - eta_p/f, which is positive (its minimum is 3e-3). The
 #         pair (lambda, eta_p) is the one with the largest 2 Hz loss viscosity
@@ -64,6 +67,8 @@ BUILD="${BUILD:-build-gcc12}"
 export OUT="${OUT:-$HOME/Results/arteries}"
 export LAMBDA_R="${LAMBDA_R:-0.1}"
 export ETAP_R="${ETAP_R:-0.0104}"
+export LAMBDA_H="${LAMBDA_H:-0.005}" ETA_PLASMA="${ETA_PLASMA:-1.2e-3}"
+export A0_O="${A0_O:-1}" ACRIT_O="${ACRIT_O:--1}" EPS_O="${EPS_O:-0}" N0_O="${N0_O:--1}" NIN_O="${NIN_O:--1}"
 NPWO="${NPWO:-64}"
 GEOS="${GEOS:-S75 A200}"
 ARTERIES="${ARTERIES:-carotid coronary aorta femoral small}"
@@ -104,7 +109,9 @@ artery() {   # name -> D U mesh waveform(0/1)
   esac
 }
 derive() {   # D U -> Re Wo steps  (Re = rho U D/eta_inf; Wo = D/2 sqrt(2 pi rho/(T eta_inf)))
-  awk -v D="$1" -v U="$2" -v rho="$RHO" -v eta="$ETAINF" -v T="$PERIOD" 'BEGIN {
+  # LC_ALL=C: mawk prints Wo with the locale's decimal separator ("4,6" under
+  # es_CL), which PETSc rejects (-al_wo 4,6: "has no numeric value").
+  LC_ALL=C awk -v D="$1" -v U="$2" -v rho="$RHO" -v eta="$ETAINF" -v T="$PERIOD" 'BEGIN {
     re = rho*U*D/eta; wo = D/2*sqrt(2*3.14159265*rho/(T*eta));
     n = int(40*U*T/D/100 + 0.5)*100; if (n < 600) n = 600; if (n > 1600) n = 1600;
     printf "%d %.1f %d\n", re + 0.5, wo, n }'

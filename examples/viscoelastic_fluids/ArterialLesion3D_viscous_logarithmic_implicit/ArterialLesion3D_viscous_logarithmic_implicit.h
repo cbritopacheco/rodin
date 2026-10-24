@@ -98,7 +98,8 @@
  *            eta_CY(gd) - eta_p/f(gd), whose steady shear viscosity is exactly
  *            the Carreau-Yasuda eta_CY; eta_s at u^n (u* with BDF2);
  *  - "cy"    Carreau-Yasuda: here the "gsptt" system with a vanishing polymer
- *            (eta_p = 1e-6 eta_inf, De = 1e-3), so eta_s = eta_CY to 1e-6; the
+ *            (eta_p = 1e-6 eta_inf, De = 1e-5, epsilon 0.5: passive, psi ~ 0),
+ *            so eta_s = eta_CY to 1e-6; the
  *            psi unknowns are kept (same cost as "gsptt").
  * For "cy" and "gsptt" the inlet mean mode is the developed steady
  * Carreau-Yasuda profile and Re, Wo use eta_ref (default eta_inf).
@@ -110,6 +111,7 @@
 #ifndef EXAMPLES_VISCOELASTICFLUIDS_ARTERIALLESION3D_VISCOUS_LOGARITHMIC_IMPLICIT_H
 #define EXAMPLES_VISCOELASTICFLUIDS_ARTERIALLESION3D_VISCOUS_LOGARITHMIC_IMPLICIT_H
 
+#include <limits>
 #include <array>
 #include <complex>
 #include <cstdint>
@@ -238,6 +240,9 @@ namespace Rodin::Examples::ViscoelasticFluids
       using VectorProblemType = Rodin::Variational::Problem<LinearSystemType,
         VectorTrialFunctionType, VectorTestFunctionType>;
 
+      using ScalarProblemType = Rodin::Variational::Problem<LinearSystemType,
+        ScalarTrialFunctionType, ScalarTestFunctionType>;
+
       using FluxFormType = Rodin::Variational::LinearForm<ScalarFESType, ::Vec>;
 
       /// @brief Cellwise (P0) stabilisation parameters.
@@ -279,6 +284,54 @@ namespace Rodin::Examples::ViscoelasticFluids
           Real lambda = 1.902;     ///< time constant (s)
           Real n = 0.22;
           Real a = 1.25;
+      };
+
+      /**
+       * @brief Owens (2006) blood model, JNNFM 140:57-70, single mode: red
+       *        cells aggregate into rouleaux of mean size n (Hookean
+       *        dumbbells, friction proportional to the size). Eqs. (23), (24),
+       *        (10), (27), (28) of the paper:
+       *          tau + mu tau^nabla = G mu gd,  G = N0 kB T = eta_p,inf/lambda_H,
+       *          mu(n, gd) = n lambda_H / (1 + (b n (n - 1)/2 + aN0) lambda_H),
+       *          D n/Dt = -(1/2) b (n - n_st)(n + n_st - 1),
+       *          n_st = (eta(gd) - eta_s)/eta_p,inf (1 + (3/2) aN0 lambda_H),
+       *          b = aN0/(n_st (n_st - 1)),
+       *        so that G mu(n_st) = eta(gd) - eta_s exactly. eta(gd) is the
+       *        Carreau-Yasuda of "cy" (Owens fits a Cross model: any steady
+       *        fit will do, Eq. (29)); the plasma is the solvent, as in Fang &
+       *        Owens (2006) and Moyers-Gonzalez et al. (JFM 2008), and eta_p,inf
+       *        = eta_CY(inf) - eta_plasma.
+       *        Aggregation rate aN0(gd): Moyers-Gonzalez, Owens & Fang (JFM
+       *        2008, Part I, Appendix A, Eq. A1), the C1 cubics with zero slope
+       *        at 0, gd_c = 5.78 1/s (Murata & Secomb) and gd_max = 900 1/s:
+       *          aN0 = a0 + (ac - a0)(3 s^2 - 2 s^3),  s = gd/gd_c,          gd <= gd_c
+       *          aN0 = ac (1 - 3 s^2 + 2 s^3),  s = (gd - gd_c)/(gd_max - gd_c), gd <= gd_max
+       *          aN0 = 0,                                                     gd > gd_max,
+       *        with a0 = a_{1,0} = 1 1/s and ac = 2 a0 (their coefficients
+       *        a_{1,k}, a_{2,k} expand exactly to this). b -> 0 with aN0 near
+       *        gd_max, which would freeze n in the jet; bFloor keeps b at its
+       *        maximum above the shear rate where it peaks (steady viscosity
+       *        changed by < 0.2 %, printed at start).
+       */
+      struct Owens
+      {
+          Real lambdaH = 0.005;      ///< single-cell relaxation time (s)
+          Real etaPlasma = 1.2e-3;   ///< plasma (solvent) viscosity (Pa s)
+          Real a0 = 1.0;             ///< aN0 at rest, a_{1,0} (1/s)
+          Real aCrit = -1.0;         ///< aN0 at gd_c (1/s); < 0: 2 a0 (JFM 2008)
+          Real gdCrit = 5.78;        ///< shear rate of the aggregation peak (1/s)
+          Real gdMax = 900.0;        ///< aN0 = 0 above it (1/s)
+          bool bFloor = true;
+          /// @brief sPTT epsilon of the dumbbells (0: Hookean, Owens' model).
+          Real epsilon = 0.0;
+          /// @brief Initial aggregate size: < 0 the rest value n_st(0), 0 the
+          ///        developed-profile value n_st(gd(r)), > 0 that value.
+          Real nInitial = -1.0;
+          /// @brief Inlet aggregate size: < 0 n_st(gd(r)) of the developed
+          ///        profile (equilibrium); > 0 that value (blood that left the
+          ///        heart ~1 s ago: n ~ 1 + aN0 t/2 ~ 1.5, aggregation being
+          ///        ~10 s slower than the transit).
+          Real nInlet = -1.0;
       };
 
       struct Config
@@ -349,9 +402,10 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        the u-psi coupling changes sign. The S75 Re 600 test grew
           ///        at ~8000 1/s from t = 0.135 s (deceleration) whatever dt.
           bool subscaleTimeResidual = true;
-          /// @brief "sptt", "gsptt" or "cy" (file header).
+          /// @brief "sptt", "gsptt", "cy" or "owens" (file header, Owens).
           std::string fluid = "sptt";
           CarreauYasuda carreauYasuda;
+          Owens owens;
           /// @brief Viscosity defining Re and Wo (Pa s); 0 means eta_s + eta_p
           ///        for "sptt" and eta_inf for "cy" and "gsptt".
           Real etaRef = 0.0;
@@ -479,6 +533,11 @@ namespace Rodin::Examples::ViscoelasticFluids
           /// @brief Divergence guard: max|u| above this multiple of Ubar
           ///        rejects the step (stops the run without adaptiveTimeStep).
           Real maxVelocityFactor = 20.0;
+          /// @brief Diagnostics: XDMF output at every accepted step with
+          ///        max|sigma| > dumpStress (Pa; 0 off), at most dumpMax times;
+          ///        the last accepted state is also written when the run aborts.
+          Real dumpStress = 0.0;
+          int dumpMax = 12;
 
           /// @brief Step control. A step is rejected, and retried from the same
           ///        x^n with dt * dtShrink, when Newton does not converge in
@@ -679,6 +738,38 @@ namespace Rodin::Examples::ViscoelasticFluids
       Real shearRateAt(const Rodin::Geometry::Point& p) const;
       Real solventViscosityAt(const Rodin::Geometry::Point& p) const;
       Real referenceViscosity() const;
+      /// @brief The solvent viscosity does not depend on the shear rate.
+      bool constantSolvent() const
+      {
+        return m_cfg.fluid == "sptt" || m_cfg.fluid == "owens";
+      }
+      bool isOwens() const
+      {
+        return m_cfg.fluid == "owens";
+      }
+      /// @brief Relaxation time of the steady simple shear at this rate:
+      ///        lambda, or (eta_CY - eta_plasma)/G for Owens.
+      Real steadyLambda(Real gammaDot) const;
+      /// @brief Owens: aggregation rate aN0(gd), fragmentation rate b(gd),
+      ///        steady aggregate size n_st(gd) and mu = lambda(n, gd).
+      Real owensA(Real gammaDot) const;
+      Real owensBRaw(Real gammaDot) const;
+      Real owensB(Real gammaDot) const;
+      Real owensNst(Real gammaDot) const;
+      Real owensLambda(Real n, Real gammaDot) const;
+      Real shearRateOf(const VectorGridFunctionType& u, const Rodin::Geometry::Point& p) const;
+      /// @brief Owens: n_st at the shear rate of the developed inlet profile.
+      Real inletAggregateSize(const Rodin::Geometry::Point& p) const;
+      /// @brief Owens: lambda by cell for the psi equation, or nullptr.
+      const CellGridFunctionType* lambdaField() const
+      {
+        return isOwens() ? &m_lambdaCell : nullptr;
+      }
+      void setupStructure();
+      /// @brief Owens: n^{n+1} from the accepted (u^{n+1}, n^n), then
+      ///        lambda(n^{n+1}, gd^{n+1}) for the next step.
+      void solveStructure();
+      void updateStructureFields();
       /// @brief Developed steady Carreau-Yasuda pipe flow at the mean flow rate:
       ///        m_inletR, m_inletPhi (u/Ubar) and m_inletShear (gd >= 0).
       void computeDevelopedProfile();
@@ -807,6 +898,24 @@ namespace Rodin::Examples::ViscoelasticFluids
       Heart::OrthogonalProjection<VectorFESType> m_piRO;
       CellGridFunctionType m_alpha3Dyn;
       CellGridFunctionType m_pttN;
+      /// @brief Owens: the aggregate size n (P1; n^n, n^{n-1} and its BDF
+      ///        history) and lambda(n^n, gd(u^n)) by cell, read by the psi
+      ///        equation and its stabilisation during step n + 1.
+      ScalarTrialFunctionType m_n;
+      ScalarTestFunctionType m_nTest;
+      ScalarGridFunctionType m_nOld;
+      ScalarGridFunctionType m_nNm1;
+      ScalarGridFunctionType m_nHist;
+      CellGridFunctionType m_lambdaCell;
+      ScalarProblemType m_structure;
+      Rodin::Solver::KSP m_structureKSP;
+      Real m_nMin = 1.0;
+      Real m_nMax = 1.0;
+      Real m_lambdaMax = 0.0;
+      int m_dumps = 0;
+      /// @brief Owens: the maximum of b(gd) and where it is (bFloor).
+      Real m_owensBPeak = 0.0;
+      Real m_owensGdPeak = std::numeric_limits<Real>::infinity();
 
 
       // ---- Wall shear indices ----------------------------------------------

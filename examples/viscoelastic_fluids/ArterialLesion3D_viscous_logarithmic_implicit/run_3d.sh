@@ -13,6 +13,9 @@
 #     D   weak-elasticity sPTT (beta 0.889, eps 0.1), Wi    -> <geo>/Wi<wi>/
 #     CY  Carreau-Yasuda of whole blood (eta_ref 3.45 mPa s) -> <geo>/CY/
 #     R   generalised sPTT, the viscoelastic twin of CY      -> <geo>/R/
+#     O   Owens (2006) aggregating blood: rouleaux of size n, -> <geo>/O/
+#         lambda = n lambda_H/(1 + g lambda_H), G = (eta_inf - eta_plasma)/lambda_H,
+#         steady viscosity = CY; elasticity where the shear is low (Config::Owens)
 #
 #  Seed: the inlet profile is multiplied by 1 + PERTURB y/R during the first
 #  cycle (flow rate unchanged), then the flow evolves freely. The CSV columns
@@ -36,6 +39,11 @@
 #     ETAP_R=0.050    polymer viscosity of R (Pa s); the solvent eta_CY - eta_p/f
 #                     must stay positive: eta_p <= 0.0104 at lambda 0.1 s, 0.0081
 #                     at 0.05 s, 0.031 at 1 s (N1 at the wall ~40-60 Pa either way)
+#     LAMBDA_H=0.005  O: single-cell relaxation time (s); ETA_PLASMA=1.2e-3 (Pa s);
+#     A0_O=1 ACRIT_O=-1  O: aggregation rate aN0 at rest and at gd_c = 5.78 1/s
+#                     (1/s; -1: 2 A0_O, Moyers-Gonzalez et al. JFM 2008); 0 above 900 1/s
+#     NIN_O=-1        O: inlet aggregate size (-1: equilibrium n_st of the profile)
+#     EPS_O=0 N0_O=-1  O: sPTT epsilon of the dumbbells; initial n (-1: rest)
 #     LAMBDA_R=4.83   relaxation time of R (s), a material constant, the same
 #                     at every Re (De = lambda/T varies with Wo at fixed
 #                     El = lambda nu/D^2); solvent positive for lambda >= 2.4 s
@@ -117,6 +125,13 @@ HARMONICS="${HARMONICS:-10}"
 ETA_REF="${ETA_REF:-0.00345}"
 LAMBDA_R="${LAMBDA_R:-4.83}"
 ETAP_R="${ETAP_R:-0.050}"
+LAMBDA_H="${LAMBDA_H:-0.005}"
+ETA_PLASMA="${ETA_PLASMA:-1.2e-3}"
+A0_O="${A0_O:-1}"
+NIN_O="${NIN_O:--1}"
+ACRIT_O="${ACRIT_O:--1}"
+EPS_O="${EPS_O:-0}"
+N0_O="${N0_O:--1}"
 if [[ -n "$WAVEFORM" ]]; then
   [[ -f "$WAVEFORM" ]] || { echo "Waveform file not found: $WAVEFORM"; exit 1; }
   WAVEFORM="$(cd "$(dirname "$WAVEFORM")" && pwd)/$(basename "$WAVEFORM")"
@@ -170,7 +185,12 @@ run_case() {   # fluid steps dir solver
     R)  wi=-; cycles="$CYCLES_R"
         fargs=(-al_fluid gsptt -al_eta_ref "$ETA_REF" -al_eta_p "$ETAP_R" -al_ptt_epsilon 0.2
                -al_lambda "$LAMBDA_R" -al_de 0 -al_wi 0 -al_inlet_developed_conformation 1) ;;
-    *) echo "unknown fluid $fluid (3D: N, D, CY or R)"; return 2 ;;
+    O)  wi=-; cycles="$CYCLES_R"
+        fargs=(-al_fluid owens -al_eta_ref "$ETA_REF" -al_owens_lambda_h "$LAMBDA_H"
+               -al_owens_eta_plasma "$ETA_PLASMA" -al_owens_a0 "$A0_O" -al_owens_a_crit "$ACRIT_O"
+               -al_owens_epsilon "$EPS_O" -al_owens_n0 "$N0_O" -al_owens_n_inlet "$NIN_O"
+               -al_de 0 -al_wi 0 -al_inlet_developed_conformation 1) ;;
+    *) echo "unknown fluid $fluid (3D: N, D, CY, R or O)"; return 2 ;;
   esac
   if [[ -f "$dir/DONE" ]]; then
     echo "[skip] $GEO $fluid Re=$RE Wo=$WO (DONE)"; return 0
