@@ -277,3 +277,34 @@ namespace Rodin::Tests::Unit
   }
 
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Eigen operands use right conjugation and retain complex result types.
+  TEST(Geometry_PointCloud, DotConjugatesEigenOperand)
+  {
+    for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
+      for (size_t count : {size_t(0), size_t(2)})
+      {
+        PointCloud cloud(rows, count);
+        cloud.getPackedMatrix().setConstant(std::numeric_limits<Real>::quiet_NaN());
+        Eigen::Matrix<Complex, Eigen::Dynamic, Eigen::Dynamic> other(rows, count);
+        Complex expected(0);
+        Real square = 0;
+        for (size_t i = 0; i < rows; ++i)
+        {
+          for (size_t j = 0; j < count; ++j)
+          {
+            cloud(i, j) = Real(i + 2 * j + 1);
+            other(i, j) = Complex(i + j + 2, 1 + j);
+            expected += cloud(i, j) * std::conj(other(i, j));
+            square += cloud(i, j) * cloud(i, j);
+          }
+        }
+        EXPECT_EQ(cloud.dot(other), expected);
+        EXPECT_EQ(cloud.dot(cloud), square);
+      }
+    }
+  }
+}

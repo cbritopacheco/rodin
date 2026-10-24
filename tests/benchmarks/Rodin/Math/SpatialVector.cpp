@@ -104,7 +104,7 @@ namespace Rodin::Tests::Benchmarks
         add.template operator()<Op::SubtractAssign>("SubtractAssign");
       if constexpr (Storage != SpatialStorage::Fixed)
         add.template operator()<Op::DivideAssign>("DivideAssign");
-      add.template operator()<Op::BilinearDot>("BilinearDot");
+      add.template operator()<Op::BilinearProduct>("BilinearProduct");
       if constexpr (Storage != SpatialStorage::Fixed)
         add.template operator()<Op::StableNorm>("StableNorm");
       if constexpr (Storage != SpatialStorage::Fixed)

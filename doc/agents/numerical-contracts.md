@@ -75,7 +75,20 @@ Do not negate the residual twice.
 ## Real and complex form convention
 
 Rodin writes forms in trial-first, test-second order. `Math::dot(lhs, rhs)`
-conjugates `rhs`, so a complex-valued form has the discrete actions
+conjugates `rhs`. Every Rodin-defined `dot` member follows the same
+convention, including the Frobenius contraction of dense matrices.
+`Math::Vector`, `Math::FixedSizeVector`, `Math::Matrix` and
+`Math::FixedSizeMatrix` own Eigen storage without adding data members.
+Their inherited views, expressions and factory expressions retain Eigen
+types and Eigen member-dot semantics. Use `Math::dot` for those operands.
+The matrix classes derive from `Eigen::PlainObjectBase` with the Rodin
+owner as the CRTP argument. Deriving from a concrete `Eigen::Matrix` would
+retain Eigen's native derived type and can invalidate references inside
+explicit Eigen decomposition templates. Use `Eigen::MatrixBase` interfaces
+or `Eigen::Ref` to borrow a Rodin matrix in backend code. Constructing a native
+Eigen matrix copies its value; moving matching native dynamic storage into a
+Rodin matrix transfers the allocation.
+A complex-valued form has the discrete actions
 
 ```text
 L(v)   = v* b
@@ -91,12 +104,12 @@ ordinary linear and bilinear cases; the class names cover both scalar domains.
 Assembly stores `b[i] = L(psi_i)` and `A[i,j] = a(phi_j, psi_i)`. The local
 integrator returns this entry directly. Do not add a backend-level conjugation:
 `Integral(c * u, v)` represents `c * u * conj(v)`, not
-`conj(c) * conj(u) * v`. Eigen evaluates the action as `v.dot(A * u)` and
-PETSc as `VecDot(A * u, v)`. Eigen conjugates its first operand; PETSc
-conjugates its second operand. Their argument order therefore differs even
-though both evaluate the same action. Likewise, PETSc linear-form action
-uses `VecDot(b, v)`. Do not infer one backend's dot-product convention from
-the other backend's API spelling.
+`conj(c) * conj(u) * v`. The local backend evaluates the action as
+`Math::dot(A * u, v)` and PETSc as `VecDot(A * u, v)`. Both conjugate the
+second operand. Raw Eigen member dot conjugates its first operand and would
+instead require `v.dot(A * u)`. The corresponding linear-form actions are
+`Math::dot(b, v)` and `VecDot(b, v)`. Do not infer a backend's convention
+from a member method's spelling alone.
 
 Sesquilinearity is not Hermitian symmetry. Whether `A == A*` is a separate
 property of the particular weak form and coefficients.

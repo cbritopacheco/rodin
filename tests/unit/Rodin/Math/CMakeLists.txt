@@ -151,3 +151,11 @@ rodin_discover_tests(RodinMathSparseEliminationTest PROPERTIES LABELS unit TIMEO
 add_executable(RodinMathSpatialComplexTest SpatialComplexTest.cpp)
 target_link_libraries(RodinMathSpatialComplexTest PRIVATE GTest::gtest_main Rodin::Math)
 rodin_discover_tests(RodinMathSpatialComplexTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathVectorContractTest VectorContractTest.cpp)
+target_link_libraries(RodinMathVectorContractTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathVectorContractTest PROPERTIES LABELS unit)
+
+add_executable(RodinMathMatrixContractTest MatrixContractTest.cpp)
+target_link_libraries(RodinMathMatrixContractTest PRIVATE GTest::gtest_main Rodin::Math)
+rodin_discover_tests(RodinMathMatrixContractTest PROPERTIES LABELS unit)

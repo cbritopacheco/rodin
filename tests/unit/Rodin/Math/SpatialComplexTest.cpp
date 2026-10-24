@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialTensor.h"
 
 using namespace Rodin;
 using namespace Rodin::Math;
@@ -28,10 +29,10 @@ namespace Rodin::Tests::Unit
   {
     const auto coefficient = []<class Scalar>(size_t index, bool right) {
       const Real real = Real(index + (right ? 2 : 1)) / 4;
-      if constexpr (std::is_same_v<Scalar, Complex>)
+      if constexpr (Eigen::NumTraits<Scalar>::IsComplex)
         return Scalar(real, Real(index + 1) * (right ? -0.5 : 0.25));
       else
-        return real;
+        return Scalar(real);
     };
     for (std::uint8_t rows = 0; rows <= 3; ++rows)
     {
@@ -39,25 +40,28 @@ namespace Rodin::Tests::Unit
       SpatialVector<Right> v(rows);
       u.getData().setConstant(Left(std::numeric_limits<Real>::quiet_NaN()));
       v.getData().setConstant(Right(std::numeric_limits<Real>::quiet_NaN()));
-      Complex expected(0), bilinear(0);
+      using Result = decltype(Math::dot(Left{}, Right{}));
+      Result expected(0);
+      const auto tolerance =
+        64 * std::numeric_limits<typename Eigen::NumTraits<Result>::Real>::epsilon();
       for (size_t i = 0; i < rows; ++i)
       {
         u(i) = coefficient.template operator()<Left>(i, false);
         v(i) = coefficient.template operator()<Right>(i, true);
-        expected += u(i) * Math::conj(v(i));
-        bilinear += u(i) * v(i);
+        expected += Math::dot(u(i), v(i));
       }
-      EXPECT_NEAR(std::abs(Math::dot(u, v) - expected), 0, 1e-13);
-      EXPECT_NEAR(std::abs(Math::dot(u, v.getData().head(rows)) - expected), 0, 1e-13);
-      EXPECT_NEAR(std::abs(Math::dot(u.getData().head(rows), v) - expected), 0, 1e-13);
+      EXPECT_NEAR(std::abs(Math::dot(u, v) - expected), 0, tolerance);
+      EXPECT_NEAR(
+        std::abs(Math::dot(u, v.getData().head(rows)) - expected), 0, tolerance);
+      EXPECT_NEAR(
+        std::abs(Math::dot(u.getData().head(rows), v) - expected), 0, tolerance);
+      EXPECT_NEAR(std::abs(u.dot(v) - expected), 0, tolerance);
+      EXPECT_NEAR(std::abs(u.dot(v.getData().head(rows)) - expected), 0, tolerance);
       if constexpr (std::is_same_v<Left, Right>)
       {
-        EXPECT_NEAR(std::abs(u.dot(v) - bilinear), 0, 1e-13);
-        EXPECT_NEAR(std::abs(u.dot(v.getData().head(rows)) - bilinear), 0, 1e-13);
         EXPECT_NEAR(
           std::abs(v.getData().head(rows).dot(u.getData().head(rows)) - expected), 0,
-          1e-13);
-        EXPECT_NEAR(std::abs(u.dot(v.conjugate()) - expected), 0, 1e-13);
+          tolerance);
       }
       for (std::uint8_t cols = 0; cols <= 3; ++cols)
       {
@@ -72,22 +76,19 @@ namespace Rodin::Tests::Unit
           {
             a(i, j) = coefficient.template operator()<Left>(3 * i + j, false);
             b(i, j) = coefficient.template operator()<Right>(i + 3 * j, true);
-            expected += a(i, j) * Math::conj(b(i, j));
+            expected += Math::dot(a(i, j), b(i, j));
           }
         }
-        EXPECT_NEAR(std::abs(Math::dot(a, b) - expected), 0, 1e-13);
+        EXPECT_NEAR(std::abs(Math::dot(a, b) - expected), 0, tolerance);
         EXPECT_NEAR(
           std::abs(Math::dot(a, b.getData().topLeftCorner(rows, cols)) - expected), 0,
-          1e-13);
+          tolerance);
         EXPECT_NEAR(
           std::abs(Math::dot(a.getData().topLeftCorner(rows, cols), b) - expected), 0,
-          1e-13);
-        if constexpr (std::is_same_v<Left, Right>)
-        {
-          EXPECT_NEAR(std::abs(a.dot(b) - expected), 0, 1e-13);
-          EXPECT_NEAR(
-            std::abs(a.dot(b.getData().topLeftCorner(rows, cols)) - expected), 0, 1e-13);
-        }
+          tolerance);
+        EXPECT_NEAR(std::abs(a.dot(b) - expected), 0, tolerance);
+        EXPECT_NEAR(std::abs(a.dot(b.getData().topLeftCorner(rows, cols)) - expected), 0,
+          tolerance);
       }
     }
   }
@@ -101,10 +102,79 @@ namespace Rodin::Tests::Unit
     const SpatialVector<Complex> u{Complex(1, 2), Complex(3, -1)};
     const SpatialVector<Complex> v{Complex(2, -3), Complex(-1, 4)};
     // A nonsymmetric complex pair distinguishes all three conventions exactly.
-    EXPECT_NE(u.dot(v), Math::dot(u, v));
+    EXPECT_EQ(u.dot(v), Math::dot(u, v));
     EXPECT_NE(Math::dot(u, v), u.getData().head(2).dot(v.getData().head(2)));
     EXPECT_EQ(Math::dot(u, v), std::conj(Math::dot(v, u)));
     EXPECT_EQ(Math::dot(Complex(1, 2), Complex(2, -3)), Complex(-4, 7));
+  }
+
+  /// @brief Complex contractions support each floating precision and mixed fields.
+  TEST(SpatialComplexTest, InnerProductsPromoteScalarPrecision)
+  {
+    checkSpatialInnerProducts<std::complex<float>, std::complex<float>>();
+    checkSpatialInnerProducts<std::complex<long double>, std::complex<long double>>();
+    checkSpatialInnerProducts<float, std::complex<float>>();
+    checkSpatialInnerProducts<std::complex<float>, double>();
+    checkSpatialInnerProducts<double, std::complex<float>>();
+    checkSpatialInnerProducts<std::complex<float>, std::complex<long double>>();
+  }
+
+  /// @brief Scalar conjugation and tensor contractions preserve extended precision.
+  TEST(SpatialComplexTest, ConjugationPreservesScalarPrecision)
+  {
+    const long double value = 1 + 4 * std::numeric_limits<long double>::epsilon();
+    const std::complex<long double> a(value, value), b(2, -3);
+    static_assert(std::is_same_v<decltype(Math::conj(a)), std::complex<long double>>);
+    static_assert(std::is_same_v<decltype(Math::conj(value)), long double>);
+    static_assert(std::is_same_v<decltype(Math::dot(a, std::complex<float>())),
+      std::complex<long double>>);
+    EXPECT_EQ(Math::conj(a), std::conj(a));
+    EXPECT_EQ(Math::conj(value), value);
+    EXPECT_EQ(Math::dot(a, b), a * std::conj(b));
+    EXPECT_EQ(Math::dot(value, b), value * std::conj(b));
+    EXPECT_EQ(Math::dot(a, 2.0f), a * 2.0L);
+    SpatialMatrix<std::complex<long double>> matrix(1, 1);
+    matrix(0, 0) = a;
+    EXPECT_EQ(matrix.conjugate()(0, 0), std::conj(a));
+    EXPECT_EQ(matrix.adjoint()(0, 0), std::conj(a));
+    SpatialTensor<std::complex<long double>> left({1, 1, 1});
+    SpatialTensor<std::complex<float>> right({1, 1, 1});
+    left[0] = a;
+    right[0] = std::complex<float>(2, -3);
+    EXPECT_EQ(left.conjugate()[0], std::conj(a));
+    EXPECT_EQ(left.dot(right), a * std::conj(b));
+    EXPECT_EQ(Math::dot(left, right), a * std::conj(b));
+  }
+
+  /// @brief The optimized second norm ignores padding and agrees with the norm API.
+  TEST(SpatialComplexTest, SecondNormUsesActiveEuclideanNorm)
+  {
+    const auto check = []<class Scalar>() {
+      using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+      for (std::uint8_t size = 0; size <= 3; ++size)
+      {
+        SpatialVector<Scalar> value(size);
+        value.getData().setConstant(Scalar(std::numeric_limits<RealScalar>::quiet_NaN()));
+        for (size_t i = 0; i < size; ++i)
+        {
+          if constexpr (Eigen::NumTraits<Scalar>::IsComplex)
+            value(i) = Scalar(i + 3, i + 4);
+          else
+            value(i) = Scalar(i + 3);
+        }
+        EXPECT_EQ(value.template lpNorm<2>(), value.norm());
+        EXPECT_NEAR(value.template lpNorm<1>(),
+          value.getData().head(size).template lpNorm<1>(),
+          32 * std::numeric_limits<RealScalar>::epsilon());
+        EXPECT_EQ(value.template lpNorm<2>(), value.getData().head(size).norm());
+      }
+    };
+    check.template operator()<float>();
+    check.template operator()<double>();
+    check.template operator()<long double>();
+    check.template operator()<std::complex<float>>();
+    check.template operator()<Complex>();
+    check.template operator()<std::complex<long double>>();
   }
 
   TEST(SpatialComplexTest, ConjugateTransposeAndAdjointExcludePadding)
@@ -171,7 +241,7 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(interop(i), expected);
       EXPECT_EQ(std::conj(eigen(i)), expected);
     }
-    EXPECT_NEAR(std::abs(a.dot(spatial)), 0, 1e-13);
+    EXPECT_NEAR(std::abs(Math::dot(a, spatial.conjugate())), 0, 1e-13);
     EXPECT_GT(std::abs(Math::dot(a, spatial)), 1);
   }
 

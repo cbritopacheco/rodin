@@ -26,8 +26,8 @@ namespace Rodin::Tests::Benchmarks
    * reduction through the original const Eigen views. Compile-time guards
    * retain that expression-type contract. Both operate on the same vectors;
    * construction and exact result guards are outside timing. This does not
-   * measure the differently defined
-   * unconjugated SpatialVector member dot, mapped quadrature or full assembly.
+   * measure
+   * entrywise bilinear products, mapped quadrature or full assembly.
    *
    * @tparam LHS Left operand's scalar type.
    * @tparam RHS Right operand's scalar type.

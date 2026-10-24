@@ -54,7 +54,7 @@ namespace Rodin::Tests::Benchmarks
     ScalarDot,
     MathDot,
     RightDot,
-    BilinearDot,
+    BilinearProduct,
     SquaredNorm,
     Norm,
     Conjugate,
@@ -104,8 +104,8 @@ namespace Rodin::Tests::Benchmarks
    * prepared disjoint output through noalias(). They isolate temporary ownership
    * from arithmetic and are labeled separately from owned-result measurements.
    *
-   * MathDot and RightDot compute right-conjugating inner products. BilinearDot
-   * computes the unconjugated SpatialVector member contract. Eigen RightDot uses
+   * MathDot and RightDot compute right-conjugating inner products. BilinearProduct
+   * computes an explicitly unconjugated entrywise product. Eigen RightDot uses
    * rhs.dot(lhs), since Eigen's dot conjugates its left operand. Matrix products
    * and Cross are bilinear. Complex Eigen cross is conjugated back to match the
    * spatial algebraic cross. Pseudoinverse comparators use the same full-rank
@@ -460,22 +460,15 @@ namespace Rodin::Tests::Benchmarks
           return Math::dot(a, b);
         else if constexpr (Operation == Op::RightDot)
         {
-          if constexpr (Storage == SpatialStorage::Spatial && Matrix)
+          if constexpr (Storage == SpatialStorage::Spatial)
             return a.dot(b);
-          else if constexpr (Storage == SpatialStorage::Spatial)
-            return a.dot(b.conjugate());
           else if constexpr (!Matrix)
             return b.dot(a);
           else
             return (a.array() * b.conjugate().array()).sum();
         }
-        else if constexpr (Operation == Op::BilinearDot)
-        {
-          if constexpr (Storage == SpatialStorage::Spatial)
-            return a.dot(b);
-          else
-            return (a.array() * b.array()).sum();
-        }
+        else if constexpr (Operation == Op::BilinearProduct)
+          return (view(a).array() * view(b).array()).sum();
         else if constexpr (Operation == Op::SquaredNorm)
           return a.squaredNorm();
         else if constexpr (Operation == Op::Norm)
@@ -621,15 +614,15 @@ namespace Rodin::Tests::Benchmarks
         const Reference a = view(input.left), b = view(input.right);
         const Scalar factor = input.factor;
         if constexpr (Operation == Op::ScalarDot || Operation == Op::MathDot ||
-          Operation == Op::RightDot || Operation == Op::BilinearDot)
+          Operation == Op::RightDot || Operation == Op::BilinearProduct)
         {
           Scalar result(0);
           for (Eigen::Index i = 0; i < a.rows(); ++i)
           {
             for (Eigen::Index j = 0; j < a.cols(); ++j)
             {
-              result +=
-                a(i, j) * (Operation == Op::BilinearDot ? b(i, j) : Math::conj(b(i, j)));
+              result += a(i, j) *
+                (Operation == Op::BilinearProduct ? b(i, j) : Math::conj(b(i, j)));
             }
           }
           return result;

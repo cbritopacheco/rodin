@@ -24,6 +24,7 @@
 
 #include "Rodin/Alert.h"
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Utility/ForConstexpr.h"
 
 #include "Function.h"
@@ -245,7 +246,7 @@ namespace Rodin::Variational
        * Each value passed must be convertible to any specialization of
        * RealFunction.
        */
-      VectorFunction(const VectorType& v)
+      VectorFunction(const typename VectorType::Parent& v)
         : m_vector(v)
       {}
 
@@ -257,7 +258,7 @@ namespace Rodin::Variational
        * shares immutable owned storage across expression copies; evaluation uses
        * the same direct reference in both cases.
        */
-      VectorFunction(VectorType&& v)
+      VectorFunction(typename VectorType::Parent&& v)
         : m_owned(std::make_shared<const VectorType>(std::move(v))),
           m_vector(*m_owned)
       {}
@@ -266,7 +267,7 @@ namespace Rodin::Variational
        * @brief Copies a const temporary into retained storage.
        * @param v Temporary whose const qualification prevents moving its values.
        */
-      VectorFunction(const VectorType&& v)
+      VectorFunction(const typename VectorType::Parent&& v)
         : m_owned(std::make_shared<const VectorType>(v)),
           m_vector(*m_owned)
       {}
@@ -339,7 +340,7 @@ namespace Rodin::Variational
     private:
       /// @brief Optional immutable owner for vectors supplied as temporaries.
       std::shared_ptr<const VectorType> m_owned;
-      std::reference_wrapper<const VectorType> m_vector;
+      std::reference_wrapper<const typename VectorType::Parent> m_vector;
   };
 
   /**
@@ -348,6 +349,14 @@ namespace Rodin::Variational
    */
   template <class Scalar>
   VectorFunction(const Math::Vector<Scalar>& v) -> VectorFunction<Math::Vector<Scalar>>;
+
+  /**
+   * @brief CTAD for native Eigen dense-vector constants.
+   * @tparam Scalar Vector scalar type.
+   * @param v Vector borrowed when an lvalue and retained when a temporary.
+   */
+  template <class Scalar>
+  VectorFunction(const Eigen::VectorX<Scalar>& v) -> VectorFunction<Math::Vector<Scalar>>;
 
   /**
    * @ingroup VectorFunctionSpecializations

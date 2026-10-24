@@ -23,12 +23,11 @@ class VectorTest : public ::testing::Test
     void TearDown() override {}
 };
 
-// Test basic vector type aliases
-/// @brief Test Vector type alias.
+/// @brief Vector ownership retains the dimension and scalar convenience aliases.
 TEST_F(VectorTest, TypeAliases)
 {
-  // Test Vector type alias
-  static_assert(std::is_same_v<Vector<Real>, Eigen::VectorX<Real>>);
+  // Rodin owns the vector interface and inherits Eigen storage.
+  static_assert(std::is_base_of_v<Eigen::VectorX<Real>, Vector<Real>>);
   static_assert(std::is_same_v<Vector<Complex>, ComplexVector>);
 
   // Test SpatialPoint type

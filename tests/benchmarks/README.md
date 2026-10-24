@@ -58,8 +58,7 @@ imbalance. Such measurements do not count as production solver coverage.
 
 `RodinMathSpatialVectorBenchmarks` and `RodinMathSpatialMatrixBenchmarks` compare the
 public spatial APIs (including `Math::sum`, `Math::minus`, `Math::mult`,
-`Math::division`, `Math::conj` and `Math::dot`) with bounded-capacity Eigen values, dynamic `Math::Vector`
-/ `Math::Matrix` representations, and selected compile-time fixed Eigen values.
+`Math::division`, `Math::conj` and `Math::dot`) with bounded-capacity Eigen values, dynamic Eigen vector/matrix representations, and selected compile-time fixed Eigen values.
 `SpatialArithmetic.h` owns the common input, execution and numerical guards.
 These opt-in executables are separate from the historical publication suite.
 
@@ -88,8 +87,8 @@ The names identify different mathematical contracts explicitly:
 | --- | --- | --- |
 | `ScalarDot` | $\sum_i u_i\overline{v_i}$ | Explicit scalar-loop comparator |
 | `MathDot` | $\sum_i u_i\overline{v_i}$ | `Math::dot`, including Eigen-backed values |
-| `RightDot` | $\sum_i u_i\overline{v_i}$ | Spatial vector `u.dot(v.conjugate())`, spatial matrix member dot, or Eigen vector `v.dot(u)` |
-| `BilinearDot` | $\sum_i u_i v_i$ | Spatial vector member dot or Eigen entrywise reduction |
+| `RightDot` | $\sum_i u_i\overline{v_i}$ | Spatial vector/matrix member dot, or Eigen vector `v.dot(u)` |
+| `BilinearProduct` | $\sum_i u_i v_i$ | Explicit entrywise reduction without conjugation |
 | `Cross` | Ordinary bilinear cross product | Eigen's complex cross is conjugated back to match this contract |
 | `MatrixProduct` | $C=AB$ | Ordinary product without conjugation |
 | `Adjoint` | $A^*=\overline{A}^{\mathsf T}$ | Distinct from transpose |

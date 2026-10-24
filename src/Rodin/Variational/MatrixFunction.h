@@ -216,9 +216,11 @@ namespace Rodin::Variational
 
       /**
        * @brief Constructs the MatrixFunction from the given arguments.
+       * @tparam Derived Eigen dense expression type.
        * @param matrix Matrix operand.
        */
-      MatrixFunction(const MatrixType& matrix)
+      template <class Derived>
+      MatrixFunction(const Eigen::MatrixBase<Derived>& matrix)
         : m_matrix(matrix)
       {}
 
@@ -295,6 +297,15 @@ namespace Rodin::Variational
   template <class Scalar>
   MatrixFunction(
     const Math::Matrix<Scalar>& matrix) -> MatrixFunction<Math::Matrix<Scalar>>;
+
+  /**
+   * @brief Deduces a dense matrix coefficient from native Eigen storage.
+   * @tparam Scalar Matrix scalar type.
+   * @param matrix Matrix whose value is copied into the coefficient.
+   */
+  template <class Scalar>
+  MatrixFunction(const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>& matrix)
+    -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 
 namespace Rodin::Variational

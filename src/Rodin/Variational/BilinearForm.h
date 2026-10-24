@@ -549,7 +549,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return v.getData().dot(this->getOperator() * u.getData());
+        return Math::dot(this->getOperator() * u.getData(), v.getData());
       }
 
       /**
@@ -747,7 +747,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return v.getData().dot(this->getOperator() * u.getData());
+        return Math::dot(this->getOperator() * u.getData(), v.getData());
       }
 
       /**

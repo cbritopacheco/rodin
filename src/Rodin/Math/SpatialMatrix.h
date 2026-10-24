@@ -509,173 +509,30 @@ namespace Rodin::Math
       }
 
       /**
-       * @brief Returns the Frobenius inner product with another spatial matrix.
-       * @param other Other operand.
-       * @returns The Frobenius inner product with another spatial matrix.
+       * @brief Contracts active entries, conjugating the right operand.
+       *
+       * Computes @f$\sum_{ij}A_{ij}\overline{B_{ij}}@f$, as does Math::dot.
+       *
+       * @tparam OtherScalar Right operand's scalar type.
+       * @param other Right operand.
+       * @returns Right-conjugating Frobenius contraction with scalar promotion.
        */
-      constexpr ScalarType dot(const SpatialMatrix& other) const noexcept
+      template <class OtherScalar>
+      constexpr auto dot(const SpatialMatrix<OtherScalar>& other) const noexcept
       {
-        if constexpr (std::is_same_v<ScalarType, Complex>)
-        {
-          return Math::dot(m_data.topLeftCorner(m_rows, m_cols),
-            other.getData().topLeftCorner(other.rows(), other.cols()));
-        }
-        assert(m_rows == other.m_rows);
-        assert(m_cols == other.m_cols);
-
-        const std::uint8_t r = m_rows;
-        const std::uint8_t c = m_cols;
-
-        // Access m_data directly (avoid topLeftCorner expressions).
-        const auto& A = m_data;
-        const auto& B = other.m_data;
-
-        // Flatten (r,c) into one switch value in [0..9]
-        switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
-        {
-          case 0u: // 0x0
-            return ScalarType(0);
-
-          case 1u: // 0x1
-            return ScalarType(0);
-
-          case 2u: // 0x2
-            return ScalarType(0);
-
-          case 3u: // 0x3
-            return ScalarType(0);
-
-          case 4u: // 1x0
-            return ScalarType(0);
-
-          case 5u: // 1x1
-            return A(0, 0) * B(0, 0);
-
-          case 6u: // 1x2
-            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1);
-
-          case 7u: // 1x3
-            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(0, 2) * B(0, 2);
-
-          case 8u: // 2x0
-            return ScalarType(0);
-
-          case 9u: // 2x1
-            return A(0, 0) * B(0, 0) + A(1, 0) * B(1, 0);
-
-          case 10u: // 2x2
-            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(1, 0) * B(1, 0) +
-              A(1, 1) * B(1, 1);
-
-          case 11u: // 2x3
-            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(0, 2) * B(0, 2) +
-              A(1, 0) * B(1, 0) + A(1, 1) * B(1, 1) + A(1, 2) * B(1, 2);
-
-          case 12u: // 3x0
-            return ScalarType(0);
-
-          case 13u: // 3x1
-            return A(0, 0) * B(0, 0) + A(1, 0) * B(1, 0) + A(2, 0) * B(2, 0);
-
-          case 14u: // 3x2
-            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(1, 0) * B(1, 0) +
-              A(1, 1) * B(1, 1) + A(2, 0) * B(2, 0) + A(2, 1) * B(2, 1);
-
-          case 15u: // 3x3
-            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(0, 2) * B(0, 2) +
-              A(1, 0) * B(1, 0) + A(1, 1) * B(1, 1) + A(1, 2) * B(1, 2) +
-              A(2, 0) * B(2, 0) + A(2, 1) * B(2, 1) + A(2, 2) * B(2, 2);
-
-          default:
-            // Should be unreachable with MaxSize==3 and validated sizes.
-            assert(false);
-            return ScalarType(0);
-        }
+        return Math::dot(*this, other);
       }
 
       /**
-       * @brief Returns the Frobenius inner product with an Eigen matrix expression.
-       * @param other Other operand.
-       * @returns The Frobenius inner product with an Eigen matrix expression.
+       * @brief Contracts an Eigen matrix, conjugating the right operand.
+       * @tparam EigenDerived Right Eigen matrix expression type.
+       * @param other Right operand.
+       * @returns Right-conjugating Frobenius contraction with scalar promotion.
        */
       template <class EigenDerived>
-      constexpr ScalarType dot(
-        const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      constexpr auto dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        if constexpr (std::is_same_v<ScalarType, Complex>)
-          return Math::dot(m_data.topLeftCorner(m_rows, m_cols), other);
-        ScalarType s = ScalarType(0);
-        switch (m_rows)
-        {
-          case 3:
-            switch (m_cols)
-            {
-              case 3:
-                s += m_data(2, 2) *
-                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
-                [[fallthrough]];
-              case 2:
-                s += m_data(2, 1) *
-                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
-                [[fallthrough]];
-              case 1:
-                s += m_data(2, 0) *
-                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
-                [[fallthrough]];
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 2:
-            switch (m_cols)
-            {
-              case 3:
-                s += m_data(1, 2) *
-                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
-                [[fallthrough]];
-              case 2:
-                s += m_data(1, 1) *
-                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
-                [[fallthrough]];
-              case 1:
-                s += m_data(1, 0) *
-                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
-                [[fallthrough]];
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 1:
-            switch (m_cols)
-            {
-              case 3:
-                s += m_data(0, 2) *
-                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
-                [[fallthrough]];
-              case 2:
-                s += m_data(0, 1) *
-                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
-                [[fallthrough]];
-              case 1:
-                s += m_data(0, 0) *
-                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
-                [[fallthrough]];
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return s;
+        return Math::dot(*this, other);
       }
 
       /**
@@ -793,66 +650,66 @@ namespace Rodin::Math
             return Cout;
 
           case 5u: // 1x1
-            Cout(0, 0) = conj(A(0, 0));
+            Cout(0, 0) = Math::conj(A(0, 0));
             return Cout;
 
           case 6u: // 1x2
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(0, 1) = conj(A(0, 1));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(0, 1) = Math::conj(A(0, 1));
             return Cout;
 
           case 7u: // 1x3
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(0, 1) = conj(A(0, 1));
-            Cout(0, 2) = conj(A(0, 2));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(0, 1) = Math::conj(A(0, 1));
+            Cout(0, 2) = Math::conj(A(0, 2));
             return Cout;
 
           case 9u: // 2x1
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(1, 0) = conj(A(1, 0));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(1, 0) = Math::conj(A(1, 0));
             return Cout;
 
           case 10u: // 2x2
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(0, 1) = conj(A(0, 1));
-            Cout(1, 0) = conj(A(1, 0));
-            Cout(1, 1) = conj(A(1, 1));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(0, 1) = Math::conj(A(0, 1));
+            Cout(1, 0) = Math::conj(A(1, 0));
+            Cout(1, 1) = Math::conj(A(1, 1));
             return Cout;
 
           case 11u: // 2x3
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(0, 1) = conj(A(0, 1));
-            Cout(0, 2) = conj(A(0, 2));
-            Cout(1, 0) = conj(A(1, 0));
-            Cout(1, 1) = conj(A(1, 1));
-            Cout(1, 2) = conj(A(1, 2));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(0, 1) = Math::conj(A(0, 1));
+            Cout(0, 2) = Math::conj(A(0, 2));
+            Cout(1, 0) = Math::conj(A(1, 0));
+            Cout(1, 1) = Math::conj(A(1, 1));
+            Cout(1, 2) = Math::conj(A(1, 2));
             return Cout;
 
           case 13u: // 3x1
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(1, 0) = conj(A(1, 0));
-            Cout(2, 0) = conj(A(2, 0));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(1, 0) = Math::conj(A(1, 0));
+            Cout(2, 0) = Math::conj(A(2, 0));
             return Cout;
 
           case 14u: // 3x2
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(0, 1) = conj(A(0, 1));
-            Cout(1, 0) = conj(A(1, 0));
-            Cout(1, 1) = conj(A(1, 1));
-            Cout(2, 0) = conj(A(2, 0));
-            Cout(2, 1) = conj(A(2, 1));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(0, 1) = Math::conj(A(0, 1));
+            Cout(1, 0) = Math::conj(A(1, 0));
+            Cout(1, 1) = Math::conj(A(1, 1));
+            Cout(2, 0) = Math::conj(A(2, 0));
+            Cout(2, 1) = Math::conj(A(2, 1));
             return Cout;
 
           case 15u: // 3x3
-            Cout(0, 0) = conj(A(0, 0));
-            Cout(0, 1) = conj(A(0, 1));
-            Cout(0, 2) = conj(A(0, 2));
-            Cout(1, 0) = conj(A(1, 0));
-            Cout(1, 1) = conj(A(1, 1));
-            Cout(1, 2) = conj(A(1, 2));
-            Cout(2, 0) = conj(A(2, 0));
-            Cout(2, 1) = conj(A(2, 1));
-            Cout(2, 2) = conj(A(2, 2));
+            Cout(0, 0) = Math::conj(A(0, 0));
+            Cout(0, 1) = Math::conj(A(0, 1));
+            Cout(0, 2) = Math::conj(A(0, 2));
+            Cout(1, 0) = Math::conj(A(1, 0));
+            Cout(1, 1) = Math::conj(A(1, 1));
+            Cout(1, 2) = Math::conj(A(1, 2));
+            Cout(2, 0) = Math::conj(A(2, 0));
+            Cout(2, 1) = Math::conj(A(2, 1));
+            Cout(2, 2) = Math::conj(A(2, 2));
             return Cout;
 
           default:
@@ -884,66 +741,66 @@ namespace Rodin::Math
             return Aout;
 
           case 5u: // 1x1
-            Aout(0, 0) = conj(A(0, 0));
+            Aout(0, 0) = Math::conj(A(0, 0));
             return Aout;
 
           case 6u: // 1x2 -> 2x1
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(1, 0) = conj(A(0, 1));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(1, 0) = Math::conj(A(0, 1));
             return Aout;
 
           case 7u: // 1x3 -> 3x1
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(1, 0) = conj(A(0, 1));
-            Aout(2, 0) = conj(A(0, 2));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(1, 0) = Math::conj(A(0, 1));
+            Aout(2, 0) = Math::conj(A(0, 2));
             return Aout;
 
           case 9u: // 2x1 -> 1x2
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(0, 1) = conj(A(1, 0));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(0, 1) = Math::conj(A(1, 0));
             return Aout;
 
           case 10u: // 2x2
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(0, 1) = conj(A(1, 0));
-            Aout(1, 0) = conj(A(0, 1));
-            Aout(1, 1) = conj(A(1, 1));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(0, 1) = Math::conj(A(1, 0));
+            Aout(1, 0) = Math::conj(A(0, 1));
+            Aout(1, 1) = Math::conj(A(1, 1));
             return Aout;
 
           case 11u: // 2x3 -> 3x2
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(0, 1) = conj(A(1, 0));
-            Aout(1, 0) = conj(A(0, 1));
-            Aout(1, 1) = conj(A(1, 1));
-            Aout(2, 0) = conj(A(0, 2));
-            Aout(2, 1) = conj(A(1, 2));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(0, 1) = Math::conj(A(1, 0));
+            Aout(1, 0) = Math::conj(A(0, 1));
+            Aout(1, 1) = Math::conj(A(1, 1));
+            Aout(2, 0) = Math::conj(A(0, 2));
+            Aout(2, 1) = Math::conj(A(1, 2));
             return Aout;
 
           case 13u: // 3x1 -> 1x3
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(0, 1) = conj(A(1, 0));
-            Aout(0, 2) = conj(A(2, 0));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(0, 1) = Math::conj(A(1, 0));
+            Aout(0, 2) = Math::conj(A(2, 0));
             return Aout;
 
           case 14u: // 3x2 -> 2x3
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(0, 1) = conj(A(1, 0));
-            Aout(0, 2) = conj(A(2, 0));
-            Aout(1, 0) = conj(A(0, 1));
-            Aout(1, 1) = conj(A(1, 1));
-            Aout(1, 2) = conj(A(2, 1));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(0, 1) = Math::conj(A(1, 0));
+            Aout(0, 2) = Math::conj(A(2, 0));
+            Aout(1, 0) = Math::conj(A(0, 1));
+            Aout(1, 1) = Math::conj(A(1, 1));
+            Aout(1, 2) = Math::conj(A(2, 1));
             return Aout;
 
           case 15u: // 3x3
-            Aout(0, 0) = conj(A(0, 0));
-            Aout(0, 1) = conj(A(1, 0));
-            Aout(0, 2) = conj(A(2, 0));
-            Aout(1, 0) = conj(A(0, 1));
-            Aout(1, 1) = conj(A(1, 1));
-            Aout(1, 2) = conj(A(2, 1));
-            Aout(2, 0) = conj(A(0, 2));
-            Aout(2, 1) = conj(A(1, 2));
-            Aout(2, 2) = conj(A(2, 2));
+            Aout(0, 0) = Math::conj(A(0, 0));
+            Aout(0, 1) = Math::conj(A(1, 0));
+            Aout(0, 2) = Math::conj(A(2, 0));
+            Aout(1, 0) = Math::conj(A(0, 1));
+            Aout(1, 1) = Math::conj(A(1, 1));
+            Aout(1, 2) = Math::conj(A(2, 1));
+            Aout(2, 0) = Math::conj(A(0, 2));
+            Aout(2, 1) = Math::conj(A(1, 2));
+            Aout(2, 2) = Math::conj(A(2, 2));
             return Aout;
 
           default:
