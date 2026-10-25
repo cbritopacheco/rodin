@@ -226,13 +226,22 @@ library/MPI-launcher fingerprints. A selection spanning several directories
 restores their compatible artifacts. CMake regeneration is suppressed;
 execution lanes do not rebuild test targets.
 
-Execution lanes pre-download only their indexed archives. Restoration accepts
-that download only when both `manifest.json` and `build.tar.gz` exist. An
-incomplete download triggers `gh run download` for that exact archive with the
-workflow's read-only Actions token: at most three fresh attempts, each bounded
-to two minutes. A downloader success alone is insufficient. Source/configuration
-and SHA256 validation remain mandatory; failed recovery fails the lane instead
-of skipping its tests.
+Execution lanes download only the exact archive names in their build index.
+Single-artifact steps use the named download action; multi-artifact steps use
+[the exact-name downloader](../actions/download-artifacts/action.yml). It uses
+GitHub's official artifact client with the current-run runtime credentials,
+resolves each name once, then downloads that artifact ID. It never lists every
+artifact in the workflow or falls back to `gh run download`. Thus a run with more
+than 1,000 artifacts does not silently lose matches or repeatedly consume the
+installation REST API quota.
+
+Interrupted or empty transfers retry the same resolved ID up to three times,
+with fresh staging on each attempt. A missing name fails immediately. Each
+artifact gets its own subdirectory. Restoration still requires `manifest.json`
+and `build.tar.gz`; source/configuration, runtime compatibility and archive
+SHA256 validation remain mandatory. Incomplete restoration fails the lane.
+The downloader's official client dependency is pinned in a lockfile and installed
+once per runner in `RUNNER_TEMP`; its JavaScript action uses Node 24.
 
 Regular and Slow variants share executables. MPI ranks, geometries and study
 partitions remain execution coordinates with their original timeouts and
@@ -245,6 +254,14 @@ Coverage is the union of production-source lines hit by the eligible execution
 lanes, not an average of their percentages. Tests and benchmarks may exercise
 production code but their own source lines are excluded from the denominator.
 Coverage describes compiled code and its instantiated templates.
+
+`dev/ci_artifacts.py` derives exact producer artifact names from the same plans
+used to schedule execution. A publisher downloads every required contribution
+for its family and common configuration, without glob discovery. Finalization
+first downloads every planned build index, then every ordinary/targeted receipt,
+build receipt and eligible publication. Missing artifacts remain errors; this
+download change does not relax receipt/hash checks, compilation inventories,
+zero-hit records, the baseline or the final 95% production-line threshold.
 
 - Unsanitized grouped unit/manufactured/slow and dedicated convergence/restriction
   lanes save independent LCOV contributions and receipts. Sanitizer and installation checks

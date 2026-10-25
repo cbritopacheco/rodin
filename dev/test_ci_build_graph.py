@@ -267,92 +267,36 @@ class BuildGraphExecutionTest(unittest.TestCase):
 
 
 class BuildArtifactDownloadTest(unittest.TestCase):
-    def environment(self):
-        return patch.dict(os.environ, {'GITHUB_RUN_ID': '123', 'CI_RESTORED_ARTIFACTS': '', 'GH_TOKEN': ''})
+    def test_requires_preloaded_artifacts_without_rest_fallback(self):
+        with patch.dict(os.environ, CI_RESTORED_ARTIFACTS=''), patch.object(graph.subprocess, 'run') as run:
+            with self.assertRaisesRegex(ValueError, 'not preloaded'):
+                graph.download('ci-build-test', Path('unused'))
+            run.assert_not_called()
 
-    def test_downloads_only_named_artifact(self):
-        with tempfile.TemporaryDirectory() as directory, self.environment():
-            destination = Path(directory) / 'restored'
-            def fetch(command, **kwargs):
-                self.assertTrue(kwargs['check'])
-                self.assertEqual(command[:6], ['gh', 'run', 'download', '123', '--name', 'ci-build-test'])
-                staging = Path(command[-1])
-                (staging / 'manifest.json').write_text('{}')
-                (staging / 'build.tar.gz').write_bytes(b'archive')
-            with patch.object(graph.subprocess, 'run', side_effect=fetch) as run:
-                self.assertEqual(graph.download('ci-build-test', destination), destination)
-            self.assertEqual(run.call_count, 1)
-            self.assertEqual((destination / 'build.tar.gz').read_bytes(), b'archive')
+    def test_missing_or_partial_archive_remains_failure_even_with_read_token(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'ci-build-test'
+            source.mkdir()
+            env = {'CI_RESTORED_ARTIFACTS': directory, 'GH_TOKEN': 'test-token'}
+            with patch.dict(os.environ, env), patch.object(graph.subprocess, 'run') as run:
+                for present in [None, 'manifest.json', 'build.tar.gz']:
+                    for path in source.iterdir():
+                        path.unlink()
+                    if present:
+                        (source / present).write_bytes(b'incomplete')
+                    with self.assertRaisesRegex(ValueError, 'not downloaded'):
+                        graph.download('ci-build-test', Path(directory) / 'unused')
+                run.assert_not_called()
 
-    def test_retries_successful_but_incomplete_download(self):
-        with tempfile.TemporaryDirectory() as directory, self.environment():
-            destination = Path(directory) / 'restored'
-            attempts = []
-            def fetch(command, **kwargs):
-                staging = Path(command[-1])
-                attempts.append(staging)
-                (staging / 'manifest.json').write_text('{}')
-                if len(attempts) == 2:
-                    (staging / 'build.tar.gz').write_bytes(b'complete')
-                else:
-                    (staging / 'partial').write_bytes(b'discard me')
-            with patch.object(graph.subprocess, 'run', side_effect=fetch), patch.object(graph.time, 'sleep') as sleep:
-                graph.download('ci-build-test', destination)
-            self.assertEqual(len(attempts), 2)
-            self.assertNotEqual(attempts[0], attempts[1])
-            self.assertFalse((destination / 'partial').exists())
-            self.assertEqual((destination / 'build.tar.gz').read_bytes(), b'complete')
-            sleep.assert_called_once_with(2)
-
-    def test_retries_failed_download_and_keeps_failure_mandatory(self):
-        with tempfile.TemporaryDirectory() as directory, self.environment():
-            destination = Path(directory) / 'restored'
-            with patch.object(graph.subprocess, 'run', side_effect=subprocess.CalledProcessError(1, 'gh')) as run, \
-                    patch.object(graph.time, 'sleep'):
-                with self.assertRaises(subprocess.CalledProcessError):
-                    graph.download('ci-build-test', destination)
-            self.assertEqual(run.call_count, 3)
-            self.assertFalse(destination.exists())
-
-    def test_rejects_incomplete_pre_downloaded_artifact(self):
+    def test_complete_preloaded_archive_is_returned_without_network(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / 'ci-build-test'
             source.mkdir()
             (source / 'manifest.json').write_text('{}')
-            with patch.dict(os.environ, {'CI_RESTORED_ARTIFACTS': directory, 'GH_TOKEN': ''}):
-                with self.assertRaisesRegex(ValueError, 'not downloaded'):
-                    graph.download('ci-build-test', Path(directory) / 'unused')
-                (source / 'build.tar.gz').write_bytes(b'archive')
+            (source / 'build.tar.gz').write_bytes(b'archive')
+            with patch.dict(os.environ, CI_RESTORED_ARTIFACTS=directory), patch.object(graph.subprocess, 'run') as run:
                 self.assertEqual(graph.download('ci-build-test', Path(directory) / 'unused'), source)
-
-
-class BuildArtifactFallbackTest(unittest.TestCase):
-    def test_incomplete_preloaded_artifact_is_retried_with_read_token(self):
-        with tempfile.TemporaryDirectory() as directory:
-            source = Path(directory) / 'ci-build-test'
-            source.mkdir()
-            (source / 'partial').write_bytes(b'discard')
-            def fetch(command, **kwargs):
-                self.assertEqual(kwargs['timeout'], 120)
-                staging = Path(command[-1])
-                (staging / 'manifest.json').write_text('{}')
-                (staging / 'build.tar.gz').write_bytes(b'archive')
-            env = {'CI_RESTORED_ARTIFACTS': directory, 'GH_TOKEN': 'test-token', 'GITHUB_RUN_ID': '123'}
-            with patch.dict(os.environ, env), patch.object(graph.subprocess, 'run', side_effect=fetch):
-                self.assertEqual(graph.download('ci-build-test', Path(directory) / 'unused'), source)
-            self.assertFalse((source / 'partial').exists())
-            self.assertTrue((source / 'build.tar.gz').is_file())
-
-    def test_stalled_download_is_bounded_and_remains_failure(self):
-        with tempfile.TemporaryDirectory() as directory:
-            env = {'CI_RESTORED_ARTIFACTS': '', 'GITHUB_RUN_ID': '123'}
-            with patch.dict(os.environ, env), \
-                    patch.object(graph.subprocess, 'run', side_effect=subprocess.TimeoutExpired('gh', 120)) as run, \
-                    patch.object(graph.time, 'sleep'):
-                with self.assertRaises(subprocess.TimeoutExpired):
-                    graph.download('ci-build-test', Path(directory) / 'destination')
-            self.assertEqual(run.call_count, 3)
-            self.assertFalse((Path(directory) / 'destination').exists())
+                run.assert_not_called()
 
 
 if __name__ == '__main__':

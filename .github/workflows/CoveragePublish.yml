@@ -30,10 +30,16 @@ jobs:
         with:
           name: ci-test-plan
           path: .
-      - name: Download independent lane reports and receipts
-        uses: actions/download-artifact@v4
+      - name: Plan exact independent lane reports and receipts
+        env:
+          KIND: ${{ inputs.kind }}
+          FAMILY: ${{ inputs.family }}
+          COMMON: ${{ inputs.common }}
+        run: python3 dev/ci_artifacts.py publication --kind "$KIND" --family "$FAMILY" --common "$COMMON" --output ci-publication-inputs.json
+      - name: Download every planned lane report and receipt
+        uses: ./.github/actions/download-artifacts
         with:
-          pattern: ${{ inputs.kind == 'ordinary' && 'ci-result' || 'ci-target' }}-${{ inputs.family }}-${{ inputs.common }}-*
+          names-file: ci-publication-inputs.json
           path: ci-contributions
       - name: Verify all producers and form production coverage union
         env:

@@ -1,0 +1,8 @@
+{
+  "name": "rodin-ci-artifact-downloads",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@actions/artifact": "2.3.2"
+  }
+}

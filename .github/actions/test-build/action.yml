@@ -39,9 +39,9 @@ runs:
       with:
         definition: ${{ steps.build.outputs.definition }}
     - name: Download only this selection's required builds
-      uses: actions/download-artifact@v4
+      uses: ./.github/actions/download-artifacts
       with:
-        pattern: ${{ steps.build.outputs.artifacts }}
+        names: ${{ steps.build.outputs.artifacts }}
         path: ci-runtime-inputs
     - name: Check restoration disk headroom
       shell: bash
@@ -52,5 +52,4 @@ runs:
         JOB: ${{ inputs.job }}
         MATRIX: ${{ inputs.matrix }}
         CI_RESTORED_ARTIFACTS: ${{ github.workspace }}/ci-runtime-inputs
-        GH_TOKEN: ${{ github.token }}
       run: python3 dev/ci_build_graph.py restore --job "$JOB" --matrix "$MATRIX"

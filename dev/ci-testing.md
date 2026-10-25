@@ -281,3 +281,20 @@ raw-to-published union equality check and the complete 95% final gate.
 See also the [testing rules](../doc/agents/testing.md),
 [benchmark guide](../tests/benchmarks/README.md) and
 [installation checks](../tests/installation/README.md).
+
+### Artifact retrieval and coverage collection
+
+Build and execution lanes use exact names from their shared-build index.
+Publishers and finalization use `dev/ci_artifacts.py` to derive their complete
+input list from the saved plans; do not introduce workflow-wide artifact globs
+or `gh run download` fallback scans. Large runs can exceed 1,000 artifacts, and
+repeated REST enumeration can exhaust the installation token quota.
+
+For a new producer, retain the naming contract in `ci_coverage.py`,
+`TestGroup.yml` and `ci_artifacts.py`. Run the serial `test_ci_artifacts.py`
+regressions: they compare the full configuration plan with publisher inputs and
+exercise more than 1,000 artifacts, missing/empty downloads and clean transfer
+retries. Their Node tests run through the Python CI guard suite, one at a time.
+The final receipt/hash/inventory checks and 95% gate remain authoritative.
+See the [workflow architecture](../.github/workflows/README.md) for the complete
+hierarchy and coverage flow.
