@@ -392,8 +392,8 @@ dl.m-doc dt a.m-doc {
 }
 
 /* Declaration qualifiers remain readable without badge borders or fills. */
-.m-doc-wrap .m-label,
-h1 .m-label {
+:is(.m-doc-wrap, h1) .m-label,
+:is(.m-doc-wrap, h1) .m-label:not(.m-flat) {
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -403,28 +403,23 @@ h1 .m-label {
 }
 
 /* Unboxed constexpr/consteval labels use the syntax palette in both themes. */
-.m-doc-wrap .m-label.m-primary,
-h1 .m-label.m-primary {
+:is(.m-doc-wrap, h1) .m-label.m-primary {
   color: var(--code-keyword);
 }
 
-.m-doc-wrap .m-label.m-success,
-h1 .m-label.m-success {
+:is(.m-doc-wrap, h1) .m-label.m-success {
   color: var(--success-color);
 }
 
-.m-doc-wrap .m-label.m-info,
-h1 .m-label.m-info {
+:is(.m-doc-wrap, h1) .m-label.m-info {
   color: var(--info-color);
 }
 
-.m-doc-wrap .m-label.m-danger,
-h1 .m-label.m-danger {
+:is(.m-doc-wrap, h1) .m-label.m-danger {
   color: var(--danger-color);
 }
 
-.m-doc-wrap .m-label.m-warning,
-h1 .m-label.m-warning {
+:is(.m-doc-wrap, h1) .m-label.m-warning {
   color: var(--warning-color);
 }
 
