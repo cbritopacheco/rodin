@@ -932,6 +932,16 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief TAWSS and OSI on the lesion wall (tag 5) only.
       ScalarGridFunctionType m_tawssLesion;
       ScalarGridFunctionType m_osiLesion;
+      /// @brief Nodal wall and lesion indicators, int_G phi_i dA (assembled,
+      ///        ADD across ranks): consistent on every rank, which a
+      ///        Region::Boundary projection is not (it visits the OWNED faces
+      ///        only, and flush() lets a stale ghost overwrite the owner:
+      ///        seams of zeros along the partition, as in AtriumPTAG).
+      ScalarGridFunctionType m_wallArea;
+      ScalarGridFunctionType m_lesionArea;
+      VectorGridFunctionType m_wssRec;
+      Real m_wallAreaThreshold = 0.0;
+      Real m_lesionAreaThreshold = 0.0;
 
       // ---- Fluxes ----------------------------------------------------------
       ScalarTestFunctionType m_qFlux;

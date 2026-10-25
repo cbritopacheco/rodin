@@ -1323,6 +1323,9 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_osi(m_sh),
       m_tawssLesion(m_sh),
       m_osiLesion(m_sh),
+      m_wallArea(m_sh),
+      m_lesionArea(m_sh),
+      m_wssRec(m_vh),
       m_qFlux(m_sh),
       m_one(m_sh),
       m_flux(m_qFlux),
@@ -2305,6 +2308,18 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_flux = Integral(m_one, m_qFlux);
     m_flux.assemble();
     m_volume = std::max<Real>(m_flux(m_one), 1e-30);
+
+    // Nodal wall/lesion indicators (see m_wallArea). Interpolating a P1 field
+    // at its own node leaves O(1e-21) round-off where it is zero, hence the
+    // thresholds relative to the maximum.
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(m_wallSet);
+    m_flux.assemble();
+    m_wallArea.setData(m_flux.getVector());
+    m_wallAreaThreshold = 1.0e-6 * m_wallArea.max();
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(AttributeSet{m_cfg.labels.lesion});
+    m_flux.assemble();
+    m_lesionArea.setData(m_flux.getVector());
+    m_lesionAreaThreshold = 1.0e-6 * m_lesionArea.max();
 
     if (isRoot())
     {
@@ -3761,25 +3776,23 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     // Keep only the wall: off it the regularised projection carries a
     // sign-alternating tail (2D driver, computeWallShear).
+    // Projected over the cells with the nodal wall indicator, so that every
+    // rank writes every local node consistently (never Region::Boundary).
     const size_t dim = m_mesh.getSpaceDimension();
-    const size_t faceDim = m_mesh.getDimension() - 1;
-    const auto onWall = [this, faceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
-      return a && m_wallSet.count(*a);
-    };
-
-    const auto& wssSol = m_wssTrial.getSolution();
-    m_wss = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-    m_wss.project(Region::Boundary,
-      VectorFunction(dim,
-        [&wssSol, dim](const Point& p) -> Math::SpatialVector<Real> {
-          const auto w = wssSol.getValue(p);
-          Math::SpatialVector<Real> out(dim);
-          for (Index c = 0; c < static_cast<Index>(dim); ++c)
-            out(c) = w(c);
+    m_wssRec.setData(m_wssTrial.getSolution().getData());
+    m_wss.project(VectorFunction(dim,
+      [this, dim](const Point& p) -> Math::SpatialVector<Real> {
+        Math::SpatialVector<Real> out(dim);
+        if (!(m_wallArea.getValue(p) > m_wallAreaThreshold))
+        {
+          out.setZero();
           return out;
-        }),
-      onWall);
+        }
+        const auto w = m_wssRec.getValue(p);
+        for (Index c = 0; c < static_cast<Index>(dim); ++c)
+          out(c) = w(c);
+        return out;
+      }));
 
     axpy(m_dt, m_wss.getData(), m_netShear.getData());
     m_shearMagnitude.project(Sqrt(Dot(m_wss, m_wss)));
@@ -3793,31 +3806,25 @@ namespace Rodin::Examples::ViscoelasticFluids
     if (elapsed <= 0.0)
       return;
 
-    // TAWSS and OSI on the wall only (2D driver, closeCycle).
-    const size_t faceDim = m_mesh.getDimension() - 1;
-    const auto onWall = [this, faceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
-      return a && m_wallSet.count(*a);
+    // TAWSS and OSI on the wall only, projected over the cells with the nodal
+    // wall indicator (see m_wallArea; never Region::Boundary).
+    const auto onWallNode = [this](const Point& p) {
+      return m_wallArea.getValue(p) > m_wallAreaThreshold;
     };
+    m_tawss.project(RealFunction([this, elapsed, onWallNode](const Point& p) -> Real {
+      return onWallNode(p) ? m_absShear.getValue(p) / elapsed : 0.0;
+    }));
 
-    m_tawss = Real(0);
-    m_osi = Real(0);
-
-    m_tawss.project(Region::Boundary,
-      RealFunction([this, elapsed](const Point& p) -> Real {
-        return m_absShear.getValue(p) / elapsed;
-      }),
-      onWall);
-
-    m_osi.project(Region::Boundary, RealFunction([this](const Point& p) -> Real {
+    m_osi.project(RealFunction([this, onWallNode](const Point& p) -> Real {
+      if (!onWallNode(p))
+        return 0.0;
       const Real abs = m_absShear.getValue(p);
       if (abs <= 0.0)
         return 0.0;
       const auto net = m_netShear.getValue(p);
       const Real mag = std::sqrt(Math::dot(net, net));
       return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
-    }),
-      onWall);
+    }));
 
     const auto zeroWithGhosts = [](::Vec& v) {
       PetscErrorCode e = VecZeroEntries(v);
@@ -3834,16 +3841,13 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     // The same indices restricted to the lesion wall: the global maxima can
     // sit at the inlet, where the imposed profile meets the discrete flow.
-    const auto onLesion = [this, faceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
-      return a && *a == m_cfg.labels.lesion;
+    const auto onLesion = [this](const Point& p) {
+      return m_lesionArea.getValue(p) > m_lesionAreaThreshold;
     };
-    m_tawssLesion = Real(0);
-    m_osiLesion = Real(0);
-    m_tawssLesion.project(Region::Boundary,
-      RealFunction([this](const Point& p) -> Real { return m_tawss.getValue(p); }), onLesion);
-    m_osiLesion.project(Region::Boundary,
-      RealFunction([this](const Point& p) -> Real { return m_osi.getValue(p); }), onLesion);
+    m_tawssLesion.project(RealFunction([this, onLesion](const Point& p) -> Real {
+      return onLesion(p) ? m_tawss.getValue(p) : 0.0; }));
+    m_osiLesion.project(RealFunction([this, onLesion](const Point& p) -> Real {
+      return onLesion(p) ? m_osi.getValue(p) : 0.0; }));
   }
 
   void ArterialLesion3DViscousLogImplicit::computeFluxes()
