@@ -1501,10 +1501,29 @@ namespace Rodin::Examples::ViscoelasticFluids
       computeDevelopedProfile();
       m_inflow.setMeanProfile(m_inletR, m_inletPhi);
       if (!isOwens())
-        for (Real gd = 1.0e-3; gd < 1.0e5; gd *= 1.5)
-          if (!(solventViscosity(gd) > 0.0))
+      {
+        // The solvent must be positive AND its shear stress eta_s(gd) gd
+        // increasing: the solvent carries the instantaneous response, and a
+        // falling solvent stress is a negative differential viscosity, an
+        // ill-posed (Hadamard-unstable) momentum equation whose blow-up is
+        // faster on finer meshes (R with eta_p 0.0104, lambda 0.1 s: eta_s
+        // down to 1.6e-5 Pa s and falling stress for 1.75 < gd < 16 1/s).
+        Real gdPrev = 0.0, stressPrev = 0.0;
+        for (Real gd = 1.0e-3; gd < 1.0e5; gd *= 1.02)
+        {
+          const Real es = solventViscosity(gd);
+          if (!(es > 0.0))
             throw std::runtime_error("gsptt: eta_CY(gd) - eta_p/f(gd) <= 0 at gd = " +
               std::to_string(gd) + " 1/s; lower eta_p or epsilon.");
+          if (gdPrev > 0.0 && !(es * gd > stressPrev))
+            throw std::runtime_error("gsptt: the solvent shear stress (eta_CY - eta_p/f) gd "
+              "decreases between gd = " + std::to_string(gdPrev) + " and " + std::to_string(gd) +
+              " 1/s (negative differential viscosity, ill-posed); lower eta_p (at lambda 0.1 s, "
+              "epsilon 0.2: eta_p <= 7.2e-3 Pa s).");
+          gdPrev = gd;
+          stressPrev = es * gd;
+        }
+      }
     }
 
     if (isRoot())

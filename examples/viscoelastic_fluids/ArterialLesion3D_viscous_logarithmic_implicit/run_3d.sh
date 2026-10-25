@@ -37,13 +37,16 @@
 #     CYCLES_R=6      cycles for R (lambda spans several periods: compare the
 #                     growth of uyMean, uzMean with CY rather than periodicity)
 #     ETAP_R=0.050    polymer viscosity of R (Pa s); the solvent eta_CY - eta_p/f
-#                     must stay positive: eta_p <= 0.0104 at lambda 0.1 s, 0.0081
-#                     at 0.05 s, 0.031 at 1 s (N1 at the wall ~40-60 Pa either way)
+#                     must be positive with an increasing shear stress (checked by
+#                     the driver): eta_p <= 7.2e-3 at lambda 0.1 s, 5.8e-3 at 0.05 s
+#                     (epsilon 0.2); 0.0104 at 0.1 s is ill-posed (runs 9, 12, 13)
 #     LAMBDA_H=0.005  O: single-cell relaxation time (s); ETA_PLASMA=1.2e-3 (Pa s);
 #     A0_O=1 ACRIT_O=-1  O: aggregation rate aN0 at rest and at gd_c = 5.78 1/s
 #                     (1/s; -1: 2 A0_O, Moyers-Gonzalez et al. JFM 2008); 0 above 900 1/s
 #     NIN_O=-1        O: inlet aggregate size (-1: equilibrium n_st of the profile)
 #     EPS_O=0 N0_O=-1  O: sPTT epsilon of the dumbbells; initial n (-1: rest)
+#     EPS_R=0.2       sPTT epsilon of R (0.5 with LAMBDA_R 0.138, ETAP_R 0.0095:
+#                     the largest well-posed eta''(2 Hz) = 0.0041 Pa s with eta = CY)
 #     LAMBDA_R=4.83   relaxation time of R (s), a material constant, the same
 #                     at every Re (De = lambda/T varies with Wo at fixed
 #                     El = lambda nu/D^2); solvent positive for lambda >= 2.4 s
@@ -124,6 +127,7 @@ WAVEFORM="${WAVEFORM:-}"
 HARMONICS="${HARMONICS:-10}"
 ETA_REF="${ETA_REF:-0.00345}"
 LAMBDA_R="${LAMBDA_R:-4.83}"
+EPS_R="${EPS_R:-0.2}"
 ETAP_R="${ETAP_R:-0.050}"
 LAMBDA_H="${LAMBDA_H:-0.005}"
 ETA_PLASMA="${ETA_PLASMA:-1.2e-3}"
@@ -183,7 +187,7 @@ run_case() {   # fluid steps dir solver
     D)  wi="$WI"; fargs=(-al_wi "$WI" -al_ptt_epsilon "$PTT_EPS") ;;
     CY) wi=-; fargs=(-al_fluid cy -al_eta_ref "$ETA_REF") ;;
     R)  wi=-; cycles="$CYCLES_R"
-        fargs=(-al_fluid gsptt -al_eta_ref "$ETA_REF" -al_eta_p "$ETAP_R" -al_ptt_epsilon 0.2
+        fargs=(-al_fluid gsptt -al_eta_ref "$ETA_REF" -al_eta_p "$ETAP_R" -al_ptt_epsilon "$EPS_R"
                -al_lambda "$LAMBDA_R" -al_de 0 -al_wi 0 -al_inlet_developed_conformation 1) ;;
     O)  wi=-; cycles="$CYCLES_R"
         fargs=(-al_fluid owens -al_eta_ref "$ETA_REF" -al_owens_lambda_h "$LAMBDA_H"

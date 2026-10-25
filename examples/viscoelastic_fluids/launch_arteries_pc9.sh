@@ -12,10 +12,13 @@
 #     O   Owens (2006) aggregating blood (run_3d.sh; LAMBDA_H, ETA_PLASMA, A0_O,
 #         ACRIT_O, EPS_O, N0_O, NIN_O): lambda = n lambda_H in rouleaux of size n(x, t),
 #         lambda_H at high shear; add it with FLUIDS3D="O R CY N"
-#     R   gsPTT: sPTT polymer (lambda 0.1 s, eta_p 0.0104 Pa s, eps 0.2) plus the
-#         solvent eta_CY - eta_p/f, which is positive (its minimum is 3e-3). The
+#     R   gsPTT: sPTT polymer (lambda 0.1 s, eta_p 0.0070 Pa s, eps 0.2) plus the
+#         solvent eta_CY - eta_p/f. Its shear stress must INCREASE with gd
+#         (eta_p <= 7.2e-3 at lambda 0.1 s; the driver checks it): with eta_p
+#         0.0104 eta_s fell to 1.6e-5 Pa s and its stress decreased for 1.75 <
+#         gd < 16 1/s, an ill-posed momentum equation (runs 9, 12, 13). The
 #         pair (lambda, eta_p) is the one with the largest 2 Hz loss viscosity
-#         eta'' under that constraint (eta'' 0.005 Pa s, G = eta_p/lambda 0.10
+#         eta'' under that constraint (eta'' 0.0034 Pa s, G = eta_p/lambda 0.07
 #         Pa, De = lambda/T 0.12 at 72 bpm; Thurston's blood: eta'' ~ 0.01,
 #         G ~ 0.1 Pa, lambda 0.01-0.1 s). lambda 4.83 s (De 5.8, lambda gd ~ 5e4
 #         at the throat) was abandoned: not blood, and beyond the method.
@@ -46,7 +49,7 @@
 #     CORES=200  NP3D=32  NPWO=64  NPAXI=5  PHASES=0  GEOS="S75 A200"
 #     ARTERIES="carotid coronary aorta femoral small"  FLUIDS3D="R CY N"
 #     SOLVER3D=lulag  BUILD=build-gcc12  OUT=$HOME/Results/arteries
-#     LAMBDA_R=0.1  ETAP_R=0.0104  SKIP_3D=0  SKIP_AXI=1
+#     LAMBDA_R=0.1  ETAP_R=0.0070  SKIP_3D=0  SKIP_AXI=1
 #  Results: $OUT/3D/<artery>/Re<Re>_Wo<Wo>[_waveform_cca]/<geo>/<fluid>/
 # =============================================================================
 set -u
@@ -66,7 +69,7 @@ export OMPI_MCA_hwloc_base_binding_policy=none
 BUILD="${BUILD:-build-gcc12}"
 export OUT="${OUT:-$HOME/Results/arteries}"
 export LAMBDA_R="${LAMBDA_R:-0.1}"
-export ETAP_R="${ETAP_R:-0.0104}"
+export ETAP_R="${ETAP_R:-0.0070}"
 export LAMBDA_H="${LAMBDA_H:-0.005}" ETA_PLASMA="${ETA_PLASMA:-1.2e-3}"
 export A0_O="${A0_O:-1}" ACRIT_O="${ACRIT_O:--1}" EPS_O="${EPS_O:-0}" N0_O="${N0_O:--1}" NIN_O="${NIN_O:--1}"
 NPWO="${NPWO:-64}"
