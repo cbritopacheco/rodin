@@ -558,7 +558,7 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
     </td>
     <td align="center" width="33%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD.mp4">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=2" alt="Blood velocity in an atrium CFD simulation" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png?v=3" alt="Blood velocity in an atrium CFD simulation" width="100%">
       </a>
       <br />
       CFD simulation of blood flow in an atrium (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">Oscar Ruz</a>, <a href="https://cfdusach.cl/">CFD Lab at USACH</a>)
