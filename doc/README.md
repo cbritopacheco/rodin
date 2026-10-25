@@ -402,3 +402,8 @@ section when it contains a reference. The upstream m.css checkout is unchanged.
 Enum values without detailed sections receive their XML anchor IDs at their
 existing declaration entries. The complete-site check also rejects missing
 fragment destinations; the navigation control `#!` is intentionally exempt.
+
+Doxygen `@warning` notes use the native m.css `m-note m-warning` component and
+the theme's warning palette. Other danger notes retain `m-danger`. First note
+headings have no inherited section-heading top margin. Unboxed declaration
+qualifiers use their semantic text colours rather than filled-badge colours.

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from documentation_reference import (ReferenceLayout, Markup, parameters,
-                                     prepare_reference_headers, render_references, scope_name,
+                                     prepare_reference_headers, render_references, render_warning_notes, scope_name,
                                      split_arguments, text)
 import xml.etree.ElementTree as ET
 
@@ -21,6 +21,15 @@ class ReferenceTest(unittest.TestCase):
         self.write('special', 'Rodin::IO::Loader&lt;FileFormat::MEDIT, P1&lt;Range, Mesh&lt;Local&gt;&gt;, Vector&lt;Range&gt;&gt;', '<param><type>class Range</type></param>')
         self.write('other', 'Rodin::Math::Loader')
         self.layout = ReferenceLayout(self.xml, self.site)
+
+    def test_doxygen_warning_uses_native_warning_component_without_changing_danger(self):
+        page = self.site / 'page.html'
+        page.write_text('<aside class="m-note m-danger"><h4>Warning</h4><p>Read this.</p></aside>'
+                        '<aside class="m-note m-danger"><h4>Danger</h4><p>Stop.</p></aside>')
+        self.assertEqual(render_warning_notes(self.site), 1)
+        self.assertIn('class="m-note m-warning"><h4>Warning</h4>', page.read_text())
+        self.assertIn('class="m-note m-danger"><h4>Danger</h4>', page.read_text())
+        self.assertEqual(render_warning_notes(self.site), 0)
 
     def write(self, identity, name, params='', kind='class'):
         source = ('<doxygen><compounddef id="' + identity + '" kind="' + kind + '"><compoundname>' + name + '</compoundname>' +

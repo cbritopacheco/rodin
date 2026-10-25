@@ -20,7 +20,7 @@ import xml.etree.ElementTree as ET
 from documentation_hierarchy import prepare_hierarchy, prepare_member_definitions, symbol_index
 from documentation_links import publish_enum_anchors, unlink_unpublished_references
 from documentation_highlighting import cpp_symbols
-from documentation_reference import prepare_reference_headers, render_references
+from documentation_reference import prepare_reference_headers, render_references, render_warning_notes
 from documentation_search import assemble_search, prepare_class_search
 
 
@@ -248,6 +248,7 @@ def build(configuration, renderer, templates):
                            html_output / 'benchmarks', 'Published configurations',
                            config.get('RODIN_BENCHMARK_DOCUMENTATION_URL', '../'))
         print('Rendered benchmark documentation pages:', count)
+    print('Rendered m.css warning notes:', render_warning_notes(output / state.doxyfile['HTML_OUTPUT']))
     print('Published enum-value anchors:', publish_enum_anchors(xml, output / state.doxyfile['HTML_OUTPUT']))
     print('Unlinked unpublished scopes:', unlink_unpublished_references(xml, output / state.doxyfile['HTML_OUTPUT']))
     print('Rendered concise overview for', len(data), 'modules.')

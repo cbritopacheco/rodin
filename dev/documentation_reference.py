@@ -770,6 +770,35 @@ def prepare_reference_headers(xml):
             tree.write(path, encoding='utf-8', xml_declaration=True)
 
 
+def render_warning_notes(site):
+    """Use the native m.css warning component for Doxygen @warning notes."""
+    count = 0
+    for path in Path(site).rglob('*.html'):
+        source = path.read_text()
+        if 'm-danger' not in source or 'Warning' not in source:
+            continue
+        markup = Markup(source)
+        edits = []
+        for note in markup.nodes:
+            classes = note.attrs.get('class', '').split()
+            if note.tag != 'aside' or 'm-note' not in classes or 'm-danger' not in classes:
+                continue
+            heading = next((child for child in note.children if child.tag == 'h4'), None)
+            if heading is None or markup.content(heading) != 'Warning':
+                continue
+            end = source.index('>', note.start) + 1
+            opening = source[note.start:end]
+            classes = ['m-warning' if value == 'm-danger' else value for value in classes]
+            opening = re.sub(r"""(?<![\w:-])class\s*=\s*(["'])(.*?)\1""",
+                             lambda match: 'class=' + match.group(1) + ' '.join(classes) + match.group(1),
+                             opening, count=1)
+            edits.append((note.start, end, opening))
+        if edits:
+            path.write_text(replace_ranges(source, edits))
+            count += len(edits)
+    return count
+
+
 def render_references(xml, site):
     layout = ReferenceLayout(xml, site)
     count = 0

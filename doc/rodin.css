@@ -392,12 +392,12 @@ dl.m-doc dt a.m-doc {
 }
 
 /* Declaration qualifiers remain readable without badge borders or fills. */
-.m-doc-details .m-doc-wrap .m-label,
-dl.m-doc .m-doc-wrap .m-label,
+.m-doc-wrap .m-label,
 h1 .m-label {
   border: 0;
   background: transparent;
   box-shadow: none;
+  color: var(--color);
   font-size: inherit;
   vertical-align: baseline;
 }
@@ -406,6 +406,21 @@ h1 .m-label {
 .m-doc-wrap .m-label.m-primary,
 h1 .m-label.m-primary {
   color: var(--code-keyword);
+}
+
+.m-doc-wrap .m-label.m-success,
+h1 .m-label.m-success {
+  color: var(--success-color);
+}
+
+.m-doc-wrap .m-label.m-info,
+h1 .m-label.m-info {
+  color: var(--info-color);
+}
+
+.m-doc-wrap .m-label.m-danger,
+h1 .m-label.m-danger {
+  color: var(--danger-color);
 }
 
 .m-doc-wrap .m-label.m-warning,
@@ -666,7 +681,8 @@ main article :is(h2, h3, h4) {
   margin-bottom: .6em;
 }
 main article .m-frame > :is(h2, h3, h4):first-child,
-main article .m-block > :is(h2, h3, h4):first-child {
+main article .m-block > :is(h2, h3, h4):first-child,
+main article .m-note > :is(h2, h3, h4):first-child {
   margin-top: 0;
 }
 main article :is(pre, code, .m-code) {
