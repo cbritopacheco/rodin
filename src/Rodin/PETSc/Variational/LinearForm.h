@@ -113,8 +113,10 @@ namespace Rodin::Variational
         createVector();
       }
 
-      /// @brief Copy constructor (deep-copies the PETSc vector).
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Copy constructor (deep-copies the PETSc vector).
+       * @param other Source object to copy or move from.
+       */
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
@@ -137,8 +139,10 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
-      /// @brief Move constructor.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
       LinearForm(LinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
@@ -236,29 +240,37 @@ namespace Rodin::Variational
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
-      /// @brief Returns a mutable reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
-      /// @returns PETSc vector storing the assembled linear form.
+      /**
+       * @brief Returns a mutable reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+       * @returns PETSc vector storing the assembled linear form.
+       */
       VectorType& getVector() override
       {
         return m_vector;
       }
 
-      /// @brief Returns a read-only reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
-      /// @returns PETSc vector storing the assembled linear form.
+      /**
+       * @brief Returns a read-only reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+       * @returns PETSc vector storing the assembled linear form.
+       */
       const VectorType& getVector() const override
       {
         return m_vector;
       }
 
-      /// @brief Returns a reference to the associated test function.
-      /// @returns Test function used by the assembled form.
+      /**
+       * @brief Returns a reference to the associated test function.
+       * @returns Test function used by the assembled form.
+       */
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
-      /// @brief Creates a heap-allocated copy of this linear form.
-      /// @returns Pointer to a newly allocated copy of this object.
+      /**
+       * @brief Creates a heap-allocated copy of this linear form.
+       * @returns Pointer to a newly allocated copy of this object.
+       */
       LinearForm* copy() const noexcept override
       {
         return new LinearForm(*this);

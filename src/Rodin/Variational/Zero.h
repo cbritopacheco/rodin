@@ -177,9 +177,11 @@ namespace Rodin::Variational
         return v;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geom Polytope on which the order is requested.
-      /// @returns Polynomial order on the requested polytope, or no value when unavailable.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Polytope on which the order is requested.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {

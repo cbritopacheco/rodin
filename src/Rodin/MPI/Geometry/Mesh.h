@@ -155,14 +155,18 @@ namespace Rodin::Geometry
        */
       Mesh(Mesh&& other);
 
-      /// @brief Copy assignment operator.
-      /// @param other Source object to copy or move from.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       Mesh& operator=(const Mesh& other);
 
-      /// @brief Move assignment operator.
-      /// @param other Source object to copy or move from.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Move assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       Mesh& operator=(Mesh&& other);
 
       /**
@@ -253,9 +257,11 @@ namespace Rodin::Geometry
        */
       bool isSubMesh() const override;
 
-      /// @brief Checks whether a point is attached to this mesh or its local shard.
-      /// @param p Point whose mesh attachment is checked.
-      /// @returns Whether the point belongs to this distributed mesh or its local shard.
+      /**
+       * @brief Checks whether a point is attached to this mesh or its local shard.
+       * @param p Point whose mesh attachment is checked.
+       * @returns Whether the point belongs to this distributed mesh or its local shard.
+       */
       bool isLocalPoint(const Point& p) const override;
 
       /**
@@ -819,12 +825,16 @@ namespace Rodin::Geometry
         throw error;
       }
 
-      /// @brief Returns mutable connectivity data of the local shard.
-      /// @returns Topological connectivity of this mesh.
+      /**
+       * @brief Returns mutable connectivity data of the local shard.
+       * @returns Topological connectivity of this mesh.
+       */
       Connectivity<Context::Local>& getConnectivity() override;
 
-      /// @brief Returns const connectivity data of the local shard.
-      /// @returns Topological connectivity of this mesh.
+      /**
+       * @brief Returns const connectivity data of the local shard.
+       * @returns Topological connectivity of this mesh.
+       */
       const Connectivity<Context::Local>& getConnectivity() const override;
 
       /// @brief Options controlling iterative reconciliation rounds.

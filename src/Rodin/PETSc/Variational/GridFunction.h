@@ -567,9 +567,11 @@ namespace Rodin::Variational
         this->release();
       }
 
-      /// @brief Sets every entry of the PETSc vector to a scalar value.
-      /// @param value Field callable composed with the coordinate mapping.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Sets every entry of the PETSc vector to a scalar value.
+       * @param value Field callable composed with the coordinate mapping.
+       * @returns Reference to this object after assignment.
+       */
       GridFunction& operator=(const ScalarType& value)
       {
         static_cast<const GridFunction&>(*this).flush();

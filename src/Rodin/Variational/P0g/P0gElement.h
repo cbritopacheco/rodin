@@ -656,18 +656,22 @@ namespace Rodin::Variational
       /// @brief Nodal functional type of the underlying scalar element.
       using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
 
-      /// @brief Replicates a scalar reference element for a rectangular matrix range.
-      /// @param geometry Reference polytope geometry.
-      /// @param rows Number of rows in the matrix-valued range.
-      /// @param cols Number of columns in the matrix-valued range.
+      /**
+       * @brief Replicates a scalar reference element for a rectangular matrix range.
+       * @param geometry Reference polytope geometry.
+       * @param rows Number of rows in the matrix-valued range.
+       * @param cols Number of columns in the matrix-valued range.
+       */
       P0gElement(Geometry::Polytope::Type geometry, size_t rows, size_t cols)
         : P0gElement(ScalarElement(geometry), rows, cols)
       {}
 
-      /// @brief Replicates a scalar reference element for a rectangular matrix range.
-      /// @param scalar Scalar finite element used for the componentwise construction.
-      /// @param rows Number of rows in the matrix-valued range.
-      /// @param cols Number of columns in the matrix-valued range.
+      /**
+       * @brief Replicates a scalar reference element for a rectangular matrix range.
+       * @param scalar Scalar finite element used for the componentwise construction.
+       * @param rows Number of rows in the matrix-valued range.
+       * @param cols Number of columns in the matrix-valued range.
+       */
       P0gElement(const ScalarElement& scalar, size_t rows, size_t cols)
         : Parent(scalar.getGeometry()),
           m_scalar(scalar),
@@ -682,22 +686,30 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Copies the element and its component extents.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Copies the element and its component extents.
+       * @param other Source object to copy or move from.
+       */
       P0gElement([[maybe_unused]] const P0gElement& other) = default;
 
-      /// @brief Moves the element and its component extents.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Moves the element and its component extents.
+       * @param other Source object to copy or move from.
+       */
       P0gElement([[maybe_unused]] P0gElement&& other) = default;
 
-      /// @brief Copies the element and its component extents.
-      /// @param other Source object to copy or move from.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Copies the element and its component extents.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       P0gElement& operator=([[maybe_unused]] const P0gElement& other) = default;
 
-      /// @brief Moves the element and its component extents.
-      /// @param other Source object to copy or move from.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Moves the element and its component extents.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       P0gElement& operator=([[maybe_unused]] P0gElement&& other) = default;
 
       /// @brief Matrix basis with one nonzero entry.
@@ -797,10 +809,12 @@ namespace Rodin::Variational
           size_t m_rows, m_cols, m_component;
       };
 
-      /// @brief Contracts each matrix entry with the scalar reference element.
-      /// @param out Output value receiving the basis-coefficient contraction.
-      /// @param coefficient Callable returning the coefficient associated with a local basis index.
-      /// @param point Reference coordinates of the evaluation point.
+      /**
+       * @brief Contracts each matrix entry with the scalar reference element.
+       * @param out Output value receiving the basis-coefficient contraction.
+       * @param coefficient Callable returning the coefficient associated with a local basis index.
+       * @param point Reference coordinates of the evaluation point.
+       */
       template <class Coefficient>
       void evaluate(
         RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& point) const
@@ -815,53 +829,67 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the number of local matrix basis functions.
-      /// @returns Number of degrees of freedom for the requested entity or element.
+      /**
+       * @brief Returns the number of local matrix basis functions.
+       * @returns Number of degrees of freedom for the requested entity or element.
+       */
       size_t getCount() const
       {
         return m_scalar.getCount() * m_rows * m_cols;
       }
 
-      /// @brief Returns the polynomial order when it is known.
-      /// @returns Polynomial order on the requested polytope, or no value when unavailable.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
       size_t getOrder() const
       {
         return m_scalar.getOrder();
       }
 
-      /// @brief Returns the number of matrix rows.
-      /// @returns Number of rows in the matrix-valued range.
+      /**
+       * @brief Returns the number of matrix rows.
+       * @returns Number of rows in the matrix-valued range.
+       */
       size_t getRows() const
       {
         return m_rows;
       }
 
-      /// @brief Returns the number of matrix columns.
-      /// @returns Number of columns in the matrix-valued range.
+      /**
+       * @brief Returns the number of matrix columns.
+       * @returns Number of columns in the matrix-valued range.
+       */
       size_t getColumns() const
       {
         return m_cols;
       }
 
-      /// @brief Returns the scalar element whose basis is replicated for matrix entries.
-      /// @returns Underlying scalar finite element.
+      /**
+       * @brief Returns the scalar element whose basis is replicated for matrix entries.
+       * @returns Underlying scalar finite element.
+       */
       const ScalarElement& getScalarElement() const
       {
         return m_scalar;
       }
 
-      /// @brief Returns the scalar reference node for the selected component DOF.
-      /// @param local Local degree-of-freedom index.
-      /// @returns Reference node associated with the local degree of freedom.
+      /**
+       * @brief Returns the scalar reference node for the selected component DOF.
+       * @param local Local degree-of-freedom index.
+       * @returns Reference node associated with the local degree of freedom.
+       */
       decltype(auto) getNode(size_t local) const
       {
         assert(local < getCount());
         return m_scalar.getNode(local / (m_rows * m_cols));
       }
 
-      /// @brief Returns a basis value at the bound integration point.
-      /// @param local Local degree-of-freedom index.
-      /// @returns Basis function associated with the local degree of freedom.
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Local degree-of-freedom index.
+       * @returns Basis function associated with the local degree of freedom.
+       */
       BasisFunction getBasis(size_t local) const
       {
         assert(local < getCount());
@@ -869,9 +897,11 @@ namespace Rodin::Variational
           local % (m_rows * m_cols)};
       }
 
-      /// @brief Returns the scalar nodal functional applied to the selected matrix entry.
-      /// @param local Local degree-of-freedom index.
-      /// @returns Degree-of-freedom functional associated with the local index.
+      /**
+       * @brief Returns the scalar nodal functional applied to the selected matrix entry.
+       * @param local Local degree-of-freedom index.
+       * @returns Degree-of-freedom functional associated with the local index.
+       */
       LinearForm getLinearForm(size_t local) const
       {
         assert(local < getCount());

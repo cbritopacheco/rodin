@@ -57,12 +57,16 @@ namespace Rodin
       constexpr
       Tuple() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Copy constructor.
+       * @param other Source object to copy or move from.
+       */
       constexpr Tuple([[maybe_unused]] const Tuple& other) = default;
 
-      /// @brief Move constructor.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
       constexpr Tuple([[maybe_unused]] Tuple&& other) = default;
 
       /**

@@ -1206,8 +1206,10 @@ namespace Rodin::Geometry
           PolytopeQuadratureIndex m_quadratures;
       };
 
-      /// @brief Generates a Builder instance to build a Mesh object.
-      /// @returns Builder for constructing a local mesh.
+      /**
+       * @brief Generates a Builder instance to build a Mesh object.
+       * @returns Builder for constructing a local mesh.
+       */
       static Builder Build()
       {
         return Builder();
@@ -1295,12 +1297,16 @@ namespace Rodin::Geometry
         load(filename, fmt);
       }
 
-      /// @brief Performs a copy of another mesh.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Performs a copy of another mesh.
+       * @param other Source object to copy or move from.
+       */
       Mesh(const Mesh& other);
 
-      /// @brief Move constructs the mesh from another mesh.
-      /// @param other Source object to copy or move from.
+      /**
+       * @brief Move constructs the mesh from another mesh.
+       * @param other Source object to copy or move from.
+       */
       Mesh(Mesh&& other);
 
       virtual ~Mesh() = default;
@@ -1311,9 +1317,11 @@ namespace Rodin::Geometry
        */
       Mesh& operator=(const Mesh& other) = delete;
 
-      /// @brief Move assigns the mesh from another mesh.
-      /// @param other Source object to copy or move from.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Move assigns the mesh from another mesh.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       Mesh& operator=([[maybe_unused]] Mesh&& other);
 
       /**
@@ -1772,15 +1780,19 @@ namespace Rodin::Geometry
       virtual Optional<Attribute> getAttribute(
         size_t dimension, Index index) const override;
 
-      /// @brief Returns the mesh connectivity (incidence relations).
-      /// @returns Topological connectivity of this mesh.
+      /**
+       * @brief Returns the mesh connectivity (incidence relations).
+       * @returns Topological connectivity of this mesh.
+       */
       virtual Connectivity<Context>& getConnectivity() override
       {
         return m_connectivity;
       }
 
-      /// @brief Returns the mesh connectivity (incidence relations).
-      /// @returns Topological connectivity of this mesh.
+      /**
+       * @brief Returns the mesh connectivity (incidence relations).
+       * @returns Topological connectivity of this mesh.
+       */
       virtual const Connectivity<Context>& getConnectivity() const override
       {
         return m_connectivity;
@@ -1818,9 +1830,11 @@ namespace Rodin::Geometry
       virtual const PolytopeQuadrature& getQuadrature(
         size_t dimension, Index idx, const QF::QuadratureFormula& qf) const override;
 
-      /// @brief Serializes the mesh (for boost::serialization).
-      /// @param ar Serialization archive used to store or restore the object.
-      /// @param version Serialization format version; unused by this implementation.
+      /**
+       * @brief Serializes the mesh (for boost::serialization).
+       * @param ar Serialization archive used to store or restore the object.
+       * @param version Serialization format version; unused by this implementation.
+       */
       template <class Archive>
       void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {

@@ -395,9 +395,11 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /// @brief Move assignment operator.
-      /// @param other Source object to copy or move from.
-      /// @returns Reference to this object after assignment.
+      /**
+       * @brief Move assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       Connectivity& operator=(Connectivity&& other) noexcept
       {
         if (this != &other)
@@ -735,8 +737,10 @@ namespace Rodin::Geometry
        */
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true);
 
-      /// @brief Returns the maximal polytope dimension present in this connectivity.
-      /// @returns Largest polytope dimension stored in the mesh.
+      /**
+       * @brief Returns the maximal polytope dimension present in this connectivity.
+       * @returns Largest polytope dimension stored in the mesh.
+       */
       size_t getMaximalDimension() const;
 
       /**
