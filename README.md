@@ -500,7 +500,7 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
     </td>
     <td align="center" width="50%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/LevelSetCantilever3D.webm?v=4x">
-        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png?v=stacked" alt="Shape optimization of a cantilever in 3D" width="100%">
       </a>
       <br />
      Minimization of linear-elastic compliance in 3D
