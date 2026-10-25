@@ -41,7 +41,6 @@
 
   @subsection credits-index-mmg MMG
 
-
   MMG is an open source software for bidimensional and tridimensional surface
   and volume remeshing. It is licensed under the
   [LGPL](https://github.com/MmgTools/mmg/blob/master/LICENSE) and is originally
@@ -52,31 +51,98 @@
   - https://www.mmgtools.org/
   @endparblock
 
-  @subsection credits-index-mfem MFEM
+  @subsection credits-index-hdf5 HDF5
 
+  [HDF5](https://www.hdfgroup.org/solutions/hdf5/) provides structured binary
+  storage for Rodin mesh and field output, including the data referenced by
+  XDMF visualization files.
 
-    MFEM is a modular parallel C++ library for finite element methods. Its goal
-    is to enable high-performance scalable finite element discretization
-    research and application development on a wide variety of platforms,
-    ranging from laptops to supercomputers. It is licensed under the
-    [BSD-3-Clause License](https://github.com/mfem/mfem/blob/master/LICENSE).
+  @subsection credits-index-termcolor termcolor
 
-  @par Links
-  @parblock
-  - https://mfem.org/
-  - https://glvis.org/
-  @endparblock
+  [termcolor](https://github.com/ikalnytskyi/termcolor) supplies terminal
+  colors for contextual diagnostics in the Alert module.
+
+  @subsection credits-index-petsc PETSc
+
+  [PETSc](https://petsc.org/) supplies the optional distributed algebra,
+  linear and nonlinear solvers, and preconditioners used by Rodin's PETSc backend.
 
   @subsection credits-index-suitesparse SuiteSparse
 
-  SuiteSparse is a suite of sparse matrix algorithms.
-  Each package has its own individual
-  [license](https://github.com/DrTimothyAldenDavis/SuiteSparse/blob/master/LICENSE.txt).
+  [SuiteSparse](https://github.com/DrTimothyAldenDavis/SuiteSparse) supplies
+  the optional UMFPACK, CHOLMOD, SPQR, and ParU sparse solver backends.
+  Individual components have their own license terms.
 
-  @par Links
-  @parblock
-  - https://people.engr.tamu.edu/davis/suitesparse.html
-  @endparblock
+  @subsection credits-index-mumps MUMPS
+
+  [MUMPS](https://mumps-solver.org/) provides the optional multifrontal
+  sparse direct solver backend.
+
+  @subsection credits-index-scotch Scotch
+
+  [Scotch](https://gitlab.inria.fr/scotch/scotch) provides graph
+  partitioning for mesh decomposition through the Scotch module.
+
+  @subsection credits-index-metis METIS
+
+  [METIS](https://github.com/KarypisLab/METIS) provides graph partitioning
+  and fill-reducing orderings used by supported sparse solver dependencies.
+
+  @subsection credits-index-mpi MPI implementations
+
+  [MPICH](https://www.mpich.org/) and [Open MPI](https://www.open-mpi.org/)
+  provide implementations of the Message Passing Interface used in Rodin's
+  distributed builds and continuous integration. Rodin uses MPI through its
+  distributed mesh, finite element, and solver paths.
+
+  @subsection credits-index-openmp OpenMP
+
+  [OpenMP](https://www.openmp.org/) provides the compiler and runtime
+  interface used by optional shared-memory parallel code paths.
+
+  @subsection credits-index-pybind11 pybind11
+
+  [pybind11](https://pybind11.readthedocs.io/) connects C++ interfaces
+  to Python in Rodin's optional Python bindings.
+
+  @section credits-index-development Development and documentation tools
+
+  @subsection credits-index-googletest GoogleTest
+
+  [GoogleTest](https://google.github.io/googletest/) supplies the C++
+  testing framework used by Rodin's unit and regression tests.
+
+  @subsection credits-index-benchmark Google Benchmark
+
+  [Google Benchmark](https://github.com/google/benchmark) supplies the
+  benchmark framework used to measure Rodin's numerical kernels and
+  assembly operations.
+
+  @subsection credits-index-doxygen Doxygen
+
+  [Doxygen](https://www.doxygen.nl/) extracts API declarations and
+  documentation from Rodin's C++ sources and documentation pages.
+
+  @subsection credits-index-mcss m.css
+
+  [m.css](https://mcss.mosra.cz/) renders the extracted documentation
+  and supplies the site theme and documentation components.
+
+  @subsection credits-index-jinja Jinja
+
+  [Jinja](https://jinja.palletsprojects.com/) renders the HTML templates
+  used by m.css and Rodin's documentation pages.
+
+  @subsection credits-index-pygments Pygments
+
+  [Pygments](https://pygments.org/) provides syntax highlighting
+  for code examples throughout the documentation.
+
+  @subsection credits-index-latex LaTeX and dvisvgm
+
+  [LaTeX](https://www.latex-project.org/) typesets mathematical
+  expressions, and [dvisvgm](https://dvisvgm.de/) converts the results
+  into SVG images for the documentation.
 
   @section References
 

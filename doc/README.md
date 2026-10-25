@@ -13,6 +13,8 @@ artifacts are written under the CMake build tree.
 - `Doxygen.in` configures the standard Doxygen build.
 - `Doxygen.mcss.in` configures the XML-producing Doxygen pass used by m.css.
 - `conf.py.in` configures m.css presentation, navigation, and search.
+- `Configuration.dox` explains build selections and links to the generated-header reference.
+- `templates/` customizes the Modules index and public module headings in m.css.
 - `Mainpage.dox`, `Namespaces.dox`, `Notation.dox`, and `Credits.dox` provide
   top-level reference pages.
 - `Guides/` contains narrative user guides and conceptual documentation.
@@ -139,3 +141,106 @@ Useful conventions:
 architectural context. Start with `doc/agents/README.md`, then read the
 philosophy and conventions pages before touching code. Domain-specific pages
 cover geometry, variational forms, solvers, PETSc, physics, and testing.
+
+## Module and Template Navigation
+
+The Modules index groups public Rodin components using `RODIN_MODULES` and
+`RODIN_MODULE_CATEGORIES` in `conf.py.in`. Each category starts with a description.
+A table of contents links to each category and module. Each module is framed
+in a single-column list with a linked name, an italic brief in dimmed text without a block,
+one compact representative formula or usage example, and one introductory
+description paragraph in a flat block. Complete descriptions remain on the linked module pages.
+These descriptions come from the namespace documentation in `Namespaces.dox`; they are not maintained
+in a separate overview. Public module namespace pages use the title “module”;
+nested implementation namespaces retain their C++ namespace labels. The first
+displayed formula or code block supplies the representative item; the opening
+detailed paragraph supplies the description. Keep both concise and self-contained.
+
+`rodin_add_mcss` invokes `dev/build_documentation.py` with the repository-pinned
+m.css renderer and `doc/templates`. The helper renders the complete API and search
+index once, then renders the concise Modules page from those same parsed module
+descriptions. It scopes copied formula and section identifiers to keep SVG glyphs
+and local anchors distinct, and preserves links to anchors on API pages. The
+upstream templates remain the fallback for other pages.
+
+Rebuilds remove generated XML and HTML pages while retaining formula caches and
+assets, so deleted source pages disappear from navigation and search as well.
+Local stylesheets use content-based filenames, so browsers refresh the palette
+when CSS changes without discarding unchanged cached styles.
+
+Before rendering, `dev/documentation_hierarchy.py` completes navigation
+relationships in generated XML. Directory descriptions keep documented header
+files reachable through the Files tree. Missing ownership links for nested types
+are resolved against known enclosing classes and namespaces, ignoring scope
+separators inside template arguments. Existing ownership links are preserved. The class index retains documented types
+through undocumented enclosing scopes, keeping the omitted scope in their
+displayed names. Private types excluded by the renderer are also excluded from
+the index, preventing links to pages that are not generated.
+This step changes generated documentation only; it does not change declarations
+or the m.css submodule.
+
+Template-specialization groups retain their Doxygen identifiers and are linked
+from the generic class's `@see` documentation. They are technical references,
+not entries in the Modules index. When adding a specialization family, include
+that backlink on the primary template. Preprocessor macros stay attached to
+their declaring header; the Configuration page links to `Configure.h.in` and
+explains the generated `Rodin/Configure.h` include.
+
+After rendering the full m.css site, run:
+
+```sh
+python3 dev/check_documentation_navigation.py
+```
+
+This checks every catalogue entry, representative formula/example, configuration
+header link and visible primary-template specialization backlink. The
+Documentation workflow runs the helper regression tests and the same check before
+deployment. Adding a public
+module requires an entry in `RODIN_MODULES` and a documented namespace with a
+brief, a detailed description, and a representative formula or usage example.
+
+## In-page Sidebar
+
+The styled site provides an “On this page” sidebar on the left on wide screens.
+`rodin-navigation.js` builds links from the page's section headings and marks the
+current section while scrolling. Nested lists and connector lines show heading
+hierarchy under Overview. Existing contents menus are excluded. The
+sidebar scrolls independently and supports normal keyboard navigation.
+Smaller screens and printed pages retain the original layout and inline contents.
+The sidebar uses no external JavaScript dependencies; without JavaScript the
+original page remains usable. Its layout is defined in `rodin.css`, and
+`conf.py.in` loads the script for every generated page, and `Doxygen.mcss.in`
+registers it as a copied site asset.
+
+## Main-page Presentation
+
+`Images/Architecture.svg` presents the core stack in blue, model modules on the
+left in green, and third-party interfaces on the right in yellow. All blocks
+have transparent backgrounds. `Mainpage.dox` embeds this vector diagram.
+
+`dev/documentation_highlighting.py` supplements Pygments with documented C++ type
+names and enum declarations from Doxygen XML. The configured post-filter colors
+types blue and enum values red, preserving variables, strings and comments.
+Qualified enum values are matched against their declaring scopes to distinguish
+them from identically named classes. The shared palette in `rodin.css` applies
+to code throughout the site and uses normal font weight for every token.
+
+## Color Themes
+
+The site uses a dark base palette and follows the system's light preference
+until a theme is selected explicitly. The icon at the right of the top bar
+opens a keyboard-accessible System / Light / Dark selector. Its choice is saved
+in local storage; selecting System resumes automatic changes. The two existing
+transparent logos switch with the active theme.
+
+`rodin-theme.css` owns both palettes and the section-heading colors. Page titles
+and ordinary subsection titles stay neutral. Main sections use blue; module
+category and module headings use blue for Core, green for Models, gold for
+integrations, and purple for Infrastructure. Status blocks retain semantic
+colors. Light-mode accents are darker to preserve readability.
+
+`rodin-theme.js` applies the saved choice before rendering and adds the selector.
+`RODIN_MCSS_STYLESHEETS` in `conf.py.in` lists the pinned upstream CSS components.
+The documentation builder bundles them with their variables intact and loads
+Rodin's overrides afterwards. Upstream m.css is not modified. Update palettes
+in Rodin's stylesheet rather than changing the vendor files or generated HTML.

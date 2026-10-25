@@ -53,8 +53,12 @@ jobs:
           -DRODIN_USE_MCSS=ON
           -DRODIN_BUILD_SRC=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
+      - name: Test documentation navigation checks
+        run: python3 -m unittest discover -s dev -p 'test_documentation_*.py' -v
       - name: Build
         run: cmake --build ${{github.workspace}}/build --target RodinDoxygen
+      - name: Verify rendered module and template navigation
+        run: python3 dev/check_documentation_navigation.py
       - name: Deploy
         if: github.event_name == 'push'
         uses: peaceiris/actions-gh-pages@v3

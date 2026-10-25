@@ -56,6 +56,8 @@ namespace Rodin::IO
    * @tparam Fmt File format to use for loading
    * @tparam Trait Context trait (e.g., sequential or parallel)
    * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
+   *
+   * @see @ref MeshLoaderSpecializations "MeshLoader Template Specializations"
    */
   template <FileFormat Fmt, class Trait>
   class MeshLoader;

@@ -13,7 +13,6 @@
  */
 
 /**
- * @ingroup RodinDirectives
  * @brief Default order for PolytopeQuadratureFormula.
  *
  * This macro defines the default polynomial degree of exactness when

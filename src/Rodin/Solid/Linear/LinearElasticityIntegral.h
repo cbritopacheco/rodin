@@ -432,6 +432,8 @@ namespace Rodin::Variational
    *
    * @tparam Solution Solution type
    * @tparam FES Finite element space type
+   *
+   * @see @ref LinearElasticitySpecializations "LinearElasticityIntegral Template Specializations"
    */
   template <class Solution, class FES>
   class LinearElasticityIntegral final

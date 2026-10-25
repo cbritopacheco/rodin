@@ -3,15 +3,82 @@ DOXYFILE = '@DOXYGEN_MCSS_OUT@'
 STYLESHEETS = [
     'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600',
     'https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600',
-    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-dark+documentation.compiled.css',
-    '@CMAKE_SOURCE_DIR@/doc/rodin.css'
+    '@CMAKE_SOURCE_DIR@/doc/rodin.css',
+    '@CMAKE_SOURCE_DIR@/doc/rodin-theme.css'
 ]
 
-THEME_COLOR = '#22272e'
+# Keep CSS variables so palettes can follow the system or an explicit choice.
+RODIN_MCSS_STYLESHEETS = [
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-theme-dark.css',
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-grid.css',
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-components.css',
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-layout.css',
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/pygments-dark.css',
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/pygments-console.css',
+    '@CMAKE_SOURCE_DIR@/third-party/m.css/css/m-documentation.css',
+]
+
+HTML_HEADER = '<script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>'
+
+# The documentation builder augments this lexer filter with declared C++ types
+# and enum values from Doxygen XML.
+import sys
+sys.path.insert(0, '@CMAKE_SOURCE_DIR@/dev')
+from documentation_highlighting import cpp_highlighter
+RODIN_CPP_HIGHLIGHTER = cpp_highlighter
+M_CODE_FILTERS_POST = {'C++': cpp_highlighter()}
+
+THEME_COLOR = '#20252d'
 
 FAVICON = 'favicon.ico'
 
 SEARCH_NAME_SIZE_BYTES = 2
+
+# Public module catalogue. Briefs and detailed pages come from namespace documentation.
+RODIN_MODULES = [
+    ('Core', [
+        ('Geometry', 'namespace_rodin_1_1_geometry'),
+        ('Variational', 'namespace_rodin_1_1_variational'),
+        ('Assembly', 'namespace_rodin_1_1_assembly'),
+        ('Solver', 'namespace_rodin_1_1_solver'),
+        ('Quadrature formulae', 'namespace_rodin_1_1_q_f'),
+        ('Math', 'namespace_rodin_1_1_math'),
+        ('Form language', 'namespace_rodin_1_1_form_language'),
+        ('IO', 'namespace_rodin_1_1_i_o'),
+    ]),
+    ('Models', [
+        ('Solid', 'namespace_rodin_1_1_solid'),
+        ('Advection', 'namespace_rodin_1_1_advection'),
+        ('Eikonal', 'namespace_rodin_1_1_eikonal'),
+        ('Distance', 'namespace_rodin_1_1_distance'),
+        ('Hilbert', 'namespace_rodin_1_1_hilbert'),
+        ('Adaptation', 'namespace_rodin_1_1_adaptation'),
+        ('Heart', 'namespace_rodin_1_1_heart'),
+    ]),
+    ('Parallelism and integrations', [
+        ('MPI', 'namespace_rodin_1_1_m_p_i'),
+        ('PETSc', 'namespace_rodin_1_1_p_e_t_sc'),
+        ('MMG', 'namespace_rodin_1_1_m_m_g'),
+        ('Scotch', 'namespace_rodin_1_1_scotch'),
+    ]),
+    ('Infrastructure', [
+        ('Context', 'namespace_rodin_1_1_context'),
+        ('Alert', 'namespace_rodin_1_1_alert'),
+        ('Location', 'namespace_rodin_1_1_location'),
+        ('Utility', 'namespace_rodin_1_1_utility'),
+        ('Serialization', 'namespace_rodin_1_1_serialization'),
+        ('Test', 'namespace_rodin_1_1_test'),
+    ]),
+]
+
+RODIN_MODULE_CATEGORIES = {
+    'Core': 'Geometry, finite element spaces, variational expressions, assembly and linear algebra form the path from a weak formulation to an algebraic system.',
+    'Models': 'Transport, distance construction, regularization, solid mechanics and cardiac models are expressed using the core numerical interfaces.',
+    'Parallelism and integrations': 'These modules connect Rodin to distributed execution, external solver backends, mesh adaptation and graph partitioning libraries.',
+    'Infrastructure': 'Execution contexts, diagnostics, spatial search, type utilities, serialization and numerical test helpers support the numerical modules.',
+}
+
+RODIN_MODULE_URLS = [target + ".html" for _, modules in RODIN_MODULES for _, target in modules]
 
 LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
@@ -19,20 +86,17 @@ LINKS_NAVBAR1 = [
         ('Examples and tutorials', 'examples-index'),
         ('Gallery', 'gallery'),
         ('I/O in Rodin', 'guides-io'),
-        ('Source headers', 'source-headers'),
+        ('Configuration', 'configuration'),
         ('Notation', 'notation-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [
-        ('Preprocessor directives', 'group___rodin_directives'),
-    ]),
-    ("Namespaces", 'namespaces', [
-        ('Assembly', 'namespace_rodin_1_1_assembly'),
-        ('Geometry', 'namespace_rodin_1_1_geometry'),
-        ('IO', 'namespace_rodin_1_1_i_o'),
-        ('Math', 'namespace_rodin_1_1_math'),
-        ('Quadrature formulae', 'namespace_rodin_1_1_q_f'),
-        ('Solver', 'namespace_rodin_1_1_solver'),
-        ('Variational', 'namespace_rodin_1_1_variational'),
+        ('<a href="namespace_rodin_1_1_geometry.html">Geometry</a>',),
+        ('<a href="namespace_rodin_1_1_variational.html">Variational</a>',),
+        ('<a href="namespace_rodin_1_1_assembly.html">Assembly</a>',),
+        ('<a href="namespace_rodin_1_1_math.html">Math</a>',),
+        ('<a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a>',),
+        ('<a href="namespace_rodin_1_1_solver.html">Solver</a>',),
+        ('<a href="namespace_rodin_1_1_i_o.html">IO</a>',),
     ]),
 ]
 LINKS_NAVBAR2 = [

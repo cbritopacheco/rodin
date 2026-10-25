@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="660" viewBox="0 0 920 660" role="img" aria-labelledby="title description">
+  <title id="title">Rodin architecture</title>
+  <desc id="description">The central core-module stack runs from Math and Geometry through quadrature, expressions, variational problems, assembly, solvers and IO. Model modules are on the left in green. Third-party integrations and dependencies are on the right in yellow. Shared services, shown in dimmed purple, support the whole library.</desc>
+  <style>
+    text { font-family: "Source Sans Pro", system-ui, sans-serif; font-weight: 400; text-anchor: middle; fill: currentColor; stroke: none; }
+    .core { color: #87b5da; }
+    .model { color: #96b99c; }
+    .backend { color: #c9b580; }
+    .shared { color: #a99abb; }
+    .frame { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-opacity: 0.65; }
+    .heading { font-size: 20px; }
+    .name { font-size: 18px; }
+    .detail { font-size: 13px; }
+
+    @media (prefers-color-scheme: light) { .core {color:#28648f} .model {color:#39764d} .backend {color:#7e6527} .shared {color:#756082} }
+  </style>
+  <g class="model">
+    <text x="145" y="32" class="heading">Models</text>
+    <rect x="20" y="58" width="250" height="48" class="frame"/>
+    <text x="145" y="79" class="name">Solid</text>
+    <text x="145" y="97" class="detail">constitutive laws</text>
+    <rect x="20" y="114" width="250" height="48" class="frame"/>
+    <text x="145" y="135" class="name">Heart</text>
+    <text x="145" y="153" class="detail">cardiac models</text>
+    <rect x="20" y="170" width="250" height="48" class="frame"/>
+    <text x="145" y="191" class="name">Adaptation</text>
+    <text x="145" y="209" class="detail">moving interfaces</text>
+    <rect x="20" y="226" width="250" height="48" class="frame"/>
+    <text x="145" y="247" class="name">Hilbert</text>
+    <text x="145" y="265" class="detail">regularized extension</text>
+    <rect x="20" y="282" width="250" height="48" class="frame"/>
+    <text x="145" y="303" class="name">Distance</text>
+    <text x="145" y="321" class="detail">distance fields</text>
+    <rect x="20" y="338" width="250" height="48" class="frame"/>
+    <text x="145" y="359" class="name">Advection</text>
+    <text x="145" y="377" class="detail">field transport</text>
+    <rect x="20" y="394" width="250" height="48" class="frame"/>
+    <text x="145" y="415" class="name">Eikonal</text>
+    <text x="145" y="433" class="detail">fast marching</text>
+  </g>
+  <g class="core">
+    <text x="460" y="32" class="heading">Core modules</text>
+    <rect x="335" y="58" width="250" height="48" class="frame"/>
+    <text x="460" y="79" class="name">IO</text>
+    <text x="460" y="97" class="detail">meshes and fields</text>
+    <rect x="335" y="114" width="250" height="48" class="frame"/>
+    <text x="460" y="135" class="name">Solver</text>
+    <text x="460" y="153" class="detail">linear and nonlinear solves</text>
+    <rect x="335" y="170" width="250" height="48" class="frame"/>
+    <text x="460" y="191" class="name">Assembly</text>
+    <text x="460" y="209" class="detail">local-to-global integration</text>
+    <rect x="335" y="226" width="250" height="48" class="frame"/>
+    <text x="460" y="247" class="name">Variational</text>
+    <text x="460" y="265" class="detail">spaces, fields and weak forms</text>
+    <rect x="335" y="282" width="250" height="48" class="frame"/>
+    <text x="460" y="303" class="name">FormLanguage</text>
+    <text x="460" y="321" class="detail">typed expressions</text>
+    <rect x="335" y="338" width="250" height="48" class="frame"/>
+    <text x="460" y="359" class="name">QF</text>
+    <text x="460" y="377" class="detail">reference quadrature</text>
+    <rect x="335" y="394" width="250" height="48" class="frame"/>
+    <text x="460" y="415" class="name">Geometry</text>
+    <text x="460" y="433" class="detail">meshes, mappings and topology</text>
+    <rect x="335" y="450" width="250" height="48" class="frame"/>
+    <text x="460" y="471" class="name">Math</text>
+    <text x="460" y="489" class="detail">spatial, dense and sparse algebra</text>
+  </g>
+  <g class="backend">
+    <text x="775" y="32" class="heading">Third-party interfaces</text>
+    <rect x="650" y="58" width="250" height="48" class="frame"/>
+    <text x="775" y="79" class="name">PETSc</text>
+    <text x="775" y="97" class="detail">linear and nonlinear solvers</text>
+    <rect x="650" y="114" width="250" height="48" class="frame"/>
+    <text x="775" y="135" class="name">MPI / Boost.MPI</text>
+    <text x="775" y="153" class="detail">distributed execution</text>
+    <rect x="650" y="170" width="250" height="48" class="frame"/>
+    <text x="775" y="191" class="name">MMG</text>
+    <text x="775" y="209" class="detail">mesh adaptation</text>
+    <rect x="650" y="226" width="250" height="48" class="frame"/>
+    <text x="775" y="247" class="name">Scotch</text>
+    <text x="775" y="265" class="detail">mesh partitioning</text>
+    <rect x="650" y="282" width="250" height="48" class="frame"/>
+    <text x="775" y="303" class="name">HDF5</text>
+    <text x="775" y="321" class="detail">data storage</text>
+    <rect x="650" y="338" width="250" height="48" class="frame"/>
+    <text x="775" y="359" class="name">Eigen</text>
+    <text x="775" y="377" class="detail">linear algebra</text>
+    <rect x="650" y="394" width="250" height="48" class="frame"/>
+    <text x="775" y="415" class="name">Boost</text>
+    <text x="775" y="433" class="detail">support libraries</text>
+  </g>
+  <g class="shared">
+    <rect x="20" y="540" width="880" height="96" class="frame"/>
+    <text x="460" y="568" class="heading">Shared services</text>
+    <text x="460" y="595" class="name">Context · Alert · Utility · Location · Serialization · Test</text>
+    <text x="460" y="619" class="detail">Execution contexts, diagnostics, generic helpers, spatial search, persistence and numerical testing</text>
+  </g>
+</svg>

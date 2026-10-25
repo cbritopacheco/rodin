@@ -109,6 +109,8 @@ namespace Rodin::Variational
    * approximations.
    *
    * @tparam Scalar Type of scalar range (e.g., Real, Complex)
+   *
+   * @see @ref P0ElementSpecializations "P0Element Template Specializations"
    */
   template <class Scalar>
   class P0Element final : public FiniteElementBase<P0Element<Scalar>>

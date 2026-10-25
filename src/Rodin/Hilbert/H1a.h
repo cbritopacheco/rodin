@@ -4,6 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file H1a.h
+ * @brief Regularized Hilbert-space extension operator.
+ *
+ * Provides @ref Rodin::Hilbert::H1a for smoothing linear functionals and
+ * extending boundary shape derivatives into volume fields.
+ */
 #ifndef RODIN_HILBERT_H1A_H
 #define RODIN_HILBERT_H1A_H
 

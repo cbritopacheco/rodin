@@ -50,10 +50,7 @@
 
 #include "ForwardDecls.h"
 
-/**
- * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a H1Element can support.
- */
+/// @brief Indicates the maximum vector dimension a H1Element can support.
 #define RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION 16
 
 namespace Rodin::FormLanguage
@@ -139,6 +136,8 @@ namespace Rodin::Variational
    * @see H1Element<K, Math::SpatialVector<Scalar>> for vector-valued version
    * @see P0Element for piecewise constant elements
    * @see P1Element for piecewise linear elements
+   *
+   * @see @ref H1ElementSpecializations "H1Element Template Specializations"
    */
   template <size_t K, class Scalar>
   class H1Element final : public FiniteElementBase<H1Element<K, Scalar>>

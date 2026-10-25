@@ -85,6 +85,8 @@ namespace Rodin::Variational
    * for elliptic PDEs like Poisson's equation @f$ -\Delta u = f @f$.
    *
    * @tparam Scalar Type of scalar range (e.g., Real, Complex)
+   *
+   * @see @ref P1ElementSpecializations "P1Element Template Specializations"
    */
   template <class Scalar>
   class P1Element final : public FiniteElementBase<P1Element<Scalar>>

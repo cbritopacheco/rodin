@@ -50,6 +50,7 @@
 
 namespace Rodin::Variational
 {
+  /// @see @ref DenseProblemSpecializations "DenseProblem Template Specializations"
   template <class ... Parameters>
   class DenseProblem;
 

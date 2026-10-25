@@ -416,6 +416,8 @@ namespace Rodin::Variational
   /**
    * @ingroup MatrixFunctionSpecializations
    * @brief Callable matrix coefficient with explicit row and column extents.
+   *
+   * @see @ref MatrixFunctionSpecializations "MatrixFunction Template Specializations"
    */
   template <class F>
   class MatrixFunction final

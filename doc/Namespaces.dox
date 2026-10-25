@@ -1,14 +1,4 @@
 /**
-  Directory src/
-  @brief Source directory for Rodin.
- */
-
-/**
-  Directory src/Rodin
-  @brief Namespace @ref Rodin
- */
-
-/**
   @defgroup RodinVariational Variational module
   @brief Finite element spaces, form-language nodes, and variational problems.
  */
@@ -39,37 +29,45 @@
  */
 
 /**
-  Directory src/Rodin/Context
-  @brief Namespace @ref Rodin::Context
- */
-
-/**
   @namespace Rodin::Context
-  @brief Module for serial, multi-threaded, distributed, and/or parallel
-  computation.
+  @brief Execution contexts for local and distributed computation.
 
-  The Context module provides abstractions for different execution environments
-  and computing contexts. It enables Rodin to operate efficiently across various
-  platforms, from single-machine local execution to distributed computing
-  environments.
+  @ref Rodin::Context::Local "Local" selects local execution, and @ref
+  Rodin::Context::MPI "MPI" carries the environment and communicator for distributed
+  execution. Mesh, connectivity, and finite element specializations use these
+  context types to select their data distribution and backend behavior while
+  preserving the same mathematical interfaces.
 
   ## Supported Contexts
   - **Local Context**: Single-machine execution with shared memory
   - **Distributed Context**: Multi-node execution with message passing (MPI)
- */
 
-/**
-  Directory src/Rodin/Alert
-  @brief Namespace @ref Rodin::Alert
+  ## Representative use
+
+  A mesh's context selects its execution environment without changing its
+  geometric role:
+
+  @code{.cpp}
+  using LocalMesh = Geometry::Mesh<Context::Local>;
+  auto mesh = LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle, {8, 8});
+  @endcode
+
  */
 
 /**
   @namespace Rodin::Alert
-  @brief Module to handle alerts, exceptions, and diagnostic messages.
+  @brief Contextual exceptions and diagnostic reporting.
 
-  The Alert module provides a stream-based system for handling exceptions,
-  warnings, informational messages, and success notifications with colored
-  terminal output. Rodin uses this system **instead of raw `throw` statements**.
+  @code{.cpp}
+  Alert::Info() << "Assembling the system..." << Alert::Raise;
+  @endcode
+
+  @ref Rodin::Alert::Exception "Exception" and @ref
+  Rodin::Alert::MemberFunctionException "MemberFunctionException" report errors with
+  contextual diagnostics. @ref Rodin::Alert::Info "Info" and @ref
+  Rodin::Alert::Warning "Warning" provide nonfatal messages through the same stream
+  interface. These classes communicate invalid inputs, unavailable operations, and
+  solver or mesh-processing status.
 
   ## Alert Types
 
@@ -105,16 +103,21 @@
  */
 
 /**
-  Directory src/Rodin/Geometry
-  @brief Namespace @ref Rodin::Geometry
- */
-
-/**
   @namespace Rodin::Geometry
-  @brief Module for dealing with meshes, polytopes, and geometric operations.
+  @brief Meshes, geometric transformations, and mapped evaluation.
 
-  The Geometry module provides the core data structures for finite element
-  meshes. Key classes include:
+  @f[
+    \mathbf{x}=F_K(\widehat{\mathbf{x}}).
+  @f]
+
+  @ref Rodin::Geometry::Mesh "Mesh" and @ref Rodin::Geometry::Connectivity
+  "Connectivity" describe mesh entities and their incidence relations. @ref
+  Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Point "Point", and
+  @ref Rodin::Geometry::PolytopeTransformation "PolytopeTransformation" connect
+  reference elements to physical geometry for integration, field evaluation, mesh
+  extraction, and deformation.
+
+  Key classes include:
 
   - @ref Rodin::Geometry::Mesh "Mesh" — The primary mesh class supporting
     triangular, quadrilateral, tetrahedral, and hexahedral meshes
@@ -177,19 +180,16 @@
  */
 
 /**
-  Directory src/Rodin/Assembly
-  @brief Namespace @ref Rodin::Assembly
- */
-
-/**
   @namespace Rodin::Assembly
-  @brief Module for performing the assembly of linear algebra objects from
-  variational expressions.
+  @brief Global assembly of discrete operators.
 
-  The Assembly module provides the core infrastructure for assembling finite
-  element matrices and vectors from variational forms. It supports both
-  sequential and parallel assembly strategies, with specializations for
-  different operator types and finite element spaces.
+  @ref Rodin::Assembly::Sequential "Sequential" evaluates local integrals and
+  accumulates global matrices and vectors; @ref Rodin::Assembly::Default "Default"
+  selects the configured assembly strategy. @ref
+  Rodin::Assembly::BilinearFormAssemblyInput "BilinearFormAssemblyInput" supplies
+  spaces and integrators, and @ref Rodin::Assembly::ConstraintMap "ConstraintMap"
+  expands degree-of-freedom constraints when assembling constrained or coupled
+  problems.
 
   ## Assembly Strategies
 
@@ -234,11 +234,15 @@
   function pairs.
 
   @see @ref guides-variational "Variational Formulations Guide"
- */
 
-/**
-  Directory Rodin/Threads
-  @brief Namespace @ref Rodin::Threads
+  ## Representative formula
+
+  Trial basis functions @f$\phi_j@f$ and test basis functions @f$\psi_i@f$
+  give the assembled matrix and load vector:
+  @f[
+    A_{ij}=a(\phi_j,\psi_i), \qquad b_i=\ell(\psi_i).
+  @f]
+
  */
 
 /**
@@ -247,26 +251,22 @@
  */
 
 /**
-  Directory src/Rodin/Geometry/Euclidean
-  @brief Namespace @ref Rodin::Geometry::Euclidean
- */
-
-/**
   @namespace Rodin::Geometry::Euclidean
   @brief Module for dealing with Euclidean geometries.
  */
 
 /**
-  Directory src/Rodin/IO
-  @brief Namespace @ref Rodin::IO
- */
-
-/**
   @namespace Rodin::IO
-  @brief Module for mesh and grid function input/output.
+  @brief Reading and writing meshes, fields, and associated data.
 
-  The IO module provides facilities for reading and writing meshes and grid
-  functions in several formats:
+  @ref Rodin::IO::MeshLoader "MeshLoader" and @ref Rodin::IO::MeshPrinter
+  "MeshPrinter" import and export meshes; @ref Rodin::IO::GridFunctionLoader
+  "GridFunctionLoader" and @ref Rodin::IO::GridFunctionPrinter "GridFunctionPrinter"
+  transfer discrete fields. Format-specific backends support MFEM, MEDIT, and HDF5
+  data, while @ref Rodin::IO::XDMF "XDMF" writes meshes, multiple fields, and time
+  series for visualization.
+
+  Supported mesh and field formats include:
 
   - **MFEM** (@ref Rodin::IO::FileFormat "IO::FileFormat::MFEM") — Native MFEM mesh and grid function format
   - **MEDIT** (@ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT") — MEDIT format used by MMG and INRIA tools
@@ -310,18 +310,8 @@
  */
 
 /**
-  Directory Rodin/Plot
-  @brief Namespace @ref Rodin::Plot
- */
-
-/**
   @namespace Rodin::Plot
   @brief Module for visualization tools.
- */
-
-/**
-  Directory Rodin/Plot/Artist
-  @brief Namespace @ref Rodin::Plot::Artist
  */
 
 /**
@@ -330,18 +320,8 @@
  */
 
 /**
-  Directory Rodin/Plot/Artist/Axes
-  @brief Namespace @ref Rodin::Plot::Artist::Axes
- */
-
-/**
   @namespace Rodin::Plot::Artist::Axes
   @brief Contains artist functionality for Axes.
- */
-
-/**
-  Directory Rodin/Plot/Artist/Axis
-  @brief Namespace @ref Rodin::Plot::Artist::Axis
  */
 
 /**
@@ -350,18 +330,8 @@
  */
 
 /**
-  Directory Rodin/Plot/Artist/Lines
-  @brief Namespace @ref Rodin::Plot::Artist::Lines
- */
-
-/**
   @namespace Rodin::Plot::Artist::Lines
   @brief Contains artist functionality for Lines.
- */
-
-/**
-  Directory Rodin/Plot/Backend
-  @brief Namespace @ref Rodin::Plot::Backend
  */
 
 /**
@@ -370,18 +340,8 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend/Bases
-  @brief Namespace @ref Rodin::Plot::Backend::Bases
- */
-
-/**
   @namespace Rodin::Plot::Backend::Bases
   @brief Contains base backend functionality.
- */
-
-/**
-  Directory Rodin/Plot/Backend/Renderer
-  @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
 /**
@@ -390,28 +350,13 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend/Renderer/Drawables
-  @brief Namespace @ref Rodin::Plot::Backend::Renderer::Drawables
- */
-
-/**
   @namespace Rodin::Plot::Backend::Renderer::Drawables
   @brief Contains backend renderer for drawables.
  */
 
 /**
-  Directory Rodin/Plot/Backend/Event
-  @brief Namespace @ref Rodin::Plot::Backend::Event
- */
-
-/**
   @namespace Rodin::Plot::Backend::Event
   @brief Contains backend event functionality.
- */
-
-/**
-  Directory Rodin/Plot/GUI
-  @brief Namespace @ref Rodin::Plot::GUI
  */
 
 /**
@@ -421,18 +366,15 @@
 
 
 /**
-  Directory src/Rodin/Variational
-  @brief Namespace @ref Rodin::Variational
- */
-
-/**
   @namespace Rodin::Variational
-  @brief Module which provides the necessary tools for constructing and
-  solving variational problems.
+  @brief Finite element spaces, fields, and variational problems.
 
-  The Variational module is the core of the Rodin finite element framework.
-  It provides classes for defining finite element spaces, trial and test
-  functions, variational forms, boundary conditions, and problems.
+  @ref Rodin::Variational::H1 "H1" and @ref Rodin::Variational::P1 "P1" define
+  finite element spaces, while @ref Rodin::Variational::GridFunction "GridFunction"
+  evaluates and interpolates discrete fields. @ref Rodin::Variational::TrialFunction
+  "TrialFunction", @ref Rodin::Variational::TestFunction "TestFunction", and @ref
+  Rodin::Variational::Problem "Problem" express weak forms, boundary conditions, and
+  the algebraic problems used to solve PDEs.
 
   ## Finite Element Spaces
 
@@ -530,17 +472,18 @@
  */
 
 /**
-  Directory src/Rodin/Distance
-  @brief Namespace @ref Rodin::Distance
- */
-
-/**
   @namespace Rodin::Distance
-  @brief Module which provides models for computation of the distance function.
+  @brief Distance-field computations.
 
-  The Distance module offers several methods for computing distance functions
-  on finite element meshes, each with different trade-offs between accuracy,
-  speed, and smoothness.
+  @f[
+    d(\mathbf{x},\Gamma)=\inf_{\mathbf{y}\in\Gamma}\|\mathbf{x}-\mathbf{y}\|.
+  @f]
+
+  @ref Rodin::Distance::Eikonal "Eikonal" constructs distance fields through fast
+  marching, while @ref Rodin::Distance::Poisson "Poisson" and @ref
+  Rodin::Distance::SignedPoisson "SignedPoisson" provide PDE-based alternatives.
+  These models convert boundary or level-set information into distance
+  approximations for shape optimization, interface processing, and mesh adaptation.
 
   ## Available Methods
 
@@ -613,18 +556,14 @@
  */
 
 /**
-  Directory src/Rodin/Hilbert
-  @brief Namespace @ref Rodin::Hilbert
- */
-
-/**
   @namespace Rodin::Hilbert
-  @brief Module which provides models and tools for the Hilbertian
-  extension-regularization procedure.
+  @brief Hilbert-space formulations and regularization.
 
-  The Hilbert module implements @f$ H^1 @f$-based extension-regularization
-  operators used in shape and topology optimization. The primary class
-  @ref Rodin::Hilbert::H1a "H1a" solves the regularized extension problem:
+  @ref Rodin::Hilbert::H1a "H1a" solves a regularized extension problem that
+  converts a linear functional into a smooth field over the mesh. It is commonly
+  used to extend boundary shape derivatives into volume descent directions, with a
+  configurable length scale controlling smoothing and boundary conditions
+  constraining the extension.
   @f[
     \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
   @f]
@@ -651,19 +590,14 @@
  */
 
 /**
-  Directory src/Rodin/Advection
-  @brief Namespace @ref Rodin::Advection
- */
-
-/**
   @namespace Rodin::Advection
-  @brief Module which provides models for the resolution of unsteady advection
-  equations.
+  @brief Transport and advection of fields.
 
-  The Advection module implements semi-Lagrangian (characteristic-based)
-  transport of scalar fields on unstructured meshes. The primary class is
-  @ref Rodin::Advection::Lagrangian "Lagrangian", which solves the
-  advection equation:
+  @ref Rodin::Advection::Lagrangian "Lagrangian" advances scalar fields on
+  unstructured meshes by tracing characteristics and projecting the transported
+  field into a finite element space. It is used to transport level sets and other
+  evolving fields; boundary policies control the treatment of characteristics that
+  reach the mesh boundary.
   @f[
     \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0
   @f]
@@ -727,15 +661,14 @@
  */
 
 /**
-  Directory src/Rodin/Eikonal
-  @brief Namespace @ref Rodin::Eikonal
- */
-
-/**
   @namespace Rodin::Eikonal
-  @brief Module which provides solvers for the Eikonal equation.
+  @brief Eikonal equations and distance propagation.
 
-  The Eikonal equation is a non-linear partial differential equation of the form:
+  @ref Rodin::Eikonal::FMM "FMM" implements fast marching on simplicial meshes,
+  propagating arrival times from prescribed seed vertices. It provides the
+  underlying distance propagation used by level-set reinitialization and
+  distance-field construction, with a priority queue controlling the order of vertex
+  updates.
   @f[
     |\nabla u| = F(x)
   @f]
@@ -780,11 +713,6 @@
  */
 
 /**
-  Directory Rodin/Elasticity
-  @brief Namespace @ref Rodin::Elasticity
- */
-
-/**
   @namespace Rodin::Elasticity
   @brief Module which provides models for solid mechanics and elasticity.
 
@@ -824,10 +752,21 @@
 
 /**
   @namespace Rodin::Solid
-  @brief Hyperelastic solid mechanics module for large-deformation problems.
+  @brief Constitutive laws, kinematics, and solid-mechanics integration.
 
-  The Solid module provides a layered framework for finite-strain
-  hyperelasticity. It is organized into four sub-layers:
+  @f[
+    \mathbf{P}=\frac{\partial W}{\partial\mathbf{F}}.
+  @f]
+
+  @ref Rodin::Solid::KinematicState "KinematicState" computes deformation measures
+  for constitutive laws such as @ref Rodin::Solid::NeoHookean "NeoHookean" and @ref
+  Rodin::Solid::HolzapfelOgden "HolzapfelOgden". @ref
+  Rodin::Solid::InternalVirtualWork "InternalVirtualWork" assembles residuals and
+  consistent tangents, and stress fields such as @ref Rodin::Solid::CauchyStress
+  "CauchyStress" support postprocessing. The module covers finite-strain elasticity
+  and fiber-reinforced material models.
+
+  It is organized into four sub-layers:
 
   ## Kinematics
 
@@ -975,17 +914,15 @@
  */
 
 /**
-  Directory src/Rodin/QF
-  @brief Namespace @ref Rodin::QF
- */
-
-/**
   * @namespace Rodin::QF
   * @brief Module for defining quadrature formulae over reference polytopes.
 
-  * The QF (Quadrature Formula) module provides numerical integration rules
-  * for computing integrals over reference polytopes. These quadrature rules
-  * approximate integrals by weighted sums of function evaluations:
+  * @ref Rodin::QF::PolytopeQuadratureFormula "PolytopeQuadratureFormula" selects
+  * reference integration rules by geometry and exactness, while @ref
+  * Rodin::QF::QuadratureFormula "QuadratureFormula" provides shared, persistent
+  * formulas. @ref Rodin::QF::GaussLegendre "GaussLegendre", @ref
+  * Rodin::QF::TensorProduct "TensorProduct", and the simplex rule families supply
+  * points and weights for element integration and reference-basis tabulation.
   * @f[
   *   \int_{\hat{K}} f(\hat{x}) \, d\hat{x} \approx \sum_{i=1}^n w_i \, f(\hat{x}_i)
   * @f]
@@ -1024,17 +961,18 @@
  */
 
 /**
-  Directory src/Rodin/FormLanguage
-  @brief Namespace @ref Rodin::FormLanguage
- */
-
-/**
   @namespace Rodin::FormLanguage
-  @brief Module for writing high level abstract expressions.
+  @brief Typed expressions for constructing variational forms.
 
-  The FormLanguage module provides the expression template infrastructure
-  underlying Rodin's variational form language. It enables composing
-  mathematical expressions that are lazily evaluated during assembly.
+  @code{.cpp}
+  auto stiffness = Integral(Grad(u), Grad(v));
+  @endcode
+
+  @ref Rodin::FormLanguage::Base "Base" supplies the common expression-node
+  interface, @ref Rodin::FormLanguage::Traits "Traits" describes ranges and
+  algebraic properties, and @ref Rodin::FormLanguage::List "List" groups polymorphic
+  nodes. They underpin the typed variational expressions used to compose integrals
+  and operators, and provide extension points for new function and form types.
 
   ## Key Classes
 
@@ -1077,16 +1015,16 @@
  */
 
 /**
-  Directory src/Rodin/Math
-  @brief Namespace @ref Rodin::Math
- */
-
-/**
   @namespace Rodin::Math
-  @brief Module for general mathematical operations.
+  @brief Spatial arithmetic, matrix operations, and sparse linear algebra.
 
-  Provides mathematical types, constants, and utility functions used
-  throughout the Rodin framework.
+  @ref Rodin::Math::SpatialVector "SpatialVector" and @ref
+  Rodin::Math::SpatialMatrix "SpatialMatrix" support small spatial calculations
+  without heap allocation. @ref Rodin::Math::Vector "Vector", @ref
+  Rodin::Math::Matrix "Matrix", and their fixed-size counterparts provide
+  Eigen-compatible algebra; @ref Rodin::Math::LinearSystem "LinearSystem" groups
+  system data and constraint elimination. These types support geometric mappings,
+  constitutive calculations, assembly, and linear solves.
 
   ## Types
 
@@ -1143,21 +1081,37 @@
   - `sum`, `minus`, `mult`, `division` — Element-wise operations
   - `conj` — Complex conjugate
   - `nan<T>()` — NaN sentinel
+
+  ## Representative use
+
+  Rodin's scalar product conjugates its right-hand operand:
+  @f[
+    a\cdot b=\sum_i a_i\overline{b_i}.
+  @f]
+
+  @code{.cpp}
+  Math::SpatialVector<Real> a{1, 2, 3};
+  Math::SpatialVector<Real> b{4, 5, 6};
+  const Real product = Math::dot(a, b);
+  @endcode
+
  */
 
-
-/**
-  Directory src/Rodin/Solver
-  @brief Namespace @ref Rodin::Solver
- */
 
 /**
   @namespace Rodin::Solver
-  @brief Module for solving linear and nonlinear systems arising from
-  finite element discretizations.
+  @brief Solution of linear and nonlinear discrete systems.
 
-  The Solver module provides a comprehensive set of direct and iterative
-  linear solvers:
+  @f[
+    \text{Find } \mathbf{x} \text{ such that } A\mathbf{x}=\mathbf{b}.
+  @f]
+
+  @ref Rodin::Solver::CG "CG" handles symmetric positive-definite systems, @ref
+  Rodin::Solver::GMRES "GMRES" handles general iterative solves, and @ref
+  Rodin::Solver::SparseLU "SparseLU" provides direct sparse factorization. @ref
+  Rodin::Solver::NewtonSolver "NewtonSolver" drives nonlinear solves. These solvers
+  operate on prepared systems or variational problems and provide convergence
+  controls for PDE and optimization calculations.
 
   Direct solvers (exact up to floating-point precision):
   - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
@@ -1207,23 +1161,47 @@
 
 /**
   @namespace Rodin::Test
-  @brief Module containing various utilities and classes for writing tests
- */
+  @brief Helpers for constructing numerical tests.
 
-/**
-  Directory src/Rodin/Test
-  @brief Namespace @ref Rodin::Test
+  @ref Rodin::Test::FDProbe "FDProbe" compares assembled tangents with finite
+  differences and returns error diagnostics in @ref Rodin::Test::FDProbeReport
+  "FDProbeReport". @ref Rodin::Test::Utility::ExpectedResultTable
+  "ExpectedResultTable" organizes known input-output cases, and random generators
+  supply test samples. These helpers support numerical regression tests for
+  constitutive laws, geometry, and variational operators.
+
+  For Rodin's convention
+  @f$A(u)\Delta u=b(u)=-R(u)@f$, the consistency check is
+  @f[
+    A(u)w \approx -\frac{b(u+\epsilon w)-b(u-\epsilon w)}{2\epsilon}.
+  @f]
+  The probe reports absolute and relative errors. Table-driven helpers and
+  random samplers support complementary numerical tests.
+
  */
 
 /**
   @namespace Rodin::Utility
-  @brief Module containing general purpose and language support utility
-  classes.
- */
+  @brief Type utilities and generic programming helpers.
 
-/**
-  Directory src/Rodin/Utility
-  @brief Namespace @ref Rodin::Utility
+  @ref Rodin::Utility::ParameterPack "ParameterPack" and @ref Rodin::Utility::Zip
+  "Zip" support compile-time type and parameter manipulation. @ref
+  Rodin::Utility::Overloaded "Overloaded" combines callable visitors, and @ref
+  Rodin::Utility::OptionalReference "OptionalReference" represents optional
+  non-owning access. These helpers support generic expressions, type dispatch, and
+  reusable library extensions.
+
+  For example,
+  @ref Rodin::Utility::Overloaded "Overloaded" builds a visitor from lambdas:
+
+  @code{.cpp}
+  std::variant<int, Real> value = 2;
+  const Real result = std::visit(Utility::Overloaded{
+    [](int x) { return Real(x); },
+    [](Real x) { return x; }
+  }, value);
+  @endcode
+
  */
 
 /**
@@ -1232,23 +1210,15 @@
  */
 
 /**
-  Directory Rodin/Traits
-  @brief Namespace @ref Rodin::Traits
- */
-
-/**
-  Directory src/Rodin/MMG
-  @brief Namespace @ref Rodin::MMG
- */
-
-/**
   @namespace Rodin::MMG
-  @brief MMG integration with Rodin
+  @brief Mesh adaptation through the MMG integration.
 
-  The `Rodin::MMG` module provides C++ wrappers for the
-  [Mmg Platform](https://www.mmgtools.org/), enabling metric-based mesh
-  adaptation, mesh-quality optimization, and level-set discretization directly
-  from Rodin objects.
+  @ref Rodin::MMG::Mesh "Mesh" connects Rodin geometry to MMG. @ref
+  Rodin::MMG::Adapt "Adapt" performs metric-driven adaptation, @ref
+  Rodin::MMG::Optimizer "Optimizer" improves mesh quality, and @ref
+  Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" fits or extracts an
+  isosurface. These workflows support remeshing and interface reconstruction in
+  shape optimization and evolving-geometry simulations.
 
   ## Key Classes
 
@@ -1377,12 +1347,17 @@
 
 /**
   @namespace Rodin::Scotch
-  @brief PT-Scotch mesh partitioning integration.
+  @brief Graph partitioning through the Scotch integration.
 
-  The Scotch module provides a graph-based mesh partitioner using the
-  [PT-Scotch](https://www.labri.fr/perso/pelegrin/scotch/) library.
-  It implements the `Geometry::Partitioner` interface and supports
-  configurable partitioning strategies via `SCOTCH_Strat`.
+  @code{.cpp}
+  Scotch::Partitioner partitioner(mesh);
+  partitioner.partition(numRanks);
+  @endcode
+
+  @ref Rodin::Scotch::Partitioner "Partitioner" builds a graph-based partition of
+  mesh cells using Scotch. The resulting cell assignments feed mesh sharding and
+  distribution, helping divide finite element workloads across MPI ranks while
+  limiting connections between partitions.
 
   The primary class is `Scotch::Partitioner`, which partitions cells of
   a local mesh into a given number of parts. The resulting partition can be
@@ -1402,10 +1377,18 @@
 
 /**
   @namespace Rodin::MPI
-  @brief Distributed-memory parallel extensions using MPI.
+  @brief Distributed meshes, finite element spaces, and search operations.
 
-  The MPI module enables distributed finite element computations across
-  multiple processes using the Message Passing Interface (MPI) via Boost.MPI.
+  @code{.cpp}
+  using DistributedMesh = Geometry::Mesh<Context::MPI>;
+  @endcode
+
+  @ref Rodin::Context::MPI "Context::MPI" supplies the distributed execution
+  context, while @ref Rodin::Geometry::Mesh "Mesh<Context::MPI>" manages distributed
+  mesh entities and connectivity. @ref Rodin::MPI::Sharder "Sharder" partitions mesh
+  data for transfer between ranks. Distributed finite element spaces, point
+  location, and assembly build on these components for multi-process PDE
+  calculations.
 
   ## Key Components
 
@@ -1475,14 +1458,35 @@
   @namespace Rodin::PETSc
   @brief PETSc integration module for Rodin.
 
-  The PETSc module provides integration with the
-  [Portable, Extensible Toolkit for Scientific Computation](https://petsc.org/)
-  (PETSc), enabling the use of distributed and parallel linear algebra objects,
-  Krylov solvers, and nonlinear solver frameworks within Rodin's finite element
-  pipeline.
+  @code{.cpp}
+  Solver::KSP(poisson).solve();
+  @endcode
+
+  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" groups PETSc
+  matrix and vector handles, while @ref Rodin::Solver::KSP "KSP" and @ref
+  Rodin::Solver::SNES "SNES" expose linear and nonlinear solvers. PETSc-backed
+  variational and assembly specializations connect the same weak-form interfaces to
+  distributed algebra, preconditioning, and solver configuration for larger PDE
+  systems.
 
   PETSc-specific linear algebra, solver, variational, and assembly adapters
   are documented in their corresponding headers.
+
+  ## Submodules
+
+  - @ref Rodin::PETSc::Math "Math" — PETSc vector, matrix, and linear
+    system wrappers
+  - @ref Rodin::PETSc::Solver "Solver" — @ref Rodin::Solver::KSP "KSP",
+    @ref Rodin::Solver::SNES "SNES", CG, and GMRES solver aliases
+  - @ref Rodin::PETSc::Assembly "Assembly" — Assembly strategies for PETSc
+    objects (sequential, MPI, OpenMP)
+  - @ref Rodin::PETSc::Variational "Variational" — Trial/test functions,
+    forms, grid functions, and problems backed by PETSc
+
+  @note Available only when Rodin is configured with PETSc support.
+
+  @see <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html">Rodin::PETSc::Math</a>
+  @see <a href="namespace_rodin_1_1_p_e_t_sc_1_1_solver.html">Rodin::PETSc::Solver</a>
 
   ## Typical Usage (Sequential)
 
@@ -1605,18 +1609,8 @@
  */
 
 /**
-  Directory Rodin/tests
-  @brief Namespace @ref Rodin::Tests
- */
-
-/**
   @namespace Rodin::Tests::Unit
   @brief Unitary tests
- */
-
-/**
-  Directory Rodin/tests/unit
-  @brief Namespace @ref Rodin::Tests::Unit
  */
 
 /**
@@ -1625,35 +1619,24 @@
  */
 
 /**
-  Directory Rodin/tests/manufactured
-  @brief Namespace @ref Rodin::Tests::Manufactured
- */
-
-/**
   @namespace Rodin::Tests::Benchmarks
   @brief Performance benchmarks
  */
 
 /**
-  Directory Rodin/tests/benchmarks
-  @brief Namespace @ref Rodin::Tests::Benchmarks
- */
-
-/**
-  Directory src/Rodin/Adaptation
-  @brief Namespace @ref Rodin::Adaptation
- */
-
-/**
   @namespace Rodin::Adaptation
-  @brief Module for moving-interface mesh adaptation.
+  @brief Mesh adaptation and deformation operations.
 
-  The Adaptation module provides tools for fitting and adapting meshes to
-  moving interfaces described by level set functions. Its centerpiece is
-  SWIFT (Strain-distributed Welsch Implicit-interface Fitting Technique):
-  a variational method that displaces mesh vertices so that a discrete interface tracks
-  the zero set of a level set function @f$ \phi @f$, while preserving
-  element quality.
+  @f[
+    \mathbf{x}^{\prime}=\mathbf{x}+\mathbf{d}(\mathbf{x}).
+  @f]
+
+  @ref Rodin::Adaptation::SWIFT::Adapt "SWIFT::Adapt" and @ref
+  Rodin::Adaptation::SWIFT::Problem "SWIFT::Problem" fit mesh interfaces to level
+  sets while controlling element distortion. @ref Rodin::Adaptation::DeformationMap
+  "DeformationMap" and @ref Rodin::Adaptation::CellDeformation "CellDeformation"
+  describe mapped geometry for evaluating deformed cells and fields. These
+  components support moving-interface calculations and body-fitted mesh updates.
 
   ## Design
 
@@ -1682,6 +1665,17 @@
   @note Interface-fitting constraints are formulated as smooth penalties;
   the module deliberately avoids hard geometric projections inside the
   solve, which break line-search continuity.
+
+  ## Representative formula
+
+  SWIFT combines fitting and distribution contributions in the displacement
+  metric:
+  @f[
+    M=F+D.
+  @f]
+  The metric acts on displacement directions; admissibility is checked during
+  line search. See @ref guides-swift "SWIFT" for the fitting model and contracts.
+
  */
 
 /**
@@ -1695,54 +1689,118 @@
  */
 
 /**
-  Directory src/Rodin/Heart
-  @brief Namespace @ref Rodin::Heart
- */
-
-/**
   @namespace Rodin::Heart
-  @brief Module for reduced-order (0D) cardiac models.
+  @brief Cardiac models and their coupled state evolution.
 
-  Provides lumped-parameter ventricular models used to calibrate and
-  validate the 3D constitutive laws of the @ref Rodin::Solid "Solid"
-  module. The main component is the CCMLC2014 0D ventricular model: a
-  cardiac-cycle stepper driven by a reduced Holzapfel-type passive energy
-  (reduced invariants with first and second derivatives) coupled to an
-  active contraction law.
+  @code{.cpp}
+  const auto report = model.step(dt);
+  @endcode
+
+  @ref Rodin::Heart::CCMLC2014T "CCMLC2014T" advances a reduced ventricular model
+  through a cardiac cycle. @ref Rodin::Heart::HolzapfelReducedLaw
+  "HolzapfelReducedLaw" and @ref Rodin::Heart::CCMLC2014PassiveLaw
+  "CCMLC2014PassiveLaw" supply its reduced passive energy and stress response. The
+  module supports cardiac-cycle studies and constitutive parameter calibration
+  before larger three-dimensional simulations.
 
   0D models integrate ordinary differential equations over a heartbeat and
   are orders of magnitude cheaper than 3D simulations; parameters should
   round-trip between the 0D cycle and the corresponding 3D laws before
   debugging full simulations.
- */
 
-/**
-  Directory Rodin/Location
-  @brief Namespace @ref Rodin::Location
+  ## Representative use
+
+  The reduced ventricular model advances a configured state with a nonlinear
+  time step:
+
+  @code{.cpp}
+  using Model = Heart::CCMLC2014T<>;
+  Model::Input input;
+  Model model(input);
+  const auto report = model.step(dt);
+  @endcode
+
+  Material, loading and initialization parameters in @c input must be chosen
+  for the intended experiment before advancing the model.
+
  */
 
 /**
   @namespace Rodin::Location
-  @brief Module for spatial search and point location.
+  @brief Spatial indexing and geometric search.
 
-  Provides acceleration structures for locating points within meshes. The
-  main component is a bounding-volume hierarchy over axis-aligned bounding
-  boxes (AABB) supporting point-in-mesh queries, used by operations that
-  must evaluate fields at arbitrary physical coordinates.
- */
+  @ref Rodin::Location::AABB "AABB" builds a bounding-volume hierarchy to locate
+  physical coordinates in a mesh and recover the containing cell and reference
+  coordinates. The resulting @ref Rodin::Geometry::Point "Point" can be used for
+  field sampling and evaluation at arbitrary locations. The locator must be rebuilt
+  when the mesh geometry or topology changes.
 
-/**
-  Directory src/Rodin/Serialization
-  @brief Namespace support for serialization of Rodin types.
+  ## Representative use
+
+  An AABB index first prunes candidate cells and then checks their inverse
+  geometric maps. A query returns an optional mesh point:
+
+  @code{.cpp}
+  Location::AABB locator(mesh);
+  const auto point = locator.locate(physicalCoordinates);
+  @endcode
+
+  The mesh must remain fixed during queries. Geometry or topology changes
+  require rebuilding the locator.
+
  */
 
 /**
   @namespace Rodin::Serialization
-  @brief Module providing boost::serialization support for Rodin types.
+  @brief Serialization and reconstruction of library objects.
 
-  Contains serialization adapters for Rodin, Eigen, and Boost container
-  types (connectivity, arrays, flat maps/sets, dense matrices, optionals),
-  enabling binary checkpointing of meshes and fields. Polymorphic types
-  (such as polytope transformations) are registered through export headers
-  so they can be serialized through base-class pointers.
+  @code{.cpp}
+  archive << values;
+  @endcode
+
+  Boost.Serialization adapters store arrays, Eigen-compatible dense matrices, flat
+  containers, and optional values. The export registrations cover selected @ref
+  Rodin::Geometry::ParametricTransformation "ParametricTransformation"
+  instantiations used in MPI shard transfer. Including the relevant adapter headers
+  enables binary archives of supported numerical data and container structures.
+
+  ## Representative use
+
+  Include the adapter for a stored type before using it with a Boost archive.
+  For example, a Rodin array can be written to a binary archive over a stream:
+
+  @code{.cpp}
+  #include <Rodin/Serialization/Array.h>
+  #include <boost/archive/binary_oarchive.hpp>
+
+  Array<Real> values(3);
+  values << 1, 2, 3;
+  boost::archive::binary_oarchive archive(stream);
+  archive << values;
+  @endcode
+
+ */
+
+/**
+  @namespace Eigen
+  @brief Eigen interoperability declarations for Rodin mathematical types.
+
+  Rodin's matrix and vector classes provide Eigen traits and evaluators to
+  participate in Eigen expressions, maps, and references.
+ */
+
+/**
+  @namespace Eigen::internal
+  @brief Eigen traits and evaluators for Rodin matrices and vectors.
+
+  The traits, evaluator, and eval specializations connect Rodin-owned dense
+  containers to Eigen's expression evaluation and storage interfaces.
+ */
+
+/**
+  @namespace std
+  @brief Standard-library customizations for Rodin types.
+
+  Tuple traits enable structured bindings of Rodin linear systems and other
+  supported library objects.
  */

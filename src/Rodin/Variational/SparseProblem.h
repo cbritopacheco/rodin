@@ -49,6 +49,7 @@
 
 namespace Rodin::Variational
 {
+  /// @see @ref SparseProblemSpecializations "SparseProblem Template Specializations"
   template <class ... Parameters>
   class SparseProblem;
 

@@ -54,7 +54,6 @@
 #include "PolytopeTransformationIndex.h"
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ to be computed.
  *
  * Throws an exception if the specified connectivity relation has not been
@@ -75,7 +74,6 @@
   }
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ (for use in member functions).
  *
  * Throws an exception if the specified connectivity relation has not been
@@ -94,7 +92,6 @@
   }
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires mesh to be a SubMesh.
  *
  * Throws an exception if the mesh is not a SubMesh instance, preventing

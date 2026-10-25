@@ -72,6 +72,8 @@ namespace Rodin::IO
    *
    * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a>
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
+   *
+   * @see @ref PrinterSpecializations "Printer Template Specializations"
    */
   template <class T>
   class Printer

@@ -1,0 +1,518 @@
+/* Rodin palette; the upstream m.css components retain their CSS variables. */
+:root,
+body
+{
+  color-scheme: dark;
+  --background-color: #20252d;
+  --color: #dee3eb;
+  --line-color: #414957;
+  --link-color: #87b5da;
+  --link-active-color: #b7d3e9;
+  --dim-color: #a3adbc;
+  --code-color: #e6edf3;
+  --code-background-color: #191e26;
+  --code-note-background-color: #252c36;
+  --console-background-color: #191e26;
+  --header-background-color: #191e26;
+  --header-color: #dee3eb;
+  --header-link-color: #dee3eb;
+  --header-link-current-color: #87b5da;
+  --header-link-active-color: #b7d3e9;
+  --header-link-active-background-color: #292f39;
+  --article-heading-color: #dee3eb;
+  --article-heading-active-color: #b7d3e9;
+  --article-header-color: #dee3eb;
+  --navpanel-link-color: #dee3eb;
+  --footer-background-color: #292f39;
+  --footer-color: #a3adbc;
+  --default-color: #dee3eb;
+  --default-filled-color: #dee3eb;
+  --default-filled-background-color: #292f39;
+  --default-filled-link-color: #87b5da;
+  --success-color: #96b99c;
+  --success-filled-background-color: #29362f;
+  --success-filled-color: #cbded0;
+  --info-color: #87b5da;
+  --info-filled-background-color: #283440;
+  --info-filled-color: #cedfed;
+  --warning-color: #c9b580;
+  --warning-filled-background-color: #383426;
+  --warning-filled-color: #e3d6b5;
+  --primary-color: #87b5da;
+  --danger-color: #df9292;
+  --button-background-color: #292f39;
+  --code-base: #e6edf3;
+  --code-keyword: #c6a4db;
+  --code-type: #87b5da;
+  --code-enum: #ed8d87;
+  --code-operator: #d7a0ba;
+  --code-string: #a8c9a7;
+  --code-number: #d8b189;
+  --code-comment: #a3adbc;
+}
+
+@media(prefers-color-scheme:light)
+{
+  :root:not([data-theme]),
+  :root:not([data-theme]) body
+  {
+    color-scheme: light;
+    --background-color: #f7f8fa;
+    --color: #27323f;
+    --line-color: #d1d8e0;
+    --link-color: #28648f;
+    --link-active-color: #16476b;
+    --dim-color: #627083;
+    --code-color: #27323f;
+    --code-background-color: #edf0f4;
+    --code-note-background-color: #edf0f4;
+    --console-background-color: #edf0f4;
+    --header-background-color: #edf0f4;
+    --header-color: #27323f;
+    --header-link-color: #27323f;
+    --header-link-current-color: #28648f;
+    --header-link-active-color: #16476b;
+    --header-link-active-background-color: #e0e6ed;
+    --article-heading-color: #27323f;
+    --article-heading-active-color: #16476b;
+    --article-header-color: #27323f;
+    --navpanel-link-color: #27323f;
+    --footer-background-color: #edf0f4;
+    --footer-color: #627083;
+    --default-color: #27323f;
+    --default-filled-color: #27323f;
+    --default-filled-background-color: #edf0f4;
+    --default-filled-link-color: #28648f;
+    --success-color: #39764d;
+    --success-filled-background-color: #e6efe8;
+    --success-filled-color: #294d36;
+    --info-color: #28648f;
+    --info-filled-background-color: #e6eef5;
+    --info-filled-color: #254b67;
+    --warning-color: #7e6527;
+    --warning-filled-background-color: #f2edde;
+    --warning-filled-color: #69551f;
+    --primary-color: #28648f;
+    --danger-color: #b12f37;
+    --button-background-color: #edf0f4;
+    --code-base: #27323f;
+    --code-keyword: #795299;
+    --code-type: #216184;
+    --code-enum: #b12f37;
+    --code-operator: #984e74;
+    --code-string: #397246;
+    --code-number: #92531d;
+    --code-comment: #627083;
+  }
+
+}
+
+:root[data-theme="light"],
+:root[data-theme="light"] body
+{
+  color-scheme: light;
+  --background-color: #f7f8fa;
+  --color: #27323f;
+  --line-color: #d1d8e0;
+  --link-color: #28648f;
+  --link-active-color: #16476b;
+  --dim-color: #627083;
+  --code-color: #27323f;
+  --code-background-color: #edf0f4;
+  --code-note-background-color: #edf0f4;
+  --console-background-color: #edf0f4;
+  --header-background-color: #edf0f4;
+  --header-color: #27323f;
+  --header-link-color: #27323f;
+  --header-link-current-color: #28648f;
+  --header-link-active-color: #16476b;
+  --header-link-active-background-color: #e0e6ed;
+  --article-heading-color: #27323f;
+  --article-heading-active-color: #16476b;
+  --article-header-color: #27323f;
+  --navpanel-link-color: #27323f;
+  --footer-background-color: #edf0f4;
+  --footer-color: #627083;
+  --default-color: #27323f;
+  --default-filled-color: #27323f;
+  --default-filled-background-color: #edf0f4;
+  --default-filled-link-color: #28648f;
+  --success-color: #39764d;
+  --success-filled-background-color: #e6efe8;
+  --success-filled-color: #294d36;
+  --info-color: #28648f;
+  --info-filled-background-color: #e6eef5;
+  --info-filled-color: #254b67;
+  --warning-color: #7e6527;
+  --warning-filled-background-color: #f2edde;
+  --warning-filled-color: #69551f;
+  --primary-color: #28648f;
+  --danger-color: #b12f37;
+  --button-background-color: #edf0f4;
+  --code-base: #27323f;
+  --code-keyword: #795299;
+  --code-type: #216184;
+  --code-enum: #b12f37;
+  --code-operator: #984e74;
+  --code-string: #397246;
+  --code-number: #92531d;
+  --code-comment: #627083;
+}
+
+.m-code,
+.m-code span
+{
+  color: var(--code-base);
+}
+
+pre.m-code
+{
+  background: var(--code-background-color);
+}
+
+.m-code .k,
+.m-code .kd,
+.m-code .kn,
+.m-code .kr,
+.m-code .kc
+{
+  color: var(--code-keyword);
+}
+
+.m-code .nc,
+.m-code .nt,
+.m-code .kt,
+.m-code .nb
+{
+  color: var(--code-type);
+}
+
+.m-code .no
+{
+  color: var(--code-enum);
+}
+
+.m-code .cp,
+.m-code .o,
+.m-code .ow
+{
+  color: var(--code-operator);
+}
+
+.m-code .s,
+.m-code .s1,
+.m-code .s2,
+.m-code .sa,
+.m-code .sb,
+.m-code .sc,
+.m-code .sd,
+.m-code .se,
+.m-code .sh,
+.m-code .si,
+.m-code .sr,
+.m-code .ss,
+.m-code .sx,
+.m-code .cpf
+{
+  color: var(--code-string);
+}
+
+.m-code .m,
+.m-code .mi,
+.m-code .mf,
+.m-code .mh,
+.m-code .mo,
+.m-code .mb,
+.m-code .il,
+.m-code .fm
+{
+  color: var(--code-number);
+}
+
+.m-code .c,
+.m-code .c1,
+.m-code .cm,
+.m-code .cs,
+.m-code .ch
+{
+  color: var(--code-comment);
+}
+
+.m-code,
+.m-code span[class]
+{
+  font-weight: 400;
+}
+
+.m-block.m-default
+{
+  background: var(--default-filled-background-color);
+}
+
+.m-block.m-success
+{
+  background: var(--success-filled-background-color);
+}
+
+.m-block.m-info
+{
+  background: var(--info-filled-background-color);
+}
+
+.m-code .n,
+.m-code .p,
+.m-code .nn,
+.m-code .nv,
+.m-code .na,
+.m-code .nf,
+.m-code .w,
+.m-code .nx,
+.m-code .nl,
+.m-code .py,
+.m-code .bp,
+.m-code .ne
+{
+  color: var(--code-base);
+}
+
+img.m-image.rodin-logo-light
+{
+  display: none;
+}
+
+img.m-image.rodin-logo-dark
+{
+  display: block;
+}
+
+@media(prefers-color-scheme:light)
+{
+  :root:not([data-theme]) img.m-image.rodin-logo-light
+  {
+    display: block;
+  }
+
+  :root:not([data-theme]) img.m-image.rodin-logo-dark
+  {
+    display: none;
+  }
+
+}
+
+:root[data-theme="light"] img.m-image.rodin-logo-light
+{
+  display: block;
+}
+
+:root[data-theme="light"] img.m-image.rodin-logo-dark
+{
+  display: none;
+}
+
+#navigation
+{
+  position: relative;
+}
+
+#navigation > .m-container
+{
+  box-sizing: border-box;
+  padding-right: 4.5rem;
+}
+
+#navigation > .m-container > .m-row
+{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#navigation #m-navbar-brand
+{
+  width: auto;
+  flex: 0 0 auto;
+}
+
+#navigation #m-navbar-collapse
+{
+  margin-left: auto;
+}
+
+#navigation .rodin-theme-control
+{
+  position: absolute;
+  right: max(0.75rem,env(safe-area-inset-right));
+  top: 0.125rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+}
+
+.rodin-theme-control label
+{
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rodin-theme-icon
+{
+  position: absolute;
+  inset: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: var(--header-link-color);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.rodin-theme-control select
+{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: transparent;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+  cursor: pointer;
+}
+
+.rodin-theme-control select:hover
+{
+  border-color: var(--line-color);
+}
+
+.rodin-theme-control select:focus-visible
+{
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+.rodin-theme-control select option
+{
+  color: var(--color);
+  background: var(--background-color);
+}
+
+@media(max-width:767px)
+{
+  #navigation > .m-container > .m-row > .m-hide-m
+  {
+    width: auto;
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+
+  #navigation #m-navbar-collapse
+  {
+    flex: 0 0 100%;
+  }
+
+}
+
+:root,
+body
+{
+  --category-core: #87b5da;
+  --category-model: #96b99c;
+  --category-integration: #c9b580;
+  --category-infrastructure: #a99abb;
+}
+
+@media(prefers-color-scheme:light)
+{
+  :root:not([data-theme]),
+  :root:not([data-theme]) body
+  {
+    --category-core: #28648f;
+    --category-model: #39764d;
+    --category-integration: #7e6527;
+    --category-infrastructure: #756082;
+  }
+
+}
+
+:root[data-theme="light"],
+:root[data-theme="light"] body
+{
+  --category-core: #28648f;
+  --category-model: #39764d;
+  --category-integration: #7e6527;
+  --category-infrastructure: #756082;
+}
+
+main article section > h2,
+main article section > h2 > a
+{
+  color: var(--link-color);
+}
+
+section[data-category="Core"]
+{
+  --category-color: var(--category-core);
+}
+
+section[data-category="Models"]
+{
+  --category-color: var(--category-model);
+}
+
+section[data-category="Parallelism and integrations"]
+{
+  --category-color: var(--category-integration);
+}
+
+section[data-category="Infrastructure"]
+{
+  --category-color: var(--category-infrastructure);
+}
+
+section[data-category]>h2,
+section[data-category] section[data-module]>h3,
+section[data-category] section[data-module]>h3>a
+{
+  color: var(--category-color);
+}
+
+/* Shared component states follow the active palette as well. */
+:root,
+body
+{
+  --footer-link-color: var(--link-color);
+  --footer-link-active-color: var(--link-active-color);
+  --article-footer-color: var(--dim-color);
+  --navpanel-link-active-color: var(--link-active-color);
+  --header-breadcrumb-color: var(--dim-color);
+  --default-link-active-color: var(--link-active-color);
+  --default-filled-link-active-color: var(--link-active-color);
+  --primary-link-active-color: var(--link-active-color);
+  --success-link-active-color: var(--link-active-color);
+  --success-filled-link-color: var(--link-color);
+  --success-filled-link-active-color: var(--link-active-color);
+  --info-link-active-color: var(--link-active-color);
+  --info-filled-link-color: var(--link-color);
+  --info-filled-link-active-color: var(--link-active-color);
+  --warning-link-active-color: var(--link-active-color);
+  --warning-filled-link-color: var(--link-color);
+  --warning-filled-link-active-color: var(--link-active-color);
+  --dim-link-color: var(--link-color);
+  --dim-link-active-color: var(--link-active-color);
+  --dim-filled-color: var(--dim-color);
+  --dim-filled-background-color: var(--default-filled-background-color);
+  --dim-filled-link-color: var(--link-color);
+  --dim-filled-link-active-color: var(--link-active-color);
+  --console-color: var(--code-color);
+  --plot-background-color: var(--default-filled-background-color);
+}

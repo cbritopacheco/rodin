@@ -23,3 +23,157 @@
   color: transparent;
   font-family: 'Varela Round', sans-serif;
 }
+
+/* Keep the full-width layout and inline contents on smaller screens. */
+.rodin-page-nav
+{
+  display: none;
+}
+
+@media screen and (min-width: 1200px)
+{
+  .rodin-page-nav.rodin-page-nav-fit
+  {
+    display: block;
+    position: fixed;
+    top: 4rem;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+  }
+
+  .rodin-page-nav h2
+  {
+    font-size: 1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .rodin-page-nav ol
+  {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .rodin-page-nav > ol
+  {
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-color, #5a6475) transparent;
+  }
+
+  .rodin-page-nav li
+  {
+    margin: 0;
+  }
+
+  .rodin-page-nav a
+  {
+    display: block;
+    padding: 0.25rem 0.5rem;
+    border-left: 2px solid transparent;
+    color: var(--dim-color, #9aa4af);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .rodin-page-nav ol ol
+  {
+    margin-left: 0.6rem;
+    padding-left: 0.7rem;
+    border-left: 1px solid var(--line-color, #3c4554);
+  }
+
+  .rodin-page-nav ol ol > li > a
+  {
+    position: relative;
+  }
+
+  .rodin-page-nav ol ol > li > a::before
+  {
+    content: "";
+    position: absolute;
+    left: -0.7rem;
+    top: 0.9rem;
+    width: 0.7rem;
+    border-top: 1px solid var(--line-color, #3c4554);
+  }
+
+  .rodin-page-nav a:hover,
+  .rodin-page-nav a[aria-current="location"]
+  {
+    color: var(--link-color, #5b9dd9);
+    border-left-color: var(--link-color, #5b9dd9);
+  }
+}
+
+@media print
+{
+  .rodin-page-nav
+  {
+    display: none;
+  }
+}
+
+/* Shared code palette. Token weight stays uniform throughout the site. */
+.m-code, .m-code span
+{
+  color: #e6edf3;
+}
+
+.m-code, .m-code span[class], .m-console, .m-console span[class]
+{
+  font-weight: 400;
+}
+
+pre.m-code
+{
+  background-color: #181d24;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+.m-code .k, .m-code .kd, .m-code .kn, .m-code .kr, .m-code .kc
+{
+  color: #c792ea;
+}
+
+.m-code .nc, .m-code .nt, .m-code .kt, .m-code .nb
+{
+  color: #7dc4ff;
+}
+
+.m-code .no
+{
+  color: #f47067;
+}
+
+.m-code .cp, .m-code .o, .m-code .ow
+{
+  color: #f291b7;
+}
+
+.m-code .s, .m-code .s1, .m-code .s2, .m-code .sa, .m-code .sb,
+.m-code .sc, .m-code .sd, .m-code .se, .m-code .sh, .m-code .si,
+.m-code .sr, .m-code .ss, .m-code .sx, .m-code .cpf
+{
+  color: #a5d6a7;
+}
+
+.m-code .m, .m-code .mi, .m-code .mf, .m-code .mh,
+.m-code .mo, .m-code .mb, .m-code .il
+{
+  color: #ffa657;
+}
+
+.m-code .fm
+{
+  color: #ffd166;
+}
+
+.m-code .c, .m-code .c1, .m-code .cm, .m-code .cs, .m-code .ch
+{
+  color: #9aadc2;
+  font-style: italic;
+}
