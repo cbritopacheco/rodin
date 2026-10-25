@@ -20,6 +20,15 @@ RODIN_MCSS_STYLESHEETS = [
 
 HTML_HEADER = '<script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>'
 
+FINE_PRINT = '''<div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    {doxygen_version} and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>'''
+
 # The documentation builder augments this lexer filter with declared C++ types
 # and enum values from Doxygen XML.
 import sys

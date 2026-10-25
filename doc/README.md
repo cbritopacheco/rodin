@@ -250,6 +250,16 @@ The documentation builder bundles them with their variables intact and loads
 Rodin's overrides afterwards. Upstream m.css is not modified. Update palettes
 in Rodin's stylesheet rather than changing the vendor files or generated HTML.
 
+## Footer
+
+The shared footer is configured through `FINE_PRINT` in `conf.py.in`. It keeps
+the copyright notice separate from the Doxygen/m.css credits, including the
+detected Doxygen version. `HTML_EXTRA_FILES` in `Doxygen.in` bundles the Doxygen
+wordmark; a CSS mask gives it the surrounding text colour. The m.css credit is a
+bold text link. Artwork provenance is in
+[`Images/README.md`](Images/README.md). The footer stacks its two parts on narrow
+screens, without changing upstream m.css templates.
+
 ## Class and Specialization References
 
 `dev/documentation_reference.py` presents reference pages after the pinned m.css
@@ -264,6 +274,25 @@ parameter names. Parameters that remain generic are preserved in the declaration
 concrete instantiations are never inferred. Primary-template pages and class
 lists group the available specializations into a two-column table. Every row
 links to its original page and expands to show the complete declaration.
+In class lists, this table is initially collapsed under “See specializations”,
+with a plus/minus indicator. The primary declaration and brief remain visible;
+keyboard activation expands the full list without JavaScript.
+The Doxygen configuration enables `RODIN_USE_OPENMP` for extraction so the
+parallel assembly primary declarations are documented even in serial builds.
+If a primary declaration is unavailable, the renderer groups specializations by
+fully qualified family name without inventing template parameters or a primary
+page. Families in different namespaces remain separate.
+
+Overview declarations longer than 120 characters (with whitespace normalized)
+show only the linked symbol and brief, with the original linked declaration under
+“See declaration”. This is a presentation threshold, independent of viewport
+width; dedicated reference pages retain their complete declarations.
+Source-header annotations consistently use “Defined in” with a linked header,
+below the declaration. Example code retains its literal `#include` directives.
+Deduction-guide details use the linked class name as their heading and keep the
+full original declaration behind “See declaration”. Source-header links, the
+description, and parameter documentation remain visible. Guides are identified
+from their Doxygen member metadata, not from descriptive prose or name length.
 
 Member signatures omit the current class or namespace qualification and avoid
 repeating the enclosing class template declaration. Return types, member template

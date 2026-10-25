@@ -107,6 +107,74 @@ class ReferenceTest(unittest.TestCase):
         self.assertEqual(result.count('href="special.html"'), 1)
         self.assertIn('Full specialization', result)
         self.assertIn('href="other.html"', result)
+        markup = Markup(result)
+        disclosure = next(node for node in markup.nodes if node.attrs.get('class') == 'rodin-specialization-disclosure')
+        self.assertNotIn('open', disclosure.attrs)
+        self.assertIn('<summary>See specializations</summary>', markup.raw(disclosure))
+        self.assertIn('href="special.html"', markup.raw(disclosure))
+        self.assertNotIn('Primary contract.', markup.raw(disclosure))
+
+    def test_missing_primary_groups_by_qualified_family_without_invention(self):
+        self.write('a', 'Rodin::IO::Missing&lt;A&lt;B,C&gt;, D&gt;')
+        self.write('b', 'Rodin::IO::Missing&lt;E&gt;')
+        self.write('c', 'Rodin::Math::Missing&lt;A&gt;')
+        layout = ReferenceLayout(self.xml, self.site)
+        source = '<dl class="m-doc">' + ''.join('<dt>class <a href="' + key + '.html">Missing&lt;...&gt;</a></dt><dd>Brief.</dd>' for key in ['a', 'b', 'c']) + '</dl>'
+        result = layout.group_entries(source)
+        self.assertEqual(result.count('class="rodin-specialization-disclosure"'), 2)
+        self.assertEqual(result.count('Missing specializations</dt>'), 2)
+        self.assertNotIn('template&lt;', result.split('Full specialization')[0])
+        for key in ['a', 'b', 'c']:
+            self.assertEqual(result.count('href="' + key + '.html"'), 1)
+
+    def test_long_overview_declarations_preserve_links_briefs_and_anchors(self):
+        parameters = ', '.join('class Parameter' + str(i) for i in range(12))
+        raw = '<div class="m-doc-template">template&lt;' + parameters + '&gt;</div>class <a href="primary.html">Loader</a>'
+        source = '<dl class="m-doc"><dt id="class-anchor">' + raw + '</dt><dd>Primary brief.</dd></dl>'
+        result = self.layout.collapse_declarations(source)
+        self.assertIn('<dt id="class-anchor">class <a href="primary.html">Loader</a></dt>', result)
+        self.assertIn('Primary brief.', result)
+        self.assertIn('<summary>See declaration</summary>', result)
+        self.assertIn(raw, result)
+        self.assertNotIn(' open', result)
+        function = '<span class="m-doc-wrap-bumper">auto <a href="#function">assemble</a>(</span><span class="m-doc-wrap">' + parameters + ') -&gt; <a href="other.html">Result</a></span>'
+        result = self.layout.collapse_declarations('<dl class="m-doc"><dt>' + function + '</dt><dd>Function brief.</dd></dl>')
+        self.assertIn('<dt><a href="#function">assemble</a></dt>', result)
+        self.assertIn(function, result)
+        self.assertEqual(result.count('href="other.html"'), 1)
+        short = '<dl class="m-doc"><dt>class <a href="primary.html">Loader</a></dt><dd>Short.</dd></dl>'
+        self.assertEqual(self.layout.collapse_declarations(short), short)
+
+    def test_deduction_guide_details_preserve_declaration_and_contract(self):
+        self.write('space', 'Rodin::IO', kind='namespace')
+        path = self.xml / 'space.xml'
+        path.write_text(path.read_text().replace('</compounddef>', '<sectiondef><memberdef kind="function" id="space_1guide"><type/><name>Loader</name><argsstring>(const T&amp; value) -&gt; Loader&lt;T&gt;</argsstring></memberdef><memberdef kind="function" id="space_1ordinary"><type>auto</type><name>Loader</name><argsstring>(const T&amp; value) -&gt; Loader&lt;T&gt;</argsstring></memberdef></sectiondef></compounddef>'))
+        layout = ReferenceLayout(self.xml, self.site)
+        signature = '<div class="m-doc-template">template&lt;class T&gt;</div><a href="#guide" class="m-doc-self">Loader</a>(const <a href="other.html">T</a>&amp; value) -&gt; Loader&lt;T&gt;'
+        header = '<p class="rodin-reference-include">Defined in <a href="header.html">Loader.h</a></p>'
+        contract = '<p>Deduction guide.</p><table><tr><td>value</td><td>Input.</td></tr></table>'
+        source = '<section class="m-doc-details" id="guide"><div><h3>' + signature + '</h3>' + header + contract + '</div></section>'
+        result = layout.deduction_guides('space', source)
+        self.assertIn('<h3><a href="#guide" class="m-doc-self">Loader</a></h3>' + header + '<details', result)
+        self.assertIn('<summary>See declaration</summary>', result)
+        self.assertIn(signature, result)
+        self.assertIn('</details>' + contract, result)
+        self.assertNotIn(' open', result)
+        self.assertEqual(layout.deduction_guides('space', result), result)
+        ordinary = source.replace('id="guide"', 'id="ordinary"')
+        self.assertEqual(layout.deduction_guides('space', ordinary), ordinary)
+
+    def test_source_header_uses_defined_in_outside_signature(self):
+        include = '<div class="m-doc-include m-code m-text-right"><span>#include</span> <a class="cpf" href="header.html">&lt;Rodin/Assembly/OpenMP.h&gt;</a></div>'
+        example = '<pre><span>#include &lt;Example.h&gt;</span></pre>'
+        source = '<h3><a href="#function">assemble</a>()' + include + '</h3>' + example
+        result = self.layout.source_headers(source)
+        self.assertIn('</h3><p class="rodin-reference-include">Defined in <a href="header.html"><code>Rodin/Assembly/OpenMP.h</code></a></p>', result)
+        self.assertNotIn('m-doc-include', result)
+        self.assertIn(example, result)
+        self.assertEqual(self.layout.source_headers(result), result)
+        unlinked = self.layout.source_headers('<div class="m-doc-include">#include &lt;Local.h&gt;</div>')
+        self.assertIn('Defined in <code>Local.h</code>', unlinked)
 
     def test_typedef_headings_drop_only_the_current_scope(self):
         self.write('space', 'Rodin::IO', kind='namespace')

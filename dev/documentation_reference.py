@@ -302,7 +302,7 @@ class ReferenceLayout:
             includes = definition.find('includes')
             target = includes.get('refid') if includes is not None else None
             if target and self.exists(target):
-                result += '<p class="rodin-reference-include">Defined in <a href="' + target + '.html"><code>&lt;' + escape(source) + '&gt;</code></a></p>'
+                result += '<p class="rodin-reference-include">Defined in <a href="' + target + '.html"><code>' + escape(source) + '</code></a></p>'
         result += self.code(self.declaration(definition), definition) + self.bindings(identity)
         return [(header.start, end, result)]
 
@@ -547,10 +547,123 @@ class ReferenceLayout:
                 _, _, description = represented[primary]
                 original = markup.raw(description)
                 edits.append((description.start, description.end,
-                              original[:-5] + self.family(primary, members) + '</dd>'))
+                              original[:-5] + '<details class="rodin-specialization-disclosure">'
+                              '<summary>See specializations</summary>' + self.family(primary, members) + '</details></dd>'))
                 for member in members:
                     _, declaration, description = represented[member]
                     edits.append((declaration.start, description.end, ''))
+            # Some extraction configurations provide specializations without a
+            # primary page. Group these by fully qualified family name without
+            # inventing a declaration or linking to a nonexistent primary.
+            missing = {}
+            for identity, declaration, description in pairs:
+                scope, name = scope_name(self.definitions[identity].findtext('compoundname'))
+                if '<' not in name or identity in self.primaries:
+                    continue
+                family = (scope + '::' if scope else '') + name.split('<', 1)[0]
+                missing.setdefault(family, []).append((identity, declaration, description))
+            for family, entries in missing.items():
+                identity, declaration, description = entries[0]
+                label = scope_name(family)[1]
+                content = ('<dt>' + escape(label) + ' specializations</dt><dd>'
+                           '<details class="rodin-specialization-disclosure"><summary>See specializations</summary>' +
+                           self.family(None, [entry[0] for entry in entries]) + '</details></dd>')
+                edits.append((declaration.start, description.end, content))
+                for _, declaration, description in entries[1:]:
+                    edits.append((declaration.start, description.end, ''))
+        return replace_ranges(source, edits)
+
+    def collapse_declarations(self, source):
+        # A stable textual limit makes the overview independent of viewport
+        # width. Full declarations, including all links, stay in the disclosure.
+        maximum_preview_length = 120
+        markup, edits = Markup(source), []
+        for listing in [node for node in markup.nodes if node.tag == 'dl' and 'm-doc' in node.attrs.get('class', '').split()]:
+            ancestor = listing.parent
+            while ancestor and ancestor.tag not in ('dl', 'details'):
+                ancestor = ancestor.parent
+            if ancestor is not None:
+                continue
+            for index, declaration in enumerate(listing.children[:-1]):
+                description = listing.children[index + 1]
+                if declaration.tag != 'dt' or description.tag != 'dd':
+                    continue
+                plain = re.sub(r'\s+', ' ', markup.content(declaration))
+                if len(plain) <= maximum_preview_length:
+                    continue
+                raw = markup.raw(declaration)
+                symbol = re.search(r'\b(class|struct|union)\s+(<a\b[^>]*>.*?</a>)', raw, re.S)
+                if symbol:
+                    short = symbol[1] + ' ' + symbol[2]
+                else:
+                    function = re.search(r'(<a\b[^>]*>[^<]*(?:<wbr\s*/?>[^<]*)*</a>)\s*\(', raw)
+                    if not function:
+                        continue
+                    short = function[1]
+                opening = raw[:raw.index('>') + 1]
+                complete = raw[len(opening):-5]
+                brief = markup.raw(description)
+                content = (opening + short + '</dt>' + brief[:-5] +
+                           '<details class="rodin-declaration-disclosure"><summary>See declaration</summary>'
+                           '<div class="rodin-overview-declaration">' + complete + '</div></details></dd>')
+                edits.append((declaration.start, description.end, content))
+        return replace_ranges(source, edits)
+
+    def deduction_guides(self, identity, source):
+        markup, edits = Markup(source), []
+        for section in [node for node in markup.nodes if node.tag == 'section' and 'm-doc-details' in node.attrs.get('class', '').split()]:
+            if any(node.tag == 'details' and 'rodin-declaration-disclosure' in node.attrs.get('class', '').split()
+                   for node in markup.nodes if section.start < node.start < section.end):
+                continue
+            member = self.members.get(identity + '_1' + section.attrs.get('id', ''))
+            # Doxygen represents deduction guides as functions with no return
+            # type and a trailing deduced class type. Ordinary trailing-return
+            # functions have a nonempty type (normally auto).
+            if member is None or member.get('kind') != 'function' or text(member.find('type')):
+                continue
+            name = member.findtext('name') or ''
+            arguments = member.findtext('argsstring') or ''
+            result = re.search(r'\)\s*->\s*(.+)$', arguments, re.S)
+            if not result or scope_name(result[1].strip())[1].split('<', 1)[0].strip() != name:
+                continue
+            heading = next((node for node in markup.nodes if node.tag == 'h3' and section.start < node.start < section.end), None)
+            if heading is None:
+                continue
+            raw = markup.raw(heading)
+            link = re.search(r'<a\b[^>]*class="m-doc-self"[^>]*>.*?</a>', raw, re.S)
+            if not link:
+                continue
+            declaration = raw[raw.index('>') + 1:-5]
+            disclosure = ('<details class="rodin-declaration-disclosure"><summary>See declaration</summary>'
+                          '<div class="rodin-overview-declaration">' + declaration + '</div></details>')
+            # Keep the source-header annotation immediately below the heading.
+            following = next((node for node in heading.parent.children if node.start >= heading.end), None)
+            position = following.end if following and 'rodin-reference-include' in following.attrs.get('class', '').split() else heading.end
+            edits.append((heading.start, heading.end, '<h3>' + link[0] + '</h3>'))
+            edits.append((position, position, disclosure))
+        return replace_ranges(source, edits)
+
+    def source_headers(self, source):
+        markup, edits = Markup(source), []
+        for node in markup.nodes:
+            if 'm-doc-include' not in node.attrs.get('class', '').split():
+                continue
+            anchors = [child for child in markup.nodes if child.tag == 'a' and node.start < child.start < node.end]
+            if anchors:
+                anchor = anchors[0]
+                header = '<a href="' + escape(anchor.attrs.get('href', ''), quote=True) + '"><code>' + escape(markup.content(anchor).removeprefix('<').removesuffix('>')) + '</code></a>'
+            else:
+                header = '<code>' + escape(markup.content(node).removeprefix('#include').strip().removeprefix('<').removesuffix('>')) + '</code>'
+            replacement = '<p class="rodin-reference-include">Defined in ' + header + '</p>'
+            ancestor = node.parent
+            while ancestor and ancestor.tag not in ('h1', 'h2', 'h3'):
+                ancestor = ancestor.parent
+            if ancestor:
+                # Source location is supporting prose, not part of the signature.
+                edits.append((node.start, node.end, ''))
+                edits.append((ancestor.end, ancestor.end, replacement))
+            else:
+                edits.append((node.start, node.end, replacement))
         return replace_ranges(source, edits)
 
     def remove_related_see_also(self, identity, source):
@@ -631,7 +744,8 @@ class ReferenceLayout:
                 source = replace_ranges(source, [(declaration.end, declaration.end,
                     '<section id="rodin-specializations"><h2><a href="#rodin-specializations">Specializations</a></h2>' + family + '</section>')])
         source = source.replace('>Base classes</a>', '>Inherits from</a>')
-        return self.remove_related_see_also(identity, self.group_entries(source))
+        source = self.source_headers(self.remove_related_see_also(identity, self.collapse_declarations(self.group_entries(source))))
+        return self.deduction_guides(identity, source)
 
 
 def prepare_reference_headers(xml):

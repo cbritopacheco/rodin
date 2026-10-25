@@ -24,6 +24,11 @@
   font-family: 'Varela Round', sans-serif;
 }
 
+/* Anchored sections must not draw a competing line between coloured blocks. */
+article section:target:has(.m-block) {
+  border-left-color: transparent;
+}
+
 /* Keep the full-width layout and inline contents on smaller screens. */
 .rodin-page-nav
 {
@@ -347,6 +352,35 @@ section.m-doc-details h3 a.m-doc-self {
   overflow-wrap: anywhere;
 }
 
+.rodin-specialization-disclosure,
+.rodin-declaration-disclosure {
+  margin-top: .5rem;
+}
+
+.rodin-specialization-disclosure > summary,
+.rodin-declaration-disclosure > summary {
+  color: var(--link-color);
+  cursor: pointer;
+  list-style: none;
+}
+
+.rodin-specialization-disclosure > summary::-webkit-details-marker,
+.rodin-declaration-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.rodin-specialization-disclosure > summary::before,
+.rodin-declaration-disclosure > summary::before {
+  content: "+";
+  display: inline-block;
+  width: 1.2em;
+}
+
+.rodin-specialization-disclosure[open] > summary::before,
+.rodin-declaration-disclosure[open] > summary::before {
+  content: "−";
+}
+
 /* Nested base-class specializations must wrap on narrow reference pages. */
 dl.m-doc dt a.m-doc {
   overflow-wrap: anywhere;
@@ -487,4 +521,91 @@ section.m-doc-details table td:first-child > .m-label.m-flat {
 .rodin-disclosure-button:focus-visible {
   outline: 2px solid var(--link-color);
   outline-offset: 3px;
+}
+
+.rodin-overview-declaration {
+  margin-top: .5rem;
+  padding: .75rem;
+  border: 1px solid var(--line-color);
+  border-radius: .2rem;
+  overflow-wrap: anywhere;
+}
+
+/* Keep project ownership separate from the documentation tool credits. */
+body > footer > nav > .m-container {
+  width: 100%;
+  max-width: none;
+}
+
+body > footer > nav > .m-container > .m-row > .m-col-l-10 {
+  width: 100%;
+  left: 0;
+}
+
+.rodin-site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  text-align: left;
+}
+
+.rodin-site-footer p {
+  margin: 0;
+}
+
+.rodin-site-footer .rodin-footer-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin-left: auto;
+}
+
+.rodin-footer-tools a {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  color: inherit;
+}
+
+.rodin-footer-tools a:hover {
+  color: var(--link-color);
+}
+
+.rodin-footer-logo {
+  display: inline-block;
+  flex-shrink: 0;
+  background: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.rodin-footer-doxygen {
+  width: 3.4rem;
+  height: 1rem;
+  mask-image: url('Doxygen.svg');
+}
+
+
+.rodin-footer-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 640px) {
+  .rodin-site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rodin-site-footer .rodin-footer-tools {
+    margin-left: 0;
+  }
 }
