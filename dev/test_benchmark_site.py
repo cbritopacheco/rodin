@@ -65,7 +65,9 @@ class BenchmarkSiteTest(unittest.TestCase):
             self.assertNotIn('Convergence', index)
             self.assertNotIn('class="benchmark-breadcrumb"', index)
             self.assertNotIn('class="benchmark-home-link"', index)
-            self.assertIn('aria-label="Search benchmarks"><svg class="rodin-benchmark-icon"', index)
+            self.assertIn('</svg><svg class="rodin-benchmark-icon"', index)
+            self.assertLess(index.index('class="benchmark-magnifier-icon"'),
+                            index.index('class="rodin-benchmark-icon"'))
             self.assertIn('class="benchmark-magnifier-icon"', index)
             self.assertIn('class="benchmark-breadcrumb"', leaf)
             self.assertIn('>Rodin</a>', index)

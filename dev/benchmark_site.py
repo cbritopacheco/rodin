@@ -81,7 +81,8 @@ def benchmark_navigation(documentation, documentation_url):
         anchor = match[0].replace('m-doc-search-icon', 'm-doc-search-icon benchmark-search-trigger', 1)
         anchor = re.sub(r'title="[^"]*"', 'title="Search benchmarks"', anchor)
         anchor = anchor.replace('<svg ', '<svg class="benchmark-magnifier-icon" ', 1)
-        return anchor.replace('>', ' aria-label="Search benchmarks">' + icon, 1)
+        anchor = anchor.replace('>', ' aria-label="Search benchmarks">', 1)
+        return anchor.replace('</a>', icon + '</a>')
     return re.sub(r'<a\b[^>]*class="[^"]*m-doc-search-icon[^"]*"[^>]*>.*?</a>',
                   search_control, markup, flags=re.S)
 
