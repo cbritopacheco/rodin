@@ -37,8 +37,32 @@ const { chromium } = require('playwright');
     await page.goto(pathToFileURL(path.resolve(process.argv[2], 'index.html')).href);
     const navigation = page.getByRole('navigation', { name: 'On this page' });
     await navigation.waitFor();
-    await page.waitForFunction(() => getComputedStyle(document.querySelector('.rodin-benchmark-layout')).display === 'grid');
-    assert.ok(await page.locator('main').evaluate(node => node.getBoundingClientRect().left > 200));
+    const content = page.locator('main > article > .m-container > .m-row > [data-rodin-content]');
+    assert.ok(await content.evaluate(node => node.getBoundingClientRect().left > 200));
+    const docs = await browser.newPage({ viewport: { width: 1280, height: 650 } });
+    await docs.goto(pathToFileURL(path.resolve(process.argv[2], '../index.html')).href);
+    const metrics = target => target.locator('h1').first().evaluate(node => ({
+      x: node.getBoundingClientRect().left,
+      width: node.getBoundingClientRect().width,
+      size: getComputedStyle(node).fontSize
+    }));
+    const expected = await metrics(docs);
+    const actual = await metrics(page);
+    assert.ok(Math.abs(actual.x - expected.x) < 1);
+    assert.ok(Math.abs(actual.width - expected.width) < 1);
+    assert.equal(actual.size, expected.size);
+    const searchCenter = (target, selector) => target.locator(selector).evaluate(node => {
+      const bounds = node.getBoundingClientRect();
+      return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+    });
+    const docsSearch = await searchCenter(docs, '#m-navbar-collapse .m-doc-search-icon svg');
+    const benchmarkSearch = await searchCenter(page, '.benchmark-magnifier-icon');
+    assert.ok(Math.abs(docsSearch.x - benchmarkSearch.x) < 1);
+    assert.ok(Math.abs(docsSearch.y - benchmarkSearch.y) < 1);
+    const back = await page.locator('#m-navbar-brand').boundingBox();
+    const brand = await page.locator('.benchmark-search-trigger').boundingBox();
+    assert.ok(back.x + back.width <= brand.x + 1);
+    await docs.close();
     await navigation.hover();
     const control = page.getByRole('button', { name: 'Sidebar on right' });
     await control.click();

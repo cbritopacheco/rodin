@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from documentation_reference import (ReferenceLayout, Markup, parameters,
-                                     prepare_reference_headers, scope_name,
+                                     prepare_reference_headers, render_references, scope_name,
                                      split_arguments, text)
 import xml.etree.ElementTree as ET
 
@@ -163,6 +163,21 @@ class ReferenceTest(unittest.TestCase):
         self.assertEqual(layout.deduction_guides('space', result), result)
         ordinary = source.replace('id="guide"', 'id="ordinary"')
         self.assertEqual(layout.deduction_guides('space', ordinary), ordinary)
+
+    def test_source_headers_are_normalized_on_group_and_file_pages(self):
+        xml = self.root / 'empty-xml'
+        xml.mkdir()
+        annotation = '<h3><div class="m-doc-include m-code"><span>#include</span> <a href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>Type</h3>'
+        example = '<pre class="m-code"><span>#include</span> &lt;Rodin/Header.h&gt;</pre>'
+        for name in ['group_types.html', '_header_8h.html', 'guide.html']:
+            (self.site / name).write_text(annotation + example)
+        self.assertEqual(render_references(xml, self.site), 3)
+        for name in ['group_types.html', '_header_8h.html', 'guide.html']:
+            result = (self.site / name).read_text()
+            self.assertNotIn('m-doc-include', result)
+            self.assertIn('Defined in <a href="_polytope_8h.html"><code>Rodin/Geometry/Polytope.h</code></a>', result)
+            self.assertIn(example, result)
+        self.assertEqual(render_references(xml, self.site), 0)
 
     def test_source_header_uses_defined_in_outside_signature(self):
         include = '<div class="m-doc-include m-code m-text-right"><span>#include</span> <a class="cpf" href="header.html">&lt;Rodin/Assembly/OpenMP.h&gt;</a></div>'

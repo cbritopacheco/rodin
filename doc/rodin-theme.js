@@ -27,6 +27,30 @@
   applyTheme();
   system.addEventListener('change', applyTheme);
 
+  function addNavigationIcons() {
+    const paths = {
+      'pages.html': 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7',
+      'modules.html': 'm12 3 9 5-9 5-9-5z M3 12l9 5 9-5 M3 16l9 5 9-5',
+      'annotated.html': 'M4 3h16v7H4z M8 6h8 M12 10v4 M5 14h14 M5 14v3 M19 14v3 M2 17h6v4H2z M16 17h6v4h-6z',
+      'files.html': 'M6 3h9l4 4v14H6z M14 3v5h5'
+    };
+    for (const link of document.querySelectorAll('#m-navbar-collapse > .m-row > ol > li > a')) {
+      const drawing = paths[link.getAttribute('href')];
+      if (!drawing || link.querySelector('svg')) continue;
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.classList.add('rodin-nav-icon');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', drawing);
+      icon.append(path);
+      link.prepend(icon);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addNavigationIcons, {once: true});
+  } else addNavigationIcons();
+
   function initializeControl() {
     const brand = document.querySelector('#m-navbar-brand');
     if (!brand) return false;

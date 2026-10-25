@@ -781,4 +781,14 @@ def render_references(xml, site):
         rendered = layout.render(identity, source)
         path.write_text(rendered)
         count += 1
+    # Header annotations also occur on group and file pages, which do not use
+    # the class/namespace declaration layouts above.
+    for path in Path(site).glob('*.html'):
+        source = path.read_text()
+        if 'm-doc-include' not in source:
+            continue
+        rendered = layout.source_headers(source)
+        if rendered != source:
+            path.write_text(rendered)
+            count += 1
     return count

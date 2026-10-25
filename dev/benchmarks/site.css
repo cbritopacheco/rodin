@@ -1,88 +1,14 @@
-.rodin-benchmarks .rodin-benchmark-layout
+/* Use the documentation grid and sidebar; retain only benchmark-specific UI. */
+.rodin-benchmarks [data-rodin-content]
 {
-  display: grid;
-  grid-template-columns: 12rem minmax(0, 1fr);
-  grid-template-areas: "contents main";
-  gap: 2rem;
-  max-width: 90rem;
-  margin: auto;
-  padding: 2rem;
-}
-
-.rodin-benchmarks main
-{
-  grid-area: main;
   min-width: 0;
   container-type: inline-size;
-}
-
-.rodin-benchmarks[data-contents-side="right"] .rodin-benchmark-layout
-{
-  grid-template-columns: minmax(0, 1fr) 12rem;
-  grid-template-areas: "main contents";
-}
-
-.rodin-benchmarks .rodin-page-nav
-{
-  grid-area: contents;
-  display: block;
-  position: sticky;
-  top: 1rem;
-  align-self: start;
-  padding: 0;
-  font-size: 0.9rem;
-}
-
-.rodin-benchmarks .rodin-page-nav > ol
-{
-  max-height: calc(100vh - 9rem);
-  overflow-y: auto;
-}
-
-.rodin-benchmarks .rodin-page-nav a
-{
-  display: block;
-  padding: 0.3rem 0.5rem;
-  border-left: 2px solid transparent;
-  color: var(--dim-color);
-  text-decoration: none;
-}
-
-.rodin-benchmarks .rodin-page-nav a:hover,
-.rodin-benchmarks .rodin-page-nav a[aria-current="location"]
-{
-  color: var(--link-color);
-  border-color: var(--link-color);
-}
-
-.rodin-benchmarks .rodin-page-nav ol
-{
-  list-style: none;
-  padding: 0;
-}
-
-.rodin-benchmarks .rodin-page-nav ol ol
-{
-  padding-left: 0.75rem;
 }
 
 .rodin-benchmarks h2[id],
 .rodin-benchmarks h3[id]
 {
   scroll-margin-top: 1rem;
-}
-
-.rodin-benchmarks main > h2,
-.rodin-benchmarks main > section[data-category] > h2
-{
-  margin-top: 2rem;
-  margin-bottom: 1.25rem;
-}
-
-.rodin-benchmarks main > .m-frame,
-.rodin-benchmarks main > section[data-category] > .m-frame
-{
-  margin-top: 1.5rem;
 }
 
 .benchmark-children
@@ -136,108 +62,83 @@
   overflow: visible;
 }
 
-@media(max-width: 767px)
-{
-  .rodin-benchmarks .rodin-benchmark-layout,
-  .rodin-benchmarks[data-contents-side="right"] .rodin-benchmark-layout
-  {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "contents" "main";
-    padding: 1rem;
-  }
-
-  .rodin-benchmarks .rodin-page-nav
-  {
-    position: static;
-  }
-
-  .rodin-benchmarks .rodin-page-nav > ol
-  {
-    max-height: none;
-  }
-}
-
-/* Keep MathJax's accessible duplicate inside a one-pixel box at line ends. */
-.rodin-benchmarks mjx-assistive-mml
-{
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.benchmark-chart-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
-.benchmark-chart-controls label { display: flex; flex-direction: column; gap: .4rem; min-width: 0; max-width: 100%; }
-.benchmark-chart-controls select, .benchmark-chart-controls input { max-width: 100%; font: inherit; color: var(--color); background: var(--background-color); border: 1px solid var(--line-color); padding: .4rem; }
 .benchmark-chart { position: relative; height: 22rem; }
 .benchmark-chart-status { color: var(--dim-color); }
 
-#navigation .benchmark-docs-link
-{
-  position: absolute;
-  left: .75rem;
-  top: 0;
-  height: 3rem;
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  color: var(--header-link-color);
-  font-size: .85rem;
-  max-width: calc((100vw - 60rem) / 2 - 1rem);
-}
+#navigation .m-row { position: relative; }
 
-.rodin-benchmarks #navigation #m-navbar-brand
+#navigation .benchmark-navbar-title
 {
   display: flex;
   align-items: center;
-  box-sizing: border-box;
-  height: 3rem;
-  padding-top: 0;
-  padding-bottom: 0;
+  gap: 1.5rem;
+  width: auto;
 }
 
-@media screen and (max-width: 74rem)
+#navigation .benchmark-navbar-title #m-navbar-brand { left: 0; padding: 0; }
+
+@media screen and (min-width: 992px)
 {
-  .rodin-benchmarks #navigation > .m-container { padding-top: 3rem; }
-  #navigation .benchmark-docs-link { max-width: none; }
-  .rodin-benchmarks #navigation .benchmark-search-trigger { top: 3rem; }
-  .rodin-benchmarks #navigation .rodin-theme-control { top: 3.125rem; }
+  #navigation .benchmark-navbar-title { position: relative; left: calc(100% / 12); }
 }
 
-.benchmark-docs-link svg
+#navigation .benchmark-navbar-controls
 {
-  flex-shrink: 0;
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 #navigation .benchmark-search-trigger
 {
-  position: absolute;
-  right: 3.75rem;
-  top: 0;
-  width: 3rem;
   height: 3rem;
-  display: flex;
+  margin-left: 0;
+  padding: 0 1rem;
+  border: solid transparent;
+  border-width: 0 0 .25rem;
+  box-sizing: border-box;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: .5rem;
   color: var(--header-link-color);
 }
 
-.benchmark-search-trigger svg
+#navigation .benchmark-search-trigger:hover,
+#navigation .benchmark-search-trigger:focus,
+#navigation .benchmark-search-trigger:active
 {
-  width: 1.75rem;
-  height: 1.75rem;
+  color: var(--header-link-active-color);
+}
+
+@media screen and (min-width: 992px)
+{
+  #navigation .benchmark-navbar-controls { margin-right: 3.5rem; }
+}
+
+#navigation .benchmark-search-trigger .benchmark-magnifier-icon
+{
+  width: .9rem;
+  height: .9rem;
+  fill: currentColor;
+  stroke: none;
+}
+
+#navigation .benchmark-search-trigger .rodin-benchmark-icon
+{
+  width: 1rem;
+  height: 1rem;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rodin-benchmarks .m-frame > h3,
+.rodin-benchmarks .m-frame > h3 > a
+{
+  color: var(--category-color, var(--link-color));
 }
 
 .benchmark-search-trigger:focus-visible

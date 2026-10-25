@@ -245,11 +245,14 @@ Each block reuses the opening paragraph of its child's authored description;
 keep that paragraph a concise explanation of the measured operation. The full
 mathematics and timing contract remain on the destination page.
 
-The top bar contains Rodin, benchmark search and the theme control. The reusable documentation
-sidebar supplies section links and scroll-following highlights. On benchmark
-pages its icon moves the sidebar to the indicated destination side, retains the
-choice across pages, and becomes inline navigation on narrow screens. Clicking
-a subsection scrolls to that heading. Navigation updates do not steal focus.
+Benchmark pages use the same content grid, heading sizes and sidebar placement
+as the API documentation. The top bar contains a Rodin home link, a combined
+benchmark-and-search icon control, and the theme control. Both search icons
+open the same search overlay and share hover and keyboard focus behavior. The sidebar supplies
+section links and scroll-following highlights. Its controls retain the chosen
+side across pages without shifting the content column. Visibility follows the
+same viewport rules as the API sidebar. Clicking a subsection scrolls to that
+heading. Navigation updates do not steal focus.
 
 Benchmark search reuses the pinned m.css engine and overlay. Its generated index
 contains module, collection and benchmark names, paths, CMake target names and

@@ -240,7 +240,9 @@ physical-context pages. It reads the same explicit CMake registrations as the
 benchmark build, without compiling or executing numerical workloads. Authored
 HTML fragments live beside benchmark drivers; canonical module descriptions
 come from the rendered API module catalogue. The common theme and in-page
-sidebar remain shared with the API documentation.
+sidebar remain shared with the API documentation. Benchmark pages use the same
+content grid and heading sizes; sidebar placement never changes the content
+column. Top-bar branding aligns with the content headings.
 
 On main-branch pushes the Benchmarks workflow builds documentation and a complete
 benchmark campaign, then publishes both in one Pages commit under

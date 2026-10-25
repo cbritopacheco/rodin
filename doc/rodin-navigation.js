@@ -102,12 +102,7 @@
   }
   content.parentElement.prepend(navigation);
   const layout = () => {
-    if (benchmark) {
-      document.body.dataset.contentsSide = side;
-      navigation.dataset.side = side;
-      navigation.classList.add('rodin-page-nav-fit');
-      return;
-    }
+    if (benchmark) document.body.dataset.contentsSide = side;
     const unit = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const bounds = content.getBoundingClientRect();
     const gutter = side === 'left' ? bounds.left : document.documentElement.clientWidth - bounds.right;

@@ -357,9 +357,46 @@ img.m-image.rodin-logo-dark
   vertical-align: -.125em;
 }
 
+#navigation #m-navbar-collapse > .m-row > ol > li > a
+{
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+#navigation .rodin-nav-icon,
+#navigation .rodin-github-icon,
+#navigation .rodin-benchmark-icon
+{
+  width: 1em;
+  height: 1em;
+  margin: 0;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+#navigation .rodin-nav-icon
+{
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 #navigation #m-navbar-collapse
 {
   margin-left: auto;
+}
+
+/* Match the documentation's one-column desktop content inset. */
+@media screen and (min-width: 992px)
+{
+  #navigation > .m-container { padding-right: 1rem; }
+  #navigation #m-navbar-brand { left: calc(100% / 12); }
+  #navigation #m-navbar-collapse { margin-right: 3.5rem; }
 }
 
 #navigation .rodin-theme-control
