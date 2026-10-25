@@ -538,6 +538,19 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        the last accepted state is also written when the run aborts.
           Real dumpStress = 0.0;
           int dumpMax = 12;
+          /// @brief No-slip kinematics in the psi equation. At a no-slip wall
+          ///        grad u = a n^T with a . n = 0 (pure shear), but a P1 velocity
+          ///        on a faceted curved wall gives the first element layer a
+          ///        spurious normal extension n n^T, which stretched psi along
+          ///        the wall normal at wall nodes (u = 0, nothing advects it
+          ///        away): psi ~ 12, |sigma| ~ 2e4 Pa on the distal flank of S75,
+          ///        stretch within 3-7 deg of the normal (runs 13-14). With it,
+          ///        the gradient read by the psi equation (and its residual) is
+          ///        L' = (1 - w) L + w (I - n n^T) L n n^T, w the P1 interpolant
+          ///        of the wall-node indicator (1 on the wall, 0 from the first
+          ///        interior node), n the area-weighted nodal wall normal. L' is
+          ///        linear in L, so Newton stays exact; the momentum is untouched.
+          bool wallKinematics = true;
 
           /// @brief Step control. A step is rejected, and retried from the same
           ///        x^n with dt * dtShrink, when Newton does not converge in
@@ -939,6 +952,12 @@ namespace Rodin::Examples::ViscoelasticFluids
       ///        seams of zeros along the partition, as in AtriumPTAG).
       ScalarGridFunctionType m_wallArea;
       ScalarGridFunctionType m_lesionArea;
+      /// @brief Config::wallKinematics: wall-node indicator (0/1) and the
+      ///        area-weighted nodal wall normal, by component.
+      ScalarGridFunctionType m_wallFlag;
+      ScalarGridFunctionType m_wallN0;
+      ScalarGridFunctionType m_wallN1;
+      ScalarGridFunctionType m_wallN2;
       VectorGridFunctionType m_wssRec;
       Real m_wallAreaThreshold = 0.0;
       Real m_lesionAreaThreshold = 0.0;

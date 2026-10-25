@@ -311,6 +311,48 @@ namespace Rodin::Examples::ViscoelasticFluids
       return out;
     }
 
+    /// @brief Config::wallKinematics: the wall-node indicator and the nodal
+    ///        wall normal (by component), set by the driver; null when off.
+    struct WallKinematics
+    {
+        const ArterialLesion3DViscousLogImplicit::ScalarGridFunctionType* flag = nullptr;
+        std::array<const ArterialLesion3DViscousLogImplicit::ScalarGridFunctionType*, 3> normal{};
+    };
+
+    WallKinematics& wallKinematics()
+    {
+      static WallKinematics w;
+      return w;
+    }
+
+    /// @brief The wall weight w in [0, 1] at p and the unit wall normal n; 0
+    ///        off the first element layer or when the correction is off.
+    Real wallWeight(const Point& p, Eigen::Vector3d& n)
+    {
+      const auto& wk = wallKinematics();
+      if (!wk.flag)
+        return 0.0;
+      const Real w = wk.flag->getValue(p);
+      if (!(w > 1.0e-12))
+        return 0.0;
+      n = Eigen::Vector3d(wk.normal[0]->getValue(p), wk.normal[1]->getValue(p), wk.normal[2]->getValue(p));
+      const Real nn = n.norm();
+      if (!(nn > 0.0))
+        return 0.0;
+      n /= nn;
+      return std::min<Real>(w, 1.0);
+    }
+
+    /// @brief L' = (1 - w) L + w (I - n n^T) L n n^T: the pure shear a n^T,
+    ///        a = (I - n n^T) L n, that a no-slip wall allows, blended in.
+    Eigen::Matrix3d wallGradient(const Eigen::Matrix3d& L, Real w, const Eigen::Vector3d& n)
+    {
+      if (w <= 0.0)
+        return L;
+      const Eigen::Matrix3d P = Eigen::Matrix3d::Identity() - n * n.transpose();
+      return (1.0 - w) * L + w * (P * L * n) * n.transpose();
+    }
+
     /// @brief What the forms read at one quadrature point, from (psi^k, L^k =
     ///        grad u^k): exp(psi) and Dexp[E_j] (momentum, S1), and the Newton
     ///        data of the psi equation paired against the test blocks.
@@ -396,8 +438,13 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     /// @brief A, P and r; reads out.exp, so logPointDexp() comes first.
     void logPointNewton(LogPoint& out, const LogEig& e, const Eigen::Matrix3d& psi,
-      const Eigen::Matrix3d& L, const LogModel& m)
+      const Eigen::Matrix3d& Lraw, const LogModel& m, Real w = 0.0,
+      const Eigen::Vector3d& n = Eigen::Vector3d::Zero())
     {
+      // Config::wallKinematics: N is evaluated at L' = wallGradient(L), linear
+      // in L, so its velocity derivative Q'_ab = dN/dL_ab follows by the chain
+      // rule (below) and the residual keeps the same form in terms of L.
+      const Eigen::Matrix3d L = wallGradient(Lraw, w, n);
       const auto& B = voigtBasisEigen();
       // Central differences in the six Voigt directions (twelve 3x3
       // eigenproblems); the map is smooth in psi.
@@ -414,13 +461,36 @@ namespace Rodin::Examples::ViscoelasticFluids
           Q[a][b] = -e.dexpInverse(E * out.exp + out.exp * E.transpose() -
             0.5 * m.c * (E + E.transpose()));
         }
+      if (w > 0.0)
+      {
+        // dL'_cd/dL_ab = (1 - w) d_ca d_db + w P_ca n_b n_d, P = I - n n^T:
+        // Q'_ab = (1 - w) Q_ab + w n_b sum_c P_ca (sum_d Q_cd n_d).
+        const Eigen::Matrix3d P = Eigen::Matrix3d::Identity() - n * n.transpose();
+        std::array<Eigen::Matrix3d, 3> Qn;
+        for (size_t c = 0; c < 3; ++c)
+        {
+          Qn[c].setZero();
+          for (size_t dd = 0; dd < 3; ++dd)
+            Qn[c] += n(dd) * Q[c][dd];
+        }
+        std::array<std::array<Eigen::Matrix3d, 3>, 3> Qw;
+        for (size_t a = 0; a < 3; ++a)
+        {
+          Eigen::Matrix3d sa = Eigen::Matrix3d::Zero();
+          for (size_t c = 0; c < 3; ++c)
+            sa += P(c, a) * Qn[c];
+          for (size_t b = 0; b < 3; ++b)
+            Qw[a][b] = (1.0 - w) * Q[a][b] + w * n(b) * sa;
+        }
+        Q = Qw;
+      }
       // psi = sum_j psi_j E_j, psi_j = psi : E_j / |E_j|^2.
       Eigen::Matrix3d R = nonlinearMap(psi, L, m);
       for (size_t j = 0; j < 6; ++j)
         R -= (psi.cwiseProduct(B[j]).sum() / B[j].squaredNorm()) * JN[j];
       for (size_t a = 0; a < 3; ++a)
         for (size_t b = 0; b < 3; ++b)
-          R -= L(a, b) * Q[a][b];
+          R -= Lraw(a, b) * Q[a][b];
       for (size_t C = 0; C < 2; ++C)
         for (size_t k = 0; k < 3; ++k)
         {
@@ -618,7 +688,9 @@ namespace Rodin::Examples::ViscoelasticFluids
             for (int a = 0; a < 3; ++a)
               for (int b = 0; b < 3; ++b)
                 L(a, b) = J(a, b);
-            logPointNewton(e.value, eig, psi, L, md);
+            Eigen::Vector3d nw = Eigen::Vector3d::Zero();
+            const Real ww = wallWeight(p, nw);
+            logPointNewton(e.value, eig, psi, L, md, ww, nw);
             e.have |= LogNewton;
           }
           const bool wantD2 = need & LogD2 & ~e.have;
@@ -1325,6 +1397,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_osiLesion(m_sh),
       m_wallArea(m_sh),
       m_lesionArea(m_sh),
+      m_wallFlag(m_sh),
+      m_wallN0(m_sh),
+      m_wallN1(m_sh),
+      m_wallN2(m_sh),
       m_wssRec(m_vh),
       m_qFlux(m_sh),
       m_one(m_sh),
@@ -2321,6 +2397,32 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_lesionArea.setData(m_flux.getVector());
     m_lesionAreaThreshold = 1.0e-6 * m_lesionArea.max();
 
+    // Config::wallKinematics: wall-node indicator (0/1, projected over the
+    // cells) and the area-weighted nodal wall normal int_Gw n phi_i dA.
+    m_wallFlag.project(RealFunction([this](const Point& p) -> Real {
+      return m_wallArea.getValue(p) > m_wallAreaThreshold ? 1.0 : 0.0; }));
+    {
+      const auto normal = BoundaryNormal(m_mesh);
+      ScalarGridFunctionType* comp[3] = { &m_wallN0, &m_wallN1, &m_wallN2 };
+      for (size_t c = 0; c < 3; ++c)
+      {
+        m_flux = BoundaryIntegral(Component(normal, c), m_qFlux).over(m_wallSet);
+        m_flux.assemble();
+        comp[c]->setData(m_flux.getVector());
+      }
+    }
+    if (m_cfg.wallKinematics)
+    {
+      auto& wk = wallKinematics();
+      wk.flag = &m_wallFlag;
+      wk.normal = { &m_wallN0, &m_wallN1, &m_wallN2 };
+    }
+    else
+      wallKinematics() = WallKinematics{};
+    if (isRoot())
+      Alert::Info() << "[wall] no-slip kinematics in the psi equation: "
+                    << (m_cfg.wallKinematics ? "on" : "off") << Alert::Raise;
+
     if (isRoot())
     {
       const Real area = 0.25 * M_PI * m_cfg.diameter * m_cfg.diameter;
@@ -3034,8 +3136,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       const LogEig eig = logEig(psi);
       StepPoint out;
       // d_t psi_h only with Config::subscaleTimeResidual (P^perp[d_t psi_h] = 0).
+      Eigen::Vector3d nw = Eigen::Vector3d::Zero();
+      const Real ww = wallWeight(p, nw);
       out.R = (hT / dtM) * (psi - unpack(m_psiHistD.getValue(p), m_psiHistO.getValue(p))) +
-        nonlinearMap(psi, L, pointModel(model, lambdaField(), p));
+        nonlinearMap(psi, wallGradient(L, ww, nw), pointModel(model, lambdaField(), p));
       out.divE.setZero();
       for (int j = 0; j < 3; ++j)
       {
@@ -4253,6 +4357,7 @@ int main(int argc, char** argv)
       getReal("-al_newton_max_step", cfg.newtonMaxStep);
       getReal("-al_max_velocity_factor", cfg.maxVelocityFactor);
       getReal("-al_dump_stress", cfg.dumpStress);
+      getBool("-al_wall_kinematics", cfg.wallKinematics);
       getInt("-al_dump_max", cfg.dumpMax);
       getBool("-al_vms", cfg.useVMS);
       getBool("-al_inlet_conformation", cfg.inletConformation);
