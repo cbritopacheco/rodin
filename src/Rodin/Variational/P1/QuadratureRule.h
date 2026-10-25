@@ -12,12 +12,12 @@
  * the constant gradient property of P1 basis functions to achieve exact
  * integration with minimal quadrature points.
  *
- * ## Quadrature Strategies
+ * # Quadrature Strategies
  * - **Centroid quadrature**: Uses single point at element barycenter
  * - **Exact for P1 bilinear forms**: @f$ \int \nabla \phi_i \cdot \nabla \phi_j @f$
  * - **Reduced integration**: Enables efficient assembly
  *
- * ## Supported Integrands
+ * # Supported Integrands
  * - Scalar P1 shape functions: @f$ \int v \, dx @f$
  * - Dot products: @f$ \int f \cdot v \, dx @f$
  * - Mass forms: @f$ \int (Au) \cdot v \, dx @f$
@@ -63,8 +63,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ v \in \mathbb{P}_1 @f$.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -280,8 +279,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ v \in \mathbb{P}_1 @f$.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -551,7 +549,7 @@ namespace Rodin::Variational
    * The specialization evaluates the selected quadrature formula and supports
    * distinct P1 trial and test spaces.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Binding selects the formula, owns its mapped samples and sizes the local
    * matrix before scalar reference preparation. Zero components give a
@@ -905,7 +903,7 @@ namespace Rodin::Variational
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and @f$
    * A @f$ is a coefficient function.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Scalar reference values are owned by this rule and keyed by geometry and
    * integration order. The ready flag is published after complete preparation.
@@ -913,8 +911,7 @@ namespace Rodin::Variational
    * @f$0\times0@f$ matrix, without scalar preparation or coefficient evaluation.
    * This contract does not require a component count to serve as a divisor.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -1299,8 +1296,7 @@ namespace Rodin::Variational
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and @f$ A
    * @f$ is a coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -1597,8 +1593,7 @@ namespace Rodin::Variational
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and @f$ A
    * @f$ is a coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -1998,8 +1993,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u, v \in \mathbb{P}_1 @f$ and @f$ c @f$ is a coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -2281,8 +2275,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u \in \mathbb{P}_1 @f$ (vector-valued) and @f$ q \in \mathbb{P}_1 @f$ (scalar-valued).
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -2574,8 +2567,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ p \in \mathbb{P}_1 @f$ (scalar-valued) and @f$ v \in \mathbb{P}_1 @f$ (vector-valued).
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -2870,8 +2862,7 @@ namespace Rodin::Variational
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in
    * \mathbb{P}_1 @f$, and @f$ A @f$ is coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -3561,8 +3552,7 @@ namespace Rodin::Variational
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in
    * \mathbb{P}_1 @f$, and @f$ A @f$ is a coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -3986,8 +3976,7 @@ namespace Rodin::Variational
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and
    * @f$ f @f$ is a coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -4002,7 +3991,7 @@ namespace Rodin::Variational
    * distinct P1 trial and test spaces and implements the linearized convection
    * term for Navier-Stokes.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Reference derivatives of the trial scalar basis and values of the test
    * scalar basis are prepared directly in their respective scalar fields.
@@ -4333,8 +4322,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u, v \in \mathbb{P}_1 @f$ and @f$\mathcal{K}@f$ is a potential kernel operator.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.

@@ -93,7 +93,7 @@
   | @ref Rodin::Alert "Alert" | <a href="_alert_8h.html"><code>&lt;Rodin/Alert.h&gt;</code></a> | Exceptions and diagnostic messages | @ref Rodin::Alert::Exception "Exception", @ref Rodin::Alert::MemberFunctionException "MemberFunctionException" |
   | @ref Rodin::Location "Location" | <a href="_location_8h.html"><code>&lt;Rodin/Location.h&gt;</code></a> | Spatial search and point location | @ref Rodin::Location::AABB "AABB" |
   | @ref Rodin::Utility "Utility" | <a href="_utility_8h.html"><code>&lt;Rodin/Utility.h&gt;</code></a> | Generic programming helpers | @ref Rodin::Utility::Overloaded "Overloaded", @ref Rodin::Utility::IsSpecialization "IsSpecialization" |
-  | @ref Rodin::Serialization "Serialization" | <a href="_serialization_2_array_8h.html"><code>&lt;Rodin/Serialization/Array.h&gt;</code></a><br/><a href="_eigen_matrix_8h.html"><code>&lt;Rodin/Serialization/EigenMatrix.h&gt;</code></a> | Boost.Serialization adapters | @ref Rodin::Math::Matrix "Matrix" |
+  | @ref RodinSerialization "Serialization" | <a href="_serialization_2_array_8h.html"><code>&lt;Rodin/Serialization/Array.h&gt;</code></a><br/><a href="_eigen_matrix_8h.html"><code>&lt;Rodin/Serialization/EigenMatrix.h&gt;</code></a> | Boost.Serialization adapters | @ref Rodin::Math::Matrix "Matrix" |
   | @ref Rodin::Test "Test" | <a href="_f_d_probe_8h.html"><code>&lt;Rodin/Test/FDProbe.h&gt;</code></a><br/><a href="_test_2_utility_8h.html"><code>&lt;Rodin/Test/Utility.h&gt;</code></a> | Numerical validation helpers | @ref Rodin::Test::FDProbe "FDProbe", @ref Rodin::Test::Utility::ExpectedResultTable "ExpectedResultTable" |
 
   @section guides-getting-started-first-steps-hello Hello Rodin

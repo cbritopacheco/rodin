@@ -137,7 +137,7 @@ namespace Rodin::Variational
        * owns copies of the Lamé parameters, so that each thread assembling
        * with its own copy of the kernel evaluates its own copies.
        *
-       * ## Trial-side weighting
+       * # Trial-side weighting
        *
        * At each quadrature point, trial divergences are multiplied by the
        * first Lamé parameter and trial symmetric gradients by the shear
@@ -146,7 +146,7 @@ namespace Rodin::Variational
        * order or the local entry accumulation sequence. No additional buffer
        * or cross-point physical cache is introduced.
        *
-       * ## Spatial contraction
+       * # Spatial contraction
        *
        * At spatial dimension @f$s=3@f$, const Eigen views expose the known
        * column extent while retaining dynamic rows. Other dimensions retain

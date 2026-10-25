@@ -19,7 +19,7 @@
  *
  * @see @ref configuration "Configuration guide"
  *
- * ## Representative use
+ * # Representative use
  *
  * @code{.cpp}
  * #include <Rodin/Configure.h>
@@ -28,7 +28,7 @@
  * #endif
  * @endcode
  *
- * ## Module-specific controls
+ * # Module-specific controls
  *
  * Controls declared by individual modules remain documented on their own
  * header pages: @ref RODIN_GEOMETRY_REQUIRE_INCIDENCE for mesh connectivity,
@@ -65,10 +65,10 @@
 #cmakedefine RODIN_WITH_PY
 
 /**
- * @brief Indicates if Rodin::Plot is built.
+ * @brief Legacy plotting feature macro; no plotting module is currently shipped.
  * @code{.cpp}
  *  #ifndef RODIN_WITH_PLOT
- *  // Code depending on Rodin::Plot support
+ *  // Legacy plotting integration
  *  #endif
  * @endcode
  */

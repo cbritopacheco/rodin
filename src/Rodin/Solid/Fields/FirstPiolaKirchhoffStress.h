@@ -30,7 +30,7 @@ namespace Rodin::Solid
   /**
    * @brief Computes the first Piola-Kirchhoff stress from a constitutive law.
    *
-   * ## Usage
+   * # Usage
    * @code
    * NeoHookean law(lambda, mu);
    * KinematicState state(d);

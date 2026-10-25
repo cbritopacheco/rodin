@@ -92,7 +92,7 @@ namespace Rodin::Variational
    *
    * The Jacobian is constant on each element for P1 functions.
    *
-   * ## Applications
+   * # Applications
    * - Strain tensor in elasticity: @f$ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) @f$
    * - Velocity gradient in fluid mechanics
    * - Deformation gradient in nonlinear mechanics

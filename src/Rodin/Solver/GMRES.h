@@ -15,19 +15,19 @@
  * @f]
  * for general (possibly non-symmetric) matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * GMRES builds a Krylov subspace and computes the iterate that minimizes the
  * residual norm over that subspace.
  *
- * ## Applicability
+ * # Applicability
  * - Non-symmetric or indefinite matrices
  * - Large sparse systems
  * - Convection-diffusion, saddle-point systems (when used appropriately)
  *
- * ## Notes
+ * # Notes
  * - Restarted GMRES is typically used to bound memory; Eigen's GMRES supports restart.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

@@ -13,7 +13,7 @@
  * Forward declarations allow for efficient compilation by avoiding circular
  * dependencies and reducing header inclusion overhead.
  *
- * ## Key Declarations
+ * # Key Declarations
  * - **Shape Functions**: TrialFunction, TestFunction, ShapeFunction
  * - **Spaces**: FiniteElementSpace, FiniteElement
  * - **Forms**: BilinearForm, LinearForm
@@ -22,7 +22,7 @@
  * - **Operators**: Grad, Div, Jacobian, etc.
  * - **Boundary Conditions**: DirichletBC, PeriodicBC
  *
- * ## ShapeFunctionSpaceType Enum
+ * # ShapeFunctionSpaceType Enum
  * Distinguishes between trial and test functions in variational formulations.
  */
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
@@ -533,8 +533,7 @@ namespace Rodin::Variational
    *   - \text{Operand}
    * @f]
    *
-   * Range Deduction Rules
-   * ---------------------
+   * # Range Deduction Rules
    *  The rule for deducing the range of a UnaryMinus object, denoted @f$
    *  \texttt{Range}[-\text{Operand}] @f$, is the following:
    *  @f[
@@ -562,8 +561,7 @@ namespace Rodin::Variational
    * @f]
    * which represents the usual arithmetic addition of two operands.
    *
-   * Range Deduction Rules
-   * ---------------------
+   * # Range Deduction Rules
    *  The rule for deducing the range of a Sum object, denoted @f$
    *  \texttt{Range}[\text{LHS} + \text{RHS}]@f$, is the following:
    *  @f[
@@ -590,8 +588,7 @@ namespace Rodin::Variational
    * \text{LHS} * \text{RHS}
    * @f]
    *
-   * Range Deduction Rules
-   * ---------------------
+   * # Range Deduction Rules
    *  The rules for deducing the range of a Mult object, denoted @f$
    *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are the following:
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Real} @f$

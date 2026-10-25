@@ -184,7 +184,7 @@ namespace Rodin::Solid
    * through @c getPoint(), which returns an optional reference to the
    * underlying Geometry::Point.
    *
-   * ## Usage (with geometric context, typical in integrators)
+   * # Usage (with geometric context, typical in integrators)
    *
    * @code
    * Geometry::Point pt(polytope, rc);
@@ -198,7 +198,7 @@ namespace Rodin::Solid
    * law.getFirstPiolaKirchhoffStress(P);
    * @endcode
    *
-   * ## Usage (without geometry, for unit testing)
+   * # Usage (without geometry, for unit testing)
    *
    * @code
    * KinematicState state(2);

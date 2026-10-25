@@ -92,7 +92,7 @@ namespace Rodin::Variational
    * The H1Element provides a k-th order finite element with Lagrange basis functions.
    * This is a high-order-stable H1-conforming element family.
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - **DOF count**: Depends on geometry and polynomial degree K
    *   - Segment: K+1
    *   - Triangle: (K+1)(K+2)/2
@@ -105,17 +105,17 @@ namespace Rodin::Variational
    * - **Partition of unity**: @f$ \sum_{i=1}^{n} \phi_i(x) = 1 @f$ for all @f$ x @f$
    * - **Continuity**: Global C⁰ continuity across element interfaces (H¹-conforming)
    *
-   * ## Convergence Rates
+   * # Convergence Rates
    * For smooth solutions, H1 elements of degree k provide k-th order convergence:
    * - **L² norm**: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
    * - **H¹ norm (energy)**: @f$ \|u - u_h\|_{H^1} = O(h^k) @f$
    *
-   * ## Basis Function Construction
+   * # Basis Function Construction
    * - **1D (Segment)**: Classical Lagrange interpolation @f$ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} @f$
    * - **2D/3D Simplices**: Barycentric Lagrange polynomials @f$ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} @f$
    * - **Tensor Products**: For quadrilaterals and wedges, tensor product of lower-dimensional bases
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // H1 element of degree 3 on triangle - 10 DOFs
    * RealH1Element<3> h1_tri(Polytope::Type::Triangle);
@@ -211,12 +211,12 @@ namespace Rodin::Variational
        *
        * The basis functions form a partition of unity: @f$ \sum_i \phi_i(x) = 1 @f$.
        *
-       * ## Evaluation Methods
+       * # Evaluation Methods
        * - `operator()(point)`: Evaluates the basis function at a spatial point
        * - `getDerivative<Order>(i)`: Gets the partial derivative of order `Order` w.r.t. coordinate i
        * - `getGradient()`: Gets the gradient function (vector of first-order partial derivatives)
        *
-       * ## Implementation
+       * # Implementation
        * The basis functions are constructed using:
        * - **Segments**: Classical Lagrange interpolation
        * - **Triangles/Tetrahedra**: Barycentric Lagrange polynomials
@@ -930,7 +930,7 @@ namespace Rodin::Variational
    *
    * Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - **DOF count**: @f$ d \times n_s @f$ where:
    *   - @f$ d @f$ is the vector dimension (vdim)
    *   - @f$ n_s @f$ is the number of scalar DOFs for the underlying H1 element
@@ -940,18 +940,18 @@ namespace Rodin::Variational
    * - **Jacobian**: @f$ J_{ij} = \frac{\partial u_i}{\partial x_j} @f$ where @f$ \mathbf{u} @f$ is the vector field
    * - **Continuity**: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)
    *
-   * ## Component Structure
+   * # Component Structure
    * Each vector basis function is non-zero in only one component:
    * - Basis function `i*vdim + c` has value @f$ \phi_i(x) @f$ in component c, zero elsewhere
    * - This allows efficient assembly and clear physical interpretation
    *
-   * ## Applications
+   * # Applications
    * - **Linear elasticity**: Displacement field @f$ \mathbf{u}(x) @f$
    * - **Fluid mechanics**: Velocity field @f$ \mathbf{v}(x) @f$
    * - **Electromagnetics**: Electric field @f$ \mathbf{E}(x) @f$
    * - **General vector PDEs**: Any vector-valued unknown
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs
    * VectorH1Element<2> vec_h1(2, Polytope::Type::Triangle);

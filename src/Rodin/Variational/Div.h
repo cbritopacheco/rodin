@@ -12,14 +12,14 @@
  * vector-valued functions in variational formulations. The divergence is
  * a fundamental differential operator that measures the "outflow" of a vector field.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a vector field @f$ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d @f$,
  * the divergence is defined as:
  * @f[
  *   \nabla \cdot \mathbf{u} = \sum_{i=1}^d \frac{\partial u_i}{\partial x_i}
  * @f]
  *
- * ## Applications
+ * # Applications
  * - Incompressibility constraint: @f$ \nabla \cdot \mathbf{u} = 0 @f$
  * - Conservation laws: @f$ \nabla \cdot \mathbf{F} = 0 @f$
  * - Mixed formulations for elliptic problems

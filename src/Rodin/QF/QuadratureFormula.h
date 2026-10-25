@@ -96,7 +96,7 @@ namespace Rodin::QF
    * @brief Persistent immutable reference quadrature points and weights.
    * @ingroup RodinQuadrature
    *
-   * ## Architecture
+   * # Architecture
    *
    * Each formula family and constructor-key type has a shared owning pool.
    * Integer and enum arguments are copied into a tuple; published formula

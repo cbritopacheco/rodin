@@ -25,7 +25,7 @@ namespace Rodin::Math
    * This class provides a type-safe wrapper for angles measured in radians,
    * inheriting all the unit arithmetic operations from the Unit base class.
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * Rad angle1(Math::Constants::pi());  // π radians (180 degrees)
    * Rad angle2(Math::Constants::pi() / 2);  // π/2 radians (90 degrees)

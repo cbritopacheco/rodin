@@ -12,21 +12,21 @@
  * space, which consists of continuous piecewise linear functions over mesh
  * elements. P1 is the most commonly used conforming finite element space.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * The P1 space is defined as:
  * @f[
  *   P_1(\mathcal{T}_h) = \{u \in C^0(\Omega) : u|_K \in \mathbb{P}_1(K) \, \forall K \in \mathcal{T}_h\}
  * @f]
  * where @f$ \mathbb{P}_1(K) @f$ denotes linear polynomials on element @f$ K @f$.
  *
- * ## Features
+ * # Features
  * - One degree of freedom per mesh vertex (nodal values)
  * - Continuous across element boundaries (@f$ C^0 @f$ conforming)
  * - Gradient is constant within each element
  * - Optimal convergence: @f$ O(h^2) @f$ in @f$ L^2 @f$ norm for smooth solutions
  * - Basis functions: Lagrange nodal basis @f$ \phi_i(x_j) = \delta_{ij} @f$
  *
- * ## Usage Example
+ * # Usage Example
  *
  * ```cpp
  * P1 Vh(mesh);           // Define P1 space
@@ -38,7 +38,7 @@
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
  * ```
  *
- * ## Supported Operations
+ * # Supported Operations
  * - Gradient (Grad)
  * - Divergence (Div) for vector-valued functions
  * - Jacobian transformations

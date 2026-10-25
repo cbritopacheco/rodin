@@ -42,7 +42,7 @@ namespace Rodin::IO
    * - print(std::ostream&) - Write object to an output stream
    * - getObject() - Access the object being printed
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * class MyObjectPrinter : public Printer<MyObject>
    * {

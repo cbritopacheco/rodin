@@ -178,7 +178,7 @@ namespace Rodin::Variational
        * P1 basis functions satisfy the Lagrange property:
        * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the vertices of the element.
        *
-       * ## Properties
+       * # Properties
        * - **Lagrange property**: φ_i = 1 at vertex i, φ_i = 0 at other vertices
        * - **Basis family**: Affine on simplices, tensor-product on quadrilaterals
        *   and hexahedra, triangle-by-segment on wedges, and rational on pyramids

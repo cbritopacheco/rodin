@@ -17,7 +17,7 @@
  * the stiffness (or system) matrix @f$ A @f$ of a discrete finite
  * element system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
- * ## Mathematical Background
+ * # Mathematical Background
  *
  * A form @f$ a : U_h \times V_h \to \mathbb{K} @f$ acts on a trial function
  * @f$ u \in U_h @f$ and a test function @f$ v \in V_h @f$. It is bilinear

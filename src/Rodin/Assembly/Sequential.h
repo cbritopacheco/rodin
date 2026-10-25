@@ -179,7 +179,7 @@ namespace Rodin::Assembly
    *
    * @tparam FES Finite element space type
    *
-   * ## Assembly Algorithm
+   * # Assembly Algorithm
    * For each element @f$ K @f$ in the mesh:
    * 1. Retrieve element quadrature rule and basis functions
    * 2. Compute local element vector @f$ b_K @f$

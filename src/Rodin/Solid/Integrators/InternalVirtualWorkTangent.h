@@ -82,7 +82,7 @@ namespace Rodin::Solid
    *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
    * @f]
    *
-   * ## Architecture
+   * # Architecture
    *
    * Cell binding selects a two- or three-dimensional instantiation of the same
    * quadrature algorithm. Two-dimensional contractions have fixed bounds;

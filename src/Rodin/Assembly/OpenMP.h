@@ -100,7 +100,7 @@ namespace Rodin::Assembly
    *
    * @tparam MeshType Type of mesh to iterate over (specialized for local context)
    *
-   * ## Parallelization Strategy
+   * # Parallelization Strategy
    * The implementation uses OpenMP to parallelize element-wise assembly:
    * - Each thread processes a subset of mesh elements
    * - Local contributions are computed independently
@@ -180,7 +180,7 @@ namespace Rodin::Assembly
    * @tparam TrialFES Trial finite element space type  
    * @tparam TestFES Test finite element space type
    *
-   * ## Parallel Assembly Algorithm
+   * # Parallel Assembly Algorithm
    * 1. **Element Distribution**: Distribute elements across OpenMP threads
    * 2. **Local Assembly**: Each thread computes local element matrices independently
    * 3. **Triplet Accumulation**: Store contributions as Eigen triplets for thread safety

@@ -477,18 +477,18 @@ namespace Rodin::Variational
    * @f]
    * where @f$ d @f$ is the vector dimension (typically the spatial dimension).
    *
-   * ## Properties
+   * # Properties
    * - **DOF count**: @f$ d \cdot n_{\text{vertices}} @f$ total
    * - **DOF structure**: Each vertex has @f$ d @f$ DOFs (one per vector component)
    * - **Continuity**: C⁰ continuous for each component
    * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
    *
-   * ## Use Cases
+   * # Use Cases
    * - Displacement fields in elasticity
    * - Velocity fields in fluid mechanics
    * - Vector-valued PDEs requiring H¹ conformity
    *
-   * ## Example
+   * # Example
    * @code{.cpp}
    * Mesh Th;
    * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});

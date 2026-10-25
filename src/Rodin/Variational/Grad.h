@@ -109,7 +109,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u @f$ is a scalar function and @f$ d @f$ is the spatial dimension.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * For a scalar function @f$ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} @f$,
    * the gradient is a vector field:
    * @f[
@@ -121,7 +121,7 @@ namespace Rodin::Variational
    *   \nabla u_h = \sum_i u_i \nabla \phi_i
    * @f]
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // In a variational formulation
    * auto stiffness = Integral(Grad(u), Grad(v));  // Laplacian term

@@ -29,7 +29,7 @@ namespace Rodin::IO
    * - @ref load(std::istream&) "load(std::istream&)" - Load object from an input stream
    * - @ref getObject() "getObject()" - Access the object being loaded
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * class MyObjectLoader : public Loader<MyObject>
    * {

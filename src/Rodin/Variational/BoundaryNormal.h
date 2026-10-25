@@ -13,7 +13,7 @@
  * essential for imposing natural boundary conditions and computing boundary
  * integrals in finite element formulations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a domain @f$ \Omega \subset \mathbb{R}^d @f$ with boundary @f$ \partial\Omega @f$,
  * the outward unit normal @f$ \mathbf{n} @f$ satisfies:
  * @f[
@@ -21,19 +21,19 @@
  * @f]
  * where @f$ \mathbf{t} @f$ is any tangent vector to @f$ \partial\Omega @f$.
  *
- * ## Applications
+ * # Applications
  * - **Neumann boundary conditions**: @f$ \nabla u \cdot \mathbf{n} = g @f$
  * - **Robin boundary conditions**: @f$ \alpha u + \beta \nabla u \cdot \mathbf{n} = g @f$
  * - **Flux calculations**: @f$ \int_{\partial\Omega} (\mathbf{v} \cdot \mathbf{n}) \, ds @f$
  * - **Integration by parts**: Boundary terms involving normal derivatives
  * - **DG methods**: Numerical flux terms with normal components
  *
- * ## Properties
+ * # Properties
  * - Orientation: Points outward from the domain
  * - Uniqueness: Well-defined except at corners/edges (where limits differ)
  * - Computation: Derived from surface geometry and element transformations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * BoundaryNormal n(mesh);
  * 

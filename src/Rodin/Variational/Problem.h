@@ -83,7 +83,7 @@ namespace Rodin::Variational
    * of linear and nonlinear problems, boundary conditions, and various finite
    * element spaces.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * The module implements the standard finite element methodology:
    * - **Bilinear Forms**: @f$ a(u,v) : V \times V \to \mathbb{R} @f$
    * - **Linear Forms**: @f$ l(v) : V \to \mathbb{R} @f$ 
@@ -114,7 +114,7 @@ namespace Rodin::Variational
    *
    * @tparam LinearSystem Type of linear system (e.g., sparse or dense)
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // Define a problem and solve
    * auto problem = Problem(trialSpace, testSpace);
@@ -690,7 +690,7 @@ namespace Rodin::Variational
   /**
    * @brief Base for mixed variational problems with three or more functions.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Trial/test identities and cumulative DOF offsets are passed directly to
    * the problem assembly selected by @ref Rodin::Assembly::Default. That single

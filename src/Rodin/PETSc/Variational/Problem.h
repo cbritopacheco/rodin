@@ -382,14 +382,14 @@ namespace Rodin::Variational
    * scattered back into each trial function's grid function using the
    * precomputed offset arrays.
    *
-   * ## Block Structure
+   * # Block Structure
    *
    * For @f$ K @f$ trial fields with sizes @f$ N_1, \ldots, N_K @f$, the
    * global system has size @f$ N = \sum_{k=1}^K N_k @f$.  The DOF
    * offset of the @f$ k @f$-th field is @f$ O_k = \sum_{j=1}^{k-1} N_j @f$
    * (with @f$ O_1 = 0 @f$).
    *
-   * ## Field-Split Preconditioning
+   * # Field-Split Preconditioning
    *
    * Call `setFieldSplits()` after `assemble()` to create PETSc `IS`
    * objects for each trial field.  These are passed to `PCFIELDSPLIT` so

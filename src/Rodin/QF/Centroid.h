@@ -25,7 +25,7 @@ namespace Rodin::QF
    * point located at the centroid (barycenter) of the reference polytope.
    * The quadrature is exact for polynomials up to degree 1 (linear functions).
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    *
    * The centroid rule approximates integrals as:
    * @f[
@@ -34,7 +34,7 @@ namespace Rodin::QF
    * where @f$ c @f$ is the centroid of the polytope @f$ K @f$ and @f$ w @f$
    * is the weight equal to the volume (measure) of the reference element.
    *
-   * ## Reference Element Centroids
+   * # Reference Element Centroids
    *
    * The quadrature points are located at:
    * - Point: @f$ (0) @f$
@@ -45,7 +45,7 @@ namespace Rodin::QF
    * - Wedge: @f$ (1/3, 1/3, 0.5) @f$
    * - Hexahedron: @f$ (0.5, 0.5, 0.5) @f$
    *
-   * ## Reference Element Weights
+   * # Reference Element Weights
    *
    * The weights correspond to the reference element measures:
    * - Point: @f$ 1 @f$

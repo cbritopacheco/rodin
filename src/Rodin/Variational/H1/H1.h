@@ -111,7 +111,7 @@ namespace Rodin::Variational
    * This class is scalar valued, i.e. evaluations of the function are of
    * Rodin::Real type.
    *
-   * ## Building the H1 Space
+   * # Building the H1 Space
    *
    * The H1 space is built by distributing degrees of freedom (DOFs) across the
    * mesh entities based on polynomial degree K:
@@ -131,7 +131,7 @@ namespace Rodin::Variational
    * edges, and vertices while respecting H1 conformity (shared entities have
    * shared DOFs).
    *
-   * ### Nodal Ordering
+   * ## Nodal Ordering
    *
    * The nodal basis functions are ordered using:
    * - **Segments**: Gauss-Lobatto-Legendre (GLL) points
@@ -294,7 +294,7 @@ namespace Rodin::Variational
        * Creates the H1 space of degree K. The total number of DOFs depends on
        * the polynomial degree and mesh topology.
        *
-       * ### Mesh Connectivity Requirements
+       * # Mesh Connectivity Requirements
        *
        * The mesh must have the complete connectivity chain from dimension D
        * (mesh dimension) down to dimension 0:
@@ -306,12 +306,12 @@ namespace Rodin::Variational
        * to faces to edges to vertices, ensuring conformity (shared entities
        * have shared DOFs).
        *
-       * #### Example for 2D Triangle Mesh
+       * ## Example for 2D Triangle Mesh
        * Required connectivity:
        * - 2 → 1 (triangles to edges)
        * - 1 → 0 (edges to vertices)
        *
-       * #### Example for 3D Tetrahedral Mesh
+       * ## Example for 3D Tetrahedral Mesh
        * Required connectivity:
        * - 3 → 2 (tetrahedra to faces)
        * - 2 → 1 (faces to edges)
@@ -396,7 +396,7 @@ namespace Rodin::Variational
        * by recursively processing its boundary entities (faces, edges, vertices).
        * The process ensures H1 conformity: shared entities receive shared DOFs.
        *
-       * ### Algorithm Overview
+       * # Algorithm Overview
        *
        * 1. **Check if already visited**: If this polytope has been numbered, return.
        * 2. **Process boundary entities**: Recursively call getClosure on incident
@@ -406,7 +406,7 @@ namespace Rodin::Variational
        * 4. **Number interior DOFs**: Assign new global DOF indices to any DOFs not
        *    on the boundary (interior edge DOFs, face DOFs, cell DOFs).
        *
-       * ### Connectivity Requirements
+       * # Connectivity Requirements
        *
        * This method requires mesh connectivity from dimension d down to dimension 0:
        * @f[
@@ -418,7 +418,7 @@ namespace Rodin::Variational
        * - 2 → 1 (faces to edges)  
        * - 1 → 0 (edges to vertices)
        *
-       * ### Example
+       * # Example
        *
        * For a triangle (d=2) with 3 vertices and 3 edges:
        * 1. Recursively number the 3 edges (which number their 2 vertices each)

@@ -12,24 +12,24 @@
  * of scalar functions. This generalizes the gradient concept to derivatives
  * in specific directions.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * The directional derivative of a function @f$ u @f$ in direction @f$ \mathbf{v} @f$ is:
  * @f[
  *   D_{\mathbf{v}} u = \nabla u \cdot \mathbf{v} = \lim_{h \to 0} \frac{u(x + h\mathbf{v}) - u(x)}{h}
  * @f]
  *
- * ## Coordinate Derivatives
+ * # Coordinate Derivatives
  * Special cases are partial derivatives:
  * - @f$ \frac{\partial u}{\partial x_i} = D_{\mathbf{e}_i} u @f$
  * where @f$ \mathbf{e}_i @f$ is the @f$ i @f$-th coordinate direction.
  *
- * ## Applications
+ * # Applications
  * - Normal derivatives: @f$ \frac{\partial u}{\partial n} = \nabla u \cdot \mathbf{n} @f$
  * - Material derivatives in fluid dynamics
  * - Characteristic methods for PDEs
  * - Shape sensitivity analysis
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Normal derivative on boundary
  * auto n = BoundaryNormal();

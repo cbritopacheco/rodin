@@ -63,7 +63,7 @@ namespace Rodin::Variational
    *
    * @tparam Derived Derived class following CRTP (Curiously Recurring Template Pattern)
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A function @f$ f : \Omega \to \mathbb{R}^n @f$ maps points in the domain 
    * @f$ \Omega @f$ to values in @f$ \mathbb{R}^n @f$. In finite element analysis,
    * functions serve various roles:
@@ -71,7 +71,7 @@ namespace Rodin::Variational
    * - **Discrete functions**: Finite element approximations @f$ u_h = \sum_i u_i \phi_i @f$
    * - **Test/Trial functions**: Basis functions @f$ \phi_i @f$ spanning finite element spaces
    *
-   * ## Key Features
+   * # Key Features
    * - **Domain support**: Functions can be restricted to subdomains or boundaries
    * - **Trace operations**: Support for function traces on mesh boundaries
    * - **Point evaluation**: Evaluation at arbitrary points within the domain

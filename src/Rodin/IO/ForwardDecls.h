@@ -124,7 +124,7 @@ namespace Rodin::IO
    * @param[in] fmt File format enum value
    * @returns C-style string name of the format, or nullptr if invalid
    *
-   * ## Example
+   * # Example
    * ```cpp
    * const char* name = toCharString(FileFormat::MFEM);  // Returns "MFEM"
    * ```
@@ -153,7 +153,7 @@ namespace Rodin::IO
    * unrecognized format. Numeric fallback preserves diagnostics without
    * inserting a null string into the stream.
    *
-   * ## Example
+   * # Example
    * ```cpp
    * std::cout << FileFormat::MEDIT;  // Outputs "MEDIT"
    * ```

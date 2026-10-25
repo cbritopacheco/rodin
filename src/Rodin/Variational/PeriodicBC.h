@@ -12,7 +12,7 @@
  * finite element problems. Periodic conditions enforce that the solution
  * values match across opposite boundaries of the domain.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * A periodic boundary condition specifies:
  * @f[
  *   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
@@ -20,19 +20,19 @@
  * where @f$ \Gamma_- @f$ and @f$ \Gamma_+ @f$ are matching boundary pairs
  * separated by periodicity vector @f$ L @f$.
  *
- * ## Applications
+ * # Applications
  * - Crystal lattice simulations
  * - Unit cell problems in homogenization
  * - Fluid flow in periodic geometries
  * - Wave propagation in periodic media
  *
- * ## Implementation
+ * # Implementation
  * Periodic conditions are enforced by:
  * 1. Identifying matching DOF pairs on opposite boundaries
  * 2. Constraining one DOF to equal its periodic partner
  * 3. Eliminating dependent DOFs from the system
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Periodic BC between boundaries 1 and 2
  * auto pbc = PeriodicBC(u).from(1).to(2);

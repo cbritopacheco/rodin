@@ -24,7 +24,7 @@
  *   by ParaView/XDMF, and are completely separate from the canonical
  *   persistence path.
  *
- * ## HDF5 Mesh Layout
+ * # HDF5 Mesh Layout
  *
  * ```
  * /Mesh
@@ -55,7 +55,7 @@
  *     /{entity}/Points                [control_nodes x sdim] (F64, nondefault charts)
  * ```
  *
- * ## XDMF Visualization Datasets (written by IO::XDMF via writeXDMFMesh)
+ * # XDMF Visualization Datasets (written by IO::XDMF via writeXDMFMesh)
  *
  * ```
  * /Mesh                               (visualization-only file, no canonical persistence)
@@ -67,7 +67,7 @@
  *   /Attributes/{d}                     [n_d] (U64)
  * ```
  *
- * ## HDF5 GridFunction Layout (standalone field file)
+ * # HDF5 GridFunction Layout (standalone field file)
  *
  * ```
  * /GridFunction
@@ -291,7 +291,7 @@ namespace Rodin::IO
      * Use the factory functions File(), Group(), DataSet(), and Space()
      * to construct handles with the correct close function.
      *
-     * ## Usage Example
+     * # Usage Example
      * ```cpp
      * auto file = HDF5::File(H5Fcreate("out.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
      * if (!file)
@@ -2193,7 +2193,7 @@ namespace Rodin::IO
    *
    * Stream-based loading is not supported; only file-path loading is available.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * Geometry::Mesh<Context::Local> mesh;
    * IO::MeshLoader<IO::FileFormat::HDF5, Context::Local> loader(mesh);
@@ -2565,7 +2565,7 @@ namespace Rodin::IO
    *
    * Stream-based printing is not supported; only file-path printing is available.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * const Geometry::Mesh<Context::Local>& mesh = ...;
    * IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(mesh)
@@ -3044,7 +3044,7 @@ namespace Rodin::IO
    * @tparam FES     Finite element space type.
    * @tparam Scalar  Scalar element type of the data vector.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);
    * GridFunction u(Vh);
@@ -3195,7 +3195,7 @@ namespace Rodin::IO
    * @tparam FES     Finite element space type.
    * @tparam Scalar  Scalar element type of the data vector.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * const GridFunction& u = ...;
    * IO::GridFunctionPrinter<IO::FileFormat::HDF5, P1, Math::Vector<Real>>(u)

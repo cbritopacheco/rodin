@@ -100,7 +100,7 @@ namespace Rodin::Geometry
    * on a polytope so that repeated integration passes can reuse mapped
    * @ref Rodin::Geometry::Point objects.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Construction evaluates the transformation's quadrature Jacobians in one
    * bulk call and places each matrix in its point's existing owned cache.

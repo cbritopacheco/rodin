@@ -127,9 +127,7 @@
   - @subpage guides-petsc — PETSc-backed variational forms, distributed
     linear algebra, KSP/SNES solvers, and multi-field problems
 
-  - @subpage guides-thread-safety — The thread-safety model, the
-    @ref Rodin::Threads "Threads" utilities, and how parallel assembly
-    scales
+  - @subpage guides-thread-safety — The thread-safety model, synchronization requirements, and how parallel assembly scales
 
   @section guides-getting-started-help Getting Help
 

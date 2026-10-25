@@ -76,7 +76,7 @@ RODIN_MODULES = [
         ('Alert', 'namespace_rodin_1_1_alert'),
         ('Location', 'namespace_rodin_1_1_location'),
         ('Utility', 'namespace_rodin_1_1_utility'),
-        ('Serialization', 'namespace_rodin_1_1_serialization'),
+        ('Serialization', 'group___rodin_serialization'),
         ('Test', 'namespace_rodin_1_1_test'),
     ]),
 ]

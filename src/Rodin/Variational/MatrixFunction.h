@@ -68,7 +68,7 @@ namespace Rodin::Variational
    * @tparam Scalar The scalar entry type (typically Real or Complex)
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Component Access
+   * # Component Access
    * Matrix entries can be accessed via:
    * - `A(i, j)` for the entry at row i, column j
    * - `A(i)` for the i-th row (returning a vector function)

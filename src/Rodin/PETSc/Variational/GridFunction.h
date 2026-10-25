@@ -20,7 +20,7 @@
  * degrees of freedom inside PETSc distributed vectors, supporting both
  * purely local (sequential) and MPI-parallel computations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  *
  * A grid function represents a discrete finite element approximation
  * @f$ u_h \in V_h @f$ defined by its expansion in the finite element
@@ -39,7 +39,7 @@
  * ghost layer so that every rank can read DOFs shared with adjacent mesh
  * partitions without explicit point-to-point communication.
  *
- * ## Ghost-Vector Management
+ * # Ghost-Vector Management
  *
  * In MPI mode the PETSc vector is created with `VecMPISetGhost()`.
  * The ghost indices are computed from the shard's local DOFs that map to
@@ -54,7 +54,7 @@
  * The `acquire()` / `flush()` / `sync()` / `release()` methods encapsulate
  * these patterns.
  *
- * ## Key Features
+ * # Key Features
  *
  * - **Dual context support**: Compiles for both `Context::Local`
  *   (sequential `PETSC_COMM_SELF`) and `Context::MPI` (distributed) meshes.
@@ -81,7 +81,7 @@
  * - **Projection**: `project()` assigns DOF values by evaluating a
  *   user-supplied function over a filtered mesh region.
  *
- * ## Usage Example
+ * # Usage Example
  *
  * ```cpp
  * // Sequential usage
@@ -142,7 +142,7 @@ namespace Rodin::Variational
    * supports both sequential (`Context::Local`) and distributed
    * (`Context::MPI`) finite element spaces.
    *
-   * ## Ownership and Ghost Model (MPI)
+   * # Ownership and Ghost Model (MPI)
    *
    * When the mesh context is `Context::MPI`, the constructor partitions the
    * global DOF vector across MPI ranks.  Each rank *owns* a contiguous
@@ -152,7 +152,7 @@ namespace Rodin::Variational
    * a `GhostBimap` so that `operator[]` can transparently translate a
    * global DOF index to the correct local position in the ghosted vector.
    *
-   * ## Array Access Protocol
+   * # Array Access Protocol
    *
    * PETSc requires explicit lock/unlock of the underlying raw array via
    * `VecGetArray*` / `VecRestoreArray*`.  This class manages the lock
@@ -290,12 +290,12 @@ namespace Rodin::Variational
        * Allocates a PETSc vector whose size matches the number of DOFs in
        * @p fes and sets all entries to zero.
        *
-       * ### Local mode (`Context::Local`)
+       * # Local mode (`Context::Local`)
        * Creates a sequential vector on `PETSC_COMM_SELF` with
        * `VecCreate` → `VecSetSizes` → `VecSetFromOptions` → `VecSetUp` →
        * `VecZeroEntries`.
        *
-       * ### MPI mode (`Context::MPI`)
+       * # MPI mode (`Context::MPI`)
        * 1. Queries the ownership range from the finite element space via
        *    `fes.getOwnershipRange(m_begin, m_end)`.
        * 2. Iterates over local shard DOFs to identify ghost indices —
@@ -1252,10 +1252,10 @@ namespace Rodin::Variational
        * array has not already been acquired (`m_write.acquired == false`),
        * the method:
        *
-       * ### Local mode
+       * # Local mode
        * - Calls `VecGetArrayWrite(m_data, &raw)`.
        *
-       * ### MPI mode
+       * # MPI mode
        * 1. Obtains the local (ghosted) form via `VecGhostGetLocalForm`.
        * 2. Locks the local form with `VecGetArrayWrite`.
        *
@@ -1361,10 +1361,10 @@ namespace Rodin::Variational
        * @brief Releases mutable (write) access and scatters locally-modified
        *        ghost values back to their owners.
        *
-       * ### Local mode
+       * # Local mode
        * - Calls `VecRestoreArrayWrite(m_data, &raw)`.
        *
-       * ### MPI mode
+       * # MPI mode
        * 1. Restores the array with `VecRestoreArrayWrite(ghost, &raw)`.
        * 2. Returns the local form via `VecGhostRestoreLocalForm`.
        * 3. Performs a **reverse** ghost update

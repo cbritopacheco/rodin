@@ -32,7 +32,7 @@ namespace Rodin::FormLanguage
    * @warning The FormLanguage::Base class is not thread safe. Only one thread
    * should access the methods of a FormLanguage object at a time.
    *
-   * ## Key Features
+   * # Key Features
    * - **Unique Identification**: Each instance receives a unique UUID for tracking
    * - **Polymorphic Operations**: Support for copying and cloning operations
    */

@@ -30,13 +30,13 @@ namespace Rodin::Math::RootFinding
    * finding roots of equations @f$ f(x) = 0 @f$. The method combines Newton's
    * method with interval bracketing and automatic fallbacks to ensure convergence.
    *
-   * ## Algorithm
+   * # Algorithm
    * The Newton-Raphson iteration is:
    * @f[
    *   x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
    * @f]
    *
-   * ## Robustness Features
+   * # Robustness Features
    * - **Interval bracketing**: Maintains a bracket @f$ [a, b] @f$ where @f$ f(a)f(b) \leq 0 @f$
    * - **Safeguards**: Falls back to bisection if Newton step goes outside bracket
    * - **Secant fallback**: Uses secant method if derivative is too small
@@ -44,14 +44,14 @@ namespace Rodin::Math::RootFinding
    * - **Midpoint safety**: Forms finite midpoints without overflowing finite endpoints
    * - **Convergence checks**: Multiple criteria for termination
    *
-   * ## Convergence Criteria
+   * # Convergence Criteria
    * The algorithm terminates when any of these conditions are met:
    * 1. **Function tolerance**: @f$ f(x)=0 @f$ or
    *    @f$ |f(x)| < \varepsilon_{\text{abs}} @f$
    * 2. **Interval tolerance**: @f$ |b - a| < \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| @f$
    * 3. **Maximum iterations**: Iteration count exceeds maximum
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * // Find root of f(x) = x^2 - 2 in [1, 2]
    * NewtonRaphson<Real> solver(1e-12, 1e-9, 1e-12, 25);

@@ -24,7 +24,7 @@ namespace Rodin::IO
    * @brief PETSc storage adapter for supported MFEM finite element collections.
    * @tparam FES Finite element space with an MFEM data-printer interface.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Select the shard-local space when present, copy its coefficients through
    * the source field's read view, then restore that view before serialization.

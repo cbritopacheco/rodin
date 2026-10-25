@@ -29,7 +29,7 @@ namespace Rodin::QF
    * points are the zeros of the Legendre polynomial @f$ P_n(x) @f$, and the
    * weights are chosen to maximize the degree of exactness.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    *
    * For the unit interval @f$ [0,1] @f$, the rule approximates:
    * @f[
@@ -39,7 +39,7 @@ namespace Rodin::QF
    * determined by the requirement that the formula is exact for all
    * polynomials of degree at most @f$ 2n-1 @f$.
    *
-   * ## Higher Dimensions
+   * # Higher Dimensions
    *
    * For tensor-product geometries, the multi-dimensional rule is constructed
    * from one-dimensional Gauss--Legendre rules. For triangles and
@@ -53,7 +53,7 @@ namespace Rodin::QF
    * an @f$ n @f$-point rule in every collapsed coordinate is exact for total
    * polynomial degree @f$ 2n-1 @f$ and has strictly positive weights.
    *
-   * ## Supported Geometries
+   * # Supported Geometries
    * - Point
    * - Segment
    * - Triangle

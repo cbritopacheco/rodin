@@ -32,7 +32,7 @@ namespace Rodin::Solid
   /**
    * @brief Computes the Cauchy stress from a constitutive law.
    *
-   * ## Usage
+   * # Usage
    * @code
    * NeoHookean law(lambda, mu);
    * KinematicState state(d);

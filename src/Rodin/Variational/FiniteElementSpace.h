@@ -13,26 +13,26 @@
  * element space defines the polynomial degree, mesh association, DOF mapping,
  * and conformity properties of the approximation.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * A finite element space @f$ V_h @f$ is defined by the triple @f$ (K, P, \Sigma) @f$:
  * - @f$ K @f$: Reference element geometry (triangle, tetrahedron, etc.)
  * - @f$ P @f$: Polynomial space (@f$ \mathbb{P}_k @f$, @f$ \mathbb{Q}_k @f$, etc.)
  * - @f$ \Sigma @f$: Set of degrees of freedom (nodal values, moments, etc.)
  *
- * ## Conformity
+ * # Conformity
  * Different conforming spaces for different problems:
  * - **H¹-conforming**: Continuous functions (standard Lagrange elements)
  * - **H(div)-conforming**: Normal component continuous (Raviart-Thomas, BDM)
  * - **H(curl)-conforming**: Tangential component continuous (Nédélec)
  * - **L²-spaces**: Discontinuous (DG methods)
  *
- * ## DOF Management
+ * # DOF Management
  * The finite element space manages:
  * - Global DOF numbering: unique index for each basis function
  * - Local-to-global mapping: relates element DOFs to global DOFs
  * - Boundary DOFs: identification for boundary condition application
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Create P1 space (continuous piecewise linear)
  * P1 Vh(mesh);
@@ -62,7 +62,7 @@ namespace Rodin::Variational
    * space defines the basis functions, degrees of freedom, and mesh association
    * required for finite element computations.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A finite element space is characterized by:
    * - **Mesh**: Geometric discretization @f$ \mathcal{T}_h @f$
    * - **Element**: Local finite element @f$ (K, P, \Sigma) @f$ where:
@@ -71,7 +71,7 @@ namespace Rodin::Variational
    *   - @f$ \Sigma @f$ is the set of degrees of freedom
    * - **Global Space**: @f$ V_h = \{v \in V : v|_K \in P_K \text{ for all } K \in \mathcal{T}_h\} @f$
    *
-   * ## Key Features
+   * # Key Features
    * - **DOF Management**: Global and local degree of freedom indexing
    * - **Basis Functions**: Access to shape functions and their derivatives
    * - **Mesh Association**: Strong coupling with underlying mesh structure

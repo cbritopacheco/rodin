@@ -60,7 +60,7 @@ namespace Rodin::Variational
    *
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Usage Examples
+   * # Usage Examples
    * ```
    * // Constant real function
    * RealFunction<Real> f(3.14);

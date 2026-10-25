@@ -12,7 +12,7 @@
  * solver for sparse symmetric positive definite systems using supernodal LLT
  * Cholesky factorization.
  *
- * ## Algorithm
+ * # Algorithm
  * CHOLMOD computes:
  * @f[
  *   A = LL^T
@@ -21,14 +21,14 @@
  * with similar sparsity patterns to exploit dense matrix operations (BLAS)
  * for improved performance.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite sparse matrices
  * - Large-scale finite element problems
  * - Structural mechanics
  * - Heat transfer problems
  * - Graph Laplacian systems
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

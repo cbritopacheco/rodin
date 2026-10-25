@@ -12,7 +12,7 @@
  * for integrating functions and shape-function expressions over mesh
  * polytopes.
  *
- * ## Mathematical foundation
+ * # Mathematical foundation
  *
  * A quadrature rule approximates an integral by a weighted sum:
  * @f[
@@ -30,7 +30,7 @@
  * - integrator-owned mapped points for the currently bound polytope,
  * - bounded mapped-point storage during a one-pass mesh traversal.
  *
- * ## Usage
+ * # Usage
  *
  * Typical usage is:
  * @code{.cpp}

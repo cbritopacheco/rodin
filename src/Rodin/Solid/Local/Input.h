@@ -14,7 +14,7 @@
  * region-wise material properties, etc.) without hard-coding them into the
  * integrator or the constitutive law.
  *
- * ## Usage with CRTP
+ * # Usage with CRTP
  *
  * @code
  * struct MyInput : Solid::Input<MyInput>
@@ -36,7 +36,7 @@
  * });
  * @endcode
  *
- * ## Usage with lambda / std::function
+ * # Usage with lambda / std::function
  *
  * @code
  * force.setInput([&](Solid::ConstitutivePoint& cp) {

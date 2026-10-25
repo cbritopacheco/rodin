@@ -7,7 +7,7 @@
   from @ref Rodin/Configure.h.in "Configure.h.in"; exported CMake targets also carry
   the include paths, compile definitions and dependencies needed by consumers.
 
-  ## Configure a build
+  # Configure a build
 
   @code{.bash}
   cmake -S . -B build \
@@ -39,7 +39,7 @@
   backends have their own dependency requirements; enabling an option does not
   install the corresponding system library.
 
-  ## Inspect configuration in C++
+  # Inspect configuration in C++
 
   @code{.cpp}
   #include <Rodin/Configure.h>
@@ -59,7 +59,7 @@
   include. Regenerate the build after changing CMake selections rather than
   editing the generated header or manually enabling a backend in consumer code.
 
-  ## Module-specific controls
+  # Module-specific controls
 
   A small number of capacity and precondition macros are declared by their
   owning headers. Their references remain attached to those files:

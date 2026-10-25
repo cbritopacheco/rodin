@@ -11,7 +11,7 @@
  * This file provides the explicit implementations of P1 basis functions
  * and their first derivatives for each supported polytope geometry.
  *
- * ## Basis Functions by Geometry
+ * # Basis Functions by Geometry
  *
  * **Point** (0D): @f$ \phi_0 = 1 @f$
  *

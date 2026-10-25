@@ -1864,7 +1864,7 @@ namespace Rodin::IO
    * format used by the MFEM library. It supports various element types and
    * can handle 2D and 3D meshes.
    *
-   * ## MFEM Format Structure
+   * # MFEM Format Structure
    * The MFEM mesh format consists of several sections:
    * - Header: "MFEM mesh v1.0" with version information
    * - dimension: Spatial dimension of the mesh
@@ -1872,7 +1872,7 @@ namespace Rodin::IO
    * - boundary: Boundary element information
    * - vertices: Vertex coordinates
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * Mesh<Context::Local> mesh;
    * MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
@@ -1955,7 +1955,7 @@ namespace Rodin::IO
    * This printer writes mesh data in the MFEM mesh file format, a text-based
    * format compatible with the MFEM library.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * const Mesh<Context::Local>& mesh = getMesh();
    * MeshPrinter<FileFormat::MFEM, Context::Local> printer(mesh);
@@ -2023,7 +2023,7 @@ namespace Rodin::IO
    *
    * @tparam Range Range type for the finite element space
    *
-   * ## MFEM Grid Function Format
+   * # MFEM Grid Function Format
    * The format includes:
    * - FiniteElementSpace header
    * - FiniteElementCollection name (e.g., "H1_2D_P1")
@@ -2031,7 +2031,7 @@ namespace Rodin::IO
    * - Ordering: data layout (Nodes=0 or VectorDimension=1)
    * - Coefficient data values
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1<Real> Vh(mesh);
    * GridFunction<P1<Real>> u(Vh);
@@ -2153,7 +2153,7 @@ namespace Rodin::IO
    * @tparam K Polynomial degree
    * @tparam Range Range type for the finite element space
    *
-   * ## MFEM Grid Function Format
+   * # MFEM Grid Function Format
    * The format includes:
    * - FiniteElementSpace header
    * - FiniteElementCollection name (e.g., "H1_2D_P2" for degree 2 in 2D)
@@ -2163,7 +2163,7 @@ namespace Rodin::IO
    *
    * MFEM DOF ordering: vertices -> edge interiors -> face interiors -> element interiors
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * H1 fes(std::integral_constant<size_t, 2>{}, mesh);
    * GridFunction gf(fes);
@@ -2944,14 +2944,14 @@ namespace Rodin::IO
    *
    * @tparam Range Range type for the finite element space
    *
-   * ## Expected MFEM Format
+   * # Expected MFEM Format
    * - Header: FiniteElementSpace
    * - FiniteElementCollection: L2_<dim>D_P0
    * - VDim: vector dimension
    * - Ordering: data layout (Nodes=0 or VectorDimension=1)
    * - Coefficient data values (one per element, in element order)
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P0 fes(mesh);
    * GridFunction gf(fes);
@@ -3333,7 +3333,7 @@ namespace Rodin::IO
    * @tparam FES Finite element space type
    * @tparam Scalar Scalar type for the vector data
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1<Real> Vh(mesh);
    * GridFunction<P1<Real>> u(Vh);

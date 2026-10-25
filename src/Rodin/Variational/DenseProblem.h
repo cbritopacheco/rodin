@@ -13,25 +13,25 @@
  * sparse storage, dense matrices can be advantageous for small problems or
  * when matrix structure doesn't favor sparsity.
  *
- * ## Dense Matrix Storage
+ * # Dense Matrix Storage
  * Dense storage stores all @f$ N^2 @f$ matrix entries regardless of zeros:
  * - **Memory**: @f$ O(N^2) @f$
  * - **Access**: @f$ O(1) @f$ for any entry
  * - **Operations**: Cache-friendly for small matrices
  *
- * ## When to Use Dense Storage
+ * # When to Use Dense Storage
  * - Small problems (few hundred DOFs)
  * - Nearly full matrices (rare in standard FEM)
  * - Prototyping and testing
  * - Spectral methods with global basis functions
  * - Problems with dense blocks (e.g., boundary elements)
  *
- * ## Performance Considerations
+ * # Performance Considerations
  * For typical FEM problems:
  * - Sparse: scales to millions of DOFs
  * - Dense: practical only for ~1000 DOFs or less
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * P1 Vh(mesh);  // Small mesh
  * TrialFunction u(Vh);

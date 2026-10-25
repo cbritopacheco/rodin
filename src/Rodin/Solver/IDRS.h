@@ -18,10 +18,10 @@
  * IDR(s) is typically competitive with BiCGSTAB/GMRES for certain nonsymmetric
  * problems, with short recurrences and modest memory footprint.
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported IDRS.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Solver::IDRS solver(problem);
  * solver.setTolerance(1e-10).setMaxIterations(1000).setS(8).solve();

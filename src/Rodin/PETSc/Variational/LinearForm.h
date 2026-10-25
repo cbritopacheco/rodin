@@ -17,7 +17,7 @@
  * the right-hand side @f$ \mathbf{b} @f$ of a discrete finite element
  * system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
- * ## Mathematical Background
+ * # Mathematical Background
  *
  * A form @f$ L : V_h \to \mathbb{K} @f$ takes a test function @f$ v \in V_h
  * @f$ and produces a scalar. It is linear over the reals and conjugate-linear

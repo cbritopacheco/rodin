@@ -39,12 +39,12 @@ namespace Rodin::Variational
      * where @f$ u_h @f$ is the numerical solution and @f$ u_{\text{exact}} @f$
      * is the exact solution.
      *
-     * ## Supported Norms
+     * # Supported Norms
      * - **L1 norm**: @f$ \|u\|_{L^1} = \int_\Omega |u| \, dx @f$
      * - **L2 norm**: @f$ \|u\|_{L^2} = \sqrt{\int_\Omega u^2 \, dx} @f$
      * - **L∞ norm**: @f$ \|u\|_{L^\infty} = \max_{x \in \Omega} |u(x)| @f$
      *
-     * ## Usage Example
+     * # Usage Example
      * ```cpp
      * // Compute L2 relative error
      * auto exact = [](const Point& p) { return sin(p.x()) * cos(p.y()); };
@@ -55,7 +55,7 @@ namespace Rodin::Variational
      * Real error_linf = RelativeError::lInf(uh, exact);
      * ```
      *
-     * ## Convergence Analysis
+     * # Convergence Analysis
      * These error measures are used to verify convergence rates:
      * - P1 elements: @f$ E_{L^2} \sim O(h^2) @f$
      * - P2 elements: @f$ E_{L^2} \sim O(h^3) @f$

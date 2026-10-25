@@ -28,7 +28,7 @@ namespace Rodin::Math
    * inheriting all the unit arithmetic operations from the Unit base class.
    * Provides a conversion method to radians.
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * Deg angle(180.0);  // 180 degrees
    * Rad radians = angle.toRad();  // π radians

@@ -17,7 +17,7 @@
  * - Constant basis function: @f$ \phi(x) = 1 @f$
  * - Zero gradient: @f$ \nabla \phi = 0 @f$
  *
- * ## Supported Specializations
+ * # Supported Specializations
  *
  * **Scalar P0Element<Scalar>:**
  * - Works with Real and Complex scalar types
@@ -29,7 +29,7 @@
  * - @f$ d @f$ DOFs per element (one per vector component)
  * - Basis functions: @f$ \boldsymbol{\phi}_i = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$
  *
- * ## Usage Example
+ * # Usage Example
  * @code{.cpp}
  * using namespace Rodin::Variational;
  *
@@ -167,7 +167,7 @@ namespace Rodin::Variational
        * For P0 elements, the basis function is simply @f$ \phi(x) = 1 @f$ for all x
        * in the element. This represents a piecewise constant approximation.
        *
-       * ## Properties
+       * # Properties
        * - **Value**: @f$ \phi(x) = 1 @f$ everywhere in the element
        * - **Derivatives**: @f$ \frac{\partial \phi}{\partial x_i} = 0 @f$ (constant has zero gradient)
        * - **Partition of unity**: Trivially satisfied (single basis function equals 1)
@@ -348,7 +348,7 @@ namespace Rodin::Variational
    * Used for vector-valued DG approximations (e.g., velocity in compressible flow, element-wise
    * constant vector fields).
    *
-   * ## Example
+   * # Example
    * For a 2D element with vdim=2:
    * - @f$ \boldsymbol{\phi}_0(x) = (1, 0)^T @f$ - constant in x-direction
    * - @f$ \boldsymbol{\phi}_1(x) = (0, 1)^T @f$ - constant in y-direction

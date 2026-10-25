@@ -36,7 +36,7 @@ namespace Rodin::Geometry
    * - owner information for non-owned entities,
    * - halo information for owned entities.
    *
-   * ## Local vs distributed indices
+   * # Local vs distributed indices
    *
    * Every entity stored in a shard has a **local shard index**. This is the
    * index used by the inherited local mesh API.
@@ -55,7 +55,7 @@ namespace Rodin::Geometry
    * - all inherited `Mesh<Context::Local>` methods use **local shard indices**,
    * - `getPolytopeMap(d)` is used to recover the corresponding distributed index.
    *
-   * ## Local state semantics
+   * # Local state semantics
    *
    * Each local shard entity is classified by two orthogonal notions:
    * - whether it belongs to the local partition, and
@@ -96,7 +96,7 @@ namespace Rodin::Geometry
    * - `isGhost(d, i)`
    * - `isLocal(d, i)` (equivalent to `Owned || Shared`)
    *
-   * ## Owner map
+   * # Owner map
    *
    * For each dimension @f$ d @f$, `getOwner(d)` stores
    *
@@ -111,7 +111,7 @@ namespace Rodin::Geometry
    * - if `i` is `Shared` or `Ghost`, then `getOwner(d).at(i)` gives the rank
    *   that owns the entity.
    *
-   * ## Halo map
+   * # Halo map
    *
    * For each dimension @f$ d @f$, `getHalo(d)` stores
    *
@@ -133,7 +133,7 @@ namespace Rodin::Geometry
    * - neighborhood-restricted communication,
    * - distributed connectivity discovery.
    *
-   * ## Geometric and topological contents
+   * # Geometric and topological contents
    *
    * A shard is not just a set of cells. It generally contains lower-dimensional
    * entities as well, for example vertices, edges, and faces needed by the local
@@ -148,7 +148,7 @@ namespace Rodin::Geometry
    *
    * Thus `Shard` is intended to be a self-consistent local mesh with overlap.
    *
-   * ## Construction model
+   * # Construction model
    *
    * `Shard::Builder` constructs a shard incrementally from either:
    * - a parent mesh (`Mode::Parent`), or
@@ -175,7 +175,7 @@ namespace Rodin::Geometry
    * - the local shard index of the entity,
    * - a boolean telling whether the entity was newly inserted.
    *
-   * ## Finalization guarantees
+   * # Finalization guarantees
    *
    * After `Builder::finalize()`:
    * - all local entity indices are stable,
@@ -188,7 +188,7 @@ namespace Rodin::Geometry
    *   `Ghost`),
    * - `getHalo(d)` is defined for owned local entities.
    *
-   * ## Important convention
+   * # Important convention
    *
    * A shard does **not** itself define a distributed global numbering of mesh
    * entities or degrees of freedom. It only provides:

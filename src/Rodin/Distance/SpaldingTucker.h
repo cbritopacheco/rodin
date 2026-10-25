@@ -31,16 +31,16 @@ namespace Rodin::Distance
    * where @f$ u @f$ is the input level set function and @f$ d @f$ is the
    * normalized approximate signed distance.
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - Preserves the zero level set: @f$ d(x) = 0 \iff u(x) = 0 @f$
    * - Preserves the sign: @f$ \text{sign}(d) = \text{sign}(u) @f$
    * - Better gradient normalization than simple Rvachev method
    * - More accurate near the interface
    *
-   * ## References
+   * # References
    * @cite belyaev2015variational @cite spalding1994calculation @cite tucker1998assessment
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * GridFunction u(fes);  // Some level set function
    * SpaldingTucker st;

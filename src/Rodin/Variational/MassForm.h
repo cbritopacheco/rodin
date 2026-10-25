@@ -126,7 +126,7 @@ namespace Rodin::Variational
        * coefficient, so that each thread assembling with its own copy of the
        * kernel also evaluates its own copy of the coefficient.
        *
-       * ## Architecture
+       * # Architecture
        *
        * Reference preparation owns one basis-pair matrix per quadrature sample.
        * Trial values are evaluated once into point-local scratch before the

@@ -18,7 +18,7 @@ namespace Rodin::Adaptation
   /**
    * @brief The deformation @f$\Phi(x)=x+u(x)@f$ induced by a displacement.
    *
-   * ## Architecture
+   * # Architecture
    *
    * A point binding locates the deformed point once and owns that result for all
    * subsequent basis requests in the binding. Cell binding or invalidation

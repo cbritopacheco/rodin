@@ -104,21 +104,21 @@ namespace Rodin::Variational
    * @f]
    * where @f$ \mathbb{P}_0(\tau) @f$ denotes constant functions on element @f$ \tau @f$.
    *
-   * ## Properties
+   * # Properties
    * - **DOF count**: One DOF per cell (total: @f$ n_{\text{cells}} @f$)
    * - **DOF location**: Element barycenter
    * - **Continuity**: Discontinuous across element boundaries (@f$ L^2 @f$-conforming)
    * - **Polynomial degree**: 0 (constant functions)
    * - **Gradient**: @f$ \nabla u|_K = 0 @f$ (zero within each element)
    *
-   * ## Use Cases
+   * # Use Cases
    * - Discontinuous Galerkin (DG) methods
    * - Flux-based formulations
    * - Element-wise constant material properties
    * - Finite volume schemes as FEM
    * - Pressure space in mixed methods (when inf-sup stability permits)
    *
-   * ## Example
+   * # Example
    * @code{.cpp}
    * Mesh Th;
    * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});

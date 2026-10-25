@@ -81,7 +81,7 @@ namespace Rodin::Variational
    *
    * @tparam Operator Matrix type for the discrete representation
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A real bilinear form @f$ a(u,v) @f$ satisfies:
    * - **Linearity in first argument**: @f$ a(\alpha u_1 + \beta u_2, v) = \alpha a(u_1,v) + \beta a(u_2,v) @f$
    * - **Linearity in second argument**: @f$ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) @f$
@@ -90,7 +90,7 @@ namespace Rodin::Variational
    * coefficients: @f$ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
    * a(u,v_1) + \overline{\beta} a(u,v_2) @f$.
    *
-   * ## Discrete Representation  
+   * # Discrete Representation
    * The discrete matrix representation satisfies @f$ A_{ij} = a(\phi_j, \psi_i) @f$
    * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test basis functions.
    */
