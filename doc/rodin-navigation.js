@@ -23,12 +23,49 @@
   }
   if (entries.length < 2) return;
 
+  const positionKey = 'rodin-sidebar-side';
+  let side = 'left';
+  try { if (localStorage.getItem(positionKey) === 'right') side = 'right'; } catch {}
   const navigation = document.createElement('nav');
   navigation.className = 'rodin-page-nav';
   navigation.setAttribute('aria-label', 'On this page');
   const title = document.createElement('h2');
   title.textContent = 'On this page';
-  navigation.append(title);
+  const header = document.createElement('div');
+  header.className = 'rodin-page-nav-header';
+  const positions = document.createElement('div');
+  positions.className = 'rodin-page-nav-positions';
+  positions.setAttribute('role', 'group');
+  positions.setAttribute('aria-label', 'Sidebar position');
+  const controls = [];
+  for (const location of ['left', 'right']) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.side = location;
+    button.setAttribute('aria-label', 'Sidebar on ' + location);
+    button.setAttribute('aria-pressed', String(location === side));
+    button.title = 'Sidebar on ' + location;
+    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    icon.setAttribute('viewBox', '0 0 24 24');
+    icon.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', location === 'left' ? 'M3 4h18v16H3z M9 4v16 M5 8h2 M5 12h2'
+      : 'M3 4h18v16H3z M15 4v16 M17 8h2 M17 12h2');
+    icon.append(path);
+    button.append(icon);
+    button.addEventListener('click', () => {
+      side = location;
+      try { localStorage.setItem(positionKey, side); } catch {}
+      for (const control of controls) {
+        control.setAttribute('aria-pressed', String(control.dataset.side === side));
+      }
+      relayout();
+    });
+    controls.push(button);
+    positions.append(button);
+  }
+  header.append(title, positions);
+  navigation.append(header);
   const list = document.createElement('ol');
   const parents = [{ level: 0, list }];
   for (const entry of entries) {
@@ -51,10 +88,12 @@
   content.parentElement.prepend(navigation);
   const layout = () => {
     const unit = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const gutter = content.getBoundingClientRect().left;
+    const bounds = content.getBoundingClientRect();
+    const gutter = side === 'left' ? bounds.left : document.documentElement.clientWidth - bounds.right;
     const width = Math.max(0, Math.min(13 * unit, gutter - 2 * unit));
     navigation.style.width = width + 'px';
-    navigation.style.left = (gutter - width - unit) + 'px';
+    navigation.style.left = (side === 'left' ? bounds.left - width - unit : bounds.right + unit) + 'px';
+    navigation.dataset.side = side;
     navigation.classList.toggle('rodin-page-nav-fit', width >= 9 * unit);
   };
 

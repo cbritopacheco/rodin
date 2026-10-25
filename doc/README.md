@@ -201,7 +201,10 @@ brief, a detailed description, and a representative formula or usage example.
 
 ## In-page Sidebar
 
-The styled site provides an “On this page” sidebar on the left on wide screens.
+The styled site provides an “On this page” sidebar on wide screens. The two
+placement icons beside its heading choose the left or right gutter without
+moving the centered content. The choice is saved in local storage; left is
+the default.
 `rodin-navigation.js` builds links from the page's section headings and marks the
 current section while scrolling. Nested lists and connector lines show heading
 hierarchy under Overview. Existing contents menus are excluded. The

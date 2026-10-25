@@ -184,3 +184,96 @@ pre.m-code
   color: #9aadc2;
   font-style: italic;
 }
+
+/* Sidebar placement controls remain beside its heading on wide screens. */
+.rodin-page-nav-header
+{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rodin-page-nav .rodin-page-nav-header h2
+{
+  margin: 0;
+}
+
+.rodin-page-nav-positions
+{
+  display: flex;
+  gap: 0.125rem;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rodin-page-nav:hover .rodin-page-nav-positions,
+.rodin-page-nav:has(:focus-visible) .rodin-page-nav-positions
+{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rodin-page-nav-positions button
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--dim-color);
+  cursor: pointer;
+}
+
+.rodin-page-nav-positions button:hover,
+.rodin-page-nav-positions button[aria-pressed="true"]
+{
+  color: var(--link-color);
+  background: var(--default-filled-background-color);
+  border-color: var(--line-color);
+}
+
+.rodin-page-nav-positions button:focus-visible
+{
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+.rodin-page-nav-positions svg
+{
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media screen and (min-width: 1200px)
+{
+  .rodin-page-nav.rodin-page-nav-fit
+  {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 5rem);
+  }
+
+  .rodin-page-nav-header
+  {
+    flex-shrink: 0;
+  }
+
+  .rodin-page-nav > ol
+  {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+  }
+}
