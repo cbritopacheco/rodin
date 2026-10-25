@@ -18,6 +18,8 @@
 #include <chrono>
 
 #include <benchmark/benchmark.h>
+#include <string_view>
+#include <vector>
 #include <boost/mpi/collectives.hpp>
 
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -78,7 +80,16 @@ int main(int argc, char** argv)
     measureConstruction<Math::SpatialVector<Real>, P1>(state, context, 3);
   });
 
-  benchmark::Initialize(&argc, argv);
+  // All ranks execute the collective workload; only rank zero owns the report.
+  std::vector<char*> arguments;
+  for (int i = 0; i < argc; ++i)
+  {
+    if (world.rank() == 0 || !std::string_view(argv[i]).starts_with("--benchmark_out="))
+      arguments.push_back(argv[i]);
+  }
+  int argumentCount = static_cast<int>(arguments.size());
+  arguments.push_back(nullptr);
+  benchmark::Initialize(&argumentCount, arguments.data());
   benchmark::RunSpecifiedBenchmarks();
   benchmark::Shutdown();
 }

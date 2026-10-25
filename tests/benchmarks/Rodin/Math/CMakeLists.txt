@@ -41,3 +41,9 @@ target_link_libraries(RodinMathSpatialVectorBenchmarks PRIVATE
 add_executable(RodinMathSpatialMatrixBenchmarks EXCLUDE_FROM_ALL SpatialMatrix.cpp)
 target_link_libraries(RodinMathSpatialMatrixBenchmarks PRIVATE
   Rodin::Math benchmark::benchmark)
+
+rodin_register_benchmark(RodinMathSpatialMatrixBenchmarks
+  PATH Rodin/Math/SpatialMatrix DESCRIPTION SpatialMatrix.html
+  FORMAT googlecpp PROFILE slow METRIC cpu_time RANKS 1)
+
+include(registrations.benchmarks.cmake)

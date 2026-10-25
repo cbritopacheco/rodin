@@ -1,8 +1,10 @@
 /* In-page navigation for the generated documentation. */
 (() => {
-  const content = document.querySelector('main > article > .m-container > .m-row > .m-col-l-10');
+  const benchmark = document.querySelector('[data-rodin-content]');
+  const content = benchmark || document.querySelector('main > article > .m-container > .m-row > .m-col-l-10');
   if (!content) return;
 
+  let selected = null;
   const entries = [];
   const targets = new Set();
   for (const heading of content.querySelectorAll('h1, h2, h3')) {
@@ -85,8 +87,27 @@
     parents.push({ level, item });
   }
   navigation.append(list);
+  if (benchmark) {
+    navigation.addEventListener('click', event => {
+      const link = event.target.closest('a');
+      const entry = entries.find(item => item.link === link);
+      if (!entry) return;
+      event.preventDefault();
+      selected = entry;
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      entry.heading.scrollIntoView({ block: 'start', behavior: reduced ? 'instant' : 'smooth' });
+      history.replaceState(history.state, '', '#' + encodeURIComponent(entry.target));
+      schedule();
+    });
+  }
   content.parentElement.prepend(navigation);
   const layout = () => {
+    if (benchmark) {
+      document.body.dataset.contentsSide = side;
+      navigation.dataset.side = side;
+      navigation.classList.add('rodin-page-nav-fit');
+      return;
+    }
     const unit = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const bounds = content.getBoundingClientRect();
     const gutter = side === 'left' ? bounds.left : document.documentElement.clientWidth - bounds.right;
@@ -108,7 +129,13 @@
       if (entry.heading.getBoundingClientRect().top > 140) break;
       active = entry;
     }
-    if (Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight) {
+    const bottom = Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight;
+    if (benchmark && selected && bottom) {
+      const bounds = selected.heading.getBoundingClientRect();
+      // Near the page end a target cannot always reach the reading line.
+      if (bounds.top >= 0 && bounds.top < window.innerHeight) active = selected;
+    }
+    if (!benchmark && Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight) {
       for (const entry of entries) {
         if (entry.heading.getClientRects().length) active = entry;
       }
@@ -131,6 +158,17 @@
     }
   };
   window.addEventListener('scroll', schedule, { passive: true });
+  if (benchmark) {
+    const resume = () => { selected = null; schedule(); };
+    window.addEventListener('wheel', resume, { passive: true });
+    window.addEventListener('touchstart', resume, { passive: true });
+    window.addEventListener('keydown', event => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) resume();
+    });
+    window.addEventListener('pointerdown', event => {
+      if (!navigation.contains(event.target)) resume();
+    }, { passive: true });
+  }
   const relayout = () => {
     layout();
     schedule();

@@ -27,17 +27,20 @@
   applyTheme();
   system.addEventListener('change', applyTheme);
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initializeControl() {
     const brand = document.querySelector('#m-navbar-brand');
-    if (!brand) return;
-    const home = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    home.setAttribute('viewBox', '2 2 20 20');
-    home.setAttribute('aria-hidden', 'true');
-    home.classList.add('rodin-home-icon');
-    const homePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    homePath.setAttribute('d', 'M3 10 12 3l9 7 M5 9v12h5v-7h4v7h5V9');
-    home.append(homePath);
-    brand.prepend(home);
+    if (!brand) return false;
+    if (document.querySelector('#rodin-theme-trigger')) return true;
+    if (!document.body?.classList.contains('rodin-benchmarks')) {
+      const home = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      home.setAttribute('viewBox', '2 2 20 20');
+      home.setAttribute('aria-hidden', 'true');
+      home.classList.add('rodin-home-icon');
+      const homePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      homePath.setAttribute('d', 'M3 10 12 3l9 7 M5 9v12h5v-7h4v7h5V9');
+      home.append(homePath);
+      brand.prepend(home);
+    }
     const github = document.querySelector('#m-navbar-collapse a[href="https://github.com/cbritopacheco/rodin"]');
     if (github) {
       const mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -134,5 +137,17 @@
     item.append(trigger, menu);
     brand.closest('nav').append(item);
     applyTheme();
-  });
+    return true;
+  }
+
+  if (!initializeControl()) {
+    const observer = new MutationObserver(() => {
+      if (initializeControl()) observer.disconnect();
+    });
+    observer.observe(document.documentElement, {childList: true, subtree: true});
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeControl();
+      observer.disconnect();
+    }, {once: true});
+  }
 })();

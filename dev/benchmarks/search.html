@@ -1,0 +1,25 @@
+{# Overlay structure follows the pinned m.css documentation template; engine and styles retain their upstream licences. #}
+<div class="m-doc-search" id="search" role="dialog" aria-modal="true" aria-label="Benchmark search">
+  <a href="#!" onclick="return hideSearch()" aria-label="Dismiss search backdrop"></a>
+  <div class="m-container"><div class="m-row"><div class="m-col-m-8 m-push-m-2">
+    <div class="m-doc-search-header m-text m-small">
+      <div class="benchmark-search-shortcuts"><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+      <div id="search-symbolcount">Loading index…</div>
+      <button class="benchmark-search-close" type="button" aria-label="Close benchmark search" onclick="return hideSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12 M18 6 6 18"></path></svg></button>
+    </div>
+    <div class="m-doc-search-content">
+      <form><input type="search" name="q" id="search-input" aria-label="Find benchmarks" placeholder="Loading…" disabled autocomplete="off" spellcheck="false"></form>
+      <noscript>Benchmark search requires JavaScript.</noscript>
+      <div id="search-help" class="m-text m-dim m-text-center">
+        <p>Find modules, classes and workloads by name, path or description.
+        Try <code>SpatialMatrix</code>, <code>pyramid</code> or <code>Stokes stability</code>.</p>
+        <p>Use ↑ / ↓ to select a result and Enter to open it. Tab completes a prefix.
+        Individual measured cases can be filtered on their benchmark page.</p>
+      </div>
+      <div id="search-notfound" class="m-text m-warning m-text-center">No matching benchmarks.</div>
+      <ul id="search-results"></ul>
+    </div>
+  </div></div></div>
+</div>
+<script src="{{ prefix }}assets/{{ search.engine }}"></script>
+<script src="{{ prefix }}assets/{{ search.data }}"></script>

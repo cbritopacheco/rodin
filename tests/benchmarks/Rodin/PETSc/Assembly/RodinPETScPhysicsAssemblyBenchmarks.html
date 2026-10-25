@@ -1,0 +1,5 @@
+<p>PETSc local/MPI warmed physics assembly with aligned iterations.</p>
+<h2>Measured operation</h2>
+<p>Complete warmed assembly measured independently of setup and oracles. Architecture: identical forms are configured through PhysicsForm. MPI meshes use explicit incidence and root partitioning; only owned cells contribute to workload counts. Fixed iteration counts align collectives. Assembly is timed between steady-clock readings; MPI reports maximum rank duration. Synchronization, timing reduction, and numerical checks are outside timing.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

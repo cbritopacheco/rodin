@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · Rodin benchmarks</title>
+  {% for stylesheet in stylesheets %}<link rel="stylesheet" href="{{ stylesheet if '://' in stylesheet else prefix + stylesheet }}">
+  {% endfor %}<script src="{{ prefix }}assets/rodin-theme.js"></script>
+  <script src="{{ prefix }}assets/rodin-navigation.js" defer></script>
+  {% if page.record %}<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.2/dist/Chart.min.js" defer></script>
+  <script src="{{ prefix }}assets/charts.js" defer></script>{% endif %}
+  <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'local'}};</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body class="rodin-benchmarks">
+  <header><nav id="navigation"><div class="m-container"><div class="m-row"><a class="benchmark-docs-link" href="__RODIN_DOCS__/index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4-5 5 5 5 M3 9h11a6 6 0 0 1 0 12h-3"></path></svg>Go back to Rodin docs</a><a id="m-navbar-brand" href="{{ prefix }}index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></div></div><a class="benchmark-search-trigger" href="#search" onclick="return showSearch()" aria-label="Search benchmarks" title="Search benchmarks"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"></circle><path d="m15 15 6 6"></path></svg></a></nav></header>
+  <div class="rodin-benchmark-layout">
+    <main data-rodin-content>
+      <nav class="benchmark-breadcrumb" aria-label="Breadcrumb">{% for path, label in breadcrumbs %}{% if not loop.first %} / {% endif %}<a href="{{ prefix }}{{ path + '/' if path else '' }}index.html">{{ label }}</a>{% endfor %}</nav>
+      <h1>{{ title }}</h1>
+      <p class="benchmark-configuration">{{ configuration }}</p>
+      {% if not value or value == 'Rodin' %}
+      <p>This catalogue presents Rodin's performance benchmarks, from individual mathematical
+        operations to assembled finite element problems. Each benchmark describes the operation
+        measured, the inputs and the measurement conditions. Published timing histories help
+        track changes across commits for a selected configuration and benchmark case.</p>
+      <p>Benchmarks are organized by their owning module, following the library's directory
+        hierarchy. The module groups below provide entry points to classes and workloads;
+        MPI and PETSc benchmarks remain within their respective modules. Physical contexts,
+        such as Stokes, collect benchmarks whose meaning depends on a mathematical model.
+        Descriptions become more detailed as the navigation reaches individual benchmarks,
+        explaining what is measured and why. Use the search to find a class, operation or
+        workload directly. Modules without registered benchmarks are identified on their pages.</p>
+      {% for group in groups %}<section data-category="{{ group.name }}"><h2>{{ group.name }}</h2><p>{{ group.description }}</p>
+        {% for item in group.modules %}<section class="m-frame"><h3><a href="{{ prefix }}{{ item.path }}/index.html">{{ item.title }}</a></h3>
+          <p class="m-text m-dim"><em>{{ item.brief|safe }}</em></p>
+          <div class="benchmark-representative">{{ item.representative|safe }}</div>
+          <div class="m-block m-flat">{{ item.description|safe }}</div>
+        </section>{% endfor %}
+      </section>{% endfor %}
+      <h2>Physical contexts</h2>
+      {% for context in contexts %}<section class="m-frame"><h3><a href="{{ prefix }}{{ context.path }}/index.html">{{ context.title }}</a></h3>
+        <div class="m-block m-flat">{{ context.description|safe }}</div>
+      </section>{% endfor %}
+      {% else %}
+      {% if module %}<p class="m-text m-dim"><em>{{ module.brief|safe }}</em></p><div class="benchmark-representative">{{ module.representative|safe }}</div><div class="m-block m-flat">{{ module.description|safe }}</div>{% endif %}
+      {{ page.description|safe }}
+      {% if children %}<h2>Benchmarks</h2>
+      <div class="benchmark-children">{% for child in children %}
+        <section class="m-frame"><h3><a href="{{ prefix }}{{ child.path }}/index.html">{{ child.title }}</a></h3>
+          {{ child.brief|safe }}
+        </section>
+      {% endfor %}</div>{% endif %}
+      {% if page.record %}<h2>Timing history</h2>
+      <p class="benchmark-contract">{{ page.record.target }} · {{ page.record.metric }} · {{ page.record.profile }} · ranks: {{ page.record.ranks }}</p>
+      <div data-benchmark-history><p>No timing history has been published for this component.</p></div>
+      {% elif not children %}<p>No benchmarks have been registered for this module yet.</p>{% endif %}
+      {% endif %}
+    </main>
+  </div>
+  {% include "search.html" %}
+  {{ footer|safe }}
+</body>
+</html>

@@ -1,0 +1,11 @@
+<p>Separates field coefficient lookup from reference-gradient contraction.</p>
+<h2>Measured operation</h2>
+<p>Measures the consumer of already evaluated reference gradients.</p>
+<h3>Mathematical foundation</h3>
+<p>For the cell closure \(I_K(a)\), the reference derivative is \(\widehat\nabla u_h(\widehat x_q)= \sum_a c_{I_K(a)}\widehat\nabla\phi_a(\widehat x_q)\). Coefficients are distinct deterministic values, not interpreted as nodal samples. Real and complex fields use \(c_i=(i+1)\eta\), with \(\eta=1\) and \(\eta=1+i/2\), respectively.</p>
+<h3>Architecture</h3>
+<p>One cell, its space, quadrature, public basis gradients and output storage are prepared before timing. CoefficientLookup writes one coefficient per sample and basis through the public local-to-global lookup. ReferenceContraction additionally performs the ordered gradient sum. PreparedIndexContraction uses an owned closure copied before timing to isolate lookup from contraction. It is a caller-side measurement control, not a new library implementation. Physical mapping, derivative generation, assembly and solving are absent. These local scopes do not establish distributed lookup costs or borrow rules.</p>
+<h3>Numerical qualification</h3>
+<p>Every prepared closure index must equal the public local-to-global index. Each coefficient and contraction entry is compared exactly with an untimed closure-based ordered expansion before and after timing. Coefficients change through \(1\to2\to1\) without changing the space. Deliberately changed output must be rejected. No timing or approximation tolerance is used. This validates the lookup/contraction decomposition, not independent basis accuracy; that remains covered by element and convergence tests.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

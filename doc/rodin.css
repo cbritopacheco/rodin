@@ -523,6 +523,23 @@ section.m-doc-details table td:first-child > .m-label.m-flat {
   outline-offset: 3px;
 }
 
+
+/* Shared benchmark navigation icon. */
+#navigation .rodin-benchmark-icon
+{
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: .5rem;
+  vertical-align: -.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .rodin-overview-declaration {
   margin-top: .5rem;
   padding: .75rem;

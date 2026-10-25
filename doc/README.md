@@ -228,6 +228,31 @@ Qualified enum values are matched against their declaring scopes to distinguish
 them from identically named classes. The shared palette in `rodin.css` applies
 to code throughout the site and uses normal font weight for every token.
 
+The documentation build also exports `rodin-module-catalogue.json` with the same
+rendered module overviews, category descriptions, ownership paths and stylesheet
+order. The benchmark navigation consumes this catalogue rather than duplicating
+namespace prose. See [benchmark registration and display](../tests/benchmarks/README.md#registration-and-display).
+
+## Benchmark documentation and publication
+
+The m.css build also renders `benchmarks/index.html` and its module/class and
+physical-context pages. It reads the same explicit CMake registrations as the
+benchmark build, without compiling or executing numerical workloads. Authored
+HTML fragments live beside benchmark drivers; canonical module descriptions
+come from the rendered API module catalogue. The common theme and in-page
+sidebar remain shared with the API documentation.
+
+On main-branch pushes the Benchmarks workflow builds documentation and a complete
+benchmark campaign, then publishes both in one Pages commit under
+`docs/refs/heads/<branch>/`. Component histories are stored separately in
+`benchmark-data/refs/heads/<branch>/` and connected to the generated leaf pages.
+A failed or incomplete campaign cannot replace the public documentation or
+publish partial timing histories. Pull-request documentation builds upload an
+artifact for validation without publishing it.
+
+See [benchmark registration, shared builds and publication](../tests/benchmarks/README.md)
+for the full graph, naming rules, timing contracts and extension instructions.
+
 ## Color Themes
 
 The site uses a dark base palette and follows the system's light preference

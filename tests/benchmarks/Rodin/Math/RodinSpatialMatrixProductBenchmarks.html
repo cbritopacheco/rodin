@@ -1,0 +1,10 @@
+<p>Spatial matrix products underlying vector-basis gradient transforms.</p>
+<h2>Measured operation</h2>
+<p>Measures the canonical matrix product over retained basis-sized arrays.</p>
+<h3>Mathematical operation</h3>
+<p>For \(A_a\in\mathbb F^{r\times k}\) and \(B\in\mathbb G^{k\times c}\), the operation is \(C_a=A_aB\). There is no conjugation in this product. Reference Jacobians have \(r=m\), \(k=d\) and the geometric inverse has \(c=s\), where \(m\) is the field component count and \(d,s\) are reference and ambient dimensions. The real/real and complex/real selections therefore isolate the product used by vector-basis pullbacks in assembly. The other scalar pairs cover the same public arithmetic contract.</p>
+<h3>Measurement boundary</h3>
+<p>Each iteration multiplies every retained left matrix by the same right matrix, including result construction and assignment to retained output. Counts 6, 12, 30 and 81 model local vector-basis sizes; they do not identify particular geometries. No finite-element evaluation, geometric inverse, symmetric-gradient construction, coefficient weighting, pair contraction or sparse insertion is included. This is a primitive measurement, not a decomposition into additive fractions of a complete cell-kernel time.</p>
+<p>All dimensions zero through three and all real/complex scalar pairs are qualified. Bounded dyadic inputs admit an exact independent scalar-loop reference. Inactive input storage is poisoned, while inactive output must remain zero. Wrong values or dimensions must be rejected outside timing.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

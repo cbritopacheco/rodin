@@ -1,0 +1,5 @@
+<p>Overlapping sequential assembly-stage measurements.</p>
+<h2>Measured operation</h2>
+<p>Separates local evaluation from canonical sparse assembly costs. Binding visits all cells and binds each integrator. Kernel additionally evaluates every local entry. Triplets uses the library&#x27;s sequential assembler, including binding, evaluation, and scatter. Finalize replaces an Eigen sparse matrix using previously generated triplets. These scopes overlap and must not be added or interpreted as disjoint percentages.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

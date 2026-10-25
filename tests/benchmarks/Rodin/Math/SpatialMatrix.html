@@ -1,0 +1,20 @@
+<p>SpatialMatrix benchmarks separate arithmetic, contractions, products and
+matrix decompositions. Ordinary multiplication obeys
+\(C_{ij}=\sum_k A_{ik}B_{kj}\), without conjugation of complex operands.
+Right-conjugated scalar contractions are identified separately.</p>
+<h2>Representations and products</h2>
+<p>Spatial matrices are compared with bounded, dynamic and selected fixed Eigen
+matrices. Matched products multiply an \(r\times k\) matrix by a
+\(k\times r\) matrix. The separate matrix-product component covers the full
+three-extent sweep and mixed scalar orders.</p>
+<h2>Decompositions</h2>
+<p>Trace, determinant, inverse, solve and full-rank pseudoinverse cases retain
+their shape requirements. Full-pivot LU and complete orthogonal decomposition
+provide untimed references. Pseudoinverse comparators retain the same
+normal-equation algorithm inside timing.</p>
+<h2>Measurement contract</h2>
+<p>Owned-result cases include materialization and assignment. Destination cases
+use prepared disjoint storage and a distinct result lifecycle. Inputs and
+numerical references are excluded; outputs are checked before and after timing.
+Calling-thread CPU time is reported per sweep of one or thirty-two inputs;
+divide by the operations counter for time per matrix.</p>

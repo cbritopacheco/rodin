@@ -365,6 +365,29 @@ An upload receipt proves submission, not completion of Codecov processing.
 When confirming coverage, check the complete local union and the final
 current-commit Codecov report after all family uploads have been processed.
 
+## Benchmark builds and publication
+
+`Benchmarks.yml` is independent of the numerical-test/coverage graph. It runs on
+main-branch pushes and manual dispatch. The local and MPI/PETSc configurations
+each compile shared Rodin and Google Benchmark libraries once, then build
+hierarchical module groups. `BenchmarkConfiguration.yml` owns the common stage;
+`BenchmarkGroup.yml` owns a group build and its independent Regular/Slow case
+lanes. A lane waits only for its own group, restores its binary and never builds.
+MPI and PETSc ranks remain explicit benchmark registrations.
+
+Every enabled benchmark executable must be registered. Discovery determines all
+case partitions, and the pooling gate requires every raw report, checksum and
+current-commit receipt. Documentation generation runs in parallel using the
+same descriptions. A single publisher requires both complete results and
+successful documentation before updating `gh-pages`. Component histories live
+under `benchmark-data/<ref>/`; documentation and its benchmark navigation live
+under `docs/<ref>/`. The former aggregate benchmark publisher is retired; its
+source cases remain in owning module targets. Benchmark execution is not a
+substitute for production coverage or test configurations.
+
+The [benchmark guide](../../tests/benchmarks/README.md) contains the full graph,
+paths, measurement definitions and steps for adding a target or execution lane.
+
 ## Related documentation
 
 The [test registration guide](../../dev/ci-testing.md) explains how to add tests,

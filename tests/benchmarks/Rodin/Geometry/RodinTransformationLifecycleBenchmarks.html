@@ -1,0 +1,7 @@
+<p>Measures geometric transformation construction and value lifetimes.</p>
+<h2>Measured operation</h2>
+<p>Measures identity-map construction without geometric evaluation.</p>
+<p>Construct measures one map. ConstructCopy and ConstructMove each construct a source and a destination; source construction is deliberately included, rather than hidden behind per-iteration timing pauses. Both addresses escape through mutable pointer barriers. No heap allocation, mesh, formula, assembly or solver is included. Dimensions and the identity Jacobian are qualified outside timing, including the empty zero-dimensional map.</p>
+<p>construction/move.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

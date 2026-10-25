@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import json
 from html.parser import HTMLParser
 import importlib.util
 import logging
@@ -155,6 +156,23 @@ def clear_generated_pages(xml, html):
             page.unlink()
 
 
+def export_module_catalogue(groups, categories, overviews, namespaces, stylesheets, output):
+    """Expose the same rendered module descriptions to the benchmark site."""
+    from urllib.parse import urlparse
+    catalogue = {'schema': 1, 'groups': [], 'stylesheets': []}
+    for stylesheet in stylesheets:
+        catalogue['stylesheets'].append(stylesheet if urlparse(stylesheet).netloc else Path(stylesheet).name)
+    for category, modules in groups:
+        entries = []
+        for title, target in modules:
+            entries.append({'title': title, 'path': namespaces[target].replace('::', '/'),
+                            **overviews[target]})
+        catalogue['groups'].append({'name': category, 'description': categories[category],
+                                    'modules': entries})
+    (output / 'rodin-module-catalogue.json').write_text(json.dumps(catalogue, indent=2) + '\n')
+    return catalogue
+
+
 def build(configuration, renderer, templates):
     # Use the repository-pinned m.css implementation for parsing and rendering;
     # no vendor edits or second copies of the scientific descriptions are needed.
@@ -216,6 +234,18 @@ def build(configuration, renderer, templates):
     print('Ranked general class search references:', assemble_search(
         xml, output / state.doxyfile['HTML_OUTPUT'], renderer.parent / 'search.js',
         Path(__file__).resolve().parents[1] / 'doc' / 'rodin-search.js', mcss.searchdata_format_version))
+    namespaces = {target: ET.parse(xml / (target + '.xml')).findtext('./compounddef/compoundname')
+                  for target in data}
+    export_module_catalogue(config['RODIN_MODULES'], config['RODIN_MODULE_CATEGORIES'], data,
+                            namespaces, state.config['STYLESHEETS'],
+                            output / state.doxyfile['HTML_OUTPUT'])
+    if config.get('RODIN_BENCHMARK_MANIFEST'):
+        from benchmark_site import build_site
+        html_output = output / state.doxyfile['HTML_OUTPUT']
+        count = build_site(Path(config['RODIN_BENCHMARK_MANIFEST']), html_output,
+                           html_output / 'benchmarks', 'Published configurations',
+                           config.get('RODIN_BENCHMARK_DOCUMENTATION_URL', '../'))
+        print('Rendered benchmark documentation pages:', count)
     print('Rendered concise overview for', len(data), 'modules.')
 
 

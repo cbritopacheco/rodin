@@ -1,6 +1,6 @@
 # Integrator benchmarks
 
-The `RodinBenchmarks` target contains two complementary integrator benchmark
+The `RodinVariationalIntegratorsBenchmarks` target contains two complementary integrator benchmark
 levels under the `Integrator/` prefix.
 
 - `Integrator/Kernel/` measures element binding, quadrature, basis evaluation,
@@ -61,18 +61,18 @@ cost.
 Build and list the repertoire with:
 
 ```sh
-cmake --build build -j --target RodinBenchmarks
-build/tests/benchmarks/RodinBenchmarks \
-  --benchmark_list_tests | grep '^Integrator/'
+cmake --build build -j --target RodinVariationalIntegratorsBenchmarks
+build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
+  --benchmark_list_tests=true | grep '^Integrator/'
 ```
 
 Run only local kernels or complete assembly with:
 
 ```sh
-build/tests/benchmarks/RodinBenchmarks \
+build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_filter='Integrator/Kernel/.*'
 
-OMP_NUM_THREADS=8 build/tests/benchmarks/RodinBenchmarks \
+OMP_NUM_THREADS=8 build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_filter='Integrator/Assembly/.*'
 ```
 
@@ -81,10 +81,9 @@ count, CPU frequency policy, and benchmark filter on both revisions, and emit
 Google Benchmark JSON:
 
 ```sh
-build/tests/benchmarks/RodinBenchmarks \
+build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_filter='Integrator/.*' \
   --benchmark_repetitions=5 \
-  --benchmark_report_aggregates_only=true \
   --benchmark_out=integrators.json \
   --benchmark_out_format=json
 ```

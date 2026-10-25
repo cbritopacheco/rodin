@@ -1,11 +1,8 @@
 name: Documentation
 permissions:
-  contents: write
+  contents: read
 on:
-  push:
-    branches:
-      - master
-      - develop
+  workflow_call:
   pull_request:
     branches:
       - master
@@ -59,10 +56,8 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --target RodinDoxygen
       - name: Verify rendered module and template navigation
         run: python3 dev/check_documentation_navigation.py
-      - name: Deploy
-        if: github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v3
+      - uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{github.workspace}}/build/doc/html
-          destination_dir: docs/${{ github.ref }}
+          name: documentation
+          path: ${{ github.workspace }}/build/doc/html
+          if-no-files-found: error

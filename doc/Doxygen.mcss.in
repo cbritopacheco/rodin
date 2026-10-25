@@ -2,7 +2,7 @@
 GENERATE_HTML           = NO
 GENERATE_XML            = YES
 XML_PROGRAMLISTING      = NO
-HTML_EXTRA_FILES        = @CMAKE_SOURCE_DIR@/doc/rodin-navigation.js @CMAKE_SOURCE_DIR@/doc/rodin-theme.js
+HTML_EXTRA_FILES        = @CMAKE_SOURCE_DIR@/doc/rodin-navigation.js @CMAKE_SOURCE_DIR@/doc/rodin-theme.js @CMAKE_SOURCE_DIR@/doc/Images/Doxygen.svg
 
 ALIASES = \
     "m_div{1}=@xmlonly<mcss:div xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly" \

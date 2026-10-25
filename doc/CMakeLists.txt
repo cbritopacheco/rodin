@@ -7,6 +7,8 @@ set(DOXYGEN_OUT ${CMAKE_BINARY_DIR}/doc/Doxygen)
 configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 
 if (RODIN_USE_MCSS)
+  include(RodinBenchmarkManifest)
+  rodin_export_benchmark_descriptions("${CMAKE_BINARY_DIR}/doc/RodinBenchmarkDescriptions.tsv")
   set(DOXYGEN_MCSS_IN ${CMAKE_SOURCE_DIR}/doc/Doxygen.mcss.in)
   set(DOXYGEN_MCSS_OUT ${CMAKE_BINARY_DIR}/doc/Doxygen.mcss)
   configure_file(${DOXYGEN_MCSS_IN} ${DOXYGEN_MCSS_OUT} @ONLY)

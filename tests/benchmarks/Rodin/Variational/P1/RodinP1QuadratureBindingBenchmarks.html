@@ -1,0 +1,10 @@
+<p>Profiles P1 mass and transport binding with warm and refreshed scalar data.</p>
+<h2>Measured operation</h2>
+<p>Measures the local binding stages consumed by P1 form assembly.</p>
+<h3>Mathematical foundation</h3>
+<p>On one mapped cell, the forms are \((u,v)_K\), \((2u,v)_K\) and \((J(u)b,v)_K\), with real \(b_j=j+1\). The vector field has zero through three components, independently of the spatial dimension. Real and complex fields use the same real transport coefficient. Empty ranges have no matrix entries and are not assigned a fictitious entry read.</p>
+<h3>Architecture</h3>
+<p>Warm scopes retain scalar reference data at one integration order. Refresh scopes alternate that order and the order four degrees higher, forcing the existing owner&#x27;s preparation stage without constructing a second cache. Both include owned mapped quadrature and local contraction; neither measures mesh traversal, global insertion or solving. Three base orders study local sample-count scaling, not mesh-refinement convergence. Point formulas always retain one sample and are not assigned artificial refinement rates.</p>
+<p>Independent entry-loop qualification and perturbation rejection precede timing. Repeated binding must reproduce every retained entry exactly at the final order. Empty-range qualification uses logical DOF counts instead. Benchmarks are opt-in and are not CTest or publication timing gates.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

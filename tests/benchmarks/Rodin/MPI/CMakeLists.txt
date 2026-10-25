@@ -1,2 +1,2 @@
-add_subdirectory(Geometry)
+add_subdirectory(Variational)
 add_subdirectory(Location)

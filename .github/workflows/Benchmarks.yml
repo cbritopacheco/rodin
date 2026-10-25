@@ -1,80 +1,125 @@
 name: Benchmarks
 on:
   push:
-    branches:
-      - master
-      - develop
-
+    branches: [master, develop]
+  workflow_dispatch:
 concurrency:
   group: Benchmarks-${{ github.ref }}
   cancel-in-progress: true
-
 permissions:
-  deployments: write
-  contents: write
-
+  contents: read
 jobs:
-  Ubuntu:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        compiler: [gcc-10]
-        build_type: ['Release']
-      fail-fast: false
-    env:
-      MAKEFLAGS: "-j2"
+  Infrastructure:
+    name: Infrastructure checks
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
           lfs: false
-      - name: Hydrate benchmark resources
-        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
-      - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v1
+      - name: Initialize pinned search engine
+        run: git submodule update --init third-party/m.css
+      - uses: actions/setup-python@v5
         with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
-      - name: Install dependencies
-        uses: ./.github/actions/apt-dependencies
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - run: python3 -m unittest discover -s dev -p 'test_benchmark_*.py' -v
+      - run: node --check dev/benchmarks/charts.js
+  Documentation:
+    uses: ./.github/workflows/Documentation.yml
+  Local:
+    name: Local
+    needs: Infrastructure
+    uses: ./.github/workflows/BenchmarkConfiguration.yml
+    with:
+      configuration: local
+  Distributed:
+    name: MPI and PETSc
+    needs: Infrastructure
+    uses: ./.github/workflows/BenchmarkConfiguration.yml
+    with:
+      configuration: distributed
+  Pool:
+    name: Validate complete campaign
+    needs: [Local, Distributed]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
         with:
-          packages: libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov
-      - name: Configure CMake
-        run: >
-          cmake
-          -B ${{github.workspace}}/build
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DRODIN_BUILD_DOC=OFF
-          -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_USE_MCSS=OFF
-          -DRODIN_BUILD_EXAMPLES=OFF
-          -DRODIN_BUILD_UNIT_TESTS=OFF
-          -DRODIN_CODE_COVERAGE=OFF
-          -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_BENCHMARKS=ON
-          -DRODIN_MULTITHREADED=NO
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --target RodinBenchmarks
-      - name: Run benchmarks
-        # A fifth of a second a case rather than the default second. The
-        # reported numbers are per iteration, so this changes their precision
-        # and not their meaning, and it is the difference between minutes and
-        # a quarter of an hour across the suite. Set here rather than on the
-        # registrations because MinTime() appends to a benchmark's name, and
-        # these names are the keys the results are tracked under.
-        run: ${{github.workspace}}/build/tests/benchmarks/RodinBenchmarks --benchmark_min_time=0.2s --benchmark_format=json --benchmark_out=${{github.workspace}}/RodinBenchmarks.json
-      - name: Store benchmark result
-        uses: benchmark-action/github-action-benchmark@v1
+          lfs: false
+      - uses: actions/setup-python@v5
         with:
-          name: C++ Rodin Benchmarks
-          tool: 'googlecpp'
-          output-file-path: ${{github.workspace}}/RodinBenchmarks.json
-          # Access token to deploy GitHub Pages branch
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          # Push and deploy GitHub pages branch automatically
-          auto-push: true
-          comment-on-alert: true
-          alert-threshold: "150%"
-          benchmark-data-dir-path: benchmarks/${{ github.ref }}
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - name: Require successful execution configurations
+        env:
+          LOCAL: ${{ needs.Local.result }}
+          DISTRIBUTED: ${{ needs.Distributed.result }}
+        run: test "$LOCAL" = success && test "$DISTRIBUTED" = success
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-plan-*
+          path: benchmark-inputs
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-result-*
+          path: benchmark-inputs
+      - run: python3 dev/benchmark_ci.py pool --artifacts benchmark-inputs --output benchmark-complete
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-complete
+          path: benchmark-complete
+          if-no-files-found: error
+  Publish:
+    name: Publish documentation and benchmark histories
+    needs: [Documentation, Pool]
+    if: always()
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: rodin-gh-pages-publication
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - name: Require complete documentation and benchmark results
+        env:
+          DOCUMENTATION: ${{ needs.Documentation.result }}
+          POOL: ${{ needs.Pool.result }}
+        run: test "$DOCUMENTATION" = success && test "$POOL" = success
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: documentation-site
+      - uses: actions/download-artifact@v4
+        with:
+          name: benchmark-complete
+          path: benchmark-complete
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: .ci-pages
+          lfs: false
+      - name: Update complete histories and integrate documentation
+        env:
+          REF: ${{ github.ref }}
+          RUN: ${{ github.run_id }}.${{ github.run_attempt }}
+        run: python3 dev/benchmark_publish.py --results benchmark-complete --site documentation-site --pages .ci-pages --ref "$REF" --run "$RUN"
+      - name: Publish one atomic Pages update
+        working-directory: .ci-pages
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish documentation and complete benchmark campaign $SHA"
+            git push origin HEAD:gh-pages
+          fi

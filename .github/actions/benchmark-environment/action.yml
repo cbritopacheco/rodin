@@ -1,0 +1,29 @@
+name: Compatible benchmark environment
+description: Install identical compiler and runtime dependencies for shared benchmark producers and consumers.
+inputs:
+  configuration:
+    description: local or distributed benchmark configuration.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: aminya/setup-cpp@v1
+      with:
+        compiler: gcc-14
+        cmake: true
+    - name: Select benchmark dependencies
+      id: packages
+      shell: bash
+      env:
+        CONFIGURATION: ${{ inputs.configuration }}
+      run: |
+        packages='gcc-14 g++-14 libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev'
+        case "$CONFIGURATION" in
+          local) ;;
+          distributed) packages="$packages petsc-dev mpi-default-bin mpi-default-dev" ;;
+          *) exit 1 ;;
+        esac
+        echo "packages=$packages" >> "$GITHUB_OUTPUT"
+    - uses: ./.github/actions/apt-dependencies
+      with:
+        packages: ${{ steps.packages.outputs.packages }}

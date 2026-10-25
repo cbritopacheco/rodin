@@ -10,14 +10,28 @@ add_executable(RodinProblemLifecycleBenchmarks EXCLUDE_FROM_ALL ProblemLifecycle
 target_link_libraries(RodinProblemLifecycleBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
-add_executable(RodinVariationalBenchmarks EXCLUDE_FROM_ALL
-  GridFunction.cpp
-  NamedForms.cpp
-  RankOneJacobian.cpp
-  Integrators.cpp
-  CoefficientEvaluation.cpp
-  P1/P1.cpp)
-target_link_libraries(RodinVariationalBenchmarks PRIVATE
+add_executable(RodinVariationalGridFunctionBenchmarks EXCLUDE_FROM_ALL GridFunction.cpp)
+target_link_libraries(RodinVariationalGridFunctionBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+add_executable(RodinVariationalNamedFormsBenchmarks EXCLUDE_FROM_ALL NamedForms.cpp)
+target_link_libraries(RodinVariationalNamedFormsBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+add_executable(RodinVariationalRankOneJacobianBenchmarks EXCLUDE_FROM_ALL RankOneJacobian.cpp)
+target_link_libraries(RodinVariationalRankOneJacobianBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+add_executable(RodinVariationalIntegratorsBenchmarks EXCLUDE_FROM_ALL Integrators.cpp)
+target_link_libraries(RodinVariationalIntegratorsBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+add_executable(RodinVariationalCoefficientEvaluationBenchmarks EXCLUDE_FROM_ALL CoefficientEvaluation.cpp)
+target_link_libraries(RodinVariationalCoefficientEvaluationBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+add_executable(RodinVariationalP1Benchmarks EXCLUDE_FROM_ALL P1/P1.cpp)
+target_link_libraries(RodinVariationalP1Benchmarks PRIVATE
   Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
 
 add_executable(RodinGridFunctionBenchmarks EXCLUDE_FROM_ALL
@@ -65,3 +79,5 @@ target_link_libraries(RodinBasisScalingBenchmarks PRIVATE
 
 add_subdirectory(H1)
 add_subdirectory(P1)
+
+include(registrations.benchmarks.cmake)
