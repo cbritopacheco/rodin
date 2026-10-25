@@ -329,8 +329,32 @@ img.m-image.rodin-logo-dark
 
 #navigation #m-navbar-brand
 {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
   width: auto;
   flex: 0 0 auto;
+}
+
+.rodin-home-icon
+{
+  width: 1cap;
+  height: 1cap;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rodin-github-icon
+{
+  width: 1em;
+  height: 1em;
+  margin-right: .4em;
+  fill: currentColor;
+  vertical-align: -.125em;
 }
 
 #navigation #m-navbar-collapse

@@ -1,0 +1,7 @@
+<p>Complete constrained Helmholtz assembly, separately from solving.</p>
+<h2>Measured operation</h2>
+<p>Measures repeated full assembly of the shared Helmholtz formulations.</p>
+<p>The physical forms, exact coefficients, quadrature and grid sizes match HelmholtzWorkload. Setup, interpolation, the original-kernel reference and numerical checks precede timing. Public <code>Problem::assemble</code> includes volume kernels, matrix/load insertion and Dirichlet processing; no solve is performed. Repeated calls measure the warmed fixed-layout operation, not process-first allocation or changing coefficients.</p>
+<p>The manufactured equation \(Ax_\star=b\) and the full matrix/load comparison are checked before and after timing. A wrong coefficient vector must fail the equation; the complex-shifted case must retain a positive imaginary diagonal sum. These are untimed correctness guards, not CTest registrations or performance gates.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

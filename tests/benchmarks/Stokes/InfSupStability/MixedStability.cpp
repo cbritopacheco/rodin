@@ -6,7 +6,7 @@
  */
 /**
  * @file
- * @brief Local profiling of the certified finite-mesh pressure-spectrum oracle.
+ * @brief Local profiling of the finite-mesh mixed-stability calculation.
  */
 #include <benchmark/benchmark.h>
 #include <array>
@@ -22,10 +22,10 @@ namespace Rodin::Tests::Benchmarks
   using namespace Variational;
   using namespace Convergence;
 
-  bool pressureOracleFailed = false;
+  bool mixedStabilityFailed = false;
 
   /**
-   * @brief Measures the complete oracle on fixed Taylor--Hood operators.
+   * @brief Measures mixed stability on fixed Taylor--Hood operators.
    *
    * The velocity energy, divergence and pressure mass matrices define the
    * zero-mean generalized Schur spectrum. Both the Schur eigensolver and the
@@ -38,17 +38,17 @@ namespace Rodin::Tests::Benchmarks
    * a fresh result and includes reduction, factorization, blocked solves, QR,
    * spectra and residual diagnostics. Untimed warmup/repeat checks guard the
    * measurement; they do not count as additional convergence certification.
-   * The global oracle is rank-local once supplied with complete matrices.
+   * The calculation is rank-local once supplied with complete matrices.
    * This benchmark introduces no MPI operations and measures no sharding.
    *
    * @tparam K Velocity degree; pressure degree is one less.
    */
   template <size_t K>
-  class PressureOracle
+  class MixedStabilityBenchmark
   {
     public:
       /**
-       * @brief Assembles fixed inputs and profiles repeated oracle evaluation.
+       * @brief Assembles fixed inputs and profiles repeated mixed-stability evaluation.
        * @param state Grid points, quadrature order and benchmark iterations.
        * @param geometry Reference-cell family.
        * @param curved Whether to install the exact quadratic map.
@@ -95,8 +95,8 @@ namespace Rodin::Tests::Benchmarks
           MixedStability::expectConsistent(baseline);
         if (::testing::Test::HasFailure())
         {
-          pressureOracleFailed = true;
-          state.SkipWithError("Pressure-oracle warmup failed");
+          mixedStabilityFailed = true;
+          state.SkipWithError("Mixed-stability warmup failed");
           return;
         }
         for (auto _ : state)
@@ -108,8 +108,8 @@ namespace Rodin::Tests::Benchmarks
           benchmark::ClobberMemory();
           if (::testing::Test::HasFailure())
           {
-            pressureOracleFailed = true;
-            state.SkipWithError("Timed pressure oracle failed");
+            mixedStabilityFailed = true;
+            state.SkipWithError("Timed mixed-stability calculation failed");
             break;
           }
         }
@@ -122,8 +122,9 @@ namespace Rodin::Tests::Benchmarks
           final.eigenvalues.size() != baseline.eigenvalues.size() ||
           !(final.eigenvalues.array() == baseline.eigenvalues.array()).all())
         {
-          pressureOracleFailed = true;
-          state.SkipWithError("Repeated pressure oracle changed its spectrum");
+          mixedStabilityFailed = true;
+          state.SkipWithError(
+            "Repeated mixed-stability calculation changed its spectrum");
         }
         state.counters["dimension"] = mesh.getDimension();
         state.counters["cells"] = mesh.getPolytopeCount(mesh.getDimension());
@@ -152,7 +153,7 @@ namespace Rodin::Tests::Benchmarks
         {
           for (const bool curved : {false, true})
           {
-            const std::string name = std::string("Stokes/PressureOracle/") +
+            const std::string name = std::string("Stokes/MixedStability/") +
               (curved ? "CurvedQ2/" : "Affine/") + "P" + std::to_string(K) + "P" +
               std::to_string(K - 1) + "/" +
               std::string(UniformGrid::getGeometryName(geometry));
@@ -178,15 +179,15 @@ int main(int argc, char** argv)
 {
   using namespace Rodin::Tests::Benchmarks;
   ::testing::InitGoogleTest(&argc, argv);
-  PressureOracle<2>::registerCases();
-  PressureOracle<3>::registerCases();
-  PressureOracle<4>::registerCases();
+  MixedStabilityBenchmark<2>::registerCases();
+  MixedStabilityBenchmark<3>::registerCases();
+  MixedStabilityBenchmark<4>::registerCases();
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
-  benchmark::AddCustomContext("scope", "Pressure-spectrum oracle; FE assembly excluded");
+  benchmark::AddCustomContext("scope", "Mixed-stability spectrum; FE assembly excluded");
   benchmark::AddCustomContext("compiler", __VERSION__);
   const auto count = benchmark::RunSpecifiedBenchmarks();
   benchmark::Shutdown();
-  return !count || pressureOracleFailed || ::testing::Test::HasFailure() ? 1 : 0;
+  return !count || mixedStabilityFailed || ::testing::Test::HasFailure() ? 1 : 0;
 }

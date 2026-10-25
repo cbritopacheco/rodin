@@ -11,7 +11,7 @@ src/Rodin/          The library
 tests/unit/         GoogleTest, mirrors src/Rodin module tree
 tests/manufactured/ Manufactured solutions + targeted fixed-mesh regressions
 tests/convergence/  Multi-resolution h, p, hp, and isoparametric rate validation
-tests/benchmarks/   Source-module benchmark tree; RodinBenchmarks compatibility target
+tests/benchmarks/   Registered module/component benchmarks and physical contexts
 examples/           One directory per theme; each example is a CLI executable
 third-party/        Git submodules (eigen, googletest, ...)
 py/                 pybind11 Python bindings (scikit-build / pyproject.toml)

@@ -1,0 +1,5 @@
+<p>Specialized rank-one Jacobian assembly compared with generic dispatch.</p>
+<h2>Measured operation</h2>
+<p>The form contracts coefficient-weighted trial and test Jacobians. Identity coefficients with identical types select the specialized quadrature rule; a numerically identical coefficient with a distinct type selects the generic rule. Both routes assemble the same operator, separating dispatch and contraction costs from the mathematical problem. Mesh, space and form construction precede timing; repeated assembly is included.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

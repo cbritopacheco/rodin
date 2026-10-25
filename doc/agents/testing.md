@@ -35,8 +35,11 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   assert every observed rate.
 - Library benchmarks mirror source modules, including MPI/PETSc mirrors.
   Module and component executables are opt-in and are not CTest timing gates.
-  `RodinBenchmarks` retains the historical publication registration set;
-  verification-support profiling lives separately in `benchmarks/convergence`.
+  Every executable has an explicit component registration and authored description.
+  Shared builds feed independent Regular/Slow execution lanes; complete results
+  publish in the m.css documentation. Physical contexts include
+  `benchmarks/Stokes/InfSupStability`; there is no convergence-benchmark category.
+  See `tests/benchmarks/README.md` for registration and publication procedures.
 
 A change is complete after the affected unit test executable passes. Assembly
 and solver changes also require the relevant manufactured tests to pass.
@@ -110,7 +113,7 @@ Two rules that make the difference between coverage and theatre:
 - **Randomized inputs** via `Rodin::Test::Random` where a property should
   hold for arbitrary data.
 - **Benchmarks as oracles**: performance claims cite
-  `RodinBenchmarks --benchmark_filter=...` numbers plus identical-numerics
+  the owning component executable’s `--benchmark_filter=...` measurements plus identical-numerics
   evidence (iteration counts, final energies) — never "it feels faster".
 - New capability defaults off; its tests prove both the feature and the
   default-off no-regression.

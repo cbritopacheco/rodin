@@ -27,3 +27,5 @@ target_link_libraries(RodinH1PyramidBenchmarks PRIVATE
 add_executable(RodinH1PyramidNodalBenchmarks EXCLUDE_FROM_ALL PyramidNodal.cpp)
 target_link_libraries(RodinH1PyramidNodalBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
+
+include(registrations.benchmarks.cmake)

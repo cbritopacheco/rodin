@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Share compiled test families between independent execution partitions.
+"""Share compiled test and benchmark families between execution partitions.
 
 A build is identified by its complete CMake configuration and target set. Rank,
 geometry and case selectors belong to execution lanes, not to the build key.
@@ -129,6 +129,14 @@ def plan(workflow):
     return {family: list(rows.values()) for family, rows in families.items()}
 
 
+def configured_targets(spec, build_dir):
+    if spec.get('kind') == 'benchmark':
+        from benchmark_site import inventory
+        return inventory(build_dir / ('RodinBenchmarkTargets-' + spec['cmake']['CMAKE_BUILD_TYPE'] + '.tsv'))
+    from ci_tests import targets
+    return targets(build_dir)
+
+
 def build(spec, build_dir):
     flags = dict(spec['cmake'])
     if spec['mode'] == 'complex':
@@ -137,8 +145,7 @@ def build(spec, build_dir):
     subprocess.run(['cmake', '-S', str(ROOT), '-B', str(build_dir)] +
                    ['-D' + key + '=' + value for key, value in flags.items()], check=True)
     # The configured manifest remains authoritative for enabled target names.
-    from ci_tests import targets
-    enabled = {row['target'] for row in targets(build_dir)}
+    enabled = {row['target'] for row in configured_targets(spec, build_dir)}
     missing = set(spec['targets']) - enabled
     if missing:
         raise ValueError('Unregistered build targets: ' + ', '.join(sorted(missing)))
@@ -164,10 +171,9 @@ def digest(path):
 
 
 def runtime_libraries(spec, build_dir):
-    from ci_tests import targets
     paths = set()
-    for target in targets(build_dir):
-        if target['target'] not in spec['targets']:
+    for target in configured_targets(spec, build_dir):
+        if target['target'] not in spec['targets'] or not target.get('executable'):
             continue
         output = subprocess.check_output(['ldd', target['executable']], text=True)
         if 'not found' in output:

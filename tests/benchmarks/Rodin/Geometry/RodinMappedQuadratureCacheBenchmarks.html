@@ -1,0 +1,7 @@
+<p>Mesh-owned mapped-quadrature lookup along the assembly call tree.</p>
+<h2>Measured operation</h2>
+<p>Measures cold index storage separately from owned mapped quadratures.</p>
+<p>FirstCell constructs one mapped quadrature per live formula; CellSweep constructs one per cell. Cache scopes include index initialization, dense empty-slot allocation, publication and destruction. Owned scopes construct and destroy quadratures directly, without retaining cell-wide storage. These are complete lifecycles, not isolated allocation latencies. All transformations are warmed outside timing, with fixed live formulas. One-formula scopes retain warm reference tables. Twenty-formula scopes exceed the eight-entry reference store and include its retabulation policy; they must not be interpreted as pure mapped-index allocation measurements.</p>
+<p>Comparing FirstCell across mesh sizes exposes the cost of empty slots at fixed mapped-point count. Comparing full sweeps instead includes retention versus immediate destruction, and must not be interpreted as the same memory-lifetime contract. Slot counts describe the source representation, not measured resident bytes. No collective or field solve is performed.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

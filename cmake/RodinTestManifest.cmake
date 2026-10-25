@@ -6,7 +6,8 @@ function(rodin_collect_test_targets directory)
     get_target_property(_type "${_target}" TYPE)
     get_target_property(_source "${_target}" SOURCE_DIR)
     file(RELATIVE_PATH _owner "${PROJECT_SOURCE_DIR}" "${_source}")
-    if(_owner MATCHES "^tests/" AND _type STREQUAL "EXECUTABLE")
+    if(_owner MATCHES "^tests/" AND NOT _owner MATCHES "^tests/benchmarks(/|$)"
+        AND _type STREQUAL "EXECUTABLE")
       get_property(_profiles TARGET "${_target}" PROPERTY RODIN_TEST_PROFILES)
       set_property(GLOBAL APPEND_STRING PROPERTY RODIN_TEST_MANIFEST
         "${_target}\t${_owner}\t$<TARGET_FILE:${_target}>\ttest\t${_profiles}\n")

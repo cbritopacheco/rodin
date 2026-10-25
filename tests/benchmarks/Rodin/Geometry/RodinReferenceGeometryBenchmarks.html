@@ -1,0 +1,6 @@
+<p>Paired reference-table and pointwise geometry Jacobian measurements.</p>
+<h2>Measured operation</h2>
+<p>Measures bulk Jacobians against the original pointwise fallback.</p>
+<p>Both paths evaluate \(J_{ji}(\widehat x_q)= \sum_a X_{ja}\partial_i\phi_a(\widehat x_q)\) with the same vertex basis and accumulation order. The pointwise measurement explicitly calls the base transformation&#x27;s bulk fallback; no second production path is added. Setup, warmup and exact entry comparisons are outside timing. Repeated calls retain output-vector capacity. Physical Jacobians are timed, but no physical-coordinate evaluation, FE assembly or solve is timed. Results are local diagnostics, not CTest or CI gates.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

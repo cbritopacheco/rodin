@@ -1,0 +1,307 @@
+.rodin-benchmarks .rodin-benchmark-layout
+{
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  grid-template-areas: "contents main";
+  gap: 2rem;
+  max-width: 90rem;
+  margin: auto;
+  padding: 2rem;
+}
+
+.rodin-benchmarks main
+{
+  grid-area: main;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.rodin-benchmarks[data-contents-side="right"] .rodin-benchmark-layout
+{
+  grid-template-columns: minmax(0, 1fr) 12rem;
+  grid-template-areas: "main contents";
+}
+
+.rodin-benchmarks .rodin-page-nav
+{
+  grid-area: contents;
+  display: block;
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.rodin-benchmarks .rodin-page-nav > ol
+{
+  max-height: calc(100vh - 9rem);
+  overflow-y: auto;
+}
+
+.rodin-benchmarks .rodin-page-nav a
+{
+  display: block;
+  padding: 0.3rem 0.5rem;
+  border-left: 2px solid transparent;
+  color: var(--dim-color);
+  text-decoration: none;
+}
+
+.rodin-benchmarks .rodin-page-nav a:hover,
+.rodin-benchmarks .rodin-page-nav a[aria-current="location"]
+{
+  color: var(--link-color);
+  border-color: var(--link-color);
+}
+
+.rodin-benchmarks .rodin-page-nav ol
+{
+  list-style: none;
+  padding: 0;
+}
+
+.rodin-benchmarks .rodin-page-nav ol ol
+{
+  padding-left: 0.75rem;
+}
+
+.rodin-benchmarks h2[id],
+.rodin-benchmarks h3[id]
+{
+  scroll-margin-top: 1rem;
+}
+
+.rodin-benchmarks main > h2,
+.rodin-benchmarks main > section[data-category] > h2
+{
+  margin-top: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.rodin-benchmarks main > .m-frame,
+.rodin-benchmarks main > section[data-category] > .m-frame
+{
+  margin-top: 1.5rem;
+}
+
+.benchmark-children
+{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.benchmark-children > .m-frame
+{
+  min-width: 0;
+  margin: 0;
+}
+
+.benchmark-children h3 a
+{
+  overflow-wrap: anywhere;
+}
+
+@container (min-width: 48rem)
+{
+  .benchmark-children
+  {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.benchmark-configuration,
+.benchmark-contract
+{
+  color: var(--dim-color);
+}
+
+.benchmark-breadcrumb
+{
+  margin-bottom: 1.5rem;
+}
+
+.rodin-benchmarks pre.m-code
+{
+  white-space: pre-wrap;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+.rodin-benchmarks .m-math,
+.rodin-benchmarks mjx-container
+{
+  max-width: 100%;
+  overflow: visible;
+}
+
+@media(max-width: 767px)
+{
+  .rodin-benchmarks .rodin-benchmark-layout,
+  .rodin-benchmarks[data-contents-side="right"] .rodin-benchmark-layout
+  {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "contents" "main";
+    padding: 1rem;
+  }
+
+  .rodin-benchmarks .rodin-page-nav
+  {
+    position: static;
+  }
+
+  .rodin-benchmarks .rodin-page-nav > ol
+  {
+    max-height: none;
+  }
+}
+
+/* Keep MathJax's accessible duplicate inside a one-pixel box at line ends. */
+.rodin-benchmarks mjx-assistive-mml
+{
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.benchmark-chart-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+.benchmark-chart-controls label { display: flex; flex-direction: column; gap: .4rem; min-width: 0; max-width: 100%; }
+.benchmark-chart-controls select, .benchmark-chart-controls input { max-width: 100%; font: inherit; color: var(--color); background: var(--background-color); border: 1px solid var(--line-color); padding: .4rem; }
+.benchmark-chart { position: relative; height: 22rem; }
+.benchmark-chart-status { color: var(--dim-color); }
+
+#navigation .benchmark-docs-link
+{
+  position: absolute;
+  left: .75rem;
+  top: 0;
+  height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--header-link-color);
+  font-size: .85rem;
+  max-width: calc((100vw - 60rem) / 2 - 1rem);
+}
+
+.rodin-benchmarks #navigation #m-navbar-brand
+{
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 3rem;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+@media screen and (max-width: 74rem)
+{
+  .rodin-benchmarks #navigation > .m-container { padding-top: 3rem; }
+  #navigation .benchmark-docs-link { max-width: none; }
+  .rodin-benchmarks #navigation .benchmark-search-trigger { top: 3rem; }
+  .rodin-benchmarks #navigation .rodin-theme-control { top: 3.125rem; }
+}
+
+.benchmark-docs-link svg
+{
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#navigation .benchmark-search-trigger
+{
+  position: absolute;
+  right: 3.75rem;
+  top: 0;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--header-link-color);
+}
+
+.benchmark-search-trigger svg
+{
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.benchmark-search-trigger:focus-visible
+{
+  outline: 2px solid var(--link-color);
+}
+
+.rodin-benchmarks .m-doc-search #search-results .benchmark-search-path
+{
+  direction: ltr;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.rodin-benchmarks .m-doc-search #search-results .benchmark-search-brief
+{
+  margin: .4rem 0 0;
+  text-indent: 0;
+  white-space: normal;
+  font-size: .9rem;
+  color: var(--dim-color);
+}
+
+.benchmark-search-close
+{
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--color);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.benchmark-search-close svg
+{
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+@media (max-width: 767px)
+{
+  .benchmark-search-shortcuts { display: none; }
+}
+
+.rodin-benchmarks .m-doc-search-header
+{
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  height: 2.5rem;
+  background: var(--search-background-color);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.rodin-benchmarks .m-doc-search-header > .benchmark-search-shortcuts
+{
+  float: none;
+  order: 1;
+}
+
+.rodin-benchmarks #search-symbolcount { flex: 1; }
+.rodin-benchmarks .benchmark-search-close { order: 2; }
+.rodin-benchmarks .m-doc-search-content { border-top-left-radius: 0; border-top-right-radius: 0; }

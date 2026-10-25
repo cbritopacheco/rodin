@@ -1,0 +1,8 @@
+<p>Prescribed-state semilinear residual and tangent assembly.</p>
+<h2>Measured operation</h2>
+<p>Measures the volume assembly used by semilinear Poisson Newton steps.</p>
+<p>The benchmark separates residual and tangent costs at a fixed discrete state.</p>
+<h3>Architecture</h3>
+<p>On the unit box, a public DOF interpolation prescribes \(q=s(1+x_0)\). Separate public forms assemble \(R(q;v)=\int\nabla q\cdot\nabla v+(q+q^3)v\) and \(J(q;w,v)=\int\nabla w\cdot\nabla v+(1+3q^2)wv\). Untimed gates compare the tangent with the original quadrature loop, check analytic actions, and differentiate the assembled residual. Warm replacement assembly is timed; a post-timing state change checks cache invalidation. There are no constraints, boundary integrals, source terms, nonlinear iterations, or linear solves in this scope. Curved Q2 cases use the existing volume-preserving quadratic shear in dimensions two and three. Its first coordinate is unchanged, so the same affine state and analytic actions apply without a geometry-dependent reference solve.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

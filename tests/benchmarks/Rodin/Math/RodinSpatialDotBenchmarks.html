@@ -1,0 +1,8 @@
+<p>Paired public spatial-dot and original dynamic-reduction measurements.</p>
+<h2>Measured operation</h2>
+<p>Measures public spatial contractions over a retained pair batch.</p>
+<h3>Architecture</h3>
+<p>For \(N\) left and right vectors of logical dimension \(d\), stores \(D_{ba}=\sum_{j=0}^{d-1}u_{bj}\overline{v_{aj}}\). Full batches evaluate all \(N^2\) pairs; lower batches evaluate \(N(N+1)/2\) pairs without assuming that the arbitrary input vectors define a symmetric operator. Barriers surround a complete batch, not each scalar contraction. Construction and exact entry qualification remain outside timing.</p>
+<p>The original dynamic Eigen reduction through const views supplies every reference entry. Compile-time guards reject mutable comparator views. Inactive vector storage is poisoned, including all storage at dimension zero. A changed output must fail qualification. This measures Math::dot with pair-loop and output-store overhead, not physical gradient mapping, weighted local-matrix accumulation or complete assembly. RowSnapshot scopes copy the current left vector into a local value before traversing its right-hand pairs. Ordinary Public and Original scopes keep a borrowed row. This isolates value-ownership effects without changing the reduction expression or adding a retained cache. The strategy is not an assembly timing decomposition.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

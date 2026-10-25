@@ -1,0 +1,5 @@
+<p>Distributed finite-element-space construction benchmarks.</p>
+<h2>Measured operation</h2>
+<p>Mesh creation is excluded from the timed region. Each iteration times the slowest rank&#x27;s P0 or vector P1 construction, including the ghost-DOF exchange and reverse-index construction. Fixed iteration counts keep MPI collectives aligned across ranks. Run with two or more MPI ranks.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

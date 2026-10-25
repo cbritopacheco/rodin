@@ -1,0 +1,11 @@
+<p>Controlled nodal derivative contractions with and without modal reuse.</p>
+<h2>Measured operation</h2>
+<p>Measures a caller-side reuse experiment without changing the library.</p>
+<h3>Operation</h3>
+<p>Nodal derivatives are \(\partial_i\phi_a(\widehat x_q)= \sum_b(V^{-1})_{ba}\partial_i\psi_b(\widehat x_q)\). Public calls the existing element derivative. RepeatedModes spells the same contraction with production modal derivatives. SharedModes computes each modal derivative once per point and reuses it across nodal functions. Every nodal sum retains ascending mode order; no Eigen reduction or reassociation is substituted. Nodal sums use real arithmetic before promotion to real or complex storage, matching the public element&#x27;s real-valued reference basis contract.</p>
+<h3>Measurement boundary</h3>
+<p>Vandermonde initialization, quadrature lookup, output allocation and scratch allocation are untimed. Modal evaluation and nodal contractions are timed, including scratch writes for SharedModes. The scratch holds only one point&#x27;s modal derivatives and is not a new production cache. Reference-table lookup, physical mapping, assembly and solving are absent. Public and RepeatedModes are separate compiler/calling-protocol controls; a gain in this experiment is not yet a library or assembly speedup.</p>
+<h3>Numerical guards</h3>
+<p>Every quadrature output must exactly match the public derivative before and after timing. Independent DOF-functional reconstruction recovers the gradient of \(\eta(1+x+2y+3z)\), with \(\eta=1\) for real fields and \(\eta=1+i/2\) for complex fields, to an absolute dimensionless roundoff budget of \(10^{-8}\) at interior samples. Perturbation must be rejected.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>
