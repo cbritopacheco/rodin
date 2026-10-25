@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+from urllib.parse import urlsplit
 
 
 GIB = 1024 ** 3
@@ -61,6 +62,57 @@ def packages(value):
     if not result or any(not re.fullmatch(r'[a-z0-9][a-z0-9+.:\-]*(?:=[A-Za-z0-9.+:~\-]+)?', p) for p in result):
         raise ValueError('Expected a nonempty list of Debian package names or exact versions')
     return result
+
+
+def without_microsoft_ubuntu(text, deb822=False):
+    """Exclude only Microsoft's unused Ubuntu feeds, preserving other trust rules."""
+    def unrelated(uri):
+        parsed = urlsplit(uri)
+        return parsed.hostname == 'packages.microsoft.com' and parsed.path.startswith('/ubuntu/')
+    if not deb822:
+        return ''.join(line for line in text.splitlines(keepends=True)
+                       if not (re.match(r'^\s*deb(?:-src)?\s', line) and
+                               any(unrelated(uri) for uri in re.findall(r'https?://[^\s]+', line))))
+    result = []
+    changed = False
+    for paragraph in re.split(r'\n[ \t]*\n', text):
+        field = re.search(r'^URIs:[ \t]*([^\n]*(?:\n[ \t]+[^\n]*)*)', paragraph, re.M)
+        if field:
+            uris = field[1].split()
+            retained = [uri for uri in uris if not unrelated(uri)]
+            if len(retained) != len(uris):
+                changed = True
+                if not retained:
+                    continue
+                paragraph = paragraph[:field.start()] + 'URIs: ' + ' '.join(retained) + paragraph[field.end():]
+        result.append(paragraph)
+    return '\n\n'.join(result) if changed else text
+
+
+def setup_sources(system=Path('/etc/apt')):
+    """Prepare disposable hosted-runner feeds before setup-cpp runs apt-get."""
+    if (os.environ.get('GITHUB_ACTIONS') != 'true' or
+            os.environ.get('RUNNER_ENVIRONMENT') != 'github-hosted'):
+        print('APT source preparation is restricted to GitHub-hosted runners', flush=True)
+        return
+    entries = [system / 'sources.list']
+    entries += sorted((system / 'sources.list.d').glob('*.list'))
+    entries += sorted((system / 'sources.list.d').glob('*.sources'))
+    for source in entries:
+        if not source.is_file():
+            continue
+        original = source.read_text()
+        prepared = without_microsoft_ubuntu(original, source.suffix == '.sources')
+        if prepared == original:
+            continue
+        backup = source.with_name(source.name + '.rodin-backup')
+        if not backup.exists():
+            subprocess.run(['sudo', 'cp', '--', str(source), str(backup)], check=True)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.apt') as temporary:
+            temporary.write(prepared)
+            temporary.flush()
+            subprocess.run(['sudo', 'install', '-m', '644', temporary.name, str(source)], check=True)
+        print('Excluded unused Microsoft Ubuntu feed from ' + str(source), flush=True)
 
 
 def sources(directory, mirror, system=Path('/etc/apt')):
@@ -194,14 +246,16 @@ def install(archives, state):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=['disk', 'prepare', 'install'])
+    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install'])
     parser.add_argument('--packages', default='')
     parser.add_argument('--minimum-gib', type=float, default=MIN_FREE_GIB)
     args = parser.parse_args()
     if args.minimum_gib <= 0:
         parser.error('Disk headroom must be positive')
     root = Path(os.environ.get('RUNNER_TEMP', tempfile.gettempdir()))
-    if args.operation == 'disk':
+    if args.operation == 'setup':
+        setup_sources()
+    elif args.operation == 'disk':
         disk_space(Path.cwd(), args.minimum_gib)
     elif args.operation == 'prepare':
         prepare(packages(args.packages), root / 'rodin-apt-archives', root / 'rodin-apt-state')

@@ -56,13 +56,19 @@ jobs:
           LOCAL: ${{ needs.Local.result }}
           DISTRIBUTED: ${{ needs.Distributed.result }}
         run: test "$LOCAL" = success && test "$DISTRIBUTED" = success
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         with:
-          pattern: benchmark-plan-*
+          names: '["benchmark-plan-common-local", "benchmark-plan-common-distributed"]'
           path: benchmark-inputs
-      - uses: actions/download-artifact@v4
+      - run: python3 dev/benchmark_ci.py artifact-groups --artifacts benchmark-inputs --output benchmark-group-names.json
+      - uses: ./.github/actions/download-artifacts
         with:
-          pattern: benchmark-result-*
+          names-file: benchmark-group-names.json
+          path: benchmark-inputs
+      - run: python3 dev/benchmark_ci.py artifact-results --artifacts benchmark-inputs --output benchmark-result-names.json
+      - uses: ./.github/actions/download-artifacts
+        with:
+          names-file: benchmark-result-names.json
           path: benchmark-inputs
       - run: python3 dev/benchmark_ci.py pool --artifacts benchmark-inputs --output benchmark-complete
       - uses: actions/upload-artifact@v4

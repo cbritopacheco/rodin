@@ -38,6 +38,12 @@ dedicated execution lanes, installation, Build, Documentation and Linux style
 dependency steps use this installer. Test commands, configurations, MPI ranks
 and coverage producers are independent of the cache.
 
+Before compiler installation, [`prepare-apt`](../actions/prepare-apt/action.yml)
+excludes the unused Microsoft Ubuntu feeds on GitHub-hosted Linux runners.
+An unavailable feed must not prevent installation of Rodin's Ubuntu packages.
+The original definitions are backed up; other sources and signing rules remain
+intact. Local machines and self-hosted runners are not changed.
+
 The installer refreshes signed APT indexes, resolves and pins requested packages
 and their installation dependencies, then restores `.deb` downloads. Keys include
 Ubuntu release, architecture, runner image, requested package set and resolved
@@ -57,8 +63,8 @@ signing keys and exact resolved versions. Ubuntu `mirror+file:` source indirecti
 is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
-Third-party source definitions remain
-unchanged. Final installation is offline, allows no package removals and has a
+Mirror fallback leaves the remaining third-party source definitions unchanged.
+Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
 
@@ -244,7 +250,7 @@ The downloader's official client dependency is pinned in a lockfile and installe
 once per runner in `RUNNER_TEMP`; its JavaScript action uses Node 24.
 
 Regular and Slow variants share executables. MPI ranks, geometries and study
-partitions remain execution coordinates with their original timeouts and
+partitions remain execution coordinates with their CMake-defined timeouts and
 numerical criteria. A failed producer blocks dependent execution rather than
 masquerading as a numerical failure. Artifacts expire after seven days.
 
@@ -254,6 +260,12 @@ Coverage is the union of production-source lines hit by the eligible execution
 lanes, not an average of their percentages. Tests and benchmarks may exercise
 production code but their own source lines are excluded from the denominator.
 Coverage describes compiled code and its instantiated templates.
+
+Coverage counters retain atomic updates for threaded execution. Instrumented
+processes can require a different watchdog from ordinary builds: the local
+curved cubic-pyramid Stokes rate test uses the existing one-hour high-order
+pyramid budget when coverage is enabled. Its refinement hierarchy, numerical
+criteria and distributed counterparts are unchanged.
 
 `dev/ci_artifacts.py` derives exact producer artifact names from the same plans
 used to schedule execution. A publisher downloads every required contribution

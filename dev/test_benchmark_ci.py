@@ -52,6 +52,27 @@ class BenchmarkCampaignTest(unittest.TestCase):
             groups.append(built)
         return commons, groups, contributions
 
+    def test_exact_download_names_include_every_group_and_execution_lane(self):
+        with patch.object(ci.archive, 'commit', return_value=COMMIT), tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            commons, groups, _ = self.fixture(root)
+            for common in commons:
+                plan = json.loads((common / 'plan.json').read_text())
+                common.rename(root / ('benchmark-plan-common-' + plan['configuration']))
+            expected_groups = []
+            expected_results = []
+            for group in groups:
+                execution = json.loads((group / 'execution.json').read_text())
+                name = 'benchmark-plan-group-' + execution['group']['id']
+                expected_groups.append(name)
+                expected_results += ['benchmark-result-' + lane['id'] for lane in execution['lanes']]
+                group.rename(root / name)
+            self.assertEqual(ci.artifact_names(root, 'groups'), sorted(expected_groups))
+            self.assertEqual(ci.artifact_names(root, 'results'), sorted(expected_results))
+            (root / expected_groups[0] / 'execution.json').unlink()
+            with self.assertRaises(FileNotFoundError):
+                ci.artifact_names(root, 'results')
+
     def test_complete_campaign_pools_without_mixing_ranks(self):
         with patch.object(ci.archive, 'commit', return_value=COMMIT), tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

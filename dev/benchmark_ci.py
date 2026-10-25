@@ -393,9 +393,34 @@ def pool(common_sources, group_sources, result_sources, output):
                                     'components': {str(path.relative_to(output)): archive.digest(path) for path in sorted(output.glob('**/results.json'))}})
 
 
+def artifact_names(source, stage):
+    """Derive mandatory exact downloads from the preceding campaign manifests."""
+    plans = [json.loads((path / 'plan.json').read_text())
+             for path in sorted(source.glob('benchmark-plan-common-*'))]
+    if len(plans) != 2 or {p['configuration'] for p in plans} != {'local', 'distributed'}:
+        raise ValueError('Both benchmark configuration plans are required')
+    if any(p['commit'] != archive.commit() for p in plans):
+        raise ValueError('Stale benchmark configuration plan')
+    groups = {group['id'] for plan in plans for group in plan['groups']}
+    if len(groups) != sum(len(plan['groups']) for plan in plans):
+        raise ValueError('Duplicate benchmark build group')
+    if stage == 'groups':
+        return sorted('benchmark-plan-group-' + identity for identity in groups)
+    executions = [json.loads((path / 'execution.json').read_text())
+                  for path in sorted(source.glob('benchmark-plan-group-*'))]
+    if len(executions) != len(groups) or {e['group']['id'] for e in executions} != groups:
+        raise ValueError('Every benchmark build group is required before downloading results')
+    if any(e['commit'] != archive.commit() for e in executions):
+        raise ValueError('Stale benchmark group plan')
+    names = ['benchmark-result-' + lane['id'] for execution in executions for lane in execution['lanes']]
+    if not names or len(names) != len(set(names)):
+        raise ValueError('Empty or duplicate benchmark execution lanes')
+    return sorted(names)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=['prepare', 'build', 'run', 'pool'])
+    parser.add_argument('operation', choices=['prepare', 'build', 'run', 'pool', 'artifact-groups', 'artifact-results'])
     parser.add_argument('--configuration', choices=['local', 'distributed'])
     parser.add_argument('--source', type=Path)
     parser.add_argument('--id')
@@ -405,6 +430,8 @@ def main():
     if args.operation == 'prepare': prepare(args.configuration, args.output)
     elif args.operation == 'build': build_group(args.source, args.id, args.output)
     elif args.operation == 'run': run_lane(args.source, args.id, args.output)
+    elif args.operation.startswith('artifact-'):
+        dump(args.output, artifact_names(args.artifacts, args.operation.removeprefix('artifact-')))
     else:
         pool(sorted(args.artifacts.glob('benchmark-plan-common-*')), sorted(args.artifacts.glob('benchmark-plan-group-*')),
              sorted(args.artifacts.glob('benchmark-result-*')), args.output)

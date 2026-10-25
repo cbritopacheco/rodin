@@ -221,6 +221,63 @@ class EnvironmentTest(unittest.TestCase):
             self.assertNotIn('apt-get clean', text)
             self.assertIn('python3 dev/ci_environment.py disk', text)
 
+    def test_every_compiler_setup_is_preceded_by_the_source_guard(self):
+        count = 0
+        paths = list((ROOT / '.github/workflows').glob('*.yml'))
+        paths += list((ROOT / '.github/actions').glob('*/action.yml'))
+        for path in paths:
+            document = yaml.safe_load(path.read_text())
+            groups = [job.get('steps', []) for job in document.get('jobs', {}).values()]
+            groups.append(document.get('runs', {}).get('steps', []))
+            for steps in groups:
+                for i, step in enumerate(steps):
+                    if step.get('uses', '').startswith('aminya/setup-cpp@'):
+                        count += 1
+                        self.assertGreater(i, 0, str(path))
+                        self.assertEqual(steps[i - 1].get('uses'), './.github/actions/prepare-apt', str(path))
+        self.assertGreater(count, 0)
+
+    def test_unused_microsoft_feed_is_removed_without_changing_ubuntu_or_comments(self):
+        ubuntu = 'deb [signed-by=/keys/ubuntu.gpg] https://archive.ubuntu.com/ubuntu noble main\n'
+        microsoft = 'deb [signed-by=/keys/microsoft.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main\n'
+        comment = '# https://packages.microsoft.com/ubuntu/24.04/prod\n'
+        self.assertEqual(environment.without_microsoft_ubuntu(ubuntu + microsoft + comment), ubuntu + comment)
+        self.assertEqual(environment.without_microsoft_ubuntu(ubuntu), ubuntu)
+        self.assertEqual(environment.without_microsoft_ubuntu(comment), comment)
+
+    def test_deb822_filters_only_microsoft_uris_and_preserves_signature_fields(self):
+        vendor = 'Types: deb\nURIs: https://packages.microsoft.com/ubuntu/24.04/prod\nSuites: noble\nSigned-By: /keys/vendor.gpg\n'
+        ubuntu = 'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\nSuites: noble\nSigned-By: /keys/ubuntu.gpg\n'
+        self.assertEqual(environment.without_microsoft_ubuntu(vendor + '\n' + ubuntu, True), ubuntu)
+        mixed = ubuntu.replace('URIs: ', 'URIs: https://packages.microsoft.com/ubuntu/24.04/prod ')
+        self.assertEqual(environment.without_microsoft_ubuntu(mixed, True), ubuntu)
+        self.assertEqual(environment.without_microsoft_ubuntu(ubuntu + '\n\n', True), ubuntu + '\n\n')
+        self.assertEqual(environment.without_microsoft_ubuntu(vendor, True), '')
+
+    def test_source_setup_leaves_local_and_self_hosted_systems_untouched(self):
+        with patch.dict(os.environ, GITHUB_ACTIONS='true', RUNNER_ENVIRONMENT='self-hosted'), \
+                patch.object(environment.subprocess, 'run') as run:
+            environment.setup_sources()
+            run.assert_not_called()
+
+    def test_hosted_source_setup_backs_up_then_installs_only_filtered_definition(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'sources.list.d').mkdir()
+            source = root / 'sources.list.d/microsoft-prod.list'
+            source.write_text('deb https://packages.microsoft.com/ubuntu/24.04/prod noble main\n')
+            commands = []
+            def execute(command, **kwargs):
+                commands.append(command)
+                if command[1] == 'install':
+                    self.assertEqual(Path(command[-2]).read_text(), '')
+            with patch.dict(os.environ, GITHUB_ACTIONS='true', RUNNER_ENVIRONMENT='github-hosted'), \
+                    patch.object(environment.subprocess, 'run', side_effect=execute):
+                environment.setup_sources(root)
+            self.assertEqual(commands[0], ['sudo', 'cp', '--', str(source), str(source) + '.rodin-backup'])
+            self.assertEqual(commands[1][:4], ['sudo', 'install', '-m', '644'])
+
+
 
 if __name__ == '__main__':
     unittest.main()
