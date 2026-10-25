@@ -556,12 +556,12 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
       <br />
       Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
     </td>
-        <td align="center" width="33%">
-      <a href="">
-        <img src="" alt="Placeholder" width="100%">
+    <td align="center" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/AtriumCFD_Preview.png" alt="Blood velocity in an atrium CFD simulation" width="100%">
       </a>
       <br />
-      Placeholder
+      CFD simulation of blood flow in an atrium
     </td>
         <td align="center" width="33%">
       <a href="">
