@@ -125,7 +125,8 @@ namespace
               }
             }
             EXPECT_LT((actual - expected).norm(), 1e-11);
-            const Scalar action = testField.getData().dot(actual * trialField.getData());
+            const Scalar action =
+              Math::dot(actual * trialField.getData(), testField.getData());
             const Scalar exact = factor *
               Scalar(
                 exactMoment(trialAttribute, true) * exactMoment(testAttribute, false));

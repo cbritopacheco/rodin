@@ -365,17 +365,18 @@ namespace Rodin::Math
       template <class EigenDerived>
       SpatialVector& operator+=(const Eigen::MatrixBase<EigenDerived>& v)
       {
-        assert(static_cast<std::uint8_t>(v.size()) == m_size);
+        const SpatialVector<typename EigenDerived::Scalar> owned(v);
+        assert(owned.size() == m_size);
         switch (m_size)
         {
           case 3:
-            m_data[2] += v(static_cast<Eigen::Index>(2));
+            m_data[2] += owned[2];
             [[fallthrough]];
           case 2:
-            m_data[1] += v(static_cast<Eigen::Index>(1));
+            m_data[1] += owned[1];
             [[fallthrough]];
           case 1:
-            m_data[0] += v(static_cast<Eigen::Index>(0));
+            m_data[0] += owned[0];
             break;
           case 0:
             break;
@@ -393,17 +394,18 @@ namespace Rodin::Math
       template <class EigenDerived>
       SpatialVector& operator-=(const Eigen::MatrixBase<EigenDerived>& v)
       {
-        assert(static_cast<std::uint8_t>(v.size()) == m_size);
+        const SpatialVector<typename EigenDerived::Scalar> owned(v);
+        assert(owned.size() == m_size);
         switch (m_size)
         {
           case 3:
-            m_data[2] -= v(static_cast<Eigen::Index>(2));
+            m_data[2] -= owned[2];
             [[fallthrough]];
           case 2:
-            m_data[1] -= v(static_cast<Eigen::Index>(1));
+            m_data[1] -= owned[1];
             [[fallthrough]];
           case 1:
-            m_data[0] -= v(static_cast<Eigen::Index>(0));
+            m_data[0] -= owned[0];
             break;
           case 0:
             break;

@@ -123,3 +123,64 @@ TYPED_TEST(GridFunctionRegionInterpolation, SubMeshPointOwnership)
   check(P1<Scalar>(submesh));
   check(H1<2, Scalar>(std::integral_constant<size_t, 2>{}, submesh));
 }
+
+/// @brief Attribute and constant-entity overloads retain the selected interpolation domain.
+TEST(GridFunctionInterpolationOverloads, AttributesAndConstantEntities)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.setAttribute({1, 0}, 7);
+  mesh.setAttribute({1, 1}, 8);
+  P1<Real> space(mesh);
+  GridFunction field(space);
+  field = Real(0);
+  field.project(
+    Region::Cells, [](const Point&) { return Real(2); }, FlatSet<Attribute>{7});
+  EXPECT_EQ(field.getValue(Point(*mesh.getCell(0), Math::SpatialPoint{0.5})), Real(2));
+  field.project(std::pair<size_t, Index>{1, 1}, Real(3));
+  EXPECT_EQ(field.getValue(Point(*mesh.getCell(1), Math::SpatialPoint{0.5})), Real(3));
+}
+
+/// @brief Replacing mesh topology in place invalidates previously cached element DOFs.
+TEST(GridFunctionEvaluationCache, ReplacedMeshTopology)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1 fes(mesh);
+  GridFunction field(fes);
+  const auto function = [](const Point& p) { return p.x() + 10 * p.y(); };
+  field.project(function);
+  EXPECT_NEAR(
+    field.getValue(Point(*mesh.getCell(), Math::SpatialPoint{0.2, 0.3})), 3.2, 1e-13);
+  for (const bool sameSize : {false, true})
+  {
+    if (!sameSize)
+      mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    else
+    {
+      mesh = LocalMesh::Build()
+               .initialize(2)
+               .nodes(9)
+               .vertex({0, 0})
+               .vertex({1, 0})
+               .vertex({2, 0})
+               .vertex({0, 1})
+               .vertex({1, 1})
+               .vertex({2, 1})
+               .vertex({0, 2})
+               .vertex({1, 2})
+               .vertex({2, 2})
+               .polytope(Polytope::Type::Triangle, {8, 7, 5})
+               .polytope(Polytope::Type::Triangle, {5, 7, 4})
+               .polytope(Polytope::Type::Triangle, {7, 6, 3})
+               .polytope(Polytope::Type::Triangle, {7, 3, 4})
+               .polytope(Polytope::Type::Triangle, {5, 4, 1})
+               .polytope(Polytope::Type::Triangle, {5, 1, 2})
+               .polytope(Polytope::Type::Triangle, {4, 3, 0})
+               .polytope(Polytope::Type::Triangle, {4, 0, 1})
+               .finalize();
+    }
+    field.getData().resize(fes.getSize());
+    field.project(function);
+    const Point point(*mesh.getCell(), Math::SpatialPoint{0.2, 0.3});
+    EXPECT_NEAR(field.getValue(point), function(point), 1e-12);
+  }
+}

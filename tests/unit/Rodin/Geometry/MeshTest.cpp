@@ -608,3 +608,44 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getCellCount(), 1);
   }
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief A point grid initializes its embedding and connectivity before insertion.
+  TEST(Rodin_Geometry_Mesh, UniformPointGrid)
+  {
+    const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Point, {});
+    EXPECT_EQ(mesh.getDimension(), 0u);
+    EXPECT_EQ(mesh.getSpaceDimension(), 1u);
+    EXPECT_EQ(mesh.getVertexCount(), 1u);
+    EXPECT_EQ(mesh.getVertex(0)->getCoordinates().value(), 0);
+  }
+
+  /// @brief Box quadrilaterals remain unfolded at every sample and recover the surface area.
+  TEST(Rodin_Geometry_Mesh, QuadrilateralBoxFaces)
+  {
+    for (const auto& shape :
+      {std::array<size_t, 3>{2, 2, 2}, std::array<size_t, 3>{3, 4, 5}})
+    {
+      const auto mesh =
+        LocalMesh::Box(Polytope::Type::Quadrilateral, {shape[0], shape[1], shape[2]});
+      Real area = 0;
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        area += cell->getMeasure();
+        for (const Real x : {0.1, 0.5, 0.9})
+        {
+          for (const Real y : {0.1, 0.5, 0.9})
+          {
+            const Point point(*cell, Math::SpatialPoint{x, y});
+            EXPECT_NEAR(point.getDistortion(), 1, 1e-13);
+          }
+        }
+      }
+      const Real nx = shape[0];
+      const Real ny = shape[1];
+      const Real nz = shape[2];
+      EXPECT_NEAR(area, 2 * (nx * ny + nx * nz + ny * nz), 1e-11);
+    }
+  }
+}

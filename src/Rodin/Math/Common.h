@@ -645,22 +645,31 @@ namespace Rodin::Math
   constexpr auto dot(
     const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    assert(lhs.rows() == rhs.rows());
-    assert(lhs.cols() == rhs.cols());
     using LeftScalar = typename LHSDerived::Scalar;
     using RightScalar = typename RHSDerived::Scalar;
-    if constexpr (requires {
+    if constexpr (LHSDerived::IsVectorAtCompileTime && RHSDerived::IsVectorAtCompileTime)
+    {
+      assert(lhs.size() == rhs.size());
+      using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+      return rhs.template cast<Scalar>().dot(lhs.template cast<Scalar>());
+    }
+    else
+    {
+      assert(lhs.rows() == rhs.rows());
+      assert(lhs.cols() == rhs.cols());
+      if constexpr (requires {
                     typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
                       Eigen::internal::scalar_product_op<LeftScalar,
                         RightScalar>>::ReturnType;
                   })
-      return (lhs.array() * rhs.conjugate().array()).sum();
-    else
-    {
-      using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
-      return (lhs.template cast<Scalar>().array() *
-        rhs.template cast<Scalar>().conjugate().array())
-        .sum();
+        return (lhs.array() * rhs.conjugate().array()).sum();
+      else
+      {
+        using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().array())
+          .sum();
+      }
     }
   }
 

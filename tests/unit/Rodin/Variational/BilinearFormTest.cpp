@@ -423,3 +423,46 @@ namespace Rodin::Tests::Unit
     checkScalar.operator()<Complex>();
   }
 }
+
+/// @brief Copy/move assignment transfers integrators as well as assembled values for both local backends.
+TEST(BilinearFormAssignment, IntegratorsSurviveReassembly)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  P1 fes(mesh);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  const auto check = [&](auto& source) {
+    using Form = std::decay_t<decltype(source)>;
+    source = Integral(Real(3) * u, v);
+    source.assemble();
+    const Math::Matrix<Real> expected = source.getOperator();
+    Form destination(u, v);
+    destination = Integral(Real(7) * u, v);
+    destination = source;
+    destination.assemble();
+    EXPECT_LE((Math::Matrix<Real>(destination.getOperator()) - expected).norm(), 1e-13);
+    Form moved(u, v);
+    moved = std::move(destination);
+    moved.assemble();
+    EXPECT_LE((Math::Matrix<Real>(moved.getOperator()) - expected).norm(), 1e-13);
+  };
+  BilinearForm sparse(u, v);
+  check(sparse);
+  using Solution = typename decltype(u)::SolutionType;
+  BilinearForm<Solution, decltype(fes), decltype(fes), Math::Matrix<Real>> dense(u, v);
+  check(dense);
+}
+
+/// @brief Empty sparse assembly avoids undefined conversion of a nonfinite reserve estimate.
+TEST(BilinearFormAssembly, EmptySpace)
+{
+  const auto mesh = LocalMesh::Build().initialize(1).nodes(0).finalize();
+  P1 fes(mesh);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  BilinearForm form(u, v);
+  form = Integral(u, v);
+  EXPECT_NO_THROW(form.assemble());
+  EXPECT_EQ(form.getOperator().rows(), 0);
+  EXPECT_EQ(form.getOperator().cols(), 0);
+}

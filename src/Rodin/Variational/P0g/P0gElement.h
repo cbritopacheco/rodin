@@ -540,10 +540,8 @@ namespace Rodin::Variational
        */
       constexpr P0gElement& operator=(const P0gElement& other)
       {
-        Parent::operator=(other);
-        m_vdim = other.m_vdim;
-        m_lfs = other.m_lfs;
-        m_bs = other.m_bs;
+        if (this != &other)
+          *this = P0gElement(other);
         return *this;
       }
 

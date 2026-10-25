@@ -1374,10 +1374,7 @@ namespace Rodin::Variational
 
       /// @brief Copy constructor.
       constexpr P1Element(const P1Element& other)
-        : Parent(other),
-          m_vdim(other.m_vdim),
-          m_lfs(other.m_lfs),
-          m_bs(other.m_bs)
+        : P1Element(other.getGeometry(), other.m_vdim)
       {}
 
       /// @brief Move constructor.
@@ -1391,10 +1388,8 @@ namespace Rodin::Variational
       /// @brief Copy assignment.
       constexpr P1Element& operator=(const P1Element& other)
       {
-        Parent::operator=(other);
-        m_vdim = other.m_vdim;
-        m_lfs = other.m_lfs;
-        m_bs = other.m_bs;
+        if (this != &other)
+          *this = P1Element(other);
         return *this;
       }
 
@@ -1489,6 +1484,8 @@ namespace Rodin::Variational
       {
         ar& boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;
+        if constexpr (Archive::is_loading::value)
+          *this = P1Element(this->getGeometry(), m_vdim);
       }
 
     private:

@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include "Rodin/Geometry.h"
+#include "Rodin/Variational.h"
 #include "Rodin/MMG.h"
 
 using namespace Rodin;
@@ -44,4 +45,31 @@ TEST(MMG5Copy, InsertionAfterSourceDestruction)
       EXPECT_GT(MMG2D_newElt(copy.get()), mesh.getCellCount());
     }
   }
+}
+
+/// @brief Native scalar/vector transfers preserve interleaved nodal coefficients in both directions.
+TEST(MMG5Copy, SolutionGridFunctionRoundtrip)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  using Native = MMG::MMG5;
+  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> nativeMesh(
+    Native::rodinToMesh(mesh), Native::destroyMesh);
+  const auto check = [&](auto& source, auto& destination, size_t components) {
+    for (Index i = 0; i < source.getData().size(); ++i)
+      source.getData()(i) = Real(i + 1) / 8;
+    std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)> native(
+      Native::createSolution(nativeMesh.get(), components), Native::destroySolution);
+    Native::copySolution(source, native.get());
+    ASSERT_EQ(native->np, mesh.getVertexCount());
+    for (size_t i = 0; i < mesh.getVertexCount() * components; ++i)
+      EXPECT_EQ(native->m[components + i], source.getData()(i));
+    Native::copySolution(native.get(), destination);
+    EXPECT_EQ(destination.getData(), source.getData());
+  };
+  Variational::P1 scalarSpace(mesh);
+  Variational::P1 vectorSpace(mesh, 2);
+  MMG::RealGridFunction scalarSource(scalarSpace), scalarDestination(scalarSpace);
+  MMG::VectorGridFunction vectorSource(vectorSpace), vectorDestination(vectorSpace);
+  check(scalarSource, scalarDestination, 1);
+  check(vectorSource, vectorDestination, 2);
 }

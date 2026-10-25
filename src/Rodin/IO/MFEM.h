@@ -2510,7 +2510,8 @@ namespace Rodin::IO
                       {
                         const Index sd = scalarLocalDof(fdofs, faceNodeMap[k]);
                         tempUR(static_cast<Index>(k)) =
-                          (static_cast<size_t>(sd) < scalarSize)
+                          (static_cast<size_t>(sd) < scalarSize &&
+                            written[static_cast<size_t>(sd)])
                           ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
                           : ScalarType(0);
                       }
@@ -2654,7 +2655,8 @@ namespace Rodin::IO
                     {
                       const Index sd = scalarLocalDof(cdofs, k);
                       tempUR(static_cast<Index>(k)) =
-                        (static_cast<size_t>(sd) < scalarSize)
+                        (static_cast<size_t>(sd) < scalarSize &&
+                          written[static_cast<size_t>(sd)])
                         ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
                         : ScalarType(0);
                     }
@@ -2762,7 +2764,8 @@ namespace Rodin::IO
                     {
                       const Index sd = scalarLocalDof(cdofs, k);
                       tempUR(static_cast<Index>(k)) =
-                        (static_cast<size_t>(sd) < scalarSize)
+                        (static_cast<size_t>(sd) < scalarSize &&
+                          written[static_cast<size_t>(sd)])
                         ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
                         : ScalarType(0);
                     }
@@ -2837,7 +2840,8 @@ namespace Rodin::IO
                     {
                       const Index sd = scalarLocalDof(cdofs, k);
                       tempUR(static_cast<Index>(k)) =
-                        (static_cast<size_t>(sd) < scalarSize)
+                        (static_cast<size_t>(sd) < scalarSize &&
+                          written[static_cast<size_t>(sd)])
                         ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
                         : ScalarType(0);
                     }

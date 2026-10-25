@@ -1883,9 +1883,9 @@ namespace Rodin::Tests::Unit
     prepared.getFirstPiolaKirchhoffStress(P_direct);
 
     // Via Field wrapper
-    Solid::FirstPiolaKirchhoffStress<Solid::NeoHookean> pk1(law);
+    Solid::FirstPiolaKirchhoffStress<Solid::NeoHookean> pk1(prepared);
     Math::SpatialMatrix<Real> P_wrapper;
-    prepared.getFirstPiolaKirchhoffStress(P_wrapper);
+    pk1.getFirstPiolaKirchhoffStress(P_wrapper);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -2353,8 +2353,8 @@ namespace Rodin::Tests::Unit
         for (size_t repeat = 0; repeat < 2; ++repeat)
         {
           form.assemble();
-          const Scalar actual =
-            testField.getData().dot(form.getOperator() * trial.getSolution().getData());
+          const Scalar actual = Math::dot(
+            form.getOperator() * trial.getSolution().getData(), testField.getData());
           EXPECT_LT(std::abs(actual - expected), Real(1e-10));
         }
         Variational::TestFunction sharedTest(trialSpace);
@@ -2370,8 +2370,9 @@ namespace Rodin::Tests::Unit
         sharedForm = Variational::LinearElasticityIntegral(trial, sharedTest)(
           coefficient(Real(2)), coefficient(Real(3)));
         sharedForm.assemble();
-        const Scalar sharedAction = sharedField.getData().dot(
-          sharedForm.getOperator() * trial.getSolution().getData());
+        const Scalar sharedAction =
+          Math::dot(sharedForm.getOperator() * trial.getSolution().getData(),
+            sharedField.getData());
         EXPECT_LT(std::abs(sharedAction - expected), Real(1e-10));
       };
       check(

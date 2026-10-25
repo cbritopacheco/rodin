@@ -539,7 +539,7 @@ namespace Rodin::Variational
       UnaryMinus(const OperandType& op)
       {
         for (const auto& p : op)
-          add(UnaryMinus<LinearFormIntegratorBaseType>(p));
+          this->add(UnaryMinus<LinearFormIntegratorBaseType>(p));
       }
 
       /**
@@ -737,7 +737,7 @@ namespace Rodin::Variational
       UnaryMinus(const OperandType& op)
       {
         for (const auto& p : op)
-          add(UnaryMinus<LocalBilinearFormIntegratorBaseType>(p));
+          this->add(UnaryMinus<LocalBilinearFormIntegratorBaseType>(p));
       }
 
       /**

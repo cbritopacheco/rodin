@@ -518,3 +518,39 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Names are escaped in XML while generated filesystem paths retain their literal names.
+  TEST_F(XDMFTest, EscapedNamesAndPaths)
+  {
+    const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+    P1 fes(mesh);
+    GridFunction field(fes);
+    field = Real(2);
+    XDMF writer(m_directory / "series&data");
+    writer.grid("mesh&<\"'>").setMesh(mesh).add("value&<\"'>", field);
+    writer.write().close();
+    std::ifstream input((m_directory / "series&data.xdmf").string());
+    ASSERT_TRUE(input.good());
+    const std::string xml((std::istreambuf_iterator<char>(input)), {});
+    EXPECT_NE(xml.find("mesh&amp;&lt;&quot;&apos;&gt;"), std::string::npos);
+    EXPECT_NE(xml.find("value&amp;&lt;&quot;&apos;&gt;"), std::string::npos);
+    EXPECT_NE(xml.find("series&amp;data"), std::string::npos);
+    EXPECT_EQ(xml.find("Name=\"mesh&<"), std::string::npos);
+    size_t files = 0;
+    for (const auto& entry : boost::filesystem::directory_iterator(m_directory))
+    {
+      if (entry.path().extension() == ".h5")
+      {
+        ++files;
+        EXPECT_NE(
+          entry.path().filename().string().find("series&data"), std::string::npos);
+        auto file =
+          HDF5::File(H5Fopen(entry.path().c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        EXPECT_TRUE(file);
+      }
+    }
+    EXPECT_EQ(files, 2u);
+  }
+}

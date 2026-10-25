@@ -807,7 +807,7 @@ namespace Rodin::Geometry
     {
       case Polytope::Type::Point:
       {
-        return build.nodes(1).vertex({0}).finalize();
+        return build.initialize(1).nodes(1).vertex({0}).finalize();
       }
       case Polytope::Type::Segment:
       {
@@ -1511,7 +1511,7 @@ namespace Rodin::Geometry
 
         build.reserve(2, 2 * (Ny * Nz + Nx * Nz + Nx * Ny));
 
-        // z = 0  (−z outward) order (0,0)(1,0)(0,1)(1,1)
+        // z = 0  param (x,y): (0,0)(1,0)(1,1)(0,1)
         for (size_t j = 0; j < Ny; ++j)
         {
           for (size_t i = 0; i < Nx; ++i)
@@ -1519,12 +1519,12 @@ namespace Rodin::Geometry
             build.polytope(Polytope::Type::Quadrilateral,
               {Index(offZ0 + (i + 0) + (j + 0) * Lx),
                 Index(offZ0 + (i + 1) + (j + 0) * Lx),
-                Index(offZ0 + (i + 0) + (j + 1) * Lx),
-                Index(offZ0 + (i + 1) + (j + 1) * Lx)});
+                Index(offZ0 + (i + 1) + (j + 1) * Lx),
+                Index(offZ0 + (i + 0) + (j + 1) * Lx)});
           }
         }
 
-        // z = Nz (+z outward) order (0,0)(0,1)(1,0)(1,1)
+        // z = Nz param (y,x): (0,0)(1,0)(1,1)(0,1)
         for (size_t j = 0; j < Ny; ++j)
         {
           for (size_t i = 0; i < Nx; ++i)
@@ -1532,12 +1532,12 @@ namespace Rodin::Geometry
             build.polytope(Polytope::Type::Quadrilateral,
               {Index(offZN + (i + 0) + (j + 0) * Lx),
                 Index(offZN + (i + 0) + (j + 1) * Lx),
-                Index(offZN + (i + 1) + (j + 0) * Lx),
-                Index(offZN + (i + 1) + (j + 1) * Lx)});
+                Index(offZN + (i + 1) + (j + 1) * Lx),
+                Index(offZN + (i + 1) + (j + 0) * Lx)});
           }
         }
 
-        // x = 0  (−x outward) param (y,z): (0,0)(1,0)(0,1)(1,1)
+        // x = 0  param (y,z): (0,0)(1,0)(1,1)(0,1)
         for (size_t j = 0; j < Ny; ++j)
         {
           for (size_t k = 0; k < Nz; ++k)
@@ -1547,14 +1547,14 @@ namespace Rodin::Geometry
                               : (offX0 + (k - 1) * Ly + (j + 0))),
                 Index((k == 0) ? (offZ0 + 0 + (j + 1) * Lx)
                                : (offX0 + (k - 1) * Ly + (j + 1))),
-                Index((k + 1 == Nz) ? (offZN + 0 + (j + 0) * Lx)
-                                    : (offX0 + (k + 0) * Ly + (j + 0))),
                 Index((k + 1 == Nz) ? (offZN + 0 + (j + 1) * Lx)
-                                    : (offX0 + (k + 0) * Ly + (j + 1)))});
+                                    : (offX0 + (k + 0) * Ly + (j + 1))),
+                Index((k + 1 == Nz) ? (offZN + 0 + (j + 0) * Lx)
+                                    : (offX0 + (k + 0) * Ly + (j + 0)))});
           }
         }
 
-        // x = Nx (+x outward) param (y,z): (0,0)(1,0)(0,1)(1,1)
+        // x = Nx param (z,y): (0,0)(1,0)(1,1)(0,1)
         for (size_t j = 0; j < Ny; ++j)
         {
           for (size_t k = 0; k < Nz; ++k)
@@ -1564,14 +1564,14 @@ namespace Rodin::Geometry
                               : (offXN + (k - 1) * Ly + (j + 0))),
                 Index((k + 1 == Nz) ? (offZN + Nx + (j + 0) * Lx)
                                     : (offXN + (k + 0) * Ly + (j + 0))),
-                Index((k == 0) ? (offZ0 + Nx + (j + 1) * Lx)
-                               : (offXN + (k - 1) * Ly + (j + 1))),
                 Index((k + 1 == Nz) ? (offZN + Nx + (j + 1) * Lx)
-                                    : (offXN + (k + 0) * Ly + (j + 1)))});
+                                    : (offXN + (k + 0) * Ly + (j + 1))),
+                Index((k == 0) ? (offZ0 + Nx + (j + 1) * Lx)
+                               : (offXN + (k - 1) * Ly + (j + 1)))});
           }
         }
 
-        // y = 0  (−y outward) param (x,z): (0,0)(1,0)(0,1)(1,1)
+        // y = 0  param (x,z): (0,0)(1,0)(1,1)(0,1)
         for (size_t i = 0; i < Nx; ++i)
         {
           for (size_t k = 0; k < Nz; ++k)
@@ -1586,18 +1586,18 @@ namespace Rodin::Geometry
                                : (i + 1 == Nx ? (offXN + (k - 1) * Ly + 0)
                                               : (offY0 + (k - 1) * (Lx - 2) + (i + 0)))),
                 Index((k + 1 == Nz)
+                    ? (offZN + (i + 1) + 0 * Lx)
+                    : (i + 1 == Nx ? (offXN + (k + 0) * Ly + 0)
+                                   : (offY0 + (k + 0) * (Lx - 2) + (i + 0)))),
+                Index((k + 1 == Nz)
                     ? (offZN + (i + 0) + 0 * Lx)
                     : (i == 0 ? (offX0 + (k + 0) * Ly + 0)
                               : (i == Nx ? (offXN + (k + 0) * Ly + 0)
-                                         : (offY0 + (k + 0) * (Lx - 2) + (i - 1))))),
-                Index((k + 1 == Nz)
-                    ? (offZN + (i + 1) + 0 * Lx)
-                    : (i + 1 == Nx ? (offXN + (k + 0) * Ly + 0)
-                                   : (offY0 + (k + 0) * (Lx - 2) + (i + 0))))});
+                                         : (offY0 + (k + 0) * (Lx - 2) + (i - 1)))))});
           }
         }
 
-        // y = Ny (+y outward) param (x,z): (0,0)(1,0)(0,1)(1,1)
+        // y = Ny param (x,z): (0,0)(1,0)(1,1)(0,1)
         for (size_t i = 0; i < Nx; ++i)
         {
           for (size_t k = 0; k < Nz; ++k)
@@ -1612,14 +1612,14 @@ namespace Rodin::Geometry
                                : (i + 1 == Nx ? (offXN + (k - 1) * Ly + Ny)
                                               : (offYN + (k - 1) * (Lx - 2) + (i + 0)))),
                 Index((k + 1 == Nz)
+                    ? (offZN + (i + 1) + Ny * Lx)
+                    : (i + 1 == Nx ? (offXN + (k + 0) * Ly + Ny)
+                                   : (offYN + (k + 0) * (Lx - 2) + (i + 0)))),
+                Index((k + 1 == Nz)
                     ? (offZN + (i + 0) + Ny * Lx)
                     : (i == 0 ? (offX0 + (k + 0) * Ly + Ny)
                               : (i == Nx ? (offXN + (k + 0) * Ly + Ny)
-                                         : (offYN + (k + 0) * (Lx - 2) + (i - 1))))),
-                Index((k + 1 == Nz)
-                    ? (offZN + (i + 1) + Ny * Lx)
-                    : (i + 1 == Nx ? (offXN + (k + 0) * Ly + Ny)
-                                   : (offYN + (k + 0) * (Lx - 2) + (i + 0))))});
+                                         : (offYN + (k + 0) * (Lx - 2) + (i - 1)))))});
           }
         }
 

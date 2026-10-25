@@ -1063,7 +1063,8 @@ namespace Rodin::IO
           const size_t order = it->getTransformation().getOrder();
           const auto nodes = getXDMFReferenceNodes(it->getGeometry(), order);
           size += 1 + nodes.size();
-          if (it->getGeometry() == Geometry::Polytope::Type::Segment && order <= 1)
+          if (it->getGeometry() == Geometry::Polytope::Type::Point ||
+            (it->getGeometry() == Geometry::Polytope::Type::Segment && order <= 1))
             size += 1;
         }
         return size;
@@ -1077,7 +1078,8 @@ namespace Rodin::IO
         const auto geometry = it->getGeometry();
         const size_t nv = it->getVertices().size();
         size += 1 + nv;
-        if (geometry == Geometry::Polytope::Type::Segment)
+        if (geometry == Geometry::Polytope::Type::Point ||
+          geometry == Geometry::Polytope::Type::Segment)
           size += 1;
       }
       return size;
@@ -1447,7 +1449,8 @@ namespace Rodin::IO
           topology.push_back(order > 1 ? getXDMFQuadraticMixedTopologyId(geometry)
                                        : getXDMFMixedTopologyId(geometry));
 
-          if (geometry == Geometry::Polytope::Type::Segment && order <= 1)
+          if (geometry == Geometry::Polytope::Type::Point ||
+            (geometry == Geometry::Polytope::Type::Segment && order <= 1))
             topology.push_back(static_cast<U64>(nodes.size()));
 
           for (size_t k = 0; k < nodes.size(); ++k)
@@ -1470,7 +1473,8 @@ namespace Rodin::IO
 
         topology.push_back(getXDMFMixedTopologyId(geometry));
 
-        if (geometry == Geometry::Polytope::Type::Segment)
+        if (geometry == Geometry::Polytope::Type::Point ||
+          geometry == Geometry::Polytope::Type::Segment)
           topology.push_back(static_cast<U64>(key.size()));
 
         for (size_t k = 0; k < key.size(); ++k)

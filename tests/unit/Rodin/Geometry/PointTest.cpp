@@ -1361,3 +1361,14 @@ TEST(Geometry_Point, PhysicalOrderingIsStrictAcrossEmbeddingDimensions)
     EXPECT_EQ(distinct.size(), count);
   }
 }
+
+/// @brief Empty physical coordinates compare equal without indexing absent entries.
+TEST(Geometry_Point, ZeroDimensionOrdering)
+{
+  auto mesh = LocalMesh::Builder().initialize(0).nodes(1).vertex({}).finalize();
+  const Vertex vertex(0, mesh);
+  const Point point(vertex, Math::SpatialPoint{}, Math::SpatialPoint{});
+  const Point copy(point);
+  EXPECT_FALSE(point < copy);
+  EXPECT_FALSE(copy < point);
+}

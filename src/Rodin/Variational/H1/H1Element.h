@@ -234,7 +234,9 @@ namespace Rodin::Variational
            * Computes @f$ \frac{\partial^{Order} \phi}{\partial x_i^{Order}} @f$ where
            * φ is the basis function and x_i is a spatial coordinate.
            *
-           * @tparam Order Order of differentiation (1 for first derivative, 2 for second, etc.)
+           * @tparam Order Order of differentiation.
+           * @note Higher derivatives use the degree-one formulas or return a known
+           * zero. Other higher derivatives raise Alert::Exception on evaluation.
            */
           template <size_t Order>
           class DerivativeFunction
@@ -344,7 +346,9 @@ namespace Rodin::Variational
 
           /**
            * @brief Gets the derivative function of specified order.
-           * @tparam Order Order of differentiation
+           * @tparam Order Order of differentiation.
+           * @note Higher derivatives use the degree-one formulas or return a known
+           * zero. Other higher derivatives raise Alert::Exception on evaluation.
            * @param i Coordinate index (0=x, 1=y, 2=z)
            * @return Derivative function object
            */
@@ -1053,8 +1057,8 @@ namespace Rodin::Variational
 
           /**
            * @brief Represents a derivative function of a Pk vector element.
-           * @tparam Order Order of the derivative (0 for function, 1 for first
-           * derivative, etc.)
+           * @tparam Order Order of the derivative.
+           * @note Higher derivatives follow the scalar basis contract.
            */
           template <size_t Order>
           class DerivativeFunction
@@ -1112,22 +1116,18 @@ namespace Rodin::Variational
                     return 0;
                   }
                 }
-                else if constexpr (Order == 1)
+                else
                 {
                   if (m_i == m_local % m_vdim)
                   {
                     return H1Element<K, ScalarType>(m_g)
                       .getBasis(m_local / m_vdim)
-                      .template getDerivative<1>(m_j)(rc);
+                      .template getDerivative<Order>(m_j)(rc);
                   }
                   else
                   {
                     return 0;
                   }
-                }
-                else
-                {
-                  return 0;
                 }
               }
 
@@ -1336,10 +1336,8 @@ namespace Rodin::Variational
        */
       constexpr H1Element& operator=(const H1Element& other)
       {
-        Parent::operator=(other);
-        m_vdim = other.m_vdim;
-        m_lfs = other.m_lfs;
-        m_bs = other.m_bs;
+        if (this != &other)
+          *this = H1Element(other);
         return *this;
       }
 
@@ -1522,6 +1520,8 @@ namespace Rodin::Variational
       {
         ar& boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;
+        if constexpr (Archive::is_loading::value)
+          *this = H1Element(this->getGeometry(), m_vdim);
       }
 
     private:

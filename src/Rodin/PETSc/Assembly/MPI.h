@@ -98,13 +98,15 @@ namespace Rodin::Assembly
         MPIIteration seq(mesh, input.getRegion());
         auto kernel = input.getKernel();
         Math::Matrix<PetscScalar> local;
+        IndexVector rows;
         for (auto it = seq.getIterator(); it; ++it)
         {
           const size_t d = it->getDimension();
           const Index i = it->getIndex();
           if (!shard.isOwned(d, i))
             continue;
-          const auto& rows = testFES.getDOFs(d, i);
+          const auto& testDOFs = testFES.getDOFs(d, i);
+          rows.assign(testDOFs.begin(), testDOFs.end());
           const auto& cols = trialFES.getDOFs(d, i);
           const auto attribute = it->getAttribute();
           if (attributes.empty() || (attribute && attributes.count(*attribute)))
@@ -320,6 +322,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
 
+        IndexVector rows;
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -340,8 +343,9 @@ namespace Rodin::Assembly
             }
 
             bfi.setPolytope(*it);
-            const auto& rows = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+            const auto& testDOFs = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
                                                        : testFES.getDOFs(d, idx);
+            rows.assign(testDOFs.begin(), testDOFs.end());
             const auto& cols = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
                                                         : trialFES.getDOFs(d, idx);
 
@@ -727,6 +731,7 @@ namespace Rodin::Assembly
         // ------------------------
         if (doMatrix || liftBoundary)
         {
+          IndexVector rowsDOF;
           for (auto& bfi : pb.getLocalBFIs())
           {
             const auto& attrs = bfi.getAttributes();
@@ -761,8 +766,9 @@ namespace Rodin::Assembly
               }
               bfi.setPolytope(*it);
 
-              const auto& rowsDOF = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
+              const auto& testDOFs = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
                                                             : testFES.getDOFs(d, idx);
+              rowsDOF.assign(testDOFs.begin(), testDOFs.end());
               const auto& colsDOF = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
                                                              : trialFES.getDOFs(d, idx);
 
@@ -1504,6 +1510,7 @@ namespace Rodin::Assembly
 
         if (doMatrix || liftBoundary)
         {
+          IndexVector rows;
           for (auto& bfi : pb.getLocalBFIs())
           {
             const auto uUUID = bfi.getTrialFunction().getUUID();
@@ -1550,8 +1557,9 @@ namespace Rodin::Assembly
               }
               bfi.setPolytope(*it);
 
-              const auto& rows =
+              const auto& testDOFs =
                 bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices() : vFES.getDOFs(d, idx);
+              rows.assign(testDOFs.begin(), testDOFs.end());
               const auto& cols = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
                                                           : uFES.getDOFs(d, idx);
 

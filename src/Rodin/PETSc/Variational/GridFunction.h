@@ -1105,6 +1105,23 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Projects a constant over the selected entities of a region.
+       * @tparam Pred Unary predicate selecting entities.
+       * @param region Region over which to interpolate.
+       * @param value Constant value to interpolate.
+       * @param pred Predicate selecting the entities to update.
+       * @returns Reference to this grid function.
+       */
+      template <class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
+      GridFunction& project(
+        const Geometry::Region& region, const RangeType& value, const Pred& pred)
+      {
+        return this->project(
+          region, [&](const auto&) -> RangeType { return value; }, pred);
+      }
+
+      /**
        * @brief Projects a user-supplied function onto the grid function
        *        over a filtered mesh region.
        *
@@ -1112,12 +1129,12 @@ namespace Rodin::Variational
        * @p pred to each polytope, and for those that pass, sets the
        * corresponding DOF values by evaluating the function @p v.
        *
-       * In local mode the method acquires and flushes array access around
-       * the entity loop. In MPI mode interpolation is collective: the
+       * In local mode functional values are staged before acquiring write
+       * access. In MPI mode interpolation is collective: the
        * backend-independent @ref Interpolation selects and evaluates
        * functionals, then each owner commits its coefficients and refreshes
        * ghost copies. Unselected coefficients retain their previous values.
-       * In MPI mode source values are evaluated before any destination
+       * Source values are evaluated before any destination
        * coefficient is replaced, including when the source references this
        * grid function.
        *
@@ -1171,6 +1188,7 @@ namespace Rodin::Variational
         }
 #endif
 
+        // Preserve the source type and its evaluation overloads for the pullback.
         Geometry::PolytopeIterator it;
         switch (region)
         {
@@ -1188,16 +1206,36 @@ namespace Rodin::Variational
             break;
         }
 
-        this->acquire();
-
+        // Source expressions may read this field. Evaluate every functional
+        // before acquiring write access, including across shared entities.
+        this->sync();
+        std::vector<std::pair<Index, ScalarType>> coefficients;
+        coefficients.reserve(fes.getSize());
         while (it)
         {
           const auto& polytope = *it;
           if (pred(polytope))
-            this->project({polytope.getDimension(), polytope.getIndex()}, v);
+          {
+            const auto d = polytope.getDimension();
+            const auto i = polytope.getIndex();
+            const auto& element = fes.getFiniteElement(d, i);
+            const auto mapping = fes.getPullback({d, i}, v);
+            for (Index local = 0; local < element.getCount(); ++local)
+            {
+              coefficients.emplace_back(
+                fes.getGlobalIndex({d, i}, local), element.getLinearForm(local)(mapping));
+            }
+          }
           ++it;
         }
 
+        static_cast<const GridFunction&>(*this).flush();
+        this->acquire();
+        for (const auto& [index, value] : coefficients)
+        {
+          assert(index < fes.getSize());
+          m_write.raw[index] = value;
+        }
         this->flush();
 
         return *this;

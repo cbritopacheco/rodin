@@ -6,9 +6,10 @@
  */
 /**
  * @file
- * @brief Exact local elasticity weighting and kernel-state regressions.
+ * @brief Local elasticity weighting and kernel-state regressions.
  */
 #include <gtest/gtest.h>
+#include <limits>
 #include "Rodin/Solid.h"
 #include "Rodin/Variational.h"
 #include "../../../../convergence/CurvedGeometry.h"
@@ -162,11 +163,15 @@ namespace Rodin::Tests::Unit
         const auto expected = pairwiseOperator(space, cell, lambda, mu);
         ASSERT_EQ(actual.rows(), expected.rows());
         ASSERT_EQ(actual.cols(), expected.cols());
+        // Independent derivative/weighting paths may differ by rounding.
+        constexpr Real RoundoffFactor = 64;
+        const Real tolerance = RoundoffFactor * std::numeric_limits<Real>::epsilon() *
+          std::max(Real(1), expected.norm());
         for (Eigen::Index row = 0; row < actual.rows(); ++row)
         {
           for (Eigen::Index col = 0; col < actual.cols(); ++col)
           {
-            ASSERT_EQ(actual(row, col), expected(row, col))
+            ASSERT_LE(std::abs(actual(row, col) - expected(row, col)), tolerance)
               << "entry=" << row << ',' << col;
           }
         }

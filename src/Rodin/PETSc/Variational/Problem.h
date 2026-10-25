@@ -880,15 +880,21 @@ namespace Rodin::Variational
           })
           .iapply([&](const Index i, const PetscInt s) { sz[i] = s; });
 
+        PetscInt ownershipBegin, ownershipEnd;
+        ierr = MatGetOwnershipRange(m_axb.getOperator(), &ownershipBegin, &ownershipEnd);
+        assert(ierr == PETSC_SUCCESS);
+
         // Build one IS per trial field (block layout: [u][p][lambda]...)
         for (size_t k = 0; k < TrialFunctionTuple::Size; ++k)
         {
           const PetscInt n = sz[k];
           const PetscInt start = static_cast<PetscInt>(m_trialOffsets[k]);
 
+          const PetscInt begin = std::max(start, ownershipBegin);
+          const PetscInt end = std::min(start + n, ownershipEnd);
+          const PetscInt count = std::max(PetscInt(0), end - begin);
           ::IS is = PETSC_NULLPTR;
-          ierr = ISCreateStride(m_axb.getCommunicator(), // PETSC_COMM_SELF in sequential
-            n, start, 1, &is);
+          ierr = ISCreateStride(m_axb.getCommunicator(), count, begin, 1, &is);
           assert(ierr == PETSC_SUCCESS);
 
           std::string name;

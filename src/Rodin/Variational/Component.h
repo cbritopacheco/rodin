@@ -546,9 +546,16 @@ namespace Rodin::Variational
        */
       constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
-        const size_t d = polytope.getDimension();
-        const size_t i = polytope.getIndex();
-        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+        return getOperand().getDOFs(polytope);
+      }
+
+      /**
+       * @brief Returns the operand's interface support indices.
+       * @returns The operand's explicit indices, or no override for cell support.
+       */
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
       }
 
       /**
@@ -736,9 +743,16 @@ namespace Rodin::Variational
        */
       constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
-        const size_t d = polytope.getDimension();
-        const size_t i = polytope.getIndex();
-        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+        return getOperand().getDOFs(polytope);
+      }
+
+      /**
+       * @brief Returns the operand's interface support indices.
+       * @returns The operand's explicit indices, or no override for cell support.
+       */
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
       }
 
       /**

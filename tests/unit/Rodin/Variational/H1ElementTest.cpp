@@ -11,10 +11,14 @@
 
 #include <array>
 #include <complex>
+#include <sstream>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "Rodin/Variational/P0/P0Element.h"
+#include "Rodin/Variational/P0g/P0gElement.h"
 #include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/Variational/H1/H1Element.h"
 
@@ -3949,5 +3953,162 @@ namespace Rodin::Tests::Unit
     checkReferenceGradient(
       Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
     checkReferenceGradient(Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
+  }
+}
+
+/**
+ * @brief Vector reference elements preserve their owned descriptors on copy assignment.
+ *
+ * Rebuilds over an existing element with a different geometry and component
+ * count. Basis values and interpolation functionals are compared to the source.
+ */
+TEST(VectorElementValueSemantics, CopyAssignmentPreservesDescriptors)
+{
+  const auto check = []<class Element>(const Element& source) {
+    Element assigned(Polytope::Type::Segment, 1);
+    assigned = source;
+    const auto& self = assigned;
+    assigned = self;
+    const auto compare = [&](const Element& actual) {
+      ASSERT_EQ(actual.getGeometry(), source.getGeometry());
+      ASSERT_EQ(actual.getCount(), source.getCount());
+      const auto& point = Polytope::Traits(source.getGeometry()).getCentroid();
+      for (size_t i = 0; i < source.getCount(); ++i)
+      {
+        const auto expected = source.getBasis(i)(point);
+        const auto value = actual.getBasis(i)(point);
+        ASSERT_EQ(value.size(), expected.size());
+        for (size_t component = 0; component < expected.size(); ++component)
+          EXPECT_EQ(value[component], expected[component]);
+        const auto function = [&](const Math::SpatialPoint&) { return expected; };
+        EXPECT_EQ(actual.getLinearForm(i)(function), source.getLinearForm(i)(function));
+      }
+    };
+    compare(assigned);
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    check(H1Element<2, Math::SpatialVector<Real>>(geometry, 3));
+    check(P1Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P0Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P0gElement<Math::SpatialVector<Real>>(geometry, 3));
+    check(H1Element<2, Math::SpatialVector<Complex>>(geometry, 2));
+    check(P1Element<Math::SpatialVector<Complex>>(geometry, 2));
+    check(P0Element<Math::SpatialVector<Complex>>(geometry, 2));
+    check(P0gElement<Math::SpatialVector<Complex>>(geometry, 2));
+  }
+}
+
+/// @brief Archive loading reconstructs vector basis and functional storage from geometry and range size.
+TEST(VectorElementValueSemantics, ArchiveRebuildsDescriptors)
+{
+  const auto check = []<class Element>(const Element& source) {
+    std::stringstream stream;
+    {
+      boost::archive::text_oarchive archive(stream);
+      archive << source;
+    }
+    Element restored;
+    {
+      boost::archive::text_iarchive archive(stream);
+      archive >> restored;
+    }
+    const auto verify = [&](const Element& actual) {
+      ASSERT_EQ(actual.getCount(), source.getCount());
+      EXPECT_EQ(actual.getGeometry(), source.getGeometry());
+      const auto point = Polytope::Traits(source.getGeometry()).getCentroid();
+      for (size_t i = 0; i < source.getCount(); ++i)
+      {
+        const auto expected = source.getBasis(i)(point);
+        const auto value = actual.getBasis(i)(point);
+        ASSERT_EQ(value.size(), expected.size());
+        for (size_t j = 0; j < value.size(); ++j)
+          EXPECT_EQ(value[j], expected[j]);
+        const auto function = [&](const Math::SpatialPoint&) { return expected; };
+        EXPECT_EQ(actual.getLinearForm(i)(function), source.getLinearForm(i)(function));
+      }
+    };
+    verify(restored);
+    Element existing(Polytope::Type::Segment, 1);
+    std::stringstream second(stream.str());
+    {
+      boost::archive::text_iarchive archive(second);
+      archive >> existing;
+    }
+    verify(existing);
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    check(H1Element<2, Math::SpatialVector<Real>>(geometry, 3));
+    check(H1Element<3, Math::SpatialVector<Complex>>(geometry, 2));
+    check(P1Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P1Element<Math::SpatialVector<Complex>>(geometry, 2));
+  }
+}
+
+/// @brief Unsupported higher reference derivatives raise instead of returning incorrect zeros.
+TEST(H1ElementDerivatives, UnsupportedOrderRaises)
+{
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    H1Element<2, Real> element(geometry);
+    const auto point = Polytope::Traits(geometry).getCentroid();
+    EXPECT_THROW(element.getBasis(0).getDerivative<2>(0)(point), Alert::Exception);
+    H1Element<2, Complex> complexElement(geometry);
+    EXPECT_THROW(complexElement.getBasis(0).getDerivative<2>(0)(point), Alert::Exception);
+    H1Element<2, Math::SpatialVector<Real>> vectorElement(geometry, 2);
+    EXPECT_THROW(
+      vectorElement.getBasis(0).getDerivative<2>(0, 0)(point), Alert::Exception);
+    H1Element<2, Math::SpatialVector<Complex>> complexVectorElement(geometry, 2);
+    EXPECT_THROW(
+      complexVectorElement.getBasis(0).getDerivative<2>(0, 0)(point), Alert::Exception);
+  }
+}
+
+/// @brief Exact zeros remain supported, and degree-one rational derivatives match their analytic values.
+TEST(H1ElementDerivatives, HigherOrdersPreserveKnownValues)
+{
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    const auto point = Polytope::Traits(geometry).getCentroid();
+    H1Element<2, Real> quadratic(geometry);
+    EXPECT_EQ(quadratic.getBasis(0).getDerivative<3>(0)(point), 0);
+    H1Element<1, Real> linear(geometry);
+    EXPECT_EQ(linear.getBasis(0).getDerivative<2>(0)(point), 0);
+  }
+  const Math::SpatialPoint point{0.2, 0.3, 0.4};
+  const Real magnitude = 2 * point.x() * point.y() / std::pow(1 - point.z(), 3);
+  H1Element<1, Real> scalar(Polytope::Type::Pyramid);
+  H1Element<1, Math::SpatialVector<Complex>> vector(Polytope::Type::Pyramid, 2);
+  for (size_t vertex = 0; vertex < 5; ++vertex)
+  {
+    SCOPED_TRACE(vertex);
+    const Real expected = vertex == 4 ? 0
+      : (vertex == 0 || vertex == 3)  ? magnitude
+                                      : -magnitude;
+    EXPECT_NEAR(scalar.getBasis(vertex).getDerivative<2>(2)(point), expected, 1e-14);
+    auto before = point, after = point;
+    constexpr Real step = 1e-6;
+    before.z() -= step;
+    after.z() += step;
+    const Real difference = (scalar.getBasis(vertex).getDerivative<1>(2)(after) -
+                              scalar.getBasis(vertex).getDerivative<1>(2)(before)) /
+      (2 * step);
+    EXPECT_NEAR(difference, expected, 1e-8);
+    EXPECT_LE(
+      std::abs(vector.getBasis(2 * vertex).getDerivative<2>(0, 2)(point) - expected),
+      1e-14);
+    EXPECT_EQ(vector.getBasis(2 * vertex).getDerivative<2>(1, 2)(point), Complex(0));
   }
 }

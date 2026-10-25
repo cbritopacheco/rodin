@@ -58,14 +58,14 @@ namespace Rodin::Geometry
     assert(this->getDimension() == p.getDimension());
     const auto& lhs = getCoordinates(Coordinates::Physical);
     const auto& rhs = p.getCoordinates(Coordinates::Physical);
-    for (int i = 0; i < lhs.size() - 1; i++)
+    for (size_t i = 0; i < lhs.size(); ++i)
     {
       if (lhs(i) < rhs(i))
         return true;
       if (rhs(i) < lhs(i))
         return false;
     }
-    return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));
+    return false;
   }
 
   PointBase::PointBase(const PointBase& other)

@@ -263,6 +263,12 @@ namespace Rodin::Assembly
           m_threadCount(std::move(other.m_threadCount))
       {}
 
+      /// @brief Assigns the assembly policy and working storage.
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /// @brief Moves the assembly policy and working storage.
+      OpenMP& operator=(OpenMP&& other) = default;
+
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
@@ -271,8 +277,11 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) override
       {
-        const size_t capacity =
-          input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
+        const size_t trialSize = input.getTrialFES().getSize();
+        const size_t testSize = input.getTestFES().getSize();
+        const size_t capacity = trialSize == 0 || testSize == 0
+          ? size_t(0)
+          : size_t(testSize * std::log(trialSize));
         res.clear();
         res.reserve(capacity);
 
@@ -516,6 +525,12 @@ namespace Rodin::Assembly
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /// @brief Assigns the assembly policy and working storage.
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /// @brief Moves the assembly policy and working storage.
+      OpenMP& operator=(OpenMP&& other) = default;
+
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
@@ -633,6 +648,12 @@ namespace Rodin::Assembly
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
+
+      /// @brief Assigns the assembly policy and working storage.
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /// @brief Moves the assembly policy and working storage.
+      OpenMP& operator=(OpenMP&& other) = default;
 
       /**
        * @brief Executes dense matrix assembly.
@@ -853,6 +874,12 @@ namespace Rodin::Assembly
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
+
+      /// @brief Assigns the assembly policy and working storage.
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /// @brief Moves the assembly policy and working storage.
+      OpenMP& operator=(OpenMP&& other) = default;
 
       /**
        * @brief Executes vector assembly.

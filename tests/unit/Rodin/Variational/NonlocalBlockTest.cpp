@@ -349,9 +349,10 @@ namespace
                   exactMoment(trialAttribute, true) * exactMoment(testAttribute, false)) +
               Scalar(massAction);
             EXPECT_LT(
-              std::abs(testField.getData().dot(actual * trialField.getData()) - exact),
+              std::abs(
+                Math::dot(actual * trialField.getData(), testField.getData()) - exact),
               1e-10);
-            EXPECT_LT(std::abs(testField.getData().dot(system.getVector()) -
+            EXPECT_LT(std::abs(Math::dot(system.getVector(), testField.getData()) -
                         Scalar(exactMoment(testAttribute, false))),
               1e-10);
           };

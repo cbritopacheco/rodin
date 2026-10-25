@@ -672,3 +672,67 @@ TEST(PETSc_GridFunction, MoveAssignmentPreservesBorrows)
 {
   checkLocalMoveBorrows(true);
 }
+
+/// @brief A local source may read the destination without observing partially replaced shared DOFs.
+TEST(PETSc_GridFunction, SelfReferencingProjectionUsesOldValues)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction field(space);
+  const auto initial = [](const Point& p) { return PetscScalar(2 + p.x() + 3 * p.y()); };
+  field.project(initial);
+  field.project([&](const Point& p) { return PetscScalar(1) + field.getValue(p); });
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    const Point point(*cell, Math::SpatialPoint{0.2, 0.3});
+    EXPECT_LE(std::abs(field.getValue(point) - (PetscScalar(1) + initial(point))), 1e-12);
+  }
+}
+
+/// @brief Constant regional values update only selected boundary entities, including attribute selection.
+TEST(PETSc_GridFunction, ConstantRegionalProjection)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
+  mesh.scale(0.5);
+  mesh.getConnectivity().compute(1, 2);
+  for (auto face = mesh.getBoundary(); face; ++face)
+    mesh.setAttribute(face.key(), 17);
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction field(space);
+  field = PetscScalar(-1);
+  const auto check = [&](PetscScalar boundaryValue) {
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+    {
+      const Point point(*vertex, Math::SpatialPoint(0));
+      const bool boundary =
+        point.x() == 0 || point.x() == 1 || point.y() == 0 || point.y() == 1;
+      EXPECT_EQ(field.getValue(point), boundary ? boundaryValue : PetscScalar(-1));
+    }
+  };
+  field.project(Region::Boundary, PetscScalar(4), [](const Polytope&) { return true; });
+  check(PetscScalar(4));
+  field.project(Region::Boundary, PetscScalar(5), Attribute(17));
+  check(PetscScalar(5));
+}
+
+/// @brief Callable sources retain their evaluation protocol even if they also convert to a range value.
+TEST(PETSc_GridFunction, CallableProjectionPreservesSourceType)
+{
+  struct Source
+  {
+    operator PetscScalar() const
+    {
+      return PetscScalar(-100);
+    }
+    PetscScalar operator()(const Point& p) const
+    {
+      return PetscScalar(2 + p.x());
+    }
+  };
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction field(space);
+  field.project(Source{});
+  const Point point(*mesh.getCell(), Math::SpatialPoint{0.2, 0.3});
+  EXPECT_LE(std::abs(field.getValue(point) - PetscScalar(2 + point.x())), 1e-12);
+}

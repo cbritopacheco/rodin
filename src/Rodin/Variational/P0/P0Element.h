@@ -608,10 +608,8 @@ namespace Rodin::Variational
       /// @brief Copy assignment.
       constexpr P0Element& operator=(const P0Element& other)
       {
-        Parent::operator=(other);
-        m_vdim = other.m_vdim;
-        m_lfs = other.m_lfs;
-        m_bs = other.m_bs;
+        if (this != &other)
+          *this = P0Element(other);
         return *this;
       }
 

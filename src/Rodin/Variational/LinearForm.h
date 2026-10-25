@@ -143,7 +143,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(other);
           m_lfis = other.m_lfis;
         }
         return *this;
@@ -158,7 +157,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(std::move(other));
           m_lfis = std::move(other.m_lfis);
         }
         return *this;

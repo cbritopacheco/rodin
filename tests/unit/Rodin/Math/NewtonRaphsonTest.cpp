@@ -319,3 +319,25 @@ TEST_F(NewtonRaphsonTest, NaNDerivativeUsesSecant)
   EXPECT_NEAR(*root, Real(0.123456789), 1e-12);
   EXPECT_LT(calls, 10u);
 }
+
+/**
+ * @brief Nonfinite secant proposals fall back to a finite bracket midpoint.
+ *
+ * The residual is finite on the bracket but its secant arithmetic overflows.
+ * The unavailable derivative forces that fallback; callbacks must remain finite.
+ */
+TEST_F(NewtonRaphsonTest, OverflowingSecantRemainsInBracket)
+{
+  NewtonRaphson<Real> solver;
+  size_t nonfiniteCalls = 0;
+  const auto residual = [&](Real x) -> std::pair<Real, Real> {
+    if (!std::isfinite(x))
+      ++nonfiniteCalls;
+    return {Real(1.5e308) * std::tanh(Real(20) * (x - Real(1))),
+      std::numeric_limits<Real>::quiet_NaN()};
+  };
+  const auto root = solver.solve(residual, Real(5), Real(-10), Real(10));
+  ASSERT_TRUE(root);
+  EXPECT_NEAR(*root, Real(1), Real(1e-10));
+  EXPECT_EQ(nonfiniteCalls, 0u);
+}

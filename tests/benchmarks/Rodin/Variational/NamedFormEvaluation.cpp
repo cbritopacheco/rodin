@@ -188,7 +188,7 @@ namespace Rodin::Tests::Benchmarks
     state.counters["dofs"] = expected.rows();
     state.counters["nonzeros"] = expected.nonZeros();
     state.counters["named_nonzeros"] = named.getOperator().nonZeros();
-    const auto& cell = *mesh.getCell();
+    const auto cell = *mesh.getCell();
     const size_t coefficientDegree = coefficient.getOrder(cell).value_or(0);
     const size_t massOrder = 2 * Order + coefficientDegree;
     const size_t diffusionOrder = 2 * Order - 2 + coefficientDegree;

@@ -91,7 +91,7 @@ namespace Rodin::Tests::Benchmarks
         const auto baselineLoad = load.getVector();
         const auto& c = u.getSolution().getData();
         const auto valid = [&](const auto& a, const auto& b) {
-          const Scalar energy = c.dot(a * c);
+          const Scalar energy = Math::dot(a * c, c);
           return std::isfinite(std::abs(energy)) &&
             std::abs(energy / (scale * expected) - Scalar(1)) < EnergyBudget &&
             (a - scale * baseline).norm() <

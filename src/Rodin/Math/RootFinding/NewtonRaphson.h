@@ -214,7 +214,8 @@ namespace Rodin::Math::RootFinding
           const Scalar mid = std::midpoint(a, b);
           const Scalar half = 0.5 * (b - a);
 
-          if (tNew <= a || tNew >= b || std::fabs(tNew - t) > half)
+          if (!std::isfinite(tNew) || tNew <= a || tNew >= b ||
+            std::fabs(tNew - t) > half)
             tNew = mid;
 
           if (std::fabs(tNew - t) < at)

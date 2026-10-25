@@ -312,3 +312,22 @@ TEST(SubMeshBuilder, ReuseStartsFresh)
     }
   }
 }
+
+/// @brief Move assignment replaces the ancestry used by point restriction.
+TEST(Geometry_SubMesh, MoveAssignmentReplacesAncestors)
+{
+  auto first = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  auto second = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  auto destination =
+    SubMesh<Context::Local>::Builder().initialize(first).include(1, 0).finalize();
+  auto source =
+    SubMesh<Context::Local>::Builder().initialize(second).include(1, 0).finalize();
+  destination = std::move(source);
+  ASSERT_FALSE(destination.getAncestors().empty());
+  EXPECT_EQ(&destination.getParent(), &second);
+  EXPECT_EQ(&destination.getAncestors().front().get(), &second);
+  const Point point(*second.getCell(), Math::SpatialPoint{0.5});
+  EXPECT_TRUE(destination.restriction(point));
+  const Point oldPoint(*first.getCell(), Math::SpatialPoint{0.5});
+  EXPECT_FALSE(destination.restriction(oldPoint));
+}

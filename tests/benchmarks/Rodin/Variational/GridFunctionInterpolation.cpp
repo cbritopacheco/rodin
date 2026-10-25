@@ -11,7 +11,7 @@
  *
  * Meshes, spaces, analytic functions and quadrature points are prepared before
  * timing. Each operation checks the final value against the analytic field.
- * Cache hits repeat one sample; misses alternate two samples in the same cell.
+ * Tabulated evaluation repeats one sample or alternates samples in the same cell.
  * Cross-space assignment uses distinct spaces on the same mesh and therefore
  * interpolates the source rather than copying its coefficients.
  */
@@ -82,10 +82,18 @@ namespace Rodin::Tests::Benchmarks
     phase = 0;
     const Polytope cell(dimension, 0, mesh);
     const auto& qf = QF::PolytopeQuadratureFormula::get(2 * Order, geometry);
-    const Point point0(cell, qf.getPoint(0));
-    const Point point1(cell, qf.getPoint(1));
-    const IntegrationPoint ip0(point0, &qf, 0);
-    const IntegrationPoint ip1(point1, &qf, 1);
+    const PolytopeQuadrature quadrature(cell, qf);
+    const IntegrationPoint ip0(quadrature, 0);
+    const IntegrationPoint ip1(quadrature, 1);
+    const Point& point0 = ip0.getPoint();
+    const IntegrationPoint provenance(point0, &qf, 0);
+    if (ip0.getReferenceQuadratureFormula() != &qf ||
+      ip1.getReferenceQuadratureFormula() != &qf ||
+      provenance.getReferenceQuadratureFormula())
+    {
+      state.SkipWithError("Quadrature association contract was not preserved");
+      return;
+    }
     const Point* lastPoint = &point0;
     typename decltype(gf)::RangeType value{};
     gf.interpolate(value, ip0); // Warm the cache and lazy geometry outside timing.
@@ -97,11 +105,11 @@ namespace Rodin::Tests::Benchmarks
     };
     switch (state.range(1))
     {
-      case 0: // Quadrature cache hit.
+      case 0: // Repeated tabulated sample.
         for (auto _ : state)
           evaluate(ip0);
         break;
-      case 1: // Alternating samples force basis-cache refresh.
+      case 1: // Alternating samples retain the complete reference table.
         for (auto _ : state)
         {
           phase = 1 - phase;
@@ -146,6 +154,10 @@ namespace Rodin::Tests::Benchmarks
           benchmark::ClobberMemory();
         }
         break;
+      case 6: // Provenance alone retains the pointwise fallback.
+        for (auto _ : state)
+          evaluate(provenance);
+        break;
     }
     const auto expected = fn(*lastPoint);
     const Real error = [&] {
@@ -162,9 +174,9 @@ namespace Rodin::Tests::Benchmarks
   }
 
   const bool registeredInterpolation = [] {
-    const char* operations[] = {"QuadratureHit", "QuadratureMiss", "Pointwise",
-      "Reproject", "CrossSpaceAssignment", "FirstInterpolation"};
-    for (size_t operation = 0; operation < 6; ++operation)
+    const char* operations[] = {"QuadratureRepeat", "QuadratureAlternate", "Pointwise",
+      "Reproject", "CrossSpaceAssignment", "FirstInterpolation", "ProvenanceFallback"};
+    for (size_t operation = 0; operation < 7; ++operation)
     {
       const auto args = [&](auto* registration) {
         registration->Args({2, static_cast<int64_t>(operation)})

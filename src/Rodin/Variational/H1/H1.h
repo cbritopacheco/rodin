@@ -382,6 +382,7 @@ namespace Rodin::Variational
           Parent::operator=(other);
           m_mesh = other.m_mesh;
           m_closure = other.m_closure;
+          m_visited = other.m_visited;
           m_size = other.m_size;
         }
         return *this;

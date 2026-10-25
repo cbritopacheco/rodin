@@ -377,6 +377,7 @@ namespace Rodin::Geometry
       {
         if (this != &other)
         {
+          ++m_revision;
           m_maximalDimension = other.m_maximalDimension;
           m_dimension = other.m_dimension;
           m_count = other.m_count;
@@ -391,7 +392,34 @@ namespace Rodin::Geometry
       }
 
       /// @brief Move assignment operator.
-      Connectivity& operator=(Connectivity&&) = default;
+      Connectivity& operator=(Connectivity&& other) noexcept
+      {
+        if (this != &other)
+        {
+          ++m_revision;
+          m_maximalDimension = other.m_maximalDimension;
+          m_dimension = other.m_dimension;
+          m_count = std::move(other.m_count);
+          m_gcount = std::move(other.m_gcount);
+          m_index = std::move(other.m_index);
+          m_dirty = std::move(other.m_dirty);
+          m_geometry = std::move(other.m_geometry);
+          m_connectivity = std::move(other.m_connectivity);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Returns the revision of the stored topology.
+       * @returns Revision changed by explicit topology edits or replacement.
+       *
+       * Derived incidence computations retain this revision. Topology edits
+       * must not run concurrently with mesh evaluation.
+       */
+      size_t getRevision() const noexcept
+      {
+        return m_revision;
+      }
 
       /**
        * @brief Initializes connectivity for a mesh of given dimension.
@@ -713,6 +741,8 @@ namespace Rodin::Geometry
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
+        if constexpr (Archive::is_loading::value)
+          ++m_revision;
         ar & m_maximalDimension;
         ar & m_dimension;
         ar & m_count;
@@ -745,6 +775,7 @@ namespace Rodin::Geometry
         }
       }
 
+      size_t m_revision = 0; ///< Revision of explicitly supplied topology.
       size_t m_maximalDimension;
       size_t m_dimension;
       std::vector<size_t> m_count;

@@ -152,7 +152,8 @@ namespace Rodin::Variational
       template <class... Args>
       constexpr Derived& traceOf(const Args&... args)
       {
-        return static_cast<Derived&>(*this).traceOf(args...);
+        Parent::traceOf(args...);
+        return static_cast<Derived&>(*this);
       }
 
       /**

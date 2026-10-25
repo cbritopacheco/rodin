@@ -992,7 +992,11 @@ namespace Rodin::Geometry
 
   bool operator<(const Polytope& lhs, const Polytope& rhs)
   {
-    return lhs.getIndex() < rhs.getIndex();
+    const auto left = std::make_pair(lhs.getDimension(), lhs.getIndex());
+    const auto right = std::make_pair(rhs.getDimension(), rhs.getIndex());
+    if (left != right)
+      return left < right;
+    return std::less<const MeshBase*>{}(&lhs.getMesh(), &rhs.getMesh());
   }
 
   // ---- Polytope -----------------------------------------------------------
