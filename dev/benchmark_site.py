@@ -69,6 +69,23 @@ def rebase_links(markup, documentation_url):
                                               urljoin(documentation_url, m[2])) + m[1], markup)
 
 
+def benchmark_navigation(documentation, documentation_url):
+    """Reuse the documentation navigation, replacing only its search glyphs."""
+    header = re.search(r'<header\b[^>]*>.*?</header>', documentation, re.S)
+    if not header:
+        raise ValueError('Documentation navigation is missing')
+    markup = rebase_links(header[0], documentation_url)
+    icon = ('<svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true">'
+            '<path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>')
+    def search_control(match):
+        anchor = match[0].replace('m-doc-search-icon', 'm-doc-search-icon benchmark-search-trigger', 1)
+        anchor = re.sub(r'title="[^"]*"', 'title="Search benchmarks"', anchor)
+        anchor = anchor.replace('<svg ', '<svg class="benchmark-magnifier-icon" ', 1)
+        return anchor.replace('>', ' aria-label="Search benchmarks">' + icon, 1)
+    return re.sub(r'<a\b[^>]*class="[^"]*m-doc-search-icon[^"]*"[^>]*>.*?</a>',
+                  search_control, markup, flags=re.S)
+
+
 def build_site(manifest, documentation, output, configuration, documentation_url):
     records = inventory(manifest)
     catalogue = json.loads((documentation / 'rodin-module-catalogue.json').read_text())
@@ -80,6 +97,9 @@ def build_site(manifest, documentation, output, configuration, documentation_url
         raise ValueError('Documentation footer is missing')
     footer = rebase_links(footer[0], documentation_url if not documentation_url.startswith('../')
                          else '__RODIN_DOCS__/')
+    navigation = benchmark_navigation((documentation / 'index.html').read_text(),
+                                     documentation_url if not documentation_url.startswith('../')
+                                     else '__RODIN_DOCS__/')
     output.mkdir(parents=True, exist_ok=True)
     assets = output / 'assets'
     assets.mkdir(exist_ok=True)
@@ -165,7 +185,7 @@ def build_site(manifest, documentation, output, configuration, documentation_url
             title=title, value=value, prefix=prefix, configuration=configuration,
             breadcrumbs=breadcrumb, page=page, module=modules.get(value), groups=groups,
             children=cards,
-            contexts=contexts, footer=footer,
+            contexts=contexts, footer=footer, navigation=navigation,
             stylesheets=stylesheets, escape=escape, search=search)
         (directory / 'index.html').write_text(rendered.replace('__RODIN_DOCS__/', prefix + documentation_url))
     # Keep unregistered executables visible to maintainers; never claim a complete campaign.

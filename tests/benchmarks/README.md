@@ -246,8 +246,9 @@ keep that paragraph a concise explanation of the measured operation. The full
 mathematics and timing contract remain on the destination page.
 
 Benchmark pages use the same content grid, heading sizes and sidebar placement
-as the API documentation. The top bar contains a Rodin home link, a combined
-benchmark-and-search icon control, and the theme control. Both search icons
+as the API documentation. Its top bar reuses the rendered documentation navigation,
+including dropdowns, responsive controls and theme selection. Only search changes
+to a combined benchmark-and-search icon control. Both search icons
 open the same search overlay and share hover and keyboard focus behavior. The sidebar supplies
 section links and scroll-following highlights. Its controls retain the chosen
 side across pages without shifting the content column. Visibility follows the

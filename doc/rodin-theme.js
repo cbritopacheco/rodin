@@ -35,7 +35,7 @@
       'files.html': 'M6 3h9l4 4v14H6z M14 3v5h5'
     };
     for (const link of document.querySelectorAll('#m-navbar-collapse > .m-row > ol > li > a')) {
-      const drawing = paths[link.getAttribute('href')];
+      const drawing = paths[link.getAttribute('href')?.split('/').pop()];
       if (!drawing || link.querySelector('svg')) continue;
       const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       icon.setAttribute('viewBox', '0 0 24 24');
@@ -55,7 +55,7 @@
     const brand = document.querySelector('#m-navbar-brand');
     if (!brand) return false;
     if (document.querySelector('#rodin-theme-trigger')) return true;
-    if (!document.body?.classList.contains('rodin-benchmarks')) {
+    if (!brand.querySelector('.rodin-home-icon')) {
       const home = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       home.setAttribute('viewBox', '2 2 20 20');
       home.setAttribute('aria-hidden', 'true');

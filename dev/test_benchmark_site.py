@@ -14,7 +14,7 @@ class BenchmarkSiteTest(unittest.TestCase):
         docs = root / 'docs'
         docs.mkdir()
         (docs / 'theme.css').write_text(':root { --color: black; }')
-        (docs / 'index.html').write_text('<footer><nav>Rodin copyright · Created with Doxygen and m.css</nav></footer>')
+        (docs / 'index.html').write_text('<header><nav id="navigation"><a id="m-navbar-brand" href="index.html">Rodin</a><a href="pages.html">Pages</a><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg viewBox="0 0 16 16"></svg></a></nav></header><footer><nav>Rodin copyright · Created with Doxygen and m.css</nav></footer>')
         (docs / 'Doxygen.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
         overview = {'brief': 'Matrix operations.', 'representative': '<code>Ax</code>',
                     'description': '<p><a href="class_matrix.html">Matrices</a>.</p>'}
@@ -65,14 +65,15 @@ class BenchmarkSiteTest(unittest.TestCase):
             self.assertNotIn('Convergence', index)
             self.assertNotIn('class="benchmark-breadcrumb"', index)
             self.assertNotIn('class="benchmark-home-link"', index)
-            self.assertIn('title="Search benchmarks"><svg class="rodin-benchmark-icon"', index)
+            self.assertIn('aria-label="Search benchmarks"><svg class="rodin-benchmark-icon"', index)
             self.assertIn('class="benchmark-magnifier-icon"', index)
             self.assertIn('class="benchmark-breadcrumb"', leaf)
-            self.assertIn('>RODIN</a>', index)
+            self.assertIn('>Rodin</a>', index)
+            self.assertIn('href="https://example.org/docs/pages.html"', index)
             self.assertNotIn('Go back to Rodin docs', index)
             self.assertNotIn('data-benchmark-history', index)
             self.assertIn('Rodin/Math/index.html', index)
-            footer = (docs / 'index.html').read_text()
+            footer = '<footer>' + (docs / 'index.html').read_text().split('<footer>', 1)[1]
             self.assertIn(footer, index)
             self.assertIn(footer, leaf)
             self.assertEqual((out / 'assets/Doxygen.svg').read_bytes(),
