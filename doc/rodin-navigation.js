@@ -90,6 +90,21 @@
   }
   navigation.append(list);
   if (benchmark) {
+    const contents = document.createElement('nav');
+    contents.className = 'm-block m-default';
+    contents.setAttribute('aria-label', 'Benchmark table of contents');
+    const label = document.createElement('strong');
+    label.textContent = 'Contents';
+    contents.append(label);
+    const sections = list.cloneNode(true);
+    const overview = sections.firstElementChild;
+    if (overview?.querySelector('ol')) {
+      contents.append(overview.querySelector('ol'));
+    } else {
+      contents.append(sections);
+    }
+    const configuration = benchmark.querySelector('.benchmark-configuration');
+    (configuration || benchmark.querySelector('h1')).after(contents);
     navigation.addEventListener('click', event => {
       const link = event.target.closest('a');
       const entry = entries.find(item => item.link === link);
