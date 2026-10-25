@@ -79,6 +79,8 @@
       parent.item.append(parent.list);
     }
     const item = document.createElement('li');
+    const category = entry.heading.closest('[data-category]')?.dataset.category;
+    if (category) item.dataset.category = category;
     entry.link = document.createElement('a');
     entry.link.href = '#' + encodeURIComponent(entry.target);
     entry.link.textContent = entry.title;
@@ -101,6 +103,20 @@
     });
   }
   content.parentElement.prepend(navigation);
+  // The rendered heading is the source of truth, including uncategorized pages.
+  const synchronizeColors = () => {
+    for (const entry of entries) {
+      entry.link.parentElement.style.setProperty('--rodin-section-color',
+        getComputedStyle(entry.heading).color);
+    }
+  };
+  synchronizeColors();
+  const themeObserver = new MutationObserver(synchronizeColors);
+  themeObserver.observe(document.documentElement, {
+    attributes: true, attributeFilter: ['data-theme']
+  });
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change', synchronizeColors);
+
   const layout = () => {
     if (benchmark) document.body.dataset.contentsSide = side;
     const unit = parseFloat(getComputedStyle(document.documentElement).fontSize);

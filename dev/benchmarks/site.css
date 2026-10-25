@@ -135,8 +135,8 @@
   stroke-linejoin: round;
 }
 
-.rodin-benchmarks .m-frame > h3,
-.rodin-benchmarks .m-frame > h3 > a
+.rodin-benchmarks [data-rodin-content] :is(h2, h3),
+.rodin-benchmarks [data-rodin-content] :is(h2, h3) > a
 {
   color: var(--category-color, var(--link-color));
 }

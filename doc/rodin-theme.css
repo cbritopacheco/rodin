@@ -519,6 +519,7 @@ body
 {
   --category-core: #87b5da;
   --category-model: #96b99c;
+  --category-physical: #d6a092;
   --category-integration: #c9b580;
   --category-infrastructure: #a99abb;
 }
@@ -530,6 +531,7 @@ body
   {
     --category-core: #28648f;
     --category-model: #39764d;
+    --category-physical: #a04f3d;
     --category-integration: #7e6527;
     --category-infrastructure: #756082;
   }
@@ -541,6 +543,7 @@ body
 {
   --category-core: #28648f;
   --category-model: #39764d;
+  --category-physical: #a04f3d;
   --category-integration: #7e6527;
   --category-infrastructure: #756082;
 }
@@ -551,22 +554,32 @@ main article section > h2 > a
   color: var(--link-color);
 }
 
-section[data-category="Core"]
+section[data-category="Core"],
+.rodin-page-nav li[data-category="Core"]
 {
   --category-color: var(--category-core);
 }
 
-section[data-category="Models"]
+section[data-category="Physical contexts"],
+.rodin-page-nav li[data-category="Physical contexts"]
+{
+  --category-color: var(--category-physical);
+}
+
+section[data-category="Models"],
+.rodin-page-nav li[data-category="Models"]
 {
   --category-color: var(--category-model);
 }
 
-section[data-category="Parallelism and integrations"]
+section[data-category="Parallelism and integrations"],
+.rodin-page-nav li[data-category="Parallelism and integrations"]
 {
   --category-color: var(--category-integration);
 }
 
-section[data-category="Infrastructure"]
+section[data-category="Infrastructure"],
+.rodin-page-nav li[data-category="Infrastructure"]
 {
   --category-color: var(--category-infrastructure);
 }
@@ -607,4 +620,23 @@ body
   --dim-filled-link-active-color: var(--link-active-color);
   --console-color: var(--code-color);
   --plot-background-color: var(--default-filled-background-color);
+}
+
+/* Match every navigation indicator to its rendered section heading. */
+.rodin-page-nav li > a
+{
+  border-left-color: var(--rodin-section-color, var(--link-color));
+}
+
+.rodin-page-nav li > a:hover,
+.rodin-page-nav li > a[aria-current="location"]
+{
+  color: var(--rodin-section-color, var(--link-color));
+  border-left-color: var(--rodin-section-color, var(--link-color));
+}
+
+.rodin-page-nav li > ol,
+.rodin-page-nav li > a::before
+{
+  border-color: var(--rodin-section-color, var(--line-color));
 }

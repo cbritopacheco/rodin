@@ -39,10 +39,10 @@
           <div class="m-block m-flat">{{ item.description|safe }}</div>
         </section>{% endfor %}
       </section>{% endfor %}
-      <h2>Physical contexts</h2>
+      <section data-category="Physical contexts"><h2>Physical contexts</h2>
       {% for context in contexts %}<section class="m-frame"><h3><a href="{{ prefix }}{{ context.path }}/index.html">{{ context.title }}</a></h3>
         <div class="m-block m-flat">{{ context.description|safe }}</div>
-      </section>{% endfor %}
+      </section>{% endfor %}</section>
       {% else %}
       {% if module %}<p class="m-text m-dim"><em>{{ module.brief|safe }}</em></p><div class="benchmark-representative">{{ module.representative|safe }}</div><div class="m-block m-flat">{{ module.description|safe }}</div>{% endif %}
       {{ page.description|safe }}
