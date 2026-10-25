@@ -275,6 +275,8 @@ namespace Rodin::Assembly
 #ifdef RODIN_USE_OPENMP
       /**
        * @brief Atomically accumulates @p s into @p value.
+       * @param[in,out] value Destination entry updated atomically.
+       * @param[in] s Contribution added to the destination.
        *
        * Only the OpenMP scatter needs this, and the @c omp @c atomic
        * directives are not valid outside an OpenMP build.
