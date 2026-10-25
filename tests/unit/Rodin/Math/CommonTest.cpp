@@ -497,6 +497,35 @@ TEST_F(CommonTest, DotProductVectorOrientation)
   check.template operator()<float>();
 }
 
+/// @brief Vector-shaped Rodin matrix owners contract without member dispatch or orientation restrictions.
+TEST_F(CommonTest, DotProductFixedMatrixVectors)
+{
+  FixedSizeMatrix<Complex, 3, 1> column;
+  FixedSizeMatrix<Complex, 1, 3> row;
+  column << Complex(1, 2), Complex(3, -1), Complex(-2, 4);
+  row << Complex(2, -1), Complex(-1, 3), Complex(4, 2);
+  Complex expected = 0;
+  for (Index i = 0; i < 3; ++i)
+    expected += column[i] * std::conj(row[i]);
+  EXPECT_EQ(Math::dot(column, row), expected);
+  EXPECT_EQ(column.dot(row), expected);
+  EXPECT_EQ(Math::dot(row, column), std::conj(expected));
+  EXPECT_EQ(row.dot(column), std::conj(expected));
+  EXPECT_EQ(Math::dot(column + column, row), Complex(2) * expected);
+
+  FixedSizeMatrix<float, 3, 1> real;
+  real << 1, 2, 3;
+  Complex mixed = 0;
+  for (Index i = 0; i < 3; ++i)
+    mixed += static_cast<Real>(real[i]) * std::conj(row[i]);
+  EXPECT_EQ(Math::dot(real, row), mixed);
+  EXPECT_EQ(real.dot(row), mixed);
+
+  FixedSizeMatrix<Complex, 0, 1> emptyColumn;
+  FixedSizeMatrix<Complex, 1, 0> emptyRow;
+  EXPECT_EQ(Math::dot(emptyColumn, emptyRow), Complex(0));
+}
+
 /// @brief Verifies min function for common test by checking tolerance-based numerical results, exact expected values.
 TEST_F(CommonTest, MinFunction)
 {

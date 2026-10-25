@@ -3972,7 +3972,7 @@ TEST(VectorElementValueSemantics, CopyAssignmentPreservesDescriptors)
     const auto compare = [&](const Element& actual) {
       ASSERT_EQ(actual.getGeometry(), source.getGeometry());
       ASSERT_EQ(actual.getCount(), source.getCount());
-      const auto& point = Polytope::Traits(source.getGeometry()).getCentroid();
+      const auto point = Polytope::Traits(source.getGeometry()).getCentroid();
       for (size_t i = 0; i < source.getCount(); ++i)
       {
         const auto expected = source.getBasis(i)(point);

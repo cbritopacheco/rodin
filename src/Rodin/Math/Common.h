@@ -651,7 +651,21 @@ namespace Rodin::Math
     {
       assert(lhs.size() == rhs.size());
       using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
-      return rhs.template cast<Scalar>().dot(lhs.template cast<Scalar>());
+      // Contract Eigen expressions directly: Rodin owners route member dot()
+      // back here. Align row/column vectors before the coefficientwise product.
+      if constexpr ((LHSDerived::RowsAtCompileTime == 1) !=
+        (RHSDerived::RowsAtCompileTime == 1))
+      {
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().transpose().array())
+          .sum();
+      }
+      else
+      {
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().array())
+          .sum();
+      }
     }
     else
     {
