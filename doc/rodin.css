@@ -127,6 +127,13 @@
   font-weight: 400;
 }
 
+pre.m-code,
+pre.m-console
+{
+  border: 1px solid var(--line-color);
+  border-radius: var(--border-radius);
+}
+
 pre.m-code
 {
   background-color: #181d24;

@@ -89,7 +89,7 @@
   @m_class{m-block m-success}
 
   @parblock
-  <h2>Bash commands</h2>
+  <h2>Bash installation</h2>
 
   @code{.bash}
   git clone --recursive https://github.com/cbritopacheco/rodin
@@ -184,10 +184,10 @@
 
   Rodin follows [mosra](https://mosra.cz/)'s
   ["batteries included, but screws not glued in"](https://magnum.graphics/)
-  philosophy from the Magnum Engine project: meshes, finite element spaces,
-  forms, assembly, and solvers work together, while their interfaces remain
-  accessible for extensions. A custom
-  solver, constitutive law, or integrator can reuse the surrounding components.
+  philosophy from the Magnum Engine project. For Rodin it means meshes, finite
+  element spaces, forms, assembly, and solvers work together, while their
+  interfaces remain accessible for extensions. A custom solver, constitutive
+  law, or integrator can reuse the surrounding components.
 
   The form language keeps the mathematics visible in C++. For real-valued
   scalar fields @f$u@f$, @f$v@f$, and @f$f@f$ on @f$\Omega@f$,

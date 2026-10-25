@@ -229,7 +229,9 @@ to code throughout the site and uses normal font weight for every token.
 
 The site uses a dark base palette and follows the system's light preference
 until a theme is selected explicitly. The icon at the right of the top bar
-opens a keyboard-accessible System / Light / Dark selector. Its choice is saved
+opens a System / Light / Dark menu below the icon, inside the page. Arrow keys,
+Home/End, Enter/Space, and Escape provide keyboard navigation; clicking outside
+closes the menu. Its choice is saved
 in local storage; selecting System resumes automatic changes. The two existing
 transparent logos switch with the active theme.
 
