@@ -344,7 +344,7 @@ namespace Rodin::Assembly
 
             bfi.setPolytope(*it);
             const auto& testDOFs = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
-                                                       : testFES.getDOFs(d, idx);
+                                                           : testFES.getDOFs(d, idx);
             rows.assign(testDOFs.begin(), testDOFs.end());
             const auto& cols = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
                                                         : trialFES.getDOFs(d, idx);
@@ -767,7 +767,7 @@ namespace Rodin::Assembly
               bfi.setPolytope(*it);
 
               const auto& testDOFs = bfi.getTestDOFIndices() ? *bfi.getTestDOFIndices()
-                                                            : testFES.getDOFs(d, idx);
+                                                             : testFES.getDOFs(d, idx);
               rowsDOF.assign(testDOFs.begin(), testDOFs.end());
               const auto& colsDOF = bfi.getTrialDOFIndices() ? *bfi.getTrialDOFIndices()
                                                              : trialFES.getDOFs(d, idx);

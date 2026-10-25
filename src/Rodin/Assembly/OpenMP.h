@@ -263,10 +263,18 @@ namespace Rodin::Assembly
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(const OpenMP& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(OpenMP&& other) = default;
 
       /**
@@ -525,10 +533,18 @@ namespace Rodin::Assembly
           m_assembly(std::move(other.m_assembly))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(const OpenMP& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(OpenMP&& other) = default;
 
       /**
@@ -649,10 +665,18 @@ namespace Rodin::Assembly
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(const OpenMP& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(OpenMP&& other) = default;
 
       /**
@@ -875,10 +899,18 @@ namespace Rodin::Assembly
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(const OpenMP& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       OpenMP& operator=(OpenMP&& other) = default;
 
       /**

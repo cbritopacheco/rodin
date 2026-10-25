@@ -235,10 +235,18 @@ namespace Rodin::Assembly
         : Parent(std::move(other))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(const Sequential& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(Sequential&& other) = default;
 
       /**
@@ -355,10 +363,18 @@ namespace Rodin::Assembly
         : Parent(std::move(other))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(const Sequential& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(Sequential&& other) = default;
 
       /**
@@ -517,10 +533,18 @@ namespace Rodin::Assembly
         : Parent(std::move(other))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(const Sequential& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(Sequential&& other) = default;
 
       /**
@@ -617,10 +641,18 @@ namespace Rodin::Assembly
         : Parent(std::move(other))
       {}
 
-      /// @brief Assigns the assembly policy and working storage.
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(const Sequential& other) = default;
 
-      /// @brief Moves the assembly policy and working storage.
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
       Sequential& operator=(Sequential&& other) = default;
 
       /**

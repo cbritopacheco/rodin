@@ -658,10 +658,10 @@ namespace Rodin::Math
       assert(lhs.rows() == rhs.rows());
       assert(lhs.cols() == rhs.cols());
       if constexpr (requires {
-                    typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
-                      Eigen::internal::scalar_product_op<LeftScalar,
-                        RightScalar>>::ReturnType;
-                  })
+                      typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
+                        Eigen::internal::scalar_product_op<LeftScalar,
+                          RightScalar>>::ReturnType;
+                    })
         return (lhs.array() * rhs.conjugate().array()).sum();
       else
       {
