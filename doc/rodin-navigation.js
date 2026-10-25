@@ -4,6 +4,43 @@
   const content = benchmark || document.querySelector('main > article > .m-container > .m-row > .m-col-l-10');
   if (!content) return;
 
+  const prepareContents = toc => {
+    for (const item of toc.querySelectorAll('li')) {
+      const children = item.querySelector(':scope > ul, :scope > ol');
+      const link = item.querySelector(':scope > a');
+      if (!children || !link || item.querySelector(':scope > button')) continue;
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'rodin-toc-toggle';
+      toggle.textContent = '−';
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Collapse ' + link.textContent.trim());
+      item.classList.add('rodin-toc-branch');
+      item.insertBefore(toggle, link);
+      toggle.addEventListener('click', () => {
+        children.hidden = !children.hidden;
+        toggle.textContent = children.hidden ? '+' : '−';
+        toggle.setAttribute('aria-expanded', String(!children.hidden));
+        toggle.setAttribute('aria-label',
+          (children.hidden ? 'Expand ' : 'Collapse ') + link.textContent.trim());
+      });
+    }
+  };
+  for (const toc of content.querySelectorAll('nav, .m-table-of-contents')) {
+    const heading = toc.querySelector(':scope > h2, :scope > h3');
+    if (!toc.matches('[aria-label*="table of contents"], .m-table-of-contents')
+        && heading?.textContent.trim() !== 'Contents') continue;
+    toc.classList.add('rodin-toc');
+    const disclosure = document.createElement('details');
+    disclosure.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = 'Contents';
+    heading?.remove();
+    disclosure.append(summary, ...toc.childNodes);
+    toc.append(disclosure);
+    prepareContents(toc);
+  }
+
   let selected = null;
   const entries = [];
   const targets = new Set();
@@ -33,7 +70,7 @@
   navigation.setAttribute('aria-label', 'On this page');
   const title = document.createElement('h2');
   title.textContent = 'On this page';
-  const header = document.createElement('div');
+  const header = document.createElement('summary');
   header.className = 'rodin-page-nav-header';
   const positions = document.createElement('div');
   positions.className = 'rodin-page-nav-positions';
@@ -67,15 +104,18 @@
     positions.append(button);
   }
   header.append(title, positions);
-  navigation.append(header);
-  const list = document.createElement('ol');
+  const disclosure = document.createElement('details');
+  disclosure.open = true;
+  disclosure.append(header);
+  navigation.append(disclosure);
+  const list = document.createElement('ul');
   const parents = [{ level: 0, list }];
   for (const entry of entries) {
     const level = Number(entry.heading.tagName.slice(1));
     while (parents[parents.length - 1].level >= level) parents.pop();
     const parent = parents[parents.length - 1];
     if (!parent.list) {
-      parent.list = document.createElement('ol');
+      parent.list = document.createElement('ul');
       parent.item.append(parent.list);
     }
     const item = document.createElement('li');
@@ -88,20 +128,23 @@
     parent.list.append(item);
     parents.push({ level, item });
   }
-  navigation.append(list);
+  disclosure.append(list);
   if (benchmark) {
     const contents = document.createElement('nav');
     contents.className = 'm-block m-default';
     contents.setAttribute('aria-label', 'Benchmark table of contents');
-    const label = document.createElement('strong');
+    const body = document.createElement('details');
+    body.open = true;
+    const label = document.createElement('summary');
     label.textContent = 'Contents';
-    contents.append(label);
+    body.append(label);
+    contents.append(body);
     const sections = list.cloneNode(true);
     const overview = sections.firstElementChild;
-    if (overview?.querySelector('ol')) {
-      contents.append(overview.querySelector('ol'));
+    if (overview?.querySelector('ul')) {
+      body.append(overview.querySelector('ul'));
     } else {
-      contents.append(sections);
+      body.append(sections);
     }
     const configuration = benchmark.querySelector('.benchmark-configuration');
     (configuration || benchmark.querySelector('h1')).after(contents);
@@ -118,6 +161,10 @@
     });
   }
   content.parentElement.prepend(navigation);
+  prepareContents(navigation);
+  for (const toc of content.querySelectorAll('nav[aria-label*="table of contents"]')) {
+    prepareContents(toc);
+  }
   // The rendered heading is the source of truth, including uncategorized pages.
   const synchronizeColors = () => {
     for (const entry of entries) {
@@ -142,6 +189,12 @@
     navigation.style.left = (side === 'left' ? bounds.left - width - unit : bounds.right + unit) + 'px';
     navigation.dataset.side = side;
     navigation.classList.toggle('rodin-page-nav-fit', width >= 9 * unit);
+    const controlGutter = list.getBoundingClientRect().left + .15 * unit;
+    for (const toggle of navigation.querySelectorAll('.rodin-toc-toggle')) {
+      if (toggle.parentElement.getClientRects().length) {
+        toggle.style.left = controlGutter - toggle.parentElement.getBoundingClientRect().left + 'px';
+      }
+    }
   };
 
   let current;

@@ -58,14 +58,14 @@ article section:target:has(.m-block) {
     margin: 0 0 0.75rem;
   }
 
-  .rodin-page-nav ol
+  .rodin-page-nav ul
   {
     list-style: none;
     padding: 0;
     margin: 0;
   }
 
-  .rodin-page-nav > ol
+  .rodin-page-nav > details > ul
   {
     max-height: calc(100vh - 8rem);
     overflow-y: auto;
@@ -88,19 +88,19 @@ article section:target:has(.m-block) {
     overflow-wrap: anywhere;
   }
 
-  .rodin-page-nav ol ol
+  .rodin-page-nav ul ul
   {
     margin-left: 0.6rem;
     padding-left: 0.7rem;
     border-left: 1px solid var(--line-color, #3c4554);
   }
 
-  .rodin-page-nav ol ol > li > a
+  .rodin-page-nav ul ul > li > a
   {
     position: relative;
   }
 
-  .rodin-page-nav ol ol > li > a::before
+  .rodin-page-nav ul ul > li > a::before
   {
     content: "";
     position: absolute;
@@ -280,7 +280,7 @@ pre.m-code
     flex-shrink: 0;
   }
 
-  .rodin-page-nav > ol
+  .rodin-page-nav > details > ul
   {
     min-height: 0;
     max-height: none;
@@ -667,3 +667,56 @@ main article :is(pre, code, .m-code) {
   letter-spacing: 0;
 }
 .rodin-page-nav a { line-height: 1.4; }
+
+/* Contents remain readable and can be folded without hiding the page. */
+nav[aria-label*="table of contents"] summary,
+.rodin-page-nav summary {
+  cursor: pointer;
+}
+.rodin-page-nav > details {
+  min-height: 0;
+  overflow-y: auto;
+}
+.rodin-page-nav ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.rodin-toc-branch {
+  position: relative;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1.25em minmax(0, 1fr);
+  align-items: baseline;
+}
+.rodin-toc-toggle {
+  position: static;
+  width: 1.1em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+.rodin-toc-branch > :is(ul, ol) {
+  grid-column: 1 / -1;
+}
+.rodin-page-nav .rodin-toc-branch {
+  display: block;
+}
+.rodin-page-nav > details > ul {
+  padding-left: 1.5rem;
+}
+.rodin-page-nav .rodin-toc-toggle {
+  position: absolute;
+  top: .25rem;
+}
+.rodin-toc-toggle:hover,
+.rodin-toc-toggle:focus-visible {
+  color: var(--link-color);
+}
+.rodin-toc-branch > [hidden] {
+  display: none !important;
+}
