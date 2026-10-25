@@ -18,6 +18,8 @@ import xml.etree.ElementTree as ET
 
 from documentation_hierarchy import prepare_hierarchy, symbol_index
 from documentation_highlighting import cpp_symbols
+from documentation_reference import prepare_reference_headers, render_references
+from documentation_search import assemble_search, prepare_class_search
 
 
 class Representative(HTMLParser):
@@ -173,6 +175,8 @@ def build(configuration, renderer, templates):
     xml = output / state.doxyfile['XML_OUTPUT']
     clear_generated_pages(xml, output / state.doxyfile['HTML_OUTPUT'])
     subprocess.run(['doxygen', str(doxyfile)], cwd=doxyfile.parent, check=True)
+    prepare_reference_headers(xml)
+    print('Indexed forward-declared class families:', prepare_class_search(xml))
     prepare_inline_images(xml, Path(__file__).resolve().parents[1] / 'doc')
     print('Completed documentation hierarchy:', prepare_hierarchy(xml))
     stylesheets = state.config['STYLESHEETS']
@@ -208,6 +212,10 @@ def build(configuration, renderer, templates):
             index=index.index, DOXYGEN_VERSION=index.version, FILENAME=filename,
             SEARCHDATA_FORMAT_VERSION=mcss.searchdata_format_version, **state.doxyfile, **state.config)
         (output / state.doxyfile['HTML_OUTPUT'] / filename).write_text(rendered.rstrip() + '\n')
+    print('Rendered reference layouts:', render_references(xml, output / state.doxyfile['HTML_OUTPUT']))
+    print('Ranked general class search references:', assemble_search(
+        xml, output / state.doxyfile['HTML_OUTPUT'], renderer.parent / 'search.js',
+        Path(__file__).resolve().parents[1] / 'doc' / 'rodin-search.js', mcss.searchdata_format_version))
     print('Rendered concise overview for', len(data), 'modules.')
 
 

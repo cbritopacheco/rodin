@@ -293,6 +293,7 @@
   @endcode
 
   For MPI-distributed I/O, pass the communicator:
+
   @code{.cpp}
   IO::XDMF xdmf("distributed_output", MPI_COMM_WORLD);
   @endcode

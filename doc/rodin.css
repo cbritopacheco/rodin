@@ -277,3 +277,214 @@ pre.m-code
     flex: 1 1 auto;
   }
 }
+
+/* Reference declarations have their own visual hierarchy; titles stay short. */
+.rodin-reference-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-bottom: .7rem;
+  font-size: .9rem;
+}
+
+.rodin-reference-breadcrumb a {
+  font-weight: 400;
+}
+
+.rodin-reference-brief {
+  color: var(--dim-color);
+  font-style: italic;
+}
+
+.rodin-reference-include {
+  color: var(--dim-color);
+  font-size: .9rem;
+}
+
+pre.rodin-declaration {
+  padding: 1.15rem 1.3rem;
+  line-height: 1.65;
+  overflow-x: auto;
+}
+
+.rodin-declaration *,
+.rodin-bindings code,
+.rodin-specializations code,
+section.m-doc-details h3,
+section.m-doc-details h3 a {
+  font-weight: 400;
+}
+
+section.m-doc-details h3 a.m-doc-self {
+  color: var(--link-color);
+}
+
+.rodin-bindings td,
+.rodin-specializations td {
+  vertical-align: top;
+}
+
+.rodin-bindings td:first-child {
+  width: 5rem;
+}
+
+.rodin-specializations td:first-child {
+  width: 50%;
+}
+
+.rodin-bindings code,
+.rodin-specializations code {
+  overflow-wrap: anywhere;
+}
+
+.rodin-specializations details {
+  margin-top: .45rem;
+  font-size: .85rem;
+}
+
+.rodin-specializations pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Nested base-class specializations must wrap on narrow reference pages. */
+dl.m-doc dt a.m-doc {
+  overflow-wrap: anywhere;
+}
+
+/* Declaration qualifiers remain readable without badge borders or fills. */
+.m-doc-details .m-doc-wrap .m-label,
+dl.m-doc .m-doc-wrap .m-label,
+h1 .m-label {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: inherit;
+  vertical-align: baseline;
+}
+
+.m-doc-wrap .m-label.m-warning,
+h1 .m-label.m-warning {
+  color: var(--warning-color);
+}
+
+/* Separate parameter names from their input/output direction labels. */
+section.m-doc-details table td:first-child > .m-label.m-flat {
+  margin-inline-start: .35rem;
+  margin-inline-end: .15rem;
+}
+
+/* One-hop inheritance diagrams stay small; complete relationships follow. */
+.rodin-inheritance {
+  margin: 1.5rem 0;
+  padding: .8rem;
+  border: 1px solid var(--line-color);
+  border-radius: .2rem;
+  text-align: center;
+}
+
+.rodin-inheritance figcaption,
+.rodin-inheritance-qualifiers {
+  color: var(--dim-color);
+  font-size: .85rem;
+}
+
+.rodin-inheritance figcaption {
+  margin-bottom: .75rem;
+}
+
+.rodin-inheritance-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem;
+  margin: .6rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rodin-inheritance-row li,
+.rodin-inheritance-current {
+  display: inline-block;
+  padding: .3rem .6rem;
+  border: 1px solid var(--line-color);
+  border-radius: .2rem;
+  overflow-wrap: anywhere;
+}
+
+.rodin-inheritance-current {
+  color: var(--link-color);
+}
+
+.rodin-inheritance-arrow {
+  color: var(--dim-color);
+  line-height: 1.2;
+}
+
+.rodin-inheritance-qualifiers {
+  display: block;
+  margin-top: .25rem;
+}
+
+.rodin-relations td {
+  vertical-align: top;
+}
+
+.rodin-relations td:first-child {
+  width: 45%;
+}
+
+.rodin-relations code {
+  overflow-wrap: anywhere;
+}
+
+.rodin-relations details {
+  margin-top: .4rem;
+  font-size: .85rem;
+}
+
+.rodin-relations pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rodin-inherited-members {
+  margin: .4rem 0;
+  padding-inline-start: 1.2rem;
+}
+
+.rodin-inheritance-row li,
+.rodin-inheritance-current {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Native disclosure buttons keep long derived-class lists compact. */
+.rodin-derived-disclosure > .rodin-disclosure-button {
+  display: inline-block;
+  list-style: none;
+  padding: .4rem .8rem;
+  margin: .35rem 0 .8rem;
+  border: 1px solid var(--line-color);
+  border-radius: .2rem;
+  color: var(--link-color);
+  cursor: pointer;
+}
+
+.rodin-disclosure-button::-webkit-details-marker {
+  display: none;
+}
+
+.rodin-derived-disclosure > .rodin-disclosure-button .rodin-see-less,
+.rodin-derived-disclosure[open] > .rodin-disclosure-button .rodin-see-more {
+  display: none;
+}
+
+.rodin-derived-disclosure[open] > .rodin-disclosure-button .rodin-see-less {
+  display: inline;
+}
+
+.rodin-disclosure-button:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 3px;
+}

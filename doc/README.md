@@ -249,3 +249,78 @@ colors. Light-mode accents are darker to preserve readability.
 The documentation builder bundles them with their variables intact and loads
 Rodin's overrides afterwards. Upstream m.css is not modified. Update palettes
 in Rodin's stylesheet rather than changing the vendor files or generated HTML.
+
+## Class and Specialization References
+
+`dev/documentation_reference.py` presents reference pages after the pinned m.css
+renderer has produced the API and search index. Class titles use the local
+class name; namespace breadcrumbs and a linked **Defined in** line establish
+the scope and source header. The complete declaration appears separately in a
+highlighted code block. Template parameters and existing member documentation
+remain available below it.
+
+Specializations list their argument bindings against the primary template's
+parameter names. Parameters that remain generic are preserved in the declaration;
+concrete instantiations are never inferred. Primary-template pages and class
+lists group the available specializations into a two-column table. Every row
+links to its original page and expands to show the complete declaration.
+
+Member signatures omit the current class or namespace qualification and avoid
+repeating the enclosing class template declaration. Return types, member template
+parameters, qualifiers, external namespace qualifications and original member
+anchors are retained. Search continues to use the complete Doxygen names.
+Included API headers without authored file prose receive a generated file brief
+so **Defined in** links resolve to actual file pages. C++ sources and upstream
+m.css remain unchanged.
+
+### Search Ranking
+
+Class-name searches promote matching general class and primary-template pages
+before specializations and members, across every module. Among equally close
+matches, shorter qualified names come first. The requested result limit is applied
+after promotion, so a primary excluded by the initial broad lookup can still be
+returned. Deprecated and deleted declarations retain their normal placement.
+Queries containing template arguments, or ending in `::` or `/`, retain the
+upstream behavior for specialized types and scope-member lists.
+
+`dev/documentation_search.py` derives the general-class catalogue from Doxygen
+XML. Family landing pages backed by otherwise undocumented forward declarations
+receive a generated brief so that they are indexed as well. `rodin-search.js`
+uses the existing search index to retrieve and rank results; complete names,
+links, autocomplete, and keyboard navigation remain available. The builder
+appends this extension to the unchanged upstream search engine and publishes a
+content-versioned bundle. Vendor files are not modified. Search-ranking regression tests use Node.js in
+addition to the Python documentation test suite.
+
+### Inheritance and Type Aliases
+
+Reference pages show **Inherits from** and **Derived classes** tables using the
+actual Doxygen inheritance edges. Linked briefs supply the responsibility or
+description; full type arguments, access and virtual-inheritance qualifiers remain
+available. Template specialization alone does not create an inheritance edge.
+
+A small **Direct inheritance** diagram shows the current class and at most three
+distinct base and child class families on either side, grouping repeated
+specializations. Whenever more than three underlying base or derived entries
+exist, a **+N more** link leads to the corresponding complete table, including
+when specialization grouping leaves fewer than three diagram nodes. Derived-class
+tables initially show at most three entries, prioritizing distinct families.
+A native **See more / See less** disclosure button reveals the remaining entries;
+all exact types and links remain in the generated page. The diagram uses ordinary linked HTML and CSS, with no Graphviz or
+JavaScript dependency. It wraps on small screens.
+
+**Overrides** links the overriding members to the base declarations identified by
+Doxygen. **Inherited interface** groups public and protected members by their
+actual declaring base, inside expandable lists. Constructors, destructors and
+private members and friends are excluded from those inherited lists. These sections preserve
+the original member documentation and anchors rather than duplicate contracts.
+Improve the shared contract in a base class's own Doxygen comment; explain
+special behavior in its overrides.
+
+Type-alias detail headings omit the current enclosing scope before the alias
+name, while retaining the aliased type, external qualifiers, literals and links.
+These transformations run inside `RodinDoxygen` and the documentation CI build.
+
+Standalone **See also** class links already represented by inheritance or
+specialization navigation are omitted. Other cross-references, explanatory prose,
+technical specialization references and member-specific contracts are retained.
