@@ -283,6 +283,8 @@ namespace Rodin::Variational
       P0& operator=(P0&& other) = default;
 
       /// @brief Assigns the scalar basis and matrix component dimensions.
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
       P0& operator=(const P0& other) = default;
 
       /**
@@ -434,9 +436,11 @@ namespace Rodin::Variational
        * @return Pushforward transformation object
        *
        * The pushforward maps a function from reference space to physical space.
+       * @param geometry Polytope used to construct the coordinate mapping.
        */
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& geometry, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
@@ -728,6 +732,9 @@ namespace Rodin::Variational
       using ContextType = typename ScalarSpace::ContextType;
 
       /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
+      /// @param mesh Mesh on which the finite element space is defined.
+      /// @param rows Number of rows in the matrix-valued range.
+      /// @param cols Number of columns in the matrix-valued range.
       P0(const MeshType& mesh, size_t rows, size_t cols)
         : m_scalar(ScalarSpace(mesh)),
           m_rows(rows),
@@ -763,16 +770,22 @@ namespace Rodin::Variational
       }
 
       /// @brief Copies the space and its DOF maps.
-      P0(const P0&) = default;
+      /// @param other Source object to copy or move from.
+      P0([[maybe_unused]] const P0& other) = default;
 
       /// @brief Moves the space and its DOF maps.
-      P0(P0&&) = default;
+      /// @param other Source object to copy or move from.
+      P0([[maybe_unused]] P0&& other) = default;
 
       /// @brief Copies the space and its DOF maps.
-      P0& operator=(const P0&) = default;
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
+      P0& operator=([[maybe_unused]] const P0& other) = default;
 
       /// @brief Moves the space and its DOF maps.
-      P0& operator=(P0&&) = default;
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
+      P0& operator=([[maybe_unused]] P0&& other) = default;
 
       size_t getSize() const override
       {
@@ -784,12 +797,14 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the number of matrix rows.
+      /// @returns Number of rows in the matrix-valued range.
       size_t getRows() const
       {
         return m_rows;
       }
 
       /// @brief Returns the number of matrix columns.
+      /// @returns Number of columns in the matrix-valued range.
       size_t getColumns() const
       {
         return m_cols;
@@ -800,12 +815,16 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the scalar space supplying topology and component-independent maps.
+      /// @returns Underlying scalar finite element space.
       const ScalarSpace& getScalarSpace() const
       {
         return m_scalar;
       }
 
       /// @brief Returns the matrix reference element of a mesh entity.
+      /// @param d Entity dimension.
+      /// @param i Local index of the polytope in its dimension.
+      /// @returns Finite element associated with the specified polytope.
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return m_elements.at(m_scalar.getFiniteElement(d, i).getGeometry());
@@ -824,6 +843,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Pulls a physical callable back to a reference element.
+      /// @param p Dimension and local index identifying the polytope.
+      /// @param value Field callable composed with the coordinate mapping.
+      /// @returns Pullback operation for the specified polytope.
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& value) const
       {
@@ -831,6 +853,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Pushes a reference callable forward to the physical mesh.
+      /// @param p Dimension and local index identifying the polytope.
+      /// @param value Field callable composed with the coordinate mapping.
+      /// @returns Pushforward operation for the specified polytope.
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& p, Callable&& value) const
       {

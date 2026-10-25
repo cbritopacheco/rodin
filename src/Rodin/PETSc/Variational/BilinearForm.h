@@ -153,6 +153,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Copy constructor (deep-copies the PETSc matrix).
+      /// @param other Source object to copy or move from.
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u),
@@ -176,6 +177,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Move constructor.
+      /// @param other Source object to copy or move from.
       BilinearForm(BilinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -283,12 +285,14 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns a mutable reference to the assembled PETSc system matrix @f$ A @f$.
+      /// @returns PETSc matrix storing the assembled bilinear form.
       OperatorType& getOperator() override
       {
         return m_operator;
       }
 
       /// @brief Returns a read-only reference to the assembled PETSc system matrix @f$ A @f$.
+      /// @returns PETSc matrix storing the assembled bilinear form.
       const OperatorType& getOperator() const override
       {
         return m_operator;
@@ -307,18 +311,21 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns a reference to the associated trial function.
+      /// @returns Trial function used by the assembled form.
       const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
       {
         return m_u.get();
       }
 
       /// @brief Returns a reference to the associated test function.
+      /// @returns Test function used by the assembled form.
       const TestFunction<TestFES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
       /// @brief Creates a heap-allocated copy of this bilinear form.
+      /// @returns Pointer to a newly allocated copy of this object.
       BilinearForm* copy() const noexcept override
       {
         return new BilinearForm(*this);

@@ -345,6 +345,7 @@ namespace Rodin::Geometry
        * A defaulted copy would leave them aliasing the source's @c right map
        * (dangling once the source dies), so relink them into this object's
        * own @c right map.
+       * @param other Source object to copy or move from.
        */
       Connectivity(const Connectivity& other)
         : m_maximalDimension(other.m_maximalDimension),
@@ -364,14 +365,17 @@ namespace Rodin::Geometry
        *
        * Moving a @c std::unordered_map preserves node addresses, so the
        * @c left pointers remain valid; a defaulted move is correct.
+       * @param other Source object to copy or move from.
        */
-      Connectivity(Connectivity&&) = default;
+      Connectivity([[maybe_unused]] Connectivity&& other) = default;
 
       /**
        * @brief Copy assignment operator.
        *
        * See the copy constructor: @c left is relinked into this object's
        * own @c right map.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
        */
       Connectivity& operator=(const Connectivity& other)
       {
@@ -392,6 +396,8 @@ namespace Rodin::Geometry
       }
 
       /// @brief Move assignment operator.
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
       Connectivity& operator=(Connectivity&& other) noexcept
       {
         if (this != &other)
@@ -730,6 +736,7 @@ namespace Rodin::Geometry
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true);
 
       /// @brief Returns the maximal polytope dimension present in this connectivity.
+      /// @returns Largest polytope dimension stored in the mesh.
       size_t getMaximalDimension() const;
 
       /**

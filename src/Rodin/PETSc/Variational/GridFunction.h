@@ -568,6 +568,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets every entry of the PETSc vector to a scalar value.
+      /// @param value Field callable composed with the coordinate mapping.
+      /// @returns Reference to this object after assignment.
       GridFunction& operator=(const ScalarType& value)
       {
         static_cast<const GridFunction&>(*this).flush();
@@ -1547,6 +1549,7 @@ namespace Rodin::Variational
        * expose, such as block-vector manipulation.
        *
        * @see sync(), flush(), release(), axpy(), setData()
+       * @returns Underlying PETSc vector.
        */
       auto& getData()
       {
@@ -1560,6 +1563,7 @@ namespace Rodin::Variational
        * the flushing requirements before passing the handle to PETSc.
        *
        * @see sync(), flush(), release()
+       * @returns Underlying PETSc vector.
        */
       const DataType& getData() const
       {
@@ -1569,6 +1573,7 @@ namespace Rodin::Variational
       /**
        * @brief Returns the current read-access state, including the
        *        acquired flag and the raw pointer (may be null if not acquired).
+       * @returns Read-access guard for the vector storage.
        */
       const ArrayRead& getArrayRead() const
       {
@@ -1578,6 +1583,7 @@ namespace Rodin::Variational
       /**
        * @brief Returns the current write-access state, including the
        *        acquired flag and the raw pointer (may be null if not acquired).
+       * @returns Write-access guard for the vector storage.
        */
       const ArrayWrite& getArrayWrite() const
       {
@@ -1587,6 +1593,8 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of the finite element space on
        *        the given polytope.
+       * @param polytope Polytope used to construct the coordinate mapping.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
@@ -1713,15 +1721,15 @@ namespace Rodin::PETSc::Variational
     public:
       /// @brief Parent specialization type.
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
-      using Parent::Parent; ///< Inherit all constructors.
-      using Parent::operator[]; ///< Inherit element-access operators.
-      using Parent::operator(); ///< Inherit point-evaluation operator.
-      using Parent::getValue; ///< Inherit getValue.
-      using Parent::operator=; ///< Inherit assignment operators.
-      using Parent::operator+=; ///< Inherit addition operators.
-      using Parent::operator-=; ///< Inherit subtraction operators.
-      using Parent::operator*=; ///< Inherit multiplication operators.
-      using Parent::operator/=; ///< Inherit division operators.
+      using Parent::Parent; // Inherit all constructors.
+      using Parent::operator[]; // Inherit element-access operators.
+      using Parent::operator(); // Inherit point-evaluation operator.
+      using Parent::getValue; // Inherit getValue.
+      using Parent::operator=; // Inherit assignment operators.
+      using Parent::operator+=; // Inherit addition operators.
+      using Parent::operator-=; // Inherit subtraction operators.
+      using Parent::operator*=; // Inherit multiplication operators.
+      using Parent::operator/=; // Inherit division operators.
   };
 
   /**

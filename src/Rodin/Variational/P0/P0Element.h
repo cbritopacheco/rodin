@@ -566,6 +566,7 @@ namespace Rodin::Variational
        * @brief Constructor with geometry, defaulting vdim to spatial dimension.
        *
        * Keeps backward compatibility with previous behaviour.
+       * @param geometry Reference polytope geometry.
        */
       constexpr P0Element(Geometry::Polytope::Type geometry)
         : P0Element(geometry, Geometry::Polytope::Traits(geometry).getDimension())
@@ -592,6 +593,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Copy constructor.
+      /// @param other Source object to copy or move from.
       constexpr P0Element(const P0Element& other)
         : Parent(other),
           m_vdim(other.m_vdim),
@@ -600,6 +602,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Source object to copy or move from.
       constexpr P0Element(P0Element&& other)
         : Parent(std::move(other)),
           m_vdim(std::exchange(other.m_vdim, 0)),
@@ -608,6 +611,8 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy assignment.
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
       constexpr P0Element& operator=(const P0Element& other)
       {
         if (this != &other)
@@ -616,6 +621,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Move assignment.
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
       constexpr P0Element& operator=(P0Element&& other)
       {
         Parent::operator=(std::move(other));
@@ -626,6 +633,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the number of degrees of freedom of the element.
+      /// @returns Number of degrees of freedom for the requested entity or element.
       constexpr size_t getCount() const
       {
         // One DOF per vector component (all share the same barycenter)
@@ -633,27 +641,36 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
+      /// @param local Local degree-of-freedom index.
+      /// @returns Degree-of-freedom functional associated with the local index.
       constexpr const auto& getLinearForm(size_t local) const
       {
         return m_lfs[local];
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param local Local degree-of-freedom index.
+      /// @returns Basis function associated with the local degree of freedom.
       constexpr const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];
       }
 
       /// @brief Gets the node of a local degree of freedom.
+      /// @param local Local degree-of-freedom index.
+      /// @returns Reference node associated with the local degree of freedom.
       constexpr const Math::SpatialVector<Real>& getNode(size_t local) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
       /// @brief Evaluates the integrand into the output argument.
+      /// @param out Output value receiving the basis-coefficient contraction.
+      /// @param coefficient Callable returning the coefficient associated with a local basis index.
+      /// @param point Reference coordinates of the evaluation point.
       template <class Coefficient>
-      constexpr void evaluate(
-        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint&) const
+      constexpr void evaluate(RangeType& out, Coefficient&& coefficient,
+        [[maybe_unused]] const Math::SpatialPoint& point) const
       {
         out.resize(m_vdim);
         for (size_t component = 0; component < m_vdim; ++component)
@@ -661,6 +678,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order.
+      /// @returns Polynomial order on the requested polytope, or no value when unavailable.
       constexpr size_t getOrder() const
       {
         return 0;
@@ -701,11 +719,17 @@ namespace Rodin::Variational
       using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
 
       /// @brief Replicates a scalar reference element for a rectangular matrix range.
+      /// @param geometry Reference polytope geometry.
+      /// @param rows Number of rows in the matrix-valued range.
+      /// @param cols Number of columns in the matrix-valued range.
       P0Element(Geometry::Polytope::Type geometry, size_t rows, size_t cols)
         : P0Element(ScalarElement(geometry), rows, cols)
       {}
 
       /// @brief Replicates a scalar reference element for a rectangular matrix range.
+      /// @param scalar Scalar finite element used for the componentwise construction.
+      /// @param rows Number of rows in the matrix-valued range.
+      /// @param cols Number of columns in the matrix-valued range.
       P0Element(const ScalarElement& scalar, size_t rows, size_t cols)
         : Parent(scalar.getGeometry()),
           m_scalar(scalar),
@@ -721,16 +745,22 @@ namespace Rodin::Variational
       }
 
       /// @brief Copies the element and its component extents.
-      P0Element(const P0Element&) = default;
+      /// @param other Source object to copy or move from.
+      P0Element([[maybe_unused]] const P0Element& other) = default;
 
       /// @brief Moves the element and its component extents.
-      P0Element(P0Element&&) = default;
+      /// @param other Source object to copy or move from.
+      P0Element([[maybe_unused]] P0Element&& other) = default;
 
       /// @brief Copies the element and its component extents.
-      P0Element& operator=(const P0Element&) = default;
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
+      P0Element& operator=([[maybe_unused]] const P0Element& other) = default;
 
       /// @brief Moves the element and its component extents.
-      P0Element& operator=(P0Element&&) = default;
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
+      P0Element& operator=([[maybe_unused]] P0Element&& other) = default;
 
       /// @brief Matrix basis with one nonzero entry.
       class BasisFunction
@@ -830,6 +860,9 @@ namespace Rodin::Variational
       };
 
       /// @brief Contracts each matrix entry with the scalar reference element.
+      /// @param out Output value receiving the basis-coefficient contraction.
+      /// @param coefficient Callable returning the coefficient associated with a local basis index.
+      /// @param point Reference coordinates of the evaluation point.
       template <class Coefficient>
       void evaluate(
         RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& point) const
@@ -845,36 +878,43 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the number of local matrix basis functions.
+      /// @returns Number of degrees of freedom for the requested entity or element.
       size_t getCount() const
       {
         return m_scalar.getCount() * m_rows * m_cols;
       }
 
       /// @brief Returns the polynomial order when it is known.
+      /// @returns Polynomial order on the requested polytope, or no value when unavailable.
       size_t getOrder() const
       {
         return m_scalar.getOrder();
       }
 
       /// @brief Returns the number of matrix rows.
+      /// @returns Number of rows in the matrix-valued range.
       size_t getRows() const
       {
         return m_rows;
       }
 
       /// @brief Returns the number of matrix columns.
+      /// @returns Number of columns in the matrix-valued range.
       size_t getColumns() const
       {
         return m_cols;
       }
 
       /// @brief Returns the scalar element whose basis is replicated for matrix entries.
+      /// @returns Underlying scalar finite element.
       const ScalarElement& getScalarElement() const
       {
         return m_scalar;
       }
 
       /// @brief Returns the scalar reference node for the selected component DOF.
+      /// @param local Local degree-of-freedom index.
+      /// @returns Reference node associated with the local degree of freedom.
       decltype(auto) getNode(size_t local) const
       {
         assert(local < getCount());
@@ -882,6 +922,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns a basis value at the bound integration point.
+      /// @param local Local degree-of-freedom index.
+      /// @returns Basis function associated with the local degree of freedom.
       BasisFunction getBasis(size_t local) const
       {
         assert(local < getCount());
@@ -890,6 +932,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the scalar nodal functional applied to the selected matrix entry.
+      /// @param local Local degree-of-freedom index.
+      /// @returns Degree-of-freedom functional associated with the local index.
       LinearForm getLinearForm(size_t local) const
       {
         assert(local < getCount());

@@ -142,6 +142,7 @@ namespace Rodin::Geometry
        * The quadrature cache is intentionally rebuilt lazily because cached
        * quadrature points store references to the mesh object that created
        * them.
+       * @param other Source object to copy or move from.
        */
       Mesh(const Mesh& other);
 
@@ -150,13 +151,18 @@ namespace Rodin::Geometry
        *
        * The quadrature cache is intentionally not moved because cached
        * quadrature points store references to the source mesh object.
+       * @param other Source object to copy or move from.
        */
       Mesh(Mesh&& other);
 
       /// @brief Copy assignment operator.
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
       Mesh& operator=(const Mesh& other);
 
       /// @brief Move assignment operator.
+      /// @param other Source object to copy or move from.
+      /// @returns Reference to this object after assignment.
       Mesh& operator=(Mesh&& other);
 
       /**
@@ -248,6 +254,8 @@ namespace Rodin::Geometry
       bool isSubMesh() const override;
 
       /// @brief Checks whether a point is attached to this mesh or its local shard.
+      /// @param p Point whose mesh attachment is checked.
+      /// @returns Whether the point belongs to this distributed mesh or its local shard.
       bool isLocalPoint(const Point& p) const override;
 
       /**
@@ -790,6 +798,7 @@ namespace Rodin::Geometry
       /**
        * @brief Submesh downcast is unsupported for distributed meshes.
        * @throws Alert::Exception always.
+       * @returns Never returns; the distributed mesh does not support this conversion.
        */
       SubMeshBase& asSubMesh() override
       {
@@ -801,6 +810,7 @@ namespace Rodin::Geometry
       /**
        * @brief Const submesh downcast is unsupported for distributed meshes.
        * @throws Alert::Exception always.
+       * @returns Never returns; the distributed mesh does not support this conversion.
        */
       const SubMeshBase& asSubMesh() const override
       {
@@ -810,9 +820,11 @@ namespace Rodin::Geometry
       }
 
       /// @brief Returns mutable connectivity data of the local shard.
+      /// @returns Topological connectivity of this mesh.
       Connectivity<Context::Local>& getConnectivity() override;
 
       /// @brief Returns const connectivity data of the local shard.
+      /// @returns Topological connectivity of this mesh.
       const Connectivity<Context::Local>& getConnectivity() const override;
 
       /// @brief Options controlling iterative reconciliation rounds.

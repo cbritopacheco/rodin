@@ -498,7 +498,7 @@ inline on the pull request. Run them before claiming a change is finished:
 python3 dev/check_format.py --base origin/develop   # then: git clang-format origin/develop
 python3 dev/style_lint.py                           # guards, license blocks, @file docs, PETSc containment
 python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
-python3 dev/check_doxygen_warnings.py               # requires doxygen 1.14.0 exactly
+python3 dev/check_doxygen_warnings.py               # requires doxygen 1.15.0 exactly
 ```
 
 Each compares against a committed baseline in `dev/`. **A baseline may only

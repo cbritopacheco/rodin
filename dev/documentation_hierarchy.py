@@ -1,7 +1,65 @@
 """Complete navigation relationships in generated Doxygen XML before rendering."""
+import copy
 from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
+
+
+def prepare_member_definitions(xml):
+    """Resolve Doxygen member references for the pinned m.css XML parser.
+
+    Doxygen emits some namespace/file members as references to definitions in
+    another compound. m.css expects self-contained sections. Inline the genuine
+    definitions while retaining their original IDs, descriptions and locations.
+    """
+    xml = Path(xml)
+    trees = {path: ET.parse(path) for path in xml.glob('*.xml')}
+    members = {member.get('id'): member for tree in trees.values()
+               for member in tree.getroot().iter('memberdef')}
+    member_sections = {member.get('id'): section.get('kind')
+                       for tree in trees.values()
+                       for section in tree.findall('./compounddef/sectiondef')
+                       for member in section.findall('memberdef')}
+    changed = set()
+    count = 0
+    for path, tree in trees.items():
+        for section in tree.findall('./compounddef/sectiondef'):
+            for index, member in enumerate(list(section)):
+                if member.tag != 'member':
+                    continue
+                identity = member.get('refid')
+                if identity not in members:
+                    raise ValueError('Missing Doxygen member definition: ' + str(identity))
+                definition = copy.deepcopy(members[identity])
+                definition.tail = member.tail
+                section.remove(member)
+                section.insert(index, definition)
+                changed.add(path)
+                count += 1
+    # Members of undocumented namespaces can carry file-owned IDs while their
+    # definitions appear only in the namespace XML. Restore their documented
+    # declarations on that file page, where Doxygen's own references point.
+    for identity, member in members.items():
+        owner = xml / (identity.rsplit('_1', 1)[0] + '.xml')
+        if owner not in trees:
+            continue
+        definition = trees[owner].find('compounddef')
+        if definition is None or definition.get('kind') != 'file':
+            continue
+        documented = any(''.join(node.itertext()).strip() for node in member.findall('briefdescription') +
+                         member.findall('detaileddescription') + member.findall('enumvalue/briefdescription'))
+        if not documented or definition.find('.//memberdef[@id="' + identity + '"]') is not None:
+            continue
+        kind = member_sections[identity]
+        section = definition.find('sectiondef[@kind="' + kind + '"]')
+        if section is None:
+            section = ET.SubElement(definition, 'sectiondef', kind=kind)
+        section.append(copy.deepcopy(member))
+        changed.add(owner)
+        count += 1
+    for path in changed:
+        trees[path].write(path, encoding='utf-8', xml_declaration=True)
+    return count
 
 
 def scope_prefixes(name):

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
-from documentation_hierarchy import prepare_hierarchy, scope_prefixes, symbol_index
+from documentation_hierarchy import prepare_hierarchy, prepare_member_definitions, scope_prefixes, symbol_index
 
 
 class DocumentationHierarchyTest(unittest.TestCase):
@@ -22,6 +22,44 @@ class DocumentationHierarchyTest(unittest.TestCase):
                 ET.SubElement(definition, tag, refid=child)
             ET.ElementTree(tree).write(root / (identity + '.xml'))
         ET.ElementTree(index).write(root / 'index.xml')
+
+    def test_referenced_members_retain_real_documentation_and_anchors(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'owner.xml').write_text('<doxygen><compounddef><sectiondef kind="typedef">'
+                '<memberdef id="owner_1avalue" kind="typedef"><name>Value</name>'
+                '<briefdescription>Scalar type.</briefdescription><location file="Types.h" line="3"/>'
+                '</memberdef></sectiondef></compounddef></doxygen>')
+            (root / 'file.xml').write_text('<doxygen><compounddef><sectiondef kind="typedef">'
+                '<member refid="owner_1avalue"/></sectiondef></compounddef></doxygen>')
+            self.assertEqual(prepare_member_definitions(root), 1)
+            member = ET.parse(root / 'file.xml').find('./compounddef/sectiondef/memberdef')
+            self.assertEqual(member.get('id'), 'owner_1avalue')
+            self.assertEqual(member.findtext('briefdescription'), 'Scalar type.')
+            self.assertEqual(member.find('location').get('line'), '3')
+            self.assertEqual(prepare_member_definitions(root), 0)
+
+    def test_file_owned_member_is_published_on_its_actual_destination(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'namespace.xml').write_text('<doxygen><compounddef kind="namespace">'
+                '<sectiondef kind="enum"><memberdef id="header_1amode" kind="enum">'
+                '<name>Mode</name><briefdescription>Integration method.</briefdescription>'
+                '</memberdef></sectiondef></compounddef></doxygen>')
+            (root / 'header.xml').write_text('<doxygen><compounddef kind="file"/></doxygen>')
+            self.assertEqual(prepare_member_definitions(root), 1)
+            definition = ET.parse(root / 'header.xml').find('./compounddef/sectiondef/memberdef')
+            self.assertEqual(definition.get('id'), 'header_1amode')
+            self.assertEqual(definition.findtext('briefdescription'), 'Integration method.')
+            self.assertEqual(prepare_member_definitions(root), 0)
+
+    def test_missing_member_definition_cannot_be_silently_discarded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'file.xml').write_text('<doxygen><compounddef><sectiondef kind="func">'
+                '<member refid="missing"/></sectiondef></compounddef></doxygen>')
+            with self.assertRaisesRegex(ValueError, 'Missing Doxygen member definition'):
+                prepare_member_definitions(root)
 
     def test_scope_resolution_skips_template_argument_namespaces(self):
         self.assertEqual(scope_prefixes('Rodin::Variational::GridFunction<FES,::Vec>::ArrayRead'),

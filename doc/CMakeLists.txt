@@ -1,6 +1,6 @@
 # ---- Build documentation ---------------------------------------------------
 # Find and configure Doxygen
-find_package(Doxygen 1.8.15 REQUIRED)
+find_package(Doxygen 1.15 REQUIRED)
 
 set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxygen.in)
 set(DOXYGEN_OUT ${CMAKE_BINARY_DIR}/doc/Doxygen)

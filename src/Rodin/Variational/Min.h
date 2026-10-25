@@ -273,6 +273,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Polytope on which the polynomial order is requested.
+      /// @returns Polynomial order on the requested polytope, or no value when unavailable.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);

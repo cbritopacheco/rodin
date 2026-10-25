@@ -115,9 +115,9 @@ jobs:
       - name: Install pinned Doxygen binary
         run: |
           curl -sSL -o doxygen.tar.gz \
-            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+            https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.linux.bin.tar.gz
           tar -xzf doxygen.tar.gz
-          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
+          echo "$PWD/doxygen-1.15.0/bin" >> "$GITHUB_PATH"
       - name: Test documentation warning enforcement
         run: python3 -m unittest discover -s dev -p test_doxygen_warnings.py -v
       - name: Check for new documentation warnings

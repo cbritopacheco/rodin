@@ -10,6 +10,7 @@ import re
 import xml.etree.ElementTree as ET
 
 from documentation_hierarchy import scope_prefixes
+from documentation_links import verify_local_links
 
 
 class Page(HTMLParser):
@@ -200,6 +201,7 @@ def verify(site, xml, configuration):
     for page in ['modules.html', 'configuration.html'] + [target + '.html' for _, target in modules]:
         if '<script src="rodin-navigation.js" defer></script>' not in (site / page).read_text():
             raise ValueError('Page does not load sidebar navigation: ' + page)
+    verify_local_links(site)
     print('Reference index coverage:', verify_reference_indexes(site, xml))
     print('Verified', len(modules), 'module pages, Configuration and', len(targets), 'specialization references.')
 

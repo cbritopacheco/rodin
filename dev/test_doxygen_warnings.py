@@ -104,14 +104,54 @@ void noop();
 void noop();
 /**
  * @page guide Guide
- * See @ref target "Target
- * guide" for details.
+ * See @ref missing_target "Missing guide" for details.
  * @m_footernavigation
  */
 /** @page target Target guide */
 ''')
         self.assertEqual(status, 1, output)
-        self.assertIn("unexpected command endxmlonly", output)
+        self.assertIn("missing_target", output)
+
+    def test_specialization_alias_does_not_hide_missing_contracts(self):
+        status, output = self.check_fixture("""/// @file
+
+/// @brief Keeps a documented non-template function in the XML.
+void noop();
+/** @brief Boolean family.
+ * @tparam Enabled Select the specialization.
+ */
+template<bool Enabled> class Box;
+/// @brief Specialized value holder.
+template<> class Box<true> {
+public:
+  /// @brief Identity operation with an intentionally missing contract.
+  int identity(int value) { return value; }
+};
+using SpecializedBox = Box<true>;
+""")
+        self.assertEqual(status, 1, output)
+        self.assertIn("parameter 'value' of member identity lacks parameter documentation", output)
+        self.assertIn("return type of member identity lacks return documentation", output)
+
+    def test_using_declaration_inherits_the_complete_base_contract(self):
+        status, output = self.check_fixture("""/// @file
+
+/// @brief Base interface.
+class Base {
+public:
+  /** @brief Identity operation.
+   * @param value Input value.
+   * @returns Input value.
+   */
+  int identity(int value) { return value; }
+};
+/// @brief Derived interface.
+class Derived : public Base {
+public:
+  using Base::identity;
+};
+""")
+        self.assertEqual(status, 0, output)
 
     def test_unnamed_parameter_fails_xml_audit(self):
         status, output = self.check_fixture("""/// @file

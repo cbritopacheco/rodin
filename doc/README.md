@@ -69,11 +69,11 @@ cmake --build build --target RodinDoxygen
 
 Requirements for plain Doxygen:
 
-- Doxygen 1.8.15+
+- Doxygen 1.15+ (CI pins 1.15.0)
 
 Additional requirements for m.css:
 
-- Python 3.6+
+- Python 3.9+
 - Jinja2
 - Pygments
 - LaTeX with the packages required by m.css
@@ -380,3 +380,25 @@ These transformations run inside `RodinDoxygen` and the documentation CI build.
 Standalone **See also** class links already represented by inheritance or
 specialization navigation are omitted. Other cross-references, explanatory prose,
 technical specialization references and member-specific contracts are retained.
+
+### Complete reference links
+
+Doxygen 1.15.0 is pinned in documentation and warning CI. Version 1.14 can omit
+explicit template specializations when they have aliases (upstream issue
+[doxygen/doxygen#11761](https://github.com/doxygen/doxygen/issues/11761)).
+Use the same parser for rendering and the zero-warning ratchet.
+
+After rendering, references to undocumented forward declarations or private
+enclosing scopes retain their text but have no hyperlink if no page exists.
+Documented classes and stale hand-written links are never silently unlinked.
+The navigation check scans every HTML page, including benchmark pages, and
+rejects missing relative page, image, script and stylesheet destinations.
+Prefer `@ref` to manually spelling generated specialization filenames.
+
+Before m.css runs, `prepare_member_definitions()` resolves Doxygen's referenced
+namespace/file members from their authoritative XML definitions. This preserves
+their descriptions, source locations and anchor IDs instead of dropping a whole
+section when it contains a reference. The upstream m.css checkout is unchanged.
+Enum values without detailed sections receive their XML anchor IDs at their
+existing declaration entries. The complete-site check also rejects missing
+fragment destinations; the navigation control `#!` is intentionally exempt.
