@@ -632,3 +632,38 @@ body > footer > nav > .m-container > .m-row > .m-col-l-10 {
     margin-left: 0;
   }
 }
+
+/* Reading typography shared by documentation and benchmark pages. */
+:root, body {
+  --line-height: 1.6;
+  --paragraph-align: left;
+  --paragraph-indent: 0;
+}
+main article p,
+main article li,
+main article dd {
+  line-height: 1.6;
+  letter-spacing: .008em;
+}
+main article p {
+  text-align: left;
+  text-indent: 0;
+  margin-top: 0;
+  margin-bottom: .9em;
+}
+main article :is(h1, h2, h3, h4) {
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+main article :is(h2, h3, h4) {
+  margin-top: 1.5em;
+  margin-bottom: .6em;
+}
+main article .m-frame > :is(h2, h3, h4):first-child,
+main article .m-block > :is(h2, h3, h4):first-child {
+  margin-top: 0;
+}
+main article :is(pre, code, .m-code) {
+  letter-spacing: 0;
+}
+.rodin-page-nav a { line-height: 1.4; }
