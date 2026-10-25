@@ -19,7 +19,7 @@
 #include "Rodin/Geometry/Region.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SparseMatrix.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "BilinearForm.h"
 #include "NamedFormStorage.h"
@@ -197,8 +197,7 @@ namespace Rodin::Variational
               if (const auto k = m_coefficient->getOrder(polytope))
                 order = *k + base;
             }
-            const auto& qf =
-              QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+            const auto& qf = QF::QuadratureFormula::get(order, polytope.getGeometry());
             const auto& quadrature = polytope.getQuadrature(qf);
 
             const bool rebuild = !m_cached || m_geometry != polytope.getGeometry() ||

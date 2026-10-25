@@ -147,7 +147,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["local_entries"] = localEntries;
         state.counters["quadrature_order"] = quadratureOrder;
         const size_t samples =
-          QF::PolytopeQuadratureFormula::get(quadratureOrder, geometry).getSize();
+          QF::QuadratureFormula::get(quadratureOrder, geometry).getSize();
         state.counters["quadrature_points_per_cell"] = samples;
         state.counters["cell_sample_pairs"] = mesh.getPolytopeCount(dim) * samples;
         state.counters["local_entry_sample_pairs"] = localEntries * samples;

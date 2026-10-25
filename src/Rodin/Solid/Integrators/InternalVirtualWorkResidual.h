@@ -41,7 +41,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/TestFunction.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Geometry/Point.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
@@ -194,7 +194,7 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -484,7 +484,7 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * std::max({testFE.getOrder(), stateFE.getOrder(), pressFE.getOrder()});
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -733,7 +733,7 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 

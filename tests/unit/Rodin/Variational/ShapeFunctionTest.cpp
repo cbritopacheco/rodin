@@ -92,7 +92,7 @@ namespace Rodin::Tests::Unit
           return FES(mesh, rows, columns);
       };
       const auto cell = *mesh.getCell();
-      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const auto& formula = QF::QuadratureFormula::get(4, geometry);
       const PolytopeQuadrature quadrature(cell, formula);
       const IntegrationPoint cursor(quadrature, formula.getSize() - 1);
       auto space = makeSpace(2, 3);

@@ -15,7 +15,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Rodin/Variational/P0/P0Element.h"
 #include "Rodin/Variational/P0g/P0gElement.h"
@@ -3804,7 +3804,7 @@ namespace Rodin::Tests::Unit
       for (const size_t quadratureOrder : {size_t(8), size_t(16)})
       {
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
+          QF::QuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
         for (size_t point = 0; point < qf.getSize(); ++point)
           check(qf.getPoint(point));
       }

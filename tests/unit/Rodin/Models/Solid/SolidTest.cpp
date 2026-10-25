@@ -2546,7 +2546,7 @@ namespace Rodin::Tests::Unit
       return d * d * d * (gamma(point) * beta(point) + 0.4 * (c + 0.035) / 0.01) -
         80 * (strain - midpoint) * (1 + 2 * strain);
     });
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, Polytope::Type::Segment);
+    const auto& formula = QF::QuadratureFormula::get(4, Polytope::Type::Segment);
     Real integratedBalance = 0;
     for (auto cell = mesh.getCell(); cell; ++cell)
     {

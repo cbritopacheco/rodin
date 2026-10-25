@@ -5,7 +5,7 @@
 #include <Rodin/Adaptation.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Variational.h>
 
 #include <filesystem>
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     classifier.setParameters(classificationParameters);
     const auto classified = classifier.classify([&](const Polytope& cell) -> Real {
       const auto& formula =
-        QF::PolytopeQuadratureFormula::get(ClassificationOrder, cell.getGeometry());
+        QF::QuadratureFormula::get(ClassificationOrder, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(formula);
       Real moment = 0;
       for (size_t q = 0; q < quadrature.getSize(); ++q)

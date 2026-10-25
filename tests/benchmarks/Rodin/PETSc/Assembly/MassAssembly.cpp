@@ -239,7 +239,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["components"] = Vector ? dim : 1;
         state.counters["quadrature_order"] = 8;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(8, geometry).getSize();
+          QF::QuadratureFormula::get(8, geometry).getSize();
       }
 
       static void registerCases(const Context::MPI& context)

@@ -642,8 +642,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           {
             const RealH1Element<2> element(polytope->getGeometry());
             EXPECT_EQ(polytope->getTransformation().getOrder(), element.getOrder());
-            const auto& qf = QF::PolytopeQuadratureFormula::get(
-              GeometryCheckOrder, polytope->getGeometry());
+            const auto& qf =
+              QF::QuadratureFormula::get(GeometryCheckOrder, polytope->getGeometry());
             const Geometry::PolytopeQuadrature quadrature(*polytope, qf);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {

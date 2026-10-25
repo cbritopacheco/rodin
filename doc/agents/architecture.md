@@ -74,7 +74,7 @@ Assembly 7, FormLanguage 6, Distance 6, Test 6.
   classifier). → geometry.md
 - **QF/** — positive quadrature on reference polytopes: published
   Xiao--Gimbutas and Witherden--Vincent tables, Gauss--Legendre/Jacobi
-  conical products, tensor products, and `PolytopeQuadratureFormula`
+  conical products, tensor products, and `QuadratureFormula`
   dispatch/caching. Grundmann--Möller remains explicitly selectable but is
   not a default. → quadrature.md
 - **FormLanguage/** — `Base` (clone + identity root), `Traits` (open

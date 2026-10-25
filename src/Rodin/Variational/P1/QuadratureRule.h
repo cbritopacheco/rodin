@@ -46,7 +46,7 @@
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "P1.h"
 #include "Rodin/Math/Traits.h"
@@ -198,7 +198,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -433,7 +433,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -699,7 +699,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1099,7 +1099,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1477,7 +1477,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           const size_t n = trialfe.getCount();
 
@@ -1798,7 +1798,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           // Cached per quadrature point, not at the first one: reference
           // gradients are constant only on a simplex, so freezing them at one
@@ -2166,7 +2166,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2434,7 +2434,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           // Cached per quadrature point, not at the first one: the basis
           // values vary within every element, and the reference gradients
@@ -2728,7 +2728,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           // Cached per quadrature point, not at the first one: the basis
           // values vary within every element, and the reference gradients
@@ -3052,7 +3052,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           // Cached per quadrature point, not at the first one: reference
           // derivatives are constant only on a simplex, so freezing them at
@@ -3371,7 +3371,7 @@ namespace Rodin::Variational
           m_set = false;
           m_order = order;
           m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           // Affine simplex reference derivatives are constant. Tensor-product
           // and other nonsimplex bases require their actual sample coordinates.
@@ -3763,7 +3763,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
 
           // Cached per quadrature point, not at the first one: reference
           // derivatives are constant only on a simplex, so freezing them at
@@ -4176,7 +4176,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);

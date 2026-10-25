@@ -59,7 +59,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 

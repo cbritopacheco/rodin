@@ -109,7 +109,7 @@
 #include <Eigen/Dense>
 
 #include <Rodin/Math/SpatialVector.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Variational/H1/H1Element.h>
 #include <Rodin/Variational/IntegrationPoint.h>
 
@@ -262,7 +262,7 @@ namespace Rodin::Examples::Heart
         const size_t qOrder = tauOrder + derivativeOrder(trialFE.getOrder()) +
           derivativeOrder(testFE.getOrder()) + 2 * uOldOrder;
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -532,7 +532,7 @@ namespace Rodin::Examples::Heart
         const size_t qOrder = tauOrder + derivativeOrder(trialFE.getOrder()) +
           derivativeOrder(testFE.getOrder());
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -728,7 +728,7 @@ namespace Rodin::Examples::Heart
         const size_t xiOrder = getFunctionOrder(m_xi, polytope, size_t(0));
         const size_t qOrder = tauOrder + xiOrder + derivativeOrder(fe.getOrder());
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -960,7 +960,7 @@ namespace Rodin::Examples::Heart
         const size_t qOrder =
           coefficientOrder + derivativeOrder(fe.getOrder()) + uOldOrder;
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 

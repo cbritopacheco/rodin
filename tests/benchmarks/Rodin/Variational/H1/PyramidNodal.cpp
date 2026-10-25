@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "Rodin/Variational/H1/H1Element.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -82,8 +82,8 @@ namespace Rodin::Tests::Benchmarks
         constexpr Real ReconstructionTolerance = 1e-8;
         constexpr size_t Count = PyramidIndex<K>::Count;
         const H1Element<K, Scalar> element(Geometry::Polytope::Type::Pyramid);
-        const auto& formula = QF::PolytopeQuadratureFormula::get(
-          state.range(0), Geometry::Polytope::Type::Pyramid);
+        const auto& formula =
+          QF::QuadratureFormula::get(state.range(0), Geometry::Polytope::Type::Pyramid);
         const auto& inverse = VandermondePyramid<K>::getInverse();
         std::vector<Scalar> expected(formula.getSize() * Count * 3),
           output(expected.size());

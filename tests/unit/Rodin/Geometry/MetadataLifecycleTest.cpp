@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 #include "Rodin/Geometry.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -296,8 +296,7 @@ TEST(Geometry_MetadataLifecycle, EmbeddedCachedJacobiansOwnMetricAndReferenceDat
     std::unique_ptr<Point> retained;
     Math::SpatialPoint sample;
     {
-      const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-        size_t{3}, cell->getGeometry());
+      const auto& formula = QF::QuadratureFormula::get(size_t{3}, cell->getGeometry());
       sample = formula.getPoint(0);
       const Point original(jacobian, *cell, formula, 0);
       Point copied(original);

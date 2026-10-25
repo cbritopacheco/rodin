@@ -176,7 +176,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["local_entries"] = localBasis * localBasis;
         state.counters["quadrature_order"] = 8;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(8, geometry).getSize();
+          QF::QuadratureFormula::get(8, geometry).getSize();
       }
 
       static void registerCases()

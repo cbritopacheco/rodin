@@ -140,8 +140,7 @@ namespace Rodin::Tests::Benchmarks
           else
             return RealFunction(scalar);
         }();
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(QuadratureOrder, geometry);
+        const auto& formula = QF::QuadratureFormula::get(QuadratureOrder, geometry);
         GridFunction expected(space);
         expected = field;
         const auto fieldError = [&](const auto& measured) {

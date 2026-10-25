@@ -215,8 +215,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["local_entries_per_operator_term"] = localEntries;
         state.counters["quadrature_order"] = Workload::QuadratureOrder;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(Workload::QuadratureOrder, geometry)
-            .getSize();
+          QF::QuadratureFormula::get(Workload::QuadratureOrder, geometry).getSize();
         state.counters["scalar_bytes"] = sizeof(Scalar);
         state.counters["solver_reported_iterations"] = iterations;
         state.counters["solver_reported_error"] = solver.getError();

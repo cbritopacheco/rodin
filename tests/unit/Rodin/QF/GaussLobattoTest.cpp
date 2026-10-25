@@ -6,7 +6,7 @@
 #include <array>
 #include <thread>
 #include "Rodin/QF/GaussLobatto.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "QuadratureInvariants.h"
 
 using namespace Rodin;
@@ -65,7 +65,7 @@ TEST_P(GaussLobattoTest, DirectCachePreservesRulesAndAddress)
     const QF::GaussLobatto owned(GetParam(), count);
     const size_t dimension = Geometry::Polytope::Traits(GetParam()).getDimension();
     EXPECT_EQ(&rule, &QF::GaussLobatto::get(GetParam(), count));
-    EXPECT_NE(&rule, &QF::PolytopeQuadratureFormula::get(degree, GetParam()));
+    EXPECT_NE(&rule, &QF::QuadratureFormula::get(degree, GetParam()));
     ASSERT_EQ(rule.getSize(), owned.getSize());
     for (size_t q = 0; q < rule.getSize(); ++q)
     {

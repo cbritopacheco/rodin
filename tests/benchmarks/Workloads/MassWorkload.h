@@ -115,7 +115,7 @@ namespace Rodin::Tests::Benchmarks
       static bool checkGeometry(
         const Mesh& mesh, Geometry::Polytope::Type geometry, bool curved)
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(8, geometry);
+        const auto& formula = QF::QuadratureFormula::get(8, geometry);
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if (curved && cell->getTransformation().getFactorOrder() != 2)

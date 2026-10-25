@@ -214,7 +214,7 @@ namespace Rodin::Tests::Unit
         };
         const auto A = MatrixFunction(Components, 3, callable(first));
         const auto B = MatrixFunction(Components, 3, callable(second));
-        const auto& formula = QF::PolytopeQuadratureFormula::get(Order, geometry);
+        const auto& formula = QF::QuadratureFormula::get(Order, geometry);
         const Geometry::PolytopeQuadrature quadrature(cell, formula);
         const auto& element =
           space.getFiniteElement(cell.getDimension(), cell.getIndex());

@@ -193,13 +193,13 @@ namespace Rodin::Tests::Benchmarks
     const size_t massOrder = 2 * Order + coefficientDegree;
     const size_t diffusionOrder = 2 * Order - 2 + coefficientDegree;
     const size_t massPoints = Kind == 0 || Kind == 2 || Kind == 3
-      ? QF::PolytopeQuadratureFormula::get(massOrder, cell.getGeometry()).getSize()
+      ? QF::QuadratureFormula::get(massOrder, cell.getGeometry()).getSize()
       : 0;
     // LinearElasticityForm deliberately uses basis orders, not reduced
     // derivative orders. Report the implemented rule without changing it.
     const size_t gradientOrder = Kind == 4 ? massOrder : diffusionOrder;
     const size_t gradientPoints = Kind == 1 || Kind == 2 || Kind == 4
-      ? QF::PolytopeQuadratureFormula::get(gradientOrder, cell.getGeometry()).getSize()
+      ? QF::QuadratureFormula::get(gradientOrder, cell.getGeometry()).getSize()
       : 0;
     state.counters["dimension"] = dimension;
     state.counters["field_degree"] = Order;

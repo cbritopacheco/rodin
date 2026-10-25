@@ -133,8 +133,7 @@ namespace Rodin::Tests::Benchmarks
           else
             return Grad(field);
         }();
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
+        const auto& formula = QF::QuadratureFormula::get(state.range(0), geometry);
         const Geometry::PolytopeQuadrature quadrature(cell, formula);
         using Value =
           std::remove_cvref_t<decltype(differential.getValue(quadrature.getPoint(0)))>;

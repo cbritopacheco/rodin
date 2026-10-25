@@ -98,7 +98,7 @@ compare coordinate/key sets in tests.
 ## Quadrature (QF/)
 
 Formulas are defined on reference polytopes and selected by polytope type and
-polynomial degree. `QF::PolytopeQuadratureFormula` dispatches to published
+polynomial degree. `QF::QuadratureFormula` dispatches to published
 positive-interior tables where available and positive Gaussian product rules
 otherwise. Variational integrators pick an order automatically but accept an
 override; order 4 is the house choice for validity and diagnostic sampling of

@@ -137,8 +137,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["local_entries"] = localEntries;
         state.counters["quadrature_order"] = Workload::QuadratureOrder;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(Workload::QuadratureOrder, geometry)
-            .getSize();
+          QF::QuadratureFormula::get(Workload::QuadratureOrder, geometry).getSize();
         state.counters["relative_reference_error"] = maxReferenceError;
         state.counters["specialized"] = decltype(integral)::Specialized;
       }

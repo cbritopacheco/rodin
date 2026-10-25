@@ -53,7 +53,7 @@
 #include <stdexcept>
 
 #include <Rodin/Math/SpatialVector.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Variational/IntegrationPoint.h>
 
 namespace Rodin::Examples::Heart
@@ -127,7 +127,7 @@ namespace Rodin::Examples::Heart
         const size_t pvOrder = getFunctionOrder(m_pv, polytope, size_t(0));
         const size_t qOrder = pvOrder + derivativeOrder(fe.getOrder());
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
         const auto& q = polytope.getQuadrature(qf);
 
         m_vec.resize(static_cast<Eigen::Index>(nte));

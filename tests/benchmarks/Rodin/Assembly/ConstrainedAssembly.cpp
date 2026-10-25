@@ -102,8 +102,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["local_basis_per_cell"] = space.getDOFs(dim, 0).size();
         state.counters["local_entries_per_operator_term"] = localEntries;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(Workload::quadratureOrder, geometry)
-            .getSize();
+          QF::QuadratureFormula::get(Workload::quadratureOrder, geometry).getSize();
         state.counters["dofs"] = space.getSize();
         state.counters["nnz"] = problem.getLinearSystem().getOperator().nonZeros();
         state.counters["degree"] = K;

@@ -380,7 +380,7 @@ namespace Rodin::Tests::Convergence
               continue;
           }
           const auto& qf =
-            QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
+            QF::QuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
@@ -447,7 +447,7 @@ namespace Rodin::Tests::Convergence
               continue;
           }
           const auto& qf =
-            QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
+            QF::QuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
@@ -489,7 +489,7 @@ namespace Rodin::Tests::Convergence
               continue;
           }
           const auto& qf =
-            QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
+            QF::QuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {

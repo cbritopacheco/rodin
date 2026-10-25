@@ -16,7 +16,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/IO.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/QF/Centroid.h>
 #include <Rodin/Variational/H1/H1Element.h>
 
@@ -483,8 +483,8 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
     SCOPED_TRACE(static_cast<int>(geometry));
     auto mesh = distribute(geometry);
     const size_t dimension = mesh.getDimension();
-    const auto& first = QF::PolytopeQuadratureFormula::get(2, geometry);
-    const auto& second = QF::PolytopeQuadratureFormula::get(3, geometry);
+    const auto& first = QF::QuadratureFormula::get(2, geometry);
+    const auto& second = QF::QuadratureFormula::get(3, geometry);
     // distribute() creates three vertices per axis, spanning [0, 2].
     Real expectedVolume = 1;
     for (size_t coordinate = 0; coordinate < dimension; ++coordinate)

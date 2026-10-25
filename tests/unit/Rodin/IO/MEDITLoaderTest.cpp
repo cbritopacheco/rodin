@@ -14,7 +14,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/IO.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -112,8 +112,7 @@ namespace
       auto verify = [&] {
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(3, cell->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(3, cell->getGeometry());
           for (size_t sample = 0; sample < formula.getSize(); ++sample)
           {
             const Point point(*cell, formula.getPoint(sample));

@@ -13,9 +13,10 @@
 #include <cmath>
 #include <memory>
 #include <string>
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "unit/Rodin/QF/QuadratureInvariants.h"
+#include "unit/Rodin/QF/QuadratureSelection.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -30,7 +31,7 @@ namespace Rodin::Tests::Benchmarks
     Copy,
     Traverse,
     HotSweep,
-    PoolSweep,
+    DispatchSweep,
     MoveDiscardedSource
   };
 
@@ -39,10 +40,10 @@ namespace Rodin::Tests::Benchmarks
    *
    * Owned build/copy scopes include destruction. They measure repeated owned
    * construction after library initialization, not a process-first allocation.
-   * MoveDiscardedSource alternates owned wrappers between two optional slots.
-   * It includes move construction, moved-from destruction, source-identity
-   * reading and slot selection, but no rule construction or sample traversal.
-   * The moved-from wrapper is discarded without querying its payload. Exact
+   * MoveDiscardedSource alternates unique concrete-rule ownership between two slots.
+   * It includes ownership transfer and slot selection, but no rule construction
+   * or sample traversal. Copies duplicate concrete-family state, not a dispatcher.
+   * The moved-from pointer is discarded without querying its payload. Exact
    * destination samples and independent moments are checked outside timing.
    * Traversal integrates @f$1+\sum_j(x_j+x_j^2)@f$. Before timing, all moments
    * through total degree two are checked against closed-form integrals, with
@@ -50,12 +51,14 @@ namespace Rodin::Tests::Benchmarks
    * numerical sanity guard, not certification of every claimed order; the QF
    * unit suite supplies the full exactness tests.
    *
-   * ## Canonical cache protocol
+   * ## Default lookup protocol
    *
    * The current implementation has eight thread-local entries. Sweeping eight
    * prewarmed distinct keys visits every cache position once, independent of
    * insertion rotation. Sweeping nine prewarmed keys in round-robin order
-   * instead misses that hot cache on every access, but reuses the global pool.
+   * instead misses that default-request cache on every access, then selects the
+   * concrete-family factory. Normalized Gaussian counts can share a family
+   * entry across orders; the family pool is not necessarily consulted.
    * These scopes include lookup and size access, not rule construction. A
    * change to the source cache capacity requires updating this explicit
    * experimental protocol. No cache mutation API or source hook is introduced.
@@ -152,7 +155,7 @@ namespace Rodin::Tests::Benchmarks
           referenceQuadratureFailed = true;
           state.SkipWithError(message);
         };
-        const auto source = Quadrature::PolytopeQuadratureFormula::build(order, geometry);
+        const auto source = Verification::makeQuadratureFormula(order, geometry);
         if (!valid(*source, geometry) || valid(*source, geometry, true))
         {
           fail("Reference quadrature failed independent moment or sensitivity guard");
@@ -162,7 +165,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["dimension"] = dim;
         state.counters["quadrature_points"] = source->getSize();
         if (operation == ReferenceQuadratureOperation::HotSweep ||
-          operation == ReferenceQuadratureOperation::PoolSweep)
+          operation == ReferenceQuadratureOperation::DispatchSweep)
         {
           const size_t count = operation == ReferenceQuadratureOperation::HotSweep
             ? HotWorkingSet
@@ -174,13 +177,12 @@ namespace Rodin::Tests::Benchmarks
           // below 64), so none of these eight filler keys can already be hot.
           for (size_t j = 0; j < HotWorkingSet; ++j)
           {
-            benchmark::DoNotOptimize(Quadrature::PolytopeQuadratureFormula::get(
+            benchmark::DoNotOptimize(Quadrature::QuadratureFormula::get(
               EvictionOrder + j, Geometry::Polytope::Type::Point));
           }
           for (size_t j = 0; j < count; ++j)
           {
-            formulas[j] =
-              &Quadrature::PolytopeQuadratureFormula::get(order + j, geometry);
+            formulas[j] = &Quadrature::QuadratureFormula::get(order + j, geometry);
             points += formulas[j]->getSize();
             if (!valid(*formulas[j], geometry))
             {
@@ -192,22 +194,21 @@ namespace Rodin::Tests::Benchmarks
           for (size_t j = 0; j < count; ++j)
           {
             benchmark::DoNotOptimize(
-              Quadrature::PolytopeQuadratureFormula::get(order + j, geometry));
+              Quadrature::QuadratureFormula::get(order + j, geometry));
           }
           for (auto _ : state)
           {
             for (size_t j = 0; j < count; ++j)
             {
               const auto& formula =
-                Quadrature::PolytopeQuadratureFormula::get(order + j, geometry);
+                Quadrature::QuadratureFormula::get(order + j, geometry);
               benchmark::DoNotOptimize(&formula);
               benchmark::DoNotOptimize(formula.getSize());
             }
           }
           for (size_t j = 0; j < count; ++j)
           {
-            if (&Quadrature::PolytopeQuadratureFormula::get(order + j, geometry) !=
-              formulas[j])
+            if (&Quadrature::QuadratureFormula::get(order + j, geometry) != formulas[j])
               fail("Canonical identity changed after hot-cache eviction");
           }
           state.counters["requests_per_sweep"] = count;
@@ -256,29 +257,28 @@ namespace Rodin::Tests::Benchmarks
         }
         else if (operation == ReferenceQuadratureOperation::MoveDiscardedSource)
         {
-          const Quadrature::PolytopeQuadratureFormula expected(order, geometry);
-          std::array<Optional<Quadrature::PolytopeQuadratureFormula>, 2> rules;
-          rules[0].emplace(expected);
+          const auto expected = Verification::makeQuadratureFormula(order, geometry);
+          std::array<std::unique_ptr<const Quadrature::QuadratureFormulaBase>, 2> rules;
+          rules[0] = Verification::copyQuadratureFormula(*expected);
           size_t active = 0;
           const auto move = [&] {
             const size_t destination = 1 - active;
-            rules[destination].emplace(std::move(*rules[active]));
+            rules[destination] = std::move(rules[active]);
             rules[active].reset();
             active = destination;
           };
           const auto unchanged = [&] {
             if (!rules[active] || rules[1 - active] ||
-              rules[active]->getGeometry() != geometry ||
-              rules[active]->getSize() != expected.getSize())
+              rules[active]->getSize() != expected->getSize())
               return false;
-            for (size_t qp = 0; qp < expected.getSize(); ++qp)
+            for (size_t qp = 0; qp < expected->getSize(); ++qp)
             {
-              if (rules[active]->getWeight(qp) != expected.getWeight(qp) ||
-                rules[active]->getPoint(qp).size() != expected.getPoint(qp).size())
+              if (rules[active]->getWeight(qp) != expected->getWeight(qp) ||
+                rules[active]->getPoint(qp).size() != expected->getPoint(qp).size())
                 return false;
               for (size_t j = 0; j < dim; ++j)
               {
-                if (rules[active]->getPoint(qp)(j) != expected.getPoint(qp)(j))
+                if (rules[active]->getPoint(qp)(j) != expected->getPoint(qp)(j))
                   return false;
               }
             }
@@ -287,7 +287,7 @@ namespace Rodin::Tests::Benchmarks
           move();
           if (!unchanged())
           {
-            fail("Rule move changed destination samples, identity or ownership");
+            fail("Concrete ownership transfer changed destination samples");
             return;
           }
           for (auto _ : state)
@@ -304,12 +304,11 @@ namespace Rodin::Tests::Benchmarks
         }
         else
         {
-          const Quadrature::PolytopeQuadratureFormula prototype(order, geometry);
+          const auto prototype = Verification::makeQuadratureFormula(order, geometry);
           const auto construct = [&] {
             return operation == ReferenceQuadratureOperation::Build
-              ? Quadrature::PolytopeQuadratureFormula::build(order, geometry)
-              : std::unique_ptr<const Quadrature::QuadratureFormulaBase>(
-                  prototype.copy());
+              ? Verification::makeQuadratureFormula(order, geometry)
+              : Verification::copyQuadratureFormula(*prototype);
           };
           const auto control = construct();
           if (!valid(*control, geometry) || control->getSize() != source->getSize())
@@ -342,7 +341,7 @@ namespace Rodin::Tests::Benchmarks
       static size_t registerCases()
       {
         using G = Geometry::Polytope::Type;
-        FlatSet<std::pair<G, size_t>> poolKeys;
+        FlatSet<std::pair<G, size_t>> seedRequests;
         for (const auto& [geometry, name] :
           {std::pair{G::Point, "Point"}, {G::Segment, "Segment"},
             {G::Triangle, "Triangle"}, {G::Quadrilateral, "Quadrilateral"},
@@ -359,14 +358,14 @@ namespace Rodin::Tests::Benchmarks
           for (const int order : orders)
           {
             for (size_t j = 0; j < PoolWorkingSet; ++j)
-              poolKeys.emplace(geometry, static_cast<size_t>(order) + j);
+              seedRequests.emplace(geometry, static_cast<size_t>(order) + j);
           }
           for (const auto& [operation, scope] :
             {std::pair{ReferenceQuadratureOperation::Build, "OwnedBuild"},
               {ReferenceQuadratureOperation::Copy, "OwnedCopy"},
               {ReferenceQuadratureOperation::Traverse, "Traversal"},
-              {ReferenceQuadratureOperation::HotSweep, "CanonicalHotSweep8"},
-              {ReferenceQuadratureOperation::PoolSweep, "CanonicalPoolSweep9"},
+              {ReferenceQuadratureOperation::HotSweep, "DefaultHotSweep8"},
+              {ReferenceQuadratureOperation::DispatchSweep, "DefaultDispatchSweep9"},
               {ReferenceQuadratureOperation::MoveDiscardedSource,
                 "OwnedMoveDiscardedSource"}})
           {
@@ -380,13 +379,12 @@ namespace Rodin::Tests::Benchmarks
           }
         }
         for (size_t j = 0; j < HotWorkingSet; ++j)
-          poolKeys.emplace(G::Point, EvictionOrder + j);
-        for (const auto& [geometry, order] : poolKeys)
+          seedRequests.emplace(G::Point, EvictionOrder + j);
+        for (const auto& [geometry, order] : seedRequests)
         {
-          benchmark::DoNotOptimize(
-            Quadrature::PolytopeQuadratureFormula::get(order, geometry));
+          benchmark::DoNotOptimize(Quadrature::QuadratureFormula::get(order, geometry));
         }
-        return poolKeys.size();
+        return seedRequests.size();
       }
   };
 }
@@ -394,12 +392,12 @@ namespace Rodin::Tests::Benchmarks
 int main(int argc, char** argv)
 {
   using namespace Rodin::Tests::Benchmarks;
-  const size_t poolKeys = ReferenceQuadrature::registerCases();
+  const size_t seedRequests = ReferenceQuadrature::registerCases();
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
   benchmark::AddCustomContext("compiler", __VERSION__);
-  benchmark::AddCustomContext("canonical_pool_seed_keys", std::to_string(poolKeys));
+  benchmark::AddCustomContext("default_seed_requests", std::to_string(seedRequests));
   const size_t count = benchmark::RunSpecifiedBenchmarks();
   benchmark::Shutdown();
   return count == 0 || referenceQuadratureFailed ? 1 : 0;

@@ -15,7 +15,7 @@
 #include <vector>
 
 #include <Rodin/Geometry.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Test/Random/RandomPointOnTriangle.h>
 #include <Rodin/Variational/H1.h>
 #include <Rodin/Variational/P1.h>
@@ -417,7 +417,7 @@ namespace Rodin::Tests::Unit
         transformation.jacobian(J, Polytope::Traits(geometry).getCentroid());
         EXPECT_EQ(evaluations, fe.getCount() * Polytope::Traits(geometry).getDimension());
         evaluations = 0;
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+        const auto& formula = QF::QuadratureFormula::get(4, geometry);
         std::vector<Math::SpatialMatrix<Real>> matrices;
         transformation.jacobian(matrices, formula);
         EXPECT_EQ(matrices.size(), formula.getSize());
@@ -459,7 +459,7 @@ namespace Rodin::Tests::Unit
         for (const size_t order : {size_t(8), size_t(16)})
         {
           SCOPED_TRACE(order);
-          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
           for (size_t pdim = std::max(size_t(1), rdim); pdim <= 3; ++pdim)
           {
             for (size_t cell = 0; cell < 2; ++cell)
@@ -1064,7 +1064,7 @@ namespace Rodin::Tests::Unit
         Optional<Point> retained;
         Math::SpatialPoint reference;
         {
-          const auto& formula = QF::PolytopeQuadratureFormula::get(8, geometry);
+          const auto& formula = QF::QuadratureFormula::get(8, geometry);
           reference = formula.getPoint(0);
           PolytopeQuadrature quadrature(cells[0], formula);
           EXPECT_EQ(bulkReads, 1);
@@ -1169,7 +1169,7 @@ namespace Rodin::Tests::Unit
         for (const size_t order : {size_t(16), size_t(2), size_t(8)})
         {
           SCOPED_TRACE(order);
-          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
           for (const size_t s : {size_t(3), std::max(size_t(1), d), size_t(3)})
           {
             SCOPED_TRACE(s);
@@ -1254,8 +1254,7 @@ namespace Rodin::Tests::Unit
                                           : -large;
             }
           }
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(QuadratureOrder, geometry);
+          const auto& formula = QF::QuadratureFormula::get(QuadratureOrder, geometry);
           const ParametricTransformation transformation(controls, element);
           std::vector<Math::SpatialMatrix<Real>> matrices(formula.getSize());
           for (auto& matrix : matrices)

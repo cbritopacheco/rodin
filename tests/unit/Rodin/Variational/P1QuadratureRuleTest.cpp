@@ -153,7 +153,7 @@ namespace Rodin::Tests::Unit
                 SCOPED_TRACE(cell->getIndex());
                 const size_t expectedCalls = components == 0 || !hasCoefficient
                   ? 0
-                  : QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
+                  : QF::QuadratureFormula::get(order, geometry).getSize();
                 coefficientCalls = 0;
                 ASSERT_NO_THROW(reused.setPolytope(*cell));
                 EXPECT_EQ(coefficientCalls, expectedCalls);

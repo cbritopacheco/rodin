@@ -10,7 +10,7 @@
 
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Math/SpatialVector.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Mesh.h"
 #include "PolytopeTransformation.h"
@@ -1077,7 +1077,7 @@ namespace Rodin::Geometry
   Real Polytope::getMeasure(size_t order) const
   {
     Real res = 0;
-    const auto& qf = QF::PolytopeQuadratureFormula::get(order, getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(order, getGeometry());
     const auto& quadrature = getQuadrature(qf);
     for (size_t i = 0; i < quadrature.getSize(); i++)
     {

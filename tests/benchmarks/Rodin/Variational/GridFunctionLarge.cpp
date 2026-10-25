@@ -46,7 +46,7 @@ namespace Rodin::Tests::Benchmarks
           m_mesh(makeMesh(dimension)),
           m_space(makeSpace()),
           m_field(m_space),
-          m_qf(QF::PolytopeQuadratureFormula::get(2 * Order,
+          m_qf(QF::QuadratureFormula::get(2 * Order,
             dimension == 2 ? Polytope::Type::Triangle : Polytope::Type::Tetrahedron))
       {
         const auto fn = [&] {

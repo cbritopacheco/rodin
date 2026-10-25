@@ -170,8 +170,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["degree"] = K;
         state.counters["quadrature_order"] = Workload::quadratureOrder;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(Workload::quadratureOrder, geometry)
-            .getSize();
+          QF::QuadratureFormula::get(Workload::quadratureOrder, geometry).getSize();
         state.counters["solver_reported_iterations"] = iterations;
         state.counters["initial_relative_residual"] =
           system.getVector().norm() / rhsScale;

@@ -13,7 +13,7 @@
 #include <vector>
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Variational/H1/H1Element.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Tests::Unit
 {
@@ -41,7 +41,7 @@ namespace Rodin::Tests::Unit
         SCOPED_TRACE((std::is_same_v<Scalar, Complex> ? "Complex" : "Real"));
         const H1Element<K, Scalar> element(geometry);
         const Geometry::Polytope::Traits traits(geometry);
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+        const auto& formula = QF::QuadratureFormula::get(4, geometry);
         std::vector<Math::SpatialPoint> points;
         for (size_t qp = 0; qp < std::min(size_t(3), formula.getSize()); ++qp)
           points.push_back(formula.getPoint(qp));

@@ -12,7 +12,7 @@
 #include <optional>
 #include "Rodin/Geometry.h"
 #include "Rodin/QF/Centroid.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -147,8 +147,7 @@ TEST(Geometry_CacheGrowth, QuadratureSlotsAndDimensionBuckets)
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {5});
   const auto& centroid =
     QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Segment);
-  const auto& gaussian = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-    size_t{3}, Polytope::Type::Segment);
+  const auto& gaussian = QF::QuadratureFormula::get(size_t{3}, Polytope::Type::Segment);
   const std::array<const QF::QuadratureFormula*, 2> formulas{&centroid, &gaussian};
   std::array<const PolytopeQuadrature*, 2> retained;
   PolytopeQuadratureIndex index;

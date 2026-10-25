@@ -89,7 +89,7 @@ namespace
 
     /** Independent density @f$ W=J^{-2/d}\operatorname{tr}(F^TF)-d+p(J-1) @f$. */
     const auto energy = [&] {
-      const auto& formula = QF::PolytopeQuadratureFormula::get(6, cell.getGeometry());
+      const auto& formula = QF::QuadratureFormula::get(6, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(formula);
       auto gradient = Jacobian(displacement);
       Real result = 0;

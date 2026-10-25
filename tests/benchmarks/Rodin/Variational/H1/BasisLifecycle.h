@@ -127,7 +127,7 @@ namespace Rodin::Tests::Benchmarks
         }();
         const auto cell = *mesh.getCell();
         const H1Element<K, Scalar> scalar(geometry);
-        const auto& prototype = QF::PolytopeQuadratureFormula::get(order, geometry);
+        const auto& prototype = QF::QuadratureFormula::get(order, geometry);
         std::vector<const QF::QuadratureFormula*> formulas;
         std::vector<std::unique_ptr<PolytopeQuadrature>> quadratures;
         formulas.reserve(identities);

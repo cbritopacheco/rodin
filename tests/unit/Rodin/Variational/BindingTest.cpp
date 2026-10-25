@@ -137,7 +137,7 @@ namespace Rodin::Tests::Unit
       P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, cell.getDimension());
       TestFunction v(scalar);
       TestFunction w(vector);
-      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const auto& formula = QF::QuadratureFormula::get(4, geometry);
       const auto check = [&](auto make) {
         auto expression = make();
         using Value = std::remove_cvref_t<decltype(expression.getBasis(size_t(0)))>;
@@ -245,7 +245,7 @@ namespace Rodin::Tests::Unit
     P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, 2);
     TestFunction v(scalar);
     TestFunction w(vector);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
     const auto check = [&](auto expression) {
       using Value = std::remove_cvref_t<decltype(expression.getBasis(size_t(0)))>;
       geometryMap.setScale(1);
@@ -281,7 +281,7 @@ namespace Rodin::Tests::Unit
     const auto cell = *mesh.getCell();
     P1<TypeParam, LocalMesh> space(mesh);
     TrialFunction u(space);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
     const PolytopeQuadrature quadrature(cell, formula);
     const IntegrationPoint first(quadrature, 0);
     const IntegrationPoint second(quadrature, 1);
@@ -302,7 +302,7 @@ namespace Rodin::Tests::Unit
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const auto cell = *mesh.getCell();
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
     const PolytopeQuadrature quadrature(cell, formula);
     const IntegrationPoint point(quadrature, 0);
     Real value = 2;

@@ -84,7 +84,7 @@ namespace Rodin::Tests::Unit
       using Scalar = typename FormLanguage::Traits<Space>::ScalarType;
       using Range = typename FormLanguage::Traits<Space>::RangeType;
       const auto cell = *space.getMesh().getCell();
-      const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+      const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
       ASSERT_GT(formula.getSize(), 1);
       TestFunction u(space);
       const auto exercise = [&](auto make) {
@@ -298,7 +298,7 @@ namespace Rodin::Tests::Unit
         const bool isBoundary = face->isBoundary();
         if (isBoundary ? boundary : interior)
           continue;
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(4, face->getGeometry());
         const PolytopeQuadrature points(*face, formula);
         const IntegrationPoint ip(points, 0);
         const auto exercise = [&](const auto& expression) {
@@ -357,7 +357,7 @@ namespace Rodin::Tests::Unit
     auto builder = LocalMesh::Builder();
     builder.initialize(3).nodes(1).vertex({0, 0, 0});
     const auto mesh = builder.finalize();
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, Polytope::Type::Point);
+    const auto& formula = QF::QuadratureFormula::get(4, Polytope::Type::Point);
     const PolytopeQuadrature points(*mesh.getCell(), formula);
     const IntegrationPoint point(points, 0);
     EXPECT_EQ(point.getReferenceQuadratureFormula(), &formula);

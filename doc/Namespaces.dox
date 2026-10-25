@@ -918,10 +918,9 @@
   * @namespace Rodin::QF
   * @brief Module for defining quadrature formulae over reference polytopes.
 
-  * @ref Rodin::QF::PolytopeQuadratureFormula "PolytopeQuadratureFormula" selects
-  * reference integration rules by geometry and exactness, while @ref
-  * Rodin::QF::QuadratureFormula "QuadratureFormula" provides shared, persistent
-  * formulas. @ref Rodin::QF::GaussLegendre "GaussLegendre", @ref
+  * @ref Rodin::QF::QuadratureFormula "QuadratureFormula" selects
+  * persistent reference integration rules by geometry and exactness. @ref
+  * Rodin::QF::GaussLegendre "GaussLegendre", @ref
   * Rodin::QF::TensorProduct "TensorProduct", and the simplex rule families supply
   * points and weights for element integration and reference-basis tabulation.
   * @f[

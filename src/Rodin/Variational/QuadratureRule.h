@@ -61,7 +61,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/PolytopeQuadrature.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
@@ -188,7 +188,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
         m_value.reset();
 
-        m_qf = &QF::PolytopeQuadratureFormula::get(1, polytope.getGeometry());
+        m_qf = &QF::QuadratureFormula::get(1, polytope.getGeometry());
 
         assert(m_qf);
         m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
@@ -623,7 +623,7 @@ namespace Rodin::Variational
           m_set = true;
           m_order = order;
           m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -874,7 +874,7 @@ namespace Rodin::Variational
           m_set = true;
           m_order = order;
           m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);

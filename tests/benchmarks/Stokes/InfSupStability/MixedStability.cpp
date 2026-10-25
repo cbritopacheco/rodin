@@ -137,7 +137,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["geometry_degree"] = curved ? 2 : 1;
         state.counters["quadrature_order"] = order;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
+          QF::QuadratureFormula::get(order, geometry).getSize();
         state.counters["velocity_nnz"] = a.getOperator().nonZeros();
         state.counters["divergence_nnz"] = b.getOperator().nonZeros();
         state.counters["pressure_mass_nnz"] = mass.getOperator().nonZeros();

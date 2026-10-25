@@ -237,7 +237,7 @@ namespace Rodin::Tests::Unit
       const auto cell = *mesh.getCell();
       const auto trialElement = trial.getFiniteElement(dimension, cell.getIndex());
       const auto testElement = test.getFiniteElement(dimension, cell.getIndex());
-      const auto& formula = QF::PolytopeQuadratureFormula::get(
+      const auto& formula = QF::QuadratureFormula::get(
         trialElement.getOrder() + testElement.getOrder(), geometry);
       const size_t trialCount = formula.getSize() * trialElement.getCount();
       const size_t testCount = formula.getSize() * testElement.getCount();

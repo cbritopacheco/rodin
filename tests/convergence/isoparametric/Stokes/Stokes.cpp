@@ -710,8 +710,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               continue;
           }
-          const auto& qf =
-            QF::PolytopeQuadratureFormula::get(AssemblyOrder, cell->getGeometry());
+          const auto& qf = QF::QuadratureFormula::get(AssemblyOrder, cell->getGeometry());
           const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {

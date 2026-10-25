@@ -9,7 +9,7 @@
 #include "Rodin/Adaptation/DeformationMap.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Location/AABB.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/Variational.h"
 #include "../../../convergence/Convergence.h"
@@ -68,8 +68,8 @@ namespace Rodin::Tests::Unit
       DeformationMap deformation(displacement, locator);
       auto face = mesh.getFace();
       ASSERT_TRUE(face);
-      const auto& firstRule = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
-      const auto& secondRule = QF::PolytopeQuadratureFormula::get(6, face->getGeometry());
+      const auto& firstRule = QF::QuadratureFormula::get(2, face->getGeometry());
+      const auto& secondRule = QF::QuadratureFormula::get(6, face->getGeometry());
       const auto& firstQuadrature = face->getQuadrature(firstRule);
       const auto& secondQuadrature = face->getQuadrature(secondRule);
       const Point& first = firstQuadrature.getPoint(0);

@@ -66,7 +66,7 @@ namespace Rodin::Tests::Unit
       };
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(2, cell->getGeometry());
         const PolytopeQuadrature quadrature(*cell, formula);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
           checkValue(Grad(field), IntegrationPoint(quadrature, q));
@@ -76,7 +76,7 @@ namespace Rodin::Tests::Unit
       {
         if (face->isBoundary() ? boundary : interior)
           continue;
-        const auto& formula = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(2, face->getGeometry());
         const PolytopeQuadrature quadrature(*face, formula);
         const IntegrationPoint point(quadrature, 0);
         if (face->isBoundary())
@@ -200,7 +200,7 @@ namespace Rodin::Tests::Unit
         field[a] = Scalar(a + 1);
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(2, cell->getGeometry());
         const PolytopeQuadrature quadrature(*cell, formula);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {

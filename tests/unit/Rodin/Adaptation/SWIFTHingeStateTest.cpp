@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
     size_t points = 0, samples = 0;
     const Displacement displacement{points, samples};
     const auto cell = mesh.getCell(0);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(6, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(6, cell->getGeometry());
     EXPECT_EQ(SWIFT::getPhysicalDisplacementNorm(
                 mesh, space, std::vector<Index>{cell->getIndex()}, displacement, 6),
       Real(2));

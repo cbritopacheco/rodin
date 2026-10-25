@@ -97,7 +97,7 @@ namespace Rodin::Tests::Benchmarks
     const auto& element = space.getFiniteElement(cell.getDimension(), cell.getIndex());
     const size_t count = element.getCount();
     const size_t order = 2 * element.getOrder();
-    const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+    const auto& formula = QF::QuadratureFormula::get(order, geometry);
     tangent.setPolytope(cell);
     Math::Matrix<Real> expected(count, count);
     for (size_t row = 0; row < count; ++row)

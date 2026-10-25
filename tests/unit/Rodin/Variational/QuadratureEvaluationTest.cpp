@@ -21,7 +21,7 @@ namespace Rodin::Tests::Unit
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const auto cell = mesh.getCell(0);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(3, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(3, cell->getGeometry());
     const PolytopeQuadrature quadrature(*cell, formula);
     size_t points = 0;
     const auto coefficient = MatrixFunction(2, 2, [&](const auto& point) {
@@ -94,14 +94,14 @@ namespace Rodin::Tests::Unit
         field.getData()[i] = Real(i + 1) / 17;
     }
     const auto cell = space.getMesh().getCell(0);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(3, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(3, cell->getGeometry());
     const PolytopeQuadrature quadrature(*cell, formula);
     Grad gradient(field);
     TrialFunction trial(space);
     Grad shape(trial);
     shape.setPolytope(*cell);
     const auto& element = space.getFiniteElement(cell->getDimension(), cell->getIndex());
-    const auto& shapeFormula = QF::PolytopeQuadratureFormula::get(4, cell->getGeometry());
+    const auto& shapeFormula = QF::QuadratureFormula::get(4, cell->getGeometry());
     const PolytopeQuadrature shapeQuadrature(*cell, shapeFormula);
     const IntegrationPoint shapeSample(shapeQuadrature, 0);
     shape.setIntegrationPoint(shapeSample);
@@ -212,7 +212,7 @@ namespace Rodin::Tests::Unit
             vectorField.getData()[i] = Real(i + 2) / 17;
         }
         const auto cell = mesh.getCell(0);
-        const auto& formula = QF::PolytopeQuadratureFormula::get(3, geometry);
+        const auto& formula = QF::QuadratureFormula::get(3, geometry);
         const PolytopeQuadrature quadrature(*cell, formula);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
@@ -266,7 +266,7 @@ namespace Rodin::Tests::Unit
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const auto cell = mesh.getCell(0);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(3, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(3, cell->getGeometry());
     const PolytopeQuadrature quadrature(*cell, formula);
     for (const size_t dimension : {size_t(1), size_t(3)})
     {
@@ -287,7 +287,7 @@ namespace Rodin::Tests::Unit
              Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
              Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(3, geometry);
+        const auto& formula = QF::QuadratureFormula::get(3, geometry);
         const auto compare = [&](const auto& element) {
           for (size_t q = 0; q < formula.getSize(); ++q)
           {

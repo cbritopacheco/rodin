@@ -18,7 +18,7 @@
 #include <type_traits>
 
 #include "Rodin/FormLanguage/Traits.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/Function.h"
@@ -210,7 +210,7 @@ namespace Rodin::Variational
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
 
-        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+        m_qf = &QF::QuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));

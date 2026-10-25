@@ -226,7 +226,7 @@ namespace Rodin::Tests::Benchmarks
           localEntries += count * count;
         }
         const size_t samples =
-          QF::PolytopeQuadratureFormula::get(QuadratureOrder, geometry).getSize();
+          QF::QuadratureFormula::get(QuadratureOrder, geometry).getSize();
         state.counters["dimension"] = dimension;
         state.counters["degree"] = Degree;
         state.counters["components"] = Components;

@@ -13,7 +13,7 @@
 #include <vector>
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ReferenceTabulationCache.h"
 
 namespace Rodin::Tests::Unit
@@ -157,8 +157,7 @@ namespace Rodin::Tests::Unit
   {
     using Store = CountingTabulationElement::Store;
     CountingTabulationElement element;
-    const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-      size_t{3}, element.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(size_t{3}, element.getGeometry());
     const auto& table = Store::get(element, formula);
     EXPECT_EQ(element.getFills(), 1u);
     EXPECT_EQ(&table, &Store::get(element, formula));
@@ -185,8 +184,7 @@ namespace Rodin::Tests::Unit
     formulas.reserve(FormulaCount);
     for (size_t i = 0; i < FormulaCount; ++i)
     {
-      formulas.push_back(
-        &QF::PolytopeQuadratureFormula::get(10 + i, element.getGeometry()));
+      formulas.push_back(&QF::QuadratureFormula::get(10 + 2 * i, element.getGeometry()));
       Store::get(element, *formulas.back());
     }
     EXPECT_EQ(element.getFills(), FormulaCount);
@@ -202,8 +200,7 @@ namespace Rodin::Tests::Unit
   {
     using Store = CountingTabulationElement::Store;
     CountingTabulationElement element;
-    const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-      size_t{40}, element.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(size_t{40}, element.getGeometry());
     element.setFail(true);
     EXPECT_THROW(Store::get(element, formula), Alert::Exception);
     EXPECT_EQ(element.getFills(), 1u);
@@ -235,12 +232,11 @@ namespace Rodin::Tests::Unit
     snapshots.reserve(CacheCapacity);
     for (size_t i = 0; i < CacheCapacity; ++i)
     {
-      formulas.push_back(
-        &QF::PolytopeQuadratureFormula::get(70 + i, element.getGeometry()));
+      formulas.push_back(&QF::QuadratureFormula::get(70 + 2 * i, element.getGeometry()));
       snapshots.push_back(Store::get(element, *formulas.back()));
     }
-    const auto& replacement = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-      size_t{80}, element.getGeometry());
+    const auto& replacement =
+      QF::QuadratureFormula::get(size_t{100}, element.getGeometry());
     element.setFail(true);
     EXPECT_THROW(Store::get(element, replacement), Alert::Exception);
     EXPECT_EQ(element.getFills(), CacheCapacity + 1);
@@ -269,14 +265,13 @@ namespace Rodin::Tests::Unit
   {
     using Store = CountingTabulationElement::Store;
     CountingTabulationElement element;
-    const auto& formula = QF::PolytopeQuadratureFormula::get(41, element.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(201, element.getGeometry());
     const auto& table = Store::get(element, formula);
     const auto values = table.getValues();
     EXPECT_EQ(&table, &Store::get(element, formula));
     EXPECT_EQ(table.getValues(), values);
     EXPECT_EQ(element.getFills(), 1u);
-    const auto& replacement =
-      QF::PolytopeQuadratureFormula::get(42, element.getGeometry());
+    const auto& replacement = QF::QuadratureFormula::get(203, element.getGeometry());
     const auto& replaced = Store::get(element, replacement);
     EXPECT_EQ(replaced.getSize(), replacement.getSize());
     EXPECT_EQ(element.getFills(), 2u);

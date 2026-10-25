@@ -107,7 +107,7 @@ namespace Rodin::Tests::Benchmarks
     state.counters["components"] = Vector ? d : 1;
     state.counters["quadrature_order"] = 6;
     state.counters["quadrature_points_per_cell"] =
-      QF::PolytopeQuadratureFormula::get(6, geometry).getSize();
+      QF::QuadratureFormula::get(6, geometry).getSize();
   }
 
   template <size_t K, class Scalar, bool Vector, size_t Family>

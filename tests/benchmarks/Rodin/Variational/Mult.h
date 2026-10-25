@@ -145,7 +145,7 @@ namespace Rodin::Tests::Benchmarks
             return Space(mesh);
         }();
         const auto cell = *mesh.getCell();
-        const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+        const auto& formula = QF::QuadratureFormula::get(order, geometry);
         const PolytopeQuadrature quadrature(cell, formula);
         IntegrationPoint ip(quadrature, 0);
         TrialFunction u(space);

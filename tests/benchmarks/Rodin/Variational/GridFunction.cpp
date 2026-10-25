@@ -255,7 +255,7 @@ namespace Rodin::Tests::Benchmarks
     GridFunction gf(fes);
     gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(16, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(16, cell->getGeometry());
     const PolytopeQuadrature quadrature(*cell, formula);
 
     for (auto _ : state)
@@ -276,7 +276,7 @@ namespace Rodin::Tests::Benchmarks
     GridFunction gf(fes);
     gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(16, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(16, cell->getGeometry());
     const PolytopeQuadrature quadrature(*cell, formula);
 
     for (auto _ : state)

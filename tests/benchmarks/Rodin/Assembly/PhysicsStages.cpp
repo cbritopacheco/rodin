@@ -12,7 +12,7 @@
 #include <benchmark/benchmark.h>
 
 #include "Rodin/Assembly.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/H1.h"
 #include "convergence/Convergence.h"
 #include "Workloads/PhysicsForm.h"
@@ -169,7 +169,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["components"] = Elasticity ? dim : 1;
         state.counters["quadrature_order"] = 6;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(6, geometry).getSize();
+          QF::QuadratureFormula::get(6, geometry).getSize();
       }
   };
 

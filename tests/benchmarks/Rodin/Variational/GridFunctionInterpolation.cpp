@@ -81,7 +81,7 @@ namespace Rodin::Tests::Benchmarks
     source1.project(fn);
     phase = 0;
     const Polytope cell(dimension, 0, mesh);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(2 * Order, geometry);
+    const auto& qf = QF::QuadratureFormula::get(2 * Order, geometry);
     const PolytopeQuadrature quadrature(cell, qf);
     const IntegrationPoint ip0(quadrature, 0);
     const IntegrationPoint ip1(quadrature, 1);

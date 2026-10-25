@@ -144,7 +144,7 @@ namespace Rodin::Tests::Unit
         else
           return Scalar(1);
       }();
-      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const auto& formula = QF::QuadratureFormula::get(4, geometry);
       bool reverse = false;
       for (const Real scale : {Real(1), Real(2), Real(1)})
       {
@@ -279,7 +279,7 @@ namespace Rodin::Tests::Unit
       TrialFunction u(space);
       auto gradient = Grad(u);
       const auto cell = *mesh.getCell();
-      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const auto& formula = QF::QuadratureFormula::get(4, geometry);
       const PolytopeQuadrature before(cell, formula);
       const IntegrationPoint first(before.getPoint(0), &formula, 0);
       gradient.setIntegrationPoint(first);

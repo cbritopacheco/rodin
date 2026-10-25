@@ -34,7 +34,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/Math/SpatialVector.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -437,8 +437,7 @@ TEST(MPI_Geometry_SubMesh, RestrictionOfParentQuadraturePoint)
 
   const Index subLocal = 0;
   const Index parentLocal = pmap.left.at(subLocal);
-  const auto& qf =
-    QF::PolytopeQuadratureFormula::get(1, mesh.getGeometry(faceDim, parentLocal));
+  const auto& qf = QF::QuadratureFormula::get(1, mesh.getGeometry(faceDim, parentLocal));
   const auto& parentQ = mesh.getQuadrature(faceDim, parentLocal, qf);
   ASSERT_GT(parentQ.getSize(), 0u);
 
@@ -488,7 +487,7 @@ TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
     return;
 
   const Index localIdx = 0;
-  const auto& qf = QF::PolytopeQuadratureFormula::get(1, mesh.getGeometry(d, localIdx));
+  const auto& qf = QF::QuadratureFormula::get(1, mesh.getGeometry(d, localIdx));
   const auto& q = mesh.getQuadrature(d, localIdx, qf);
   ASSERT_GT(q.getSize(), 0u);
 
@@ -523,8 +522,7 @@ TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPISubMeshIdentity)
     return;
 
   const Index localIdx = 0;
-  const auto& qf =
-    QF::PolytopeQuadratureFormula::get(1, boundary.getGeometry(d, localIdx));
+  const auto& qf = QF::QuadratureFormula::get(1, boundary.getGeometry(d, localIdx));
   const auto& q = boundary.getQuadrature(d, localIdx, qf);
   ASSERT_GT(q.getSize(), 0u);
 
@@ -563,9 +561,8 @@ TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
   const Index parentLocalIdx = boundary.getPolytopeMap(d).left.at(subLocalIdx);
 
   const auto& parentQF =
-    QF::PolytopeQuadratureFormula::get(1, mesh.getGeometry(d, parentLocalIdx));
-  const auto& subQF =
-    QF::PolytopeQuadratureFormula::get(1, boundary.getGeometry(d, subLocalIdx));
+    QF::QuadratureFormula::get(1, mesh.getGeometry(d, parentLocalIdx));
+  const auto& subQF = QF::QuadratureFormula::get(1, boundary.getGeometry(d, subLocalIdx));
 
   const auto& parentQ = mesh.getQuadrature(d, parentLocalIdx, parentQF);
   const auto& subQ = boundary.getQuadrature(d, subLocalIdx, subQF);

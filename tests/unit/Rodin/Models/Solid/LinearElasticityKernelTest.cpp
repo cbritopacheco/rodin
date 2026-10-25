@@ -48,7 +48,7 @@ namespace Rodin::Tests::Unit
       const size_t order = 2 * element.getOrder() +
         std::max(lambda.getOrder(cell).value_or(size_t(0)),
           mu.getOrder(cell).value_or(size_t(0)));
-      const auto& formula = QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
+      const auto& formula = QF::QuadratureFormula::get(order, cell.getGeometry());
       const PolytopeQuadrature quadrature(cell, formula);
       Math::Matrix<Scalar> result(count, count);
       result.setZero();
@@ -156,8 +156,7 @@ namespace Rodin::Tests::Unit
         }
         const size_t order =
           2 * space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder();
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(order, cell.getGeometry());
         EXPECT_EQ(lambdaCalls, formula.getSize());
         EXPECT_EQ(muCalls, formula.getSize());
         const auto expected = pairwiseOperator(space, cell, lambda, mu);

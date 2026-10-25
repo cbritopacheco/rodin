@@ -89,7 +89,7 @@ namespace Rodin::Tests::Convergence
           assert(vertices.size() == mappedVertices.size());
           for (size_t i = 0; i < vertices.size(); ++i)
             assert(vertices[i] == mappedVertices[i]);
-          const auto& qf = QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+          const auto& qf = QF::QuadratureFormula::get(order, cell->getGeometry());
           const Geometry::PolytopeQuadrature originalQuadrature(*cell, qf);
           const Geometry::PolytopeQuadrature mappedQuadrature(*mapped, qf);
           for (size_t qp = 0; qp < originalQuadrature.getSize(); ++qp)

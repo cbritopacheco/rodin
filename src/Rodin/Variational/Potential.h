@@ -353,7 +353,7 @@ namespace Rodin::Variational
       const QF::QuadratureFormula& getQuadratureFormula(
         const Geometry::Polytope& polytope) const
       {
-        return QF::PolytopeQuadratureFormula::get(m_order, polytope.getGeometry());
+        return QF::QuadratureFormula::get(m_order, polytope.getGeometry());
       }
 
       Potential* copy() const noexcept override
