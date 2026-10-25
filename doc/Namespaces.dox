@@ -1342,11 +1342,6 @@
  */
 
 /**
-  @namespace Rodin::External::MFEM
-  @brief MFEM integration with Rodin
- */
-
-/**
   @namespace Rodin::Scotch
   @brief Graph partitioning through the Scotch integration.
 
