@@ -7,6 +7,7 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: ./.github/actions/prepare-apt
     - name: Check dependency disk headroom
       shell: bash
       run: python3 dev/ci_environment.py disk

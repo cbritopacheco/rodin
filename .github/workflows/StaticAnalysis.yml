@@ -13,9 +13,13 @@ concurrency:
 permissions:
   deployments: write
   contents: write
+  pages: write
 
 jobs:
   IncludeDependencyGraph:
+    concurrency:
+      group: rodin-gh-pages-publication
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -50,3 +54,7 @@ jobs:
           publish_branch: gh-pages
           publish_dir: static/dev/${{ github.ref }}
           destination_dir: static/dev/${{ github.ref }}/IncludeDependencyGraph
+      - name: Deploy and verify the published Pages commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 dev/deploy_pages.py

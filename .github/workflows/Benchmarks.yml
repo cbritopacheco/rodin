@@ -86,6 +86,7 @@ jobs:
       cancel-in-progress: false
     permissions:
       contents: write
+      pages: write
     steps:
       - name: Require complete documentation and benchmark results
         env:
@@ -129,3 +130,7 @@ jobs:
             git commit -m "Publish documentation and complete benchmark campaign $SHA"
             git push origin HEAD:gh-pages
           fi
+      - name: Deploy and verify the published Pages commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 dev/deploy_pages.py --checkout .ci-pages
