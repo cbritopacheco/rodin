@@ -176,11 +176,24 @@ def discover(entry, ranks):
     return names
 
 
+def escape_case(name):
+    """Escape one exact name for Google Benchmark's POSIX extended regex."""
+    brackets = {'[': '[[]', ']': '[]]', '{': '[{]', '}': '[}]'}
+    metacharacters = frozenset(r'\.^$|?*+()')
+    return ''.join(brackets.get(char, '\\' + char if char in metacharacters else char)
+                   for char in name)
+
+
+def selector(cases):
+    """Select precisely the supplied discovered benchmark cases."""
+    return '^(' + '|'.join(escape_case(name) for name in cases) + ')$'
+
+
 def partitions(names, count):
     """Bound both case counts and the platform's single-argument regex length."""
     chunk, size = [], 0
     for name in names:
-        length = len(re.escape(name).encode()) + 1
+        length = len(escape_case(name).encode()) + 1
         if length > 60000:
             raise ValueError('A benchmark case name exceeds the selector budget')
         if chunk and (len(chunk) == count or size + length > 60000):
@@ -303,8 +316,8 @@ def run_lane(source, lane_id, destination):
     if entry['format'] == 'googlecpp':
         report = destination / 'report.json'
         # Escape exact discovered case names; never use a broad partial-match selector.
-        selector = '^(' + '|'.join(re.escape(name) for name in lane['cases']) + ')$'
-        subprocess.run(argv + ['--benchmark_filter=' + selector, '--benchmark_min_time=0.2s',
+        case_selector = selector(lane['cases'])
+        subprocess.run(argv + ['--benchmark_filter=' + case_selector, '--benchmark_min_time=0.2s',
                               '--benchmark_out_format=json', '--benchmark_out=' + str(report.resolve())],
                        check=True, env=env)
         values = google_results(json.loads(report.read_text()), lane['cases'], entry['metric'])

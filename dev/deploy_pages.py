@@ -9,7 +9,7 @@ import subprocess
 import time
 
 
-BUILD_TIMEOUT = 3600  # Hosted Pages builds can queue behind another deployment.
+BUILD_TIMEOUT = 5 * 3600  # Hosted Pages builds share the runner queue with the CI campaign.
 POLL_INTERVAL = 15
 
 

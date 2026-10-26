@@ -85,6 +85,10 @@ not assumed to be wall time. `RANKS` preserves the required launcher counts.
 `ARGS` applies to every invocation; `MPI_ARGS` additionally applies above one
 rank.
 
+The Stokes assembly and solver registrations use `CASE_BATCH 1`: individual
+large cases can take many minutes outside their reported timed operations.
+Separate lanes retain every case while limiting work lost to a runner shutdown.
+
 Non-root display reporters must redirect their output stream as well as suppress
 measurement callbacks: Google Benchmark writes `--benchmark_list_tests` output
 directly to that stream. Only the root catalogue should reach launcher stdout;

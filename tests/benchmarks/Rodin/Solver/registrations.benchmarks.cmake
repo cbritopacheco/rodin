@@ -26,4 +26,4 @@ rodin_register_benchmark(RodinStokesSolveBenchmarks
   PATH Rodin/Solver/Stokes
   DESCRIPTION "${CMAKE_CURRENT_LIST_DIR}/RodinStokesSolveBenchmarks.html"
   FORMAT googlecpp PROFILE slow METRIC auto RANKS 1
-  CASE_BATCH 256)
+  CASE_BATCH 1)

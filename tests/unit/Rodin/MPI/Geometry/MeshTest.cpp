@@ -484,7 +484,9 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
     auto mesh = distribute(geometry);
     const size_t dimension = mesh.getDimension();
     const auto& first = QF::QuadratureFormula::get(2, geometry);
-    const auto& second = QF::QuadratureFormula::get(3, geometry);
+    // Adjacent exactness requests can select the same persistent formula.
+    const auto& second = QF::QuadratureFormula::get(4, geometry);
+    ASSERT_NE(&first, &second);
     // distribute() creates three vertices per axis, spanning [0, 2].
     Real expectedVolume = 1;
     for (size_t coordinate = 0; coordinate < dimension; ++coordinate)

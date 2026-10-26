@@ -9,6 +9,7 @@
 #include <cmath>
 #include <memory>
 #include <limits>
+#include <sstream>
 #include <string>
 
 #include "Rodin/Geometry.h"
@@ -160,7 +161,15 @@ namespace Rodin::Tests::Benchmarks
         state.counters["sample_repeat_fraction"] =
           workload == 3 ? Real(1) : Real(repeats - 1) / repeats;
         if (!std::isfinite(relativeError) || relativeError > 1e-9 || m_setupError > 1e-10)
-          state.SkipWithError("Large interpolation sweep disagrees with analytic field");
+        {
+          std::ostringstream error;
+          error.precision(std::numeric_limits<Real>::max_digits10);
+          error << "Large interpolation sweep disagrees with analytic field: total="
+                << total << ", expected=" << expected
+                << ", relative error=" << relativeError
+                << ", setup error=" << m_setupError;
+          state.SkipWithError(error.str().c_str());
+        }
         state.SetItemsProcessed(state.iterations() * evaluations);
       }
 
