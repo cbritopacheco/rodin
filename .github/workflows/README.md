@@ -210,10 +210,13 @@ hierarchy-owned executable artifacts and execution-only coordinates. The complet
 compiler/backend/build-type/threading/sanitizer configuration determines
 compatibility. Compilation stops at `Unit / Rodin / <Module>`,
 `Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
-`/ Isoparametric`. Selected descendants share their group's single artifact;
-direct root targets retain a separate parent group. There are no automatic
-numbered subdivisions or component-specific compilation jobs. Execution lanes
-retain their existing partitions. Test enable switches register a superset
+`/ Isoparametric`. Selected descendants normally share their group's single
+artifact; direct root targets retain a separate parent group. The optional
+Release build with both sanitizers divides the oversized Variational producer
+into numbered parts of at most 24 executables. This configuration selected 133
+executables and lost its runner after four hours of compilation. Each part
+restores the same common libraries, and dependent lanes wait for the group.
+Execution lanes retain their existing partitions. Test enable switches register a superset
 without changing production ABI; original configuration-specific
 inventories and runtime selectors remain required.
 

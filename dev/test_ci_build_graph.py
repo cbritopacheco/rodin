@@ -69,6 +69,30 @@ class BuildGraphPlanTest(unittest.TestCase):
             self.assertEqual(slow_record['selected'], targets[:1])
             self.assertEqual(json.dumps(records, sort_keys=True), frozen)
 
+    def test_oversized_optional_sanitizer_build_is_split_without_losing_targets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            folder = root / 'tests/unit/Rodin/Variational'
+            folder.mkdir(parents=True)
+            (folder / 'CMakeLists.txt').touch()
+            targets = [{'target': f'Target{i:03}', 'owner': 'tests/unit/Rodin/Variational',
+                        'kind': 'test'} for i in range(133)]
+            first = planning.entry('unit', 'unit/Rodin/Variational', 'Release', 'ON',
+                                   asan='ON', ubsan='ON', backend='optional')
+            request = {'job': 'Ordinary', 'matrix': first}
+            entry = {'id': 'common', 'definition': graph.common_specification(graph.specification(**request))}
+            records = [{'request': request, 'selected': targets, 'configured': targets}]
+            with patch.object(graph, 'ROOT', root), patch.object(archive, 'commit', return_value='current'):
+                document = graph.directory_plan(entry, records)
+            parts = list(document['directories'].values())
+            self.assertEqual(len(parts), 6)
+            self.assertEqual([p['part'] for p in parts], list(range(1, 7)))
+            self.assertTrue(all(p['common'] == 'common' and len(p['targets']) <= 24 for p in parts))
+            self.assertEqual([t for part in parts for t in part['targets']],
+                             sorted(t['target'] for t in targets))
+            self.assertEqual(set(document['requests'][graph.request_key(**request)]['builds']),
+                             {archive.identity(part) for part in parts})
+
     def requests(self):
         native = [{'multithreaded': mt, 'suite': 'baseline', 'group': group, 'path': tests.display_group(group)}
                   for group in planning.native_convergence_groups() for mt in ['ON', 'OFF']]

@@ -140,6 +140,14 @@ def directory(target):
     return build_group(group)
 
 
+def split_variational_build(spec, group):
+    """Bound the observed oversized optional Release sanitizer producer."""
+    flags = spec['cmake']
+    return (group == 'unit/Rodin/Variational' and spec['mode'] == 'optional' and
+            flags['CMAKE_BUILD_TYPE'] == 'Release' and flags['RODIN_USE_ASAN'] == 'ON' and
+            flags['RODIN_USE_UBSAN'] == 'ON')
+
+
 def directory_plan(entry, records):
     """Bind configured selections to one producer per compatible hierarchy group."""
     groups, requests = {}, {}
@@ -156,9 +164,18 @@ def directory_plan(entry, records):
             raise ValueError('Duplicate execution request')
         requests[key] = {k: record[k] for k in ['request', 'selected', 'configured']}
         requests[key]['common'] = entry['id']
-    specs = {group: {**entry['definition'], 'stage': 'directory', 'common': entry['id'],
-                     'directory': group, 'targets': sorted(targets)}
-             for group, targets in sorted(groups.items())}
+    specs = {}
+    for group, targets in sorted(groups.items()):
+        oversized = split_variational_build(entry['definition'], group)
+        names = sorted(targets)
+        chunks = [names[i:i + 24] for i in range(0, len(names), 24)] if oversized else [names]
+        for i, chunk in enumerate(chunks):
+            name = group + f' / {i + 1}' if len(chunks) > 1 else group
+            spec = {**entry['definition'], 'stage': 'directory', 'common': entry['id'],
+                    'directory': group, 'targets': chunk}
+            if len(chunks) > 1:
+                spec['part'] = i + 1
+            specs[name] = spec
     for record in requests.values():
         wanted = {t['target'] for t in record['selected']}
         record['builds'] = [archive.identity(row) for row in specs.values()
@@ -228,7 +245,7 @@ def index_graph(folder, mode=None, common_id=None):
             key = archive.identity(spec)
             if key in builds:
                 raise ValueError('Duplicate directory build')
-            builds[key] = {'id': key, 'name': tests.display_group(group), 'definition': spec}
+            builds[key] = {'id': key, 'name': tests.display_group(spec['directory']), 'definition': spec}
     expected = [e for e in json.loads((ROOT / 'ci-common-plan.json').read_text())
                 if (mode is None or e['definition']['mode'] == mode)
                 and (common_id is None or e['id'] == common_id)]
@@ -255,8 +272,11 @@ def index_graph(folder, mode=None, common_id=None):
                        for record in requests.values() for target in record['selected'] if target['kind'] == 'test'}
     for row in builds.values():
         spec = row['definition']
-        producer = (spec['common'], spec['directory'])
-        if ('part' in spec or spec['directory'] != build_group(spec['directory']) or
+        producer = (spec['common'], spec['directory'], spec.get('part'))
+        if (spec['directory'] != build_group(spec['directory']) or
+                ('part' in spec and (not split_variational_build(spec, spec['directory']) or
+                                     not isinstance(spec['part'], int) or spec['part'] < 1 or
+                                     len(spec['targets']) > 24)) or
                 producer in producer_groups or not spec['targets']):
             raise ValueError('Build producer does not stop at the agreed hierarchy level')
         producer_groups.add(producer)
@@ -277,7 +297,8 @@ def index_graph(folder, mode=None, common_id=None):
     for i, row in enumerate(sorted(builds.values(), key=lambda r: (r['name'], r['id']))):
         spec = row['definition']
         flags = spec['cmake']
-        label = (row['name'] + f" ({spec['compiler'].upper()}, {BACKEND_NAMES[spec['mode']]}, {flags['CMAKE_BUILD_TYPE']}, "
+        name = row['name'] + (f" / {spec['part']}" if 'part' in spec else '')
+        label = (name + f" ({spec['compiler'].upper()}, {BACKEND_NAMES[spec['mode']]}, {flags['CMAKE_BUILD_TYPE']}, "
                  f"MT-{flags['RODIN_MULTITHREADED']}, ASan-{flags['RODIN_USE_ASAN']}, "
                  f"UBSan-{flags['RODIN_USE_UBSAN']})")
         # Large definitions travel as an artifact, not through GitHub's 1 MiB

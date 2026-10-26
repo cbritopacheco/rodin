@@ -145,8 +145,8 @@ def prepare(common_id):
             raise ValueError('Configured producer has no unique declared hierarchy edge')
         build_owner[identity] = owner
         label = tests.display_group(producers[owner]['path'])
-        if owner in build_rows:
-            raise ValueError('Hierarchy group has more than one build producer')
+        if 'part' in spec:
+            label += f" / {spec['part']}"
         build_rows.setdefault(owner, []).append({'id': identity, 'runner': spec['runner'],
                                                  'name': label})
     ordinary, _ = requests()

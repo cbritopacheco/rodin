@@ -228,6 +228,33 @@ class HierarchicalScheduleTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'no unique declared hierarchy edge'):
                     schedule.prepare('common')
 
+    def test_multiple_build_parts_remain_in_one_hierarchy_dependency(self):
+        ordinary, _ = schedule.requests()
+        family, row = next((f, r) for f, rows in ordinary.items() for r in rows
+                           if r['group'] == 'unit/Rodin/Variational')
+        request = {'job': 'Ordinary', 'matrix': row}
+        entry = {'id': 'common', 'definition': {'mode': 'optional',
+                 'cmake': {'RODIN_CODE_COVERAGE': 'OFF'}}, 'requests': [request]}
+        producer = schedule.key('b', row['group'])
+        execution = schedule.execution_key(request, family)
+        index = {'builds': {str(i): {'definition': {'directory': row['group'],
+                 'targets': [f'Target{i}'], 'runner': 'ubuntu-latest', 'part': i}}
+                 for i in (1, 2)}, 'requests': {graph.request_key(**request):
+                 {'builds': ['1', '2'], 'selected': ['fixture']}}}
+        layout = ({producer: {'path': row['group']}},
+                  {execution: {'family': family, 'dependencies': [producer]}})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'ci-common-plan.json').write_text(json.dumps([entry]))
+            output = root / 'outputs'
+            with patch.object(schedule, 'ROOT', root), patch.object(graph, 'index_graph', return_value=(index, {})), \
+                    patch.dict(os.environ, GITHUB_OUTPUT=str(output)), patch.object(schedule, 'layout', return_value=layout):
+                schedule.prepare('common')
+            values = dict(line.split('=', 1) for line in output.read_text().splitlines())
+            parts = json.loads(values[producer])['include']
+            self.assertEqual({p['id'] for p in parts}, {'1', '2'})
+            self.assertEqual({p['name'][-3:] for p in parts}, {'/ 1', '/ 2'})
+
     def test_generated_workflows_are_current_and_bounded(self):
         for name, document in schedule.generated().items():
             text = (tests.ROOT / '.github/workflows' / name).read_text()
