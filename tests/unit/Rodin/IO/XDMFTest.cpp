@@ -166,7 +166,7 @@ namespace Rodin::Tests::Unit
       if (!curved)
       {
         for (Index vertex = 0; vertex < static_cast<Index>(mesh.getVertexCount());
-          ++vertex)
+             ++vertex)
         {
           coordinates.push_back(mesh.getVertexCoordinates(vertex));
           referenceValues.push_back(1 + coordinates.back()[0]);
@@ -251,8 +251,10 @@ namespace Rodin::Tests::Unit
       for (size_t point = 0; point < points; ++point)
       {
         for (size_t component = 0; component < dimension; ++component)
+        {
           EXPECT_NEAR(geometry[point * dimension + component],
             coordinates[point][component], SamplingTolerance);
+        }
         EXPECT_NEAR(scalars[point], referenceValues[point], SamplingTolerance);
         EXPECT_NEAR(vectors[2 * point], referenceValues[point], SamplingTolerance);
         EXPECT_NEAR(
