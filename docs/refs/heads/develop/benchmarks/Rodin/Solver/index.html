@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solver · Rodin benchmarks</title>
+  <link rel="stylesheet" href="../../assets/mcss-22c93d2587ab.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="../../assets/rodin-e6524bc0dfe4.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme-a31a2c4268f0.css">
+  <link rel="stylesheet" href="../../assets/rodin.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme.css">
+  <link rel="stylesheet" href="../../assets/site.css">
+  <script src="../../assets/rodin-theme.js"></script>
+  <script src="../../assets/rodin-navigation.js" defer></script>
+  
+  <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'local'}};</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body class="rodin-benchmarks">
+  <header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="../../../index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="../../../pages.html">Pages</a>
+              <ol>
+                <li><a href="../../../guides-index.html">General concepts</a></li>
+                <li><a href="../../../examples-index.html">Examples and tutorials</a></li>
+                <li><a href="../../../gallery.html">Gallery</a></li>
+                <li><a href="../../../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../../../configuration.html">Configuration</a></li>
+                <li><a href="../../../notation-index.html">Notation</a></li>
+                <li><a href="../../../credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="../../../modules.html">Modules</a>
+              <ol>
+                <li><a href="../../../namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="../../../namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="../../../namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="../../../namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="../../../namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="../../../namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="../../../namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="../../../annotated.html">Classes</a></li>
+            <li><a href="../../../files.html">Files</a></li>
+            <li><a href="../../../benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+  <main><article>
+    <div class="m-container m-container-inflatable rodin-benchmark-layout"><div class="m-row">
+      <div class="m-col-l-10 m-push-l-1" data-rodin-content>
+      <nav class="benchmark-breadcrumb" aria-label="Breadcrumb"><a href="../../index.html">Benchmarks</a> / <a href="../../Rodin/index.html">Modules</a> / <a href="../../Rodin/Solver/index.html">Solver</a></nav>
+      <h1>Solver</h1>
+      <p class="benchmark-configuration">Published configurations</p>
+      
+      <p class="m-text m-dim"><em>Solution of linear and nonlinear discrete systems.</em></p><div class="benchmark-representative"><div class="m-math"><svg style="width: 12.793em; height: 0.878em;" viewBox="132.866041 -8.433687 122.810909 8.427251">
+<title>
+\[  \text{Find } \mathbf{x} \text{ such that } A\mathbf{x}=\mathbf{b}.
+\]
+</title>
+<defs>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g5-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g0-98' d='M2.486675-8.296887L.418431-8.201245V-7.687173C1.159651-7.687173 1.243337-7.687173 1.243337-7.220922V0H1.745455C1.948692-.227148 2.15193-.454296 2.343213-.6934C2.952927-.059776 3.610461 .071731 4.088667 .071731C5.738481 .071731 7.005729-.932503 7.005729-2.666002C7.005729-4.303861 5.881943-5.379826 4.244085-5.379826C3.53873-5.379826 2.976837-5.152677 2.486675-4.770112V-8.296887ZM2.546451-4.196264C2.964882-4.770112 3.58655-4.985305 4.088667-4.985305C5.571108-4.985305 5.571108-3.466999 5.571108-2.677958C5.571108-2.139975 5.571108-1.458531 5.284184-1.016189C4.913574-.442341 4.351681-.32279 3.969116-.32279C3.156164-.32279 2.713823-.896638 2.546451-1.159651V-4.196264Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g0-120' d='M4.028892-2.952927L5.415691-4.542964C5.547198-4.698381 5.654795-4.794022 6.647073-4.794022V-5.308095C5.977584-5.284184 5.953674-5.284184 5.547198-5.284184C5.200498-5.284184 4.686426-5.284184 4.351681-5.308095V-4.794022C4.578829-4.794022 4.829888-4.734247 4.829888-4.65056C4.829888-4.62665 4.770112-4.542964 4.746202-4.519054L3.706102-3.347447L2.52254-4.794022H3.024658V-5.308095C2.749689-5.284184 1.936737-5.284184 1.613948-5.284184C1.255293-5.284184 .609714-5.284184 .274969-5.308095V-4.794022H1.123786L2.988792-2.52254L1.43462-.765131C1.291158-.597758 1.207472-.514072 .215193-.514072V0C.932503-.02391 .956413-.02391 1.327024-.02391C1.673724-.02391 2.175841-.02391 2.510585 0V-.514072C2.283437-.514072 2.032379-.573848 2.032379-.657534C2.032379-.669489 2.032379-.681445 2.116065-.777086L3.311582-2.12802L4.638605-.514072H4.136488V0C4.423412-.02391 5.224408-.02391 5.559153-.02391C5.917808-.02391 6.551432-.02391 6.886177 0V-.514072H6.049315L4.028892-2.952927Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g1-58' d='M2.199751-.573848C2.199751-.920548 1.912827-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.872727 1.0401-.585803C1.0401-.239103 1.327024 0 1.613948 0C1.960648 0 2.199751-.286924 2.199751-.573848Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-70' d='M6.503135-6.181551L6.467404-7.884753H.142926V-7.658454C1.024303-7.586991 1.17914-7.420244 1.17914-6.586509V-1.42926C1.17914-.440689 1.048124-.285852 .142926-.2263V0H3.477867V-.2263C2.560758-.273942 2.394011-.440689 2.394011-1.298245V-3.894735H4.121034C5.085785-3.894735 5.288264-3.716077 5.43119-2.751326H5.705131V-5.514563H5.43119C5.288264-4.561723 5.073875-4.383065 4.121034-4.383065H2.394011V-7.027197C2.394011-7.360691 2.453564-7.432154 2.775147-7.432154H4.394976C5.740863-7.432154 6.002894-7.253497 6.205372-6.181551H6.503135Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-97' d='M5.264443-.47642V-.786093C5.061964-.619346 4.919038-.559794 4.74038-.559794C4.466439-.559794 4.383065-.726541 4.383065-1.250603V-3.573151C4.383065-4.180587 4.323513-4.514081 4.156766-4.788022C3.906645-5.240622 3.394494-5.478832 2.667953-5.478832C2.060517-5.478832 1.488813-5.312085 1.155319-5.038143C.857556-4.788022 .666988-4.442618 .666988-4.144855C.666988-3.870914 .893288-3.632704 1.17914-3.632704S1.715113-3.870914 1.715113-4.132945C1.715113-4.180587 1.703202-4.240139 1.691292-4.323513C1.667471-4.430707 1.65556-4.525991 1.65556-4.609365C1.65556-4.930949 2.036696-5.19298 2.513116-5.19298C3.096731-5.19298 3.418315-4.847575 3.418315-4.204408V-3.477867C1.584097-2.739416 1.381618-2.644132 .869467-2.191533C.607436-1.953323 .440689-1.548365 .440689-1.155319C.440689-.404957 .95284 .119105 1.691292 .119105C2.215354 .119105 2.703684-.131016 3.430225-.750362C3.489778-.119105 3.704167 .119105 4.192497 .119105C4.597454 .119105 4.847575-.023821 5.264443-.47642ZM3.418315-1.464992C3.418315-1.095766 3.358762-.988572 3.108641-.833735C2.822789-.666988 2.489295-.571704 2.239175-.571704C1.822307-.571704 1.488813-.976661 1.488813-1.488813V-1.536455C1.488813-2.239175 1.977144-2.667953 3.418315-3.192015V-1.464992Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-99' d='M4.907128-1.750844L4.74038-1.858039C4.168676-1.024303 3.739898-.738451 3.060999-.738451C1.965233-.738451 1.214871-1.691292 1.214871-3.060999C1.214871-4.299692 1.869949-5.133427 2.8347-5.133427C3.263478-5.133427 3.418315-5.002412 3.53742-4.561723L3.608883-4.299692C3.704167-3.954287 3.918556-3.751809 4.180587-3.751809C4.49026-3.751809 4.74038-3.978108 4.74038-4.25205C4.74038-4.919038 3.906645-5.478832 2.906163-5.478832C2.346369-5.478832 1.774665-5.264443 1.298245-4.871396C.655078-4.335423 .297763-3.513599 .297763-2.525027C.297763-.988572 1.238692 .119105 2.560758 .119105C3.07291 .119105 3.525509-.047642 3.930466-.381136C4.287781-.666988 4.525991-1.012393 4.907128-1.750844Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-100' d='M5.848057-.500241V-.690809C5.633668-.678899 5.609847-.678899 5.574116-.678899C5.145338-.678899 5.050054-.809914 5.050054-1.357797V-8.111053L4.990501-8.134874C4.418797-7.932395 4.001929-7.81329 3.239657-7.610812V-7.420244C3.334941-7.432154 3.406404-7.432154 3.501688-7.432154C3.942377-7.432154 4.049571-7.313049 4.049571-6.824719V-4.96668C3.596972-5.347816 3.275389-5.478832 2.798968-5.478832C1.42926-5.478832 .321584-4.132945 .321584-2.441653C.321584-.917109 1.214871 .119105 2.525027 .119105C3.192015 .119105 3.644614-.119105 4.049571-.678899V.083374L4.097213 .119105L5.848057-.500241ZM4.049571-1.214871C4.049571-1.131498 3.966198-.988572 3.847093-.857556C3.632704-.619346 3.334941-.500241 2.989536-.500241C2.000965-.500241 1.345887-1.453081 1.345887-2.918073C1.345887-4.26396 1.929502-5.145338 2.8347-5.145338C3.465957-5.145338 4.049571-4.585544 4.049571-3.954287V-1.214871Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-104' d='M5.800415 0V-.178658C5.157248-.297763 5.085785-.393047 5.085785-1.214871V-3.585062C5.085785-4.835665 4.585544-5.478832 3.620793-5.478832C2.918073-5.478832 2.417832-5.19298 1.869949-4.478349V-8.099143L1.810397-8.134874C1.405439-7.991948 1.107677-7.896664 .440689-7.706096L.119105-7.610812V-7.420244C.166747-7.432154 .202479-7.432154 .262031-7.432154C.774183-7.432154 .869467-7.33687 .869467-6.824719V-1.214871C.869467-.381136 .798004-.273942 .107195-.178658V0H2.679863V-.178658C1.989054-.250121 1.869949-.393047 1.869949-1.214871V-4.085303C2.37019-4.633186 2.727505-4.835665 3.192015-4.835665C3.78754-4.835665 4.085303-4.406886 4.085303-3.573151V-1.214871C4.085303-.404957 3.966198-.250121 3.275389-.178658V0H5.800415Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-105' d='M3.013357 0V-.178658C2.227264-.23821 2.13198-.357315 2.13198-1.214871V-5.4431L2.084338-5.478832L.23821-4.823754V-4.645096L.333494-4.657007C.47642-4.680828 .631257-4.692738 .738451-4.692738C1.024303-4.692738 1.131498-4.50217 1.131498-3.978108V-1.214871C1.131498-.357315 1.012393-.2263 .190568-.178658V0H3.013357ZM2.239175-7.527438C2.239175-7.860932 1.977144-8.134874 1.631739-8.134874C1.298245-8.134874 1.024303-7.860932 1.024303-7.527438C1.024303-7.182034 1.298245-6.920003 1.631739-6.920003C1.977144-6.920003 2.239175-7.182034 2.239175-7.527438Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-110' d='M5.776594 0V-.178658C5.19298-.23821 5.050054-.381136 5.050054-.964751V-3.692256C5.050054-4.811844 4.525991-5.478832 3.644614-5.478832C3.096731-5.478832 2.727505-5.276353 1.917591-4.514081V-5.455011L1.834218-5.478832C1.250603-5.264443 .845646-5.133427 .190568-4.942859V-4.74038C.262031-4.776112 .381136-4.788022 .512152-4.788022C.845646-4.788022 .95284-4.609365 .95284-4.02575V-1.071945C.95284-.393047 .821825-.2263 .214389-.178658V0H2.739416V-.178658C2.13198-.2263 1.953323-.369226 1.953323-.798004V-4.144855C2.525027-4.680828 2.787058-4.823754 3.180104-4.823754C3.763719-4.823754 4.049571-4.454528 4.049571-3.668435V-1.17914C4.049571-.428778 3.894735-.2263 3.29921-.178658V0H5.776594Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-115' d='M4.144855-1.405439C4.144855-2.000965 3.870914-2.394011 3.144373-2.822789L1.858039-3.585062C1.524544-3.77563 1.345887-4.073392 1.345887-4.394976C1.345887-4.883307 1.715113-5.20489 2.262996-5.20489C2.941894-5.20489 3.29921-4.811844 3.573151-3.739898H3.751809L3.704167-5.359727H3.573151L3.54933-5.335906C3.442136-5.252532 3.430225-5.240622 3.382583-5.240622C3.31112-5.240622 3.192015-5.264443 3.060999-5.323995C2.810879-5.419279 2.536937-5.466921 2.251085-5.466921C1.274424-5.466921 .607436-4.871396 .607436-4.001929C.607436-3.334941 .988572-2.870431 2.000965-2.286817L2.691774-1.89377C3.108641-1.65556 3.31112-1.369708 3.31112-1.000482C3.31112-.47642 2.929984-.142926 2.322548-.142926C1.500723-.142926 1.083856-.595525 .809914-1.810397H.619346V.047642H.774183C.857556-.071463 .905198-.095284 1.048124-.095284C1.17914-.095284 1.310155-.071463 1.596007 0C1.929502 .071463 2.227264 .119105 2.477385 .119105C3.382583 .119105 4.144855-.571704 4.144855-1.405439Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
+<path id='namespace_rodin_1_1_solver-representative-eq1-g4-117' d='M5.705131-.428778V-.595525H5.645579C5.097696-.595525 4.96668-.726541 4.96668-1.274424V-5.359727H3.08482V-5.157248C3.823272-5.121517 3.966198-5.002412 3.966198-4.406886V-1.607918C3.966198-1.286334 3.906645-1.107677 3.763719-1.000482C3.430225-.71463 3.060999-.571704 2.691774-.571704C2.227264-.571704 1.846128-.976661 1.846128-1.476902V-5.359727H.107195V-5.19298C.678899-5.157248 .845646-4.978591 .845646-4.430707V-1.42926C.845646-.488331 1.41735 .119105 2.286817 .119105C2.727505 .119105 3.192015-.071463 3.513599-.393047L4.02575-.905198V.083374L4.073392 .107195C4.668917-.131016 5.097696-.262031 5.705131-.428778Z'/>
+</defs>
+<g id='namespace_rodin_1_1_solver-representative-eq1-page1'>
+<use x='132.866041' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-70'/>
+<use x='139.333776' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-105'/>
+<use x='142.657311' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-110'/>
+<use x='148.634895' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-100'/>
+<use x='157.601271' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g0-120'/>
+<use x='167.688444' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-115'/>
+<use x='172.339004' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-117'/>
+<use x='178.316588' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-99'/>
+<use x='183.44535' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-104'/>
+<use x='192.411726' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-116'/>
+<use x='195.735262' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-104'/>
+<use x='201.712846' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-97'/>
+<use x='207.020943' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g4-116'/>
+<use x='213.33327' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g1-65'/>
+<use x='222.108617' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g0-120'/>
+<use x='232.527828' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g5-61'/>
+<use x='244.953308' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g0-98'/>
+<use x='252.425289' y='-.131495' xlink:href='#namespace_rodin_1_1_solver-representative-eq1-g1-58'/>
+</g>
+</svg></div></div><div class="m-block m-flat"><p><a href="../../../class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> handles symmetric positive-definite systems, <a href="../../../class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> handles general iterative solves, and <a href="../../../class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a> provides direct sparse factorization. <a href="../../../class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a> drives nonlinear solves. These solvers operate on prepared systems or variational problems and provide convergence controls for PDE and optimization calculations.</p></div>
+      
+      <h2>Benchmarks</h2>
+      <div class="benchmark-children">
+        <section class="m-frame"><h3><a href="../../Rodin/Solver/Constrained/index.html">Constrained</a></h3>
+          <p>Zero-initial-guess solves paired with constrained assembly workloads.</p>
+        </section>
+      
+        <section class="m-frame"><h3><a href="../../Rodin/Solver/CoupledReactionDiffusion/index.html">CoupledReactionDiffusion</a></h3>
+          <p>Fixed-system CG on manufactured two-field reaction--diffusion operators.</p>
+        </section>
+      
+        <section class="m-frame"><h3><a href="../../Rodin/Solver/DiagonalPreconditioner/index.html">DiagonalPreconditioner</a></h3>
+          <p>Diagonal-preconditioner setup and application on constrained operators.</p>
+        </section>
+      
+        <section class="m-frame"><h3><a href="../../Rodin/Solver/Helmholtz/index.html">Helmholtz</a></h3>
+          <p>Zero-initial-guess GMRES on manufactured complex Helmholtz operators.</p>
+        </section>
+      
+        <section class="m-frame"><h3><a href="../../Rodin/Solver/Stokes/index.html">Stokes</a></h3>
+          <p>Measures the StokesSolve workload through its public library pipeline.</p>
+        </section>
+      </div>
+      
+      
+      </div>
+    </div></div>
+  </article></main>
+  
+<div class="m-doc-search" id="search" role="dialog" aria-modal="true" aria-label="Benchmark search">
+  <a href="#!" onclick="return hideSearch()" aria-label="Dismiss search backdrop"></a>
+  <div class="m-container"><div class="m-row"><div class="m-col-m-8 m-push-m-2">
+    <div class="m-doc-search-header m-text m-small">
+      <div class="benchmark-search-shortcuts"><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+      <div id="search-symbolcount">Loading index…</div>
+      <button class="benchmark-search-close" type="button" aria-label="Close benchmark search" onclick="return hideSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12 M18 6 6 18"></path></svg></button>
+    </div>
+    <div class="m-doc-search-content">
+      <form><input type="search" name="q" id="search-input" aria-label="Find benchmarks" placeholder="Loading…" disabled autocomplete="off" spellcheck="false"></form>
+      <noscript>Benchmark search requires JavaScript.</noscript>
+      <div id="search-help" class="m-text m-dim m-text-center">
+        <p>Find modules, classes and workloads by name, path or description.
+        Try <code>SpatialMatrix</code>, <code>pyramid</code> or <code>Stokes stability</code>.</p>
+        <p>Use ↑ / ↓ to select a result and Enter to open it. Tab completes a prefix.
+        Individual measured cases can be filtered on their benchmark page.</p>
+      </div>
+      <div id="search-notfound" class="m-text m-warning m-text-center">No matching benchmarks.</div>
+      <ul id="search-results"></ul>
+    </div>
+  </div></div></div>
+</div>
+<script src="../../assets/search-57e2ce511c71.js"></script>
+<script src="../../assets/searchdata-fc68b61a5937.js"></script>
+  <footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

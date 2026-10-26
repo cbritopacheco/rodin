@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,21 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_h1_2_h1_8h.html">&lt;Rodin/MPI/Variational/H1/H1.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Matrix-range finite element or expression specialization.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>H1 <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Matrix-range finite element or expression specialization.</p><p class="rodin-reference-include">Defined in <a href="_m_p_i_2_variational_2_h1_2_h1_8h.html"><code>Rodin/MPI/Variational/H1/H1.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#aac09f2e1f5d1d0b10c7f67e8d96be2e0"><span class="nc">H1</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_matrix.html"><span class="nc">SpatialMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_h1.html">H1</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>K</code></td><td><code>K</code></td></tr><tr><td><code>Range</code></td><td><code>Math::SpatialMatrix&lt; Scalar &gt;</code></td></tr><tr><td><code>Mesh</code></td><td><code>Geometry::Mesh&lt; Context::MPI &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,21 +93,13 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Represernts a finite element space.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" title="FiniteElementSpace&lt; Geometry::Mesh&lt; Context::MPI &gt;, H1&lt; K, Math::SpatialMatrix&lt; Scalar &gt;, Geometry::Mesh&lt; Context::MPI &gt; &gt; &gt;">FiniteElementSpace</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">H1</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_space.html"><code>FiniteElementSpace&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">FiniteElementSpace</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#aac09f2e1f5d1d0b10c7f67e8d96be2e0"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_matrix.html"><span class="nc">SpatialMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represernts a finite element space.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#a23e73ba10e16901b2326d8212936b72b"><code>getSize()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a319cde5b2ea76e92e922845ecfa5c615">FiniteElementSpaceBase::getSize</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#a1c88fa53fe90dcf92c359274842445e9"><code>getVectorDimension()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a15d4d7b3c5feccf689799d946e09555e">FiniteElementSpaceBase::getVectorDimension</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#a023a4642b6e40a2d6ea68a6bdbb096bb"><code>getMesh()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#a454a2020aefbc34d41040472431bf9bc">FiniteElementSpace::getMesh</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#adba1954ca59742b5304d71dcc0854c65"><code>getDOFs()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#adecf53d8a9539fa3fb765d95ef7ecbd3">FiniteElementSpaceBase::getDOFs</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html#a3e24780d96854305b5c2e77823478945"><code>getGlobalIndex()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a1af6ddefe5c0c8eecd0327758e6c8f96">FiniteElementSpaceBase::getGlobalIndex</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_space.html"><code>FiniteElementSpace</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#a29f703c87fa4c46752435c503899a263"><code>getPullback()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#a16d569dadaf0ee93d7f0bd19fdd7766f"><code>getPushforward()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html#aae9a656e9a7baf0394cc62f9c5f90cf7"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html"><code>FiniteElementSpaceBase</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a941cd81695d891d128d7147ad1deb3a2"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a8ff820ffdf99dcc1cfb638ab9c4681aa"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a91c26aa6ef77cda5c91ca891660c1255"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_space_base.html#a058a75329717b1e8172d6fb365530ed4"><code>operator==()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a5bca80ba22d5a67bdc836ec7ce645be6">
-              using <a href="#a5bca80ba22d5a67bdc836ec7ce645be6" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+              using <a href="#a5bca80ba22d5a67bdc836ec7ce645be6" class="m-doc-self">FESType</a> = <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
             </dt>
             <dd>Local matrix space on the mesh shard.</dd>
             <dt id="a52597898083a89a8664becf85b25ce65">
@@ -116,7 +107,7 @@
             </dt>
             <dd>Mesh and execution context of this specialization.</dd>
             <dt id="a3b878f4d9ab9e9935a3415cbc487914f">
-              using <a href="#a3b878f4d9ab9e9935a3415cbc487914f" class="m-doc-self">ScalarSpace</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, Scalar, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#a3b878f4d9ab9e9935a3415cbc487914f" class="m-doc-self">ScalarSpace</a> = <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&lt;K, Scalar, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Scalar space supplying this family&#x27;s DOF numbering.</dd>
             <dt id="aa5fafbbe46286328887d7eedc7c23132">
@@ -124,11 +115,11 @@
             </dt>
             <dd>Matrix reference element for this family.</dd>
             <dt id="a3d408aa0b4a6bce7942ece65e2813653">
-              using <a href="#a3d408aa0b4a6bce7942ece65e2813653" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;<a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;&gt;
+              using <a href="#a3d408aa0b4a6bce7942ece65e2813653" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>, <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;&gt;
             </dt>
             <dd>Existing finite-element-space interface.</dd>
             <dt id="a5a0466f9e53517055fe19d1619dc9498">
-              using <a href="#a5a0466f9e53517055fe19d1619dc9498" class="m-doc-self">ScalarType</a> = typename ScalarSpace::ScalarType
+              using <a href="#a5a0466f9e53517055fe19d1619dc9498" class="m-doc-self">ScalarType</a> = typename <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html#adbcc1a2097c99bcaeca69ac2eff3c9bf" class="m-doc">ScalarSpace::<wbr />ScalarType</a>
             </dt>
             <dd>Scalar type of matrix or tensor entries.</dd>
             <dt id="a9e6ed8cbf80765f7c226d640bf45c15c">
@@ -136,7 +127,7 @@
             </dt>
             <dd>Evaluated matrix, tensor, or scalar range type.</dd>
             <dt id="a8f9a51af7d014a882351689e3f32cd52">
-              using <a href="#a8f9a51af7d014a882351689e3f32cd52" class="m-doc-self">ContextType</a> = typename <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">ScalarSpace::<wbr />ContextType</a>
+              using <a href="#a8f9a51af7d014a882351689e3f32cd52" class="m-doc-self">ContextType</a> = typename <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ScalarSpace::<wbr />ContextType</a>
             </dt>
             <dd>Local or distributed execution context.</dd>
           </dl>
@@ -152,11 +143,11 @@
             </dt>
             <dd>Expands scalar DOF maps into interleaved row-major matrix components.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae9dbebfa78d814fe10579a841c18c0ae" class="m-doc">H1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae9dbebfa78d814fe10579a841c18c0ae" class="m-doc">H1</a>(</span><span class="m-doc-wrap">const H1&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copies the space and its DOF maps.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a8dad30f1e67c8d675c0c6dc19065d64b" class="m-doc">H1</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a8dad30f1e67c8d675c0c6dc19065d64b" class="m-doc">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Moves the space and its DOF maps.</dd>
           </dl>
@@ -165,11 +156,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad623e852e2df2d2d7d57d32b6c074d4a" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad623e852e2df2d2d7d57d32b6c074d4a" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp; other) -&gt; <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copies the space and its DOF maps.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a32754e9d9d455ac5ffb3834665cee0cc" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a32754e9d9d455ac5ffb3834665cee0cc" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp;&amp; other) -&gt; <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Moves the space and its DOF maps.</dd>
             <dt>
@@ -264,10 +255,8 @@ $ (d, i) $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aac09f2e1f5d1d0b10c7f67e8d96be2e0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt; degree,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt; degree,
               const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; mesh,
               size_t rows,
               size_t cols)</span></span>
@@ -299,10 +288,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="ae9dbebfa78d814fe10579a841c18c0ae"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9dbebfa78d814fe10579a841c18c0ae" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9dbebfa78d814fe10579a841c18c0ae" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const H1&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Copies the space and its DOF maps.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -319,10 +306,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a8dad30f1e67c8d675c0c6dc19065d64b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dad30f1e67c8d675c0c6dc19065d64b" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dad30f1e67c8d675c0c6dc19065d64b" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Moves the space and its DOF maps.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -339,10 +324,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="ad623e852e2df2d2d7d57d32b6c074d4a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad623e852e2df2d2d7d57d32b6c074d4a" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad623e852e2df2d2d7d57d32b6c074d4a" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Copies the space and its DOF maps.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -365,10 +348,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a32754e9d9d455ac5ffb3834665cee0cc"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32754e9d9d455ac5ffb3834665cee0cc" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32754e9d9d455ac5ffb3834665cee0cc" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#aac09f2e1f5d1d0b10c7f67e8d96be2e0" class="m-doc">H1</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Moves the space and its DOF maps.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -391,10 +372,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the total number of degrees of freedom.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -408,10 +387,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a1c88fa53fe90dcf92c359274842445e9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the dimension of the range space, i.e. the number of components of each basis function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -425,10 +402,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a0af0bdf821ec4bd24b0e14e7722f5f37"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the number of matrix rows.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -442,10 +417,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="af31837cc835e05a7dce74d5dbdfecac1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the number of matrix columns.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -459,10 +432,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a023a4642b6e40a2d6ea68a6bdbb096bb"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the underlying mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -476,10 +447,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a8c2d643e2be19ceaa170b450cdaf6173"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a3b878f4d9ab9e9935a3415cbc487914f" class="m-doc">ScalarSpace</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c2d643e2be19ceaa170b450cdaf6173" class="m-doc-self">getScalarSpace</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a3b878f4d9ab9e9935a3415cbc487914f" class="m-doc">ScalarSpace</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c2d643e2be19ceaa170b450cdaf6173" class="m-doc-self">getScalarSpace</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the scalar space supplying topology and component-independent maps.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -493,10 +462,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="ae158db2d2017a069f2ede653e5110753"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#aa5fafbbe46286328887d7eedc7c23132" class="m-doc">ElementType</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aa5fafbbe46286328887d7eedc7c23132" class="m-doc">ElementType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
             </h3>
             <p>Returns the matrix reference element of a mesh entity.</p>
@@ -524,10 +491,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="adba1954ca59742b5304d71dcc0854c65"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
+              
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Returns the global DOF indices attached to a given mesh entity.</p>
@@ -648,10 +613,8 @@ $ (d,i) $
           </div></section>
           <section class="m-doc-details" id="a3e24780d96854305b5c2e77823478945"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e24780d96854305b5c2e77823478945" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e24780d96854305b5c2e77823478945" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the global index for the local degree of freedom on the <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
@@ -737,7 +700,7 @@ $ (d, i) $
                 template&lt;size_t K, class Scalar&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3312658a24699bf1889145c4224901fb" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3312658a24699bf1889145c4224901fb" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               Callable&amp;&amp; value) const</span></span>
             </h3>
             <p>Pulls a physical callable back to a reference element.</p>
@@ -769,7 +732,7 @@ $ (d, i) $
                 template&lt;size_t K, class Scalar&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8df138f79150cb366a6a90b5c19821c" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8df138f79150cb366a6a90b5c19821c" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               Callable&amp;&amp; value) const</span></span>
             </h3>
             <p>Pushes a reference callable forward to the physical mesh.</p>
@@ -797,10 +760,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a88987bef7972e7ef2a6aa0c6b83138b0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a5bca80ba22d5a67bdc836ec7ce645be6" class="m-doc">FESType</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a5bca80ba22d5a67bdc836ec7ce645be6" class="m-doc">FESType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the matrix space on the local mesh shard.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -814,10 +775,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a96abd8ba8f14deaed88496405eb96c1d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96abd8ba8f14deaed88496405eb96c1d" class="m-doc-self">getOwnershipRange</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; begin,
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96abd8ba8f14deaed88496405eb96c1d" class="m-doc-self">getOwnershipRange</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; begin,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; end) const</span></span>
             </h3>
             <p>Returns the half-open range of owned global component DOFs.</p>
@@ -839,10 +798,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="aca04136b8b11265a632cea903ec6b57c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca04136b8b11265a632cea903ec6b57c" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca04136b8b11265a632cea903ec6b57c" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const</span></span>
             </h3>
             <p>Maps a local component DOF to its global coefficient index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -865,10 +822,8 @@ $ (d, i) $
           </div></section>
           <section class="m-doc-details" id="a29c3465752af7a20aeb2db80e62df73d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialMatrix&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a29c3465752af7a20aeb2db80e62df73d" class="m-doc-self">getLocalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> global) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a29c3465752af7a20aeb2db80e62df73d" class="m-doc-self">getLocalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> global) const</span></span>
             </h3>
             <p>Returns the shard-local index of a global DOF, if present.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -928,13 +883,20 @@ $ (d, i) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

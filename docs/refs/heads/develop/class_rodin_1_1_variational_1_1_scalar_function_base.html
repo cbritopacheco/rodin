@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ScalarFunctionBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_scalar_function_8h.html">&lt;Rodin/Variational/ScalarFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ScalarFunctionBase <span class="m-thin">class</span>
-        </h1>
-        <p>Base class for scalar-valued functions with templated scalar type.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>ScalarFunctionBase</h1><p class="rodin-reference-brief">Base class for scalar-valued functions with templated scalar type.</p><p class="rodin-reference-include">Defined in <a href="_scalar_function_8h.html"><code>Rodin/Variational/ScalarFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad956ed4aec7d6dae5a657386701aecd1"><span class="nc">ScalarFunctionBase</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -101,7 +97,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
@@ -116,8 +112,8 @@
 \]
 </title>
 <defs>
-<path id='eq1-g0-70' d='M3.096389-4.016936C3.58655-4.016936 4.782067-3.993026 4.877709-2.654047C4.889664-2.510585 4.901619-2.355168 5.092902-2.355168C5.296139-2.355168 5.296139-2.52254 5.296139-2.737733V-5.977584C5.296139-6.168867 5.296139-6.360149 5.092902-6.360149C4.937484-6.360149 4.889664-6.240598 4.877709-6.109091C4.805978-4.722291 3.969116-4.483188 3.096389-4.447323V-6.969863C3.096389-7.770859 3.323537-7.770859 3.610461-7.770859H4.172354C5.702615-7.770859 6.479701-6.945953 6.551432-6.121046C6.563387-6.025405 6.575342-5.846077 6.766625-5.846077C6.969863-5.846077 6.969863-6.03736 6.969863-6.240598V-7.79477C6.969863-8.16538 6.945953-8.18929 6.575342-8.18929H.573848C.358655-8.18929 .167372-8.18929 .167372-7.974097C.167372-7.770859 .394521-7.770859 .490162-7.770859C1.171606-7.770859 1.219427-7.675218 1.219427-7.089415V-1.099875C1.219427-.537983 1.183562-.418431 .549938-.418431C.37061-.418431 .167372-.418431 .167372-.215193C.167372 0 .358655 0 .573848 0H4.028892C4.244085 0 4.423412 0 4.423412-.215193C4.423412-.418431 4.220174-.418431 4.064757-.418431C3.144209-.418431 3.096389-.502117 3.096389-1.135741V-4.016936ZM6.551432-7.770859V-7.208966C6.38406-7.388294 6.180822-7.603487 5.905853-7.770859H6.551432ZM4.877709-3.789788C4.698381-4.016936 4.387547-4.196264 4.244085-4.25604C4.471233-4.363636 4.710336-4.554919 4.877709-4.758157V-3.789788ZM1.637858-7.113325C1.637858-7.256787 1.637858-7.555666 1.542217-7.770859H2.809465C2.677958-7.49589 2.677958-7.10137 2.677958-6.993773V-1.111831C2.677958-.932503 2.677958-.645579 2.797509-.418431H1.542217C1.637858-.633624 1.637858-.932503 1.637858-1.075965V-7.113325Z'/>
 <path id='eq1-g1-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq1-g0-70' d='M3.096389-4.016936C3.58655-4.016936 4.782067-3.993026 4.877709-2.654047C4.889664-2.510585 4.901619-2.355168 5.092902-2.355168C5.296139-2.355168 5.296139-2.52254 5.296139-2.737733V-5.977584C5.296139-6.168867 5.296139-6.360149 5.092902-6.360149C4.937484-6.360149 4.889664-6.240598 4.877709-6.109091C4.805978-4.722291 3.969116-4.483188 3.096389-4.447323V-6.969863C3.096389-7.770859 3.323537-7.770859 3.610461-7.770859H4.172354C5.702615-7.770859 6.479701-6.945953 6.551432-6.121046C6.563387-6.025405 6.575342-5.846077 6.766625-5.846077C6.969863-5.846077 6.969863-6.03736 6.969863-6.240598V-7.79477C6.969863-8.16538 6.945953-8.18929 6.575342-8.18929H.573848C.358655-8.18929 .167372-8.18929 .167372-7.974097C.167372-7.770859 .394521-7.770859 .490162-7.770859C1.171606-7.770859 1.219427-7.675218 1.219427-7.089415V-1.099875C1.219427-.537983 1.183562-.418431 .549938-.418431C.37061-.418431 .167372-.418431 .167372-.215193C.167372 0 .358655 0 .573848 0H4.028892C4.244085 0 4.423412 0 4.423412-.215193C4.423412-.418431 4.220174-.418431 4.064757-.418431C3.144209-.418431 3.096389-.502117 3.096389-1.135741V-4.016936ZM6.551432-7.770859V-7.208966C6.38406-7.388294 6.180822-7.603487 5.905853-7.770859H6.551432ZM4.877709-3.789788C4.698381-4.016936 4.387547-4.196264 4.244085-4.25604C4.471233-4.363636 4.710336-4.554919 4.877709-4.758157V-3.789788ZM1.637858-7.113325C1.637858-7.256787 1.637858-7.555666 1.542217-7.770859H2.809465C2.677958-7.49589 2.677958-7.10137 2.677958-6.993773V-1.111831C2.677958-.932503 2.677958-.645579 2.797509-.418431H1.542217C1.637858-.633624 1.637858-.932503 1.637858-1.075965V-7.113325Z'/>
 <path id='eq1-g3-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
 <path id='eq1-g3-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
 <path id='eq1-g2-102' d='M5.332005-4.805978C5.571108-4.805978 5.66675-4.805978 5.66675-5.033126C5.66675-5.152677 5.571108-5.152677 5.355915-5.152677H4.387547C4.614695-6.38406 4.782067-7.232877 4.877709-7.615442C4.94944-7.902366 5.200498-8.177335 5.511333-8.177335C5.762391-8.177335 6.01345-8.069738 6.133001-7.962142C5.66675-7.914321 5.523288-7.567621 5.523288-7.364384C5.523288-7.12528 5.702615-6.981818 5.929763-6.981818C6.168867-6.981818 6.527522-7.185056 6.527522-7.639352C6.527522-8.141469 6.025405-8.416438 5.499377-8.416438C4.985305-8.416438 4.483188-8.033873 4.244085-7.567621C4.028892-7.149191 3.90934-6.718804 3.634371-5.152677H2.833375C2.606227-5.152677 2.486675-5.152677 2.486675-4.937484C2.486675-4.805978 2.558406-4.805978 2.797509-4.805978H3.56264C3.347447-3.694147 2.857285-.992279 2.582316 .286924C2.379078 1.327024 2.199751 2.199751 1.601993 2.199751C1.566127 2.199751 1.219427 2.199751 1.004234 1.972603C1.613948 1.924782 1.613948 1.398755 1.613948 1.3868C1.613948 1.147696 1.43462 1.004234 1.207472 1.004234C.968369 1.004234 .609714 1.207472 .609714 1.661768C.609714 2.175841 1.135741 2.438854 1.601993 2.438854C2.82142 2.438854 3.323537 .251059 3.455044-.3467C3.670237-1.267248 4.25604-4.447323 4.315816-4.805978H5.332005Z'/>
@@ -139,177 +135,42 @@ $ \mathbb{F} $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-70'/>
 </g>
-</svg> is a scalar field (typically Real, Complex, or Boolean).</p><aside class="m-note m-info"><h4>Note</h4><p>This serves as an intermediate base between FunctionBase and concrete scalar function types like RealFunction, ComplexFunction, and BooleanFunction.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_function_base.html">FunctionBase</a></p><p><a href="_real_function_8h.html">RealFunction</a></p><p><a href="_complex_function_8h.html">ComplexFunction</a></p><p><a href="_boolean_function_8h.html">BooleanFunction</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;ScalarFunctionBase&lt;Scalar, Derived&gt;&gt;</a>
-            </dt>
-            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>
-            </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
-          </dl>
-        </section>
+</svg> is a scalar field (typically Real, Complex, or Boolean).</p><aside class="m-note m-info"><h4>Note</h4><p>This serves as an intermediate base between FunctionBase and concrete scalar function types like RealFunction, ComplexFunction, and BooleanFunction.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="_real_function_8h.html">RealFunction</a></p><p><a href="_complex_function_8h.html">ComplexFunction</a></p><p><a href="_boolean_function_8h.html">BooleanFunction</a></p></aside>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_function_base.html" title="FunctionBase&lt; ScalarFunctionBase&lt; Scalar, Derived &gt; &gt;">FunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ScalarFunctionBase</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_complex_function_base.html" title="ComplexFunctionBase&lt; ComplexFunction&lt; Integer &gt; &gt;; ComplexFunctionBase&lt; ComplexFunction&lt; Real &gt; &gt;; ComplexFunctionBase&lt; ComplexFunction&lt; Complex &gt; &gt;; ComplexFunctionBase&lt; ComplexFunction&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; ComplexFunctionBase&lt; ComplexFunction&lt; FunctionBase&lt; RealNestedDerived &gt;, FunctionBase&lt; ImagNestedDerived &gt; &gt; &gt;; ComplexFunctionBase&lt; ComplexFunction&lt; F &gt; &gt;; ComplexFunctionBase&lt; ComplexFunction&lt; FReal, FImag &gt; &gt;">ComplexFunctionBase</a></li><li><a href="class_rodin_1_1_variational_1_1_real_function_base.html" title="RealFunctionBase&lt; PhiDerived &gt;; RealFunctionBase&lt; Abs&lt; OperandType &gt; &gt;; RealFunctionBase&lt; Component&lt; FunctionBase&lt; OperandDerived &gt;, size_t &gt; &gt;; RealFunctionBase&lt; Component&lt; OperandType &gt; &gt;; RealFunctionBase&lt; Cosh&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; Cos&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; Dot&lt; LHSType, RHSType &gt; &gt;; RealFunctionBase&lt; Exp&lt; OperandType &gt; &gt;; RealFunctionBase&lt; X &gt;; RealFunctionBase&lt; Y &gt;; RealFunctionBase&lt; Z &gt;; RealFunctionBase&lt; Frobenius&lt; OperandType &gt; &gt;; RealFunctionBase&lt; Im&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; Max&lt; FunctionBase&lt; NestedDerived &gt;, RHSType &gt; &gt;; RealFunctionBase&lt; Min&lt; FunctionBase&lt; NestedDerived &gt;, RHSType &gt; &gt;; RealFunctionBase&lt; Pow&lt; FunctionBase&lt; BaseDerived &gt;, Number &gt; &gt;; RealFunctionBase&lt; Re&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; RealFunction&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; RealFunction&lt; Real &gt; &gt;; RealFunctionBase&lt; RealFunction&lt; Integer &gt; &gt;; RealFunctionBase&lt; RealFunction&lt; F &gt; &gt;; RealFunctionBase&lt; Sin&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; Sinh&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; Sqrt&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;; RealFunctionBase&lt; Tan&lt; FunctionBase&lt; NestedDerived &gt; &gt; &gt;">RealFunctionBase</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+30 more</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad956ed4aec7d6dae5a657386701aecd1"><span class="nc">ScalarFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span><span class="w"> </span><span class="n">Derived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for function objects which can be evaluated over a mesh.</td></tr></tbody></table></section>
+        <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Integer</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;PhiDerived&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="n">PhiDerived</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr></tbody></table><details class="rodin-derived-disclosure"><summary class="rodin-disclosure-button"><span class="rodin-see-more">See more</span><span class="rodin-see-less">See less</span></summary><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RealNestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">ImagNestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;ComplexFunction&lt;F&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">ComplexFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ComplexFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="n">FReal</span><span class="p">,</span><span class="w"> </span><span class="n">FImag</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Abs&lt;OperandType&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Abs</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">OperandType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Component</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">OperandDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Component&lt;OperandType&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Component</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">OperandType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Cosh</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Cos</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Dot&lt;LHSType, RHSType&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Dot</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">LHSType</span><span class="p">,</span><span class="w"> </span><span class="nc">RHSType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Exp&lt;OperandType&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Exp</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">OperandType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;X&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">X</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Y&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Y</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Z&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Z</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;Frobenius&lt;OperandType&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Frobenius</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">OperandType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Im</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Max</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">RHSType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Min</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">RHSType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Pow</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">BaseDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Number</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Re</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RealFunction</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;RealFunction&lt;Real&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RealFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;RealFunction&lt;Integer&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RealFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Integer</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;RealFunction&lt;F&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RealFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Sin</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Sinh</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Sqrt</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_real_function_base.html"><code>RealFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">RealFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Tan</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for real-valued functions defined on a mesh.</td></tr></tbody></table></details></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#aac1e0e8d7fa21bb245a7ea2908036eb7"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_function_base.html#ad29a755240e4c6938395b937a1c4a132">FunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -318,7 +179,7 @@ $ \mathbb{F} $
             </dt>
             <dd>Type of scalar values returned by this function.</dd>
             <dt id="aedcb1487bc99ebc35768fa1942ed148d">
-              using <a href="#aedcb1487bc99ebc35768fa1942ed148d" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>, Derived&gt;&gt;
+              using <a href="#aedcb1487bc99ebc35768fa1942ed148d" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce" class="m-doc">FunctionBase</a>&lt;<a href="#ad956ed4aec7d6dae5a657386701aecd1" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -331,11 +192,11 @@ $ \mathbb{F} $
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a3e886c2e607d4b59998c0df6fa23ec53" class="m-doc">ScalarFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3e886c2e607d4b59998c0df6fa23ec53" class="m-doc">ScalarFunctionBase</a>(</span><span class="m-doc-wrap">const ScalarFunctionBase&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a3495db256c133821b7829e599bcfb903" class="m-doc">ScalarFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3495db256c133821b7829e599bcfb903" class="m-doc">ScalarFunctionBase</a>(</span><span class="m-doc-wrap">ScalarFunctionBase&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="aed9a2ad17a84d9b88de2f1dc990a953b">
@@ -360,7 +221,7 @@ $ \mathbb{F} $
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aac1e0e8d7fa21bb245a7ea2908036eb7" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aac1e0e8d7fa21bb245a7ea2908036eb7" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ad956ed4aec7d6dae5a657386701aecd1" class="m-doc">ScalarFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the function.</dd>
             <dt>
@@ -400,10 +261,8 @@ $ \mathbb{F} $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a3e886c2e607d4b59998c0df6fa23ec53"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e886c2e607d4b59998c0df6fa23ec53" class="m-doc-self">ScalarFunctionBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e886c2e607d4b59998c0df6fa23ec53" class="m-doc-self">ScalarFunctionBase</a>(</span><span class="m-doc-wrap">const ScalarFunctionBase&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -420,10 +279,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="a3495db256c133821b7829e599bcfb903"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3495db256c133821b7829e599bcfb903" class="m-doc-self">ScalarFunctionBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3495db256c133821b7829e599bcfb903" class="m-doc-self">ScalarFunctionBase</a>(</span><span class="m-doc-wrap">ScalarFunctionBase&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -440,10 +297,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="af5f065ebe0b3b1c58b0c2402a50fc9e3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the scalar function at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -467,10 +322,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="aa249459e67c36e2343e940d08970970a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the expression at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -493,10 +346,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="a9a1cb09f4677024a3b681cdb49fe4a25"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the polynomial order used on a mesh entity.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -519,10 +370,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="aac1e0e8d7fa21bb245a7ea2908036eb7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>* Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac1e0e8d7fa21bb245a7ea2908036eb7" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ad956ed4aec7d6dae5a657386701aecd1" class="m-doc">ScalarFunctionBase</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac1e0e8d7fa21bb245a7ea2908036eb7" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -537,10 +386,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets a single attribute as the trace domain.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -564,10 +411,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="a44ff9fe9f91406694a76cb99d4d2338f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44ff9fe9f91406694a76cb99d4d2338f" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44ff9fe9f91406694a76cb99d4d2338f" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
               const A2&amp; a2,
               const As&amp;... as) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
@@ -601,10 +446,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="aba5919eddb1f90f8ca65bbd25d065d60"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba5919eddb1f90f8ca65bbd25d065d60" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba5919eddb1f90f8ca65bbd25d065d60" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets a set of attributes as the trace domain.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -628,10 +471,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the function on a Point belonging to the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -655,10 +496,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="a15eb99a5cecce266b59c5e7c1a9b2f4d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the function at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -681,10 +520,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="ad7584a02ad39a4e93816d166a02c170c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Extracts the i-th component of the function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -708,10 +545,8 @@ $ \mathbb{F} $
           </div></section>
           <section class="m-doc-details" id="afd564b09b05a55499d7576b85f69a01e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
               size_t j) const</span></span>
             </h3>
             <p>Extracts the (i,j)-th component of a matrix function.</p>
@@ -777,13 +612,20 @@ $ \mathbb{F} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

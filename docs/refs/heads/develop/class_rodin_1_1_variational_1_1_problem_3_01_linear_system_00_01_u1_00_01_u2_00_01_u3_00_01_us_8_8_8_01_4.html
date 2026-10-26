@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,26 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_problem_8h.html">&lt;Rodin/Variational/Problem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;LinearSystem, U1, U2, U3, Us...&gt; <span class="m-thin">class</span>
-        </h1>
-        <p>Variational problem in three or more unknown fields.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Problem</h1><p class="rodin-reference-brief">Variational problem with three or more trial/test functions.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_problem_8h.html"><code>Rodin/Variational/Problem.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Us</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#a4cd269bcb12bd569b6fd6ecd6dde4c1b"><span class="nc">Problem</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Us</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_problem.html">Problem</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Parameters...</code></td><td><code>LinearSystem, U1, U2, U3, Us...</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +98,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_us_base.html" class="m-doc">ProblemUsBase&lt;LinearSystem, U1, U2, U3, Us...&gt;</a>
-            </dt>
-            <dd>Base for mixed variational problems with three or more functions.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html" title="ProblemUsBase&lt; LinearSystem, U1, U2, U3, Us... &gt;">ProblemUsBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Problem</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_us_base.html"><code>ProblemUsBase&lt;LinearSystem, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ae2f048f7755302177cdfb5cf6e1ba9af"><span class="nc">ProblemUsBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span><span class="w"> </span><span class="n">U1</span><span class="p">,</span><span class="w"> </span><span class="n">U2</span><span class="p">,</span><span class="w"> </span><span class="n">U3</span><span class="p">,</span><span class="w"> </span><span class="n">Us</span><span class="p">...</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base for mixed variational problems with three or more functions.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#a7f4dd7112c20d7855433d59d50032694"><code>operator=()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_base.html#acfdc6278cd6c14abafb2838f551ac03c">ProblemBase::operator=</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#a9087a471c7bafaa7b766ab09fb62af93"><code>getLinearSystem()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ae0066c598d2649e1529665eeb06e7872">ProblemUsBase::getLinearSystem</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#ad7f921c9514ca42c35720eb504e7a479"><code>getLinearSystem()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#aad0621a1b216736a99f395a24312d016">ProblemUsBase::getLinearSystem</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#ad2429ffd7600bef5051f4fab1a8eb0a5"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a348fd1dada94a9989d340baa07603686">ProblemUsBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_us_base.html"><code>ProblemUsBase</code></a></td><td><details><summary>19 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a7900d9e0f54d687ff53a089a6e4b948a"><code>assemble()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ab8925aaa3c9d532fd3fc3b3273414584"><code>assemble()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a0bc4e1e277169e34d0ff76e0fcb264d7"><code>AssemblyInput</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ac6c6aecc0cd012c8ccac788353f5ab11"><code>AssemblyType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a37c15d2c924b147e23a286bcbff4639c"><code>getBody()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#afc618e9a4c3e3509eb5be784adf5c31d"><code>getTestOffsets()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a7125711204e361371134b655d1ff6762"><code>getTrialOffsets()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a6286963c7e61682eb4bfdf5fe3c1e410"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#aa03856a15452db33271d0541aa1578da"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a6203f08d4c9004f4939b588f92e86753"><code>solve()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ac231ddf57c12df1558580349526120ef"><code>U1FESMeshContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a2085cb1d55ebfce0617985feb3dc9a9d"><code>U1FESMeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a606e38a9634619e1b69335316c338a46"><code>U1FESType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a708cc613b6f736e1d9b63810112a5804"><code>U2FESMeshContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a80960cff3c4d2e2b9b9b2bb97c0b5882"><code>U2FESMeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ace0b9ebe612364b13f5d834cf66ed969"><code>U2FESType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a8af0e3ad6cc6d02d5d5b00fd42c0a804"><code>U3FESMeshContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#a9ddbbf67172e4df29eb70409ba1e2b18"><code>U3FESMeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ac0737fd6824246623a6ff4967c9cf34e"><code>U3FESType</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_base.html"><code>ProblemBase</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a5205aa8df7a3730c86d1afceeb47f586"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_problem_base.html#a90311b262b80f9812fb973c3c44e1eac"><code>operator-=()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -111,24 +107,24 @@
               using <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc-self">LinearSystemType</a> = LinearSystem
             </dt>
             <dd>Linear system type.</dd>
-            <dt id="acbbb8aedee6685384d9653e514e4abb9">
-              using <a href="#acbbb8aedee6685384d9653e514e4abb9" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+            <dt id="a3f02c76806f998a41174a54479486d51">
+              using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::OperatorType
             </dt>
             <dd>Assembled operator type.</dd>
-            <dt id="aea1b35382690dec275f150a48e000d44">
-              using <a href="#aea1b35382690dec275f150a48e000d44" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            <dt id="a8d4666f2edbd3de42a6bfbdbec15e536">
+              using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::VectorType
             </dt>
             <dd>Vector type of the linear system.</dd>
-            <dt id="a7668ea510f9f419d9d615047ed1fd748">
-              using <a href="#a7668ea510f9f419d9d615047ed1fd748" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::ScalarType
+            <dt id="a5584bb04cdb3914f8da2f4904a179ef0">
+              using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
-            <dt id="a9ae05bc3f1920558cc1867c93ea9d4cf">
-              using <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc-self">ProblemBodyType</a> = <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&lt;<a href="#acbbb8aedee6685384d9653e514e4abb9" class="m-doc">OperatorType</a>, <a href="#aea1b35382690dec275f150a48e000d44" class="m-doc">VectorType</a>, <a href="#a7668ea510f9f419d9d615047ed1fd748" class="m-doc">ScalarType</a>&gt;
+            <dt id="a8459167869c8f59ee2695e0852f0b72d">
+              using <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc-self">ProblemBodyType</a> = <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&lt;<a href="#a3f02c76806f998a41174a54479486d51" class="m-doc">OperatorType</a>, <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc">VectorType</a>, <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Problem body type.</dd>
             <dt id="ab7612db789450fddb1cbf7a5df6ad692">
-              using <a href="#ab7612db789450fddb1cbf7a5df6ad692" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_us_base.html" class="m-doc">ProblemUsBase</a>&lt;LinearSystem, U1, U2, U3, Us...&gt;
+              using <a href="#ab7612db789450fddb1cbf7a5df6ad692" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_us_base.html#ae2f048f7755302177cdfb5cf6e1ba9af" class="m-doc">ProblemUsBase</a>&lt;LinearSystem, U1, U2, U3, Us...&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -144,11 +140,11 @@
             </dt>
             <dd>Constructs the problem over the given unknown fields.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#adf8cbfaaf9c8721a90b05bcab435530f" class="m-doc">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#adf8cbfaaf9c8721a90b05bcab435530f" class="m-doc">Problem</a>(</span><span class="m-doc-wrap">const Problem&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#adedd280d1c7bf912f4395eeeded30132" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#adedd280d1c7bf912f4395eeeded30132" class="m-doc">Problem</a>(</span><span class="m-doc-wrap">Problem&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -157,15 +153,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; other) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp;</span>
             </dt>
             <dd>Copy assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp;&amp; other) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body to this problem.</dd>
             <dt>
@@ -177,7 +173,7 @@
             </dt>
             <dd>Gets the assembled linear system (const version).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this problem.</dd>
           </dl>
@@ -186,10 +182,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4cd269bcb12bd569b6fd6ecd6dde4c1b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">U1&amp; u1,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">U1&amp; u1,
               U2&amp; u2,
               U3&amp; u3,
               Us&amp;... us)</span></span>
@@ -221,10 +215,8 @@
           </div></section>
           <section class="m-doc-details" id="adf8cbfaaf9c8721a90b05bcab435530f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf8cbfaaf9c8721a90b05bcab435530f" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf8cbfaaf9c8721a90b05bcab435530f" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const Problem&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -241,10 +233,8 @@
           </div></section>
           <section class="m-doc-details" id="adedd280d1c7bf912f4395eeeded30132"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adedd280d1c7bf912f4395eeeded30132" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adedd280d1c7bf912f4395eeeded30132" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">Problem&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,10 +251,8 @@
           </div></section>
           <section class="m-doc-details" id="a24f33cae29d53dfaa37b1732bcb0190d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -287,10 +275,8 @@
           </div></section>
           <section class="m-doc-details" id="ab01eb0b6bcc53cd8b697a29a141b3b50"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -313,10 +299,8 @@
           </div></section>
           <section class="m-doc-details" id="a7f4dd7112c20d7855433d59d50032694"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assigns a problem body to this problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -376,10 +360,8 @@ $ l(v) $
           </div></section>
           <section class="m-doc-details" id="a9087a471c7bafaa7b766ab09fb62af93"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9087a471c7bafaa7b766ab09fb62af93" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9087a471c7bafaa7b766ab09fb62af93" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the assembled linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -430,10 +412,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="ad7f921c9514ca42c35720eb504e7a479"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the assembled linear system (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -463,10 +443,8 @@ $ Au = b $
           </div></section>
           <section class="m-doc-details" id="ad2429ffd7600bef5051f4fab1a8eb0a5"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -517,13 +495,20 @@ $ Au = b $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

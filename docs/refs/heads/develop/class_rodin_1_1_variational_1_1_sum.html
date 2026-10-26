@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Sum class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,21 +71,97 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_forward_decls_8h.html">&lt;Rodin/Variational/ForwardDecls.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a>&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Sum <span class="m-thin">class</span>
-        </h1>
-        <p>Represents the sum operation.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Sum</h1><p class="rodin-reference-brief">Represents the sum operation.</p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">LHS</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">RHS</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Sum</span><span class="p">;</span>
+</pre><section id="rodin-specializations"><h2><a href="#rodin-specializations">Specializations</a></h2><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_bilinear_form_base_3_01_operator_01_4_00_01_bilinear_form_base_3_01_operator_01_4_01_4.html"><code>BilinearFormBase&lt;Operator&gt;, BilinearFormBase&lt;Operator&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Operator</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Sum</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html"><span class="nc">BilinearFormBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html"><span class="nc">BilinearFormBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_form_language_1_1_list_3_01_linear_form_integrator_basec7baeabae5db57e740658417c379b245.html"><code>FormLanguage::List&lt;…&gt;, FormLanguage::List&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum of two lists of linear form integrators.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_form_language_1_1_list_3_01_linear_form_integrator_base40b6228737be956ea38173f66b6df8c7.html"><code>FormLanguage::List&lt;…&gt;, LinearFormIntegratorBase&lt;RHSNumber&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum of a list of linear form integrators and a single one.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_form_language_1_1_list_3_01_local_bilinear_form_integra894abfc5d19ae5ba788628adae9d55fe.html"><code>FormLanguage::List&lt;…&gt;, FormLanguage::List&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum of two lists of bilinear form integrators.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_form_language_1_1_list_3_01_local_bilinear_form_integra3dac0f1f57f338a63d6ad9ac670c7a76.html"><code>FormLanguage::List&lt;…&gt;, LocalBilinearFormIntegratorBase&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum of a list of bilinear form integrators and a single one.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html"><code>FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_sum_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html#ad3f6d6b18f478e2f90b915ab37e93fa8"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Addition of two functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_linear_form_integrator_base_3_01_l_h_s_number_01_4_00_05002d0815a780dff36f27ea3e82d81ea.html"><code>LinearFormIntegratorBase&lt;LHSNumber&gt;, FormLanguage::List&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum of a linear form integrator and a list of them.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_linear_form_integrator_base_3_01_l_h_s_number_01_4_00_09f89dd4106dd23a79568958642997a12.html"><code>LinearFormIntegratorBase&lt;LHSNumber&gt;, LinearFormIntegratorBase&lt;RHSNumber&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_local_bilinear_form_integrator_base_3_01_l_h_s_number_0a7d1b6bf0eb07bc476d80084af860db4.html"><code>LocalBilinearFormIntegratorBase&lt;…&gt;, FormLanguage::List&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_list.html"><span class="nc">List</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum of a bilinear form integrator and a list of them.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_local_bilinear_form_integrator_base_3_01_l_h_s_number_0fc8852cb836f1e6d65f2ec850b1b03b5.html"><code>LocalBilinearFormIntegratorBase&lt;…&gt;, LocalBilinearFormIntegratorBase&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSNumber</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSNumber</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_sum.html"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSNumber</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html"><span class="nc">LocalBilinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSNumber</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Sum expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_sum_3_01_shape_function_base_3_01_l_h_s_derived_00_01_f_e_s_00_05205c4ec554193549c5c4a279997f174.html"><code>ShapeFunctionBase&lt;LHSDerived, …&gt;, ShapeFunctionBase&lt;RHSDerived, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_sum_3_01_shape_function_base_3_01_l_h_s_derived_00_01_f_e_s_00_05205c4ec554193549c5c4a279997f174.html#ad3f6d6b18f478e2f90b915ab37e93fa8"><span class="nc">Sum</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a0abc221d3661e40c6eeeaefabaa145aa"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a0abc221d3661e40c6eeeaefabaa145aa"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Addition of two shape functions.</td></tr></tbody></table></section>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">LHS</td>
+              <td>Type of left hand side operand</td>
+            </tr>
+            <tr>
+              <td>RHS</td>
+              <td>Type of right hand side operand</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md362">Range Deduction Rules</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md368">Range Deduction Rules</a></li>
             <li>
               Reference
               <ul>
@@ -118,7 +191,7 @@
 <use x='209.119823' y='-.913201' xlink:href='#eq1-g2-72'/>
 <use x='217.751456' y='-.913201' xlink:href='#eq1-g2-83'/>
 </g>
-</svg></div><p>which represents the usual arithmetic addition of two operands.</p><section id="autotoc_md362_1s1"><section id="autotoc_md362"><h3><a href="#autotoc_md362">Range Deduction Rules</a></h3><p>The rule for deducing the range of a Sum object, denoted  <svg class="m-math" style="width: 10.223em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.139667 11.955168">
+</svg></div><p>which represents the usual arithmetic addition of two operands.</p><section id="autotoc_md368"><h2><a href="#autotoc_md368">Range Deduction Rules</a></h2><p>The rule for deducing the range of a Sum object, denoted  <svg class="m-math" style="width: 10.223em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.139667 11.955168">
 <title>
 $ \texttt{Range}[\text{LHS} + \text{RHS}]$
 </title>
@@ -221,16 +294,15 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
 <use x='243.890654' y='-2.988792' xlink:href='#eq3-g5-58'/>
 <use x='250.463145' y='-2.988792' xlink:href='#eq3-g0-82'/>
 </g>
-</svg></div><aside class="m-note m-default"><h4>See also</h4><p>SumSpecializations</p></aside></section></section>
+</svg></div><aside class="m-note m-default"><h4>See also</h4><p><a href="group___sum_specializations.html" class="m-doc">Sum Template Specializations</a></p></aside></section>
         <section id="related">
           <h2><a href="#related">Related</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#a2f2ca97697b061a96417e64e220536a8" class="m-doc">operator+</a></dt><dd>Addition operator for two functions.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a2f2ca97697b061a96417e64e220536a8" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Addition operator for two functions.</dd>
+            </div></details></dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a28d47236b5cc88b9ede0e8b4488dc7c0" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
@@ -261,14 +333,14 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a2f2ca97697b061a96417e64e220536a8"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              
               <div class="m-doc-template">
-                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a> _2&gt;
+                template&lt;class LHS, class RHS&gt;
                 template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f2ca97697b061a96417e64e220536a8" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_sum_8h.html"><code>Rodin/Variational/Sum.h</code></a></p>
             <p>Addition operator for two functions.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -294,14 +366,14 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
           </div></section>
           <section class="m-doc-details" id="a28d47236b5cc88b9ede0e8b4488dc7c0"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              
               <div class="m-doc-template">
-                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a> _2&gt;
+                template&lt;class LHS, class RHS&gt;
                 template&lt;class LHSDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28d47236b5cc88b9ede0e8b4488dc7c0" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rhs) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_sum_8h.html"><code>Rodin/Variational/Sum.h</code></a></p>
             <p>Addition of function and scalar.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -327,14 +399,14 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
           </div></section>
           <section class="m-doc-details" id="ad0145e1dad505492ea1d0564f90ebb84"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              
               <div class="m-doc-template">
-                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a> _2&gt;
+                template&lt;class LHS, class RHS&gt;
                 template&lt;class RHSDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0145e1dad505492ea1d0564f90ebb84" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lhs,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_sum_8h.html"><code>Rodin/Variational/Sum.h</code></a></p>
             <p>Addition of scalar and function.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -360,14 +432,14 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
           </div></section>
           <section class="m-doc-details" id="a6bc215ef4512b34eb956838ecf2cf512"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              
               <div class="m-doc-template">
-                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a> _2&gt;
+                template&lt;class LHS, class RHS&gt;
                 template&lt;class LHSDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bc215ef4512b34eb956838ecf2cf512" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
               <a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> rhs) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_sum_8h.html"><code>Rodin/Variational/Sum.h</code></a></p>
             <p>Addition of function and complex scalar.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -393,14 +465,14 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
           </div></section>
           <section class="m-doc-details" id="a484688cc5033810782ff91381d5f48c6"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
+              
               <div class="m-doc-template">
-                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a> _2&gt;
+                template&lt;class LHS, class RHS&gt;
                 template&lt;class RHSDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a484688cc5033810782ff91381d5f48c6" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> lhs,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
+            </h3><p class="rodin-reference-include">Defined in <a href="_sum_8h.html"><code>Rodin/Variational/Sum.h</code></a></p>
             <p>Addition of complex scalar and function.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -463,13 +535,20 @@ $ \texttt{Range}[\text{LHS} + \text{RHS}]$
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

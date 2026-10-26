@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Location namespace | Rodin</title>
+  <title>Rodin::Location module | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,33 +35,28 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
             <li>
-              <a href="modules.html">Modules</a>
+              <a href="modules.html" id="m-navbar-current">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -75,12 +72,12 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Location <span class="m-thin">namespace</span>
-        </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_location.html" class="m-doc">Location</a>.</p>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Location <span class="m-thin">module</span>        </h1>
+        <p>Spatial indexing and geometric search.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md626">Representative use</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +86,8 @@
             </li>
           </ul>
         </nav>
-<p>Directory Rodin/Location</p><p>Module for spatial search and point location.</p><p>Provides acceleration structures for locating points within meshes. The main component is a bounding-volume hierarchy over axis-aligned bounding boxes (AABB) supporting point-in-mesh queries, used by operations that must evaluate fields at arbitrary physical coordinates.</p>
+<p><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a> builds a bounding-volume hierarchy to locate physical coordinates in a mesh and recover the containing cell and reference coordinates. The resulting <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> can be used for field sampling and evaluation at arbitrary locations. The locator must be rebuilt when the mesh geometry or topology changes.</p><section id="autotoc_md626"><h2><a href="#autotoc_md626">Representative use</a></h2><p>An AABB index first prunes candidate cells and then checks their inverse geometric maps. A query returns an optional mesh point:</p><pre class="m-code"><span class="n">Location</span><span class="o">::</span><span class="nc">AABB</span><span class="w"> </span><span class="nf">locator</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">locator</span><span class="p">.</span><span class="n">locate</span><span class="p">(</span><span class="n">physicalCoordinates</span><span class="p">);</span></pre><p>The mesh must remain fixed during queries. Geometry or topology changes require rebuilding the locator.</p></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -97,12 +95,13 @@
               <div class="m-doc-template">template&lt;class MeshType&gt;</div>
               class <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>
             </dt>
-            <dd>Bounding-volume-hierarchy point locator over axis-aligned boxes.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class MeshType&gt;</div>
-              class <a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html" class="m-doc">AABB&lt;MeshType&gt;</a>
-            </dt>
-            <dd>Noncollective point location in owned entities of an MPI mesh.</dd>
+            <dd>Bounding-volume-hierarchy point locator over axis-aligned boxes.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html"><code>MeshType</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_base_of_v</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html#a63801bfa6ec89ed42b04b98140540687"><span class="nc">AABB</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">MeshType</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Noncollective point location in owned entities of an MPI mesh.</td></tr></tbody></table></details></dd>
+            
           </dl>
         </section>
       </div>
@@ -143,13 +142,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

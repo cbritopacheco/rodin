@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Hilbert::H1a class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,7 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_hilbert.html">Hilbert</a>::<wbr/></span>H1a <span class="m-thin">class</span>
-        </h1>
-        <p>Hilbertian <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_hilbert.html">Hilbert</a></div><h1>H1a</h1><p class="rodin-reference-brief">Hilbertian <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -90,7 +83,11 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg> extension-regularization procedure with a regularization length-scale parameter.</p>
+</svg> extension-regularization procedure with a regularization length-scale parameter.</p><p class="rodin-reference-include">Defined in <a href="_h1a_8h.html"><code>Rodin/Hilbert/H1a.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_hilbert_1_1_h1a.html#a9d71adcfa2de5c656a39d63753d85b3b"><span class="nc">H1a</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -129,8 +126,8 @@ $ H^1 $
 <path id='eq2-g2-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
 <path id='eq2-g3-100' d='M3.616438-3.969116C3.622416-3.993026 3.634371-4.028892 3.634371-4.05878C3.634371-4.154421 3.514819-4.148443 3.443088-4.142466L2.773599-4.088667C2.67198-4.08269 2.594271-4.076712 2.594271-3.939228C2.594271-3.843587 2.67198-3.843587 2.761644-3.843587C2.940971-3.843587 2.982814-3.831631 3.060523-3.801743C3.054545-3.71208 3.054545-3.700125 3.036613-3.622416C2.911083-3.108344 2.815442-2.707846 2.69589-2.27746C2.612204-2.414944 2.408966-2.636115 2.038356-2.636115C1.273225-2.636115 .448319-1.835118 .448319-.956413C.448319-.310834 .902615 .059776 1.41071 .059776C1.811208 .059776 2.15193-.215193 2.30137-.364633C2.414944 .011955 2.815442 .059776 2.946949 .059776C3.162142 .059776 3.317559-.059776 3.431133-.245081C3.580573-.484184 3.664259-.830884 3.664259-.860772C3.664259-.872727 3.658281-.944458 3.550685-.944458C3.461021-.944458 3.449066-.902615 3.425156-.806974C3.329514-.442341 3.203985-.137484 2.970859-.137484C2.767621-.137484 2.749689-.352677 2.749689-.442341C2.749689-.52005 2.749689-.537983 2.779577-.645579L3.616438-3.969116ZM2.32528-.783064C2.295392-.675467 2.295392-.663512 2.211706-.573848C1.882939-.203238 1.578082-.137484 1.428643-.137484C1.189539-.137484 .956413-.298879 .956413-.723288C.956413-.968369 1.081943-1.554172 1.273225-1.894894C1.452553-2.217684 1.75741-2.438854 2.044334-2.438854C2.492653-2.438854 2.606227-1.966625 2.606227-1.924782L2.588294-1.841096L2.32528-.783064Z'/>
 <path id='eq2-g1-90' d='M1.243337 26.026401C1.625903 26.002491 1.829141 25.739477 1.829141 25.440598C1.829141 25.046077 1.530262 24.854795 1.255293 24.854795C.968369 24.854795 .669489 25.034122 .669489 25.452553C.669489 26.062267 1.267248 26.564384 1.996513 26.564384C3.813699 26.564384 4.495143 23.766874 5.34396 20.299875C6.264508 16.522042 7.041594 12.708344 7.687173 8.870735C8.129514 6.324284 8.571856 3.93325 8.978331 2.391034C9.121793 1.80523 9.528269 .263014 9.994521 .263014C10.365131 .263014 10.66401 .490162 10.711831 .537983C10.31731 .561893 10.114072 .824907 10.114072 1.123786C10.114072 1.518306 10.412951 1.709589 10.68792 1.709589C10.974844 1.709589 11.273724 1.530262 11.273724 1.111831C11.273724 .466252 10.628144 0 9.97061 0C9.062017 0 8.392528 1.303113 7.734994 3.741968C7.699128 3.873474 6.073225 9.874969 4.758157 17.693649C4.447323 19.52279 4.100623 21.519303 3.706102 23.181071C3.490909 24.053798 2.940971 26.30137 1.972603 26.30137C1.542217 26.30137 1.255293 26.026401 1.243337 26.026401Z'/>
-<path id='eq2-g5-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
 <path id='eq2-g0-82' d='M2.13599-2.502615H2.422914L3.618431-.653549C3.698132-.526027 3.889415-.215193 3.977086-.095641C4.032877 0 4.056787 0 4.2401 0H5.339975C5.483437 0 5.602989 0 5.602989-.143462C5.602989-.207223 5.555168-.263014 5.483437-.278954C5.188543-.342715 4.798007-.868742 4.606725-1.123786C4.550934-1.203487 4.152428-1.729514 3.618431-2.590286C4.327771-2.717808 5.0132-3.020672 5.0132-3.969116C5.0132-5.076961 3.841594-5.459527 2.901121-5.459527H.398506C.255044-5.459527 .127522-5.459527 .127522-5.316065C.127522-5.180573 .278954-5.180573 .342715-5.180573C.797011-5.180573 .836862-5.124782 .836862-4.726276V-.73325C.836862-.334745 .797011-.278954 .342715-.278954C.278954-.278954 .127522-.278954 .127522-.143462C.127522 0 .255044 0 .398506 0H2.582316C2.725778 0 2.84533 0 2.84533-.143462C2.84533-.278954 2.709838-.278954 2.622167-.278954C2.16787-.278954 2.13599-.342715 2.13599-.73325V-2.502615ZM3.674222-2.893151C3.897385-3.188045 3.921295-3.610461 3.921295-3.961146C3.921295-4.343711 3.873474-4.766127 3.618431-5.092902C3.945205-5.021171 4.734247-4.774097 4.734247-3.969116C4.734247-3.451059 4.495143-3.044583 3.674222-2.893151ZM2.13599-4.750187C2.13599-4.917559 2.13599-5.180573 2.630137-5.180573C3.307597-5.180573 3.642341-4.901619 3.642341-3.961146C3.642341-2.933001 3.395268-2.781569 2.13599-2.781569V-4.750187ZM1.052055-.278954C1.115816-.422416 1.115816-.645579 1.115816-.71731V-4.742217C1.115816-4.821918 1.115816-5.037111 1.052055-5.180573H1.960648C1.857036-5.053051 1.857036-4.893649 1.857036-4.774097V-.71731C1.857036-.637609 1.857036-.422416 1.920797-.278954H1.052055ZM2.749689-2.502615C2.805479-2.510585 2.83736-2.518555 2.901121-2.518555C3.020672-2.518555 3.196015-2.534496 3.315567-2.550436C3.435118-2.359153 4.29589-.940473 4.95741-.278954H4.184309L2.749689-2.502615Z'/>
+<path id='eq2-g5-50' d='M2.247572-1.625903C2.375093-1.745455 2.709838-2.008468 2.83736-2.12005C3.331507-2.574346 3.801743-3.012702 3.801743-3.737983C3.801743-4.686426 3.004732-5.300125 2.008468-5.300125C1.052055-5.300125 .422416-4.574844 .422416-3.865504C.422416-3.474969 .73325-3.419178 .844832-3.419178C1.012204-3.419178 1.259278-3.53873 1.259278-3.841594C1.259278-4.25604 .860772-4.25604 .765131-4.25604C.996264-4.837858 1.530262-5.037111 1.920797-5.037111C2.662017-5.037111 3.044583-4.407472 3.044583-3.737983C3.044583-2.909091 2.462765-2.303362 1.522291-1.338979L.518057-.302864C.422416-.215193 .422416-.199253 .422416 0H3.57061L3.801743-1.42665H3.55467C3.53076-1.267248 3.466999-.868742 3.371357-.71731C3.323537-.653549 2.717808-.653549 2.590286-.653549H1.171606L2.247572-1.625903Z'/>
 <path id='eq2-g6-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq2-g6-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
 <path id='eq2-g6-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
@@ -193,13 +190,21 @@ $ \alpha $
               <span class="m-doc-wrap-bumper"><a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc">H1a</a>(</span><span class="m-doc-wrap">const FES&amp; fes)</span>
             </dt>
             <dd>Constructs an H1a extension operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a09cea88d421ab6813fa4e6659d3d49e5" class="m-doc">H1a</a>(</span><span class="m-doc-wrap">const H1a&amp; other)</span>
+            </dt>
+            <dd>Copies parameters, boundary conditions and the owned solution.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5502785c50decc8de38638bc2c20a70e" class="m-doc">H1a</a>(</span><span class="m-doc-wrap">H1a&amp;&amp; other)</span>
+            </dt>
+            <dd>Moves an extension while binding its working problem to its new owner.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d860dccf0f71efd68c8c3974525054d" class="m-doc">setAlpha</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha) -&gt; <a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d860dccf0f71efd68c8c3974525054d" class="m-doc">setAlpha</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha) -&gt; <a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc">H1a</a>&amp;</span>
             </dt>
             <dd>Sets the regularization parameter <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
 <title>
@@ -214,11 +219,11 @@ $ \alpha $
 </svg>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Differential&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#abe94523b028bbc5334e2e7bffcff24d5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const Differential&amp; lf) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae08468f71b8552e4b2ff9d579eb1b184" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const Differential&amp; lf) -&gt; auto</span>
             </dt>
             <dd>Applies the extension operator to a differential form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad30038010617468ced55894f90517abf" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;ScalarType&gt;&amp; dbc) -&gt; <a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad30038010617468ced55894f90517abf" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;ScalarType&gt;&amp; dbc) -&gt; <a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc">H1a</a>&amp;</span>
             </dt>
             <dd>Adds a Dirichlet boundary condition to the problem.</dd>
             <dt>
@@ -247,10 +252,8 @@ $ \alpha $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a9d71adcfa2de5c656a39d63753d85b3b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc-self">H1a</a>(</span><span class="m-doc-wrap">const FES&amp; fes)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc-self">H1a</a>(</span><span class="m-doc-wrap">const FES&amp; fes)</span></span>
             </h3>
             <p>Constructs an H1a extension operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -265,12 +268,48 @@ $ \alpha $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a09cea88d421ab6813fa4e6659d3d49e5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09cea88d421ab6813fa4e6659d3d49e5" class="m-doc-self">H1a</a>(</span><span class="m-doc-wrap">const H1a&amp; other)</span></span>
+            </h3>
+            <p>Copies parameters, boundary conditions and the owned solution.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Extension to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The working problem is bound to this object&#x27;s trial and test functions. Its formulation and linear system are rebuilt on the next application.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5502785c50decc8de38638bc2c20a70e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5502785c50decc8de38638bc2c20a70e" class="m-doc-self">H1a</a>(</span><span class="m-doc-wrap">H1a&amp;&amp; other)</span></span>
+            </h3>
+            <p>Moves an extension while binding its working problem to its new owner.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Extension to move.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Boundary conditions are retained; the formulation and linear system are rebuilt on the next application, as in copy construction.</p>
+          </div></section>
           <section class="m-doc-details" id="a0d860dccf0f71efd68c8c3974525054d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a>&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d860dccf0f71efd68c8c3974525054d" class="m-doc-self">setAlpha</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc">H1a</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d860dccf0f71efd68c8c3974525054d" class="m-doc-self">setAlpha</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha)</span></span>
             </h3>
             <p>Sets the regularization parameter <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
 <title>
@@ -301,13 +340,13 @@ $ \alpha $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="abe94523b028bbc5334e2e7bffcff24d5"><div>
+          <section class="m-doc-details" id="ae08468f71b8552e4b2ff9d579eb1b184"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Solution, class FES&gt;
                 template&lt;class Differential&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abe94523b028bbc5334e2e7bffcff24d5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Differential&amp; lf) const</span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae08468f71b8552e4b2ff9d579eb1b184" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Differential&amp; lf)</span></span>
             </h3>
             <p>Applies the extension operator to a differential form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -336,13 +375,12 @@ $ \alpha $
                 </tr>
               </tfoot>
             </table>
+<p>Replaces the retained formulation and solves into the owned trial function. This operation updates the extension&#x27;s working state.</p>
           </div></section>
           <section class="m-doc-details" id="ad30038010617468ced55894f90517abf"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a>&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad30038010617468ced55894f90517abf" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;ScalarType&gt;&amp; dbc)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9d71adcfa2de5c656a39d63753d85b3b" class="m-doc">H1a</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad30038010617468ced55894f90517abf" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;ScalarType&gt;&amp; dbc)</span></span>
             </h3>
             <p>Adds a Dirichlet boundary condition to the problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -365,10 +403,8 @@ $ \alpha $
           </div></section>
           <section class="m-doc-details" id="ae0db44d771e43ee6bbfb809b624be1e1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0db44d771e43ee6bbfb809b624be1e1" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0db44d771e43ee6bbfb809b624be1e1" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the underlying variational problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -382,10 +418,8 @@ $ \alpha $
           </div></section>
           <section class="m-doc-details" id="a22f8fb642ca5b663b22bda46bfd4722b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a22f8fb642ca5b663b22bda46bfd4722b" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a22f8fb642ca5b663b22bda46bfd4722b" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the underlying variational problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -399,10 +433,8 @@ $ \alpha $
           </div></section>
           <section class="m-doc-details" id="a74e5db233928708702b9c9d1452af5fd"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74e5db233928708702b9c9d1452af5fd" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74e5db233928708702b9c9d1452af5fd" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial function used in the formulation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -416,10 +448,8 @@ $ \alpha $
           </div></section>
           <section class="m-doc-details" id="ae792a16573c09908bd922cde3f2a0608"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae792a16573c09908bd922cde3f2a0608" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae792a16573c09908bd922cde3f2a0608" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the test function used in the formulation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -433,10 +463,8 @@ $ \alpha $
           </div></section>
           <section class="m-doc-details" id="af56185a903e521bae3b6c5b7db161575"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const FES&amp; Rodin::<wbr />Hilbert::<wbr />H1a&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af56185a903e521bae3b6c5b7db161575" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const FES&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af56185a903e521bae3b6c5b7db161575" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -487,13 +515,20 @@ $ \alpha $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

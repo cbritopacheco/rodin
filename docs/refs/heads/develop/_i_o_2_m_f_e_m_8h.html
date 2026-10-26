@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/IO/MFEM.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ff6599c6033d39d885e7782b9df2e1c5.html">IO</a>/</span>MFEM.h <span class="m-thin">file</span>
+        </h1>
+        <p>Declarations in MFEM.h.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::IO</a></dt>
+            <dd>Reading and writing meshes, fields, and associated data.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_mesh_version.html" class="m-doc">Rodin::IO::MFEM::MeshVersion</a>
+            </dt>
+            <dd>Version information for MFEM mesh format.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_mesh_header.html" class="m-doc">Rodin::IO::MFEM::MeshHeader</a>
+            </dt>
+            <dd>Header information for MFEM mesh files.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_grid_function_header.html" class="m-doc">Rodin::IO::MFEM::GridFunctionHeader</a>
+            </dt>
+            <dd>Header information for MFEM grid function files.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_face_order_entry.html" class="m-doc">Rodin::IO::MFEM::FaceOrderEntry</a>
+            </dt>
+            <dd>Face index and vertex ordering used when emitting MFEM face DOFs.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_unsigned_integer.html" class="m-doc">Rodin::IO::MFEM::ParseUnsignedInteger</a>
+            </dt>
+            <dd>Parser for unsigned integers in MFEM format.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_vertex.html" class="m-doc">Rodin::IO::MFEM::ParseVertex</a>
+            </dt>
+            <dd>Parser for vertex coordinates in MFEM format.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_geometry.html" class="m-doc">Rodin::IO::MFEM::ParseGeometry</a>
+            </dt>
+            <dd>Parser for geometry (element) information in MFEM format.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_geometry_1_1_data.html" class="m-doc">Rodin::IO::MFEM::ParseGeometry::Data</a>
+            </dt>
+            <dd>Parsed geometry data.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_empty_line.html" class="m-doc">Rodin::IO::MFEM::ParseEmptyLine</a>
+            </dt>
+            <dd>Parser for empty lines.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_empty_line_or_comment.html" class="m-doc">Rodin::IO::MFEM::ParseEmptyLineOrComment</a>
+            </dt>
+            <dd>Parser for empty lines or comment lines.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_keyword.html" class="m-doc">Rodin::IO::MFEM::ParseKeyword</a>
+            </dt>
+            <dd>Parser for MFEM keywords.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_parse_mesh_header.html" class="m-doc">Rodin::IO::MFEM::ParseMeshHeader</a>
+            </dt>
+            <dd>Parser for MFEM mesh file headers.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_triangle_nodes.html" class="m-doc">Rodin::IO::MFEM::TriangleNodes</a>
+            </dt>
+            <dd>MFEM-style nodal set on the reference triangle (0,0)-(1,0)-(0,1).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_vandermonde_triangle.html" class="m-doc">Rodin::IO::MFEM::VandermondeTriangle</a>
+            </dt>
+            <dd>Vandermonde matrix on the triangle using MFEM&#x27;s nodal set.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_tetrahedron_nodes.html" class="m-doc">Rodin::IO::MFEM::TetrahedronNodes</a>
+            </dt>
+            <dd>MFEM-style nodal set on the reference tetrahedron (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_vandermonde_tetrahedron.html" class="m-doc">Rodin::IO::MFEM::VandermondeTetrahedron</a>
+            </dt>
+            <dd>Vandermonde matrix on the tetrahedron using MFEM&#x27;s nodal set.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_wedge_nodes.html" class="m-doc">Rodin::IO::MFEM::WedgeNodes</a>
+            </dt>
+            <dd>MFEM-style nodal set on the reference wedge / prism.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_m_f_e_m_1_1_wedge_change.html" class="m-doc">Rodin::IO::MFEM::WedgeChange</a>
+            </dt>
+            <dd>Change of nodes from Rodin wedge nodes to MFEM wedge nodes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html" class="m-doc">Rodin::IO::MeshLoader&lt;IO::FileFormat::MFEM, Context::Local&gt;</a>
+            </dt>
+            <dd>Specialization for loading sequential meshes in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html" class="m-doc">Rodin::IO::MeshPrinter&lt;FileFormat::MFEM, Context::Local&gt;</a>
+            </dt>
+            <dd>Specialization for printing sequential meshes in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_f56c2f78720844daa893ee3a38efa37e.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for loading P1 grid functions from MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for loading H1 grid functions from MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_6ee8254a956b51895920e0e48fe4c901.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MFEM, Variational::P0&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Loader for P0 (piecewise constant) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a>, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationa37e9447436a2f9407877d38ac61d3fb4.html" class="m-doc">Rodin::IO::GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::P0&lt;Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
+            </dt>
+            <dd>Base class for printing P0 (piecewise constant) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a>, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationaedccd52c51bf01fc65681ec61a592148.html" class="m-doc">Rodin::IO::GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
+            </dt>
+            <dd>Base class for printing P1 (continuous Lagrange) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a>, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationaa0f7bcc6d6b9a8ad6e584b65ca4654c5.html" class="m-doc">Rodin::IO::GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
+            </dt>
+            <dd>Base class for printing H1 (continuous Lagrange) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_mata6ca80a751fa9ee6d15bb619b9a7f426.html" class="m-doc">Rodin::IO::GridFunctionPrinter&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Final specialization for printing grid functions with vector data in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_154340b82701ef2fbaf99c4ee98756e99.html" class="m-doc">Rodin::IO::GridFunctionPrinter&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for printing H1 grid functions with vector data in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_math971bd62f483877e1a539011d5c867899.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Loads each MFEM component through the scalar family&#x27;s node mapping.</dd>
+          </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#ab7ba7e5475f5b6695b463ca219e2d448" class="m-doc">Keyword</a> { </span><span class="m-doc-wrap"><a href="#ab7ba7e5475f5b6695b463ca219e2d448a9e0e31246b7b078403969b265870b3f4" class="m-doc">Dimension</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448aaa56a2e65d8106aef3c61e4f6bf94fdb" class="m-doc">Elements</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448ae234de581c9c5ef91322f1469a585f9e" class="m-doc">Boundary</a>,
+              <a href="#ab7ba7e5475f5b6695b463ca219e2d448ae4bb6129669488aedeeb0ae27bb91770" class="m-doc">Vertices</a> }</span>
+            </dt>
+            <dd>Keywords used in MFEM mesh file format.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum <a href="#a0248f65bd948236b9f656ce6c5d65355" class="m-doc">Ordering</a> { </span><span class="m-doc-wrap"><a href="#a0248f65bd948236b9f656ce6c5d65355ab46c6280889c9b7d6c657f8ff3636996" class="m-doc">Nodes</a> = 0,
+              <a href="#a0248f65bd948236b9f656ce6c5d65355a9d820de9e04239cf59aee9b782d5936a" class="m-doc">VectorDimension</a> = 1 }</span>
+            </dt>
+            <dd>Data ordering for grid function storage.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a31679ffe540af840756bba81b4a412b1" class="m-doc">toCharString</a>(</span><span class="m-doc-wrap">Keyword kw) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Converts a keyword enum to its string representation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abbc2d818a90691151870fb95191485f2" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac391b190a910bfead34aef4c825e553c" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adce657245f878d40c9d6a0056664674f" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const char* str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9460428232ddb009f709c7146e8e2cc6" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for equality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a425ad79d486dc48a9623a86ba6fedf54" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afcfa9c333200d9c4240978b3ef20f408" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1cc083cbc20ab0e6bf68a6a6724f20c4" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str) -&gt; bool</span>
+            </dt>
+            <dd>Compares the operands for inequality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaee4bd5250ba0727a8504b1a8ea85313" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              Keyword kw) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Stream output operator for MFEM keywords.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a56d187df2d7a26799069b34316cbb51b" class="m-doc">toKeyword</a>(</span><span class="m-doc-wrap">const char* str) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;Keyword&gt;</span>
+            </dt>
+            <dd>Converts a C-style string to a keyword enum.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a104951847d6d3501f42cc99d6b2e48e2" class="m-doc">getline</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              std::string&amp; line,
+              size_t&amp; currentLineNumber) -&gt; std::istream&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a94306b947fd2062d6cd4dede3b77f746" class="m-doc">skipEmptyLinesAndComments</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              size_t&amp; currentLineNumber) -&gt; std::string</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a67bcf95c35fa9608b47268df860806f9" class="m-doc">readGridFunctionHeader</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              size_t&amp; lineNumber) -&gt; <a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_grid_function_header.html" class="m-doc">GridFunctionHeader</a></span>
+            </dt>
+            <dd>Reads and validates the common MFEM field header.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e524593a6c234aa5637f2b3cbb82a80" class="m-doc">getSortedEdgeKey</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v0,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v1) -&gt; std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 2&gt;</span>
+            </dt>
+            <dd>Constructs an orientation-independent edge key.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37df82e3708f8bc6ade952b0e7755e7e" class="m-doc">getTriangleFaceKey</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v0,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v1,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v2) -&gt; std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 3&gt;</span>
+            </dt>
+            <dd>Constructs an orientation-independent triangular face key.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a615a6297532354b66705170a267619e6" class="m-doc">getQuadrilateralFaceKey</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v0,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v1,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v2,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v3) -&gt; std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 3&gt;</span>
+            </dt>
+            <dd>Constructs an orientation-independent quadrilateral face key.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Callback&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a8523e5b9f3e8147173b4900be2a6761f" class="m-doc">forEachMFEMLocalEdge</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              Callback&amp;&amp; callback)</span>
+            </dt>
+            <dd>Enumerates local edges in MFEM order.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Callback&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a3f5ca6f7591e6d52613eceebaaf6d751" class="m-doc">forEachMFEMLocalFace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              Callback&amp;&amp; callback)</span>
+            </dt>
+            <dd>Enumerates local faces in MFEM order.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0ace52cf7a6f63558bec3a197e7d82f7" class="m-doc">getMFEMEdgeOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
+            </dt>
+            <dd>Orders mesh edges for MFEM output.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f8efa2d1a56841fe3614b8a0ae4c08f" class="m-doc">getMFEMFaceOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::vector&lt;<a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_face_order_entry.html" class="m-doc">FaceOrderEntry</a>&gt;</span>
+            </dt>
+            <dd>Orders mesh faces and their vertices for MFEM output.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44db242d7165d3b538568b8bf07060f9" class="m-doc">getTriangleNodeIndex</a>(</span><span class="m-doc-wrap">size_t bary0,
+              size_t bary1,
+              size_t bary2) -&gt; size_t</span>
+            </dt>
+            <dd>Flattens an integer barycentric triangle-node coordinate.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae449fe8a02e4ffd4b002ca20230d8733" class="m-doc">getTriangleNodeMap</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Geometry::<wbr />Polytope::<wbr />Key</a>&amp; sourceVertices,
+              const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; targetVertices) -&gt; std::vector&lt;size_t&gt;</span>
+            </dt>
+            <dd>Maps triangular node indices between vertex orderings.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1f35c1e7a44874196313b4aa4c011fef" class="m-doc">getQuadrilateralNodeIndex</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) -&gt; size_t</span>
+            </dt>
+            <dd>Flattens an integer quadrilateral-node coordinate.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaf2e720f5c11f772607881d9eae2532c" class="m-doc">getQuadrilateralCornerCoordinates</a>(</span><span class="m-doc-wrap">int vertex) -&gt; std::pair&lt;size_t, size_t&gt;</span>
+            </dt>
+            <dd>Gets lattice coordinates of a quadrilateral corner.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad62d1e3a32d5ef5d37d76efaebeea9d1" class="m-doc">applyQuadrilateralTransform</a>(</span><span class="m-doc-wrap">int transform,
+              size_t i,
+              size_t j) -&gt; std::pair&lt;size_t, size_t&gt;</span>
+            </dt>
+            <dd>Applies a quadrilateral rotation or reflection to lattice coordinates.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e948da25a4dbc04c081bce0f445de40" class="m-doc">getQuadrilateralNodeMap</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Geometry::<wbr />Polytope::<wbr />Key</a>&amp; sourceVertices,
+              const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; targetVertices) -&gt; std::vector&lt;size_t&gt;</span>
+            </dt>
+            <dd>Maps quadrilateral node indices between vertex orderings.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4cdbcac7b2b0da119482dd5ba621a53c" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">GeometryType t) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Type</a>&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Converts MFEM geometry type to Rodin polytope type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6bfeccbe2e7d7480767146edb49b5d6a" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;GeometryType&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Converts Rodin polytope type to MFEM geometry type.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="ab7ba7e5475f5b6695b463ca219e2d448"><div>
+            <h3>
+              enum class <a href="#ab7ba7e5475f5b6695b463ca219e2d448" class="m-doc-self">Keyword</a>
+            </h3>
+            <p>Keywords used in MFEM mesh file format.</p>
+<p>These keywords identify different sections of an MFEM mesh file.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448a9e0e31246b7b078403969b265870b3f4" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448a9e0e31246b7b078403969b265870b3f4">Dimension</a></td>
+                  <td>
+                  <p>Dimension section keyword.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448aaa56a2e65d8106aef3c61e4f6bf94fdb" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448aaa56a2e65d8106aef3c61e4f6bf94fdb">Elements</a></td>
+                  <td>
+                  <p>Elements section keyword.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ae234de581c9c5ef91322f1469a585f9e" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ae234de581c9c5ef91322f1469a585f9e">Boundary</a></td>
+                  <td>
+                  <p>Boundary section keyword.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab7ba7e5475f5b6695b463ca219e2d448ae4bb6129669488aedeeb0ae27bb91770" class="m-doc-self" id="ab7ba7e5475f5b6695b463ca219e2d448ae4bb6129669488aedeeb0ae27bb91770">Vertices</a></td>
+                  <td>
+                  <p>Vertices section keyword.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0248f65bd948236b9f656ce6c5d65355"><div>
+            <h3>
+              enum <a href="#a0248f65bd948236b9f656ce6c5d65355" class="m-doc-self">Ordering</a>
+            </h3>
+            <p>Data ordering for grid function storage.</p>
+<p>Specifies how vector-valued grid function data is organized in memory.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a0248f65bd948236b9f656ce6c5d65355ab46c6280889c9b7d6c657f8ff3636996" class="m-doc-self" id="a0248f65bd948236b9f656ce6c5d65355ab46c6280889c9b7d6c657f8ff3636996">Nodes</a></td>
+                  <td>
+                  <p>Node-major ordering: XXX..., YYY..., ZZZ... (all x-components, then all y-components, etc.).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a0248f65bd948236b9f656ce6c5d65355a9d820de9e04239cf59aee9b782d5936a" class="m-doc-self" id="a0248f65bd948236b9f656ce6c5d65355a9d820de9e04239cf59aee9b782d5936a">VectorDimension</a></td>
+                  <td>
+                  <p>Vector dimension-major ordering: XYZ, XYZ, ... (interleaved components).</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a31679ffe540af840756bba81b4a412b1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const char* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31679ffe540af840756bba81b4a412b1" class="m-doc-self">toCharString</a>(</span><span class="m-doc-wrap">Keyword kw) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Converts a keyword enum to its string representation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Keyword to convert</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>C-style string representation of the keyword</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abbc2d818a90691151870fb95191485f2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbc2d818a90691151870fb95191485f2" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac391b190a910bfead34aef4c825e553c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac391b190a910bfead34aef4c825e553c" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adce657245f878d40c9d6a0056664674f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adce657245f878d40c9d6a0056664674f" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const char* str)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9460428232ddb009f709c7146e8e2cc6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9460428232ddb009f709c7146e8e2cc6" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for equality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare equal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a425ad79d486dc48a9623a86ba6fedf54"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a425ad79d486dc48a9623a86ba6fedf54" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const char* str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afcfa9c333200d9c4240978b3ef20f408"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afcfa9c333200d9c4240978b3ef20f408" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const std::string&amp; str,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1cc083cbc20ab0e6bf68a6a6724f20c4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cc083cbc20ab0e6bf68a6a6724f20c4" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">Keyword kw,
+              const std::string&amp; str)</span></span>
+            </h3>
+            <p>Compares the operands for inequality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">kw</td>
+                  <td>Format keyword to compare or write.</td>
+                </tr>
+                <tr>
+                  <td>str</td>
+                  <td>Text to compare or convert to a format keyword.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True when the operands compare unequal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaee4bd5250ba0727a8504b1a8ea85313"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaee4bd5250ba0727a8504b1a8ea85313" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              Keyword kw)</span></span>
+            </h3>
+            <p>Stream output operator for MFEM keywords.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream</td>
+                </tr>
+                <tr>
+                  <td>kw</td>
+                  <td>Keyword to output</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a56d187df2d7a26799069b34316cbb51b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;Keyword&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56d187df2d7a26799069b34316cbb51b" class="m-doc-self">toKeyword</a>(</span><span class="m-doc-wrap">const char* str)</span></span>
+            </h3>
+            <p>Converts a C-style string to a keyword enum.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str</td>
+                  <td>String to convert</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Optional keyword if conversion succeeds, empty otherwise</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a104951847d6d3501f42cc99d6b2e48e2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::istream&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a104951847d6d3501f42cc99d6b2e48e2" class="m-doc-self">getline</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              std::string&amp; line,
+              size_t&amp; currentLineNumber)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">is</td>
+                  <td>Input stream from which a line is read.</td>
+                </tr>
+                <tr>
+                  <td>line</td>
+                  <td>Storage receiving the extracted line.</td>
+                </tr>
+                <tr>
+                  <td>currentLineNumber</td>
+                  <td>Line counter incremented for each consumed line.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the input stream after extraction.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a94306b947fd2062d6cd4dede3b77f746"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94306b947fd2062d6cd4dede3b77f746" class="m-doc-self">skipEmptyLinesAndComments</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              size_t&amp; currentLineNumber)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">is</td>
+                  <td>Input stream from which a line is read.</td>
+                </tr>
+                <tr>
+                  <td>currentLineNumber</td>
+                  <td>Line counter incremented for each consumed line.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Next data line, or an empty string when the stream is exhausted.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67bcf95c35fa9608b47268df860806f9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_grid_function_header.html" class="m-doc">GridFunctionHeader</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67bcf95c35fa9608b47268df860806f9" class="m-doc-self">readGridFunctionHeader</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              size_t&amp; lineNumber)</span></span>
+            </h3>
+            <p>Reads and validates the common MFEM field header.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">is</td>
+                  <td>Field input stream.</td>
+                </tr>
+                <tr>
+                  <td>lineNumber</td>
+                  <td>Running line counter used in diagnostics.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Initialized collection, component count and supported ordering.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2e524593a6c234aa5637f2b3cbb82a80"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 2&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2e524593a6c234aa5637f2b3cbb82a80" class="m-doc-self">getSortedEdgeKey</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v0,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v1)</span></span>
+            </h3>
+            <p>Constructs an orientation-independent edge key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v0</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+                <tr>
+                  <td>v1</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The two vertex indices in ascending order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a37df82e3708f8bc6ade952b0e7755e7e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 3&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37df82e3708f8bc6ade952b0e7755e7e" class="m-doc-self">getTriangleFaceKey</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v0,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v1,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v2)</span></span>
+            </h3>
+            <p>Constructs an orientation-independent triangular face key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v0</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+                <tr>
+                  <td>v1</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+                <tr>
+                  <td>v2</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The three vertex indices in ascending order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a615a6297532354b66705170a267619e6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 3&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a615a6297532354b66705170a267619e6" class="m-doc-self">getQuadrilateralFaceKey</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v0,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v1,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v2,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> v3)</span></span>
+            </h3>
+            <p>Constructs an orientation-independent quadrilateral face key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v0</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+                <tr>
+                  <td>v1</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+                <tr>
+                  <td>v2</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+                <tr>
+                  <td>v3</td>
+                  <td>Vertex index of the entity.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The three smallest vertex indices, in ascending order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8523e5b9f3e8147173b4900be2a6761f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Callback&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8523e5b9f3e8147173b4900be2a6761f" class="m-doc-self">forEachMFEMLocalEdge</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              Callback&amp;&amp; callback)</span></span>
+            </h3>
+            <p>Enumerates local edges in MFEM order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geometry</td>
+                  <td>Reference-cell geometry whose local entities are enumerated.</td>
+                </tr>
+                <tr>
+                  <td>callback</td>
+                  <td>Callable receiving the local vertex indices of each entity.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3f5ca6f7591e6d52613eceebaaf6d751"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Callback&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f5ca6f7591e6d52613eceebaaf6d751" class="m-doc-self">forEachMFEMLocalFace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              Callback&amp;&amp; callback)</span></span>
+            </h3>
+            <p>Enumerates local faces in MFEM order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geometry</td>
+                  <td>Reference-cell geometry whose local entities are enumerated.</td>
+                </tr>
+                <tr>
+                  <td>callback</td>
+                  <td>Callable receiving the local vertex indices of each entity.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0ace52cf7a6f63558bec3a197e7d82f7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ace52cf7a6f63558bec3a197e7d82f7" class="m-doc-self">getMFEMEdgeOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh)</span></span>
+            </h3>
+            <p>Orders mesh edges for MFEM output.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh whose entities are traversed.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Rodin edge indices in first-encounter order under MFEM local edge traversal.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4f8efa2d1a56841fe3614b8a0ae4c08f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="struct_rodin_1_1_i_o_1_1_m_f_e_m_1_1_face_order_entry.html" class="m-doc">FaceOrderEntry</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f8efa2d1a56841fe3614b8a0ae4c08f" class="m-doc-self">getMFEMFaceOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh)</span></span>
+            </h3>
+            <p>Orders mesh faces and their vertices for MFEM output.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh whose entities are traversed.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Face indices and MFEM vertex orderings in first-encounter order over the cells.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a44db242d7165d3b538568b8bf07060f9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44db242d7165d3b538568b8bf07060f9" class="m-doc-self">getTriangleNodeIndex</a>(</span><span class="m-doc-wrap">size_t bary0,
+              size_t bary1,
+              size_t bary2)</span></span>
+            </h3>
+            <p>Flattens an integer barycentric triangle-node coordinate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">bary0</td>
+                  <td>Integer barycentric coordinate; the coordinates sum to the polynomial order.</td>
+                </tr>
+                <tr>
+                  <td>bary1</td>
+                  <td>Integer barycentric coordinate; the coordinates sum to the polynomial order.</td>
+                </tr>
+                <tr>
+                  <td>bary2</td>
+                  <td>Integer barycentric coordinate; the coordinates sum to the polynomial order.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Node index in row-major triangular lattice ordering.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae449fe8a02e4ffd4b002ca20230d8733"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::vector&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae449fe8a02e4ffd4b002ca20230d8733" class="m-doc-self">getTriangleNodeMap</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Geometry::<wbr />Polytope::<wbr />Key</a>&amp; sourceVertices,
+              const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; targetVertices)</span></span>
+            </h3>
+            <p>Maps triangular node indices between vertex orderings.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">sourceVertices</td>
+                  <td>Vertices in the source entity ordering.</td>
+                </tr>
+                <tr>
+                  <td>targetVertices</td>
+                  <td>The same vertices in the target entity ordering.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Map indexed by target node index, with the corresponding source node index as its value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1f35c1e7a44874196313b4aa4c011fef"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f35c1e7a44874196313b4aa4c011fef" class="m-doc-self">getQuadrilateralNodeIndex</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j)</span></span>
+            </h3>
+            <p>Flattens an integer quadrilateral-node coordinate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>First supporting vertex index.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Second supporting vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Node index with the first coordinate varying fastest.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaf2e720f5c11f772607881d9eae2532c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::pair&lt;size_t, size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf2e720f5c11f772607881d9eae2532c" class="m-doc-self">getQuadrilateralCornerCoordinates</a>(</span><span class="m-doc-wrap">int vertex)</span></span>
+            </h3>
+            <p>Gets lattice coordinates of a quadrilateral corner.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertex</td>
+                  <td>Local corner index, from zero to three.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integer corner coordinates at the specified polynomial order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad62d1e3a32d5ef5d37d76efaebeea9d1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::pair&lt;size_t, size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad62d1e3a32d5ef5d37d76efaebeea9d1" class="m-doc-self">applyQuadrilateralTransform</a>(</span><span class="m-doc-wrap">int transform,
+              size_t i,
+              size_t j)</span></span>
+            </h3>
+            <p>Applies a quadrilateral rotation or reflection to lattice coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">transform</td>
+                  <td>Quadrilateral symmetry index, from zero to seven.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>First supporting vertex index.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Second supporting vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Transformed integer node coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2e948da25a4dbc04c081bce0f445de40"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::vector&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2e948da25a4dbc04c081bce0f445de40" class="m-doc-self">getQuadrilateralNodeMap</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Geometry::<wbr />Polytope::<wbr />Key</a>&amp; sourceVertices,
+              const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; targetVertices)</span></span>
+            </h3>
+            <p>Maps quadrilateral node indices between vertex orderings.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">sourceVertices</td>
+                  <td>Vertices in the source entity ordering.</td>
+                </tr>
+                <tr>
+                  <td>targetVertices</td>
+                  <td>The same vertices in the target entity ordering.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Map indexed by target node index, with the corresponding source node index as its value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4cdbcac7b2b0da119482dd5ba621a53c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Type</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cdbcac7b2b0da119482dd5ba621a53c" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">GeometryType t) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Converts MFEM geometry type to Rodin polytope type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>MFEM geometry type</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Optional Rodin polytope type, empty if conversion not supported</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Maps MFEM&#x27;s internal geometry type enumeration to Rodin&#x27;s polytope type system.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6bfeccbe2e7d7480767146edb49b5d6a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;GeometryType&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bfeccbe2e7d7480767146edb49b5d6a" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Converts Rodin polytope type to MFEM geometry type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Type of polytope to construct.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Optional MFEM geometry type, empty if conversion not supported</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Maps Rodin&#x27;s polytope type system to MFEM&#x27;s internal geometry type enumeration.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-8a8941761f97.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

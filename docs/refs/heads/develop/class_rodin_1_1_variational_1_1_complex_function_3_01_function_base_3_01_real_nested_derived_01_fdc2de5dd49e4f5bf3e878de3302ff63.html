@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,20 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_complex_function_8h.html">&lt;Rodin/Variational/ComplexFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class RealNestedDerived, class ImagNestedDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Complex function built from real and imaginary functions.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>ComplexFunction <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Complex function built from real and imaginary functions.</p><p class="rodin-reference-include">Defined in <a href="_complex_function_8h.html"><code>Rodin/Variational/ComplexFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RealNestedDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">ImagNestedDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_complex_function_3_01_function_base_3_01_real_nested_derived_01_fdc2de5dd49e4f5bf3e878de3302ff63.html#abec432cc90137d38f7c4dafd8a59ae16"><span class="nc">ComplexFunction</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RealNestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">ImagNestedDerived</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_complex_function.html">ComplexFunction</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Values...</code></td><td><code>FunctionBase&lt; RealNestedDerived &gt;, FunctionBase&lt; ImagNestedDerived &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,37 +92,29 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase&lt;ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Base class for complex-valued scalar functions.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_complex_function_base.html" title="ComplexFunctionBase&lt; ComplexFunction&lt; FunctionBase&lt; RealNestedDerived &gt;, FunctionBase&lt; ImagNestedDerived &gt; &gt; &gt;">ComplexFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ComplexFunction</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_complex_function_base.html#aafea6f6a222b070832d46a34edf6e1bb"><span class="nc">ComplexFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_complex_function_3_01_function_base_3_01_real_nested_derived_01_fdc2de5dd49e4f5bf3e878de3302ff63.html#abec432cc90137d38f7c4dafd8a59ae16"><span class="nc">ComplexFunction</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RealNestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">ImagNestedDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complex-valued scalar functions.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_3_01_function_base_3_01_real_nested_derived_01_fdc2de5dd49e4f5bf3e878de3302ff63.html#a6d94f4ed0ee5cbf5eb9b351c150b0d3e"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html#a0129b30567b4f5f5913dcb007b84b933">ComplexFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html"><code>ScalarFunctionBase</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ad7584a02ad39a4e93816d166a02c170c"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#a44ff9fe9f91406694a76cb99d4d2338f"><code>traceOf()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html#aba5919eddb1f90f8ca65bbd25d065d60"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_complex_function_base.html"><code>ComplexFunctionBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_complex_function_base.html#ad4dd159248d6cf0910ba183bcaa6aa2f"><code>ScalarType</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a68884b67a90a132168160c064577b342">
-              using <a href="#a68884b67a90a132168160c064577b342" class="m-doc-self">RealFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RealNestedDerived&gt;
+            <dt id="a1ce22365635e1b7c39ebb6c48a8b2769">
+              using <a href="#a1ce22365635e1b7c39ebb6c48a8b2769" class="m-doc-self">RealFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RealNestedDerived&gt;
             </dt>
             <dd>Real-part function type.</dd>
-            <dt id="aa5684a701e6438be25655cb9c8bf879e">
-              using <a href="#aa5684a701e6438be25655cb9c8bf879e" class="m-doc-self">ImagFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;ImagNestedDerived&gt;
+            <dt id="acde7fab62fca75f42e40a32f9cf16612">
+              using <a href="#acde7fab62fca75f42e40a32f9cf16612" class="m-doc-self">ImagFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;ImagNestedDerived&gt;
             </dt>
             <dd>Imaginary-part function type.</dd>
             <dt id="a61583ae99bd05594d1317da66ee8e869">
-              using <a href="#a61583ae99bd05594d1317da66ee8e869" class="m-doc-self">RealFunctionRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a68884b67a90a132168160c064577b342" class="m-doc">RealFunctionType</a>&gt;::RangeType
+              using <a href="#a61583ae99bd05594d1317da66ee8e869" class="m-doc-self">RealFunctionRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a1ce22365635e1b7c39ebb6c48a8b2769" class="m-doc">RealFunctionType</a>&gt;::RangeType
             </dt>
             <dd>Real-part function range type.</dd>
             <dt id="a00c37d6f51cbf879d636959667a82253">
-              using <a href="#a00c37d6f51cbf879d636959667a82253" class="m-doc-self">ImagFunctionRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa5684a701e6438be25655cb9c8bf879e" class="m-doc">ImagFunctionType</a>&gt;::RangeType
+              using <a href="#a00c37d6f51cbf879d636959667a82253" class="m-doc-self">ImagFunctionRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#acde7fab62fca75f42e40a32f9cf16612" class="m-doc">ImagFunctionType</a>&gt;::RangeType
             </dt>
             <dd>Imaginary-part function range type.</dd>
-            <dt id="a1cf2c1c8f31eea37a5e859f6cf8da60f">
-              using <a href="#a1cf2c1c8f31eea37a5e859f6cf8da60f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RealNestedDerived&gt;, <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;ImagNestedDerived&gt;&gt;&gt;
+            <dt id="a01449137e54e351f9f226c1d1dea96dd">
+              using <a href="#a01449137e54e351f9f226c1d1dea96dd" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_complex_function_base.html#aafea6f6a222b070832d46a34edf6e1bb" class="m-doc">ComplexFunctionBase</a>&lt;<a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RealNestedDerived&gt;, <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;ImagNestedDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -133,16 +123,16 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="#a68884b67a90a132168160c064577b342" class="m-doc">RealFunctionType</a>&amp; re,
-              const <a href="#aa5684a701e6438be25655cb9c8bf879e" class="m-doc">ImagFunctionType</a>&amp; imag)</span>
+              <span class="m-doc-wrap-bumper"><a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="#a1ce22365635e1b7c39ebb6c48a8b2769" class="m-doc">RealFunctionType</a>&amp; re,
+              const <a href="#acde7fab62fca75f42e40a32f9cf16612" class="m-doc">ImagFunctionType</a>&amp; imag)</span>
             </dt>
             <dd>Constructs from real and imaginary functions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aeb005fe739f02755010047c73afe63e7" class="m-doc">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aeb005fe739f02755010047c73afe63e7" class="m-doc">ComplexFunction</a>(</span><span class="m-doc-wrap">const ComplexFunction&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af7e8b01b6f677ca5408397e738b84651" class="m-doc">ComplexFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af7e8b01b6f677ca5408397e738b84651" class="m-doc">ComplexFunction</a>(</span><span class="m-doc-wrap">ComplexFunction&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -159,8 +149,8 @@
             </dt>
             <dd>Evaluates the complex function at an integration point.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af72e4c02d2113888b7853fbdd17250db" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af72e4c02d2113888b7853fbdd17250db" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; <a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Forwards trace-domain configuration to both parts.</dd>
             <dt>
@@ -168,7 +158,7 @@
             </dt>
             <dd>Returns the maximum order of the real and imaginary parts.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6d94f4ed0ee5cbf5eb9b351c150b0d3e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6d94f4ed0ee5cbf5eb9b351c150b0d3e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the function.</dd>
           </dl>
@@ -177,11 +167,9 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="abec432cc90137d38f7c4dafd8a59ae16"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="#a68884b67a90a132168160c064577b342" class="m-doc">RealFunctionType</a>&amp; re,
-              const <a href="#aa5684a701e6438be25655cb9c8bf879e" class="m-doc">ImagFunctionType</a>&amp; imag)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="#a1ce22365635e1b7c39ebb6c48a8b2769" class="m-doc">RealFunctionType</a>&amp; re,
+              const <a href="#acde7fab62fca75f42e40a32f9cf16612" class="m-doc">ImagFunctionType</a>&amp; imag)</span></span>
             </h3>
             <p>Constructs from real and imaginary functions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -202,10 +190,8 @@
           </div></section>
           <section class="m-doc-details" id="aeb005fe739f02755010047c73afe63e7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb005fe739f02755010047c73afe63e7" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb005fe739f02755010047c73afe63e7" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const ComplexFunction&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -222,10 +208,8 @@
           </div></section>
           <section class="m-doc-details" id="af7e8b01b6f677ca5408397e738b84651"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7e8b01b6f677ca5408397e738b84651" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7e8b01b6f677ca5408397e738b84651" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">ComplexFunction&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -242,10 +226,8 @@
           </div></section>
           <section class="m-doc-details" id="ae491f0490f978a463537e6f26e6f180c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae491f0490f978a463537e6f26e6f180c" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae491f0490f978a463537e6f26e6f180c" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the complex function at a geometry point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -268,10 +250,8 @@
           </div></section>
           <section class="m-doc-details" id="a858fa3d2e75eaca84d99be46772d1843"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a858fa3d2e75eaca84d99be46772d1843" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a858fa3d2e75eaca84d99be46772d1843" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the complex function at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -296,9 +276,9 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-                template&lt;class ... Args&gt;
+                template&lt;class... Args&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af72e4c02d2113888b7853fbdd17250db" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af72e4c02d2113888b7853fbdd17250db" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Forwards trace-domain configuration to both parts.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -321,10 +301,8 @@
           </div></section>
           <section class="m-doc-details" id="a2fd63507758680de7d09f15a011a67a7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fd63507758680de7d09f15a011a67a7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fd63507758680de7d09f15a011a67a7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the maximum order of the real and imaginary parts.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -347,10 +325,8 @@
           </div></section>
           <section class="m-doc-details" id="a6d94f4ed0ee5cbf5eb9b351c150b0d3e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class RealNestedDerived, class ImagNestedDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>* Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;RealNestedDerived&gt;, FunctionBase&lt;ImagNestedDerived&gt;&gt;&lt;RealNestedDerived, ImagNestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d94f4ed0ee5cbf5eb9b351c150b0d3e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#abec432cc90137d38f7c4dafd8a59ae16" class="m-doc">ComplexFunction</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d94f4ed0ee5cbf5eb9b351c150b0d3e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -402,13 +378,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

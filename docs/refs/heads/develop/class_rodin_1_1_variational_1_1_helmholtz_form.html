@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::HelmholtzForm class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,7 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>HelmholtzForm <span class="m-thin">class</span>
-        </h1>
-        <p>Discrete Helmholtz-type form  <svg class="m-math" style="width: 20.123em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 193.182514 13.781784">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>HelmholtzForm</h1><p class="rodin-reference-brief">Discrete Helmholtz-type form  <svg class="m-math" style="width: 20.123em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 193.182514 13.781784">
 <title>
 $ h(u,v) = \int_\Omega a\, \nabla u \cdot \nabla v\,dx
   + \int_\Omega c\, u\, v\,dx $
@@ -128,7 +121,15 @@ $ h(u,v) = \int_\Omega a\, \nabla u \cdot \nabla v\,dx
 <use x='180.447734' y='0' xlink:href='#eq1-g2-100'/>
 <use x='186.530427' y='0' xlink:href='#eq1-g2-120'/>
 </g>
-</svg>.</p>
+</svg>.</p><p class="rodin-reference-include">Defined in <a href="_helmholtz_form_8h.html"><code>Rodin/Variational/HelmholtzForm.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Operator</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">DiffusionDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MassDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#a916a02e1367140905c4ec4043b5da37d"><span class="nc">HelmholtzForm</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -150,7 +151,7 @@ $ h(u,v) = \int_\Omega a\, \nabla u \cdot \nabla v\,dx
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -187,16 +188,8 @@ $ c = -k^2 $
 <use x='36.5723' y='-4.338437' xlink:href='#eq3-g2-50'/>
 </g>
 </svg> gives the indefinite Helmholtz operator, a positive one the reaction-diffusion operator used by the Hilbertian regularizations. Scalar spaces only.</p><p>Trial and test functions are borrowed and must outlive the form and its copies, together with their spaces and mesh. Coefficient expressions are cloned; a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> coefficient keeps a live reference to the field, which must also outlive the form. Temporary value/function expressions are owned, but cloning does not extend the lifetime of their external captures. Constructors assemble immediately; call assemble() after changing a field coefficient to update the stored operator.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Operator&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase&lt;Operator&gt;</a>
-            </dt>
-            <dd>Base class for bilinear form representations.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" title="BilinearFormBase&lt; Operator &gt;">BilinearFormBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">HelmholtzForm</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html"><code>BilinearFormBase&lt;Operator&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a880ffe4823080118f27e64ee4d14acd1"><span class="nc">BilinearFormBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for bilinear form representations.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#a0f56478fd8109d4addf753090373a876"><code>getOperator()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#adba37aefa6b3599b36f6ee13093e4e98">BilinearFormBase::getOperator</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#addad6e39827f1b28efc28e434b249d2d"><code>getOperator()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#af207030cc7d8c2fb84fe9deff6cf88b2">BilinearFormBase::getOperator</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#a1995c774d971ab0041610829222607a5"><code>assemble()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#aedef9817f0ecb43ca5cf9f5d10f6bcc3">BilinearFormBase::assemble</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#a71e1f113ecb2df5494e971960630e567"><code>getTrialFunction()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a9ecdec85d47f06f7905e256139d3f72c">BilinearFormBase::getTrialFunction</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#a9b8b9e733c2157a88aca3ebd36cd4010"><code>getTestFunction()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a3baa34c2dcc5e7ab4b1403d051a41b16">BilinearFormBase::getTestFunction</a></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html#a1b470357807889605d27f2b3771562de"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#acd8ed87ef4efe52bc3071888c96ef2eb">BilinearFormBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html"><code>BilinearFormBase</code></a></td><td><details><summary>20 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a73d2eb65615f3a38bab79ce66191af11"><code>getGlobalIntegrators()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a55b436df62c240fe1802dbf6926d3a8a"><code>getGlobalIntegrators()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a4f42efd80a3cd60078ed0ad4e007bf77"><code>getLocalIntegrators()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a5e4fad8a99524a0ca4e3849994c0d751"><code>getLocalIntegrators()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a4a68a24c4c56f8ea50bba149accfe436"><code>GlobalBilinearFormIntegratorBaseListType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a70d5f3528b845731370840ab3f488007"><code>GlobalBilinearFormIntegratorBaseType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a84e961985b80a486f1ac9a01a2d20742"><code>LocalBilinearFormIntegratorBaseListType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a32e55b17f685b9703df1d38e19c11ad8"><code>LocalBilinearFormIntegratorBaseType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a4f7813aa8c85c1778e4282c2143b2994"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#aeaf14c35ddabd6be3d4c5da3de4747c2"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a04a44e88932b2d4369ef0671686fe599"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a21a5eb361998b2b14409911e0cab42aa"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a41cd1fc80c71c3d9b76d02a64fa5d95a"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#ad2d8b6b54fd3ffce4d485ab03bf9a043"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#ae04fe93a37824415faeae24ba548e43a"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a8e22f6e7bc9f90fd1fbfdcc9210619d3"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#aca06332b1b02d20959c72780b2bf13dc"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a3f280312550cd5355849fdbc7648c960"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#aedcb5797489b052a022f7db68e412545"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#adb8bef35df22bf5170e5d18ab000163e"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -245,11 +238,11 @@ $ c = -k^2 $
             </dt>
             <dd>Local kernel type, as the assembly asks for it.</dd>
             <dt id="acfb9de5cab9c516286fac935896f3b08">
-              using <a href="#acfb9de5cab9c516286fac935896f3b08" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;
+              using <a href="#acfb9de5cab9c516286fac935896f3b08" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html#a880ffe4823080118f27e64ee4d14acd1" class="m-doc">BilinearFormBase</a>&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a720f5ab3ad7f0b8766b60f657560243d">
-              using <a href="#a720f5ab3ad7f0b8766b60f657560243d" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;TrialContextType, TestContextType&gt;::template Type&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>, <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&gt;
+              using <a href="#a720f5ab3ad7f0b8766b60f657560243d" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;TrialContextType, TestContextType&gt;::template Type&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>, <a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>&gt;
             </dt>
             <dd>Assembly type selected for the trial and test contexts.</dd>
           </dl>
@@ -257,20 +250,19 @@ $ c = -k^2 $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a></dt><dd>Constructs and assembles the Helmholtz form.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class A, class C&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>(</span><span class="m-doc-wrap">const A&amp; a,
               const C&amp; c,
               const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;&amp; u,
               const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;&amp; v)</span>
-            </dt>
-            <dd>Constructs and assembles the Helmholtz form.</dd>
+            </div></details></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a19a09be38273bf23b302a3a8af93ce49" class="m-doc">HelmholtzForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a19a09be38273bf23b302a3a8af93ce49" class="m-doc">HelmholtzForm</a>(</span><span class="m-doc-wrap">const HelmholtzForm&amp; other)</span>
             </dt>
             <dd>Copy constructor, copying the coefficients.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a53ac95212375816ef488537970959558" class="m-doc">HelmholtzForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a53ac95212375816ef488537970959558" class="m-doc">HelmholtzForm</a>(</span><span class="m-doc-wrap">HelmholtzForm&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -315,13 +307,13 @@ $ c = -k^2 $
             </dt>
             <dd>Gets the attributes the form is restricted to, empty for all.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af744a61f8bafac3d1385242b1cc4fb68" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes) -&gt; <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af744a61f8bafac3d1385242b1cc4fb68" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes) -&gt; <a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>&amp;</span>
             </dt>
             <dd>Restricts the form to cells carrying one of <code>attributes</code> and reassembles it.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class A1, class... As&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a79e27c4739d2bf0a9601f421c7718d38" class="m-doc">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
-              const As&amp;... as) -&gt; <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp;</span>
+              const As&amp;... as) -&gt; <a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>&amp;</span>
             </dt>
             <dd>Restricts the form to cells carrying the given attributes and reassembles it.</dd>
             <dt>
@@ -329,7 +321,7 @@ $ c = -k^2 $
             </dt>
             <dd>Builds the kernel the assembly runs on each polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1b470357807889605d27f2b3771562de" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1b470357807889605d27f2b3771562de" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this object.</dd>
           </dl>
@@ -342,7 +334,7 @@ $ c = -k^2 $
                 template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
                 template&lt;class A, class C&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc-self">HelmholtzForm</a>(</span><span class="m-doc-wrap">const A&amp; a,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc-self">HelmholtzForm</a>(</span><span class="m-doc-wrap">const A&amp; a,
               const C&amp; c,
               const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;&amp; u,
               const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;&amp; v)</span></span>
@@ -375,10 +367,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a19a09be38273bf23b302a3a8af93ce49"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19a09be38273bf23b302a3a8af93ce49" class="m-doc-self">HelmholtzForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19a09be38273bf23b302a3a8af93ce49" class="m-doc-self">HelmholtzForm</a>(</span><span class="m-doc-wrap">const HelmholtzForm&amp; other)</span></span>
             </h3>
             <p>Copy constructor, copying the coefficients.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -395,10 +385,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a53ac95212375816ef488537970959558"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53ac95212375816ef488537970959558" class="m-doc-self">HelmholtzForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53ac95212375816ef488537970959558" class="m-doc-self">HelmholtzForm</a>(</span><span class="m-doc-wrap">HelmholtzForm&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -415,10 +403,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a0f56478fd8109d4addf753090373a876"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f56478fd8109d4addf753090373a876" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f56478fd8109d4addf753090373a876" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference to the associated operator of the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -432,10 +418,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="addad6e39827f1b28efc28e434b249d2d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addad6e39827f1b28efc28e434b249d2d" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addad6e39827f1b28efc28e434b249d2d" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets a constant reference to the associated operator of the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -449,20 +433,16 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a1995c774d971ab0041610829222607a5"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the bilinear form.</p>
 <p>This method will assemble the underlying sparse matrix associated the bilinear form.</p><aside class="m-note m-default"><h4>See also</h4><p>getMatrix()</p></aside>
           </div></section>
           <section class="m-doc-details" id="a71e1f113ecb2df5494e971960630e567"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71e1f113ecb2df5494e971960630e567" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71e1f113ecb2df5494e971960630e567" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference to the associated TrialFunction object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -476,10 +456,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a9b8b9e733c2157a88aca3ebd36cd4010"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b8b9e733c2157a88aca3ebd36cd4010" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b8b9e733c2157a88aca3ebd36cd4010" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference to the associated TestFunction object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -493,10 +471,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a8f93c7d18a861adee2b6b5bd81df18f1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a640d2cc69a49e17c6c55d597ba263e63" class="m-doc">DiffusionCoefficientType</a>&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f93c7d18a861adee2b6b5bd81df18f1" class="m-doc-self">getDiffusionCoefficient</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a640d2cc69a49e17c6c55d597ba263e63" class="m-doc">DiffusionCoefficientType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f93c7d18a861adee2b6b5bd81df18f1" class="m-doc-self">getDiffusionCoefficient</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the diffusion coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -510,10 +486,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="aa5770953c31bc305fd5f35c660fe9b3b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#af1c0e5e859318f0ef315af720f407fe1" class="m-doc">MassCoefficientType</a>&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5770953c31bc305fd5f35c660fe9b3b" class="m-doc-self">getMassCoefficient</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#af1c0e5e859318f0ef315af720f407fe1" class="m-doc">MassCoefficientType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5770953c31bc305fd5f35c660fe9b3b" class="m-doc-self">getMassCoefficient</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the mass coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -527,10 +501,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="aceaf5428ec8fd37893fc3276d222204e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aceaf5428ec8fd37893fc3276d222204e" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aceaf5428ec8fd37893fc3276d222204e" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the region the form integrates over.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -544,10 +516,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="ac76cd4c95442baa6361dfa9a0e9ba4a9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the attributes the form is restricted to, empty for all.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -561,10 +531,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="af744a61f8bafac3d1385242b1cc4fb68"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af744a61f8bafac3d1385242b1cc4fb68" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af744a61f8bafac3d1385242b1cc4fb68" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes)</span></span>
             </h3>
             <p>Restricts the form to cells carrying one of <code>attributes</code> and reassembles it.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -591,7 +559,7 @@ $ c = -k^2 $
                 template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
                 template&lt;class A1, class... As&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>&amp; Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79e27c4739d2bf0a9601f421c7718d38" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              <span class="m-doc-wrap-bumper"><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79e27c4739d2bf0a9601f421c7718d38" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
               const As&amp;... as)</span></span>
             </h3>
             <p>Restricts the form to cells carrying the given attributes and reassembles it.</p>
@@ -619,10 +587,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="ac09c83fbe8f07bff3f7baafc5e83c00a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_helmholtz_form_1_1_kernel.html" class="m-doc">Kernel</a> Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac09c83fbe8f07bff3f7baafc5e83c00a" class="m-doc-self">getKernel</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_helmholtz_form_1_1_kernel.html" class="m-doc">Kernel</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac09c83fbe8f07bff3f7baafc5e83c00a" class="m-doc-self">getKernel</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Builds the kernel the assembly runs on each polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -636,10 +602,8 @@ $ c = -k^2 $
           </div></section>
           <section class="m-doc-details" id="a1b470357807889605d27f2b3771562de"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class TrialFES, class TestFES, class Operator, class DiffusionDerived, class MassDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_helmholtz_form.html" class="m-doc">HelmholtzForm</a>* Rodin::<wbr />Variational::<wbr />HelmholtzForm&lt;Solution, TrialFES, TestFES, Operator, DiffusionDerived, MassDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b470357807889605d27f2b3771562de" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a916a02e1367140905c4ec4043b5da37d" class="m-doc">HelmholtzForm</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b470357807889605d27f2b3771562de" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -691,13 +655,20 @@ $ c = -k^2 $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

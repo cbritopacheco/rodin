@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::Success class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,17 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Success <span class="m-thin">class</span>
-        </h1>
-        <p>Success message class with formatted output.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>Success</h1><p class="rodin-reference-brief">Success message class with formatted output.</p><p class="rodin-reference-include">Defined in <a href="_success_8h.html"><code>Rodin/Alert/Success.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">Success</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
@@ -92,21 +87,13 @@
           </ul>
         </nav>
 <p>A specialized message class for displaying success notifications with green-colored formatting. Success messages indicate successful completion of operations and are typically used for user feedback and logging.</p><p>The Success class provides stream-like insertion operators for building detailed success messages with formatting capabilities.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;SuccessPrefix&gt;</a>
-            </dt>
-            <dd>Forward declaration of the Message template class.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_message.html" title="Message&lt; SuccessPrefix &gt;">Message</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Success</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message.html"><code>Message&lt;SuccessPrefix&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_alert_1_1_message.html#ace94da823978a4ee0ba31c42ac1b6a16"><span class="nc">Message</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_alert_1_1_success_prefix.html"><span class="nc">SuccessPrefix</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Forward declaration of the Message template class.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_message.html"><code>Message</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_alert_1_1_message.html#ae86b1d95969f40504107a97b5af66432"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a0ba9797c311384eee8ad17f6ea2d20fc"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#aaf41a99ca70ed695dfc5b78e1c1b03bd"><code>operator&lt;&lt;()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a05fa0dbb9670de92ab00a301d3e676b5"><code>raise()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a313a6aa220cc1d01a1ebf1d598043186"><code>setOutputStream()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_message.html#a576a441c2b1e2f01d271e237b314eac3"><code>what()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ab71edc7abcedee3a843d0324a2a4edc0">
-              using <a href="#ab71edc7abcedee3a843d0324a2a4edc0" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&lt;<a href="class_rodin_1_1_alert_1_1_success_prefix.html" class="m-doc">SuccessPrefix</a>&gt;
+              using <a href="#ab71edc7abcedee3a843d0324a2a4edc0" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html#ace94da823978a4ee0ba31c42ac1b6a16" class="m-doc">Message</a>&lt;<a href="class_rodin_1_1_alert_1_1_success_prefix.html" class="m-doc">SuccessPrefix</a>&gt;
             </dt>
             <dd>Parent class type alias.</dd>
           </dl>
@@ -123,11 +110,11 @@
             </dt>
             <dd>Constructs a Success alert with a specific output stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#abc5a600badc43d4ae6674ae74a2306d4" class="m-doc">Success</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#abc5a600badc43d4ae6674ae74a2306d4" class="m-doc">Success</a>(</span><span class="m-doc-wrap">const Success&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a5c53abd49c1d083d72260c7bd00c04f3" class="m-doc">Success</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a5c53abd49c1d083d72260c7bd00c04f3" class="m-doc">Success</a>(</span><span class="m-doc-wrap">Success&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -136,14 +123,14 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ab8be39343fd54ac04bd4108593f3b592"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Success::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8be39343fd54ac04bd4108593f3b592" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8be39343fd54ac04bd4108593f3b592" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Constructs a Success alert with an empty message.</p>
 <p>Creates a success message that outputs to std::cout by default.</p>
           </div></section>
           <section class="m-doc-details" id="aed97737d1ba887c46066b87db419ce5d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Success::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed97737d1ba887c46066b87db419ce5d" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed97737d1ba887c46066b87db419ce5d" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Constructs a Success alert with a specific output stream.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -160,7 +147,7 @@
           </div></section>
           <section class="m-doc-details" id="abc5a600badc43d4ae6674ae74a2306d4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Success::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc5a600badc43d4ae6674ae74a2306d4" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc5a600badc43d4ae6674ae74a2306d4" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">const Success&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -177,7 +164,7 @@
           </div></section>
           <section class="m-doc-details" id="a5c53abd49c1d083d72260c7bd00c04f3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Success::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c53abd49c1d083d72260c7bd00c04f3" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c53abd49c1d083d72260c7bd00c04f3" class="m-doc-self">Success</a>(</span><span class="m-doc-wrap">Success&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -231,13 +218,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::ScatterMap class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,16 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>ScatterMap <span class="m-thin">class</span>
-        </h1>
-        <p>Cached map from polytope-local matrix entries into the value array of an assembled Math::SparseMatrix.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>ScatterMap</h1><p class="rodin-reference-brief">Cached map from polytope-local matrix entries into the value array of an assembled Math::SparseMatrix.</p><p class="rodin-reference-include">Defined in <a href="_scatter_map_8h.html"><code>Rodin/Assembly/ScatterMap.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScatterMap</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md9">Regions</a></li>
-            <li><a href="#autotoc_md10">Validity</a></li>
+            <li><a href="#autotoc_md10">Regions</a></li>
+            <li><a href="#autotoc_md11">Validity</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>The sparsity pattern of a named form is fixed by the mesh, the DOF maps of the two spaces and the polytopes the form integrates over, so it is computed once, on the first assembly, out of the triplet list that assembly produces anyway. Every subsequent assembly zeroes the value array and scatters the local matrices straight into it through the cached indices, skipping both the triplet list and Eigen&#x27;s symbolic pass.</p><p>The pattern is purely topological: it holds every entry the DOF maps connect, including those whose value happens to vanish. Reassembling a form therefore never changes the sparsity of its operator, which is what makes the value array reusable.</p><section id="autotoc_md9"><h2><a href="#autotoc_md9">Regions</a></h2><p>The map iterates whatever the iteration object selects. Of its candidates, a polytope is visited when <code>filter</code> accepts it and, if an attribute set is given, when its attribute belongs to that set; this is the same selection the triplet assembly of an integrator makes. A candidate that is not visited owns an empty range of the index array, so the offsets stay indexed by candidate and need no remapping.</p></section><section id="autotoc_md10"><h2><a href="#autotoc_md10">Validity</a></h2><p>The cached indices are only valid for the DOF maps and the selection they were built from, and the shape of the operator identifies neither: an edge flip or a renumbering can leave the row count, the column count, the nonzero count and the candidate count all unchanged while moving every entry, and so can a change of attribute set. The cache is therefore keyed on a fingerprint of the visited polytopes and their maps.</p><p>The fingerprint is accumulated inside the scatter loop rather than in a pass of its own: the loop already reads both DOF arrays, so folding the hash into it costs one mix per degree of freedom instead of a second traversal, which measured 2-3x on the reassembly benchmarks. It is compared once the loop is done, and a mismatch discards the values and rebuilds the pattern from triplets, so nothing assembled against a stale pattern is ever observable. Before a polytope scatters, its local size is checked against the range the cache reserved for it, so that a polytope the cache never visited cannot write past its range before the fingerprint gets a chance to reject the pattern. The per-polytope hashes are combined by addition, which keeps the fingerprint independent of the order the threads happen to visit the polytopes in.</p></section>
+<p>The sparsity pattern of a named form is fixed by the mesh, the DOF maps of the two spaces and the polytopes the form integrates over, so it is computed once, on the first assembly, out of the triplet list that assembly produces anyway. Every subsequent assembly zeroes the value array and scatters the local matrices straight into it through the cached indices, skipping both the triplet list and Eigen&#x27;s symbolic pass.</p><p>The pattern is purely topological: it holds every entry the DOF maps connect, including those whose value happens to vanish. Reassembling a form therefore never changes the sparsity of its operator, which is what makes the value array reusable.</p><section id="autotoc_md10"><h2><a href="#autotoc_md10">Regions</a></h2><p>The map iterates whatever the iteration object selects. Of its candidates, a polytope is visited when <code>filter</code> accepts it and, if an attribute set is given, when its attribute belongs to that set; this is the same selection the triplet assembly of an integrator makes. A candidate that is not visited owns an empty range of the index array, so the offsets stay indexed by candidate and need no remapping.</p></section><section id="autotoc_md11"><h2><a href="#autotoc_md11">Validity</a></h2><p>The cached indices are only valid for the DOF maps and the selection they were built from, and the shape of the operator identifies neither: an edge flip or a renumbering can leave the row count, the column count, the nonzero count and the candidate count all unchanged while moving every entry, and so can a change of attribute set. The cache is therefore keyed on a fingerprint of the visited polytopes and their maps.</p><p>The fingerprint is accumulated inside the scatter loop rather than in a pass of its own: the loop already reads both DOF arrays, so folding the hash into it costs one mix per degree of freedom instead of a second traversal, which measured 2-3x on the reassembly benchmarks. It is compared once the loop is done, and a mismatch discards the values and rebuilds the pattern from triplets, so nothing assembled against a stale pattern is ever observable. Before a polytope scatters, its local size is checked against the range the cache reserved for it, so that a polytope the cache never visited cannot write past its range before the fingerprint gets a chance to reject the pattern. The per-polytope hashes are combined by addition, which keeps the fingerprint independent of the order the threads happen to visit the polytopes in.</p></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -110,7 +106,7 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#aaf52884618230725d4dfcb3af301d791" class="m-doc">assemble</a></dt><dd>Assembles <code>out</code> sequentially.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class KernelType, class IterationType, class TrialFES, class TestFES&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#aaf52884618230725d4dfcb3af301d791" class="m-doc">assemble</a>(</span><span class="m-doc-wrap"><a href="#ae5c46593c09a8b064a259aad2e11ad77" class="m-doc">MatrixType</a>&amp; out,
               const KernelType&amp; prototype,
@@ -118,8 +114,17 @@
               const TestFES&amp; testFES,
               const IterationType&amp; seq,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes)</span>
-            </dt>
-            <dd>Assembles <code>out</code> sequentially.</dd>
+            </div></details></dd>
+            <dt><a href="#adfb61661a18d7aa7be73014d69cd7ba9" class="m-doc">assemble</a></dt><dd>Assembles <code>out</code> with OpenMP.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class KernelType, class IterationType, class TrialFES, class TestFES&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#adfb61661a18d7aa7be73014d69cd7ba9" class="m-doc">assemble</a>(</span><span class="m-doc-wrap"><a href="#ae5c46593c09a8b064a259aad2e11ad77" class="m-doc">MatrixType</a>&amp; out,
+              const KernelType&amp; prototype,
+              const TrialFES&amp; trialFES,
+              const TestFES&amp; testFES,
+              const IterationType&amp; seq,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes,
+              int threadCount)</span>
+            </div></details></dd>
           </dl>
         </section>
         <section>
@@ -130,7 +135,7 @@
                 template&lt;class Scalar&gt;
                 template&lt;class KernelType, class IterationType, class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />ScatterMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf52884618230725d4dfcb3af301d791" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="#ae5c46593c09a8b064a259aad2e11ad77" class="m-doc">MatrixType</a>&amp; out,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf52884618230725d4dfcb3af301d791" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="#ae5c46593c09a8b064a259aad2e11ad77" class="m-doc">MatrixType</a>&amp; out,
               const KernelType&amp; prototype,
               const TrialFES&amp; trialFES,
               const TestFES&amp; testFES,
@@ -179,6 +184,67 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="adfb61661a18d7aa7be73014d69cd7ba9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+                template&lt;class KernelType, class IterationType, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adfb61661a18d7aa7be73014d69cd7ba9" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="#ae5c46593c09a8b064a259aad2e11ad77" class="m-doc">MatrixType</a>&amp; out,
+              const KernelType&amp; prototype,
+              const TrialFES&amp; trialFES,
+              const TestFES&amp; testFES,
+              const IterationType&amp; seq,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes,
+              int threadCount)</span></span>
+            </h3>
+            <p>Assembles <code>out</code> with OpenMP.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">KernelType</td>
+                  <td>Local kernel, providing <code>compute(Math::Matrix&lt;ScalarType&gt;&amp;, const Geometry::Polytope&amp;)</code>.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>out&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Operator receiving the assembly.</td>
+                </tr>
+                <tr>
+                  <td>prototype&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local kernel, copied once per thread.</td>
+                </tr>
+                <tr>
+                  <td>trialFES&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Trial space.</td>
+                </tr>
+                <tr>
+                  <td>testFES&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Test space.</td>
+                </tr>
+                <tr>
+                  <td>seq&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Iteration over the region to integrate.</td>
+                </tr>
+                <tr>
+                  <td>attributes&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attributes to restrict to, or empty for all.</td>
+                </tr>
+                <tr>
+                  <td>threadCount&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of threads.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Each thread owns a copy of the kernel and a contiguous range of candidates, and scatters into the shared value array; the additions that collide on a shared degree of freedom are made atomically.</p>
+          </div></section>
         </section>
       </div>
     </div>
@@ -218,13 +284,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::LinearSolver class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,17 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>LinearSolver <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Linear solve of the local SWIFT metric or hinge tangent.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>LinearSolver <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Linear solve of the local SWIFT metric or hinge tangent.</p><p class="rodin-reference-include">Defined in <a href="_adaptation_2_s_w_i_f_t_2_linear_solver_8h.html"><code>Rodin/Adaptation/SWIFT/LinearSolver.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html#aebf5f55a595e4359d5f4886e3cdcd59c"><span class="nc">LinearSolver</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +90,8 @@
           </ul>
         </nav>
 <aside class="m-note m-default"><h4>Architecture</h4><p>The centered metric is represented as A - U U^T. Direct solvers use the equivalent augmented system with a positive identity auxiliary block; CG applies the low-rank subtraction without forming a dense matrix. Native direct solvers retain factorizations where supported. Residuals are checked against the centered physical operator. No gauge is applied.</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">Rodin::Solver::LinearSolverBase&lt;LinearSystem&gt;</a>
-            </dt>
-            <dd>Abstract base class for linear system solvers.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" title="Solver::LinearSolverBase&lt; LinearSystem &gt;">Solver::LinearSolverBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">LinearSolver</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>Solver::LinearSolverBase&lt;LinearSystem&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Solver</span><span class="o">::</span><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><span class="nc">LinearSolverBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Abstract base class for linear system solvers.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html#a5138badfa002a29e4d9dcce4d9a246c0"><code>solve()</code></a></td><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a9b645b21287f5ab7536bf8af83a9778c">LinearSolverBase::solve</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html#a9b146d4c73e6b7688cf0639fb6baa0ba"><code>copy()</code></a></td><td><a href="class_rodin_1_1_copyable.html#ab4e2e0c492116fe03366ba4e4403a2c8">Copyable::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>Solver::LinearSolverBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a07663f770d90c7558d8746889964d6bc"><code>getProblem()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a4d980ca73cf6a9091c8da13f2fa53076"><code>getProblem()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#abd35723cce1f5ea1caded60d08551db2"><code>OperatorType</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ac921a52fc5e2c381e3b53886f6be2424"><code>ProblemBaseType</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a4e046f7b54b28ebb5d73513310e8a6ea"><code>ScalarType</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#afc6dc6223ab9bf6b1dc6f8437e727b19"><code>VectorType</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -125,7 +113,7 @@
             </dt>
             <dd>Binds a solver to its variational problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a96cd6513982c646d150daeec5fad7913" class="m-doc">LinearSolver</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a96cd6513982c646d150daeec5fad7913" class="m-doc">LinearSolver</a>(</span><span class="m-doc-wrap">const LinearSolver&amp; other)</span>
             </dt>
             <dd>Copies configuration and problem binding, not backend factorization resources.</dd>
           </dl>
@@ -134,15 +122,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7ea63fbacc69154bdab36a8b73044da" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7ea63fbacc69154bdab36a8b73044da" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) -&gt; <a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>&amp;</span>
             </dt>
             <dd>Copies solver and convergence controls.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6a395381c4acdd026660b1ed14863122" class="m-doc">setCentering</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a395381c4acdd026660b1ed14863122" class="m-doc">setCentering</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings) -&gt; <a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>&amp;</span>
             </dt>
             <dd>Copies the centered metric&#x27;s low-rank factor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a29a976c92dd01c5895d62bbf13306007" class="m-doc">setReport</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>* report) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a29a976c92dd01c5895d62bbf13306007" class="m-doc">setReport</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>* report) -&gt; <a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>&amp;</span>
             </dt>
             <dd>Binds an optional destination for factorization counters.</dd>
             <dt>
@@ -166,7 +154,7 @@
             </dt>
             <dd>Returns the last solve duration.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9b146d4c73e6b7688cf0639fb6baa0ba" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b146d4c73e6b7688cf0639fb6baa0ba" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this object.</dd>
             <dt>
@@ -179,10 +167,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aebf5f55a595e4359d5f4886e3cdcd59c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc-self">LinearSolver</a>(</span><span class="m-doc-wrap">typename <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ac921a52fc5e2c381e3b53886f6be2424" class="m-doc">Parent::<wbr />ProblemBaseType</a>&amp; problem) <span class="m-label m-info">explicit</span> </span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc-self">LinearSolver</a>(</span><span class="m-doc-wrap">typename <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ac921a52fc5e2c381e3b53886f6be2424" class="m-doc">Parent::<wbr />ProblemBaseType</a>&amp; problem) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Binds a solver to its variational problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -199,10 +185,8 @@
           </div></section>
           <section class="m-doc-details" id="a96cd6513982c646d150daeec5fad7913"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96cd6513982c646d150daeec5fad7913" class="m-doc-self">LinearSolver</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96cd6513982c646d150daeec5fad7913" class="m-doc-self">LinearSolver</a>(</span><span class="m-doc-wrap">const LinearSolver&amp; other)</span></span>
             </h3>
             <p>Copies configuration and problem binding, not backend factorization resources.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -219,10 +203,8 @@
           </div></section>
           <section class="m-doc-details" id="ad7ea63fbacc69154bdab36a8b73044da"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7ea63fbacc69154bdab36a8b73044da" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7ea63fbacc69154bdab36a8b73044da" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters)</span></span>
             </h3>
             <p>Copies solver and convergence controls.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -245,10 +227,8 @@
           </div></section>
           <section class="m-doc-details" id="a6a395381c4acdd026660b1ed14863122"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a395381c4acdd026660b1ed14863122" class="m-doc-self">setCentering</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a395381c4acdd026660b1ed14863122" class="m-doc-self">setCentering</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings)</span></span>
             </h3>
             <p>Copies the centered metric&#x27;s low-rank factor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -271,10 +251,8 @@
           </div></section>
           <section class="m-doc-details" id="a29a976c92dd01c5895d62bbf13306007"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a29a976c92dd01c5895d62bbf13306007" class="m-doc-self">setReport</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>* report)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a29a976c92dd01c5895d62bbf13306007" class="m-doc-self">setReport</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>* report)</span></span>
             </h3>
             <p>Binds an optional destination for factorization counters.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -297,10 +275,8 @@
           </div></section>
           <section class="m-doc-details" id="a5138badfa002a29e4d9dcce4d9a246c0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -364,10 +340,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="abfcd8f0576ebbce3d9f932d6fc130dca"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfcd8f0576ebbce3d9f932d6fc130dca" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfcd8f0576ebbce3d9f932d6fc130dca" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Reports whether the last solve met the physical residual tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -381,10 +355,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="ad3896d6d04860df7712f57acef0f288f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad3896d6d04860df7712f57acef0f288f" class="m-doc-self">getIterations</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad3896d6d04860df7712f57acef0f288f" class="m-doc-self">getIterations</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the last iterative solve count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -398,10 +370,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="aeba04889432024557066765fa29f2814"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeba04889432024557066765fa29f2814" class="m-doc-self">getError</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeba04889432024557066765fa29f2814" class="m-doc-self">getError</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the last centered-system residual.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -415,10 +385,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="acc551e6ef5aec992ac41cfce1d02aff0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc551e6ef5aec992ac41cfce1d02aff0" class="m-doc-self">getSolveSeconds</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc551e6ef5aec992ac41cfce1d02aff0" class="m-doc-self">getSolveSeconds</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the last solve duration.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -432,10 +400,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="a9b146d4c73e6b7688cf0639fb6baa0ba"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_linear_solver.html" class="m-doc">LinearSolver</a>* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b146d4c73e6b7688cf0639fb6baa0ba" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aebf5f55a595e4359d5f4886e3cdcd59c" class="m-doc">LinearSolver</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b146d4c73e6b7688cf0639fb6baa0ba" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -450,10 +416,8 @@ $ b $
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />LinearSolver&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the associated problem.</p>
 <p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
@@ -497,13 +461,20 @@ $ b $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

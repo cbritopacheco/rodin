@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::MMG::Adapt class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Adapt <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_adapt_8h.html">&lt;Rodin/MMG/Adapt.h&gt;</a></div>
-        </h1>
-        <p>Performs anisotropic/isotropic remeshing from a nodal size map.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_m_m_g.html">MMG</a></div><h1>Adapt</h1><p class="rodin-reference-brief">Performs anisotropic/isotropic remeshing from a nodal size map.</p><p class="rodin-reference-include">Defined in <a href="_m_m_g_2_adapt_8h.html"><code>Rodin/MMG/Adapt.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_m_m_g_1_1_adapt.html#a2722a25941a77e1468bd58c863abd8c4"><span class="nc">Adapt</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -93,15 +87,8 @@
           </ul>
         </nav>
 <p>This class wraps MMG adaptation routines and dispatches automatically to:</p><ul><li>MMG2D for planar 2D meshes,</li><li>MMG3D for volumetric 3D meshes,</li><li>MMGS for surface meshes embedded in 3D.</li></ul><p>The scalar size-map field encodes target local edge length and is sampled at mesh vertices.</p><p>Parameters inherited from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/gradation/angle) can be configured before calling <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
-            </dt>
-            <dd>Base class for MMG-backed operations in Rodin.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" title="MMG5">MMG5</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Adapt</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><code>MMG5</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><span class="nc">MMG5</span></a>
+</pre></details></td><td>Base class for MMG-backed operations in Rodin.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html"><code>MMG5</code></a></td><td><details><summary>14 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a0954c0dbf0d744cf8d3be5641173c185"><code>copyMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a1ef51aa345e4d15c90c74c01a5250c8a"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a36251842eb23f4ecc46dc1d1114ce55f"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a4aa91925305a7555c662ae9a5197469e"><code>copySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bb517cd6d646592ab60cf5b7d450d4"><code>createMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a06cb29d3f77dc8acda9887609000476b"><code>createSolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a5bded16ea18dc87c86cb1b1c1bc3fdc5"><code>destroyMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#aba26af6c43d3b4638aa99e6e65ded72c"><code>destroySolution()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a378ed49847c971e53116e33195f3a42c"><code>isSurfaceMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c"><code>meshToRodin()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287"><code>rodinToMesh()</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#afb5c3ccd7f6e8748cd36345967656fdf"><code>setParameters()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ae6667ed0cdc09787425be26a540172de"><code>sMeshVersionFormatted</code></a></li><li><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#adc10b88a081a86571f71c3ee0433c791"><code>swapSolution()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -120,23 +107,23 @@
             </dt>
             <dd>Adapts a mesh according to a scalar nodal size map.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6ebd3d6748a11cf664266bd2e4bc10d2" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6ebd3d6748a11cf664266bd2e4bc10d2" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Enables/disables ridge angle detection.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a909d36e949cd743a55ab766332ac07e7" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a909d36e949cd743a55ab766332ac07e7" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Sets the minimum edge size constraint.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad8ad39104370c574531ae96bb862778c" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad8ad39104370c574531ae96bb862778c" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Sets the maximum edge size constraint.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af886f394b39f1e465de037270023770a" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af886f394b39f1e465de037270023770a" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Sets the Hausdorff tolerance controlling boundary approximation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a26f4f407563c01c9a0304743a939adf5" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a26f4f407563c01c9a0304743a939adf5" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
           </dl>
@@ -145,7 +132,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a51b804beced77044afca46839f0c06d5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51b804beced77044afca46839f0c06d5" class="m-doc-self">adapt</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51b804beced77044afca46839f0c06d5" class="m-doc-self">adapt</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh,
               const <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a>&amp; sizeMap)</span></span>
             </h3>
             <p>Adapts a mesh according to a scalar nodal size map.</p>
@@ -168,7 +155,7 @@
           </div></section>
           <section class="m-doc-details" id="a6ebd3d6748a11cf664266bd2e4bc10d2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ebd3d6748a11cf664266bd2e4bc10d2" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ebd3d6748a11cf664266bd2e4bc10d2" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
             </h3>
             <p>Enables/disables ridge angle detection.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -191,7 +178,7 @@
           </div></section>
           <section class="m-doc-details" id="a909d36e949cd743a55ab766332ac07e7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a909d36e949cd743a55ab766332ac07e7" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a909d36e949cd743a55ab766332ac07e7" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
             </h3>
             <p>Sets the minimum edge size constraint.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -214,7 +201,7 @@
           </div></section>
           <section class="m-doc-details" id="ad8ad39104370c574531ae96bb862778c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8ad39104370c574531ae96bb862778c" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8ad39104370c574531ae96bb862778c" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax)</span></span>
             </h3>
             <p>Sets the maximum edge size constraint.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -237,7 +224,7 @@
           </div></section>
           <section class="m-doc-details" id="af886f394b39f1e465de037270023770a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af886f394b39f1e465de037270023770a" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af886f394b39f1e465de037270023770a" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd)</span></span>
             </h3>
             <p>Sets the Hausdorff tolerance controlling boundary approximation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,7 +247,7 @@
           </div></section>
           <section class="m-doc-details" id="a26f4f407563c01c9a0304743a939adf5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26f4f407563c01c9a0304743a939adf5" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26f4f407563c01c9a0304743a939adf5" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad)</span></span>
             </h3>
             <p>Sets the allowed gradation between adjacent edge sizes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -320,13 +307,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

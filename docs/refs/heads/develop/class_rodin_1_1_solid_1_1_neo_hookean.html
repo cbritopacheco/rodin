@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::NeoHookean class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,45 +71,24 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>NeoHookean <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_neo_hookean_8h.html">&lt;Rodin/Solid/Constitutive/NeoHookean.h&gt;</a></div>
-        </h1>
-        <p>Compressible Neo-Hookean hyperelastic law.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>NeoHookean <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Compressible Neo-Hookean hyperelastic law.</p><p class="rodin-reference-include">Defined in <a href="_neo_hookean_8h.html"><code>Rodin/Solid/Constitutive/NeoHookean.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_neo_hookean.html#a8fdf44a78139e251e36cc555c3de1945"><span class="nc">NeoHookean</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html">HyperElasticLaw</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw&lt;NeoHookean&gt;</a>
-            </dt>
-            <dd>CRTP base class for hyperelastic constitutive laws.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>
-            </dt>
-            <dd>Precomputed cache for the Neo-Hookean law.</dd>
-          </dl>
-        </section>
+
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" title="HyperElasticLaw&lt; NeoHookean &gt;">HyperElasticLaw</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">NeoHookean</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html"><code>HyperElasticLaw&lt;NeoHookean&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">HyperElasticLaw</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_neo_hookean.html#a8fdf44a78139e251e36cc555c3de1945"><span class="nc">NeoHookean</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>CRTP base class for hyperelastic constitutive laws.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html"><code>HyperElasticLaw</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#a5fa3d60ade418783cfb5d2d4232a29d6"><code>hasSameDirection()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#a7df4ef2783d4aa909ef378e59a8552e3"><code>hasSameKinematics()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#af960cd621d1deae8d89fa38e1fb84988"><code>operator=()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html#ad7233b02e481fdba3c5aa6d068198974"><code>require()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -122,11 +98,11 @@
             </dt>
             <dd>Constructs a Neo-Hookean law with the given Lamé parameters.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9413f4e5a7fea4706ec0d5c101a2673d" class="m-doc">NeoHookean</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a9413f4e5a7fea4706ec0d5c101a2673d" class="m-doc">NeoHookean</a>(</span><span class="m-doc-wrap">const NeoHookean&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0bc8c88b99c69906492b1b7583b2d09a" class="m-doc">NeoHookean</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a0bc8c88b99c69906492b1b7583b2d09a" class="m-doc">NeoHookean</a>(</span><span class="m-doc-wrap">NeoHookean&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -143,35 +119,33 @@
             </dt>
             <dd>Gets the shear modulus.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae29b57671be36efe3772eeefb2ee9b23" class="m-doc">setConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) -&gt; <a href="#a8fdf44a78139e251e36cc555c3de1945" class="m-doc">NeoHookean</a>&amp;</span>
             </dt>
-            <dd>Populates the invariant cache at a constitutive point.</dd>
+            <dd>Binds owned evaluation data, reusing unchanged constitutive inputs.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a859283bf64f988f608c32fcf0af4280d" class="m-doc">getKinematicState</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;</span>
             </dt>
-            <dd>Returns the stored strain-energy density.</dd>
+            <dd>Returns the owned kinematics of the prepared point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab96f841a63f48ada53e70ec7ac43d18d" class="m-doc">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Computes the first Piola-Kirchhoff stress.</dd>
+            <dd>Returns the strain-energy density at the prepared point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
-              const <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              <span class="m-doc-wrap-bumper">void <a href="#a9f27ccb3e7ba7897755c79b4e339909f" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P) const</span>
+            </dt>
+            <dd>Computes stress at the prepared point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aad67b877b6ec02ed52172441bab98235" class="m-doc">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span>
             </dt>
-            <dd>Computes the material tangent action.</dd>
+            <dd>Computes the tangent action at the prepared point.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a8fdf44a78139e251e36cc555c3de1945"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fdf44a78139e251e36cc555c3de1945" class="m-doc-self">NeoHookean</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fdf44a78139e251e36cc555c3de1945" class="m-doc-self">NeoHookean</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span></span>
             </h3>
             <p>Constructs a Neo-Hookean law with the given Lamé parameters.</p>
@@ -213,7 +187,7 @@ $ \mu $
           </div></section>
           <section class="m-doc-details" id="a9413f4e5a7fea4706ec0d5c101a2673d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9413f4e5a7fea4706ec0d5c101a2673d" class="m-doc-self">NeoHookean</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9413f4e5a7fea4706ec0d5c101a2673d" class="m-doc-self">NeoHookean</a>(</span><span class="m-doc-wrap">const NeoHookean&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -230,7 +204,7 @@ $ \mu $
           </div></section>
           <section class="m-doc-details" id="a0bc8c88b99c69906492b1b7583b2d09a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0bc8c88b99c69906492b1b7583b2d09a" class="m-doc-self">NeoHookean</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0bc8c88b99c69906492b1b7583b2d09a" class="m-doc-self">NeoHookean</a>(</span><span class="m-doc-wrap">NeoHookean&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -247,7 +221,7 @@ $ \mu $
           </div></section>
           <section class="m-doc-details" id="adc43a5ed41c61c399d6221c075e0e20a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc43a5ed41c61c399d6221c075e0e20a" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc43a5ed41c61c399d6221c075e0e20a" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the first Lamé parameter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,7 +235,7 @@ $ \mu $
           </div></section>
           <section class="m-doc-details" id="a8bc76204e126aaf61e4440b7bb525a60"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8bc76204e126aaf61e4440b7bb525a60" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8bc76204e126aaf61e4440b7bb525a60" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the shear modulus.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -273,63 +247,62 @@ $ \mu $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a7c3f4a25b01ac9b17fa90d43921b2dfb"><div>
+          <section class="m-doc-details" id="ae29b57671be36efe3772eeefb2ee9b23"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc-self">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a8fdf44a78139e251e36cc555c3de1945" class="m-doc">NeoHookean</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae29b57671be36efe3772eeefb2ee9b23" class="m-doc-self">setConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp)</span></span>
             </h3>
-            <p>Populates the invariant cache at a constitutive point.</p>
+            <p>Binds owned evaluation data, reusing unchanged constitutive inputs.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">cache</td>
-                  <td>Storage for the constitutive invariant cache.</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>Constitutive evaluation point.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="ad6e34e0670dc260c3510a097ab9bd352"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
-            </h3>
-            <p>Returns the stored strain-energy density.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">cache</td>
-                  <td>Constitutive invariant cache populated by setCache().</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>Constitutive evaluation point.</td>
+                  <td style="width: 1%">cp</td>
+                  <td>Constitutive point supplying kinematics and law-specific inputs.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The stored strain-energy density.</td>
+                  <td>This law after successful binding.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa875e5dbc449421b1cc4fdb7471aa946"><div>
+          <section class="m-doc-details" id="a859283bf64f988f608c32fcf0af4280d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a859283bf64f988f608c32fcf0af4280d" class="m-doc-self">getKinematicState</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Computes the first Piola-Kirchhoff stress.</p>
+            <p>Returns the owned kinematics of the prepared point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Prepared kinematic state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab96f841a63f48ada53e70ec7ac43d18d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab96f841a63f48ada53e70ec7ac43d18d" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the strain-energy density at the prepared point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Stored strain-energy density.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9f27ccb3e7ba7897755c79b4e339909f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f27ccb3e7ba7897755c79b4e339909f" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P) const</span></span>
+            </h3>
+            <p>Computes stress at the prepared point.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -337,27 +310,17 @@ $ \mu $
               <tbody>
                 <tr>
                   <td style="width: 1%">P</td>
-                  <td>Storage for the first Piola-Kirchhoff stress.</td>
-                </tr>
-                <tr>
-                  <td>cache</td>
-                  <td>Constitutive invariant cache populated by setCache().</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>Constitutive evaluation point.</td>
+                  <td>Output first Piola-Kirchhoff stress.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="adbcae15abc4f9d19395789c881e27e7d"><div>
+          <section class="m-doc-details" id="aad67b877b6ec02ed52172441bab98235"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />NeoHookean::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
-              const <a href="struct_rodin_1_1_solid_1_1_neo_hookean_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad67b877b6ec02ed52172441bab98235" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span></span>
             </h3>
-            <p>Computes the material tangent action.</p>
+            <p>Computes the tangent action at the prepared point.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -365,19 +328,11 @@ $ \mu $
               <tbody>
                 <tr>
                   <td style="width: 1%">dP</td>
-                  <td>Storage for the resulting stress increment.</td>
-                </tr>
-                <tr>
-                  <td>cache</td>
-                  <td>Constitutive invariant cache populated by setCache().</td>
-                </tr>
-                <tr>
-                  <td>cp</td>
-                  <td>Constitutive evaluation point.</td>
+                  <td>Output stress increment.</td>
                 </tr>
                 <tr>
                   <td>dF</td>
-                  <td>Increment of the deformation gradient.</td>
+                  <td>Deformation-gradient increment.</td>
                 </tr>
               </tbody>
             </table>
@@ -421,13 +376,20 @@ $ \mu $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

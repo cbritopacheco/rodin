@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::FormLanguage::Traits&lt;Variational::Mult&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&gt; struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,14 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_mult_8h.html">&lt;Rodin/Variational/Mult.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Variational::Mult&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&gt; <span class="m-thin">struct</span>
-        </h1>
-        <p>Type traits for <code>Mult</code> over a function expression: exposes the finite element space, the shape function space, the scalar type, the left-hand side operand, the right-hand side operand and the range type.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a></div><h1>Traits</h1><p class="rodin-reference-brief">Type traits for <code>Mult</code> over a function expression: exposes the finite element space, the shape function space, the scalar type, the left-hand side operand, the right-hand side operand and the range type.</p><p class="rodin-reference-include">Defined in <a href="_mult_8h.html"><code>Rodin/Variational/Mult.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="w"> </span><span class="nc">Space</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><a href="struct_rodin_1_1_form_language_1_1_traits.html"><span class="nc">Traits</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><span class="nc">Mult</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="nc">Space</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="struct_rodin_1_1_form_language_1_1_traits.html">Traits</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Args...</code></td><td><code>Variational::Mult&lt; Variational::FunctionBase&lt; LHSDerived &gt;, Variational::ShapeFunctionBase&lt; RHSDerived, FES, Space &gt; &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -112,19 +111,19 @@
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a5d9e9a57f44320b12e097a42ea683752">
-              using <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a248bffb63539dd043d9dd79930d88e50" class="m-doc">LHSType</a>&gt;<a href="#a38880b1f20fbdbf58b72fcce47d45723" class="m-doc">::<wbr />RangeType</a>
+              using <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a248bffb63539dd043d9dd79930d88e50" class="m-doc">LHSType</a>&gt;<a href="#a5c67f0223efd7ce15a61116d9c6c2f6a" class="m-doc">::<wbr />RangeType</a>
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
-              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a3b349c8008c7b74d6befe37203535fa7" class="m-doc">RHSType</a>&gt;<a href="#a38880b1f20fbdbf58b72fcce47d45723" class="m-doc">::<wbr />RangeType</a>
+              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a3b349c8008c7b74d6befe37203535fa7" class="m-doc">RHSType</a>&gt;<a href="#a5c67f0223efd7ce15a61116d9c6c2f6a" class="m-doc">::<wbr />RangeType</a>
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
-            <dt id="a84695756f692d7de6b17ba81a31f1bb3">
-              using <a href="#a84695756f692d7de6b17ba81a31f1bb3" class="m-doc-self">TensorProductRange</a> = typename decltype([] { if constexpr(<a href="struct_rodin_1_1_form_language_1_1_is_tensor_range.html" class="m-doc">FormLanguage::<wbr />IsTensorRange</a>&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&gt;::Value&amp;&amp; requires(const <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&amp;lhs, const <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&amp;rhs) { lhs*rhs;}) return std::type_identity&lt;typename <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">FormLanguage::<wbr />RangeOf</a>&lt;decltype(std::declval&lt;const <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&amp;&gt;()* std::declval&lt;const <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&amp;&gt;())&gt;::Type&gt;{}; else return std::type_identity&lt;void&gt;{}; }())::type
+            <dt id="a6ef40189a6b4f3a223849ab4508f08b5">
+              using <a href="#a6ef40189a6b4f3a223849ab4508f08b5" class="m-doc-self">TensorProductRange</a> = typename decltype([] { if constexpr(<a href="struct_rodin_1_1_form_language_1_1_is_tensor_range.html" class="m-doc">FormLanguage::<wbr />IsTensorRange</a>&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&gt;::Value&amp;&amp; requires(const <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&amp;lhs, const <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&amp;rhs) { lhs*rhs;}) { return std::type_identity&lt;typename <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">FormLanguage::<wbr />RangeOf</a>&lt;decltype(std::declval&lt;const <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&amp;&gt;()* std::declval&lt;const <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&amp;&gt;())&gt;::Type&gt;{}; } else return std::type_identity&lt;void&gt;{}; }())::type
             </dt>
             <dd>Tensor product range when the operands support a contraction.</dd>
-            <dt id="a38880b1f20fbdbf58b72fcce47d45723">
-              using <a href="#a38880b1f20fbdbf58b72fcce47d45723" class="m-doc-self">RangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>, <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&gt;::Value, std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, void, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&gt;::Value, std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;&gt;, <a href="#a84695756f692d7de6b17ba81a31f1bb3" class="m-doc">TensorProductRange</a>&gt;&gt;&gt;
+            <dt id="a5c67f0223efd7ce15a61116d9c6c2f6a">
+              using <a href="#a5c67f0223efd7ce15a61116d9c6c2f6a" class="m-doc-self">RangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>, <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&gt;::Value, std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, void, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc">LHSRangeType</a>&gt;::Value, std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;&gt;, <a href="#a6ef40189a6b4f3a223849ab4508f08b5" class="m-doc">TensorProductRange</a>&gt;&gt;&gt;
             </dt>
             <dd>Range (evaluation value) type.</dd>
           </dl>
@@ -176,13 +175,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

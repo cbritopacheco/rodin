@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::HingeProblem class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class TrialFunction, class TestFunction&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>HingeProblem <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Native variational tangent problem for the affine quadratic hinges.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>HingeProblem <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Native variational tangent problem for the affine quadratic hinges.</p><p class="rodin-reference-include">Defined in <a href="_hinge_problem_8h.html"><code>Rodin/Adaptation/SWIFT/HingeProblem.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFunction</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunction</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html#aaeaaa5d743167877a0f3440c93336604"><span class="nc">HingeProblem</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -96,10 +93,9 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a101c59438d5cee8d668dd1d1a14cfcf6">
+            <dt id="a101c59438d5cee8d668dd1d1a14cfcf6"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a></dt><dd>Native variational tangent problem type.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               using <a href="#a101c59438d5cee8d668dd1d1a14cfcf6" class="m-doc-self">Parent</a> = std::decay_t&lt;decltype(<a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>( std::declval&lt;TrialFunction&amp;&gt;(), std::declval&lt;TestFunction&amp;&gt;()))&gt;
-            </dt>
-            <dd>Native variational tangent problem type.</dd>
+            </div></details></dd>
             <dt id="ac0e30d2bba14d0bc3d3e9cad9253d771">
               using <a href="#ac0e30d2bba14d0bc3d3e9cad9253d771" class="m-doc-self">Displacement</a> = typename Parent::SolutionType
             </dt>
@@ -120,19 +116,19 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ddc2d2e711566f891aafc901bd85976" class="m-doc">setState</a>(</span><span class="m-doc-wrap">const <a href="#ac0e30d2bba14d0bc3d3e9cad9253d771" class="m-doc">Displacement</a>&amp; state) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ddc2d2e711566f891aafc901bd85976" class="m-doc">setState</a>(</span><span class="m-doc-wrap">const <a href="#ac0e30d2bba14d0bc3d3e9cad9253d771" class="m-doc">Displacement</a>&amp; state) -&gt; <a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp;</span>
             </dt>
             <dd>Binds the current Newton iterate without taking ownership.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a60253c5402c03636983dfda0d7bb5632" class="m-doc">setBoundaryDOFs</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dofs) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a60253c5402c03636983dfda0d7bb5632" class="m-doc">setBoundaryDOFs</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dofs) -&gt; <a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp;</span>
             </dt>
             <dd>Binds the homogeneous increment boundary conditions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3046933a0f0a267f2ad92a5f73089752" class="m-doc">setCentering</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3046933a0f0a267f2ad92a5f73089752" class="m-doc">setCentering</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings) -&gt; <a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp;</span>
             </dt>
             <dd>Copies the global mean-strain couplings.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa009a5e6db1767d5ff1b1d516a597e4f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa009a5e6db1767d5ff1b1d516a597e4f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the tangent and converts its load to a Newton residual.</dd>
             <dt>
@@ -140,7 +136,7 @@
             </dt>
             <dd>Returns the duration of the most recent assembly.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ace185371998d28f0db835b217917bcbf" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ace185371998d28f0db835b217917bcbf" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Clones the problem while retaining its referenced state.</dd>
           </dl>
@@ -149,10 +145,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aaeaaa5d743167877a0f3440c93336604"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc-self">HingeProblem</a>(</span><span class="m-doc-wrap">TrialFunction&amp; trial,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc-self">HingeProblem</a>(</span><span class="m-doc-wrap">TrialFunction&amp; trial,
               TestFunction&amp; test)</span></span>
             </h3>
             <p>Constructs a tangent problem on the supplied fields.</p>
@@ -174,10 +168,8 @@
           </div></section>
           <section class="m-doc-details" id="a3ddc2d2e711566f891aafc901bd85976"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ddc2d2e711566f891aafc901bd85976" class="m-doc-self">setState</a>(</span><span class="m-doc-wrap">const <a href="#ac0e30d2bba14d0bc3d3e9cad9253d771" class="m-doc">Displacement</a>&amp; state)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ddc2d2e711566f891aafc901bd85976" class="m-doc-self">setState</a>(</span><span class="m-doc-wrap">const <a href="#ac0e30d2bba14d0bc3d3e9cad9253d771" class="m-doc">Displacement</a>&amp; state)</span></span>
             </h3>
             <p>Binds the current Newton iterate without taking ownership.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -200,10 +192,8 @@
           </div></section>
           <section class="m-doc-details" id="a60253c5402c03636983dfda0d7bb5632"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a60253c5402c03636983dfda0d7bb5632" class="m-doc-self">setBoundaryDOFs</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dofs)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a60253c5402c03636983dfda0d7bb5632" class="m-doc-self">setBoundaryDOFs</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dofs)</span></span>
             </h3>
             <p>Binds the homogeneous increment boundary conditions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -226,10 +216,8 @@
           </div></section>
           <section class="m-doc-details" id="a3046933a0f0a267f2ad92a5f73089752"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3046933a0f0a267f2ad92a5f73089752" class="m-doc-self">setCentering</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3046933a0f0a267f2ad92a5f73089752" class="m-doc-self">setCentering</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_matrix.html" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; couplings)</span></span>
             </h3>
             <p>Copies the global mean-strain couplings.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -252,10 +240,8 @@
           </div></section>
           <section class="m-doc-details" id="aa009a5e6db1767d5ff1b1d516a597e4f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa009a5e6db1767d5ff1b1d516a597e4f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa009a5e6db1767d5ff1b1d516a597e4f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the tangent and converts its load to a Newton residual.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -269,10 +255,8 @@
           </div></section>
           <section class="m-doc-details" id="a5a970faaf3eb62e5a324bc9bf9d8aa59"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a970faaf3eb62e5a324bc9bf9d8aa59" class="m-doc-self">getAssemblySeconds</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a970faaf3eb62e5a324bc9bf9d8aa59" class="m-doc-self">getAssemblySeconds</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the duration of the most recent assembly.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -286,10 +270,8 @@
           </div></section>
           <section class="m-doc-details" id="ace185371998d28f0db835b217917bcbf"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_problem.html" class="m-doc">HingeProblem</a>* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeProblem&lt;TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace185371998d28f0db835b217917bcbf" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aaeaaa5d743167877a0f3440c93336604" class="m-doc">HingeProblem</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace185371998d28f0db835b217917bcbf" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Clones the problem while retaining its referenced state.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -340,13 +322,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

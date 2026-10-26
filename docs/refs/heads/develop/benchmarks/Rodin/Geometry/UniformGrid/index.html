@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UniformGrid · Rodin benchmarks</title>
+  <link rel="stylesheet" href="../../../assets/mcss-22c93d2587ab.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="../../../assets/rodin-e6524bc0dfe4.css">
+  <link rel="stylesheet" href="../../../assets/rodin-theme-a31a2c4268f0.css">
+  <link rel="stylesheet" href="../../../assets/rodin.css">
+  <link rel="stylesheet" href="../../../assets/rodin-theme.css">
+  <link rel="stylesheet" href="../../../assets/site.css">
+  <script src="../../../assets/rodin-theme.js"></script>
+  <script src="../../../assets/rodin-navigation.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.2/dist/Chart.min.js" defer></script>
+  <script src="../../../assets/charts.js" defer></script>
+  <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'local'}};</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body class="rodin-benchmarks">
+  <header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="../../../../index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="../../../../pages.html">Pages</a>
+              <ol>
+                <li><a href="../../../../guides-index.html">General concepts</a></li>
+                <li><a href="../../../../examples-index.html">Examples and tutorials</a></li>
+                <li><a href="../../../../gallery.html">Gallery</a></li>
+                <li><a href="../../../../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../../../../configuration.html">Configuration</a></li>
+                <li><a href="../../../../notation-index.html">Notation</a></li>
+                <li><a href="../../../../credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="../../../../modules.html">Modules</a>
+              <ol>
+                <li><a href="../../../../namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="../../../../namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="../../../../namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="../../../../namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="../../../../namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="../../../../namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="../../../../namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="../../../../annotated.html">Classes</a></li>
+            <li><a href="../../../../files.html">Files</a></li>
+            <li><a href="../../../../benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+  <main><article>
+    <div class="m-container m-container-inflatable rodin-benchmark-layout"><div class="m-row">
+      <div class="m-col-l-10 m-push-l-1" data-rodin-content>
+      <nav class="benchmark-breadcrumb" aria-label="Breadcrumb"><a href="../../../index.html">Benchmarks</a> / <a href="../../../Rodin/index.html">Modules</a> / <a href="../../../Rodin/Geometry/index.html">Geometry</a> / <a href="../../../Rodin/Geometry/UniformGrid/index.html">UniformGrid</a></nav>
+      <h1>UniformGrid</h1>
+      <p class="benchmark-configuration">Published configurations</p>
+      
+      
+      <p>Uniform-grid benchmark coverage</p>
+<h2>Measured operation</h2>
+<p>Benchmarks construction of triangular uniform grids at increasing resolutions. The cases measure mesh generation scaling for the geometry layer without adding finite-element or solver work.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>
+
+      
+      <h2>Timing history</h2>
+      <p class="benchmark-contract">RodinGeometryUniformGridBenchmarks · auto · regular · ranks: 1</p>
+      <div data-benchmark-history><p>No timing history has been published for this component.</p></div>
+      
+      
+      </div>
+    </div></div>
+  </article></main>
+  
+<div class="m-doc-search" id="search" role="dialog" aria-modal="true" aria-label="Benchmark search">
+  <a href="#!" onclick="return hideSearch()" aria-label="Dismiss search backdrop"></a>
+  <div class="m-container"><div class="m-row"><div class="m-col-m-8 m-push-m-2">
+    <div class="m-doc-search-header m-text m-small">
+      <div class="benchmark-search-shortcuts"><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+      <div id="search-symbolcount">Loading index…</div>
+      <button class="benchmark-search-close" type="button" aria-label="Close benchmark search" onclick="return hideSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12 M18 6 6 18"></path></svg></button>
+    </div>
+    <div class="m-doc-search-content">
+      <form><input type="search" name="q" id="search-input" aria-label="Find benchmarks" placeholder="Loading…" disabled autocomplete="off" spellcheck="false"></form>
+      <noscript>Benchmark search requires JavaScript.</noscript>
+      <div id="search-help" class="m-text m-dim m-text-center">
+        <p>Find modules, classes and workloads by name, path or description.
+        Try <code>SpatialMatrix</code>, <code>pyramid</code> or <code>Stokes stability</code>.</p>
+        <p>Use ↑ / ↓ to select a result and Enter to open it. Tab completes a prefix.
+        Individual measured cases can be filtered on their benchmark page.</p>
+      </div>
+      <div id="search-notfound" class="m-text m-warning m-text-center">No matching benchmarks.</div>
+      <ul id="search-results"></ul>
+    </div>
+  </div></div></div>
+</div>
+<script src="../../../assets/search-57e2ce511c71.js"></script>
+<script src="../../../assets/searchdata-fc68b61a5937.js"></script>
+  <footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

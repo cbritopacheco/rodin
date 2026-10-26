@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::IteratorIndexGenerator class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_index_generator_8h.html">&lt;Rodin/Geometry/IndexGenerator.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Iterator&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>IteratorIndexGenerator <span class="m-thin">class</span>
-        </h1>
-        <p>Index generator that wraps an iterator pair.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>IteratorIndexGenerator</h1><p class="rodin-reference-brief">Index generator that wraps an iterator pair.</p><p class="rodin-reference-include">Defined in <a href="_index_generator_8h.html"><code>Rodin/Geometry/IndexGenerator.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Iterator</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html#ac726860cf9128ceaed5ab4d9f8c97b41"><span class="nc">IteratorIndexGenerator</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -97,7 +92,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -105,15 +100,8 @@
           </ul>
         </nav>
 <p>Adapts any iterator type to the IndexGeneratorBase interface. The iterator must dereference to an Index value.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>
-            </dt>
-            <dd>Abstract base class for index generators.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" title="IndexGeneratorBase">IndexGeneratorBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">IteratorIndexGenerator</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html"><code>IndexGeneratorBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">IndexGeneratorBase</span>
+</pre></details></td><td>Abstract base class for index generators.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html#a9f02236632d0558ed138089402715d0c"><code>end()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html#a23127fb8d82647b1718ff867ef305e7e">IndexGeneratorBase::end</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html#af9221b97adc06caf066416aa6bb3f8d8"><code>operator++()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html#a4dfa65766e33da1e22064b3f2063377b">IndexGeneratorBase::operator++</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html#a673f433d56a4439d47065f24961eddf1"><code>operator*()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html#a62b22de6cec12924ec36adfefcfaeacc">IndexGeneratorBase::operator*</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html#ae24ab1082f7bcccb59548c3b226bacfd"><code>copy()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html#a58bee1c0117dbf4d0d629c662bed531b">IndexGeneratorBase::copy</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html#aedb525520442508df3b92520ddeebc36"><code>move()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html#a56ea7904485233028549bc9ead78046e">IndexGeneratorBase::move</a></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -123,11 +111,11 @@
             </dt>
             <dd>Constructs from an iterator range.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a784b76beacbd65f5b37e091e2a66a994" class="m-doc">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a784b76beacbd65f5b37e091e2a66a994" class="m-doc">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">IteratorIndexGenerator&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9b3429c674bfe9760e62df7bb4702c6f" class="m-doc">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a9b3429c674bfe9760e62df7bb4702c6f" class="m-doc">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">const IteratorIndexGenerator&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -140,7 +128,7 @@
             </dt>
             <dd>Checks if iterator has reached end.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af9221b97adc06caf066416aa6bb3f8d8" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af9221b97adc06caf066416aa6bb3f8d8" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc">IteratorIndexGenerator</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Advances the iterator.</dd>
             <dt>
@@ -148,11 +136,11 @@
             </dt>
             <dd>Gets the current index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae24ab1082f7bcccb59548c3b226bacfd" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae24ab1082f7bcccb59548c3b226bacfd" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc">IteratorIndexGenerator</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this generator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aedb525520442508df3b92520ddeebc36" class="m-doc">move</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aedb525520442508df3b92520ddeebc36" class="m-doc">move</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc">IteratorIndexGenerator</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a moved copy of this generator.</dd>
           </dl>
@@ -161,10 +149,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ac726860cf9128ceaed5ab4d9f8c97b41"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc-self">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">Iterator it,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc-self">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">Iterator it,
               Iterator end)</span></span>
             </h3>
             <p>Constructs from an iterator range.</p>
@@ -186,10 +172,8 @@
           </div></section>
           <section class="m-doc-details" id="a784b76beacbd65f5b37e091e2a66a994"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a784b76beacbd65f5b37e091e2a66a994" class="m-doc-self">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a784b76beacbd65f5b37e091e2a66a994" class="m-doc-self">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">IteratorIndexGenerator&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -206,10 +190,8 @@
           </div></section>
           <section class="m-doc-details" id="a9b3429c674bfe9760e62df7bb4702c6f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b3429c674bfe9760e62df7bb4702c6f" class="m-doc-self">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b3429c674bfe9760e62df7bb4702c6f" class="m-doc-self">IteratorIndexGenerator</a>(</span><span class="m-doc-wrap">const IteratorIndexGenerator&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -226,10 +208,8 @@
           </div></section>
           <section class="m-doc-details" id="a9f02236632d0558ed138089402715d0c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f02236632d0558ed138089402715d0c" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f02236632d0558ed138089402715d0c" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Checks if iterator has reached end.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -243,10 +223,8 @@
           </div></section>
           <section class="m-doc-details" id="af9221b97adc06caf066416aa6bb3f8d8"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>&amp; Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af9221b97adc06caf066416aa6bb3f8d8" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc">IteratorIndexGenerator</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af9221b97adc06caf066416aa6bb3f8d8" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Advances the iterator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,10 +238,8 @@
           </div></section>
           <section class="m-doc-details" id="a673f433d56a4439d47065f24961eddf1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a673f433d56a4439d47065f24961eddf1" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a673f433d56a4439d47065f24961eddf1" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the current index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -277,10 +253,8 @@
           </div></section>
           <section class="m-doc-details" id="ae24ab1082f7bcccb59548c3b226bacfd"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>* Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae24ab1082f7bcccb59548c3b226bacfd" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc">IteratorIndexGenerator</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae24ab1082f7bcccb59548c3b226bacfd" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this generator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -294,10 +268,8 @@
           </div></section>
           <section class="m-doc-details" id="aedb525520442508df3b92520ddeebc36"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Iterator&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html" class="m-doc">IteratorIndexGenerator</a>* Rodin::<wbr />Geometry::<wbr />IteratorIndexGenerator&lt;Iterator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedb525520442508df3b92520ddeebc36" class="m-doc-self">move</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac726860cf9128ceaed5ab4d9f8c97b41" class="m-doc">IteratorIndexGenerator</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedb525520442508df3b92520ddeebc36" class="m-doc-self">move</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a moved copy of this generator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -348,13 +320,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

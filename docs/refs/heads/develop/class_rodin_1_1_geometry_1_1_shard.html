@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::Shard class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,66 +71,23 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Shard <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_shard_8h.html">&lt;Rodin/Geometry/Shard.h&gt;</a></div>
-        </h1>
-        <p>Local view of one partition of a distributed mesh.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>Shard</h1><p class="rodin-reference-brief">Local view of one partition of a distributed mesh.</p><p class="rodin-reference-include">Defined in <a href="_shard_8h.html"><code>Rodin/Geometry/Shard.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_shard.html#acf8495edf1501bc4cbc0a748c3e1c8d5"><span class="nc">Shard</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md125">Local vs distributed indices</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md126">Local state semantics</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md127">Owner map</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md128">Halo map</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md129">Geometric and topological contents</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md130">Construction model</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md131">Finalization guarantees</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md132">Important convention</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md124">Local vs distributed indices</a></li>
+            <li><a href="#autotoc_md125">Local state semantics</a></li>
+            <li><a href="#autotoc_md126">Owner map</a></li>
+            <li><a href="#autotoc_md127">Halo map</a></li>
+            <li><a href="#autotoc_md128">Geometric and topological contents</a></li>
+            <li><a href="#autotoc_md129">Construction model</a></li>
+            <li><a href="#autotoc_md130">Finalization guarantees</a></li>
+            <li><a href="#autotoc_md131">Important convention</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -141,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>A <code>Shard</code> is a local mesh enriched with metadata describing how its local entities relate to a distributed partitioning of a larger mesh.</p><p>A shard contains:</p><ul><li>entities that belong to the local partition, either as locally owned entities or as shared entities owned by another partition, and</li><li>ghost entities imported as overlap from neighboring partitions.</li></ul><p>The class derives from <code>Mesh&lt;Context::Local&gt;</code> because, once constructed, a shard behaves as an ordinary local mesh for geometric and topological queries. What makes it special is the additional distributed metadata:</p><ul><li>local-to-distributed index correspondences,</li><li>per-entity local state (<code>Owned</code>, <code>Shared</code>, <code>Ghost</code>),</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><section id="autotoc_md125_1s1"><section id="autotoc_md125"><h3><a href="#autotoc_md125">Local vs distributed indices</a></h3><p>Every entity stored in a shard has a <strong>local shard index</strong>. This is the index used by the inherited local mesh API.</p><p>In addition, each shard entity corresponds to an entity of the distributed mesh. For every topological dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<p>A <code>Shard</code> is a local mesh enriched with metadata describing how its local entities relate to a distributed partitioning of a larger mesh.</p><p>A shard contains:</p><ul><li>entities that belong to the local partition, either as locally owned entities or as shared entities owned by another partition, and</li><li>ghost entities imported as overlap from neighboring partitions.</li></ul><p>The class derives from <code>Mesh&lt;Context::Local&gt;</code> because, once constructed, a shard behaves as an ordinary local mesh for geometric and topological queries. What makes it special is the additional distributed metadata:</p><ul><li>local-to-distributed index correspondences,</li><li>per-entity local state (<code>Owned</code>, <code>Shared</code>, <code>Ghost</code>),</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><section id="autotoc_md124"><h2><a href="#autotoc_md124">Local vs distributed indices</a></h2><p>Every entity stored in a shard has a <strong>local shard index</strong>. This is the index used by the inherited local mesh API.</p><p>In addition, each shard entity corresponds to an entity of the distributed mesh. For every topological dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -193,7 +147,7 @@ $ d $
 <use x='227.937931' y='0' xlink:href='#eq2-g2-101'/>
 <use x='231.701649' y='0' xlink:href='#eq2-g2-100'/>
 </g>
-</svg></div><p>through <code>PolytopeMap</code>.</p><p>Therefore:</p><ul><li>all inherited <code>Mesh&lt;Context::Local&gt;</code> methods use <strong>local shard indices</strong>,</li><li><code>getPolytopeMap(d)</code> is used to recover the corresponding distributed index.</li></ul></section></section><section id="autotoc_md126_1s1"><section id="autotoc_md126"><h3><a href="#autotoc_md126">Local state semantics</a></h3><p>Each local shard entity is classified by two orthogonal notions:</p><ul><li>whether it belongs to the local partition, and</li><li>which partition owns it.</li></ul><p>The following three mutually exclusive states are used:</p><ul><li><p><strong>Owned</strong>: The entity belongs to the local partition and this partition is its designated owner.</p><p>Owned entities are the ones on which assembly, counting, and global reductions should typically be performed.</p></li><li><p><strong>Shared</strong>: The entity belongs to the local partition but is owned by another partition.</p><p>Shared entities are part of the partition’s geometric/topological domain, but this rank is not responsible for their global contribution.</p></li><li><p><strong>Ghost</strong>: The entity does not belong to the local partition but is present locally as overlap because it is needed by neighboring local entities, for example for stencil support, adjacency completeness, or distributed connectivity.</p><p>A ghost entity is always owned by another partition.</p></li></ul><p>In particular:</p><ul><li><code>Owned ∪ Shared</code> are exactly the entities that define the local partition,</li><li><code>Ghost</code> entities form the overlap with neighboring partitions,</li><li>every distributed entity present on multiple partitions has exactly one owner.</li></ul><p>After finalization, users normally reason in terms of:</p><ul><li><code>isOwned(d, i)</code></li><li><code>isShared(d, i)</code></li><li><code>isGhost(d, i)</code></li><li><code>isLocal(d, i)</code> (equivalent to <code>Owned || Shared</code>)</li></ul></section></section><section id="autotoc_md127_1s1"><section id="autotoc_md127"><h3><a href="#autotoc_md127">Owner map</a></h3><p>For each dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></div><p>through <code>PolytopeMap</code>.</p><p>Therefore:</p><ul><li>all inherited <code>Mesh&lt;Context::Local&gt;</code> methods use <strong>local shard indices</strong>,</li><li><code>getPolytopeMap(d)</code> is used to recover the corresponding distributed index.</li></ul></section><section id="autotoc_md125"><h2><a href="#autotoc_md125">Local state semantics</a></h2><p>Each local shard entity is classified by two orthogonal notions:</p><ul><li>whether it belongs to the local partition, and</li><li>which partition owns it.</li></ul><p>The following three mutually exclusive states are used:</p><ul><li><p><strong>Owned</strong>: The entity belongs to the local partition and this partition is its designated owner.</p><p>Owned entities are the ones on which assembly, counting, and global reductions should typically be performed.</p></li><li><p><strong>Shared</strong>: The entity belongs to the local partition but is owned by another partition.</p><p>Shared entities are part of the partition’s geometric/topological domain, but this rank is not responsible for their global contribution.</p></li><li><p><strong>Ghost</strong>: The entity does not belong to the local partition but is present locally as overlap because it is needed by neighboring local entities, for example for stencil support, adjacency completeness, or distributed connectivity.</p><p>A ghost entity is always owned by another partition.</p></li></ul><p>In particular:</p><ul><li><code>Owned ∪ Shared</code> are exactly the entities that define the local partition,</li><li><code>Ghost</code> entities form the overlap with neighboring partitions,</li><li>every distributed entity present on multiple partitions has exactly one owner.</li></ul><p>After finalization, users normally reason in terms of:</p><ul><li><code>isOwned(d, i)</code></li><li><code>isShared(d, i)</code></li><li><code>isGhost(d, i)</code></li><li><code>isLocal(d, i)</code> (equivalent to <code>Owned || Shared</code>)</li></ul></section><section id="autotoc_md126"><h2><a href="#autotoc_md126">Owner map</a></h2><p>For each dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -257,7 +211,7 @@ $ d $
 <use x='272.826225' y='-.167372' xlink:href='#eq4-g3-110'/>
 <use x='278.803809' y='-.167372' xlink:href='#eq4-g3-107'/>
 </g>
-</svg></div><p>That is, this map is meaningful for entities in state <code>Shared</code> or <code>Ghost</code>.</p><p>In particular:</p><ul><li>if <code>i</code> is <code>Owned</code>, then <code>getOwner(d)</code> need not contain <code>i</code>,</li><li>if <code>i</code> is <code>Shared</code> or <code>Ghost</code>, then <code>getOwner(d).at(i)</code> gives the rank that owns the entity.</li></ul></section></section><section id="autotoc_md128_1s1"><section id="autotoc_md128"><h3><a href="#autotoc_md128">Halo map</a></h3><p>For each dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></div><p>That is, this map is meaningful for entities in state <code>Shared</code> or <code>Ghost</code>.</p><p>In particular:</p><ul><li>if <code>i</code> is <code>Owned</code>, then <code>getOwner(d)</code> need not contain <code>i</code>,</li><li>if <code>i</code> is <code>Shared</code> or <code>Ghost</code>, then <code>getOwner(d).at(i)</code> gives the rank that owns the entity.</li></ul></section><section id="autotoc_md127"><h2><a href="#autotoc_md127">Halo map</a></h2><p>For each dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -343,37 +297,29 @@ $ d $
 <use x='320.1926' y='-2.988792' xlink:href='#eq6-g3-116'/>
 <use x='323.516135' y='-2.988792' xlink:href='#eq6-g0-103'/>
 </g>
-</svg></div><p>So the halo map is dual to the owner map:</p><ul><li><code>owner</code> is attached to non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>halo</code> is attached to owned local entities.</li></ul><p>If <code>k</code> is an owned local entity of dimension <code>d</code>, then <code>getHalo(d).at(k)</code> is the set of remote ranks that also contain the same distributed entity, either as <code>Shared</code> or as <code>Ghost</code>.</p><p>This information is useful for:</p><ul><li>distributed numbering,</li><li>synchronization,</li><li>neighborhood-restricted communication,</li><li>distributed connectivity discovery.</li></ul></section></section><section id="autotoc_md129_1s1"><section id="autotoc_md129"><h3><a href="#autotoc_md129">Geometric and topological contents</a></h3><p>A shard is not just a set of cells. It generally contains lower-dimensional entities as well, for example vertices, edges, and faces needed by the local finite element space or by local topological queries.</p><p>In particular, a finalized shard may contain:</p><ul><li>owned entities,</li><li>shared entities,</li><li>ghost entities,</li><li>local incidences inherited from the distributed mesh and filtered to the shard contents.</li></ul><p>Thus <code>Shard</code> is intended to be a self-consistent local mesh with overlap.</p></section></section><section id="autotoc_md130_1s1"><section id="autotoc_md130"><h3><a href="#autotoc_md130">Construction model</a></h3><p><code>Shard::Builder</code> constructs a shard incrementally from either:</p><ul><li>a parent mesh (<code>Mode::Parent</code>), or</li><li>explicit direct insertion of vertices and polytopes (<code>Mode::Direct</code>).</li></ul><p>In parent-based mode, a typical construction pattern is:</p><pre class="m-code"><span class="n">Shard</span><span class="o">::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+</svg></div><p>So the halo map is dual to the owner map:</p><ul><li><code>owner</code> is attached to non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>halo</code> is attached to owned local entities.</li></ul><p>If <code>k</code> is an owned local entity of dimension <code>d</code>, then <code>getHalo(d).at(k)</code> is the set of remote ranks that also contain the same distributed entity, either as <code>Shared</code> or as <code>Ghost</code>.</p><p>This information is useful for:</p><ul><li>distributed numbering,</li><li>synchronization,</li><li>neighborhood-restricted communication,</li><li>distributed connectivity discovery.</li></ul></section><section id="autotoc_md128"><h2><a href="#autotoc_md128">Geometric and topological contents</a></h2><p>A shard is not just a set of cells. It generally contains lower-dimensional entities as well, for example vertices, edges, and faces needed by the local finite element space or by local topological queries.</p><p>In particular, a finalized shard may contain:</p><ul><li>owned entities,</li><li>shared entities,</li><li>ghost entities,</li><li>local incidences inherited from the distributed mesh and filtered to the shard contents.</li></ul><p>Thus <code>Shard</code> is intended to be a self-consistent local mesh with overlap.</p></section><section id="autotoc_md129"><h2><a href="#autotoc_md129">Construction model</a></h2><p><code>Shard::Builder</code> constructs a shard incrementally from either:</p><ul><li>a parent mesh (<code>Mode::Parent</code>), or</li><li>explicit direct insertion of vertices and polytopes (<code>Mode::Direct</code>).</li></ul><p>In parent-based mode, a typical construction pattern is:</p><pre class="m-code"><span class="nc">Shard</span><span class="o">::</span><span class="nc">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">parentMesh</span><span class="p">);</span>
 
 <span class="c1">// insert owned entities</span>
-<span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">({</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">cellIdx</span><span class="p">},</span><span class="w"> </span><span class="n">Shard</span><span class="o">::</span><span class="n">State</span><span class="o">::</span><span class="n">Owned</span><span class="p">);</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">({</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">cellIdx</span><span class="p">},</span><span class="w"> </span><span class="nc">Shard</span><span class="o">::</span><span class="nc">State</span><span class="o">::</span><span class="no">Owned</span><span class="p">);</span>
 
 <span class="c1">// insert overlap entities</span>
-<span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">({</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">neighborCellIdx</span><span class="p">},</span><span class="w"> </span><span class="n">Shard</span><span class="o">::</span><span class="n">State</span><span class="o">::</span><span class="n">Ghost</span><span class="p">);</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">({</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">neighborCellIdx</span><span class="p">},</span><span class="w"> </span><span class="nc">Shard</span><span class="o">::</span><span class="nc">State</span><span class="o">::</span><span class="no">Ghost</span><span class="p">);</span>
 
-<span class="n">Shard</span><span class="w"> </span><span class="n">shard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><p><code>include()</code> is idempotent with respect to the parent index: if the entity is already present in the shard, it is not duplicated. The returned pair is:</p><ul><li>the local shard index of the entity,</li><li>a boolean telling whether the entity was newly inserted.</li></ul></section></section><section id="autotoc_md131_1s1"><section id="autotoc_md131"><h3><a href="#autotoc_md131">Finalization guarantees</a></h3><p>After <code>Builder::finalize()</code>:</p><ul><li>all local entity indices are stable,</li><li>inherited local mesh queries operate on shard-local indices,</li><li><code>getPolytopeMap(d)</code> maps shard-local entities back to distributed or parent indices,</li><li><code>isOwned()</code>, <code>isShared()</code>, <code>isGhost()</code>, and <code>isLocal()</code> are available for every local entity,</li><li><code>getOwner(d)</code> is defined for non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>getHalo(d)</code> is defined for owned local entities.</li></ul></section></section><section id="autotoc_md132_1s1"><section id="autotoc_md132"><h3><a href="#autotoc_md132">Important convention</a></h3><p>A shard does <strong>not</strong> itself define a distributed global numbering of mesh entities or degrees of freedom. It only provides:</p><ul><li>a local mesh with overlap,</li><li>partition/ownership metadata,</li><li>distributed-to-local and local-to-distributed index correspondences.</li></ul><p>Global distributed numbering is a higher-level concern handled for example by MPI finite element spaces.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a></p><p><a href="class_rodin_1_1_geometry_1_1_sharder.html">Sharder</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">MPIMesh</a></p></aside></section></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class ContextType = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
-            </dt>
-            <dd>Represents a polyhedral complex.</dd>
-          </dl>
-        </section>
+<span class="nc">Shard</span><span class="w"> </span><span class="n">shard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><p><code>include()</code> is idempotent with respect to the parent index: if the entity is already present in the shard, it is not duplicated. The returned pair is:</p><ul><li>the local shard index of the entity,</li><li>a boolean telling whether the entity was newly inserted.</li></ul></section><section id="autotoc_md130"><h2><a href="#autotoc_md130">Finalization guarantees</a></h2><p>After <code>Builder::finalize()</code>:</p><ul><li>all local entity indices are stable,</li><li>inherited local mesh queries operate on shard-local indices,</li><li><code>getPolytopeMap(d)</code> maps shard-local entities back to distributed or parent indices,</li><li><code>isOwned()</code>, <code>isShared()</code>, <code>isGhost()</code>, and <code>isLocal()</code> are available for every local entity,</li><li><code>getOwner(d)</code> is defined for non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>getHalo(d)</code> is defined for owned local entities.</li></ul></section><section id="autotoc_md131"><h2><a href="#autotoc_md131">Important convention</a></h2><p>A shard does <strong>not</strong> itself define a distributed global numbering of mesh entities or degrees of freedom. It only provides:</p><ul><li>a local mesh with overlap,</li><li>partition/ownership metadata,</li><li>distributed-to-local and local-to-distributed index correspondences.</li></ul><p>Global distributed numbering is a higher-level concern handled for example by MPI finite element spaces.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sharder.html">Sharder</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">MPIMesh</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" title="Mesh&lt; Context::Local &gt;">Mesh</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Shard</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Mesh&lt;Context::Local&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2a23c7c0c4e0da252b7bc0e13b6f81d8"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents the subdivision of some domain into faces of (possibly) different geometries.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Mesh&lt;Context::Local&gt;</code></a></td><td><details><summary>75 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa66d766684c6856007643ea05ce1479e"><code>asSubMesh()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a1c114dba2d138c6b2bf26203fc4723f1"><code>asSubMesh()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ae48b0eb06ac78320310c37c2a103f165"><code>Box()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7aeff67906a94df8534f5f44ec81bd8a"><code>Box()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a93a6c4c55f0d49ea5b3cf107180876ad"><code>Build()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2ebe602bf7270d001e88a1b954a35608"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a6f087ec7662609ba9a93f51bb60ea559"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a280d34a48272a2944347eba299380194"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af7f68a546e7434e8bf74b9f7d4130398"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa3f3ca208d6ecf325e509f59b23c3c9f"><code>ccl()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be"><code>Context</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab7473b4627d3b7c776e3ff355e76770d"><code>displace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af654b48544c195ab99fe27e7bc3ed5fe"><code>flush()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7f5708e7b511ba4460df9947caf767af"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abe640c51631e5229dfefa8f2d9cd67d0"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aef8f2d8099f6409571fdd413acecd400"><code>getArea()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab8facfe5a0e9c927987eae334bed3d2e"><code>getAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abca2f0d800edd035174c48b8aec14c76"><code>getAttributeIndex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ae0136b8e6724a1c7383cfb3981735a9e"><code>getBoundary()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2bca9a9b07817b09939904981651999e"><code>getCell()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa3e186226e69e0a5aa07e5bb14d9f4d8"><code>getCell()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab8fe845b23ef3cb5628aa63964b35fd9"><code>getConnectivity()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aab52b72c8bdfdba2154de955773ce3cf"><code>getConnectivity()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abec500a2d7d961805241edefeeea01f5"><code>getContext()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab9935bb24de567e5136c110eb2180696"><code>getDefaultPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a6b670e6677871cdcf0cbc34740617e7a"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#adb6b1b331385a032bc3faea3747b286e"><code>getFace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a690698beb9010fc484bc87ffe258b1cd"><code>getFace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a731b43add6aba272d4297502a5ff19d6"><code>getGeometry()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#afb9e52721d28b811e43605092e3b8c73"><code>getInterface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#afd5d9204c1312cf4caecbb1cc9d76d75"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab0bfc5c541a898210683c9f3f70a92ee"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a89a74fc6f6232647804d097846944be5"><code>getMeasure()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2d613557ba40614c2d86e226e8cf1fc4"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ad98b386526e709f346e01ea1201a5921"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aebdabb738caffacc8ef881eaba858185"><code>getPerimeter()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ace5a24d478403c4eb3a270053e92da3c"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ad85868350acb9d551fe93199c26e278f"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a466f6a1b17ad2b0925fe6289332b4bed"><code>getPolytopeCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aa9cc9880fb91a216ea83671096e61243"><code>getPolytopeCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a333d0b9b2f4a63f4c5a6fe7542316269"><code>getPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a3544696ed62b8f55ffc6ead543e7d12b"><code>getPolytopeTransformationIndex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a4f467aa7374171800942e7e4a100d7ff"><code>getQuadrature()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a39d52066628132455cce25aefa575ab9"><code>getSpaceDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a0b7b5aa8d517f36e8e8dc2b2ece0db0c"><code>getVertex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ac3f28ae996afae0b748d36bc13b9377e"><code>getVertex()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7bdaf4beee904dd8491695e4c0b10014"><code>getVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2d2ff1f373d0c8152aa39a4020ae866a"><code>getVertices()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aedb17bb61a414bba468c922efb42e0d1"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2eb114e516b1a7bd60d5ec1518b86eb9"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a4b812fae3a6c8e2ea2916694ed19535c"><code>getVolume()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a077fe0bdd903e2d7a7a611b1c89ca788"><code>isBoundary()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a02533151918fdbde086c1f65549cb3c5"><code>isInterface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#acd63496fbf1f2d60dddc6aa7d11c733b"><code>isSubMesh()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a3cee134f1e07f60947bd85dcf9b08874"><code>keep()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a799153c4a7199d192071539880a67111"><code>keep()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#abf88784d713dfc3eccd085f7f9fb9773"><code>load()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#afb2a43ac4cb4d6cd4c5ebc64f6e7e034"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af26e292ff63011c4a5ab2ec42e731a7b"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a7215c83fd494e1e72781e74f9acde138"><code>save()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#aefedf3d42ef570a1e3d2a073795a4c47"><code>scale()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a040c01d335c937e2860c5dce21bfff39"><code>setAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#af3507fc6ce2660c3afa26624bc1affae"><code>setPolytopeTransformation()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ab153faf6107cbf3ed04f1ae0f8b0534d"><code>setVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a81d8f6728fa4a11521e1f376091710b7"><code>setVertexCoordinates()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a86324d0824fc5a5b9ae2f0115872c82f"><code>skin()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a967dc5873fa9d09f7c394ccc0323981f"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#ac19ad90ce7d194f90d53b16a98694d11"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a59420a926b39ee8493e7aac9537e4893"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a97c07df31cba1ff873f86a7801a3ee98"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a00c8256789fb4b1821dc2a069df4022a"><code>trace()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a04eca291faefd2262a792b0e71bb3f21"><code>trim()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a6ee9ba2539345c9478e4c1b048c13e26"><code>trim()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a9da6e5f40c0d6079ee0d40af03e9841d"><code>UniformGrid()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a208b253e13fe8578c4b277a422a0b175"><code>UniformGrid()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><code>MeshBase</code></a></td><td><details><summary>13 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a9000ddf38d8d853cbde9005de9efcafb"><code>getCellAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3275fb6c3d9c1b19129046c40d555972"><code>getCellCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1a93f6a1a2e97911722772d5429a79b1"><code>getFaceAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aa26e370d99a09c33f3f759c4bc52800e"><code>getFaceCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aafa1fbb6fcf1168fe50762a590fe5f89"><code>getName()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a24a4e01af898769244e11a4f94ca8fd0"><code>getVertexCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acc802e09e1a41bb47fc3fa6394184885"><code>inclusion()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acf82f9b2937375c7b1cf3dccb3df3312"><code>isEmpty()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3203ac272db4d8b0a23eef0ed605341f"><code>isLocalPoint()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d"><code>isSurface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5529f7a1957bdf41e4d323e3deb6f301"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8a80bde2a1da80e943646eb2404423c0"><code>operator==()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ad5193c20d0320dd32fd0c8df5460b883"><code>setName()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>
-            </dt>
-            <dd>Incremental builder for <code>Shard</code>.</dd>
-            <dt>
               struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>
             </dt>
             <dd>Bidirectional correspondence between local shard and distributed indices.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>
+            </dt>
+            <dd>Incremental builder for <code>Shard</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>: uint8_t { </span><span class="m-doc-wrap"><a href="#ae9c42c594bb848c81ace2ff29f64dc89aa6156ea9d66fef24e87e841fbabf7cca" class="m-doc">Shared</a> = 0,
               <a href="#ae9c42c594bb848c81ace2ff29f64dc89a60848c692f8ddb0363e500da44563bae" class="m-doc">Owned</a> = 1,
@@ -385,7 +331,7 @@ $ d $
             </dt>
             <dd>Context type (always local for shards).</dd>
             <dt id="a1363ea88bc9813941007ead0bb9d8cfd">
-              using <a href="#a1363ea88bc9813941007ead0bb9d8cfd" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="#adb8d0b2b1d142d3e4a11c0425cd49cc4" class="m-doc">ContextType</a>&gt;
+              using <a href="#a1363ea88bc9813941007ead0bb9d8cfd" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a>&lt;<a href="#adb8d0b2b1d142d3e4a11c0425cd49cc4" class="m-doc">ContextType</a>&gt;
             </dt>
             <dd>Parent mesh type.</dd>
           </dl>
@@ -398,11 +344,11 @@ $ d $
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc">Shard</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc">Shard</a>(</span><span class="m-doc-wrap">const Shard&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a5d555ce63b45f3394a95a9b8bfe446ee" class="m-doc">Shard</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d555ce63b45f3394a95a9b8bfe446ee" class="m-doc">Shard</a>(</span><span class="m-doc-wrap">Shard&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -411,7 +357,7 @@ $ d $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af136f31d55190137233452da05ddff42" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af136f31d55190137233452da05ddff42" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#acf8495edf1501bc4cbc0a748c3e1c8d5" class="m-doc">Shard</a>&amp;&amp; other) -&gt; <a href="#acf8495edf1501bc4cbc0a748c3e1c8d5" class="m-doc">Shard</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -510,7 +456,7 @@ $ d $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a76da9eacf84736496ad72ba4ace4ef9e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc-self">Shard</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc-self">Shard</a>(</span><span class="m-doc-wrap">const Shard&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -527,7 +473,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a5d555ce63b45f3394a95a9b8bfe446ee"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d555ce63b45f3394a95a9b8bfe446ee" class="m-doc-self">Shard</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d555ce63b45f3394a95a9b8bfe446ee" class="m-doc-self">Shard</a>(</span><span class="m-doc-wrap">Shard&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -544,7 +490,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="af136f31d55190137233452da05ddff42"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af136f31d55190137233452da05ddff42" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#acf8495edf1501bc4cbc0a748c3e1c8d5" class="m-doc">Shard</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af136f31d55190137233452da05ddff42" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#acf8495edf1501bc4cbc0a748c3e1c8d5" class="m-doc">Shard</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -567,7 +513,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ad610077bb89c846adcc5ed154a86d320"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc-self">isGhost</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc-self">isGhost</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity is ghost.</p>
@@ -595,7 +541,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ac8f91f04e23a9546ac37b3cfdfd55f3c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc-self">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc-self">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity is owned.</p>
@@ -623,7 +569,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="aaea8f348bbdd53ad3e7c01b855225844"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc-self">isShared</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc-self">isShared</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity is shared.</p>
@@ -651,7 +597,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ad40027b1b7d00875a8e570f9e5706636"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc-self">isLocal</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc-self">isLocal</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity belongs to the local partition.</p>
@@ -679,7 +625,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a399242681d6f2f49901b9a0145b7ea2c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the owner map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -702,7 +648,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a5a057fe5fa1699c82af689c438ad1b83"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the owner map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -725,7 +671,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ab42ea7d224cce1587d7468b6743328ad"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the halo map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -748,7 +694,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a8526f79e1b614d4a4bd0d659c92ed104"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the halo map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -771,7 +717,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a8513cd6e4768d4fd55bd0a3f434f2fd7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8513cd6e4768d4fd55bd0a3f434f2fd7" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8513cd6e4768d4fd55bd0a3f434f2fd7" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the local state array for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -794,7 +740,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a9d30bbd235b7b0a91505b6fd71989bf3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d30bbd235b7b0a91505b6fd71989bf3" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d30bbd235b7b0a91505b6fd71989bf3" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the local state array for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -817,7 +763,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a9fd3bd8730c34b9a46474d5c992375ce"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the local/distributed polytope map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -840,7 +786,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ab291f8389aff199f9e101a278ee1df9e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab291f8389aff199f9e101a278ee1df9e" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab291f8389aff199f9e101a278ee1df9e" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the local/distributed polytope map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -866,7 +812,7 @@ $ d $
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
               const unsigned int version)</span></span>
             </h3>
             <p>Serialization method.</p>
@@ -934,13 +880,20 @@ $ d $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

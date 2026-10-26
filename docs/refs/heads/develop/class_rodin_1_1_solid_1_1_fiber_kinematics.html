@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::FiberKinematics class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>FiberKinematics <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_fiber_kinematics_8h.html">&lt;Rodin/Solid/Local/FiberKinematics.h&gt;</a></div>
-        </h1>
-        <p>Preferred-direction kinematics at a constitutive point.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>FiberKinematics</h1><p class="rodin-reference-brief">Preferred-direction kinematics at a constitutive point.</p><p class="rodin-reference-include">Defined in <a href="_fiber_kinematics_8h.html"><code>Rodin/Solid/Local/FiberKinematics.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">FiberKinematics</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -227,7 +221,7 @@ $I_4 = a_0 \cdot C a_0$
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a66dd57c2055dfc391587978eda41c13c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66dd57c2055dfc391587978eda41c13c" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66dd57c2055dfc391587978eda41c13c" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp)</span></span>
             </h3>
             <p>Reads and normalizes the fiber direction from a constitutive point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -250,7 +244,7 @@ $I_4 = a_0 \cdot C a_0$
           </div></section>
           <section class="m-doc-details" id="ac5c136d739cf983736e200123bae3856"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5c136d739cf983736e200123bae3856" class="m-doc-self">dyad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; a)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5c136d739cf983736e200123bae3856" class="m-doc-self">dyad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; a)</span></span>
             </h3>
             <p>Returns the dyadic tensor <svg class="m-math" style="width: 2.802em; height: 0.830em; vertical-align: -0.104em;" viewBox="0 -6.973856 26.901713 7.970127">
 <title>
@@ -299,7 +293,7 @@ $a \otimes a$
           </div></section>
           <section class="m-doc-details" id="aebcf7989983435d1b1f33e4462d5c9fa"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcf7989983435d1b1f33e4462d5c9fa" class="m-doc-self">normalize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; a)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcf7989983435d1b1f33e4462d5c9fa" class="m-doc-self">normalize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; a)</span></span>
             </h3>
             <p>Returns a normalized copy of <code>a</code> when its norm is nonzero.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -322,7 +316,7 @@ $a \otimes a$
           </div></section>
           <section class="m-doc-details" id="a168bf0cb070ace5193978b995d38e41e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a168bf0cb070ace5193978b995d38e41e" class="m-doc-self">FiberKinematics</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a168bf0cb070ace5193978b995d38e41e" class="m-doc-self">FiberKinematics</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state,
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; direction)</span></span>
             </h3>
             <p>Constructs fiber kinematics from a state and reference direction.</p>
@@ -344,7 +338,7 @@ $a \otimes a$
           </div></section>
           <section class="m-doc-details" id="aa8b9967d337d4187bc899e6a6be065e3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8b9967d337d4187bc899e6a6be065e3" class="m-doc-self">FiberKinematics</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8b9967d337d4187bc899e6a6be065e3" class="m-doc-self">FiberKinematics</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs fiber kinematics from a constitutive point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -361,7 +355,7 @@ $a \otimes a$
           </div></section>
           <section class="m-doc-details" id="a9c3d9b2252630c3989783d711aedd658"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c3d9b2252630c3989783d711aedd658" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c3d9b2252630c3989783d711aedd658" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the normalized reference fiber direction.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -375,7 +369,7 @@ $a \otimes a$
           </div></section>
           <section class="m-doc-details" id="ab0df956045a6208c1d9c89ceea66709d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0df956045a6208c1d9c89ceea66709d" class="m-doc-self">tensor</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0df956045a6208c1d9c89ceea66709d" class="m-doc-self">tensor</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the structural tensor <svg class="m-math" style="width: 3.736em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 35.86821 8.767119">
 <title>
@@ -421,7 +415,7 @@ $a_0 \otimes a_0$
           </div></section>
           <section class="m-doc-details" id="ad24b94957d49344051f39ff2e97df45a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad24b94957d49344051f39ff2e97df45a" class="m-doc-self">current</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad24b94957d49344051f39ff2e97df45a" class="m-doc-self">current</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the current fiber direction <svg class="m-math" style="width: 2.040em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 19.582742 9.962629">
 <title>
@@ -463,7 +457,7 @@ $F a_0$
           </div></section>
           <section class="m-doc-details" id="a217232d11fb3761ad195e056758bd307"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a217232d11fb3761ad195e056758bd307" class="m-doc-self">I4</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a217232d11fb3761ad195e056758bd307" class="m-doc-self">I4</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the fiber invariant <svg class="m-math" style="width: 6.746em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 64.765742 9.962629">
 <title>
@@ -525,7 +519,7 @@ $I_4 = a_0 \cdot C a_0$
           </div></section>
           <section class="m-doc-details" id="a7f8ede6d54f6d7f962216f34e9333a41"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f8ede6d54f6d7f962216f34e9333a41" class="m-doc-self">strain</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f8ede6d54f6d7f962216f34e9333a41" class="m-doc-self">strain</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the Green-Lagrange fiber strain.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -539,7 +533,7 @@ $I_4 = a_0 \cdot C a_0$
           </div></section>
           <section class="m-doc-details" id="ac9f06f31b5ffad73781fe253385103a9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />FiberKinematics::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9f06f31b5ffad73781fe253385103a9" class="m-doc-self">dStrain</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9f06f31b5ffad73781fe253385103a9" class="m-doc-self">dStrain</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span></span>
             </h3>
             <p>Returns the directional derivative of fiber strain.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -599,13 +593,20 @@ $I_4 = a_0 \cdot C a_0$
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

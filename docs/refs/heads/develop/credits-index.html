@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Credits | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html" id="m-navbar-current">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -87,14 +84,34 @@
                 <li><a href="#credits-index-boost">Boost</a></li>
                 <li><a href="#credits-index-eigen">Eigen</a></li>
                 <li><a href="#credits-index-mmg">MMG</a></li>
-                <li><a href="#credits-index-mfem">MFEM</a></li>
+                <li><a href="#credits-index-hdf5">HDF5</a></li>
+                <li><a href="#credits-index-termcolor">termcolor</a></li>
+                <li><a href="#credits-index-petsc">PETSc</a></li>
                 <li><a href="#credits-index-suitesparse">SuiteSparse</a></li>
+                <li><a href="#credits-index-mumps">MUMPS</a></li>
+                <li><a href="#credits-index-scotch">Scotch</a></li>
+                <li><a href="#credits-index-metis">METIS</a></li>
+                <li><a href="#credits-index-mpi">MPI implementations</a></li>
+                <li><a href="#credits-index-openmp">OpenMP</a></li>
+                <li><a href="#credits-index-pybind11">pybind11</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#credits-index-development">Development and documentation tools</a>
+              <ul>
+                <li><a href="#credits-index-googletest">GoogleTest</a></li>
+                <li><a href="#credits-index-benchmark">Google Benchmark</a></li>
+                <li><a href="#credits-index-doxygen">Doxygen</a></li>
+                <li><a href="#credits-index-mcss">m.css</a></li>
+                <li><a href="#credits-index-jinja">Jinja</a></li>
+                <li><a href="#credits-index-pygments">Pygments</a></li>
+                <li><a href="#credits-index-latex">LaTeX and dvisvgm</a></li>
               </ul>
             </li>
             <li><a href="#References">References</a></li>
           </ul>
         </nav>
-<section id="credits-index-3rd-party"><h2><a href="#credits-index-3rd-party">Third-party Software</a></h2><section id="credits-index-boost"><h3><a href="#credits-index-boost">Boost</a></h3><p>Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications. The libraries are licensed under the <a href="https://www.boost.org/users/license.html">Boost Software License</a>, which is the same license Rodin utilizes.</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://www.boost.org/">https:/<wbr />/<wbr />www.boost.org/<wbr /></a></li><li><a href="https://www.boost.org/users/license.html">https:/<wbr />/<wbr />www.boost.org/<wbr />users/<wbr />license.html</a></li></ul></div></aside></section><section id="credits-index-eigen"><h3><a href="#credits-index-eigen">Eigen</a></h3><p>Eigen is a C++ template library for linear algebra. Eigen provides a wide range of mathematical operations, data structures, and algorithms for performing linear algebra operations efficiently and with a syntax that resembles mathematical notation. It is especially useful for tasks such as matrix and vector operations, solving linear systems, eigenvalue problems, and more. Eigen is <a href="https://www.gnu.org/philosophy/free-sw.html">Free Software</a>. Starting from the 3.1.1 version, it is licensed under the <a href="https://www.mozilla.org/en-US/MPL/2.0/">MPL2</a>, which is a simple weak copyleft license. Common questions about the MPL2 are answered in the official <a href="https://www.mozilla.org/en-US/MPL/2.0/FAQ/">MPL2 FAQ</a>.</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://eigen.tuxfamily.org/">https:/<wbr />/<wbr />eigen.tuxfamily.org/<wbr /></a></li><li><a href="https://eigen.tuxfamily.org/index.php?title=Main_Page#License">https://eigen.tuxfamily.org/index.php?title=Main_<wbr />Page#License</a></li></ul></div></aside></section><section id="credits-index-mmg"><h3><a href="#credits-index-mmg">MMG</a></h3><p>MMG is an open source software for bidimensional and tridimensional surface and volume remeshing. It is licensed under the <a href="https://github.com/MmgTools/mmg/blob/master/LICENSE">LGPL</a> and is originally based on <a href="citelist.html#CITEREF_dapogny2014three" class="m-doc">[3]</a> .</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://www.mmgtools.org/">https:/<wbr />/<wbr />www.mmgtools.org/<wbr /></a></li></ul></div></aside></section><section id="credits-index-mfem"><h3><a href="#credits-index-mfem">MFEM</a></h3><p>MFEM is a modular parallel C++ library for finite element methods. Its goal is to enable high-performance scalable finite element discretization research and application development on a wide variety of platforms, ranging from laptops to supercomputers. It is licensed under the <a href="https://github.com/mfem/mfem/blob/master/LICENSE">BSD-3-Clause License</a>.</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://mfem.org/">https:/<wbr />/<wbr />mfem.org/<wbr /></a></li><li><a href="https://glvis.org/">https:/<wbr />/<wbr />glvis.org/<wbr /></a></li></ul></div></aside></section><section id="credits-index-suitesparse"><h3><a href="#credits-index-suitesparse">SuiteSparse</a></h3><p>SuiteSparse is a suite of sparse matrix algorithms. Each package has its own individual <a href="https://github.com/DrTimothyAldenDavis/SuiteSparse/blob/master/LICENSE.txt">license</a>.</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://people.engr.tamu.edu/davis/suitesparse.html">https:/<wbr />/<wbr />people.engr.tamu.edu/<wbr />davis/<wbr />suitesparse.html</a></li></ul></div></aside></section></section><section id="References"><h2><a href="#References">References</a></h2><p>See the <a href="citelist.html" class="m-doc">full reference list</a> to the scientific papers which have been used or provide sources of inspiration for the library.</p></section>
+<section id="credits-index-3rd-party"><h2><a href="#credits-index-3rd-party">Third-party Software</a></h2><section id="credits-index-boost"><h3><a href="#credits-index-boost">Boost</a></h3><p>Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications. The libraries are licensed under the <a href="https://www.boost.org/users/license.html">Boost Software License</a>, which is the same license Rodin utilizes.</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://www.boost.org/">https:/<wbr />/<wbr />www.boost.org/<wbr /></a></li><li><a href="https://www.boost.org/users/license.html">https:/<wbr />/<wbr />www.boost.org/<wbr />users/<wbr />license.html</a></li></ul></div></aside></section><section id="credits-index-eigen"><h3><a href="#credits-index-eigen">Eigen</a></h3><p>Eigen is a C++ template library for linear algebra. Eigen provides a wide range of mathematical operations, data structures, and algorithms for performing linear algebra operations efficiently and with a syntax that resembles mathematical notation. It is especially useful for tasks such as matrix and vector operations, solving linear systems, eigenvalue problems, and more. Eigen is <a href="https://www.gnu.org/philosophy/free-sw.html">Free Software</a>. Starting from the 3.1.1 version, it is licensed under the <a href="https://www.mozilla.org/en-US/MPL/2.0/">MPL2</a>, which is a simple weak copyleft license. Common questions about the MPL2 are answered in the official <a href="https://www.mozilla.org/en-US/MPL/2.0/FAQ/">MPL2 FAQ</a>.</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://eigen.tuxfamily.org/">https:/<wbr />/<wbr />eigen.tuxfamily.org/<wbr /></a></li><li><a href="https://eigen.tuxfamily.org/index.php?title=Main_Page#License">https://eigen.tuxfamily.org/index.php?title=Main_<wbr />Page#License</a></li></ul></div></aside></section><section id="credits-index-mmg"><h3><a href="#credits-index-mmg">MMG</a></h3><p>MMG is an open source software for bidimensional and tridimensional surface and volume remeshing. It is licensed under the <a href="https://github.com/MmgTools/mmg/blob/master/LICENSE">LGPL</a> and is originally based on <a href="citelist.html#CITEREF_dapogny2014three" class="m-doc">[3]</a> .</p><aside class="m-note m-default"><h4>Links</h4><div><ul><li><a href="https://www.mmgtools.org/">https:/<wbr />/<wbr />www.mmgtools.org/<wbr /></a></li></ul></div></aside></section><section id="credits-index-hdf5"><h3><a href="#credits-index-hdf5">HDF5</a></h3><p><a href="https://www.hdfgroup.org/solutions/hdf5/">HDF5</a> provides structured binary storage for Rodin mesh and field output, including the data referenced by XDMF visualization files.</p></section><section id="credits-index-termcolor"><h3><a href="#credits-index-termcolor">termcolor</a></h3><p><a href="https://github.com/ikalnytskyi/termcolor">termcolor</a> supplies terminal colors for contextual diagnostics in the Alert module.</p></section><section id="credits-index-petsc"><h3><a href="#credits-index-petsc">PETSc</a></h3><p><a href="https://petsc.org/">PETSc</a> supplies the optional distributed algebra, linear and nonlinear solvers, and preconditioners used by Rodin&#x27;s PETSc backend.</p></section><section id="credits-index-suitesparse"><h3><a href="#credits-index-suitesparse">SuiteSparse</a></h3><p><a href="https://github.com/DrTimothyAldenDavis/SuiteSparse">SuiteSparse</a> supplies the optional UMFPACK, CHOLMOD, SPQR, and ParU sparse solver backends. Individual components have their own license terms.</p></section><section id="credits-index-mumps"><h3><a href="#credits-index-mumps">MUMPS</a></h3><p><a href="https://mumps-solver.org/">MUMPS</a> provides the optional multifrontal sparse direct solver backend.</p></section><section id="credits-index-scotch"><h3><a href="#credits-index-scotch">Scotch</a></h3><p><a href="https://gitlab.inria.fr/scotch/scotch">Scotch</a> provides graph partitioning for mesh decomposition through the Scotch module.</p></section><section id="credits-index-metis"><h3><a href="#credits-index-metis">METIS</a></h3><p><a href="https://github.com/KarypisLab/METIS">METIS</a> provides graph partitioning and fill-reducing orderings used by supported sparse solver dependencies.</p></section><section id="credits-index-mpi"><h3><a href="#credits-index-mpi">MPI implementations</a></h3><p><a href="https://www.mpich.org/">MPICH</a> and <a href="https://www.open-mpi.org/">Open MPI</a> provide implementations of the Message Passing Interface used in Rodin&#x27;s distributed builds and continuous integration. Rodin uses MPI through its distributed mesh, finite element, and solver paths.</p></section><section id="credits-index-openmp"><h3><a href="#credits-index-openmp">OpenMP</a></h3><p><a href="https://www.openmp.org/">OpenMP</a> provides the compiler and runtime interface used by optional shared-memory parallel code paths.</p></section><section id="credits-index-pybind11"><h3><a href="#credits-index-pybind11">pybind11</a></h3><p><a href="https://pybind11.readthedocs.io/">pybind11</a> connects C++ interfaces to Python in Rodin&#x27;s optional Python bindings.</p></section></section><section id="credits-index-development"><h2><a href="#credits-index-development">Development and documentation tools</a></h2><section id="credits-index-googletest"><h3><a href="#credits-index-googletest">GoogleTest</a></h3><p><a href="https://google.github.io/googletest/">GoogleTest</a> supplies the C++ testing framework used by Rodin&#x27;s unit and regression tests.</p></section><section id="credits-index-benchmark"><h3><a href="#credits-index-benchmark">Google Benchmark</a></h3><p><a href="https://github.com/google/benchmark">Google Benchmark</a> supplies the benchmark framework used to measure Rodin&#x27;s numerical kernels and assembly operations.</p></section><section id="credits-index-doxygen"><h3><a href="#credits-index-doxygen">Doxygen</a></h3><p><a href="https://www.doxygen.nl/">Doxygen</a> extracts API declarations and documentation from Rodin&#x27;s C++ sources and documentation pages.</p></section><section id="credits-index-mcss"><h3><a href="#credits-index-mcss">m.css</a></h3><p><a href="https://mcss.mosra.cz/">m.css</a> renders the extracted documentation and supplies the site theme and documentation components.</p></section><section id="credits-index-jinja"><h3><a href="#credits-index-jinja">Jinja</a></h3><p><a href="https://jinja.palletsprojects.com/">Jinja</a> renders the HTML templates used by m.css and Rodin&#x27;s documentation pages.</p></section><section id="credits-index-pygments"><h3><a href="#credits-index-pygments">Pygments</a></h3><p><a href="https://pygments.org/">Pygments</a> provides syntax highlighting for code examples throughout the documentation.</p></section><section id="credits-index-latex"><h3><a href="#credits-index-latex">LaTeX and dvisvgm</a></h3><p><a href="https://www.latex-project.org/">LaTeX</a> typesets mathematical expressions, and <a href="https://dvisvgm.de/">dvisvgm</a> converts the results into SVG images for the documentation.</p></section></section><section id="References"><h2><a href="#References">References</a></h2><p>See the <a href="citelist.html" class="m-doc">full reference list</a> to the scientific papers which have been used or provide sources of inspiration for the library.</p></section>
       </div>
     </div>
   </div>
@@ -133,13 +150,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

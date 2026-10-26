@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Math::LinearSystem&lt;::Mat, ::Vec&gt;::FieldSplits class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,9 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_math_2_linear_system_8h.html">&lt;Rodin/PETSc/Math/LinearSystem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">LinearSystem&lt;::Mat, ::Vec&gt;</a>::<wbr/></span>FieldSplits <span class="m-thin">class</span>
-        </h1>
-        <p>Container for named PETSc index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_math.html">Math</a><span>›</span><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">LinearSystem&lt;::Mat, ::Vec&gt;</a></div><h1>FieldSplits</h1><p class="rodin-reference-brief">Container for named PETSc index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</p><p class="rodin-reference-include">Defined in <a href="_p_e_t_sc_2_math_2_linear_system_8h.html"><code>Rodin/PETSc/Math/LinearSystem.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html#a84d6cfdceb03cbff21637f42ce200d8a"><span class="nc">FieldSplits</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -116,11 +110,11 @@
             </dt>
             <dd>Constructs from a vector of named splits.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc">FieldSplits</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc">FieldSplits</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span>
             </dt>
             <dd>Copy constructor (deep-copies PETSc index sets).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aaa76572f1b75ec734e99666e4f0946f8" class="m-doc">FieldSplits</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aaa76572f1b75ec734e99666e4f0946f8" class="m-doc">FieldSplits</a>(</span><span class="m-doc-wrap">FieldSplits&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="a57cd43f977de353e99f5a8b4c57963a9">
@@ -133,11 +127,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; other) -&gt; <a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a28252a2bddb9176f139266879e92662d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a28252a2bddb9176f139266879e92662d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp;&amp; other) -&gt; <a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -153,7 +147,7 @@
             </dt>
             <dd>Destroys all owned PETSc index sets and clears the splits.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc">copyFrom</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc">copyFrom</a>(</span><span class="m-doc-wrap">const <a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; other)</span>
             </dt>
             <dd>Deep-copies splits from another FieldSplits object.</dd>
             <dt>
@@ -181,7 +175,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87bca78f4c3a18acf21a78aadb593c1a" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">std::vector&lt;<a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&gt; splits) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87bca78f4c3a18acf21a78aadb593c1a" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">std::vector&lt;<a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&gt; splits) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs from a vector of named splits.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,7 +195,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span></span>
             </h3>
             <p>Copy constructor (deep-copies PETSc index sets).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -221,7 +215,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa76572f1b75ec734e99666e4f0946f8" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa76572f1b75ec734e99666e4f0946f8" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">FieldSplits&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -241,7 +235,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -267,7 +261,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28252a2bddb9176f139266879e92662d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28252a2bddb9176f139266879e92662d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -293,7 +287,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&gt;&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a436533d0e1ab329dc1ae6f4cab139af4" class="m-doc-self">getSplits</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a436533d0e1ab329dc1ae6f4cab139af4" class="m-doc-self">getSplits</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a mutable reference to the splits vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -310,7 +304,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&gt;&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9bfd38f18b0dd47e7965fa8b2e4e8e6f" class="m-doc-self">getSplits</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9bfd38f18b0dd47e7965fa8b2e4e8e6f" class="m-doc-self">getSplits</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a read-only reference to the splits vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -327,7 +321,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc-self">copyFrom</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc-self">copyFrom</a>(</span><span class="m-doc-wrap">const <a href="#a84d6cfdceb03cbff21637f42ce200d8a" class="m-doc">FieldSplits</a>&amp; other)</span></span>
             </h3>
             <p>Deep-copies splits from another FieldSplits object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -347,7 +341,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i)</span></span>
             </h3>
             <p>Returns a mutable reference to the split at index <code>i</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -373,7 +367,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02f73d5fed5d1a8cc969ec36ddec726e" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02f73d5fed5d1a8cc969ec36ddec726e" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Returns a read-only reference to the split at index <code>i</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -399,7 +393,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3caedb145a667c26028740417dcf32c3" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3caedb145a667c26028740417dcf32c3" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the number of splits.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -416,7 +410,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f6fc5de06a318920d84f3c3742db07f" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f6fc5de06a318920d84f3c3742db07f" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns true if there are no splits.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -467,13 +461,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

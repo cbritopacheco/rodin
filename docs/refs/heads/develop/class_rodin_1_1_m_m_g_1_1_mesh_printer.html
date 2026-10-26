@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::MMG::MeshPrinter class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>MeshPrinter <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_printer_8h.html">&lt;Rodin/MMG/MeshPrinter.h&gt;</a></div>
-        </h1>
-        <p>Printer for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> in MEDIT/MMG-compatible syntax.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_m_m_g.html">MMG</a></div><h1>MeshPrinter</h1><p class="rodin-reference-brief">Printer for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> in MEDIT/MMG-compatible syntax.</p><p class="rodin-reference-include">Defined in <a href="_m_m_g_2_mesh_printer_8h.html"><code>Rodin/MMG/MeshPrinter.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html"><span class="nc">MeshPrinter</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -93,16 +87,8 @@
           </ul>
         </nav>
 <p>In addition to standard mesh topology/geometry, this printer serializes MMG-specific sections:</p><ul><li><code>Corners</code></li><li><code>Ridges</code></li><li><code>RequiredVertices</code></li><li><code>RequiredEdges</code></li><li><code>RequiredTriangles</code></li><li><code>RequiredTetrahedra</code></li></ul>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;MMG::Mesh&gt;</a>
-            </dt>
-            <dd>Base template for printing objects to streams.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_i_o_1_1_printer.html" title="IO::Printer&lt; MMG::Mesh &gt;">IO::Printer</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MeshPrinter</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_printer.html"><code>IO::Printer&lt;MMG::Mesh&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">IO</span><span class="o">::</span><span class="nc">Printer</span><span class="o">&lt;</span><span class="w"> </span><span class="n">MMG</span><span class="o">::</span><a href="class_rodin_1_1_m_m_g_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base template for printing objects to streams.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_m_m_g_1_1_mesh_printer.html#a2504fad917ab72c2e27e762f99fa6583"><code>print()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_printer.html#abee96dede91f700b63bad73f415bbe29">Printer::print</a></td></tr><tr><td><a href="class_rodin_1_1_m_m_g_1_1_mesh_printer.html#ac9d6bd71c9896bd37bf8a0f6622dc5e4"><code>getObject()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_printer.html#ad979398cb0e10547747e429b597080ce">Printer::getObject</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_printer.html"><code>IO::Printer</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_i_o_1_1_printer.html#a45a85369a36957866b0a38d9800a1282"><code>ObjectType</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -153,7 +139,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aa8fcfa32ce16a6450a8486c05872715c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8fcfa32ce16a6450a8486c05872715c" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8fcfa32ce16a6450a8486c05872715c" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a printer for a given MMG mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -170,7 +156,7 @@
           </div></section>
           <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Prints a full MEDIT mesh including MMG-specific sections.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -187,7 +173,7 @@
           </div></section>
           <section class="m-doc-details" id="a81b9afc17eccd8c5d97c1330fe6634b1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81b9afc17eccd8c5d97c1330fe6634b1" class="m-doc-self">printCorners</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81b9afc17eccd8c5d97c1330fe6634b1" class="m-doc-self">printCorners</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>Corners</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -204,7 +190,7 @@
           </div></section>
           <section class="m-doc-details" id="aee97ab1f3f4dd41870803424fcdab549"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee97ab1f3f4dd41870803424fcdab549" class="m-doc-self">printRidges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee97ab1f3f4dd41870803424fcdab549" class="m-doc-self">printRidges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>Ridges</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -221,7 +207,7 @@
           </div></section>
           <section class="m-doc-details" id="a921aae5521f4f47362922d6ef0e4f800"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a921aae5521f4f47362922d6ef0e4f800" class="m-doc-self">printRequiredVertices</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a921aae5521f4f47362922d6ef0e4f800" class="m-doc-self">printRequiredVertices</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>RequiredVertices</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -238,7 +224,7 @@
           </div></section>
           <section class="m-doc-details" id="a98f3d70dba95f6d6ed136aca7d38e17f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98f3d70dba95f6d6ed136aca7d38e17f" class="m-doc-self">printRequiredEdges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98f3d70dba95f6d6ed136aca7d38e17f" class="m-doc-self">printRequiredEdges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>RequiredEdges</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -255,7 +241,7 @@
           </div></section>
           <section class="m-doc-details" id="a04e2da055fcdfba9fea05b5f911c04d4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04e2da055fcdfba9fea05b5f911c04d4" class="m-doc-self">printRequiredTriangles</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04e2da055fcdfba9fea05b5f911c04d4" class="m-doc-self">printRequiredTriangles</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>RequiredTriangles</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -272,7 +258,7 @@
           </div></section>
           <section class="m-doc-details" id="a1e93fa42d045284e1c26df56a8e2ddae"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e93fa42d045284e1c26df56a8e2ddae" class="m-doc-self">printRequiredTetrahedra</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e93fa42d045284e1c26df56a8e2ddae" class="m-doc-self">printRequiredTetrahedra</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>RequiredTetrahedra</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -289,7 +275,7 @@
           </div></section>
           <section class="m-doc-details" id="ac9d6bd71c9896bd37bf8a0f6622dc5e4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the mesh bound to this printer.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -340,13 +326,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

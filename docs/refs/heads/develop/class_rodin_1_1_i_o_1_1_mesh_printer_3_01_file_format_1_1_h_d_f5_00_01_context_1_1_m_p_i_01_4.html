@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::IO::MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,18 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_i_o_2_h_d_f5_8h.html">&lt;Rodin/MPI/IO/HDF5.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt; <span class="m-thin">class</span>
-        </h1>
-        <p>Prints a distributed MPI mesh to an HDF5 file.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_i_o.html">IO</a></div><h1>MeshPrinter</h1><p class="rodin-reference-brief">Prints a distributed MPI mesh to an HDF5 file.</p><p class="rodin-reference-include">Defined in <a href="_m_p_i_2_i_o_2_h_d_f5_8h.html"><code>Rodin/MPI/IO/HDF5.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html"><span class="nc">MeshPrinter</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">HDF5</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Fmt</code></td><td><code>FileFormat::HDF5</code></td></tr><tr><td><code>Trait</code></td><td><code>Context::MPI</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -95,16 +91,8 @@
           </ul>
         </nav>
 <p>Each MPI rank independently saves its local shard to the given HDF5 file path. The process consists of two phases:</p><ol><li><strong>Base mesh</strong> — delegated to <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a>, which writes the canonical <code>/Mesh/...</code> datasets (vertices, connectivity, attributes, transformations).</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> metadata — the file is reopened in read-write mode and the following datasets are appended under <code>/Shard/</code>:</li></ol><table class="m-table"><thead><tr><th>Dataset</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>/Shard/Flags/{d}</code></td><td>U8[]</td><td>Per-entity ownership (0=None, 1=Owned, 2=Ghost)</td></tr><tr><td><code>/Shard/PolytopeMap/{d}/Left</code></td><td>U64[]</td><td>Shard→distributed index</td></tr><tr><td><code>/Shard/PolytopeMap/{d}/Right/Keys</code></td><td>U64[]</td><td>Distributed indices (keys)</td></tr><tr><td><code>/Shard/PolytopeMap/{d}/Right/Values</code></td><td>U64[]</td><td>Shard indices (values)</td></tr><tr><td><code>/Shard/Owner/{d}/Keys</code></td><td>U64[]</td><td>Ghost local indices (keys)</td></tr><tr><td><code>/Shard/Owner/{d}/Values</code></td><td>U64[]</td><td>Owner ranks (values)</td></tr><tr><td><code>/Shard/Halo/{d}/Keys</code></td><td>U64[]</td><td>Owned local indices (keys)</td></tr><tr><td><code>/Shard/Halo/{d}/Offsets</code></td><td>U64[]</td><td>CSR offsets into Indices</td></tr><tr><td><code>/Shard/Halo/{d}/Indices</code></td><td>U64[]</td><td>Flattened neighbor ranks</td></tr></tbody></table><aside class="m-note m-info"><h4>Note</h4><p>Each rank must be given a rank-specific file path (e.g. via the callable filename overload on Mesh&lt;Context::MPI&gt;::save).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p><p><a href="class_rodin_1_1_geometry_1_1_shard.html">Geometry::<wbr />Shard</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Context&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase&lt;Context::MPI&gt;</a>
-            </dt>
-            <dd>Base class for printing meshes to streams or files.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" title="MeshPrinterBase&lt; Context::MPI &gt;">MeshPrinterBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MeshPrinter</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html"><code>MeshPrinterBase&lt;Context::MPI&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html#aa72cea6881a6fd6f5f4addb676c2e87f"><span class="nc">MeshPrinterBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for printing meshes to streams or files.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html#a2504fad917ab72c2e27e762f99fa6583"><code>print()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_printer.html#abee96dede91f700b63bad73f415bbe29">Printer::print</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html"><code>MeshPrinterBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html#a11c4ca84d818b4c96f829e779509de85"><code>getObject()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -117,7 +105,7 @@
             </dt>
             <dd>Distributed mesh object type written by this specialization.</dd>
             <dt id="a0f6063fe81811604830400d335765674">
-              using <a href="#a0f6063fe81811604830400d335765674" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
+              using <a href="#a0f6063fe81811604830400d335765674" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html#aa72cea6881a6fd6f5f4addb676c2e87f" class="m-doc">MeshPrinterBase</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
             </dt>
             <dd>Base printer interface specialization.</dd>
           </dl>
@@ -151,7 +139,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a printer for the given distributed mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -171,7 +159,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Stream-based printing is not supported for HDF5 format.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -200,7 +188,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Saves the local mesh shard to the given HDF5 file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -255,13 +243,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

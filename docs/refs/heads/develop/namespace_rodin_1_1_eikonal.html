@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Eikonal namespace | Rodin</title>
+  <title>Rodin::Eikonal module | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,33 +35,28 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
             </li>
             <li>
-              <a href="modules.html">Modules</a>
+              <a href="modules.html" id="m-navbar-current">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -75,24 +72,13 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Eikonal <span class="m-thin">namespace</span>
-        </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a>.</p>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Eikonal <span class="m-thin">module</span>        </h1>
+        <p>Eikonal equations and distance propagation.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md547">Fast Marching Method (FMM)</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md548">Typical Usage</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md580">Fast Marching Method (FMM)</a></li>
+            <li><a href="#autotoc_md581">Typical Usage</a></li>
             <li>
               Reference
               <ul>
@@ -102,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Eikonal</p><p>Module which provides solvers for the Eikonal equation.</p><p>The Eikonal equation is a non-linear partial differential equation of the form:</p><div class="m-math"><svg style="width: 6.664em; height: 1.245em;" viewBox="162.284712 -11.955168 63.973554 11.955168">
+<p><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> implements fast marching on simplicial meshes, propagating arrival times from prescribed seed vertices. It provides the underlying distance propagation used by level-set reinitialization and distance-field construction, with a priority queue controlling the order of vertex updates.</p><div class="m-math"><svg style="width: 6.664em; height: 1.245em;" viewBox="162.284712 -11.955168 63.973554 11.955168">
 <title>
 \[  |\nabla u| = F(x)
 \]
@@ -158,7 +144,7 @@ $ F = 1 $
 <use x='12.524444' y='0' xlink:href='#eq3-g1-61'/>
 <use x='24.949925' y='0' xlink:href='#eq3-g1-49'/>
 </g>
-</svg>, the solution represents the distance function.</p><section id="autotoc_md547_1s1"><section id="autotoc_md547"><h3><a href="#autotoc_md547">Fast Marching Method (FMM)</a></h3><p>The primary solver is <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>, which implements the Fast Marching Method on unstructured simplicial meshes. The algorithm propagates a wavefront from seed vertices, updating arrival times in causal order using a priority queue. Vertex states during propagation:</p><table class="m-table"><thead><tr><th>State</th><th>Description</th></tr></thead><tbody><tr><td><strong>Far</strong></td><td>Not yet visited</td></tr><tr><td><strong>Considered</strong></td><td>In the priority queue, tentative value computed</td></tr><tr><td><strong>Accepted</strong></td><td>Finalized — arrival time is correct</td></tr></tbody></table><p>The FMM specialization for P1 finite elements on local meshes supports:</p><ul><li>Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)</li><li>User-defined speed functions <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
+</svg>, the solution represents the distance function.</p><section id="autotoc_md580"><h2><a href="#autotoc_md580">Fast Marching Method (FMM)</a></h2><p>The primary solver is <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>, which implements the Fast Marching Method on unstructured simplicial meshes. The algorithm propagates a wavefront from seed vertices, updating arrival times in causal order using a priority queue. Vertex states during propagation:</p><table class="m-table"><thead><tr><th>State</th><th>Description</th></tr></thead><tbody><tr><td><strong>Far</strong></td><td>Not yet visited</td></tr><tr><td><strong>Considered</strong></td><td>In the priority queue, tentative value computed</td></tr><tr><td><strong>Accepted</strong></td><td>Finalized — arrival time is correct</td></tr></tbody></table><p>The FMM specialization for P1 finite elements on local meshes supports:</p><ul><li>Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)</li><li>User-defined speed functions <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
 <title>
 $ F(x) $
 </title>
@@ -174,14 +160,14 @@ $ F(x) $
 <use x='13.755941' y='0' xlink:href='#eq4-g0-120'/>
 <use x='20.408028' y='0' xlink:href='#eq4-g1-41'/>
 </g>
-</svg></li><li>Seed interface specification (initial zero-distance vertices)</li></ul></section></section><section id="autotoc_md548_1s1"><section id="autotoc_md548"><h3><a href="#autotoc_md548">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+</svg></li><li>Seed interface specification (initial zero-distance vertices)</li></ul></section><section id="autotoc_md581"><h2><a href="#autotoc_md581">Typical Usage</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="nc">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="c1">// Speed function F(x) = 1 (distance computation)</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Point</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
 
-<span class="n">Eikonal</span><span class="o">::</span><span class="n">FMM</span><span class="w"> </span><span class="nf">fmm</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">speed</span><span class="p">);</span>
-<span class="n">fmm</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="n">interfaceVertices</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance module</a> for higher-level distance function computation that wraps FMM.</p></aside></section></section>
+<span class="nc">Eikonal</span><span class="o">::</span><span class="nc">FMM</span><span class="w"> </span><span class="nf">fmm</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">speed</span><span class="p">);</span>
+<span class="n">fmm</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="n">interfaceVertices</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance module</a> for higher-level distance function computation that wraps FMM.</p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -189,12 +175,14 @@ $ F(x) $
               <div class="m-doc-template">template&lt;class Solution, class SpeedFunction&gt;</div>
               class <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>
             </dt>
-            <dd>Fast marching method for solving the Eikonal equation.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
-              class <a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html" class="m-doc">FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt;</a>
-            </dt>
-            <dd>FMM specialization for P1 finite elements on local meshes.</dd>
+            <dd>Fast marching method for solving the Eikonal equation.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html"><code>Variational::GridFunction&lt;…&gt;, SpeedFunction</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">SpeedFunction</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html#a73d89b63b13fdd0797eef84d05c3a1e9"><span class="nc">FMM</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_p1.html"><span class="nc">P1</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html#a278dcde0fa42c2714861999da25abbd2"><span class="nc">Context</span></a><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">SpeedFunction</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>FMM specialization for P1 finite elements on local meshes.</td></tr></tbody></table></details></dd>
+            
           </dl>
         </section>
         <section id="func-members">
@@ -211,14 +199,14 @@ $ F(x) $
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a88f3a1fc5adbd2761a6a432e58b08aec"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_f_m_m_8h.html">&lt;Rodin/Eikonal/FMM.h&gt;</a></div>
+            <h3><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc-self">FMM</a></h3><p class="rodin-reference-include">Defined in <a href="_f_m_m_8h.html"><code>Rodin/Eikonal/FMM.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              
               <div class="m-doc-template">
                 template&lt;class Solution, class SpeedFunction&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap">Solution&amp; u,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap">Solution&amp; u,
               SpeedFunction&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span></span>
-            </h3>
+            </div></details>
             <p>Deduction guide for FMM constructor.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -276,13 +264,20 @@ $ F(x) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

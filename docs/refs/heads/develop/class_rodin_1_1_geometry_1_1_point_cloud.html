@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::PointCloud class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,10 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PointCloud <span class="m-thin">class</span>
-        </h1>
-        <p>Point cloud with a point-centric API and Eigen &quot;matrix&quot; views.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>PointCloud</h1><p class="rodin-reference-brief">Point cloud with a point-centric API and Eigen &quot;matrix&quot; views.</p><p class="rodin-reference-include">Defined in <a href="_point_cloud_8h.html"><code>Rodin/Geometry/PointCloud.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_point_cloud.html#ab53814a183cd4cb99597ad996fdbf079"><span class="nc">PointCloud</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -140,11 +135,11 @@
             </dt>
             <dd>Constructs <code>n</code> zero-initialized points in <code>rows</code> dimensions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0efc1105b3eca288199ed555fa02cccf" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a0efc1105b3eca288199ed555fa02cccf" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap">const PointCloud&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac550b4c6b9a30e3d8dddf102c2bd84e6" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac550b4c6b9a30e3d8dddf102c2bd84e6" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap">PointCloud&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -153,11 +148,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9c7ea7c807392ed6200b4816cf355390" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c7ea7c807392ed6200b4816cf355390" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; other) -&gt; <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae9b461bc8afc82e90d41271616dac8ba" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae9b461bc8afc82e90d41271616dac8ba" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp;&amp; other) -&gt; <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -256,14 +251,14 @@
             </dt>
             <dd>Returns a (3 x N) matrix view of the underlying packed storage.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the Frobenius inner product of the active coordinates with another point cloud.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a65cd32e8aba1747e54c4f49eae2f4fd6" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af123d63d8c4c628b732d90ae11b1b37f" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns the Frobenius inner product of the active coordinates with an Eigen matrix.</dd>
+            <dd>Returns the Frobenius inner product of the active coordinates with an Eigen matrix, conjugating its entries.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9b0169291d0effd4d9cbe0e98b8e8242" class="m-doc">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -281,7 +276,7 @@
             </dt>
             <dd>Sets the active coordinates of all points to <code>v</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) -&gt; <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Scales the active coordinates of all points by <code>s</code> in place.</dd>
             <dt>
@@ -296,7 +291,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ab987767ecca85bcc69377cb8902200ac"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab987767ecca85bcc69377cb8902200ac" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab987767ecca85bcc69377cb8902200ac" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
               size_t n) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs <code>n</code> zero-initialized points in <code>rows</code> dimensions.</p>
@@ -318,7 +313,7 @@
           </div></section>
           <section class="m-doc-details" id="a0efc1105b3eca288199ed555fa02cccf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0efc1105b3eca288199ed555fa02cccf" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0efc1105b3eca288199ed555fa02cccf" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">const PointCloud&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -335,7 +330,7 @@
           </div></section>
           <section class="m-doc-details" id="ac550b4c6b9a30e3d8dddf102c2bd84e6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac550b4c6b9a30e3d8dddf102c2bd84e6" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac550b4c6b9a30e3d8dddf102c2bd84e6" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">PointCloud&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -352,7 +347,7 @@
           </div></section>
           <section class="m-doc-details" id="a9c7ea7c807392ed6200b4816cf355390"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c7ea7c807392ed6200b4816cf355390" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c7ea7c807392ed6200b4816cf355390" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -375,7 +370,7 @@
           </div></section>
           <section class="m-doc-details" id="ae9b461bc8afc82e90d41271616dac8ba"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9b461bc8afc82e90d41271616dac8ba" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9b461bc8afc82e90d41271616dac8ba" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -398,7 +393,7 @@
           </div></section>
           <section class="m-doc-details" id="a6438d172a6a815c6f200878822d94233"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6438d172a6a815c6f200878822d94233" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::uint8_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6438d172a6a815c6f200878822d94233" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the active spatial dimension (0..3).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -412,7 +407,7 @@
           </div></section>
           <section class="m-doc-details" id="acd4c9cd1521fac64a31fa24229c2a202"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::uint8_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the active spatial dimension (Eigen-style row count).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -426,7 +421,7 @@
           </div></section>
           <section class="m-doc-details" id="addadaa3fe39c2bc4170b0653b69bfd3d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addadaa3fe39c2bc4170b0653b69bfd3d" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addadaa3fe39c2bc4170b0653b69bfd3d" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the number of points (Eigen-style column count).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -440,7 +435,7 @@
           </div></section>
           <section class="m-doc-details" id="ab7d1a399cb20152208d36e0f076a7dbb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d1a399cb20152208d36e0f076a7dbb" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d1a399cb20152208d36e0f076a7dbb" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the number of points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -454,7 +449,7 @@
           </div></section>
           <section class="m-doc-details" id="a9e50bda91733f7f779137ea558a89489"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e50bda91733f7f779137ea558a89489" class="m-doc-self">setDimension</a>(</span><span class="m-doc-wrap">std::uint8_t r) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e50bda91733f7f779137ea558a89489" class="m-doc-self">setDimension</a>(</span><span class="m-doc-wrap">std::uint8_t r) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the active spatial dimension (must not exceed MaxRows).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -471,7 +466,7 @@
           </div></section>
           <section class="m-doc-details" id="a1ef2d4435fb795664c2d63a69ac40482"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ef2d4435fb795664c2d63a69ac40482" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ef2d4435fb795664c2d63a69ac40482" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
               size_t n)</span></span>
             </h3>
             <p>Resizes to <code>n</code> points in <code>r</code> dimensions.</p>
@@ -493,7 +488,7 @@
           </div></section>
           <section class="m-doc-details" id="af45d30f307f301b9d43fcdf52897bbce"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af45d30f307f301b9d43fcdf52897bbce" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t n)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af45d30f307f301b9d43fcdf52897bbce" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t n)</span></span>
             </h3>
             <p>Reserves storage for <code>n</code> points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -510,7 +505,7 @@
           </div></section>
           <section class="m-doc-details" id="a49b8da64fb90f785f3a00ba79b1feaae"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49b8da64fb90f785f3a00ba79b1feaae" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 1&gt;&amp; p)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49b8da64fb90f785f3a00ba79b1feaae" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 1&gt;&amp; p)</span></span>
             </h3>
             <p>Appends a 1D point (requires active dimension 1).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -527,7 +522,7 @@
           </div></section>
           <section class="m-doc-details" id="a5dc6a1a2e42000c65f5de0fd23495e72"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc6a1a2e42000c65f5de0fd23495e72" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, 2&gt;&amp; p)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc6a1a2e42000c65f5de0fd23495e72" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, 2&gt;&amp; p)</span></span>
             </h3>
             <p>Appends a 2D point (requires active dimension 2).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -544,7 +539,7 @@
           </div></section>
           <section class="m-doc-details" id="a1bd13919e5cc86b7407bba53e7e8cc2b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bd13919e5cc86b7407bba53e7e8cc2b" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; p)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bd13919e5cc86b7407bba53e7e8cc2b" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; p)</span></span>
             </h3>
             <p>Appends a 3D point (requires active dimension 3).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -561,7 +556,7 @@
           </div></section>
           <section class="m-doc-details" id="a4df9605dbbbc885f367048bde4bb6cd4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4df9605dbbbc885f367048bde4bb6cd4" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; p)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4df9605dbbbc885f367048bde4bb6cd4" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; p)</span></span>
             </h3>
             <p>Appends a spatial point, zero-padding unused coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -578,7 +573,7 @@
           </div></section>
           <section class="m-doc-details" id="ab3e821c8f094080e606d3903669f0ad3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3e821c8f094080e606d3903669f0ad3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3e821c8f094080e606d3903669f0ad3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
               size_t j) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a reference to coordinate <code>i</code> of point <code>j</code>.</p>
@@ -606,7 +601,7 @@
           </div></section>
           <section class="m-doc-details" id="a263653c1b5ce2b9571cc27d5d528bb97"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a263653c1b5ce2b9571cc27d5d528bb97" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+              <span class="m-doc-wrap-bumper">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a263653c1b5ce2b9571cc27d5d528bb97" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
               size_t j) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const reference to coordinate <code>i</code> of point <code>j</code>.</p>
@@ -634,7 +629,7 @@
           </div></section>
           <section class="m-doc-details" id="a431a9dd7ada22436fc53024c3c99c537"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a431a9dd7ada22436fc53024c3c99c537" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a431a9dd7ada22436fc53024c3c99c537" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a reference to the packed 3-coordinate storage of point <code>j</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -657,7 +652,7 @@
           </div></section>
           <section class="m-doc-details" id="ab09e89cd847a87de859b5fec24f7df9f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab09e89cd847a87de859b5fec24f7df9f" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab09e89cd847a87de859b5fec24f7df9f" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const reference to the packed 3-coordinate storage of point <code>j</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -680,7 +675,7 @@
           </div></section>
           <section class="m-doc-details" id="a0e88d158053084b116cc2edc1e6f7960"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e88d158053084b116cc2edc1e6f7960" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e88d158053084b116cc2edc1e6f7960" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns point <code>j</code> as a SpatialPoint of the active dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -703,7 +698,7 @@
           </div></section>
           <section class="m-doc-details" id="a97c8eb6b42cc019b05412e667d170d8f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97c8eb6b42cc019b05412e667d170d8f" class="m-doc-self">col</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97c8eb6b42cc019b05412e667d170d8f" class="m-doc-self">col</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns point <code>j</code> as a SpatialPoint (Eigen-style column accessor).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -726,7 +721,7 @@
           </div></section>
           <section class="m-doc-details" id="a0deb49315b381bd264f6a11c6f6aa691"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a (rows x N) matrix view of the active coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -740,7 +735,7 @@
           </div></section>
           <section class="m-doc-details" id="ac8c6ab65815022b535858d6fe156c565"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8c6ab65815022b535858d6fe156c565" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8c6ab65815022b535858d6fe156c565" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a (rows x N) matrix view of the active coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -754,7 +749,7 @@
           </div></section>
           <section class="m-doc-details" id="a2c36c280b7f1868b329a837548803667"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#ab7ba607d323d533edd10c09e81db9a5c" class="m-doc">MapType3xN</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c36c280b7f1868b329a837548803667" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab7ba607d323d533edd10c09e81db9a5c" class="m-doc">MapType3xN</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c36c280b7f1868b329a837548803667" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a (3 x N) matrix view of the underlying packed storage.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -769,7 +764,7 @@
           </div></section>
           <section class="m-doc-details" id="ad6cb45c9b034bc2d9f61c3d02312f4e1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#aea94119037367fc22a550b1560321b91" class="m-doc">ConstMapType3xN</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6cb45c9b034bc2d9f61c3d02312f4e1" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aea94119037367fc22a550b1560321b91" class="m-doc">ConstMapType3xN</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6cb45c9b034bc2d9f61c3d02312f4e1" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a (3 x N) matrix view of the underlying packed storage.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -783,7 +778,7 @@
           </div></section>
           <section class="m-doc-details" id="aca18453191a0cfd5d9b3ab8f1f7993f6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; other) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the Frobenius inner product of the active coordinates with another point cloud.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -804,14 +799,14 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a65cd32e8aba1747e54c4f49eae2f4fd6"><div>
+          <section class="m-doc-details" id="af123d63d8c4c628b732d90ae11b1b37f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class EigenDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65cd32e8aba1747e54c4f49eae2f4fd6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af123d63d8c4c628b732d90ae11b1b37f" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Returns the Frobenius inner product of the active coordinates with an Eigen matrix.</p>
+            <p>Returns the Frobenius inner product of the active coordinates with an Eigen matrix, conjugating its entries.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -832,7 +827,7 @@
           </div></section>
           <section class="m-doc-details" id="a9b0169291d0effd4d9cbe0e98b8e8242"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b0169291d0effd4d9cbe0e98b8e8242" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b0169291d0effd4d9cbe0e98b8e8242" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the squared Frobenius norm of the active coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -846,7 +841,7 @@
           </div></section>
           <section class="m-doc-details" id="ab6b9364c8f346d08e82e363374db9b77"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6b9364c8f346d08e82e363374db9b77" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6b9364c8f346d08e82e363374db9b77" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a reference to the underlying packed point storage.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -860,7 +855,7 @@
           </div></section>
           <section class="m-doc-details" id="a6392dc4058f8f36b32f3379b0cf053f8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6392dc4058f8f36b32f3379b0cf053f8" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6392dc4058f8f36b32f3379b0cf053f8" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const reference to the underlying packed point storage.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -874,7 +869,7 @@
           </div></section>
           <section class="m-doc-details" id="a64358518906db4895c2540dd0489b664"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64358518906db4895c2540dd0489b664" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; v) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64358518906db4895c2540dd0489b664" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; v) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the active coordinates of all points to <code>v</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -891,7 +886,7 @@
           </div></section>
           <section class="m-doc-details" id="a55e89bb179acfa812992af41747fc70d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc">PointCloud</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Scales the active coordinates of all points by <code>s</code> in place.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -917,7 +912,7 @@
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
               const unsigned int version)</span></span>
             </h3>
             <p>Serializes the point cloud (for boost::serialization).</p>
@@ -976,13 +971,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

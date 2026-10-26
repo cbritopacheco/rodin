@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::Polytope class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,17 +71,14 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Polytope <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
-        </h1>
-        <p>Base class for all geometric elements in finite element meshes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>Polytope</h1><p class="rodin-reference-brief">Base class for all geometric elements in finite element meshes.</p><p class="rodin-reference-include">Defined in <a href="_polytope_8h.html"><code>Rodin/Geometry/Polytope.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_polytope.html#a7969bd543fe55f27ba2bcb045b73b7e2"><span class="nc">Polytope</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md103">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md104">Hierarchy</a></li>
-            <li><a href="#autotoc_md105">Usage</a></li>
+            <li><a href="#autotoc_md102">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md103">Hierarchy</a></li>
+            <li><a href="#autotoc_md104">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>A Polytope represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md103"><h2><a href="#autotoc_md103">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>A Polytope represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md102"><h2><a href="#autotoc_md102">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -167,29 +161,16 @@ $ x: K \rightarrow \tau $
 <use x='30.683916' y='0' xlink:href='#eq6-g0-33'/>
 <use x='45.959948' y='0' xlink:href='#eq6-g1-28'/>
 </g>
-</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md104"><h2><a href="#autotoc_md104">Hierarchy</a></h2><p>The Polytope class serves as the base for specialized classes:</p><ul><li>Cell: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li>Face: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li>Vertex: 0-dimensional points</li></ul></section><section id="autotoc_md105"><h2><a href="#autotoc_md105">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md103"><h2><a href="#autotoc_md103">Hierarchy</a></h2><p>The Polytope class serves as the base for specialized classes:</p><ul><li>Cell: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li>Face: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li>Vertex: 0-dimensional points</li></ul></section><section id="autotoc_md104"><h2><a href="#autotoc_md104">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="nc">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Cell "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span>
 <span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" has measure "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getMeasure</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="p">}</span></pre><p>S</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_cell.html">Cell</a></p><p><a href="class_rodin_1_1_geometry_1_1_face.html">Face</a></p><p><a href="class_rodin_1_1_geometry_1_1_vertex.html">Vertex</a></p><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a></p></aside></section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>
-            </dt>
-            <dd>Represents a cell (highest-dimensional element) in a mesh.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>
-            </dt>
-            <dd>Represents a face (codimension-1 element) in a mesh.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>
-            </dt>
-            <dd>Represents a vertex (0-dimensional element) in a mesh.</dd>
-          </dl>
-        </section>
+<span class="p">}</span></pre><p>S</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a></p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><div class="rodin-inheritance-current">Polytope</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_cell.html" title="Cell">Cell</a></li><li><a href="class_rodin_1_1_geometry_1_1_face.html" title="Face">Face</a></li><li><a href="class_rodin_1_1_geometry_1_1_vertex.html" title="Vertex">Vertex</a></li></ul></figure><section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_cell.html"><code>Cell</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Cell</span>
+</pre></details></td><td>Represents a cell (highest-dimensional element) in a mesh.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_face.html"><code>Face</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Face</span>
+</pre></details></td><td>Represents a face (codimension-1 element) in a mesh.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_vertex.html"><code>Vertex</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Vertex</span>
+</pre></details></td><td>Represents a vertex (0-dimensional element) in a mesh.</td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -237,11 +218,11 @@ $ x: K \rightarrow \tau $
             </dt>
             <dd>Constructs a polytope with given dimension and index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a990360c88a70aec645ba734695f84e81" class="m-doc">Polytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a990360c88a70aec645ba734695f84e81" class="m-doc">Polytope</a>(</span><span class="m-doc-wrap">const Polytope&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7ed024fe333315d1e01a2abed984fdf3" class="m-doc">Polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7ed024fe333315d1e01a2abed984fdf3" class="m-doc">Polytope</a>(</span><span class="m-doc-wrap">Polytope&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="a33651859418e495ca9b3aacf65a5b3c3">
@@ -254,11 +235,11 @@ $ x: K \rightarrow \tau $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6a724619bcc21c48d26074908bea7d1d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a724619bcc21c48d26074908bea7d1d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp; other) -&gt; <a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2b004a85f5c1b15fb6ffb3f7cbe7f4e2" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b004a85f5c1b15fb6ffb3f7cbe7f4e2" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp;&amp; other) -&gt; <a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -281,6 +262,10 @@ $ x: K \rightarrow \tau $
               <span class="m-doc-wrap-bumper">auto <a href="#ab47e720e5ad1eaf8f1fcd6473e431ae3" class="m-doc">getMeasure</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the geometric measure of this polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8f8da686c5926868b793c3d659f97408" class="m-doc">getMeasure</a>(</span><span class="m-doc-wrap">size_t order) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Integrates geometric measure with an explicitly selected quadrature order.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad909a66c68cb27e6651a2adc5e90e321" class="m-doc">getTransformation</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;</span>
             </dt>
@@ -314,11 +299,11 @@ $ x: K \rightarrow \tau $
             </dt>
             <dd>Checks if this is a vertex (dimension 0).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a32e87d846eb60f9fa07af7a9bf17edf9" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a32e87d846eb60f9fa07af7a9bf17edf9" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp;</span>
             </dt>
             <dd>Sets the attribute for this polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aea887b1af76b0422ba7311f84254090e" class="m-doc">getQuadrature</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad872bded9b4745b1362b836076713eb3" class="m-doc">getQuadrature</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp;</span>
             </dt>
             <dd>Gets cached quadrature for this polytope.</dd>
           </dl>
@@ -390,7 +375,7 @@ $ x: K \rightarrow \tau $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a7969bd543fe55f27ba2bcb045b73b7e2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index,
               const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh)</span></span>
             </h3>
@@ -437,7 +422,7 @@ $ i $
           </div></section>
           <section class="m-doc-details" id="a990360c88a70aec645ba734695f84e81"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a990360c88a70aec645ba734695f84e81" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a990360c88a70aec645ba734695f84e81" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">const Polytope&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -454,7 +439,7 @@ $ i $
           </div></section>
           <section class="m-doc-details" id="a7ed024fe333315d1e01a2abed984fdf3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ed024fe333315d1e01a2abed984fdf3" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ed024fe333315d1e01a2abed984fdf3" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">Polytope&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -471,7 +456,7 @@ $ i $
           </div></section>
           <section class="m-doc-details" id="a6a724619bcc21c48d26074908bea7d1d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a724619bcc21c48d26074908bea7d1d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a724619bcc21c48d26074908bea7d1d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -494,7 +479,7 @@ $ i $
           </div></section>
           <section class="m-doc-details" id="a2b004a85f5c1b15fb6ffb3f7cbe7f4e2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b004a85f5c1b15fb6ffb3f7cbe7f4e2" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b004a85f5c1b15fb6ffb3f7cbe7f4e2" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -517,7 +502,7 @@ $ i $
           </div></section>
           <section class="m-doc-details" id="a1915a339e5b40714b337e27f87a15576"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1915a339e5b40714b337e27f87a15576" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1915a339e5b40714b337e27f87a15576" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the polytope&#x27;s index within its dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -541,7 +526,7 @@ $ i $
           </div></section>
           <section class="m-doc-details" id="acfab02634131e313692a9c39c73b8976"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfab02634131e313692a9c39c73b8976" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfab02634131e313692a9c39c73b8976" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the topological dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -565,7 +550,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="aec341f99d334fdd5540adacf3512cdae"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the containing mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -579,7 +564,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ae238db69b232bd9daf0b031e6e03127f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae238db69b232bd9daf0b031e6e03127f" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae238db69b232bd9daf0b031e6e03127f" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the attribute (marker) of this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -594,7 +579,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ab47e720e5ad1eaf8f1fcd6473e431ae3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47e720e5ad1eaf8f1fcd6473e431ae3" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47e720e5ad1eaf8f1fcd6473e431ae3" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the geometric measure of this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -615,11 +600,35 @@ $ d $
 <g id='eq11-page1'>
 <use x='0' y='0' xlink:href='#eq11-g0-100'/>
 </g>
-</svg>-dimensional measure of the polytope:</p><table class="m-table"><thead><tr><th>Dimension</th><th>Measure</th></tr></thead><tbody><tr><td>0</td><td>Always 0</td></tr><tr><td>1</td><td>Length</td></tr><tr><td>2</td><td>Area</td></tr><tr><td>3</td><td>Volume</td></tr></tbody></table>
+</svg>-dimensional measure of the polytope:</p><table class="m-table"><thead><tr><th>Dimension</th><th>Measure</th></tr></thead><tbody><tr><td>0</td><td>Always 1</td></tr><tr><td>1</td><td>Length</td></tr><tr><td>2</td><td>Area</td></tr><tr><td>3</td><td>Volume</td></tr></tbody></table>
+          </div></section>
+          <section class="m-doc-details" id="a8f8da686c5926868b793c3d659f97408"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f8da686c5926868b793c3d659f97408" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t order) const</span></span>
+            </h3>
+            <p>Integrates geometric measure with an explicitly selected quadrature order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">order</td>
+                  <td>Reference polynomial degree requested from the quadrature dispatcher.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The integral of the positive geometric distortion.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The default overload integrates the determinant degree on regular polynomial volume maps. Embedded and rational maps generally have nonpolynomial distortion; their default uses a conservative order policy, while this overload permits explicit accuracy studies.</p>
           </div></section>
           <section class="m-doc-details" id="ad909a66c68cb27e6651a2adc5e90e321"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad909a66c68cb27e6651a2adc5e90e321" class="m-doc-self">getTransformation</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad909a66c68cb27e6651a2adc5e90e321" class="m-doc-self">getTransformation</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the geometric transformation for this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -652,7 +661,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a8b0ab88ca43a70cd21dc35ca52782c71"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b0ab88ca43a70cd21dc35ca52782c71" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b0ab88ca43a70cd21dc35ca52782c71" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets an iterator over the vertices of this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -666,7 +675,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="ad353f52b76d722ee8c9d2832f98da996"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad353f52b76d722ee8c9d2832f98da996" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad353f52b76d722ee8c9d2832f98da996" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the vertex indices defining this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -680,7 +689,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="ae8b47f622a0bf388a31386094c7eb655"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8b47f622a0bf388a31386094c7eb655" class="m-doc-self">getAdjacent</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8b47f622a0bf388a31386094c7eb655" class="m-doc-self">getAdjacent</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets an iterator over polytopes adjacent to this one.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -695,7 +704,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="acf2f8f6c39a2fe0809fd6b2d134f12a9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf2f8f6c39a2fe0809fd6b2d134f12a9" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf2f8f6c39a2fe0809fd6b2d134f12a9" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the geometry type of this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -709,7 +718,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="aec0d641023eeffb5bb3a6ca02298f5b2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0d641023eeffb5bb3a6ca02298f5b2" class="m-doc-self">isCell</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0d641023eeffb5bb3a6ca02298f5b2" class="m-doc-self">isCell</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if this is a cell (maximal dimension).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -723,7 +732,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a8a6b0c4e8ceed1e221aa65d48a39a868"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a6b0c4e8ceed1e221aa65d48a39a868" class="m-doc-self">isFace</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a6b0c4e8ceed1e221aa65d48a39a868" class="m-doc-self">isFace</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if this is a face (codimension 1).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -737,7 +746,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a13c21226eae1b4ad1fd0469d3102cd45"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13c21226eae1b4ad1fd0469d3102cd45" class="m-doc-self">isVertex</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13c21226eae1b4ad1fd0469d3102cd45" class="m-doc-self">isVertex</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if this is a vertex (dimension 0).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -751,7 +760,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a32e87d846eb60f9fa07af7a9bf17edf9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32e87d846eb60f9fa07af7a9bf17edf9" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7969bd543fe55f27ba2bcb045b73b7e2" class="m-doc">Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32e87d846eb60f9fa07af7a9bf17edf9" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Sets the attribute for this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -764,9 +773,9 @@ $ x: K \rightarrow \tau $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>Implementation details in derived classes.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="aea887b1af76b0422ba7311f84254090e"><div>
+          <section class="m-doc-details" id="ad872bded9b4745b1362b836076713eb3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea887b1af76b0422ba7311f84254090e" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad872bded9b4745b1362b836076713eb3" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf) const</span></span>
             </h3>
             <p>Gets cached quadrature for this polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -836,13 +845,20 @@ $ x: K \rightarrow \tau $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

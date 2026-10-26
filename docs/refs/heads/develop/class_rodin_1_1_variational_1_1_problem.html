@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Problem class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,48 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_forward_decls_8h.html">&lt;Rodin/Variational/ForwardDecls.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class ... Parameters&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem <span class="m-thin">class</span>
-        </h1>
-        <p>Represents a variational problem.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Problem</h1><p class="rodin-reference-brief">Represents a variational problem.</p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="nc">Parameters</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Problem</span><span class="p">;</span>
+</pre><section id="rodin-specializations"><h2><a href="#rodin-specializations">Specializations</a></h2><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_trial_function_00_01_test_function_01_4.html"><code>LinearSystem, TrialFunction, TestFunction</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_test_function.html"><span class="nc">TestFunction</span></a><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_trial_function_00_01_test_function_01_4.html#a339597c8eeb146f909d8e8dae7016730"><span class="nc">Problem</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_test_function.html"><span class="nc">TestFunction</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Two-field variational problem.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html"><code>LinearSystem, U1, U2, U3, Us...</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Us</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#a4cd269bcb12bd569b6fd6ecd6dde4c1b"><span class="nc">Problem</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Us</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Variational problem with three or more trial/test functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html"><code>PETSc::Math::LinearSystem, U, V</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">V</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html#a92a04f56194441a169e751a0ef01f52e"><span class="nc">Problem</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">U</span><span class="p">,</span>
+<span class="w">  </span><span class="n">V</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>PETSc variational problem for a single trial / test function pair.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html"><code>PETSc::Math::LinearSystem, U1, U2, U3, Us...</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Us</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html#a4cd269bcb12bd569b6fd6ecd6dde4c1b"><span class="nc">Problem</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="n">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Us</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>PETSc variational problem for multiple coupled trial / test functions.</td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -91,7 +124,7 @@
             </tr>
           </tbody>
         </table>
-<aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the Problem class, please see <a href="group___problem_specializations.html" class="m-doc">Problem Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>ProblemSpecializations</p></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the Problem class, please see <a href="group___problem_specializations.html" class="m-doc">Problem Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___problem_specializations.html" class="m-doc">Problem Template Specializations</a></p></aside>
       </div>
     </div>
   </div>
@@ -130,13 +163,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

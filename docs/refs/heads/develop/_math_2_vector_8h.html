@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin/Math/Vector.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -77,7 +74,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_b7e57313a66daf0cc7851f0d51a70ad3.html">Math</a>/</span>Vector.h <span class="m-thin">file</span>
         </h1>
-        <p>Dense vector type aliases and definitions.</p>
+        <p>Dense vector classes and dimension aliases.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,21 +87,60 @@
             </li>
           </ul>
         </nav>
-<p>This file provides type aliases for various vector types built on Eigen. Vectors are column-oriented by default and support both dynamic and fixed sizes.</p>
+<p>This file provides Rodin vector types with Eigen storage and expression support. Vectors are column-oriented by default and support both dynamic and fixed sizes.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
+            <dt>namespace <a href="namespace_eigen.html" class="m-doc">Eigen</a></dt>
+            <dd>Eigen interoperability declarations for Rodin mathematical types.</dd>
+            <dt>namespace <a href="namespace_eigen_1_1internal.html" class="m-doc">Eigen::internal</a></dt>
+            <dd>Eigen traits and evaluators for Rodin matrices and vectors.</dd>
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::Math</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a>.</dd>
+            <dd>Spatial arithmetic, matrix operations, and sparse linear algebra.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
+            <dd>Typed expressions for constructing variational forms.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_eigen_1_1internal_1_1traits_3_01_rodin_1_1_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Eigen::internal::traits&lt;Rodin::Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Retains Eigen map and reference support for dynamic Rodin vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, size_t Size&gt;</div>
+              struct <a href="struct_eigen_1_1internal_1_1traits_3_01_rodin_1_1_math_1_1_fixed_size_vector_3_01_scalar_00_01_size_01_4_01_4.html" class="m-doc">Eigen::internal::traits&lt;Rodin::Math::FixedSizeVector&lt;Scalar, Size&gt;&gt;</a>
+            </dt>
+            <dd>Retains Eigen map and reference support for fixed-size Rodin vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_eigen_1_1internal_1_1evaluator_3_01_rodin_1_1_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Eigen::internal::evaluator&lt;Rodin::Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Evaluates dynamic Rodin vectors through their Eigen storage.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, size_t Size&gt;</div>
+              struct <a href="struct_eigen_1_1internal_1_1evaluator_3_01_rodin_1_1_math_1_1_fixed_size_vector_3_01_scalar_00_01_size_01_4_01_4.html" class="m-doc">Eigen::internal::evaluator&lt;Rodin::Math::FixedSizeVector&lt;Scalar, Size&gt;&gt;</a>
+            </dt>
+            <dd>Evaluates fixed-size Rodin vectors through their Eigen storage.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
+              class <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Rodin::Math::Vector</a>
+            </dt>
+            <dd>Dynamic-size dense vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ScalarType, size_t Size&gt;</div>
+              class <a href="class_rodin_1_1_math_1_1_fixed_size_vector.html" class="m-doc">Rodin::Math::FixedSizeVector</a>
+            </dt>
+            <dd>Compile-time fixed-size dense vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, int Rows, int Options, int MaxRows&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_eigen_1_1_matrix_3_01_number_00_01_rows_00_011_006aaad6893d12f7d5318c57752e98d6c7.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Eigen::Matrix&lt;Number, Rows, 1, Options, MaxRows, 1&gt;&gt;</a>
+            </dt>
+            <dd>Scalar type of an Eigen column vector, including bounded vectors.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Number&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_math_1_1_vector_3_01_number_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Math::Vector&lt;Number&gt;&gt;</a>
@@ -155,13 +191,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::FittingForce class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,20 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>FittingForce <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Negative first-variation coefficient of the robust interface energy.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>FittingForce <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Negative first-variation coefficient of the robust interface energy.</p><p class="rodin-reference-include">Defined in <a href="_fitting_force_8h.html"><code>Rodin/Adaptation/SWIFT/FittingForce.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">PhiDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">GradDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Displacement</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LocatorType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html#a7cd2e04f1788a11850e992e446b71d7b"><span class="nc">FittingForce</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -93,16 +92,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Real, FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;</a>
-            </dt>
-            <dd>Base class for vector-valued functions defined on a mesh.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html" title="Variational::VectorFunctionBase&lt; Real, FittingForce&lt; PhiDerived, GradDerived, Displacement, LocatorType &gt; &gt;">Variational::VectorFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">FittingForce</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_vector_function_base.html"><code>Variational::VectorFunctionBase&lt;Real, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_vector_function_base.html"><span class="nc">VectorFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html#a7cd2e04f1788a11850e992e446b71d7b"><span class="nc">FittingForce</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">PhiDerived</span><span class="p">,</span><span class="w"> </span><span class="n">GradDerived</span><span class="p">,</span><span class="w"> </span><span class="nc">Displacement</span><span class="p">,</span><span class="w"> </span><span class="n">LocatorType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for vector-valued functions defined on a mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html#a3c3191a65529002f4227be8235f4bca3"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a6049a2e88f41fa0b9ed05157cb23f772">VectorFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>Variational::FunctionBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_vector_function_base.html"><code>Variational::VectorFunctionBase</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#af5f065ebe0b3b1c58b0c2402a50fc9e3"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a15eb99a5cecce266b59c5e7c1a9b2f4d"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#afd564b09b05a55499d7576b85f69a01e"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_vector_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -115,7 +106,7 @@
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="a8fcca051abb8a8ef01c71324b9693fe5">
-              using <a href="#a8fcca051abb8a8ef01c71324b9693fe5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;
+              using <a href="#a8fcca051abb8a8ef01c71324b9693fe5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc">FittingForce</a>&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="ae66af3353f74105ab2520183cee7a10e">
@@ -131,7 +122,7 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc">FittingForce</a></dt><dd>Constructs the robust fitting force coefficient.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper"><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
               const <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc">GradType</a>&amp; grad,
               const Displacement&amp; current,
@@ -139,10 +130,9 @@
               const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_loss.html" class="m-doc">Loss</a>&amp; loss,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> normalization,
               std::size_t dimension)</span>
-            </dt>
-            <dd>Constructs the robust fitting force coefficient.</dd>
+            </div></details></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a02b42a74d643b8998d17bcb03860811a" class="m-doc">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a02b42a74d643b8998d17bcb03860811a" class="m-doc">FittingForce</a>(</span><span class="m-doc-wrap">const FittingForce&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -163,7 +153,7 @@
             </dt>
             <dd>Reports no intrinsic polynomial order.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3c3191a65529002f4227be8235f4bca3" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c3191a65529002f4227be8235f4bca3" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc">FittingForce</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Clones this coefficient.</dd>
           </dl>
@@ -172,10 +162,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a7cd2e04f1788a11850e992e446b71d7b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc-self">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc-self">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
               const <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc">GradType</a>&amp; grad,
               const Displacement&amp; current,
               const LocatorType&amp; locator,
@@ -222,10 +210,8 @@
           </div></section>
           <section class="m-doc-details" id="a02b42a74d643b8998d17bcb03860811a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02b42a74d643b8998d17bcb03860811a" class="m-doc-self">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02b42a74d643b8998d17bcb03860811a" class="m-doc-self">FittingForce</a>(</span><span class="m-doc-wrap">const FittingForce&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -242,10 +228,8 @@
           </div></section>
           <section class="m-doc-details" id="ac2cf7231deca5d00bdaddf77168dca3a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2cf7231deca5d00bdaddf77168dca3a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">Variational::<wbr />IntegrationPoint</a>&amp; ip) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2cf7231deca5d00bdaddf77168dca3a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">Variational::<wbr />IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the coefficient at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -265,13 +249,12 @@
                 </tr>
               </tfoot>
             </table>
+<p>Point preparation belongs to this evaluation. The coefficient retains only read-only dependencies, with one location per evaluation.</p>
           </div></section>
           <section class="m-doc-details" id="a70c730dbc037bcdddbe14d018c6e4165"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70c730dbc037bcdddbe14d018c6e4165" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">std::size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70c730dbc037bcdddbe14d018c6e4165" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Dimension of the vector value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -285,10 +268,8 @@
           </div></section>
           <section class="m-doc-details" id="a1277221b2d1c2fcb12361d7957fbb9c5"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Reports no intrinsic polynomial order.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -311,10 +292,8 @@
           </div></section>
           <section class="m-doc-details" id="a3c3191a65529002f4227be8235f4bca3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c3191a65529002f4227be8235f4bca3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc">FittingForce</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c3191a65529002f4227be8235f4bca3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Clones this coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -365,13 +344,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

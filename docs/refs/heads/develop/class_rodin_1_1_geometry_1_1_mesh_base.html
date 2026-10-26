@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::MeshBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,26 +71,27 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>MeshBase <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_mesh_8h.html">&lt;Rodin/Geometry/Mesh.h&gt;</a></div>
-        </h1>
-        <p>Abstract base class for all mesh implementations.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>MeshBase</h1><p class="rodin-reference-brief">Abstract base class for all mesh implementations.</p><p class="rodin-reference-include">Defined in <a href="_geometry_2_mesh_8h.html"><code>Rodin/Geometry/Mesh.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><span class="nc">MeshBase</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md93">Inheritance Hierarchy</a></li>
-            <li><a href="#autotoc_md94">Thread Safety</a></li>
+            <li><a href="#autotoc_md90">Inheritance Hierarchy</a></li>
+            <li><a href="#autotoc_md91">Thread Safety</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>MeshBase provides the common interface for all mesh types in Rodin, defining fundamental operations such as:</p><ul><li>Point inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li>Polytope access through iterators</li><li>Mesh I/O operations</li><li>Connectivity queries</li></ul><section id="autotoc_md93"><h2><a href="#autotoc_md93">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md94"><h2><a href="#autotoc_md94">Thread Safety</a></h2><p>MeshBase and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html">SubMesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a></p></aside></section>
+<p>MeshBase provides the common interface for all mesh types in Rodin, defining fundamental operations such as:</p><ul><li>Point inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li>Polytope access through iterators</li><li>Mesh I/O operations</li><li>Connectivity queries</li></ul><section id="autotoc_md90"><h2><a href="#autotoc_md90">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md91"><h2><a href="#autotoc_md91">Thread Safety</a></h2><p>MeshBase and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><div class="rodin-inheritance-current">MeshBase</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" title="Mesh&lt; Context::Local &gt;; Mesh&lt; Context::MPI &gt;">Mesh</a></li></ul></figure><section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Mesh&lt;Context::Local&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="namespace_rodin_1_1_geometry.html#a7c024ea7e23c09a13f3431386e3a7aad"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Represents the subdivision of some domain into faces of (possibly) different geometries.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Mesh&lt;Context::MPI&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="namespace_rodin_1_1_geometry.html#a7c024ea7e23c09a13f3431386e3a7aad"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Distributed mesh specialization for MPI contexts.</td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -300,12 +298,11 @@
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets polytope transformation.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab80f38c32509cafa1f70a4fd2e670a52" class="m-doc">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
+            <dt><a href="#a3d0df5c541e48ec01de14354aade83bb" class="m-doc">getQuadrature</a></dt><dd>Gets cached quadrature for a polytope.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3d0df5c541e48ec01de14354aade83bb" class="m-doc">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets cached quadrature for a polytope.</dd>
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a268f4579b564cfb506eccd16866a278f" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
@@ -344,11 +341,10 @@
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; coords) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
-            <dt>
+            <dt><a href="#a11834e52a91313eb6d2d3b44810e0ea1" class="m-doc">setPolytopeTransformation</a></dt><dd>Sets the geometric transformation for a polytope.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper">auto <a href="#a11834e52a91313eb6d2d3b44810e0ea1" class="m-doc">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
               <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* trans) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Sets the geometric transformation for a polytope.</dd>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#acef2ca1a1d09aa328c13f39950d65749" class="m-doc">getContext</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Context::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -373,7 +369,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a8a80bde2a1da80e943646eb2404423c0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a80bde2a1da80e943646eb2404423c0" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a80bde2a1da80e943646eb2404423c0" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Equality comparison (pointer equality).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -396,7 +392,7 @@
           </div></section>
           <section class="m-doc-details" id="a5529f7a1957bdf41e4d323e3deb6f301"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5529f7a1957bdf41e4d323e3deb6f301" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5529f7a1957bdf41e4d323e3deb6f301" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Inequality comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -419,7 +415,7 @@
           </div></section>
           <section class="m-doc-details" id="a3203ac272db4d8b0a23eef0ed605341f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3203ac272db4d8b0a23eef0ed605341f" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3203ac272db4d8b0a23eef0ed605341f" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Checks whether a point is already expressed in this mesh&#x27;s local indexing convention.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -443,7 +439,7 @@
           </div></section>
           <section class="m-doc-details" id="acc802e09e1a41bb47fc3fa6394184885"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc802e09e1a41bb47fc3fa6394184885" class="m-doc-self">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc802e09e1a41bb47fc3fa6394184885" class="m-doc-self">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Tests point inclusion in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -467,7 +463,7 @@
           </div></section>
           <section class="m-doc-details" id="acf82f9b2937375c7b1cf3dccb3df3312"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf82f9b2937375c7b1cf3dccb3df3312" class="m-doc-self">isEmpty</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf82f9b2937375c7b1cf3dccb3df3312" class="m-doc-self">isEmpty</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if mesh is empty.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -482,7 +478,7 @@
           </div></section>
           <section class="m-doc-details" id="a5c0ab183385f8806ca268b5c1b31d55d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0ab183385f8806ca268b5c1b31d55d" class="m-doc-self">isSurface</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if mesh is a surface mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -497,7 +493,7 @@
           </div></section>
           <section class="m-doc-details" id="a24a4e01af898769244e11a4f94ca8fd0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24a4e01af898769244e11a4f94ca8fd0" class="m-doc-self">getVertexCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24a4e01af898769244e11a4f94ca8fd0" class="m-doc-self">getVertexCount</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the number of vertices.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -511,7 +507,7 @@
           </div></section>
           <section class="m-doc-details" id="aa26e370d99a09c33f3f759c4bc52800e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa26e370d99a09c33f3f759c4bc52800e" class="m-doc-self">getFaceCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa26e370d99a09c33f3f759c4bc52800e" class="m-doc-self">getFaceCount</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the number of faces.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -525,7 +521,7 @@
           </div></section>
           <section class="m-doc-details" id="a3275fb6c3d9c1b19129046c40d555972"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3275fb6c3d9c1b19129046c40d555972" class="m-doc-self">getCellCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3275fb6c3d9c1b19129046c40d555972" class="m-doc-self">getCellCount</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the number of cells.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -539,7 +535,7 @@
           </div></section>
           <section class="m-doc-details" id="a1a93f6a1a2e97911722772d5429a79b1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a93f6a1a2e97911722772d5429a79b1" class="m-doc-self">getFaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a93f6a1a2e97911722772d5429a79b1" class="m-doc-self">getFaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
             </h3>
             <p>Gets face attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -562,7 +558,7 @@
           </div></section>
           <section class="m-doc-details" id="a9000ddf38d8d853cbde9005de9efcafb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9000ddf38d8d853cbde9005de9efcafb" class="m-doc-self">getCellAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9000ddf38d8d853cbde9005de9efcafb" class="m-doc-self">getCellAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
             </h3>
             <p>Gets cell attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -585,7 +581,7 @@
           </div></section>
           <section class="m-doc-details" id="a543288032de1acbab32a9bf3ed77d21a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a543288032de1acbab32a9bf3ed77d21a" class="m-doc-self">scale</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a543288032de1acbab32a9bf3ed77d21a" class="m-doc-self">scale</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Scales mesh coordinates by a factor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -619,7 +615,7 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="a89c3247aa437732cab60ad21974e7559"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89c3247aa437732cab60ad21974e7559" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89c3247aa437732cab60ad21974e7559" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Loads mesh from file.</p>
@@ -647,7 +643,7 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="ae5a77ac22aaa8414ec63eee7b27eea70"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5a77ac22aaa8414ec63eee7b27eea70" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5a77ac22aaa8414ec63eee7b27eea70" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Saves mesh to file.</p>
@@ -669,14 +665,14 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="a50ab71f4bc571f6e246b20db4b3dd131"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50ab71f4bc571f6e246b20db4b3dd131" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50ab71f4bc571f6e246b20db4b3dd131" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Flushes cached mesh data.</p>
 <p>Clears any internally cached derived data (e.g., cached Jacobians).</p>
           </div></section>
           <section class="m-doc-details" id="a0f3b89fad95e67e618f74858cd5927a3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f3b89fad95e67e618f74858cd5927a3" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f3b89fad95e67e618f74858cd5927a3" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Checks if this mesh is a submesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -689,13 +685,13 @@ $ c $
             </table>
 <p>A Mesh which is also a SubMesh may be casted down to access SubMesh-specific functionality:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="nc">SubMesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
 <span class="p">}</span></pre>
           </div></section>
           <section class="m-doc-details" id="a33e981194110c815414b870a181a6f20"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33e981194110c815414b870a181a6f20" class="m-doc-self">isInterface</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> faceIdx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33e981194110c815414b870a181a6f20" class="m-doc-self">isInterface</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> faceIdx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Checks if a face is an interface between regions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -718,7 +714,7 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="a8515a8a61b23cc366b3e03647fe134ea"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8515a8a61b23cc366b3e03647fe134ea" class="m-doc-self">isBoundary</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> faceIdx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8515a8a61b23cc366b3e03647fe134ea" class="m-doc-self">isBoundary</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> faceIdx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Checks if a face is on the mesh boundary.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -741,7 +737,7 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="a8061eb8e8fbe91f5b3f3d7a5d31bc23d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8061eb8e8fbe91f5b3f3d7a5d31bc23d" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8061eb8e8fbe91f5b3f3d7a5d31bc23d" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Casts to SubMeshBase interface (mutable).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -764,7 +760,7 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="ab039fe7e561ad14d2e263d8fedf1d006"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab039fe7e561ad14d2e263d8fedf1d006" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab039fe7e561ad14d2e263d8fedf1d006" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Casts to SubMeshBase interface (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -787,7 +783,7 @@ $ c $
           </div></section>
           <section class="m-doc-details" id="aecbab974d66ff87d16610de96cf16878"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the topological dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -812,7 +808,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="aed7007d20f3a38dba19ef8fd566abb46"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed7007d20f3a38dba19ef8fd566abb46" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed7007d20f3a38dba19ef8fd566abb46" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the ambient space dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -827,7 +823,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="aa90969db1bab02c4a614787ead38bd00"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa90969db1bab02c4a614787ead38bd00" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa90969db1bab02c4a614787ead38bd00" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the total mesh volume.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -841,7 +837,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="ae1086268930278ab20529d42d39c430e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1086268930278ab20529d42d39c430e" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1086268930278ab20529d42d39c430e" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets volume of cells with specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -865,7 +861,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="af662870c417da21f12e8227df3b32da6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af662870c417da21f12e8227df3b32da6" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af662870c417da21f12e8227df3b32da6" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets volume of cells with attributes in set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -888,7 +884,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="ad34d7af265f67b82725809c1d00c016b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad34d7af265f67b82725809c1d00c016b" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad34d7af265f67b82725809c1d00c016b" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the total mesh perimeter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -902,7 +898,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a5bc492688ef067f853a2500600975cdb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bc492688ef067f853a2500600975cdb" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bc492688ef067f853a2500600975cdb" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets perimeter of cells with specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -926,7 +922,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a0aeeb6eb4079e60cf24eb80c770b3ab1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0aeeb6eb4079e60cf24eb80c770b3ab1" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0aeeb6eb4079e60cf24eb80c770b3ab1" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets perimeter of cells with attributes in set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -949,7 +945,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="ac7f46af86eacabd059be482d966cfcf8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7f46af86eacabd059be482d966cfcf8" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7f46af86eacabd059be482d966cfcf8" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets total area.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -963,7 +959,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a0d5fb32cf9f3b58f4364235d6e272d7d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d5fb32cf9f3b58f4364235d6e272d7d" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d5fb32cf9f3b58f4364235d6e272d7d" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets area of elements with specified attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -986,7 +982,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a3c14aa7923d5233c351eb5fe36edf705"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c14aa7923d5233c351eb5fe36edf705" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c14aa7923d5233c351eb5fe36edf705" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets area of elements with attributes in set.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1009,7 +1005,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a0d7f7c05ed21e54029222bcdd911b3e6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d7f7c05ed21e54029222bcdd911b3e6" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d7f7c05ed21e54029222bcdd911b3e6" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets measure of polytopes of given dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1032,7 +1028,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="aad4b64cda28da924e7a59cc9429f606b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad4b64cda28da924e7a59cc9429f606b" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad4b64cda28da924e7a59cc9429f606b" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets measure of polytopes with attribute.</p>
@@ -1060,7 +1056,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a2eac32c6cf92dc422e979bc927703ef4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2eac32c6cf92dc422e979bc927703ef4" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2eac32c6cf92dc422e979bc927703ef4" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets measure of polytopes with attributes in set.</p>
@@ -1088,7 +1084,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="ab95d4c2eb2f1fe32ea874dd6cc496e84"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab95d4c2eb2f1fe32ea874dd6cc496e84" class="m-doc-self">getBoundary</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab95d4c2eb2f1fe32ea874dd6cc496e84" class="m-doc-self">getBoundary</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator over boundary faces.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1102,7 +1098,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a751a39f199d8b72e398e69ffe33be833"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a751a39f199d8b72e398e69ffe33be833" class="m-doc-self">getInterface</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a751a39f199d8b72e398e69ffe33be833" class="m-doc-self">getInterface</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator over interface faces.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1116,7 +1112,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="aa57e302d3532878660146d122c8d3af6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa57e302d3532878660146d122c8d3af6" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t dimension) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa57e302d3532878660146d122c8d3af6" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t dimension) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets count of polytopes of given dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1139,7 +1135,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a74a7c23d97678d379a3ebc5f6ce278f5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74a7c23d97678d379a3ebc5f6ce278f5" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74a7c23d97678d379a3ebc5f6ce278f5" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets count of polytopes of given geometry type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1162,7 +1158,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a2f0d9b69fe0a04c132d6855b3912fb3e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f0d9b69fe0a04c132d6855b3912fb3e" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f0d9b69fe0a04c132d6855b3912fb3e" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator over all cells.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1176,7 +1172,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a8e8284f5a68f68c3d3503033ba150453"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e8284f5a68f68c3d3503033ba150453" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e8284f5a68f68c3d3503033ba150453" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator over all faces.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1190,7 +1186,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="afb577cd14759a338f68b09172b205968"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb577cd14759a338f68b09172b205968" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb577cd14759a338f68b09172b205968" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator over all vertices.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1204,7 +1200,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="aebb9807258bf9a3a4af820ce856463cf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebb9807258bf9a3a4af820ce856463cf" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebb9807258bf9a3a4af820ce856463cf" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator over polytopes of given dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1227,7 +1223,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a5fad8e0be2fc8f6e429d7528c59d66ec"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5fad8e0be2fc8f6e429d7528c59d66ec" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5fad8e0be2fc8f6e429d7528c59d66ec" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator to specific cell.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1250,7 +1246,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a01f4516e22b25edf32c08f47e35e7834"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01f4516e22b25edf32c08f47e35e7834" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01f4516e22b25edf32c08f47e35e7834" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator to specific face.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1273,7 +1269,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a51e5396aac400d4b1bab86560f7a3e59"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51e5396aac400d4b1bab86560f7a3e59" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51e5396aac400d4b1bab86560f7a3e59" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator to specific vertex.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1296,7 +1292,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="afa79eb0f79ce5382dd3ff599afd0b746"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa79eb0f79ce5382dd3ff599afd0b746" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa79eb0f79ce5382dd3ff599afd0b746" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets iterator to specific polytope.</p>
@@ -1324,7 +1320,7 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="ab73260967f6ff488c26807cdc415abe8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab73260967f6ff488c26807cdc415abe8" class="m-doc-self">getPolytopeTransformation</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab73260967f6ff488c26807cdc415abe8" class="m-doc-self">getPolytopeTransformation</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets polytope transformation.</p>
@@ -1368,11 +1364,11 @@ $ x: K \rightarrow \tau $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab80f38c32509cafa1f70a4fd2e670a52"><div>
+          <section class="m-doc-details" id="a3d0df5c541e48ec01de14354aade83bb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab80f38c32509cafa1f70a4fd2e670a52" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d0df5c541e48ec01de14354aade83bb" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
-              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const <span class="m-label m-warning">pure virtual</span></span></span>
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets cached quadrature for a polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1403,7 +1399,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a268f4579b564cfb506eccd16866a278f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a268f4579b564cfb506eccd16866a278f" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a268f4579b564cfb506eccd16866a278f" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets geometry type of a polytope.</p>
@@ -1431,7 +1427,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a2bfd306710910a94bab24d67336ba14c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bfd306710910a94bab24d67336ba14c" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bfd306710910a94bab24d67336ba14c" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets attribute of a polytope.</p>
@@ -1459,7 +1455,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a5a22eb336f4cd59b30157ef348b19dc3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a22eb336f4cd59b30157ef348b19dc3" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a22eb336f4cd59b30157ef348b19dc3" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets attribute of a polytope.</p>
@@ -1487,7 +1483,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a1dd5d9f85e33803b0632be6f76e3118e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1dd5d9f85e33803b0632be6f76e3118e" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1dd5d9f85e33803b0632be6f76e3118e" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets reference to mesh connectivity.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1501,7 +1497,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="a83faa4b376f3bad6a1a21865a4044dc1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83faa4b376f3bad6a1a21865a4044dc1" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83faa4b376f3bad6a1a21865a4044dc1" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets a constant reference to the mesh connectivity.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1515,7 +1511,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="ac794625a89ebaf41c81ae8cbfeb45156"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac794625a89ebaf41c81ae8cbfeb45156" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac794625a89ebaf41c81ae8cbfeb45156" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the space coordinates of the vertex at the given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1538,7 +1534,7 @@ $ x: K \rightarrow \tau $
           </div></section>
           <section class="m-doc-details" id="abc4f6aa1245409482513cab4b70efac6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc4f6aa1245409482513cab4b70efac6" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc4f6aa1245409482513cab4b70efac6" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s,
               size_t i) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
@@ -1590,7 +1586,7 @@ $ (0, 5, 10) $
 <use x='32.599614' y='0' xlink:href='#eq4-g1-48'/>
 <use x='38.452604' y='0' xlink:href='#eq4-g1-41'/>
 </g>
-</svg> in a mesh embedded in three dimensional space.</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+</svg> in a mesh embedded in three dimensional space.</p><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="c1">// Add vertices...</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">setVertexCoordinates</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
@@ -1598,7 +1594,7 @@ $ (0, 5, 10) $
           </div></section>
           <section class="m-doc-details" id="a8ad0b7ba078bbd7ac8bf10c2c8b3e239"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ad0b7ba078bbd7ac8bf10c2c8b3e239" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ad0b7ba078bbd7ac8bf10c2c8b3e239" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; coords) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the space coordinate of the vertex at the given index for the given coordinate index.</p>
@@ -1626,7 +1622,7 @@ $ (0, 5, 10) $
           </div></section>
           <section class="m-doc-details" id="a11834e52a91313eb6d2d3b44810e0ea1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11834e52a91313eb6d2d3b44810e0ea1" class="m-doc-self">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11834e52a91313eb6d2d3b44810e0ea1" class="m-doc-self">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
               <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* trans) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets the geometric transformation for a polytope.</p>
@@ -1655,7 +1651,7 @@ $ (0, 5, 10) $
           </div></section>
           <section class="m-doc-details" id="acef2ca1a1d09aa328c13f39950d65749"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Context::<wbr />Base</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acef2ca1a1d09aa328c13f39950d65749" class="m-doc-self">getContext</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Context::<wbr />Base</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acef2ca1a1d09aa328c13f39950d65749" class="m-doc-self">getContext</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the execution context of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1670,7 +1666,7 @@ $ (0, 5, 10) $
           </div></section>
           <section class="m-doc-details" id="aafa1fbb6fcf1168fe50762a590fe5f89"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the optional name assigned to this mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1684,7 +1680,7 @@ $ (0, 5, 10) $
           </div></section>
           <section class="m-doc-details" id="ad5193c20d0320dd32fd0c8df5460b883"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5193c20d0320dd32fd0c8df5460b883" class="m-doc-self">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5193c20d0320dd32fd0c8df5460b883" class="m-doc-self">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name)</span></span>
             </h3>
             <p>Sets a human-readable name for the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1710,7 +1706,7 @@ $ (0, 5, 10) $
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
               const unsigned int version)</span></span>
             </h3>
             <p>Serializes the mesh (for boost::serialization).</p>
@@ -1769,13 +1765,20 @@ $ (0, 5, 10) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

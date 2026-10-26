@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin/Variational/FiniteElementSpace.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -81,30 +78,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md351">Mathematical Foundation</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md352">Conformity</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md353">DOF Management</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md354">Usage Example</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md357">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md358">Conformity</a></li>
+            <li><a href="#autotoc_md359">DOF Management</a></li>
+            <li><a href="#autotoc_md360">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -126,7 +103,7 @@ $ V_h $
 <use x='0' y='0' xlink:href='#eq1-g1-86'/>
 <use x='6.82435' y='1.793263' xlink:href='#eq1-g0-104'/>
 </g>
-</svg> used in finite element approximations. The finite element space defines the polynomial degree, mesh association, DOF mapping, and conformity properties of the approximation.</p><section id="autotoc_md351_1s1"><section id="autotoc_md351"><h3><a href="#autotoc_md351">Mathematical Foundation</a></h3><p>A finite element space <svg class="m-math" style="width: 1.219em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 11.704259 9.962629">
+</svg> used in finite element approximations. The finite element space defines the polynomial degree, mesh association, DOF mapping, and conformity properties of the approximation.</p><section id="autotoc_md357"><h2><a href="#autotoc_md357">Mathematical Foundation</a></h2><p>A finite element space <svg class="m-math" style="width: 1.219em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 11.704259 9.962629">
 <title>
 $ V_h $
 </title>
@@ -213,19 +190,19 @@ $ \Sigma $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-6'/>
 </g>
-</svg>: Set of degrees of freedom (nodal values, moments, etc.)</li></ul></section></section><section id="autotoc_md352_1s1"><section id="autotoc_md352"><h3><a href="#autotoc_md352">Conformity</a></h3><p>Different conforming spaces for different problems:</p><ul><li><strong>H¹-conforming</strong>: Continuous functions (standard Lagrange elements)</li><li><strong>H(div)-conforming</strong>: Normal component continuous (Raviart-Thomas, BDM)</li><li><strong>H(curl)-conforming</strong>: Tangential component continuous (Nédélec)</li><li><strong>L²-spaces</strong>: Discontinuous (DG methods)</li></ul></section></section><section id="autotoc_md353_1s1"><section id="autotoc_md353"><h3><a href="#autotoc_md353">DOF Management</a></h3><p>The finite element space manages:</p><ul><li>Global DOF numbering: unique index for each basis function</li><li>Local-to-global mapping: relates element DOFs to global DOFs</li><li>Boundary DOFs: identification for boundary condition application</li></ul></section></section><section id="autotoc_md354_1s1"><section id="autotoc_md354"><h3><a href="#autotoc_md354">Usage Example</a></h3><pre class="m-code"><span class="c1">// Create P1 space (continuous piecewise linear)</span>
-<span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>: Set of degrees of freedom (nodal values, moments, etc.)</li></ul></section><section id="autotoc_md358"><h2><a href="#autotoc_md358">Conformity</a></h2><p>Different conforming spaces for different problems:</p><ul><li><strong>H¹-conforming</strong>: Continuous functions (standard Lagrange elements)</li><li><strong>H(div)-conforming</strong>: Normal component continuous (Raviart-Thomas, BDM)</li><li><strong>H(curl)-conforming</strong>: Tangential component continuous (Nédélec)</li><li><strong>L²-spaces</strong>: Discontinuous (DG methods)</li></ul></section><section id="autotoc_md359"><h2><a href="#autotoc_md359">DOF Management</a></h2><p>The finite element space manages:</p><ul><li>Global DOF numbering: unique index for each basis function</li><li>Local-to-global mapping: relates element DOFs to global DOFs</li><li>Boundary DOFs: identification for boundary condition application</li></ul></section><section id="autotoc_md360"><h2><a href="#autotoc_md360">Usage Example</a></h2><pre class="m-code"><span class="c1">// Create P1 space (continuous piecewise linear)</span>
+<span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"DOFs: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">.</span><span class="n">getGlobalSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="c1">// Vector-valued space for elasticity</span>
-<span class="n">P1</span><span class="w"> </span><span class="nf">Wh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span></pre></section></section>
+<span class="nc">P1</span><span class="w"> </span><span class="nf">Wh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
+            <dd>Finite element spaces, fields, and variational problems.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -294,13 +271,20 @@ $ \Sigma $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

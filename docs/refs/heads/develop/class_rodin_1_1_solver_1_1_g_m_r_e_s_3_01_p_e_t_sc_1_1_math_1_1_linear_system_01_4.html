@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solver::GMRES&lt;PETSc::Math::LinearSystem&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,17 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_solver_2_g_m_r_e_s_8h.html">&lt;Rodin/PETSc/Solver/GMRES.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>GMRES&lt;PETSc::Math::LinearSystem&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Generalized minimal residual (GMRES) solver for PETSc linear systems.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solver.html">Solver</a></div><h1>GMRES <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Generalized minimal residual (GMRES) solver for PETSc linear systems.</p><p class="rodin-reference-include">Defined in <a href="_p_e_t_sc_2_solver_2_g_m_r_e_s_8h.html"><code>Rodin/PETSc/Solver/GMRES.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GMRES</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearSystem</code></td><td><code>PETSc::Math::LinearSystem</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -94,16 +89,9 @@
             </li>
           </ul>
         </nav>
-<p>Specialization of <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> that targets <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">LinearSystem</a> and sets the underlying KSP algorithm to <code>KSPGMRES</code>. Suitable for non-symmetric and indefinite systems.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::<wbr />Solver::<wbr />KSP</a></p><p><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::<wbr />PETSc::<wbr />Solver::<wbr />GMRES</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>
-            </dt>
-            <dd>PETSc KSP (Krylov subspace) linear solver wrapper.</dd>
-          </dl>
-        </section>
+<p>Specialization of <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> that targets <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">LinearSystem</a> and sets the underlying KSP algorithm to <code>KSPGMRES</code>. Suitable for non-symmetric and indefinite systems.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html" title="KSP">KSP</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GMRES</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_k_s_p.html"><code>KSP</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">KSP</span>
+</pre></details></td><td>PETSc KSP (Krylov subspace) linear solver wrapper.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html#ae0d964975c15ca1cca84d8c6eff3c163"><code>copy()</code></a></td><td><a href="class_rodin_1_1_solver_1_1_k_s_p.html#aa9f324ce2edff03c8fa2fe0079bc80f9">KSP::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_k_s_p.html"><code>KSP</code></a></td><td><details><summary>15 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#ad68ba7f176ce7034cfa1d0b9cff67b88"><code>DEFAULT_ABSTOL</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a44698ba0678d8a304fde7bb7c0eb9e19"><code>DEFAULT_DTOL</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a30096bf3a2cb9f682c5ca3bd0ad227c7"><code>DEFAULT_MAXIT</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#ae1fe9518a5217a23202ad95992aa57f1"><code>DEFAULT_RTOL</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a7300e7d0367728f293f23cb1951a6d64"><code>getError()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#aae8ddd82fe001dcab9c0eac87f70cac5"><code>getHandle()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a9a461ff76a370e5f8fd449bdb4950fad"><code>getHandle()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#aa01523ce17a2dd8cb2b730d9ac9fc896"><code>getIterationNumber()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a66b4e4a0f292f40b0b5119a1a7b84247"><code>HandleType</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a6323dab92ca23ac93240b87ca5352c2e"><code>setPreconditioner()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#aec0cc9fe51d97449d3c7730794a45991"><code>setPrefix()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a57bea8848cf396b0823a7f6d6ea0daa5"><code>setTolerances()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#a71cb4327c908a1a302cfd3f7a6a6b7ae"><code>setType()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#af7d39f0eac0af0ed5785935ac72a1e7d"><code>solve()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html#adeb0e48252fd318e8aa17cc7cad8d7c0"><code>solve()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_p_e_t_sc_1_1_object.html"><code>PETSc::Object</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_p_e_t_sc_1_1_object.html#a597f494c9f2a629c325206267b259244"><code>getComm()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a07663f770d90c7558d8746889964d6bc"><code>getProblem()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -158,7 +146,7 @@ $ \mathbf{x} $
             </dt>
             <dd>Base problem type that provides the linear system.</dd>
             <dt id="aaa1f19b66d8e7cb44bf307207b1035e7">
-              using <a href="#aaa1f19b66d8e7cb44bf307207b1035e7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>
+              using <a href="#aaa1f19b66d8e7cb44bf307207b1035e7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_k_s_p.html#a3b640a52cd2031bc6b8f196f66437f70" class="m-doc">KSP</a>
             </dt>
             <dd>Parent class type (<a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>).</dd>
           </dl>
@@ -171,11 +159,11 @@ $ \mathbf{x} $
             </dt>
             <dd>Construct a GMRES solver and set the PETSc type to KSPGMRES.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap">const GMRES&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a21595cbd4d8bbfb69629122a57d654e9" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a21595cbd4d8bbfb69629122a57d654e9" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap">GMRES&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -184,7 +172,7 @@ $ \mathbf{x} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a44126252bf8b19df8522a791659a0ad0" class="m-doc">GMRES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a heap-allocated copy of this GMRES solver.</dd>
             <dt>
@@ -226,7 +214,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44126252bf8b19df8522a791659a0ad0" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44126252bf8b19df8522a791659a0ad0" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Construct a GMRES solver and set the PETSc type to KSPGMRES.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -246,7 +234,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">const GMRES&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -266,7 +254,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21595cbd4d8bbfb69629122a57d654e9" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21595cbd4d8bbfb69629122a57d654e9" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">GMRES&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -286,7 +274,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>* Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a44126252bf8b19df8522a791659a0ad0" class="m-doc">GMRES</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a heap-allocated copy of this GMRES solver.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -303,7 +291,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
@@ -384,13 +372,20 @@ $ x $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

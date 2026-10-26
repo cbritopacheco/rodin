@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Geometry::PolytopeIteratorBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,11 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_iterator_8h.html">&lt;Rodin/Geometry/PolytopeIterator.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T, class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PolytopeIteratorBase <span class="m-thin">class</span>
-        </h1>
-        <p>Base class template for polytope iterators.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>PolytopeIteratorBase</h1><p class="rodin-reference-brief">Base class template for polytope iterators.</p><p class="rodin-reference-include">Defined in <a href="_polytope_iterator_8h.html"><code>Rodin/Geometry/PolytopeIterator.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html#a7fb8f299d7393119dfcb0202adfe5cb4"><span class="nc">PolytopeIteratorBase</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -98,8 +94,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md106">Usage Example</a></li>
-            <li><a href="#autotoc_md107">Thread Safety</a></li>
+            <li><a href="#autotoc_md105">Usage Example</a></li>
+            <li><a href="#autotoc_md106">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -109,12 +105,12 @@
             </li>
           </ul>
         </nav>
-<p>This CRTP (Curiously Recurring Template Pattern) base class provides common iterator functionality for traversing polytopes in a mesh.</p><section id="autotoc_md106"><h2><a href="#autotoc_md106">Usage Example</a></h2><pre class="m-code"><span class="c1">// Iterate over all cells in a mesh</span>
+<p>This CRTP (Curiously Recurring Template Pattern) base class provides common iterator functionality for traversing polytopes in a mesh.</p><section id="autotoc_md105"><h2><a href="#autotoc_md105">Usage Example</a></h2><pre class="m-code"><span class="c1">// Iterate over all cells in a mesh</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="nc">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="c1">// Process cell...</span>
-<span class="p">}</span></pre></section><section id="autotoc_md107"><h2><a href="#autotoc_md107">Thread Safety</a></h2><p>Polytope iterators are <strong>not</strong> thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a></p><p><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html">CellIterator</a></p><p><a href="class_rodin_1_1_geometry_1_1_face_iterator.html">FaceIterator</a></p><p><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html">VertexIterator</a></p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md106"><h2><a href="#autotoc_md106">Thread Safety</a></h2><p>Polytope iterators are <strong>not</strong> thread-safe. Each thread should use its own iterator instance.</p></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -133,7 +129,7 @@
             </dt>
             <dd>Copy constructor (deleted).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a5c63a35546ad0d38452654dad7f7eaae" class="m-doc">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5c63a35546ad0d38452654dad7f7eaae" class="m-doc">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">PolytopeIteratorBase&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt>
@@ -146,7 +142,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a254834199b12bbcf483c36647fa33689" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a254834199b12bbcf483c36647fa33689" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a7fb8f299d7393119dfcb0202adfe5cb4" class="m-doc">PolytopeIteratorBase</a>&amp;&amp; other) -&gt; <a href="#a7fb8f299d7393119dfcb0202adfe5cb4" class="m-doc">PolytopeIteratorBase</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -199,10 +195,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a28f662c0236f2e59cef33fa36c843bf6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28f662c0236f2e59cef33fa36c843bf6" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">size_t dimension,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28f662c0236f2e59cef33fa36c843bf6" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">size_t dimension,
               const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
               <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span></span>
             </h3>
@@ -229,10 +223,8 @@
           </div></section>
           <section class="m-doc-details" id="a80c3ab1d244d9d84baf00c5225538f31"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80c3ab1d244d9d84baf00c5225538f31" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80c3ab1d244d9d84baf00c5225538f31" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
             </h3>
             <p>Copy constructor (deleted).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -249,10 +241,8 @@
           </div></section>
           <section class="m-doc-details" id="a5c63a35546ad0d38452654dad7f7eaae"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c63a35546ad0d38452654dad7f7eaae" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c63a35546ad0d38452654dad7f7eaae" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">PolytopeIteratorBase&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -269,10 +259,8 @@
           </div></section>
           <section class="m-doc-details" id="a67b76affb3b5d35fa419ac234144038b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67b76affb3b5d35fa419ac234144038b" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67b76affb3b5d35fa419ac234144038b" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Conversion to bool (checks if iterator is valid).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -286,10 +274,8 @@
           </div></section>
           <section class="m-doc-details" id="a254834199b12bbcf483c36647fa33689"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a254834199b12bbcf483c36647fa33689" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator_base.html" class="m-doc">PolytopeIteratorBase</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a7fb8f299d7393119dfcb0202adfe5cb4" class="m-doc">PolytopeIteratorBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a254834199b12bbcf483c36647fa33689" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a7fb8f299d7393119dfcb0202adfe5cb4" class="m-doc">PolytopeIteratorBase</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -312,10 +298,8 @@
           </div></section>
           <section class="m-doc-details" id="af729c6dc6f0946ed62d77f891bc2ccbf"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af729c6dc6f0946ed62d77f891bc2ccbf" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af729c6dc6f0946ed62d77f891bc2ccbf" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if iterator has reached the end.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -329,10 +313,8 @@
           </div></section>
           <section class="m-doc-details" id="a5dc20aa91709453024849d45351245bf"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc20aa91709453024849d45351245bf" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">Derived&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc20aa91709453024849d45351245bf" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Pre-increment operator (advances to next polytope).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -346,10 +328,8 @@
           </div></section>
           <section class="m-doc-details" id="a64739e85c2e6880359a194b23ce0b5d0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const T&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64739e85c2e6880359a194b23ce0b5d0" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const T&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64739e85c2e6880359a194b23ce0b5d0" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Dereferences iterator to get current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -363,10 +343,8 @@
           </div></section>
           <section class="m-doc-details" id="a7e84d95ae6045721f4c97508a1050eb7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e84d95ae6045721f4c97508a1050eb7" class="m-doc-self">operator-&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const T* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e84d95ae6045721f4c97508a1050eb7" class="m-doc-self">operator-&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Member access operator for current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -380,10 +358,8 @@
           </div></section>
           <section class="m-doc-details" id="a16c2546e4e201592269d705be40207dc"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16c2546e4e201592269d705be40207dc" class="m-doc-self">release</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">T* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16c2546e4e201592269d705be40207dc" class="m-doc-self">release</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Releases ownership of current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -394,14 +370,12 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-danger"><h4>Warning</h4><p>The returned pointer must be deleted by the caller.</p></aside>
+<aside class="m-note m-warning"><h4>Warning</h4><p>The returned pointer must be deleted by the caller.</p></aside>
           </div></section>
           <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the dimension of polytopes being iterated.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -415,10 +389,8 @@
           </div></section>
           <section class="m-doc-details" id="aec341f99d334fdd5540adacf3512cdae"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the mesh being iterated.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -432,10 +404,8 @@
           </div></section>
           <section class="m-doc-details" id="a2ee542e13c7ba9bc077c24b0d09d4c23"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ee542e13c7ba9bc077c24b0d09d4c23" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ee542e13c7ba9bc077c24b0d09d4c23" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the index generator (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -449,10 +419,8 @@
           </div></section>
           <section class="m-doc-details" id="a9652afd996a8792391afa62a91ea12eb"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9652afd996a8792391afa62a91ea12eb" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9652afd996a8792391afa62a91ea12eb" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the index generator (mutable).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -466,10 +434,8 @@
           </div></section>
           <section class="m-doc-details" id="a801503528536ba647f223a30ea57ded2"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a801503528536ba647f223a30ea57ded2" class="m-doc-self">key</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a801503528536ba647f223a30ea57ded2" class="m-doc-self">key</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the current polytope key.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -483,10 +449,8 @@
           </div></section>
           <section class="m-doc-details" id="a2816a4292d6f956fd99a10db236f895f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class T, class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2816a4292d6f956fd99a10db236f895f" class="m-doc-self">generate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">T* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2816a4292d6f956fd99a10db236f895f" class="m-doc-self">generate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Generates a polytope at the current iterator position.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -538,13 +502,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

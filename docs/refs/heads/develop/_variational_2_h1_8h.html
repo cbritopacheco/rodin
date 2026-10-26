@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin/Variational/H1.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -81,33 +78,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md379">Mathematical Foundation</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md380">Features</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md381">Degree of Freedom (DOF) Formulas</a></li>
-              </ul>
-            </li>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md382">Usage Example</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md385">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md386">Features</a></li>
+            <li><a href="#autotoc_md387">Degree of Freedom (DOF) Formulas</a></li>
+            <li><a href="#autotoc_md388">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header provides access to the H1-conforming Lagrange finite element family. These are high-order-stable elements with continuous (H¹) basis functions across element boundaries.</p><section id="autotoc_md379_1s1"><section id="autotoc_md379"><h3><a href="#autotoc_md379">Mathematical Foundation</a></h3><p>The H1-conforming Lagrange space of degree k is defined as:</p><div class="m-math"><svg style="width: 22.649em; height: 1.402em;" viewBox="85.557851 -13.45978 217.427342 13.45978">
+<p>This header provides access to the H1-conforming Lagrange finite element family. These are high-order-stable elements with continuous (H¹) basis functions across element boundaries.</p><section id="autotoc_md385"><h2><a href="#autotoc_md385">Mathematical Foundation</a></h2><p>The H1-conforming Lagrange space of degree k is defined as:</p><div class="m-math"><svg style="width: 22.649em; height: 1.402em;" viewBox="85.557851 -13.45978 217.427342 13.45978">
 <title>
 \[     V_h^k = \{u \in H^1(\Omega) : u|_K \in \mathbb{P}_k(K) \, \forall K \in \mathcal{T}_h\}
 \]
@@ -192,7 +169,7 @@ $ K $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg>.</p></section></section><section id="autotoc_md380_1s1"><section id="autotoc_md380"><h3><a href="#autotoc_md380">Features</a></h3><ul><li>Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)</li><li>H¹-conforming (continuous across element boundaries)</li><li>Lagrange nodal basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
+</svg>.</p></section><section id="autotoc_md386"><h2><a href="#autotoc_md386">Features</a></h2><ul><li>Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)</li><li>H¹-conforming (continuous across element boundaries)</li><li>Lagrange nodal basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
 </title>
@@ -282,7 +259,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq8-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq8-g1-49'/>
 </g>
-</svg> norm</li><li>Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge</li><li>High-order-stable implementation</li></ul></section></section><section id="autotoc_md381_1s1"><section id="autotoc_md381"><h3><a href="#autotoc_md381">Degree of Freedom (DOF) Formulas</a></h3><ul><li>Segment: <svg class="m-math" style="width: 2.788em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 26.760473 9.215393">
+</svg> norm</li><li>Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge</li><li>High-order-stable implementation</li></ul></section><section id="autotoc_md387"><h2><a href="#autotoc_md387">Degree of Freedom (DOF) Formulas</a></h2><ul><li>Segment: <svg class="m-math" style="width: 2.788em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 26.760473 9.215393">
 <title>
 $ k+1 $
 </title>
@@ -413,25 +390,25 @@ $ (k+1) \cdot \frac{(k+1)(k+2)}{2} $
 <rect x='45.694855' y='-3.227886' height='.478187' width='44.057623'/>
 <use x='65.606575' y='4.122632' xlink:href='#eq13-g3-50'/>
 </g>
-</svg></li></ul></section></section><section id="autotoc_md382_1s1"><section id="autotoc_md382"><h3><a href="#autotoc_md382">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 2 (quadratic)</span>
-<span class="n">RealH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
+</svg></li></ul></section><section id="autotoc_md388"><h2><a href="#autotoc_md388">Usage Example</a></h2><pre class="m-code"><span class="c1">// H1 element of degree 2 (quadratic)</span>
+<span class="nc">RealH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"DOFs: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// 6</span>
 
 <span class="c1">// H1 element of degree 3 (cubic)</span>
-<span class="n">RealH1Element</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_3</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Segment</span><span class="p">);</span>
+<span class="nc">RealH1Element</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_3</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Segment</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">basis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h1_3</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">basis</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">{{</span><span class="mf">0.5</span><span class="p">}});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">basis</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="p">{{</span><span class="mf">0.5</span><span class="p">}});</span>
 
 <span class="c1">// Complex-valued H1 element of degree 4</span>
-<span class="n">ComplexH1Element</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_c</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">);</span>
+<span class="nc">ComplexH1Element</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_c</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Quadrilateral</span><span class="p">);</span>
 
 <span class="c1">// Vector-valued H1 element for elasticity</span>
-<span class="n">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_v</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="nc">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_v</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
 
 <span class="c1">// H1 finite element space of degree 2</span>
-<span class="n">H1</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section></section>
+<span class="nc">H1</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section>
       </div>
     </div>
   </div>
@@ -470,13 +447,20 @@ $ (k+1) \cdot \frac{(k+1)(k+2)}{2} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

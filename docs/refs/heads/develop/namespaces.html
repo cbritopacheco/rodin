@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html" id="m-navbar-current">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -77,37 +74,42 @@
         <h1>Namespaces</h1>
         <ul class="m-doc">
           <li class="m-doc-collapsible">
+            <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_eigen.html" class="m-doc">Eigen</a> <span class="m-doc">Eigen interoperability declarations for Rodin mathematical types.</span>
+            <ul class="m-doc">
+              <li>namespace <a href="namespace_eigen_1_1internal.html" class="m-doc">internal</a> <span class="m-doc">Eigen traits and evaluators for Rodin matrices and vectors.</span></li>
+            </ul>
+          </li>
+          <li class="m-doc-collapsible">
             <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> <span class="m-doc">The Rodin library for finite element methods and shape optimization.</span>
             <ul class="m-doc">
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_adaptation.html" class="m-doc">Adaptation</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Benchmarks</a>.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_adaptation.html" class="m-doc">Adaptation</a> <span class="m-doc">Mesh adaptation and deformation operations.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html" class="m-doc">SWIFT</a> <span class="m-doc">Robust interface fitting with a fitting&ndash;distribution metric.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a>.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a> <span class="m-doc">Transport and advection of fields.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a>.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> <span class="m-doc">Contextual exceptions and diagnostic reporting.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_alert_1_1_identifier.html" class="m-doc">Identifier</a> <span class="m-doc">Namespace containing factory functions for code identifiers.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Elasticity</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Elasticity</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> <span class="m-doc">Global assembly of discrete operators.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> <span class="m-doc">Execution contexts for local and distributed computation.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a> <span class="m-doc">Distance-field computations.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> <span class="m-doc">Eikonal equations and distance propagation.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Typed expressions for constructing variational forms.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a>.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> <span class="m-doc">Meshes, geometric transformations, and mapped evaluation.</span>
                 <ul class="m-doc">
-                  <li>namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a>.</span></li>
+                  <li>namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> <span class="m-doc">Module for dealing with Euclidean geometries.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_heart.html" class="m-doc">Heart</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_heart.html" class="m-doc">Heart</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Hilbert</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Hilbert</a>.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_heart.html" class="m-doc">Heart</a> <span class="m-doc">Cardiac models and their coupled state evolution.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Hilbert</a> <span class="m-doc">Hilbert-space formulations and regularization.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a>.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> <span class="m-doc">Reading and writing meshes, fields, and associated data.</span>
                 <ul class="m-doc">
                   <li class="m-doc-collapsible">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> <span class="m-doc">HDF5 utility namespace providing type aliases, path constants, RAII handle wrappers, and low-level dataset read/write helpers.</span>
@@ -118,10 +120,10 @@
                   <li>namespace <a href="namespace_rodin_1_1_i_o_1_1_internal.html" class="m-doc">Internal</a> <span class="m-doc">Internal helpers for PETSc HDF5 serialization primitives.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_location.html" class="m-doc">Location</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_location.html" class="m-doc">Location</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> <span class="m-doc">Distributed-memory parallel extensions using MPI.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_location.html" class="m-doc">Location</a> <span class="m-doc">Spatial indexing and geometric search.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a> <span class="m-doc">Spatial arithmetic, matrix operations, and sparse linear algebra.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> <span class="m-doc">Mesh adaptation through the MMG integration.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> <span class="m-doc">Distributed meshes, finite element spaces, and search operations.</span></li>
               <li class="m-doc-collapsible">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <span class="m-doc">PETSc integration module for Rodin.</span>
                 <ul class="m-doc">
@@ -131,63 +133,34 @@
                   <li>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">PETSc-backed variational form adapters.</span></li>
                 </ul>
               </li>
+              <li>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> <span class="m-doc">Module for defining quadrature formulae over reference polytopes.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a> <span class="m-doc">Graph partitioning through the Scotch integration.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot.html" class="m-doc">Plot</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot.html" class="m-doc">Plot</a>.</span>
-                <ul class="m-doc">
-                  <li class="m-doc-collapsible">
-                    <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot_1_1_artist.html" class="m-doc">Artist</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_artist.html" class="m-doc">Artist</a>.</span>
-                    <ul class="m-doc">
-                      <li>namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axes.html" class="m-doc">Axes</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axes.html" class="m-doc">Axes</a>.</span></li>
-                      <li>namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axis.html" class="m-doc">Axis</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axis.html" class="m-doc">Axis</a>.</span></li>
-                      <li>namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_lines.html" class="m-doc">Lines</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_lines.html" class="m-doc">Lines</a>.</span></li>
-                    </ul>
-                  </li>
-                  <li class="m-doc-collapsible">
-                    <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot_1_1_backend.html" class="m-doc">Backend</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_backend.html" class="m-doc">Backend</a>.</span>
-                    <ul class="m-doc">
-                      <li>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_bases.html" class="m-doc">Bases</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_bases.html" class="m-doc">Bases</a>.</span></li>
-                      <li>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_event.html" class="m-doc">Event</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_event.html" class="m-doc">Event</a>.</span></li>
-                      <li class="m-doc-collapsible">
-                        <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_renderer.html" class="m-doc">Renderer</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_event.html" class="m-doc">Event</a>.</span>
-                        <ul class="m-doc">
-                          <li>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_renderer_1_1_drawables.html" class="m-doc">Drawables</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_renderer_1_1_drawables.html" class="m-doc">Drawables</a>.</span></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </li>
-                  <li>namespace <a href="namespace_rodin_1_1_plot_1_1_g_u_i.html" class="m-doc">GUI</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_plot_1_1_g_u_i.html" class="m-doc">GUI</a>.</span></li>
-                </ul>
-              </li>
-              <li>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a> <span class="m-doc">PT-Scotch mesh partitioning integration.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_serialization.html" class="m-doc">Serialization</a> <span class="m-doc">Namespace support for serialization of Rodin types.</span></li>
-              <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a> <span class="m-doc">Hyperelastic solid mechanics module for large-deformation problems.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a> <span class="m-doc">Constitutive laws, kinematics, and solid-mechanics integration.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_solid_1_1_tags.html" class="m-doc">Tags</a> <span class="m-doc">Standard tag types for auxiliary constitutive data.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> <span class="m-doc">Module containing various utilities and classes for writing tests.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Solution of linear and nonlinear discrete systems.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> <span class="m-doc">Helpers for constructing numerical tests.</span></li>
               <li class="m-doc-collapsible">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> <span class="m-doc">Tests of the Rodin library</span>
                 <ul class="m-doc">
-                  <li>namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Benchmarks</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Manufactured</a>.</span></li>
-                  <li>namespace <a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Manufactured</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Unit</a>.</span></li>
-                  <li>namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Unit</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a>.</span></li>
+                  <li>namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Benchmarks</a> <span class="m-doc">Performance benchmarks.</span></li>
+                  <li>namespace <a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Manufactured</a> <span class="m-doc">Manufactured solution test cases</span></li>
+                  <li>namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Unit</a> <span class="m-doc">Unitary tests.</span></li>
                 </ul>
               </li>
-              <li>namespace <a href="namespace_rodin_1_1_threads.html" class="m-doc">Threads</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_threads.html" class="m-doc">Threads</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a>.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a>.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> <span class="m-doc">Type utilities and generic programming helpers.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Finite element spaces, fields, and variational problems.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_variational_1_1_f.html" class="m-doc">F</a> <span class="m-doc">Contains built-in coordinate functions.</span></li>
                 </ul>
               </li>
             </ul>
           </li>
+          <li>namespace <a href="namespacestd.html" class="m-doc">std</a> <span class="m-doc">Standard-library customizations for Rodin types.</span></li>
         </ul>
         <script>
         function toggle(e) {
@@ -243,13 +216,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

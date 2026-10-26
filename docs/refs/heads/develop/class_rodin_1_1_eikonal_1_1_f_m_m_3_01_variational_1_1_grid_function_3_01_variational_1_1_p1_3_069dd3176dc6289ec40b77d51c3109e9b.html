@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Eikonal::FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,13 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_f_m_m_8h.html">&lt;Rodin/Eikonal/FMM.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_eikonal.html">Eikonal</a>::<wbr/></span>FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; <span class="m-thin">class</span>
-        </h1>
-        <p>FMM specialization for P1 finite elements on local meshes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_eikonal.html">Eikonal</a></div><h1>FMM</h1><p class="rodin-reference-brief">FMM specialization for P1 finite elements on local meshes.</p><p class="rodin-reference-include">Defined in <a href="_f_m_m_8h.html"><code>Rodin/Eikonal/FMM.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">SpeedFunction</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html#a73d89b63b13fdd0797eef84d05c3a1e9"><span class="nc">FMM</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_p1.html"><span class="nc">P1</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html#a278dcde0fa42c2714861999da25abbd2"><span class="nc">Context</span></a><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">SpeedFunction</span><span class="o">&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html">FMM</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Solution</code></td><td><code>Variational::GridFunction&lt; Variational::P1&lt; Real, Geometry::Mesh&lt; Context::Local &gt; &gt;, Data &gt;</code></td></tr><tr><td><code>SpeedFunction</code></td><td><code>SpeedFunction</code></td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -125,7 +123,7 @@
             <dt id="a278dcde0fa42c2714861999da25abbd2">
               using <a href="#a278dcde0fa42c2714861999da25abbd2" class="m-doc-self">Context</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
             </dt>
-            <dd>Computation context (local, non-distributed)</dd>
+            <dd>Computation context (local, non-distributed).</dd>
             <dt id="abcc8463dd31a437948ed9c8d7268156b">
               using <a href="#abcc8463dd31a437948ed9c8d7268156b" class="m-doc-self">Mesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a278dcde0fa42c2714861999da25abbd2" class="m-doc">Context</a>&gt;
             </dt>
@@ -133,9 +131,9 @@
             <dt id="aa4004319189a3b8631174afc2901a486">
               using <a href="#aa4004319189a3b8631174afc2901a486" class="m-doc-self">FES</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#abcc8463dd31a437948ed9c8d7268156b" class="m-doc">Mesh</a>&gt;
             </dt>
-            <dd>Finite element space type (P1)</dd>
+            <dd>Finite element space type (P1).</dd>
             <dt id="a03dcfc66b4706bd4114ae3ba4a91c2ec">
-              using <a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa4004319189a3b8631174afc2901a486" class="m-doc">FES</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&gt;
+              using <a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa4004319189a3b8631174afc2901a486" class="m-doc">FES</a>, <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&gt;
             </dt>
             <dd>Solution type: grid function storing arrival times.</dd>
             <dt id="a0f9a347a53d2169da74827130e17e6ff">
@@ -160,7 +158,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Seed&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed) -&gt; <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed) -&gt; <a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc">FMM</a>&amp;</span>
             </dt>
             <dd>Seeds the FMM with initial points.</dd>
             <dt>
@@ -173,9 +171,7 @@
           <h2>Enum documentation</h2>
           <section class="m-doc-details" id="a292e6792084beec58825c5c5abc5ce49"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Data, class SpeedFunction&gt;
-              </div>
+              
               enum class Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /><a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc-self">Label</a>: uint8_t
             </h3>
             <p>Label for mesh vertices during FMM propagation.</p>
@@ -213,7 +209,7 @@
                 template&lt;class Data, class SpeedFunction&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc">SolutionType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc">SolutionType</a>&amp; u,
               Callable&amp;&amp; speed)</span></span>
             </h3>
             <p>Constructs a Fast Marching Method solver.</p>
@@ -264,7 +260,7 @@ $ F(x) $
                 template&lt;class Data, class SpeedFunction&gt;
                 template&lt;class Seed&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp; Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc">FMM</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed)</span></span>
             </h3>
             <p>Seeds the FMM with initial points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -293,17 +289,15 @@ $ F(x) $
                 </tr>
               </tfoot>
             </table>
-<p>Seeds are the starting vertices where the arrival time is set to zero. The method will propagate from these points throughout the domain.</p><aside class="m-note m-info"><h4>Note</h4><p>This method must be called before solve().</p></aside>
+<p>Seeds are the starting vertices where the arrival time is set to zero. The method will propagate from these points throughout the domain. All valid seeds are accepted before neighboring trial values are computed, so seed ordering and duplicate indices do not affect the initialized interface.</p><aside class="m-note m-info"><h4>Note</h4><p>This method must be called before solve().</p></aside>
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Data, class SpeedFunction&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the Eikonal equation using the Fast Marching Method.</p>
-<p>Propagates the solution from seed points throughout the domain by repeatedly accepting the vertex with the smallest arrival time from the priority queue and updating its neighbors.</p><h5 id="autotoc_md40">Algorithm</h5><ol><li>Initialize: seed points have time 0, all others have time ∞</li><li>Extract vertex with minimum arrival time from priority queue</li><li>Mark it as Accepted</li><li>Update arrival times of neighboring vertices</li><li>Repeat until priority queue is empty</li></ol><aside class="m-note m-info"><h4>Note</h4><p>The seed() method must be called before solve().</p></aside>
+<p>Propagates the solution from seed points throughout the domain by repeatedly accepting the vertex with the smallest arrival time from the priority queue and updating its neighbors.</p><h4 id="autotoc_md43">Algorithm</h4><ol><li>Initialize: seed points have time 0, all others have time ∞</li><li>Extract vertex with minimum arrival time from priority queue</li><li>Mark it as Accepted</li><li>Update arrival times of neighboring vertices</li><li>Repeat until priority queue is empty</li></ol><aside class="m-note m-info"><h4>Note</h4><p>The seed() method must be called before solve().</p></aside>
           </div></section>
         </section>
       </div>
@@ -344,13 +338,20 @@ $ F(x) $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

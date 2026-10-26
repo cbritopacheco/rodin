@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::QualityCovering class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,17 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>QualityCovering <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Cached closed-form reference coverings with equal positive base weights.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>QualityCovering <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Cached closed-form reference coverings with equal positive base weights.</p><p class="rodin-reference-include">Defined in <a href="_quality_covering_8h.html"><code>Rodin/Adaptation/SWIFT/QualityCovering.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html#a61257f1291daa67f23977fbb71d78496"><span class="nc">QualityCovering</span></a><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -212,28 +208,35 @@ $a=1/(2\sqrt2)$
 <use x='59.818212' y='0' xlink:href='#eq5-g2-41'/>
 </g>
 </svg> otherwise. Point counts are unchanged. These structured coverings have known reference radii; unrestricted optimality is not claimed. Vertices are not supplemental witnesses.</p><aside class="m-note m-default"><h4>Architecture</h4><p>Generation visits the reference geometry&#x27;s integer index set once and applies its closed-form contraction. Immutable formulas are cached by geometry and subdivision. Equal base weights sum to reference volume. The quadrature interface supplies mapped-point caching, not polynomial exactness or a continuous quality certificate.</p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              class <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>
-            </dt>
-            <dd>Abstract base class for quadrature formulas.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" title="QF::QuadratureFormulaBase">QF::QuadratureFormulaBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">QualityCovering</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html"><code>QF::QuadratureFormulaBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">QF</span><span class="o">::</span><span class="nc">QuadratureFormulaBase</span>
+</pre></details></td><td>Read-only access to reference quadrature points and weights.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html#a3eae8327ca1fb513e25290e9d367039f"><code>getSamples()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#ac9de85c2457236f7e87494d48158e743">QuadratureFormulaBase::getSamples</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html#a23e73ba10e16901b2326d8212936b72b"><code>getSize()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a319cde5b2ea76e92e922845ecfa5c615">QuadratureFormulaBase::getSize</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html#a3d9ae6d6960698e83f7b4f81ad9c40e3"><code>getPoint()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a498c8f41a2a0208b3c64510e52fa04f6">QuadratureFormulaBase::getPoint</a></td></tr><tr><td><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html#a56b74ff92cb5876bea3ef654457be465"><code>getWeight()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a37791e12d1a664c6d31f69c0b2e2b69f">QuadratureFormulaBase::getWeight</a></td></tr></tbody></table></section>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a131410b48df357031d0ea89086665c42" class="m-doc">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
-              size_t subdivisions) -&gt; const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html" class="m-doc">QualityCovering</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a74864dba83d90b6d1b8a98bb4ee7a572" class="m-doc">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              size_t subdivisions) -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp;</span>
             </dt>
             <dd>Gets immutable witnesses retained until program termination.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a61257f1291daa67f23977fbb71d78496" class="m-doc">QualityCovering</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              size_t m)</span>
+            </dt>
+            <dd>Constructs the shifted and contracted generating lattice.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3eae8327ca1fb513e25290e9d367039f" class="m-doc">getSamples</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="struct_rodin_1_1_q_f_1_1_quadrature_formula_base_1_1_samples.html" class="m-doc">Samples</a>&gt; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -251,16 +254,16 @@ $a=1/(2\sqrt2)$
             </dt>
             <dd>Gets the Euclidean covering radius in reference coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab9bb86c1dd71c0b689da58e4af2685fc" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html" class="m-doc">QualityCovering</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abc5959a52ccac0f7cf3927a7c090bba3" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a61257f1291daa67f23977fbb71d78496" class="m-doc">QualityCovering</a>* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Copies the witness set with a fresh cache identity.</dd>
+            <dd>Copies the owned witness samples.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a131410b48df357031d0ea89086665c42"><div>
+          <section class="m-doc-details" id="a74864dba83d90b6d1b8a98bb4ee7a572"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html" class="m-doc">QualityCovering</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />QualityCovering::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a131410b48df357031d0ea89086665c42" class="m-doc-self">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              <span class="m-doc-wrap-bumper">static const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74864dba83d90b6d1b8a98bb4ee7a572" class="m-doc-self">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
               size_t subdivisions)</span></span>
             </h3>
             <p>Gets immutable witnesses retained until program termination.</p>
@@ -286,9 +289,44 @@ $a=1/(2\sqrt2)$
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a61257f1291daa67f23977fbb71d78496"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61257f1291daa67f23977fbb71d78496" class="m-doc-self">QualityCovering</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              size_t m)</span></span>
+            </h3>
+            <p>Constructs the shifted and contracted generating lattice.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geometry</td>
+                  <td>Reference-cell geometry.</td>
+                </tr>
+                <tr>
+                  <td>m</td>
+                  <td>Positive generating-lattice subdivision count.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3eae8327ca1fb513e25290e9d367039f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="struct_rodin_1_1_q_f_1_1_quadrature_formula_base_1_1_samples.html" class="m-doc">Samples</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3eae8327ca1fb513e25290e9d367039f" class="m-doc-self">getSamples</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Read-only views of the retained reference samples.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />QualityCovering::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the number of distinct witnesses.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -302,7 +340,7 @@ $a=1/(2\sqrt2)$
           </div></section>
           <section class="m-doc-details" id="a3d9ae6d6960698e83f7b4f81ad9c40e3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />QualityCovering::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference coordinates of a witness.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -325,7 +363,7 @@ $a=1/(2\sqrt2)$
           </div></section>
           <section class="m-doc-details" id="a56b74ff92cb5876bea3ef654457be465"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />QualityCovering::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the equal reference penalty weight.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -348,7 +386,7 @@ $a=1/(2\sqrt2)$
           </div></section>
           <section class="m-doc-details" id="ae9008ff8a6b43ca2e03a2cb7bccc1193"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />QualityCovering::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9008ff8a6b43ca2e03a2cb7bccc1193" class="m-doc-self">getCoveringRadius</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9008ff8a6b43ca2e03a2cb7bccc1193" class="m-doc-self">getCoveringRadius</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the Euclidean covering radius in reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -360,11 +398,11 @@ $a=1/(2\sqrt2)$
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab9bb86c1dd71c0b689da58e4af2685fc"><div>
+          <section class="m-doc-details" id="abc5959a52ccac0f7cf3927a7c090bba3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_quality_covering.html" class="m-doc">QualityCovering</a>* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />QualityCovering::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bb86c1dd71c0b689da58e4af2685fc" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a61257f1291daa67f23977fbb71d78496" class="m-doc">QualityCovering</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc5959a52ccac0f7cf3927a7c090bba3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Copies the witness set with a fresh cache identity.</p>
+            <p>Copies the owned witness samples.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -413,13 +451,20 @@ $a=1/(2\sqrt2)$
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

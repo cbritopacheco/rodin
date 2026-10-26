@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advection · Rodin benchmarks</title>
+  <link rel="stylesheet" href="../../assets/mcss-22c93d2587ab.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600">
+  <link rel="stylesheet" href="../../assets/rodin-e6524bc0dfe4.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme-a31a2c4268f0.css">
+  <link rel="stylesheet" href="../../assets/rodin.css">
+  <link rel="stylesheet" href="../../assets/rodin-theme.css">
+  <link rel="stylesheet" href="../../assets/site.css">
+  <script src="../../assets/rodin-theme.js"></script>
+  <script src="../../assets/rodin-navigation.js" defer></script>
+  
+  <script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'local'}};</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body class="rodin-benchmarks">
+  <header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="../../../index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="../../../pages.html">Pages</a>
+              <ol>
+                <li><a href="../../../guides-index.html">General concepts</a></li>
+                <li><a href="../../../examples-index.html">Examples and tutorials</a></li>
+                <li><a href="../../../gallery.html">Gallery</a></li>
+                <li><a href="../../../guides-io.html">I/O in Rodin</a></li>
+                <li><a href="../../../configuration.html">Configuration</a></li>
+                <li><a href="../../../notation-index.html">Notation</a></li>
+                <li><a href="../../../credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="../../../modules.html">Modules</a>
+              <ol>
+                <li><a href="../../../namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="../../../namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="../../../namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="../../../namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="../../../namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="../../../namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="../../../namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="../../../annotated.html">Classes</a></li>
+            <li><a href="../../../files.html">Files</a></li>
+            <li><a href="../../../benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon benchmark-search-trigger" title="Search benchmarks" onclick="return showSearch()" aria-label="Search benchmarks"><svg class="benchmark-magnifier-icon" style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+  <main><article>
+    <div class="m-container m-container-inflatable rodin-benchmark-layout"><div class="m-row">
+      <div class="m-col-l-10 m-push-l-1" data-rodin-content>
+      <nav class="benchmark-breadcrumb" aria-label="Breadcrumb"><a href="../../index.html">Benchmarks</a> / <a href="../../Rodin/index.html">Modules</a> / <a href="../../Rodin/Advection/index.html">Advection</a></nav>
+      <h1>Advection</h1>
+      <p class="benchmark-configuration">Published configurations</p>
+      
+      <p class="m-text m-dim"><em>Transport and advection of fields.</em></p><div class="benchmark-representative"><div class="m-math"><svg style="width: 8.727em; height: 2.562em;" viewBox="152.978789 -24.590612 83.780911 24.590612">
+<title>
+\[  \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0
+\]
+</title>
+<defs>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g1-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g1-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g0-118' d='M5.917808-4.519054C6.001494-4.698381 6.049315-4.794022 6.802491-4.794022V-5.308095C6.372105-5.284184 6.348194-5.284184 5.858032-5.284184C5.535243-5.284184 5.511333-5.284184 4.829888-5.308095V-4.794022C5.152677-4.794022 5.415691-4.734247 5.415691-4.65056C5.415691-4.638605 5.415691-4.62665 5.355915-4.507098L3.957161-1.43462L2.414944-4.794022H3.072478V-5.308095C2.797509-5.284184 1.960648-5.284184 1.637858-5.284184C1.291158-5.284184 .597758-5.284184 .286924-5.308095V-4.794022H1.0401L3.144209-.227148C3.251806 0 3.275716 .059776 3.550685 .059776C3.741968 .059776 3.837609 .035866 3.945205-.203238L5.917808-4.519054Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g3-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g3-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g2-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g2-64' d='M5.427646-3.993026C5.355915-4.662516 4.937484-5.463512 3.861519-5.463512C2.175841-5.463512 .454296-3.753923 .454296-1.853051C.454296-1.123786 .956413 .251059 2.582316 .251059C5.403736 .251059 6.611208-3.861519 6.611208-5.499377C6.611208-7.220922 5.642839-8.547945 4.112578-8.547945C2.379078-8.547945 1.865006-7.029639 1.865006-6.706849C1.865006-6.599253 1.936737-6.336239 2.271482-6.336239C2.689913-6.336239 2.86924-6.718804 2.86924-6.922042C2.86924-7.292653 2.49863-7.292653 2.343213-7.292653C2.833375-8.177335 3.741968-8.261021 4.064757-8.261021C5.116812-8.261021 5.786301-7.424159 5.786301-6.085181C5.786301-5.32005 5.559153-4.435367 5.439601-3.993026H5.427646ZM2.618182-.071731C1.494396-.071731 1.303113-.956413 1.303113-1.458531C1.303113-1.984558 1.637858-3.21594 1.817186-3.658281C1.972603-4.016936 2.654047-5.224408 3.897385-5.224408C4.985305-5.224408 5.236364-4.27995 5.236364-3.634371C5.236364-2.749689 4.459278-.071731 2.618182-.071731Z'/>
+<path id='namespace_rodin_1_1_advection-representative-eq1-g2-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='namespace_rodin_1_1_advection-representative-eq1-page1'>
+<use x='152.978789' y='-16.288421' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g2-64'/>
+<use x='159.808657' y='-16.288421' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g2-30'/>
+<rect x='152.978789' y='-11.428548' height='.478187' width='13.757947'/>
+<use x='154.329255' y='0' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g2-64'/>
+<use x='161.159123' y='0' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g2-116'/>
+<use x='170.588914' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g3-43'/>
+<use x='182.350229' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g0-118'/>
+<use x='192.292073' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g1-1'/>
+<use x='198.269627' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g1-114'/>
+<use x='208.232297' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g2-30'/>
+<use x='218.481229' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g3-61'/>
+<use x='230.90671' y='-8.200662' xlink:href='#namespace_rodin_1_1_advection-representative-eq1-g3-48'/>
+</g>
+</svg></div></div><div class="m-block m-flat"><p><a href="../../../class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advances scalar fields on unstructured meshes by tracing characteristics and projecting the transported field into a finite element space. It is used to transport level sets and other evolving fields; boundary policies control the treatment of characteristics that reach the mesh boundary.</p></div>
+      
+      
+      <p>No benchmarks have been registered for this module yet.</p>
+      
+      </div>
+    </div></div>
+  </article></main>
+  
+<div class="m-doc-search" id="search" role="dialog" aria-modal="true" aria-label="Benchmark search">
+  <a href="#!" onclick="return hideSearch()" aria-label="Dismiss search backdrop"></a>
+  <div class="m-container"><div class="m-row"><div class="m-col-m-8 m-push-m-2">
+    <div class="m-doc-search-header m-text m-small">
+      <div class="benchmark-search-shortcuts"><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+      <div id="search-symbolcount">Loading index…</div>
+      <button class="benchmark-search-close" type="button" aria-label="Close benchmark search" onclick="return hideSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12 M18 6 6 18"></path></svg></button>
+    </div>
+    <div class="m-doc-search-content">
+      <form><input type="search" name="q" id="search-input" aria-label="Find benchmarks" placeholder="Loading…" disabled autocomplete="off" spellcheck="false"></form>
+      <noscript>Benchmark search requires JavaScript.</noscript>
+      <div id="search-help" class="m-text m-dim m-text-center">
+        <p>Find modules, classes and workloads by name, path or description.
+        Try <code>SpatialMatrix</code>, <code>pyramid</code> or <code>Stokes stability</code>.</p>
+        <p>Use ↑ / ↓ to select a result and Enter to open it. Tab completes a prefix.
+        Individual measured cases can be filtered on their benchmark page.</p>
+      </div>
+      <div id="search-notfound" class="m-text m-warning m-text-center">No matching benchmarks.</div>
+      <ul id="search-results"></ul>
+    </div>
+  </div></div></div>
+</div>
+<script src="../../assets/search-57e2ce511c71.js"></script>
+<script src="../../assets/searchdata-fc68b61a5937.js"></script>
+  <footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

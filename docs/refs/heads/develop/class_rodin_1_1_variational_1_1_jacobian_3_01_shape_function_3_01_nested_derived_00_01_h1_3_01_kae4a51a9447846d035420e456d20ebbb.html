@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,19 +71,22 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_2_jacobian_8h.html">&lt;Rodin/Variational/H1/Jacobian.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Jacobian of an H1 ShapeFunction object.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>Jacobian <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Jacobian of an H1 ShapeFunction object.</p><p class="rodin-reference-include">Defined in <a href="_h1_2_jacobian_8h.html"><code>Rodin/Variational/H1/Jacobian.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">NestedDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Mesh</span><span class="p">,</span>
+<span class="w">  </span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_kae4a51a9447846d035420e456d20ebbb.html#adc64a41bbbdfcf272835bb7e4084990e"><span class="nc">Jacobian</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_variational_1_1_shape_function.html"><span class="nc">ShapeFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1.html"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_variational_1_1_jacobian.html">Jacobian</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Operand</code></td><td><code>ShapeFunction&lt; NestedDerived, H1&lt; K, Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Space &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
@@ -95,23 +95,56 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;</a>
-            </dt>
-            <dd>Base class for shape function objects.</dd>
-          </dl>
-        </section>
+<p>Each basis Jacobian has one row per field component and one column per ambient coordinate. Reference gradients have <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<title>
+$d$
+</title>
+<defs>
+<path id='eq1-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-100'/>
+</g>
+</svg> entries, while their physical images under <svg class="m-math" style="width: 3.113em; height: 1.505em; vertical-align: -0.339em;" viewBox="0 -11.202421 29.883835 14.443533">
+<title>
+$(J_K^{\dagger})^T$
+</title>
+<defs>
+<path id='eq2-g1-75' d='M4.27995-3.203985C4.27198-3.219925 4.23213-3.299626 4.23213-3.307597C4.23213-3.323537 4.367621-3.419178 4.447323-3.474969C5.076961-3.937235 5.937733-4.558904 6.200747-4.726276C6.607223-4.98132 6.902117-5.148692 7.260772-5.180573C7.324533-5.188543 7.436115-5.196513 7.436115-5.339975C7.428144-5.395766 7.380324-5.443587 7.324533-5.443587C7.316563-5.443587 7.0934-5.419676 7.037609-5.419676H6.718804C6.583313-5.419676 6.38406-5.419676 6.312329-5.427646C6.256538-5.427646 5.945704-5.443587 5.889913-5.443587S5.72254-5.443587 5.72254-5.292154C5.72254-5.284184 5.730511-5.188543 5.850062-5.180573C5.913823-5.172603 6.041345-5.156663 6.041345-5.061021C6.041345-4.933499 5.881943-4.798007 5.866002-4.790037L5.802242-4.734247C5.778331-4.710336 5.746451-4.678456 5.7066-4.654545L2.454795-2.295392L3.084433-4.821918C3.156164-5.108842 3.172105-5.180573 3.753923-5.180573C3.913325-5.180573 4.008966-5.180573 4.008966-5.332005C4.008966-5.339975 4.000996-5.443587 3.873474-5.443587C3.722042-5.443587 3.53076-5.427646 3.379328-5.419676H2.87721C2.11208-5.419676 1.904857-5.443587 1.849066-5.443587C1.809215-5.443587 1.689664-5.443587 1.689664-5.292154C1.689664-5.180573 1.785305-5.180573 1.920797-5.180573C2.183811-5.180573 2.414944-5.180573 2.414944-5.053051C2.414944-5.021171 2.406974-5.0132 2.383064-4.909589L1.315068-.629639C1.243337-.326775 1.227397-.263014 .637609-.263014C.486177-.263014 .390535-.263014 .390535-.111582C.390535-.079701 .414446 0 .518057 0C.669489 0 .860772-.01594 1.012204-.02391H2.040349C2.16787-.01594 2.430884 0 2.550436 0C2.590286 0 2.709838 0 2.709838-.143462C2.709838-.263014 2.614197-.263014 2.478705-.263014C2.422914-.263014 2.311333-.263014 2.175841-.278954C2.008468-.294894 1.984558-.310834 1.984558-.390535C1.984558-.438356 2.040349-.637609 2.064259-.765131L2.367123-1.968618L3.650311-2.893151L4.606725-.924533C4.638605-.860772 4.726276-.68543 4.758157-.613699C4.805978-.533998 4.805978-.518057 4.805978-.486177C4.805978-.270984 4.511083-.263014 4.423412-.263014C4.343711-.263014 4.23213-.263014 4.23213-.111582C4.23213-.103611 4.2401 0 4.367621 0C4.447323 0 4.750187-.01594 4.821918-.02391H5.284184C6.017435-.02391 5.993524 0 6.097136 0C6.129016 0 6.248568 0 6.248568-.151432C6.248568-.263014 6.136986-.263014 6.089166-.263014C5.778331-.270984 5.67472-.326775 5.547198-.597758L4.27995-3.203985Z'/>
+<path id='eq2-g1-84' d='M3.602491-4.821918C3.674222-5.108842 3.682192-5.124782 4.008966-5.124782H4.614695C5.443587-5.124782 5.539228-4.861768 5.539228-4.463263C5.539228-4.26401 5.491407-3.921295 5.483437-3.881445C5.467497-3.793773 5.459527-3.722042 5.459527-3.706102C5.459527-3.602491 5.531258-3.57858 5.579078-3.57858C5.66675-3.57858 5.69863-3.626401 5.72254-3.777833L5.937733-5.276214C5.937733-5.387796 5.842092-5.387796 5.69863-5.387796H1.004234C.804981-5.387796 .789041-5.387796 .73325-5.220423L.247073-3.841594C.231133-3.801743 .207223-3.737983 .207223-3.690162C.207223-3.626401 .263014-3.57858 .326775-3.57858C.414446-3.57858 .430386-3.618431 .478207-3.753923C.932503-5.029141 1.163636-5.124782 2.375093-5.124782H2.685928C2.925031-5.124782 2.933001-5.116812 2.933001-5.053051C2.933001-5.029141 2.901121-4.869738 2.893151-4.837858L1.841096-.653549C1.769365-.350685 1.745455-.263014 .916563-.263014C.661519-.263014 .581818-.263014 .581818-.111582C.581818-.103611 .581818 0 .71731 0C.932503 0 1.482441-.02391 1.697634-.02391H2.375093C2.598257-.02391 3.156164 0 3.379328 0C3.443088 0 3.56264 0 3.56264-.151432C3.56264-.263014 3.474969-.263014 3.259776-.263014C3.068493-.263014 3.004732-.263014 2.797509-.278954C2.542466-.302864 2.510585-.334745 2.510585-.438356C2.510585-.470237 2.518555-.502117 2.542466-.581818L3.602491-4.821918Z'/>
+<path id='eq2-g0-121' d='M1.976588-3.323537C2.16787-3.299626 2.183811-3.299626 2.534496-3.203985C2.654047-3.172105 2.82939-3.132254 2.956912-3.132254C3.267746-3.132254 3.283686-3.395268 3.283686-3.427148C3.283686-3.514819 3.243836-3.730012 2.956912-3.730012C2.773599-3.730012 2.534496-3.666252 2.391034-3.618431C2.183811-3.56264 2.13599-3.55467 1.976588-3.53873C1.992528-3.769863 2.016438-4.008966 2.096139-4.511083C2.14396-4.758157 2.175841-5.00523 2.175841-5.252304C2.175841-5.371856 2.14396-5.610959 1.880946-5.610959C1.578082-5.610959 1.578082-5.324035 1.578082-5.252304C1.578082-5.228394 1.578082-4.94944 1.657783-4.511083C1.721544-4.096638 1.761395-3.825654 1.777335-3.53873C1.586052-3.56264 1.570112-3.56264 1.219427-3.658281C1.099875-3.690162 .924533-3.730012 .797011-3.730012C.486177-3.730012 .470237-3.466999 .470237-3.435118C.470237-3.347447 .510087-3.132254 .797011-3.132254C.980324-3.132254 1.219427-3.196015 1.362889-3.243836C1.570112-3.299626 1.617933-3.307597 1.777335-3.323537C1.761395-3.108344 1.729514-2.948941 1.681694-2.741719C1.578082-2.231631 1.578082-2.15193 1.578082-1.745455C1.578082-.255044 1.721544 1.323039 1.745455 1.546202C1.761395 1.657783 1.761395 1.713574 1.872976 1.713574S1.992528 1.657783 2.008468 1.562142C2.048319 1.227397 2.080199 .71731 2.10411 .366625C2.12802 .03188 2.175841-.972354 2.175841-1.745455C2.175841-2.10411 2.175841-2.239601 2.080199-2.669988C2.080199-2.693898 1.992528-3.092403 1.976588-3.323537Z'/>
+<path id='eq2-g2-74' d='M6.38406-7.340473C6.479701-7.699128 6.503611-7.81868 7.089415-7.81868C7.280697-7.81868 7.400249-7.81868 7.400249-8.033873C7.400249-8.16538 7.292653-8.16538 7.244832-8.16538C7.041594-8.16538 6.814446-8.141469 6.599253-8.141469H5.941719C5.439601-8.141469 4.913574-8.16538 4.411457-8.16538C4.303861-8.16538 4.160399-8.16538 4.160399-7.950187C4.160399-7.830635 4.25604-7.830635 4.25604-7.81868H4.554919C5.511333-7.81868 5.511333-7.723039 5.511333-7.543711C5.511333-7.531756 5.511333-7.44807 5.463512-7.256787L4.088667-1.793275C3.777833-.573848 2.976837 .011955 2.402989 .011955C1.996513 .011955 1.422665-.179328 1.279203-.812951C1.327024-.800996 1.3868-.789041 1.43462-.789041C1.829141-.789041 2.139975-1.135741 2.139975-1.482441C2.139975-1.673724 2.020423-1.924782 1.661768-1.924782C1.446575-1.924782 .944458-1.80523 .944458-1.028144C.944458-.274969 1.566127 .251059 2.426899 .251059C3.514819 .251059 4.686426-.573848 4.97335-1.709589L6.38406-7.340473Z'/>
+<path id='eq2-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq2-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g3-40'/>
+<use x='4.552326' y='0' xlink:href='#eq2-g2-74'/>
+<use x='12.129445' y='-5.66762' xlink:href='#eq2-g0-121'/>
+<use x='11.022482' y='3.241111' xlink:href='#eq2-g1-75'/>
+<use x='19.225151' y='0' xlink:href='#eq2-g3-41'/>
+<use x='23.777476' y='-4.338437' xlink:href='#eq2-g1-84'/>
+</g>
+</svg> have <svg class="m-math" style="width: 0.574em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.514006 5.147373">
+<title>
+$s$
+</title>
+<defs>
+<path id='eq3-g0-115' d='M2.725778-2.391034C2.929016-2.355168 3.251806-2.283437 3.323537-2.271482C3.478954-2.223661 4.016936-2.032379 4.016936-1.458531C4.016936-1.08792 3.682192-.119552 2.295392-.119552C2.044334-.119552 1.147696-.155417 .908593-.812951C1.3868-.753176 1.625903-1.123786 1.625903-1.3868C1.625903-1.637858 1.458531-1.769365 1.219427-1.769365C.956413-1.769365 .609714-1.566127 .609714-1.028144C.609714-.32279 1.327024 .119552 2.283437 .119552C4.100623 .119552 4.638605-1.219427 4.638605-1.841096C4.638605-2.020423 4.638605-2.355168 4.25604-2.737733C3.957161-3.024658 3.670237-3.084433 3.024658-3.21594C2.701868-3.287671 2.187796-3.395268 2.187796-3.93325C2.187796-4.172354 2.402989-5.033126 3.53873-5.033126C4.040847-5.033126 4.531009-4.841843 4.65056-4.411457C4.124533-4.411457 4.100623-3.957161 4.100623-3.945205C4.100623-3.694147 4.327771-3.622416 4.435367-3.622416C4.60274-3.622416 4.937484-3.753923 4.937484-4.25604S4.483188-5.272229 3.550685-5.272229C1.984558-5.272229 1.566127-4.040847 1.566127-3.550685C1.566127-2.642092 2.450809-2.450809 2.725778-2.391034Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-115'/>
+</g>
+</svg> entries, including on embedded cells and zero-dimensional points.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" title="ShapeFunctionBase&lt; Jacobian&lt; ShapeFunction&lt; NestedDerived, H1&lt; K, Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Space &gt; &gt;, H1&lt; K, Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Space &gt;">ShapeFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Jacobian</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><code>ShapeFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a0abc221d3661e40c6eeeaefabaa145aa"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_kae4a51a9447846d035420e456d20ebbb.html#adc64a41bbbdfcf272835bb7e4084990e"><span class="nc">Jacobian</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function.html"><span class="nc">ShapeFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">NestedDerived</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1.html"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_h1.html"><span class="nc">H1</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">Mesh</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><span class="nc">Space</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for shape function objects.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_kae4a51a9447846d035420e456d20ebbb.html#a135391db6a7bb79f8223fe066364dcad"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a1428ee337cebecb42cce3db0724526bb">ShapeFunctionBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><code>ShapeFunctionBase</code></a></td><td><details><summary>10 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#ad573d8e93ec4573179b3c070505db4f3"><code>getDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a90de35c4d5a1039c7ba9b1cd513c472b"><code>getSpaceType()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a7a2822d595fc7e8eb77c64ce081f44e0"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a1515051b5ab120ca4827293920a77eb3"><code>setPoint()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3"><code>Space</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a79dcf0096154d396a307c8719e4297b3"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#ae4c1981477f7b922c050c34f2cbd2175"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a79da2f205115b16539fc39b4f3dd4fea"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
               struct <a href="struct_rodin_1_1_variational_1_1_jacobian_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_5e70de5b09d40590ec7954ab6f913378.html" class="m-doc">Cache</a>
             </dt>
-            <dd>Per-cell tabulation cache.</dd>
+            <dd>Physical derivatives prepared by the current integration-point bind.</dd>
             <dt id="ac4a865626104ba4e2310ec636501736f">
               using <a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, Mesh&gt;
             </dt>
@@ -120,8 +153,8 @@
               using <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;NestedDerived, <a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a05619c3d225bcd170ee5c08626aba458">
-              using <a href="#a05619c3d225bcd170ee5c08626aba458" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;NestedDerived, <a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;&gt;, <a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
+            <dt id="ae7b62a6cdda5e5b8c8e41bad3fba66b4">
+              using <a href="#ae7b62a6cdda5e5b8c8e41bad3fba66b4" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a0abc221d3661e40c6eeeaefabaa145aa" class="m-doc">ShapeFunctionBase</a>&lt;<a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;NestedDerived, <a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;&gt;, <a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>, <a href="#aa1144f1bd47edfc66987067264668fc7" class="m-doc">SpaceType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
@@ -159,11 +192,11 @@
             </dt>
             <dd>Constructs the expression from its operand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const Jacobian&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">Jacobian&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -192,7 +225,11 @@
             </dt>
             <dd>Gets the integration point the expression is evaluated at.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3c3d8fc991e8a6e461a14e1ea1d8c546" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a78fd0a1ed5102a69e5f2c52fa7f48e29" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>&amp;</span>
+            </dt>
+            <dd>Starts a fresh cell binding and releases the previous point binding.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c3d8fc991e8a6e461a14e1ea1d8c546" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>&amp;</span>
             </dt>
             <dd>Sets the integration point the expression is evaluated at.</dd>
             <dt>
@@ -204,7 +241,7 @@
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the shape function.</dd>
           </dl>
@@ -213,10 +250,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="adc64a41bbbdfcf272835bb7e4084990e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; u)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
             <p>Constructs the expression from its operand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -233,10 +268,8 @@
           </div></section>
           <section class="m-doc-details" id="af5ed1b34f29463acebfe868aa0b5c950"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const Jacobian&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -253,10 +286,8 @@
           </div></section>
           <section class="m-doc-details" id="a203725244ef8426f03aa88af63c568e6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a203725244ef8426f03aa88af63c568e6" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">Jacobian&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -273,10 +304,8 @@
           </div></section>
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#afaf08734a425eabdd03481c9c0916262" class="m-doc">OperandType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -290,10 +319,8 @@
           </div></section>
           <section class="m-doc-details" id="ac5287464c39ed377af81f8543e4ff376"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand in the shape function expression.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -307,10 +334,8 @@
           </div></section>
           <section class="m-doc-details" id="af2b7ce92685158d3967f6cd88bbcc24f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2b7ce92685158d3967f6cd88bbcc24f" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; element) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2b7ce92685158d3967f6cd88bbcc24f" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; element) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the number of local basis functions for a polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -333,10 +358,8 @@
           </div></section>
           <section class="m-doc-details" id="a10349abf16afb7de7bd7c134317fcd4e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10349abf16afb7de7bd7c134317fcd4e" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const auto&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10349abf16afb7de7bd7c134317fcd4e" class="m-doc-self">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -350,10 +373,8 @@
           </div></section>
           <section class="m-doc-details" id="a233f39a256667047f0c412b2a212bbd4"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the integration point the expression is evaluated at.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -365,12 +386,34 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a78fd0a1ed5102a69e5f2c52fa7f48e29"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78fd0a1ed5102a69e5f2c52fa7f48e29" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope)</span></span>
+            </h3>
+            <p>Starts a fresh cell binding and releases the previous point binding.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Entity whose basis will be evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This expression after rebinding its evaluation state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a3c3d8fc991e8a6e461a14e1ea1d8c546"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp; Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c3d8fc991e8a6e461a14e1ea1d8c546" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c3d8fc991e8a6e461a14e1ea1d8c546" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip)</span></span>
             </h3>
             <p>Sets the integration point the expression is evaluated at.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -390,13 +433,12 @@
                 </tr>
               </tfoot>
             </table>
+<p>Every explicit bind prepares physical derivatives from the supplied point. Cell and formula identities do not identify geometry state: deformation may preserve both while changing the inverse Jacobian. Only reference tabulation and working storage are reused across binds.</p>
           </div></section>
           <section class="m-doc-details" id="a74b01660fb8ae42d027035f65d30356c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74b01660fb8ae42d027035f65d30356c" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74b01660fb8ae42d027035f65d30356c" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const</span></span>
             </h3>
             <p>Gets the basis function of a local degree of freedom.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -419,10 +461,8 @@
           </div></section>
           <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the polynomial order used on a mesh entity.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -445,10 +485,8 @@
           </div></section>
           <section class="m-doc-details" id="a135391db6a7bb79f8223fe066364dcad"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>* Rodin::<wbr />Variational::<wbr />Jacobian&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc">Jacobian</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a135391db6a7bb79f8223fe066364dcad" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the shape function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -499,13 +537,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

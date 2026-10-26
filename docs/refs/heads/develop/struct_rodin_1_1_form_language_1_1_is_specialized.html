@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::FormLanguage::IsSpecialized struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,16 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_is_specialized_8h.html">&lt;Rodin/FormLanguage/IsSpecialized.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T, class Enable = void&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>IsSpecialized <span class="m-thin">struct</span>
-        </h1>
-        <p>Whether <code>T</code> is an optimized specialization rather than a generic handler.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a></div><h1>IsSpecialized</h1><p class="rodin-reference-brief">Whether <code>T</code> is an optimized specialization rather than a generic handler.</p><p class="rodin-reference-include">Defined in <a href="_is_specialized_8h.html"><code>Rodin/FormLanguage/IsSpecialized.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">void</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IsSpecialized</span><span class="p">;</span>
+</pre><section id="rodin-specializations"><h2><a href="#rodin-specializations">Specializations</a></h2><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="struct_rodin_1_1_form_language_1_1_is_specialized_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1_specialized_08_4_01_4.html"><code>T, std::void_t&lt;decltype(T::Specialized)&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IsSpecialized</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">T</span><span class="p">,</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">void_t</span><span class="o">&lt;</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">T</span><span class="o">::</span><span class="n">Specialized</span><span class="p">)</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Specialization for types declaring a Specialized member.</td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -94,12 +95,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li>
-              <a href="#"></a>
-              <ul>
-                <li><a href="#autotoc_md45">Usage</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md48">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -108,8 +104,8 @@
             </li>
           </ul>
         </nav>
-<p>An integrand that no optimized handler matches is still integrated, by the generic handler, and still gives the right answer. That is what makes a specialization silently falling out of use so hard to notice: nothing fails, no result changes, and only the running time moves. This trait makes which handler was selected observable, so a test can require the optimized one and fail at compile time when the pattern stops matching.</p><p>Handlers report by declaring a <code>Specialized</code> member: <code class="m-code"><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">Specialized</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span></code> A type declaring no such member is reported unspecialized, so a new handler that omits it reads as generic &mdash; which fails a dispatch test rather than passing one, and is the safe direction to be wrong in.</p><section id="autotoc_md45_1s1"><section id="autotoc_md45"><h3><a href="#autotoc_md45">Usage</a></h3><pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="n">IsSpecialized</span><span class="o">&lt;</span><span class="n">QuadratureRule</span><span class="o">&lt;</span><span class="n">MassIntegrand</span><span class="o">&gt;&gt;::</span><span class="n">Value</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="o">!</span><span class="n">IsSpecialized</span><span class="o">&lt;</span><span class="n">QuadratureRule</span><span class="o">&lt;</span><span class="n">DivDivIntegrand</span><span class="o">&gt;&gt;::</span><span class="n">Value</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Always read the <code>Value</code> member; no variable-template alias is provided, in keeping with the other traits here.</p></aside><aside class="m-note m-danger"><h4>Warning</h4><p>A dispatch test must assert both directions. Optimized and generic handlers share base classes &mdash; LocalBilinearFormIntegratorBase and LinearFormIntegratorBase &mdash; so a <code>Specialized</code> member ever declared on one of those would be inherited by the generic handlers and report every type as optimized. Asserting that a known-generic integrand is <em>not</em> specialized is what catches that, and it is why every handler declares the member explicitly rather than relying on its absence.</p></aside></section></section>
+<p>An integrand that no optimized handler matches is still integrated, by the generic handler, and still gives the right answer. That is what makes a specialization silently falling out of use so hard to notice: nothing fails, no result changes, and only the running time moves. This trait makes which handler was selected observable, so a test can require the optimized one and fail at compile time when the pattern stops matching.</p><p>Handlers report by declaring a <code>Specialized</code> member: <code class="m-code"><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">Specialized</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span></code> A type declaring no such member is reported unspecialized, so a new handler that omits it reads as generic &mdash; which fails a dispatch test rather than passing one, and is the safe direction to be wrong in.</p><section id="autotoc_md48"><h2><a href="#autotoc_md48">Usage</a></h2><pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="nc">IsSpecialized</span><span class="o">&lt;</span><span class="nc">QuadratureRule</span><span class="o">&lt;</span><span class="n">MassIntegrand</span><span class="o">&gt;&gt;::</span><span class="nc">Value</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="o">!</span><span class="nc">IsSpecialized</span><span class="o">&lt;</span><span class="nc">QuadratureRule</span><span class="o">&lt;</span><span class="n">DivDivIntegrand</span><span class="o">&gt;&gt;::</span><span class="nc">Value</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Always read the <code>Value</code> member; no variable-template alias is provided, in keeping with the other traits here.</p></aside><aside class="m-note m-warning"><h4>Warning</h4><p>A dispatch test must assert both directions. Optimized and generic handlers share base classes &mdash; LocalBilinearFormIntegratorBase and LinearFormIntegratorBase &mdash; so a <code>Specialized</code> member ever declared on one of those would be inherited by the generic handlers and report every type as optimized. Asserting that a known-generic integrand is <em>not</em> specialized is what catches that, and it is why every handler declares the member explicitly rather than relying on its absence.</p></aside></section>
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
@@ -157,13 +153,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

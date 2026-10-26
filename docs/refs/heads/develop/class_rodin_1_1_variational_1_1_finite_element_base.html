@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::FiniteElementBase class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_finite_element_8h.html">&lt;Rodin/Variational/FiniteElement.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Derived&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FiniteElementBase <span class="m-thin">class</span>
-        </h1>
-        <p>Base class for finite elements.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>FiniteElementBase</h1><p class="rodin-reference-brief">Base class for finite elements.</p><p class="rodin-reference-include">Defined in <a href="_finite_element_8h.html"><code>Rodin/Variational/FiniteElement.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a53c40b18e8f77c35307ebd37bf12b8a6"><span class="nc">FiniteElementBase</span></a><span class="p">;</span>
+</pre>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -106,96 +101,26 @@
           </ul>
         </nav>
 <p>This class provides a minimal CRTP interface shared by all finite elements. Derived classes are expected to implement the following methods:</p><ul><li><code>size_t getCount() const</code></li><li><code>auto getBasis(size_t) const</code></li><li><code>auto getLinearForm(size_t) const</code></li><li><code>size_t getOrder() const</code></li></ul><p>The base class stores only the reference geometry and forwards all finite-element-specific queries to the Derived class.</p>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>
-            </dt>
-            <dd>Degree 0 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>
-            </dt>
-            <dd>Degree 0 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>
-            </dt>
-            <dd>Degree 0 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>
-            </dt>
-            <dd>Degree 0 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>
-            </dt>
-            <dd>Forward declaration of global P0 finite elements.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>
-            </dt>
-            <dd>Forward declaration of global P0 finite elements.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
-            </dt>
-            <dd>Degree 1 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
-            </dt>
-            <dd>Degree 1 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
-            </dt>
-            <dd>Degree 1 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
-            </dt>
-            <dd>Degree 1 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
-            </dt>
-            <dd>Degree 1 Lagrange element.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><div class="rodin-inheritance-current">FiniteElementBase</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_h1_element.html" title="H1Element&lt; K, RangeType &gt;; H1Element&lt; K, Real &gt;; H1Element&lt; K, Complex &gt;; H1Element&lt; K, Math::SpatialVector&lt; Real &gt; &gt;; H1Element&lt; K, Math::SpatialVector&lt; Complex &gt; &gt;; H1Element&lt; K, Math::SpatialVector&lt; ScalarType &gt; &gt;">H1Element</a></li><li><a href="class_rodin_1_1_variational_1_1_p0_element.html" title="P0Element&lt; RangeType &gt;; P0Element&lt; Real &gt;; P0Element&lt; Complex &gt;; P0Element&lt; Math::SpatialVector&lt; ScalarType &gt; &gt;; P0Element&lt; Math::SpatialVector&lt; Scalar &gt; &gt;&lt; Real &gt;; P0Element&lt; Math::SpatialVector&lt; Scalar &gt; &gt;&lt; Complex &gt;">P0Element</a></li><li><a href="class_rodin_1_1_variational_1_1_p0g_element.html" title="P0gElement&lt; RangeType &gt;; P0gElement&lt; Math::SpatialVector&lt; ScalarType &gt; &gt;">P0gElement</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+16 more</a></li></ul></figure><section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element&lt;K, RangeType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">RangeType</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree k H1-conforming Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element.html"><code>P0Element&lt;RangeType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RangeType</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 0 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g_element.html"><code>P0gElement&lt;RangeType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0gElement</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RangeType</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Forward declaration of global P0 finite elements.</td></tr></tbody></table><details class="rodin-derived-disclosure"><summary class="rodin-disclosure-button"><span class="rodin-see-more">See more</span><span class="rodin-see-less">See less</span></summary><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_p1_element.html"><code>P1Element&lt;RangeType&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">RangeType</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 1 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element&lt;K, Real&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree k H1-conforming Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element&lt;K, Complex&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree k H1-conforming Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element&lt;K, Math::SpatialVector&lt;Real&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree k H1-conforming Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element&lt;K, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree k H1-conforming Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element&lt;K, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree k H1-conforming Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element.html"><code>P0Element&lt;Real&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 0 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element.html"><code>P0Element&lt;Complex&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 0 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element.html"><code>P0Element&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 0 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html"><code>P0Element&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Piecewise constant (degree 0) vector Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html"><code>P0Element&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&lt;</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Piecewise constant (degree 0) vector Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g_element.html"><code>P0gElement&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P0gElement</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Forward declaration of global P0 finite elements.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p1_element.html"><code>P1Element&lt;Real&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 1 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p1_element.html"><code>P1Element&lt;Complex&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Complex</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 1 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p1_element.html"><code>P1Element&lt;Math::SpatialVector&lt;Real&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Real</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 1 Lagrange element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p1_element.html"><code>P1Element&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">P1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">SpatialVector</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">ScalarType</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Degree 1 Lagrange element.</td></tr></tbody></table></details></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -217,11 +142,11 @@
             </dt>
             <dd>Constructs a finite element base with a given reference geometry.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap">const FiniteElementBase&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap">FiniteElementBase&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt>
@@ -234,11 +159,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp; other) -&gt; <a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp;&amp; other) -&gt; <a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -253,13 +178,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the i-th basis function of the finite element.</dd>
-            <dt>
+            <dt><a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc">evaluate</a></dt><dd>Evaluates a local finite element expansion on the reference element.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class Range, class Coefficient&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">Range&amp; out,
               Coefficient&amp;&amp; coefficient,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Evaluates a local finite element expansion on the reference element.</dd>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
@@ -280,10 +204,8 @@
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="a5af7351b2dbf910b0d7f78fbfbec5d6d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              using Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /><a href="#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::ScalarType
+              
+              using <a href="#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::ScalarType
             </h3>
             <p>Scalar type associated with the finite element.</p>
 <p>This type is obtained from the <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization of the Derived finite element. It corresponds to the scalar field underlying the finite element (e.g. <code>Real</code>, <code>Complex&lt;Real&gt;</code>, etc.).</p>
@@ -293,20 +215,16 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a53c40b18e8f77c35307ebd37bf12b8a6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Default constructor.</p>
 <p>Initializes the finite element with a Point geometry. This is mainly provided for default-constructibility and is typically overridden by Derived classes that expose more specific constructors.</p>
           </div></section>
           <section class="m-doc-details" id="ada6303488d8c2961508382b5d25cc579"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada6303488d8c2961508382b5d25cc579" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada6303488d8c2961508382b5d25cc579" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a finite element base with a given reference geometry.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -324,10 +242,8 @@
           </div></section>
           <section class="m-doc-details" id="aade62daa06b3fa006fb9e65f55c356b9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">const FiniteElementBase&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -345,10 +261,8 @@
           </div></section>
           <section class="m-doc-details" id="a44907db2d06dffd00ac33696c69755e1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">FiniteElementBase&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -366,20 +280,16 @@
           </div></section>
           <section class="m-doc-details" id="af4c17c91bbf62b7fb9d812f5236461d7"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4c17c91bbf62b7fb9d812f5236461d7" class="m-doc-self">~FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">virtual</span> <span class="m-label m-info">defaulted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4c17c91bbf62b7fb9d812f5236461d7" class="m-doc-self">~FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">virtual</span> <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Virtual destructor.</p>
 <p>Provided to allow polymorphic destruction through a base-class pointer (e.g. when storing different finite elements in a common container).</p>
           </div></section>
           <section class="m-doc-details" id="a4341aa8c71a1769aa8e88ec085c0078c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -403,10 +313,8 @@
           </div></section>
           <section class="m-doc-details" id="ab703e9eec08b5fa84a539aedad7dd52f"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -430,10 +338,8 @@
           </div></section>
           <section class="m-doc-details" id="a31877fd761e82217b0cafe1757d2dab0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the reference geometry of the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -458,10 +364,8 @@ $ K $
           </div></section>
           <section class="m-doc-details" id="a44d43c17930cfe700de763b67a32fb7b"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of degrees of freedom in the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -476,10 +380,8 @@ $ K $
           </div></section>
           <section class="m-doc-details" id="a8c93953f1a596d6abf47a11b177dc64a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">decltype(auto) </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the i-th basis function of the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -564,7 +466,7 @@ $ x_j $
                 template&lt;class Derived&gt;
                 template&lt;class Range, class Coefficient&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">Range&amp; out,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">Range&amp; out,
               Coefficient&amp;&amp; coefficient,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
@@ -668,10 +570,8 @@ $ \varphi_i $
           </div></section>
           <section class="m-doc-details" id="a5672b0ba04c02bed94a6352f2ea8e234"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">decltype(auto) </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the i-th linear functional (degree of freedom) on the element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -715,10 +615,8 @@ $ v $
           </div></section>
           <section class="m-doc-details" id="a15b23d5374f96033b06313f150a05b96"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns a characteristic polynomial order of the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -761,7 +659,7 @@ $ \mathbb{Q}_k $
                 template&lt;class Derived&gt;
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
               const unsigned int version)</span></span>
             </h3>
             <p>Serializes the finite element base (Boost.Serialization).</p>
@@ -830,13 +728,20 @@ $ \mathbb{Q}_k $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

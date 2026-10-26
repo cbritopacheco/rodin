@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Location::AABB class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,10 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class MeshType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_location.html">Location</a>::<wbr/></span>AABB <span class="m-thin">class</span>
-        </h1>
-        <p>Bounding-volume-hierarchy point locator over axis-aligned boxes.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_location.html">Location</a></div><h1>AABB</h1><p class="rodin-reference-brief">Bounding-volume-hierarchy point locator over axis-aligned boxes.</p><p class="rodin-reference-include">Defined in <a href="_location_2_a_a_b_b_8h.html"><code>Rodin/Location/AABB.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AABB</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,7 +89,12 @@
             </li>
           </ul>
         </nav>
-<table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB&lt;MeshType&gt;</a></td><td>Local geometry, optionally restricted to supplied indices.</td></tr><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB&lt;MPIMesh&gt;</a> (MPI header)</td><td>Owned shard entities with MPI-attached results; also derived MPI meshes.</td></tr></tbody></table><section id="AABBArchitecture"><h2><a href="#AABBArchitecture">Architecture</a></h2><p>The locator answers the following geometric query. Given a physical point <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html"><code>MeshType</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">is_base_of_v</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">MeshType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_location_1_1_a_a_b_b_3_01_mesh_type_01_4.html#a63801bfa6ec89ed42b04b98140540687"><span class="nc">AABB</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">MeshType</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Noncollective point location in owned entities of an MPI mesh.</td></tr></tbody></table><section id="AABBArchitecture"><h2><a href="#AABBArchitecture">Architecture</a></h2><p>The locator answers the following geometric query. Given a physical point <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
 $ x $
 </title>
@@ -249,7 +250,7 @@ $ B_K $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
             </dt>
             <dd></dd>
             <dt>
@@ -257,15 +258,15 @@ $ B_K $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a87d84c72f462752e93738d1427b02635" class="m-doc">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87d84c72f462752e93738d1427b02635" class="m-doc">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
             </dt>
             <dd>Sets the maximum reference-space overshoot before clipping.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
             </dt>
             <dd>Enables the exhaustive narrow-phase fallback on broad-phase miss.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled) -&gt; <a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp;</span>
             </dt>
             <dd>Enables control-hull projections in addition to axis-aligned boxes.</dd>
             <dt>
@@ -283,10 +284,8 @@ $ B_K $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a3a0960489603e2eb68890b26257b5108"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
               <a href="#a0e7ded7138eedfa6108fcec605907a17" class="m-doc">Candidates</a> candidates)</span></span>
             </h3>
             <p>Builds an index over an explicit candidate subset.</p>
@@ -318,10 +317,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="a63801bfa6ec89ed42b04b98140540687"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-info">explicit</span> </span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Builds a locator bound to a fixed mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -338,10 +335,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="aef53278f6d7eb7783958288e3f67e3a8"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef53278f6d7eb7783958288e3f67e3a8" class="m-doc-self">getTolerance</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef53278f6d7eb7783958288e3f67e3a8" class="m-doc-self">getTolerance</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -355,10 +350,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="a00ccdca093e2b940d4744bfe3794320d"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -381,10 +374,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="acbd2172e8f33da1492e91afe5dc25b42"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc-self">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc-self">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -398,10 +389,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="a87d84c72f462752e93738d1427b02635"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87d84c72f462752e93738d1427b02635" class="m-doc-self">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87d84c72f462752e93738d1427b02635" class="m-doc-self">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
             </h3>
             <p>Sets the maximum reference-space overshoot before clipping.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -424,10 +413,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="a45f13be3b8fa48212335ca5761617f49"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc-self">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc-self">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback)</span></span>
             </h3>
             <p>Enables the exhaustive narrow-phase fallback on broad-phase miss.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -451,10 +438,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="a8ca4fa70401fca758cc999bf754c02a6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc-self">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc-self">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled)</span></span>
             </h3>
             <p>Enables control-hull projections in addition to axis-aligned boxes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -478,10 +463,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="af65dae747e0bf8c3345fdf083dff5dd6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const</span></span>
             </h3>
             <p>Locates a physical point on a polytope of the requested dimension.</p>
@@ -510,10 +493,8 @@ $ B_K $
           </div></section>
           <section class="m-doc-details" id="a93d9a733708bbdfa234fa7a5a3dec0a1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class MeshType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93d9a733708bbdfa234fa7a5a3dec0a1" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93d9a733708bbdfa234fa7a5a3dec0a1" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const</span></span>
             </h3>
             <p>Locates a physical point on a cell of the mesh dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -573,13 +554,20 @@ $ B_K $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

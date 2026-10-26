@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::Adapt&lt;Mesh, Context::Local&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,12 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class Mesh&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>Adapt&lt;Mesh, Context::Local&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Owns the local P1 fitting setup and displaces the supplied mesh.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>Adapt <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Owns the local P1 fitting setup and displaces the supplied mesh.</p><p class="rodin-reference-include">Defined in <a href="_adaptation_2_s_w_i_f_t_2_adapt_8h.html"><code>Rodin/Adaptation/SWIFT/Adapt.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Adapt</span><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="p">,</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html">Adapt</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Mesh</code></td><td><code>Mesh</code></td></tr><tr><td><code>ContextType</code></td><td><code>Context::Local</code></td></tr></tbody></table></section>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -93,8 +91,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md0">Architecture</a></li>
-            <li><a href="#autotoc_md1">Usage</a></li>
+            <li><a href="#autotoc_md1">Architecture</a></li>
+            <li><a href="#autotoc_md2">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -106,8 +104,8 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md0"><h2><a href="#autotoc_md0">Architecture</a></h2><p>The workflow owns a vector P1 space, trial and test functions, and a <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_problem.html" class="m-doc">Problem</a>. Each call to execute() starts from zero displacement on the current mesh, computes a fit, and applies the accepted displacement only when the sampled quality budget is satisfied. Valid best-effort results are applied even if the geometric target was not reached.</p><p>The mesh must outlive this object. Connectivity and classification must remain unchanged; this operation neither remeshes nor classifies facets. Only full-dimensional affine simplicial geometry is supported. Curved geometry requires an explicitly chosen space and <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_problem.html" class="m-doc">Problem</a>, followed by an appropriate transformation update rather than vertex displacement.</p></section><section id="autotoc_md1"><h2><a href="#autotoc_md1">Usage</a></h2><pre class="m-code"><span class="n">Adaptation</span><span class="o">::</span><span class="n">SWIFT</span><span class="o">::</span><span class="n">Adapt</span><span class="w"> </span><span class="nf">adapt</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">Adaptation</span><span class="o">::</span><span class="n">SWIFT</span><span class="o">::</span><span class="n">Parameters</span><span class="w"> </span><span class="n">parameters</span><span class="p">;</span>
+<section id="autotoc_md1"><h2><a href="#autotoc_md1">Architecture</a></h2><p>The workflow owns a vector P1 space, trial and test functions, and a <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_problem.html" class="m-doc">Problem</a>. Each call to execute() starts from zero displacement on the current mesh, computes a fit, and applies the accepted displacement only when the sampled quality budget is satisfied. Valid best-effort results are applied even if the geometric target was not reached.</p><p>The mesh must outlive this object. Connectivity and classification must remain unchanged; this operation neither remeshes nor classifies facets. Only full-dimensional affine simplicial geometry is supported. Curved geometry requires an explicitly chosen space and <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_problem.html" class="m-doc">Problem</a>, followed by an appropriate transformation update rather than vertex displacement.</p></section><section id="autotoc_md2"><h2><a href="#autotoc_md2">Usage</a></h2><pre class="m-code"><span class="n">Adaptation</span><span class="o">::</span><span class="n">SWIFT</span><span class="o">::</span><span class="nc">Adapt</span><span class="w"> </span><span class="nf">adapt</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">Adaptation</span><span class="o">::</span><span class="n">SWIFT</span><span class="o">::</span><span class="nc">Parameters</span><span class="w"> </span><span class="n">parameters</span><span class="p">;</span>
 <span class="n">parameters</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="p">;</span><span class="w"> </span><span class="c1">// Fixed background mesh scale.</span>
 <span class="n">adapt</span><span class="p">.</span><span class="n">setParameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">).</span><span class="n">setInterfaceAttribute</span><span class="p">(</span><span class="n">interface</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">adapt</span><span class="p">.</span><span class="n">execute</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">gradPhi</span><span class="p">);</span><span class="w"> </span><span class="c1">// Updates mesh in place.</span></pre></section>
@@ -149,7 +147,7 @@
             </dt>
             <dd>Constructs the fitting setup without modifying the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7ac52a89490af8d3540425f6a5641856" class="m-doc">Adapt</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7ac52a89490af8d3540425f6a5641856" class="m-doc">Adapt</a>(</span><span class="m-doc-wrap">const Adapt&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copying an owned adaptation workflow is disabled.</dd>
           </dl>
@@ -158,15 +156,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a40277c09ed095a04b99a5fe8fca4fd33" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; other) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a40277c09ed095a04b99a5fe8fca4fd33" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp; other) -&gt; <a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment of an owned adaptation workflow is disabled.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a450b5622be45be93b75c382e7588169e" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a450b5622be45be93b75c382e7588169e" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) -&gt; <a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Configures the owned fitting problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1965a0ae495e5113f7ffdd4e2efefa61" class="m-doc">setInterfaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attribute) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1965a0ae495e5113f7ffdd4e2efefa61" class="m-doc">setInterfaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attribute) -&gt; <a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp;</span>
             </dt>
             <dd>Selects the preclassified interface facets.</dd>
             <dt>
@@ -193,22 +191,19 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a40766f9f10fdc0ad41f86328f4b5493a" class="m-doc">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>&amp;</span>
             </dt>
             <dd>Inspects the last fit.</dd>
-            <dt>
+            <dt><a href="#abbd0b1523a3ec26054f8b7a7b1ae3959" class="m-doc">execute</a></dt><dd>Fits the current interface and applies a quality-valid displacement.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class Phi, class Gradient&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#abbd0b1523a3ec26054f8b7a7b1ae3959" class="m-doc">execute</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">Variational::<wbr />RealFunctionBase</a>&lt;Phi&gt;&amp; phi,
               const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, Gradient&gt;&amp; gradient) -&gt; <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a></span>
-            </dt>
-            <dd>Fits the current interface and applies a quality-valid displacement.</dd>
+            </div></details></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a9750d1c8f78f10c670ebe5fb8b5c32b9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc-self">Adapt</a>(</span><span class="m-doc-wrap">Mesh&amp; mesh) <span class="m-label m-info">explicit</span> </span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc-self">Adapt</a>(</span><span class="m-doc-wrap">Mesh&amp; mesh) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs the fitting setup without modifying the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -225,10 +220,8 @@
           </div></section>
           <section class="m-doc-details" id="a7ac52a89490af8d3540425f6a5641856"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ac52a89490af8d3540425f6a5641856" class="m-doc-self">Adapt</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ac52a89490af8d3540425f6a5641856" class="m-doc-self">Adapt</a>(</span><span class="m-doc-wrap">const Adapt&amp; other) <span class="m-label m-danger">deleted</span></span></span>
             </h3>
             <p>Copying an owned adaptation workflow is disabled.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -245,10 +238,8 @@
           </div></section>
           <section class="m-doc-details" id="a40277c09ed095a04b99a5fe8fca4fd33"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a40277c09ed095a04b99a5fe8fca4fd33" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a40277c09ed095a04b99a5fe8fca4fd33" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
             </h3>
             <p>Copy assignment of an owned adaptation workflow is disabled.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -271,10 +262,8 @@
           </div></section>
           <section class="m-doc-details" id="a450b5622be45be93b75c382e7588169e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a450b5622be45be93b75c382e7588169e" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a450b5622be45be93b75c382e7588169e" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters)</span></span>
             </h3>
             <p>Configures the owned fitting problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -297,10 +286,8 @@
           </div></section>
           <section class="m-doc-details" id="a1965a0ae495e5113f7ffdd4e2efefa61"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1965a0ae495e5113f7ffdd4e2efefa61" class="m-doc-self">setInterfaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attribute)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9750d1c8f78f10c670ebe5fb8b5c32b9" class="m-doc">Adapt</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1965a0ae495e5113f7ffdd4e2efefa61" class="m-doc-self">setInterfaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attribute)</span></span>
             </h3>
             <p>Selects the preclassified interface facets.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -323,10 +310,8 @@
           </div></section>
           <section class="m-doc-details" id="aaed24b56da4af4bd0a18f93ed3311901"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#aed5fe5f6b73f184b7be726955c81c708" class="m-doc">ProblemType</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaed24b56da4af4bd0a18f93ed3311901" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aed5fe5f6b73f184b7be726955c81c708" class="m-doc">ProblemType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaed24b56da4af4bd0a18f93ed3311901" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Accesses metric, boundary and monitor configuration.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -340,10 +325,8 @@
           </div></section>
           <section class="m-doc-details" id="a156c3328904b3feca98a47a30269cc47"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#aed5fe5f6b73f184b7be726955c81c708" class="m-doc">ProblemType</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a156c3328904b3feca98a47a30269cc47" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aed5fe5f6b73f184b7be726955c81c708" class="m-doc">ProblemType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a156c3328904b3feca98a47a30269cc47" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Inspects the owned fitting problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -357,10 +340,8 @@
           </div></section>
           <section class="m-doc-details" id="aa6b76e10e2beff6fc8cbae85766e6a5a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad24066014137c49f338d6f4da8686afb" class="m-doc">TrialFunction</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6b76e10e2beff6fc8cbae85766e6a5a" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ad24066014137c49f338d6f4da8686afb" class="m-doc">TrialFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6b76e10e2beff6fc8cbae85766e6a5a" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Accesses the trial function for additional variational terms.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -374,10 +355,8 @@
           </div></section>
           <section class="m-doc-details" id="ab06f664c18fa3d00266ddf88835c9e9e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#afe774d6876b4effc9889bcab8d5aa2a6" class="m-doc">TestFunction</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab06f664c18fa3d00266ddf88835c9e9e" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#afe774d6876b4effc9889bcab8d5aa2a6" class="m-doc">TestFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab06f664c18fa3d00266ddf88835c9e9e" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Accesses the test function for additional variational terms.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -391,10 +370,8 @@
           </div></section>
           <section class="m-doc-details" id="a6637e48887cd69c114ea87ae902553fe"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Inspects the current controls.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -408,10 +385,8 @@
           </div></section>
           <section class="m-doc-details" id="a40766f9f10fdc0ad41f86328f4b5493a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Mesh&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a40766f9f10fdc0ad41f86328f4b5493a" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a40766f9f10fdc0ad41f86328f4b5493a" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Inspects the last fit.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -429,7 +404,7 @@
                 template&lt;class Mesh&gt;
                 template&lt;class Phi, class Gradient&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Adapt&lt;Mesh, Context::<wbr />Local&gt;&lt;Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbd0b1523a3ec26054f8b7a7b1ae3959" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">Variational::<wbr />RealFunctionBase</a>&lt;Phi&gt;&amp; phi,
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_report.html" class="m-doc">Report</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbd0b1523a3ec26054f8b7a7b1ae3959" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">Variational::<wbr />RealFunctionBase</a>&lt;Phi&gt;&amp; phi,
               const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, Gradient&gt;&amp; gradient)</span></span>
             </h3>
             <p>Fits the current interface and applies a quality-valid displacement.</p>
@@ -494,13 +469,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

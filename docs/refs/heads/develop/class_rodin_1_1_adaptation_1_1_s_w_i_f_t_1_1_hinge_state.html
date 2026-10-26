@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::HingeState class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,10 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>HingeState <span class="m-thin">class</span>
-        </h1>
-        <p>Pointwise slacks and Newton coefficients of the affine quadratic hinges.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>HingeState</h1><p class="rodin-reference-brief">Pointwise slacks and Newton coefficients of the affine quadratic hinges.</p><p class="rodin-reference-include">Defined in <a href="_hinge_8h.html"><code>Rodin/Adaptation/SWIFT/Hinge.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><span class="nc">HingeState</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,25 +88,23 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc">HingeState</a></dt><dd>Constructs the SWIFT hinge state.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper"><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc">HingeState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; innerGradient,
               const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient)</span>
-            </dt>
-            <dd>Constructs the SWIFT hinge state.</dd>
+            </div></details></dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc">getEnergy</a></dt><dd>Affine quality energy with the construction parameters, evaluated only on demand.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper">auto <a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc">getEnergy</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightJ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1),
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightQ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1)) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
-            </dt>
-            <dd>Affine quality energy with the construction parameters, evaluated only on demand.</dd>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4047b202ac9d86aa68d25c14e693be17" class="m-doc">isAdmissible</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
@@ -162,7 +155,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a2693690fd3b8e702a9698dda99279d5a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc-self">HingeState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2693690fd3b8e702a9698dda99279d5a" class="m-doc-self">HingeState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; innerGradient,
               const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient)</span></span>
@@ -183,18 +176,18 @@
                 </tr>
                 <tr>
                   <td>parameters</td>
-                  <td>Quality bounds, guard widths and relative hinge weights.</td>
+                  <td>Quality bounds, guard widths and constraint strengths.</td>
                 </tr>
                 <tr>
                   <td>hingeCoefficient</td>
-                  <td>Effective penalty coefficient for this outer model.</td>
+                  <td>Predicted decrease per volume, before constraint strengths.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
           <section class="m-doc-details" id="a59401925ce106d661cd1355f497f1d44"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc-self">getEnergy</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a59401925ce106d661cd1355f497f1d44" class="m-doc-self">getEnergy</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightJ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1),
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> weightQ = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1)) const</span></span>
@@ -207,11 +200,11 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">parameters</td>
-                  <td>Quality guards and relative hinge weights used at construction.</td>
+                  <td>Quality guards and constraint strengths used at construction.</td>
                 </tr>
                 <tr>
                   <td>hingeCoefficient</td>
-                  <td>Effective penalty coefficient used at construction.</td>
+                  <td>Predicted decrease per volume used at construction.</td>
                 </tr>
                 <tr>
                   <td>weightJ</td>
@@ -232,7 +225,7 @@
           </div></section>
           <section class="m-doc-details" id="a4047b202ac9d86aa68d25c14e693be17"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4047b202ac9d86aa68d25c14e693be17" class="m-doc-self">isAdmissible</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4047b202ac9d86aa68d25c14e693be17" class="m-doc-self">isAdmissible</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Whether the frozen deformation permits evaluation; affine slacks may be negative.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -246,7 +239,7 @@
           </div></section>
           <section class="m-doc-details" id="a243dc8952986532523e01c284fd03f1e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a243dc8952986532523e01c284fd03f1e" class="m-doc-self">getJacobianRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a243dc8952986532523e01c284fd03f1e" class="m-doc-self">getJacobianRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const</span></span>
             </h3>
             <p>Negative Jacobian differential at the frozen outer state.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -269,7 +262,7 @@
           </div></section>
           <section class="m-doc-details" id="add111d3e4e72a3c58a69ad16a834ce20"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add111d3e4e72a3c58a69ad16a834ce20" class="m-doc-self">getDistortionRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add111d3e4e72a3c58a69ad16a834ce20" class="m-doc-self">getDistortionRow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gradient) const</span></span>
             </h3>
             <p>Distortion differential at the frozen outer state.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,7 +285,7 @@
           </div></section>
           <section class="m-doc-details" id="abf1d7816af48e8104f9283bda4705aa2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc-self">getJacobianAction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc-self">getJacobianAction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The jacobian action.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -306,7 +299,7 @@
           </div></section>
           <section class="m-doc-details" id="aa0b7b7958b9089e5f008ddcd8dd0fa89"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc-self">getDistortionAction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc-self">getDistortionAction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The distortion action.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -320,7 +313,7 @@
           </div></section>
           <section class="m-doc-details" id="a125bec12c32f8b8dd129b073ab9ec9f4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc-self">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc-self">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The jacobian slack.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -334,7 +327,7 @@
           </div></section>
           <section class="m-doc-details" id="a37e68359b98ff38e41a8bf11f1f2a21b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc-self">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc-self">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The distortion slack.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -348,7 +341,7 @@
           </div></section>
           <section class="m-doc-details" id="a8767c598ee4f399a340be291ea3ec279"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc-self">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc-self">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The jacobian hessian.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -362,7 +355,7 @@
           </div></section>
           <section class="m-doc-details" id="a15e149333dc05038a774f4c9f6a67844"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc-self">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc-self">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The distortion hessian.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -376,7 +369,7 @@
           </div></section>
           <section class="m-doc-details" id="aeada8d7a764e0eecae1f7dcf068d7e68"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc-self">getJacobianForce</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc-self">getJacobianForce</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The jacobian force.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -390,7 +383,7 @@
           </div></section>
           <section class="m-doc-details" id="a51ddde3a0603e3f46a04634e65cd40df"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc-self">getDistortionForce</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc-self">getDistortionForce</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The distortion force.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -441,13 +434,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

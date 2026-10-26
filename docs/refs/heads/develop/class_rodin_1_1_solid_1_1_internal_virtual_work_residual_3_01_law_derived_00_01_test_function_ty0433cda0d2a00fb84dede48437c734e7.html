@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Solid::InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,12 +71,7 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>Momentum residual of the mixed u-p formulation. Bound to the displacement test function <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solid.html">Solid</a></div><h1>InternalVirtualWorkResidual <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Momentum residual of the mixed u-p formulation. Bound to the displacement test function <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
 <title>
 $ \mathbf{v} $
 </title>
@@ -89,14 +81,24 @@ $ \mathbf{v} $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-118'/>
 </g>
-</svg>.</p>
+</svg>.</p><p class="rodin-reference-include">Defined in <a href="_internal_virtual_work_residual_8h.html"><code>Rodin/Solid/Integrators/InternalVirtualWorkResidual.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LawDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionType</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">DisplacementType</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">PressureType</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html#a13e60c597fda34bd7dfd39f339cd6297"><span class="nc">InternalVirtualWorkResidual</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">LawDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">TestFunctionType</span><span class="p">,</span>
+<span class="w">  </span><span class="n">DisplacementType</span><span class="p">,</span>
+<span class="w">  </span><span class="n">PressureType</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html">InternalVirtualWorkResidual</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Args...</code></td><td><code>LawDerived, TestFunctionType, DisplacementType, PressureType</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -111,17 +113,17 @@ $ \mathbf{v} $
 \]
 </title>
 <defs>
+<path id='eq2-g9-48' d='M3.897385-2.542466C3.897385-3.395268 3.809714-3.913325 3.5467-4.423412C3.196015-5.124782 2.550436-5.300125 2.11208-5.300125C1.107846-5.300125 .74122-4.550934 .629639-4.327771C.342715-3.745953 .326775-2.956912 .326775-2.542466C.326775-2.016438 .350685-1.211457 .73325-.573848C1.099875 .01594 1.689664 .167372 2.11208 .167372C2.494645 .167372 3.180075 .047821 3.57858-.74122C3.873474-1.315068 3.897385-2.024408 3.897385-2.542466ZM2.11208-.055791C1.841096-.055791 1.291158-.183313 1.123786-1.020174C1.036115-1.474471 1.036115-2.223661 1.036115-2.638107C1.036115-3.188045 1.036115-3.745953 1.123786-4.184309C1.291158-4.99726 1.912827-5.076961 2.11208-5.076961C2.383064-5.076961 2.933001-4.941469 3.092403-4.216189C3.188045-3.777833 3.188045-3.180075 3.188045-2.638107C3.188045-2.16787 3.188045-1.45056 3.092403-1.004234C2.925031-.167372 2.375093-.055791 2.11208-.055791Z'/>
+<path id='eq2-g6-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
 <path id='eq2-g5-0' d='M5.571108-1.809215C5.69863-1.809215 5.873973-1.809215 5.873973-1.992528S5.69863-2.175841 5.571108-2.175841H1.004234C.876712-2.175841 .70137-2.175841 .70137-1.992528S.876712-1.809215 1.004234-1.809215H5.571108Z'/>
 <path id='eq2-g2-105' d='M2.008905 0V-.119105C1.484843-.158807 1.42132-.23821 1.42132-.809914V-3.628733L1.389559-3.652554L.158807-3.215836V-3.096731L.222329-3.104671C.317613-3.120552 .420838-3.128492 .492301-3.128492C.682869-3.128492 .754332-3.001447 .754332-2.652072V-.809914C.754332-.23821 .674929-.150866 .127045-.119105V0H2.008905ZM1.492783-5.018292C1.492783-5.240622 1.318096-5.423249 1.087826-5.423249C.865497-5.423249 .682869-5.240622 .682869-5.018292C.682869-4.788022 .865497-4.613335 1.087826-4.613335C1.318096-4.613335 1.492783-4.788022 1.492783-5.018292Z'/>
 <path id='eq2-g2-111' d='M3.731958-1.858039C3.731958-2.898223 3.001447-3.652554 1.985084-3.652554C.95284-3.652554 .23027-2.890282 .23027-1.794516C.23027-.722571 .968721 .079403 1.969203 .079403S3.731958-.762272 3.731958-1.858039ZM3.017328-1.580127C3.017328-.682869 2.660012-.142926 2.064487-.142926C1.754814-.142926 1.461022-.333494 1.294275-.651108C1.071945-1.064005 .9449-1.619829 .9449-2.183592C.9449-2.937924 1.318096-3.430225 1.88186-3.430225C2.548848-3.430225 3.017328-2.667953 3.017328-1.580127Z'/>
 <path id='eq2-g2-115' d='M2.763237-.93696C2.763237-1.333976 2.580609-1.596007 2.096249-1.88186L1.238692-2.390041C1.016363-2.517086 .897258-2.715595 .897258-2.929984C.897258-3.255538 1.143408-3.469927 1.508664-3.469927C1.961263-3.469927 2.199473-3.207896 2.382101-2.493265H2.501206L2.469444-3.573151H2.382101L2.36622-3.55727C2.294757-3.501688 2.286817-3.493748 2.255055-3.493748C2.207413-3.493748 2.12801-3.509628 2.040666-3.54933C1.873919-3.612853 1.691292-3.644614 1.500723-3.644614C.849616-3.644614 .404957-3.247597 .404957-2.667953C.404957-2.223294 .659048-1.913621 1.333976-1.524544L1.794516-1.262513C2.072428-1.103707 2.207413-.913139 2.207413-.666988C2.207413-.317613 1.953323-.095284 1.548365-.095284C1.000482-.095284 .722571-.397017 .539943-1.206931H.412897V.031761H.516122C.571704-.047642 .603466-.063523 .69875-.063523C.786093-.063523 .873437-.047642 1.064005 0C1.286334 .047642 1.484843 .079403 1.65159 .079403C2.255055 .079403 2.763237-.381136 2.763237-.93696Z'/>
-<path id='eq2-g6-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
 <path id='eq2-g3-70' d='M7.531756-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0C.800996-.02391 2.163885-.02391 2.606227-.02391C3.239851-.02391 4.303861-.02391 4.889664 0V-.514072H3.299626V-3.813699H3.957161C5.104857-3.813699 5.200498-3.287671 5.200498-2.414944H5.702615V-5.726526H5.200498C5.200498-4.853798 5.104857-4.327771 3.957161-4.327771H3.299626V-7.627397H5.009215C6.910087-7.627397 7.208966-6.75467 7.376339-5.308095H7.878456L7.531756-8.141469Z'/>
 <path id='eq2-g3-80' d='M3.299626-3.646326H5.332005C7.328518-3.646326 8.440349-4.662516 8.440349-5.893898C8.440349-7.185056 7.304608-8.201245 5.332005-8.201245H.454296V-7.687173H1.721544V-.514072H.454296V0C.800996-.02391 2.080199-.02391 2.510585-.02391S4.220174-.02391 4.566874 0V-.514072H3.299626V-3.646326ZM4.901619-7.687173C6.75467-7.687173 6.75467-6.706849 6.75467-5.893898C6.75467-5.104857 6.75467-4.100623 4.901619-4.100623H3.239851V-7.687173H4.901619Z'/>
 <path id='eq2-g4-0' d='M4.937484 13.736488C4.937484 13.688667 4.913574 13.664757 4.889664 13.628892C4.339726 13.043088 3.526775 12.07472 3.024658 10.126027C2.749689 9.038107 2.642092 7.806725 2.642092 6.694894C2.642092 3.550685 3.395268 1.350934 4.829888-.203238C4.937484-.310834 4.937484-.334745 4.937484-.358655C4.937484-.478207 4.841843-.478207 4.794022-.478207C4.614695-.478207 3.969116 .239103 3.813699 .418431C2.594271 1.865006 1.817186 4.016936 1.817186 6.682939C1.817186 8.380573 2.116065 10.783562 3.682192 12.803985C3.801743 12.947447 4.578829 13.85604 4.794022 13.85604C4.841843 13.85604 4.937484 13.85604 4.937484 13.736488Z'/>
 <path id='eq2-g4-1' d='M3.646326 6.694894C3.646326 4.99726 3.347447 2.594271 1.78132 .573848C1.661768 .430386 .884682-.478207 .669489-.478207C.609714-.478207 .526027-.454296 .526027-.358655C.526027-.310834 .549938-.274969 .597758-.239103C1.171606 .382565 1.948692 1.350934 2.438854 3.251806C2.713823 4.339726 2.82142 5.571108 2.82142 6.682939C2.82142 7.890411 2.713823 9.109838 2.402989 10.281445C1.948692 11.955168 1.243337 12.911582 .633624 13.581071C.526027 13.688667 .526027 13.712578 .526027 13.736488C.526027 13.83213 .609714 13.85604 .669489 13.85604C.848817 13.85604 1.506351 13.126775 1.649813 12.959402C2.86924 11.512827 3.646326 9.360897 3.646326 6.694894Z'/>
 <path id='eq2-g4-90' d='M1.243337 26.026401C1.625903 26.002491 1.829141 25.739477 1.829141 25.440598C1.829141 25.046077 1.530262 24.854795 1.255293 24.854795C.968369 24.854795 .669489 25.034122 .669489 25.452553C.669489 26.062267 1.267248 26.564384 1.996513 26.564384C3.813699 26.564384 4.495143 23.766874 5.34396 20.299875C6.264508 16.522042 7.041594 12.708344 7.687173 8.870735C8.129514 6.324284 8.571856 3.93325 8.978331 2.391034C9.121793 1.80523 9.528269 .263014 9.994521 .263014C10.365131 .263014 10.66401 .490162 10.711831 .537983C10.31731 .561893 10.114072 .824907 10.114072 1.123786C10.114072 1.518306 10.412951 1.709589 10.68792 1.709589C10.974844 1.709589 11.273724 1.530262 11.273724 1.111831C11.273724 .466252 10.628144 0 9.97061 0C9.062017 0 8.392528 1.303113 7.734994 3.741968C7.699128 3.873474 6.073225 9.874969 4.758157 17.693649C4.447323 19.52279 4.100623 21.519303 3.706102 23.181071C3.490909 24.053798 2.940971 26.30137 1.972603 26.30137C1.542217 26.30137 1.255293 26.026401 1.243337 26.026401Z'/>
-<path id='eq2-g9-48' d='M3.897385-2.542466C3.897385-3.395268 3.809714-3.913325 3.5467-4.423412C3.196015-5.124782 2.550436-5.300125 2.11208-5.300125C1.107846-5.300125 .74122-4.550934 .629639-4.327771C.342715-3.745953 .326775-2.956912 .326775-2.542466C.326775-2.016438 .350685-1.211457 .73325-.573848C1.099875 .01594 1.689664 .167372 2.11208 .167372C2.494645 .167372 3.180075 .047821 3.57858-.74122C3.873474-1.315068 3.897385-2.024408 3.897385-2.542466ZM2.11208-.055791C1.841096-.055791 1.291158-.183313 1.123786-1.020174C1.036115-1.474471 1.036115-2.223661 1.036115-2.638107C1.036115-3.188045 1.036115-3.745953 1.123786-4.184309C1.291158-4.99726 1.912827-5.076961 2.11208-5.076961C2.383064-5.076961 2.933001-4.941469 3.092403-4.216189C3.188045-3.777833 3.188045-3.180075 3.188045-2.638107C3.188045-2.16787 3.188045-1.45056 3.092403-1.004234C2.925031-.167372 2.375093-.055791 2.11208-.055791Z'/>
 <path id='eq2-g10-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
 <path id='eq2-g10-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
 <path id='eq2-g10-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
@@ -164,16 +166,8 @@ $ \mathbf{v} $
 <use x='275.162853' y='-10.793007' xlink:href='#eq2-g8-88'/>
 </g>
 </svg></div><p>The constitutive law must supply only the isochoric part of the stress; the volumetric response is carried by the pressure field.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;Real&gt;</a>
-            </dt>
-            <dd>Base class for linear form integrators.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" title="Variational::LinearFormIntegratorBase&lt; Real &gt;">Variational::LinearFormIntegratorBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">InternalVirtualWorkResidual</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>Variational::LinearFormIntegratorBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for linear form integrators.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html#a683931e0bacbe29e7e4948b74bd68618"><code>setPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a22832b479c9c755896c4b79b8cf40730">LinearFormIntegratorBase::setPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html#a804c6a07f8876572c654f955d09a107c"><code>integrate()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a8679f07ef842cba7327119d748501eab">LinearFormIntegratorBase::integrate</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html#a07a0ed42183d01cb7d7a5e5edf3caba3"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3e2cc56a785ee8329807d7407fd76401">LinearFormIntegratorBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html#aba6371885ea424dd84df03d85fcb0706"><code>getRegion()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac16226cca266745ac414468db3235c17">LinearFormIntegratorBase::getRegion</a></td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html#a55fdf58059a17dda553e792ce5749628"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a15f41d8777010696597317c9083b7fc1">LinearFormIntegratorBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>Variational::LinearFormIntegratorBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac76cd4c95442baa6361dfa9a0e9ba4a9"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a863fc883c7ede3985157c5897e777024"><code>getTestDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#acdd90257d932f2691107f8b8b036770e"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ae4fa921a8e67b4666830521dee9d15c0"><code>setDOFIndices()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Variational::Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -218,15 +212,14 @@ $ \mathbf{v} $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
+            <dt><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a></dt><dd>Constructs the mixed momentum residual integrator.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
               const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement,
               const <a href="#afdf46ec366c4e97e3cc2005eb1ec1905" class="m-doc">PressureStateType</a>&amp; pressure)</span>
-            </dt>
-            <dd>Constructs the mixed momentum residual integrator.</dd>
+            </div></details></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const InternalVirtualWorkResidual&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -235,23 +228,23 @@ $ \mathbf{v} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Rebinds the displacement linearization point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af7be8da5dfa4371152e7d85819b9feb9" class="m-doc">setPressure</a>(</span><span class="m-doc-wrap">const <a href="#afdf46ec366c4e97e3cc2005eb1ec1905" class="m-doc">PressureStateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af7be8da5dfa4371152e7d85819b9feb9" class="m-doc">setPressure</a>(</span><span class="m-doc-wrap">const <a href="#afdf46ec366c4e97e3cc2005eb1ec1905" class="m-doc">PressureStateType</a>&amp; gf) -&gt; <a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Rebinds the pressure state.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Sets the quadrature order.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Sets an auxiliary constitutive input callback.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Sets the current polytope and assembles the element residual.</dd>
             <dt>
@@ -267,7 +260,7 @@ $ \mathbf{v} $
             </dt>
             <dd>Returns the integration region.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies this residual integrator.</dd>
             <dt>
@@ -280,10 +273,8 @@ $ \mathbf{v} $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a13e60c597fda34bd7dfd39f339cd6297"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
               const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement,
               const <a href="#afdf46ec366c4e97e3cc2005eb1ec1905" class="m-doc">PressureStateType</a>&amp; pressure)</span></span>
@@ -315,10 +306,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="afd8a13590d46ad921f2ee16a9b0910b3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const InternalVirtualWorkResidual&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -335,10 +324,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="a36cda0db261dd8cc77beb36ea7205c24"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
             </h3>
             <p>Rebinds the displacement linearization point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -361,10 +348,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="af7be8da5dfa4371152e7d85819b9feb9"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7be8da5dfa4371152e7d85819b9feb9" class="m-doc-self">setPressure</a>(</span><span class="m-doc-wrap">const <a href="#afdf46ec366c4e97e3cc2005eb1ec1905" class="m-doc">PressureStateType</a>&amp; gf)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7be8da5dfa4371152e7d85819b9feb9" class="m-doc-self">setPressure</a>(</span><span class="m-doc-wrap">const <a href="#afdf46ec366c4e97e3cc2005eb1ec1905" class="m-doc">PressureStateType</a>&amp; gf)</span></span>
             </h3>
             <p>Rebinds the pressure state.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -387,10 +372,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="a2bc18acb1094021b8f3ffdd2edc92963"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
             </h3>
             <p>Sets the quadrature order.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -413,10 +396,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="aec0dbba8d91464eb39f789a780a50dce"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
             </h3>
             <p>Sets an auxiliary constitutive input callback.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -439,10 +420,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="a683931e0bacbe29e7e4948b74bd68618"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Sets the current polytope and assembles the element residual.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -465,10 +444,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="a804c6a07f8876572c654f955d09a107c"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) <span class="m-label m-warning">final</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns an entry of the current element residual vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -491,10 +468,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns the current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -508,10 +483,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns the integration region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -525,10 +498,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="a55fdf58059a17dda553e792ce5749628"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>* Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a13e60c597fda34bd7dfd39f339cd6297" class="m-doc">InternalVirtualWorkResidual</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polymorphically copies this residual integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -542,10 +513,8 @@ $ \mathbf{v} $
           </div></section>
           <section class="m-doc-details" id="ae6c4e20b7089a8517ed5c9a8cef7cb33"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;&lt;LawDerived, TestFunctionType, DisplacementType, PressureType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const</span></span>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the stored constitutive law.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -596,13 +565,20 @@ $ \mathbf{v} $
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

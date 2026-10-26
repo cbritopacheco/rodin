@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>General concepts &raquo; Backends and supported configurations | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <link rel="prev" href="guides-io.html" />
   <link rel="next" href="guides-mpi.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -35,7 +37,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -43,25 +45,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -94,8 +91,8 @@
           </ul>
         </nav>
 <p>Rodin exposes one mathematical surface and selects concrete behavior through template specializations. The main axes are mesh context, assembly strategy, linear algebra storage, and solver backend.</p><section id="guides-backends-map"><h2><a href="#guides-backends-map">Backend Map</a></h2><table class="m-table"><thead><tr><th>Axis</th><th>Local Eigen</th><th>OpenMP</th><th>MPI</th><th>PETSc</th></tr></thead><tbody><tr><td>Context</td><td><code>Context::Local</code></td><td><code>Context::Local</code></td><td><code>Context::MPI</code></td><td>Local or MPI</td></tr><tr><td>Mesh</td><td><code>Mesh&lt;Context::Local&gt;</code></td><td>same</td><td><code>Mesh&lt;Context::MPI&gt;</code></td><td>same mesh contexts</td></tr><tr><td>Assembly</td><td><code>Assembly::Sequential</code></td><td><code>Assembly::OpenMP</code></td><td><code>Assembly::MPI</code></td><td>PETSc assembly specializations</td></tr><tr><td>Linear algebra</td><td><code>Math::SparseMatrix</code>, <code>Math::Matrix</code>, <code>Math::Vector</code></td><td>same</td><td>usually PETSc for distributed solves</td><td>PETSc <code>Mat</code>/<code>Vec</code> wrappers</td></tr><tr><td>Solvers</td><td>Eigen and SuiteSparse wrappers</td><td>same after assembly</td><td>usually PETSc KSP/SNES</td><td><code>Solver::KSP</code>, PETSc <code>CG</code>, <code>GMRES</code>, <code>SNES</code></td></tr><tr><td>I/O</td><td>MFEM, MEDIT, HDF5, XDMF</td><td>same</td><td>HDF5/XDMF shard-aware paths</td><td>PETSc grid-function data paths</td></tr></tbody></table></section><section id="guides-backends-local"><h2><a href="#guides-backends-local">Local Eigen Path</a></h2><p>The local path is the default. It uses <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>, <code>TrialFunction</code>, <code>TestFunction</code>, local <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a> matrices and vectors, and the native <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> wrappers.</p><p>This is the best path for examples, small and medium problems, unit tests, and backend-independent feature development.</p></section><section id="guides-backends-openmp"><h2><a href="#guides-backends-openmp">OpenMP Assembly</a></h2><p>When Rodin is built with OpenMP support, <code>Assembly::Default</code> can select shared-memory assembly for local meshes. OpenMP changes the assembly iteration strategy, not the mathematical problem or the linear algebra objects.</p><p>OpenMP support should preserve deterministic results within floating-point accumulation expectations. A feature that supports local assembly should be checked under OpenMP if it changes element iteration, thread-local storage, or merge behavior.</p></section><section id="guides-backends-mpi"><h2><a href="#guides-backends-mpi">MPI Mesh Context</a></h2><p>The MPI path uses <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> and <a href="namespace_rodin_1_1_geometry.html#a79f72df2bf2cffe9d0f8bc189d7924ad" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a>. A distributed mesh stores a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> with owned, shared, and ghost entities.</p><p>Distributed algorithms must respect ownership and reconciliation:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre><p>See <a href="guides-mpi.html" class="m-doc">MPI</a> for the full mesh distribution workflow.</p></section><section id="guides-backends-petsc"><h2><a href="#guides-backends-petsc">PETSc Storage and Solvers</a></h2><p>PETSc support is activated by using PETSc-backed trial and test functions:</p><pre class="m-code"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>This selects PETSc-backed grid functions, forms, assembly, and <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html" class="m-doc">PETSc linear algebra</a> where appropriate. PETSc can be used with local meshes or MPI meshes. For large distributed problems, PETSc is the standard solver backend.</p></section><section id="guides-backends-support"><h2><a href="#guides-backends-support">What Complete Support Means</a></h2><p>A feature may support only part of the backend matrix. That is fine, but the documentation and tests should say so explicitly.</p><table class="m-table"><thead><tr><th>Feature</th><th>Minimum support to claim it</th></tr></thead><tbody><tr><td>Form-language operator</td><td>Traits, expression class, and assembly/evaluation path for every advertised grade/range</td></tr><tr><td>Finite element space</td><td>DOF layout, point evaluation, GridFunction assignment, and required differential operators</td></tr><tr><td>Assembly feature</td><td>Sequential implementation plus OpenMP/MPI/PETSc mirrors when advertised</td></tr><tr><td>Solver</td><td>Specialization for each advertised linear-system type</td></tr><tr><td>IO format</td><td>Loader/printer specialization for each advertised mesh, FES, and data backend</td></tr></tbody></table></section><section id="guides-backends-see-also"><h2><a href="#guides-backends-see-also">See Also</a></h2><ul><li><a href="guides-mpi.html" class="m-doc">MPI</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a></li></ul></section>
+<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre><p>See <a href="guides-mpi.html" class="m-doc">MPI</a> for the full mesh distribution workflow.</p></section><section id="guides-backends-petsc"><h2><a href="#guides-backends-petsc">PETSc Storage and Solvers</a></h2><p>PETSc support is activated by using PETSc-backed trial and test functions:</p><pre class="m-code"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>This selects PETSc-backed grid functions, forms, assembly, and <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html" class="m-doc">PETSc linear algebra</a> where appropriate. PETSc can be used with local meshes or MPI meshes. For large distributed problems, PETSc is the standard solver backend.</p></section><section id="guides-backends-support"><h2><a href="#guides-backends-support">What Complete Support Means</a></h2><p>A feature may support only part of the backend matrix. That is fine, but the documentation and tests should say so explicitly.</p><table class="m-table"><thead><tr><th>Feature</th><th>Minimum support to claim it</th></tr></thead><tbody><tr><td>Form-language operator</td><td>Traits, expression class, and assembly/evaluation path for every advertised grade/range</td></tr><tr><td>Finite element space</td><td>DOF layout, point evaluation, GridFunction assignment, and required differential operators</td></tr><tr><td>Assembly feature</td><td>Sequential implementation plus OpenMP/MPI/PETSc mirrors when advertised</td></tr><tr><td>Solver</td><td>Specialization for each advertised linear-system type</td></tr><tr><td>IO format</td><td>Loader/printer specialization for each advertised mesh, FES, and data backend</td></tr></tbody></table></section><section id="guides-backends-see-also"><h2><a href="#guides-backends-see-also">See Also</a></h2><ul><li><a href="guides-mpi.html" class="m-doc">MPI</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a></li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="guides-io.html" class="m-doc">&laquo; I/O in Rodin</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-mpi.html" class="m-doc">MPI: Distributed Computing &raquo;</a></div>
       </div>
     </div>
@@ -135,13 +132,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Assembly::OpenMP&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,18 +71,23 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
-        </h1>
-        <p>OpenMP mixed problem assembly.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>OpenMP <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">OpenMP mixed problem assembly.</p><p class="rodin-reference-include">Defined in <a href="_assembly_2_open_m_p_8h.html"><code>Rodin/Assembly/OpenMP.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Us</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_linear_system_00_01_variational_1_1_problem_3_01_lineeef842f2b4a5012aa3800df5930768e9.html#a14b2249366e25fb8b04d56fdde20690d"><span class="nc">OpenMP</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">LinearSystem</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span><span class="w"> </span><span class="n">U1</span><span class="p">,</span><span class="w"> </span><span class="n">U2</span><span class="p">,</span><span class="w"> </span><span class="n">U3</span><span class="p">,</span><span class="w"> </span><span class="n">Us</span><span class="p">...</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_assembly_1_1_open_m_p.html">OpenMP</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearAlgebraType</code></td><td><code>LinearSystem</code></td></tr><tr><td><code>Operand</code></td><td><code>Variational::Problem&lt; LinearSystem, U1, U2, U3, Us... &gt;</code></td></tr></tbody></table></section>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -93,16 +95,8 @@
             </li>
           </ul>
         </nav>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class... Us&gt;</div>
-              class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html" class="m-doc">AssemblyBase&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
-            </dt>
-            <dd>Base class for complete mixed problem assembly.</dd>
-          </dl>
-        </section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" title="AssemblyBase&lt; LinearSystem, Variational::Problem&lt; LinearSystem, U1, U2, U3, Us... &gt; &gt;">AssemblyBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">OpenMP</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html"><code>AssemblyBase&lt;LinearSystem, …&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#ab9f33f0df38a690d6bfa27727601f32d"><span class="nc">AssemblyBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">LinearSystem</span><span class="p">,</span><span class="w"> </span><span class="n">U1</span><span class="p">,</span><span class="w"> </span><span class="n">U2</span><span class="p">,</span><span class="w"> </span><span class="n">U3</span><span class="p">,</span><span class="w"> </span><span class="n">Us</span><span class="p">...</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for complete mixed problem assembly.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_linear_system_00_01_variational_1_1_problem_3_01_lineeef842f2b4a5012aa3800df5930768e9.html#a1d27227915eb0acdf4017085fbc61244"><code>copy()</code></a></td><td><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#a0f610752ceb018058f57d5dfd588e8d2">AssemblyBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html"><code>AssemblyBase&lt;LinearSystem, …&gt;</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#ad8bd74a4400972a3b5001e4a62e211ba"><code>execute()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#a1560b3d0877544734dab4bdb6e7b029d"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#acb8955a701826bb56e17092c576e32fc"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#ade68e51af27980bb90937e3edb3b9a5b"><code>ProblemBodyType</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -110,36 +104,36 @@
               using <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc-self">LinearSystemType</a> = LinearSystem
             </dt>
             <dd>Linear system type.</dd>
-            <dt id="a2099318799c96bf385695dfcc2d4ccc7">
-              using <a href="#a2099318799c96bf385695dfcc2d4ccc7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>, U1, U2, U3, Us...&gt;&gt;
+            <dt id="aa162cdd817d5607ae476291b20d8c556">
+              using <a href="#aa162cdd817d5607ae476291b20d8c556" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html#ab9f33f0df38a690d6bfa27727601f32d" class="m-doc">AssemblyBase</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Variational::<wbr />Problem</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>, U1, U2, U3, Us...&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
               using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
             </dt>
             <dd>Assembly input data type.</dd>
-            <dt id="acbbb8aedee6685384d9653e514e4abb9">
-              using <a href="#acbbb8aedee6685384d9653e514e4abb9" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+            <dt id="a3f02c76806f998a41174a54479486d51">
+              using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::OperatorType
             </dt>
             <dd>Assembled operator type.</dd>
-            <dt id="aea1b35382690dec275f150a48e000d44">
-              using <a href="#aea1b35382690dec275f150a48e000d44" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            <dt id="a8d4666f2edbd3de42a6bfbdbec15e536">
+              using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::VectorType
             </dt>
             <dd>Vector type of the linear system.</dd>
-            <dt id="a7668ea510f9f419d9d615047ed1fd748">
-              using <a href="#a7668ea510f9f419d9d615047ed1fd748" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::ScalarType
+            <dt id="a5584bb04cdb3914f8da2f4904a179ef0">
+              using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="aaab168dfc96be3528995d614493a3c2a">
-              using <a href="#aaab168dfc96be3528995d614493a3c2a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#a7668ea510f9f419d9d615047ed1fd748" class="m-doc">ScalarType</a>&gt;
+              using <a href="#aaab168dfc96be3528995d614493a3c2a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Local bilinear form integrator base type.</dd>
             <dt id="a4a3feaf1bafabf93272f176bbe8c32af">
-              using <a href="#a4a3feaf1bafabf93272f176bbe8c32af" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="#a7668ea510f9f419d9d615047ed1fd748" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a4a3feaf1bafabf93272f176bbe8c32af" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Global bilinear form integrator base type.</dd>
             <dt id="ab48346cb2a941d35ac4593fb7c40eab7">
-              using <a href="#ab48346cb2a941d35ac4593fb7c40eab7" class="m-doc-self">LinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="#a7668ea510f9f419d9d615047ed1fd748" class="m-doc">ScalarType</a>&gt;
+              using <a href="#ab48346cb2a941d35ac4593fb7c40eab7" class="m-doc-self">LinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Linear form integrator base type.</dd>
           </dl>
@@ -165,6 +159,14 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f52a37163732c13494178b8763800a3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; other) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copies the execution policy, retaining the destination identity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf4cf036bb15e279216362eb78dc9b36" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp;&amp; other) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the execution policy, retaining the destination identity.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a5ad8e8eb9a7e687d7c6610df31753992" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -185,10 +187,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ae9ff110dd307a2e8d181728439fc88b0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -205,10 +205,8 @@
           </div></section>
           <section class="m-doc-details" id="ab629819992d852fd6c2647d00eee90e6"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span></span>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -223,12 +221,58 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a5f52a37163732c13494178b8763800a3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f52a37163732c13494178b8763800a3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copies the execution policy, retaining the destination identity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source complete-problem assembler.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this assembler.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adf4cf036bb15e279216362eb78dc9b36"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf4cf036bb15e279216362eb78dc9b36" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Moves the execution policy, retaining the destination identity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source complete-problem assembler.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this assembler.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a5ad8e8eb9a7e687d7c6610df31753992"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ad8e8eb9a7e687d7c6610df31753992" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ad8e8eb9a7e687d7c6610df31753992" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Executes full mixed problem assembly.</p>
@@ -250,10 +294,8 @@
           </div></section>
           <section class="m-doc-details" id="a223bc4ba58a655fe022036c60250bf91"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a223bc4ba58a655fe022036c60250bf91" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a223bc4ba58a655fe022036c60250bf91" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
               <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target)</span></span>
             </h3>
@@ -281,10 +323,8 @@
           </div></section>
           <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -335,13 +375,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Alert::Notation class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,17 +71,15 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Notation <span class="m-thin">class</span>
-        </h1>
-        <p>Specialized text class for mathematical and technical notation.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_alert.html">Alert</a></div><h1>Notation</h1><p class="rodin-reference-brief">Specialized text class for mathematical and technical notation.</p><p class="rodin-reference-include">Defined in <a href="_notation_8h.html"><code>Rodin/Alert/Notation.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_alert_1_1_notation.html#a617146832803308fe22edc5fe17cfc3b"><span class="nc">Notation</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#base-classes">Inherits from</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
@@ -93,22 +88,14 @@
             </li>
           </ul>
         </nav>
-<p>Provides a colored text formatting class specifically for displaying mathematical notation, variable names, and technical identifiers in alert messages. Notation objects are displayed in magenta to distinguish them from regular message text.</p><p>This class includes static factory methods for common notation patterns used throughout Rodin, such as polytope identifiers, incidence relations, and numeric values.</p><p>Example usage: <code class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Invalid polytope "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Notation</span><span class="o">::</span><span class="n">Polytope</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class F = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, class B = <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;</div>
-              class <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text&lt;NotationForeground&gt;</a>
-            </dt>
-            <dd>Templated text class with foreground and background color support.</dd>
-          </dl>
-        </section>
+<p>Provides a colored text formatting class specifically for displaying mathematical notation, variable names, and technical identifiers in alert messages. Notation objects are displayed in magenta to distinguish them from regular message text.</p><p>This class includes static factory methods for common notation patterns used throughout Rodin, such as polytope identifiers, incidence relations, and numeric values.</p><p>Example usage: <code class="m-code"><span class="nc">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Invalid polytope "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="nc">Notation</span><span class="o">::</span><span class="nc">Polytope</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_alert_1_1_text.html" title="Text&lt; NotationForeground &gt;">Text</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Notation</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_text.html"><code>Text&lt;NotationForeground&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_alert_1_1_notation.html#a23fc7bc07fb9406076d83ea956ea3cbe"><span class="nc">Text</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin_1_1_alert.html#a692d40b6e9e3d9415efe4bf4e8490443"><span class="nc">NotationForeground</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Templated text class with foreground and background color support.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_text.html"><code>Text</code></a></td><td><details><summary>15 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_alert_1_1_text.html#ad8bc9bf48308f5f14f18f08c509a67ac"><code>Background</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93"><code>Foreground</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#aea85cd6a245c54226e6187610d591f3c"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a8bb91684ea86bc326ee0cb2de6da2f41"><code>getBackground()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#acf943f9355f51b9dcfd8a73943a0f39f"><code>getForeground()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a2232ae9dafaa0daef76207df109265ca"><code>getString()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a293793ceccb85eaf50b40efa1e2dd0a0"><code>setAttribute()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#aed5527e19bf03917aaadc166501a74c2"><code>setBlink()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#aa207d65909ee3f5cd1b89bd9783327b6"><code>setBold()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a4ef1147b6db444805b3a775cbc310d72"><code>setConcealed()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a3599c205fde4c98b4d61ed4cbf8b4337"><code>setCrossed()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#ac76885e70ca48e793fbbb34514c4a12a"><code>setDark()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a66f00c6e2b41f4ea8e34f9f7c76e28f8"><code>setItalic()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a03babc81f35757b4ee2ee6c138c7d344"><code>setReverse()</code></a></li><li><a href="class_rodin_1_1_alert_1_1_text.html#a341fea2a8a515b54201290a53a5bf8e9"><code>setUnderline()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a6f184535b5c32c1f95c0c6e9061cf8e6">
-              using <a href="#a6f184535b5c32c1f95c0c6e9061cf8e6" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;<a href="namespace_rodin_1_1_alert.html#a692d40b6e9e3d9415efe4bf4e8490443" class="m-doc">NotationForeground</a>&gt;
+              using <a href="#a6f184535b5c32c1f95c0c6e9061cf8e6" class="m-doc-self">Parent</a> = <a href="#a23fc7bc07fb9406076d83ea956ea3cbe" class="m-doc">Text</a>&lt;<a href="namespace_rodin_1_1_alert.html#a692d40b6e9e3d9415efe4bf4e8490443" class="m-doc">NotationForeground</a>&gt;
             </dt>
             <dd>Parent class type alias.</dd>
           </dl>
@@ -117,7 +104,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt>
-              static const <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> <a href="#a43c9f24c0e35d74de3a47467f0e14efd" class="m-doc">Arrow</a>
+              static const <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> <a href="#a43c9f24c0e35d74de3a47467f0e14efd" class="m-doc">Arrow</a>
             </dt>
             <dd>Static arrow notation instance.</dd>
           </dl>
@@ -126,46 +113,46 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a23fc7bc07fb9406076d83ea956ea3cbe" class="m-doc">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a23fc7bc07fb9406076d83ea956ea3cbe" class="m-doc">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for text notation.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#aacf7ad07fc08a4961742753e2c43c61d" class="m-doc">Number</a>(</span><span class="m-doc-wrap">const T&amp; out) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#aacf7ad07fc08a4961742753e2c43c61d" class="m-doc">Number</a>(</span><span class="m-doc-wrap">const T&amp; out) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for numeric notation.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ac8419b3629172e8ade5f6bfcf8ce974f" class="m-doc">Print</a>(</span><span class="m-doc-wrap">const T&amp; out) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ac8419b3629172e8ade5f6bfcf8ce974f" class="m-doc">Print</a>(</span><span class="m-doc-wrap">const T&amp; out) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for general printable values.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#aeaf3865b6047b521c4617a680ba3ffd9" class="m-doc">Incidence</a>(</span><span class="m-doc-wrap">size_t d,
-              size_t dp) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              size_t dp) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for incidence relation notation.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#a54c161adea9721b20d3364d6f5cd24a2" class="m-doc">Polytope</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for polytope notation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a166347a404358b68db1015deb4e1561c" class="m-doc">True</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a166347a404358b68db1015deb4e1561c" class="m-doc">True</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for boolean true notation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ae7a56f584c0bb6d68a8be0b26329f421" class="m-doc">False</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ae7a56f584c0bb6d68a8be0b26329f421" class="m-doc">False</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for boolean false notation.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#a832ecd4c1d4dbace12545d0faf662927" class="m-doc">Predicate</a>(</span><span class="m-doc-wrap">bool v,
-              const std::string&amp; pred) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              const std::string&amp; pred) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for predicate notation.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Iterator&gt;</div>
               <span class="m-doc-wrap-bumper">static auto <a href="#a0d7d4a3bc2f1933584a9c2c86bff63c7" class="m-doc">Set</a>(</span><span class="m-doc-wrap">Iterator first,
-              Iterator last) -&gt; <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a></span>
+              Iterator last) -&gt; <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a></span>
             </dt>
             <dd>Factory method for set notation.</dd>
           </dl>
@@ -187,11 +174,11 @@
             </dt>
             <dd>Constructs notation from any type convertible to string.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a480112f3877d00feb9245676449db257" class="m-doc">Notation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a480112f3877d00feb9245676449db257" class="m-doc">Notation</a>(</span><span class="m-doc-wrap">const Notation&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aae8794f9244d74669960e6da67fbbdb2" class="m-doc">Notation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a>&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aae8794f9244d74669960e6da67fbbdb2" class="m-doc">Notation</a>(</span><span class="m-doc-wrap">Notation&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -200,7 +187,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a23fc7bc07fb9406076d83ea956ea3cbe"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23fc7bc07fb9406076d83ea956ea3cbe" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23fc7bc07fb9406076d83ea956ea3cbe" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text)</span></span>
             </h3>
             <p>Factory method for text notation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -226,7 +213,7 @@
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacf7ad07fc08a4961742753e2c43c61d" class="m-doc-self">Number</a>(</span><span class="m-doc-wrap">const T&amp; out)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacf7ad07fc08a4961742753e2c43c61d" class="m-doc-self">Number</a>(</span><span class="m-doc-wrap">const T&amp; out)</span></span>
             </h3>
             <p>Factory method for numeric notation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,7 +248,7 @@
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8419b3629172e8ade5f6bfcf8ce974f" class="m-doc-self">Print</a>(</span><span class="m-doc-wrap">const T&amp; out)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8419b3629172e8ade5f6bfcf8ce974f" class="m-doc-self">Print</a>(</span><span class="m-doc-wrap">const T&amp; out)</span></span>
             </h3>
             <p>Factory method for general printable values.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -293,7 +280,7 @@
           </div></section>
           <section class="m-doc-details" id="aeaf3865b6047b521c4617a680ba3ffd9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeaf3865b6047b521c4617a680ba3ffd9" class="m-doc-self">Incidence</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeaf3865b6047b521c4617a680ba3ffd9" class="m-doc-self">Incidence</a>(</span><span class="m-doc-wrap">size_t d,
               size_t dp)</span></span>
             </h3>
             <p>Factory method for incidence relation notation.</p>
@@ -322,7 +309,7 @@
           </div></section>
           <section class="m-doc-details" id="a54c161adea9721b20d3364d6f5cd24a2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54c161adea9721b20d3364d6f5cd24a2" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54c161adea9721b20d3364d6f5cd24a2" class="m-doc-self">Polytope</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index)</span></span>
             </h3>
             <p>Factory method for polytope notation.</p>
@@ -351,7 +338,7 @@
           </div></section>
           <section class="m-doc-details" id="a166347a404358b68db1015deb4e1561c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a166347a404358b68db1015deb4e1561c" class="m-doc-self">True</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a166347a404358b68db1015deb4e1561c" class="m-doc-self">True</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Factory method for boolean true notation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -365,7 +352,7 @@
           </div></section>
           <section class="m-doc-details" id="ae7a56f584c0bb6d68a8be0b26329f421"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7a56f584c0bb6d68a8be0b26329f421" class="m-doc-self">False</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7a56f584c0bb6d68a8be0b26329f421" class="m-doc-self">False</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Factory method for boolean false notation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -379,7 +366,7 @@
           </div></section>
           <section class="m-doc-details" id="a832ecd4c1d4dbace12545d0faf662927"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a832ecd4c1d4dbace12545d0faf662927" class="m-doc-self">Predicate</a>(</span><span class="m-doc-wrap">bool v,
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a832ecd4c1d4dbace12545d0faf662927" class="m-doc-self">Predicate</a>(</span><span class="m-doc-wrap">bool v,
               const std::string&amp; pred)</span></span>
             </h3>
             <p>Factory method for predicate notation.</p>
@@ -411,7 +398,7 @@
               <div class="m-doc-template">
                 template&lt;class Iterator&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d7d4a3bc2f1933584a9c2c86bff63c7" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">Iterator first,
+              <span class="m-doc-wrap-bumper">static <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d7d4a3bc2f1933584a9c2c86bff63c7" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">Iterator first,
               Iterator last)</span></span>
             </h3>
             <p>Factory method for set notation.</p>
@@ -449,7 +436,7 @@
           </div></section>
           <section class="m-doc-details" id="a617146832803308fe22edc5fe17cfc3b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const std::string&amp; text)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const std::string&amp; text)</span></span>
             </h3>
             <p>Constructs notation from a string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -466,7 +453,7 @@
           </div></section>
           <section class="m-doc-details" id="a5f02f20aa4545067f01b0ac61783046d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f02f20aa4545067f01b0ac61783046d" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const char* out)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f02f20aa4545067f01b0ac61783046d" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const char* out)</span></span>
             </h3>
             <p>Constructs notation from a C-style string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -486,7 +473,7 @@
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4b440f20a5ea4e9a7e81d391e27aa2dc" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const T&amp; out)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4b440f20a5ea4e9a7e81d391e27aa2dc" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const T&amp; out)</span></span>
             </h3>
             <p>Constructs notation from any type convertible to string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -512,7 +499,7 @@
           </div></section>
           <section class="m-doc-details" id="a480112f3877d00feb9245676449db257"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a480112f3877d00feb9245676449db257" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a480112f3877d00feb9245676449db257" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">const Notation&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -529,7 +516,7 @@
           </div></section>
           <section class="m-doc-details" id="aae8794f9244d74669960e6da67fbbdb2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Notation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae8794f9244d74669960e6da67fbbdb2" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae8794f9244d74669960e6da67fbbdb2" class="m-doc-self">Notation</a>(</span><span class="m-doc-wrap">Notation&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -549,7 +536,7 @@
           <h2>Variable documentation</h2>
           <section class="m-doc-details" id="a43c9f24c0e35d74de3a47467f0e14efd"><div>
             <h3>
-              static const <a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /><a href="#a43c9f24c0e35d74de3a47467f0e14efd" class="m-doc-self">Arrow</a>
+              static const <a href="#a617146832803308fe22edc5fe17cfc3b" class="m-doc">Notation</a> Rodin::<wbr />Alert::<wbr />Notation::<wbr /><a href="#a43c9f24c0e35d74de3a47467f0e14efd" class="m-doc-self">Arrow</a>
             </h3>
             <p>Static arrow notation instance.</p>
 <p>Constant notation object representing an arrow symbol, commonly used in incidence relations and mathematical expressions.</p>
@@ -593,13 +580,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

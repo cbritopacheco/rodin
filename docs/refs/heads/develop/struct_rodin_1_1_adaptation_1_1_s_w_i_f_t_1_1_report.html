@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Adaptation::SWIFT::Report struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,10 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>Report <span class="m-thin">struct</span>
-        </h1>
-        <p>Diagnostics produced by a SWIFT solve.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a><span>›</span><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a></div><h1>Report</h1><p class="rodin-reference-brief">Diagnostics produced by a SWIFT solve.</p><p class="rodin-reference-include">Defined in <a href="_report_8h.html"><code>Rodin/Adaptation/SWIFT/Report.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><span class="nc">Report</span><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -94,27 +89,26 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="af38960e2d1da2c992b2232eb3f285c4e">
-              <span class="m-doc-wrap-bumper">enum class <a href="#af38960e2d1da2c992b2232eb3f285c4e" class="m-doc-self">Reason</a> { </span><span class="m-doc-wrap"><a href="#af38960e2d1da2c992b2232eb3f285c4eacd3b6ae6163e0d9229f14e2c17cc0509" class="m-doc">IterationLimit</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea39c10db5250f1bf5767a138aab80806a" class="m-doc">MissingInterface</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea9ee8723cfc3cff0efb9fc23fa93a2320" class="m-doc">EmptyInterface</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea446aa2da0938819d2e430a189f76e976" class="m-doc">DegenerateGradient</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea92d5ceb73895f9b33249c47f3431b90d" class="m-doc">InvalidInitialGeometry</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea65ee57e21979e88d2c9f38439aa54c2b" class="m-doc">InvalidGeometry</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea99e2a1c0d4d2f466c959123125df5cb4" class="m-doc">GeometricTarget</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea687c8d60545bb66eb89fd43160aa4fd2" class="m-doc">PredictorFailure</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ead6d7ffca9eab31a16ffa2b1aecb5beab" class="m-doc">NonDescentPredictor</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea1900263d2b761ec6345c3a61dda5af15" class="m-doc">InvalidScaling</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea470945b1ddc4853b90acdab89411ee47" class="m-doc">LinearFailure</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea6873dbefd8b68a2cad42d23bbe14cb5d" class="m-doc">InnerLineSearchFailure</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4eae445958ac82929ca87cd7d58ab87ad6e" class="m-doc">InnerIterationLimit</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4eae0e7fa281eb15bac5dc8796e5647c0eb" class="m-doc">NonfiniteDirection</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea40a9cb82293e6f4d4bfa0af345d420c6" class="m-doc">NonDescentDirection</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4eab057c56bccbd75d5c27f6d2d6a71ef06" class="m-doc">LineSearchFailure</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4ea5e2f4acb4e407f85ca1a98e38294782d" class="m-doc">SmallAcceptedSteps</a>,
-              <a href="#af38960e2d1da2c992b2232eb3f285c4eaa2c03f6e14c7dad87b70aa1726b3ed63" class="m-doc">SmallEnergyChanges</a> }</span>
-            </dt>
-            <dd>Typed termination condition of the outer fitting solve.</dd>
+            <dt id="af38960e2d1da2c992b2232eb3f285c4e">class <a href="#af38960e2d1da2c992b2232eb3f285c4e" class="m-doc-self">Reason</a></dt><dd>Typed termination condition of the outer fitting solve.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">enum class <a href="#af38960e2d1da2c992b2232eb3f285c4e" class="m-doc-self">Reason</a> { </span><span class="m-doc-wrap"><a id="af38960e2d1da2c992b2232eb3f285c4eacd3b6ae6163e0d9229f14e2c17cc0509" href="#af38960e2d1da2c992b2232eb3f285c4eacd3b6ae6163e0d9229f14e2c17cc0509" class="m-doc">IterationLimit</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea39c10db5250f1bf5767a138aab80806a" href="#af38960e2d1da2c992b2232eb3f285c4ea39c10db5250f1bf5767a138aab80806a" class="m-doc">MissingInterface</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea9ee8723cfc3cff0efb9fc23fa93a2320" href="#af38960e2d1da2c992b2232eb3f285c4ea9ee8723cfc3cff0efb9fc23fa93a2320" class="m-doc">EmptyInterface</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea446aa2da0938819d2e430a189f76e976" href="#af38960e2d1da2c992b2232eb3f285c4ea446aa2da0938819d2e430a189f76e976" class="m-doc">DegenerateGradient</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea92d5ceb73895f9b33249c47f3431b90d" href="#af38960e2d1da2c992b2232eb3f285c4ea92d5ceb73895f9b33249c47f3431b90d" class="m-doc">InvalidInitialGeometry</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea65ee57e21979e88d2c9f38439aa54c2b" href="#af38960e2d1da2c992b2232eb3f285c4ea65ee57e21979e88d2c9f38439aa54c2b" class="m-doc">InvalidGeometry</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea99e2a1c0d4d2f466c959123125df5cb4" href="#af38960e2d1da2c992b2232eb3f285c4ea99e2a1c0d4d2f466c959123125df5cb4" class="m-doc">GeometricTarget</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea687c8d60545bb66eb89fd43160aa4fd2" href="#af38960e2d1da2c992b2232eb3f285c4ea687c8d60545bb66eb89fd43160aa4fd2" class="m-doc">PredictorFailure</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ead6d7ffca9eab31a16ffa2b1aecb5beab" href="#af38960e2d1da2c992b2232eb3f285c4ead6d7ffca9eab31a16ffa2b1aecb5beab" class="m-doc">NonDescentPredictor</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea1900263d2b761ec6345c3a61dda5af15" href="#af38960e2d1da2c992b2232eb3f285c4ea1900263d2b761ec6345c3a61dda5af15" class="m-doc">InvalidScaling</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea470945b1ddc4853b90acdab89411ee47" href="#af38960e2d1da2c992b2232eb3f285c4ea470945b1ddc4853b90acdab89411ee47" class="m-doc">LinearFailure</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea6873dbefd8b68a2cad42d23bbe14cb5d" href="#af38960e2d1da2c992b2232eb3f285c4ea6873dbefd8b68a2cad42d23bbe14cb5d" class="m-doc">InnerLineSearchFailure</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4eae445958ac82929ca87cd7d58ab87ad6e" href="#af38960e2d1da2c992b2232eb3f285c4eae445958ac82929ca87cd7d58ab87ad6e" class="m-doc">InnerIterationLimit</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4eae0e7fa281eb15bac5dc8796e5647c0eb" href="#af38960e2d1da2c992b2232eb3f285c4eae0e7fa281eb15bac5dc8796e5647c0eb" class="m-doc">NonfiniteDirection</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea40a9cb82293e6f4d4bfa0af345d420c6" href="#af38960e2d1da2c992b2232eb3f285c4ea40a9cb82293e6f4d4bfa0af345d420c6" class="m-doc">NonDescentDirection</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4eab057c56bccbd75d5c27f6d2d6a71ef06" href="#af38960e2d1da2c992b2232eb3f285c4eab057c56bccbd75d5c27f6d2d6a71ef06" class="m-doc">LineSearchFailure</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4ea5e2f4acb4e407f85ca1a98e38294782d" href="#af38960e2d1da2c992b2232eb3f285c4ea5e2f4acb4e407f85ca1a98e38294782d" class="m-doc">SmallAcceptedSteps</a>,
+              <a id="af38960e2d1da2c992b2232eb3f285c4eaa2c03f6e14c7dad87b70aa1726b3ed63" href="#af38960e2d1da2c992b2232eb3f285c4eaa2c03f6e14c7dad87b70aa1726b3ed63" class="m-doc">SmallEnergyChanges</a> }</span>
+            </div></details></dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -188,7 +182,7 @@
             <dt id="ae455642ab54f77e9d6cad662d044c6a6">
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ae455642ab54f77e9d6cad662d044c6a6" class="m-doc-self">hingeCoefficient</a>
             </dt>
-            <dd>Effective per-volume coefficient assembled for the last hinge QP.</dd>
+            <dd>Predicted decrease per volume, before the two hinge strengths.</dd>
             <dt id="acf05d4628af1758a6aa443f97f890b67">
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#acf05d4628af1758a6aa443f97f890b67" class="m-doc-self">innerRelativeCorrection</a>
             </dt>
@@ -280,8 +274,8 @@ $C=D_\infty/h_0^{p+1}$
 <path id='eq1-g3-43' d='M3.474969-1.809215H5.818182C5.929763-1.809215 6.105106-1.809215 6.105106-1.992528S5.929763-2.175841 5.818182-2.175841H3.474969V-4.527024C3.474969-4.638605 3.474969-4.813948 3.291656-4.813948S3.108344-4.638605 3.108344-4.527024V-2.175841H.757161C.645579-2.175841 .470237-2.175841 .470237-1.992528S.645579-1.809215 .757161-1.809215H3.108344V.541968C3.108344 .653549 3.108344 .828892 3.291656 .828892S3.474969 .653549 3.474969 .541968V-1.809215Z'/>
 <path id='eq1-g3-48' d='M3.897385-2.542466C3.897385-3.395268 3.809714-3.913325 3.5467-4.423412C3.196015-5.124782 2.550436-5.300125 2.11208-5.300125C1.107846-5.300125 .74122-4.550934 .629639-4.327771C.342715-3.745953 .326775-2.956912 .326775-2.542466C.326775-2.016438 .350685-1.211457 .73325-.573848C1.099875 .01594 1.689664 .167372 2.11208 .167372C2.494645 .167372 3.180075 .047821 3.57858-.74122C3.873474-1.315068 3.897385-2.024408 3.897385-2.542466ZM2.11208-.055791C1.841096-.055791 1.291158-.183313 1.123786-1.020174C1.036115-1.474471 1.036115-2.223661 1.036115-2.638107C1.036115-3.188045 1.036115-3.745953 1.123786-4.184309C1.291158-4.99726 1.912827-5.076961 2.11208-5.076961C2.383064-5.076961 2.933001-4.941469 3.092403-4.216189C3.188045-3.777833 3.188045-3.180075 3.188045-2.638107C3.188045-2.16787 3.188045-1.45056 3.092403-1.004234C2.925031-.167372 2.375093-.055791 2.11208-.055791Z'/>
 <path id='eq1-g3-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
-<path id='eq1-g0-49' d='M4.303861-2.183811C3.833624-2.749689 3.769863-2.81345 3.490909-3.020672C3.124284-3.299626 2.638107-3.514819 2.11208-3.514819C1.139726-3.514819 .470237-2.662017 .470237-1.713574C.470237-.781071 1.131756 .079701 2.080199 .079701C2.733748 .079701 3.498879-.263014 4.160399-1.251308C4.630635-.68543 4.694396-.621669 4.97335-.414446C5.339975-.135492 5.826152 .079701 6.352179 .079701C7.324533 .079701 7.994022-.773101 7.994022-1.721544C7.994022-2.654047 7.332503-3.514819 6.38406-3.514819C5.730511-3.514819 4.96538-3.172105 4.303861-2.183811ZM4.542964-1.888917C4.845828-2.391034 5.499377-3.211955 6.439851-3.211955C7.292653-3.211955 7.770859-2.438854 7.770859-1.721544C7.770859-.948443 7.181071-.350685 6.479701-.350685S5.308095-.932503 4.542964-1.888917ZM3.921295-1.546202C3.618431-1.044085 2.964882-.223163 2.024408-.223163C1.171606-.223163 .6934-.996264 .6934-1.713574C.6934-2.486675 1.283188-3.084433 1.984558-3.084433S3.156164-2.502615 3.921295-1.546202Z'/>
 <path id='eq1-g1-112' d='M.414446 .964384C.350685 1.219427 .334745 1.283188 .01594 1.283188C-.095641 1.283188-.191283 1.283188-.191283 1.43462C-.191283 1.506351-.119552 1.546202-.079701 1.546202C0 1.546202 .03188 1.522291 .621669 1.522291C1.195517 1.522291 1.362889 1.546202 1.41868 1.546202C1.45056 1.546202 1.570112 1.546202 1.570112 1.39477C1.570112 1.283188 1.458531 1.283188 1.362889 1.283188C.980324 1.283188 .980324 1.235367 .980324 1.163636C.980324 1.107846 1.123786 .541968 1.362889-.390535C1.466501-.207223 1.713574 .079701 2.14396 .079701C3.124284 .079701 4.144458-1.052055 4.144458-2.207721C4.144458-2.996762 3.634371-3.514819 2.996762-3.514819C2.518555-3.514819 2.13599-3.188045 1.904857-2.948941C1.737484-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.629639-2.83736 .773101-3.291656 1.099875-3.291656C1.299128-3.291656 1.354919-3.108344 1.354919-2.917061C1.354919-2.83736 1.323039-2.646077 1.307098-2.582316L.414446 .964384ZM1.880946-2.454795C1.920797-2.590286 1.920797-2.606227 2.040349-2.749689C2.343213-3.108344 2.685928-3.291656 2.972852-3.291656C3.371357-3.291656 3.52279-2.901121 3.52279-2.542466C3.52279-2.247572 3.347447-1.39477 3.108344-.924533C2.901121-.494147 2.518555-.143462 2.14396-.143462C1.601993-.143462 1.474471-.765131 1.474471-.820922C1.474471-.836862 1.490411-.924533 1.498381-.948443L1.880946-2.454795Z'/>
+<path id='eq1-g0-49' d='M4.303861-2.183811C3.833624-2.749689 3.769863-2.81345 3.490909-3.020672C3.124284-3.299626 2.638107-3.514819 2.11208-3.514819C1.139726-3.514819 .470237-2.662017 .470237-1.713574C.470237-.781071 1.131756 .079701 2.080199 .079701C2.733748 .079701 3.498879-.263014 4.160399-1.251308C4.630635-.68543 4.694396-.621669 4.97335-.414446C5.339975-.135492 5.826152 .079701 6.352179 .079701C7.324533 .079701 7.994022-.773101 7.994022-1.721544C7.994022-2.654047 7.332503-3.514819 6.38406-3.514819C5.730511-3.514819 4.96538-3.172105 4.303861-2.183811ZM4.542964-1.888917C4.845828-2.391034 5.499377-3.211955 6.439851-3.211955C7.292653-3.211955 7.770859-2.438854 7.770859-1.721544C7.770859-.948443 7.181071-.350685 6.479701-.350685S5.308095-.932503 4.542964-1.888917ZM3.921295-1.546202C3.618431-1.044085 2.964882-.223163 2.024408-.223163C1.171606-.223163 .6934-.996264 .6934-1.713574C.6934-2.486675 1.283188-3.084433 1.984558-3.084433S3.156164-2.502615 3.921295-1.546202Z'/>
 <path id='eq1-g4-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
 <path id='eq1-g2-61' d='M5.128767-8.524035C5.128767-8.53599 5.200498-8.715318 5.200498-8.739228C5.200498-8.88269 5.080946-8.966376 4.985305-8.966376C4.925529-8.966376 4.817933-8.966376 4.722291-8.703362L.71731 2.546451C.71731 2.558406 .645579 2.737733 .645579 2.761644C.645579 2.905106 .765131 2.988792 .860772 2.988792C.932503 2.988792 1.0401 2.976837 1.123786 2.725778L5.128767-8.524035Z'/>
 <path id='eq1-g2-67' d='M8.930511-8.308842C8.930511-8.416438 8.846824-8.416438 8.822914-8.416438S8.751183-8.416438 8.655542-8.296887L7.830635-7.292653C7.412204-8.009963 6.75467-8.416438 5.858032-8.416438C3.275716-8.416438 .597758-5.798257 .597758-2.988792C.597758-.992279 1.996513 .251059 3.741968 .251059C4.698381 .251059 5.535243-.155417 6.228643-.74122C7.268742-1.613948 7.579577-2.773599 7.579577-2.86924C7.579577-2.976837 7.483935-2.976837 7.44807-2.976837C7.340473-2.976837 7.328518-2.905106 7.304608-2.857285C6.75467-.992279 5.140722-.095641 3.945205-.095641C2.677958-.095641 1.578082-.908593 1.578082-2.606227C1.578082-2.988792 1.697634-5.068991 3.048568-6.635118C3.706102-7.400249 4.829888-8.069738 5.965629-8.069738C7.280697-8.069738 7.866501-6.981818 7.866501-5.762391C7.866501-5.451557 7.830635-5.188543 7.830635-5.140722C7.830635-5.033126 7.950187-5.033126 7.986052-5.033126C8.117559-5.033126 8.129514-5.045081 8.177335-5.260274L8.930511-8.308842Z'/>
@@ -321,14 +315,6 @@ $C=D_\infty/h_0^{p+1}$
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a32a1f5d1ed3ba058d67d23f8b1d47f26" class="m-doc-self">interfaceMeasure</a>
             </dt>
             <dd>Measure of the complete interface quadrature set.</dd>
-            <dt id="a960431ba98f14ed51bdd89d27fe35340">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a960431ba98f14ed51bdd89d27fe35340" class="m-doc-self">normalJumpRMS</a>
-            </dt>
-            <dd>RMS jump of the normal field across the interface.</dd>
-            <dt id="a23ad1750222d078501aaecb35a0b2a59">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a23ad1750222d078501aaecb35a0b2a59" class="m-doc-self">normalJumpMax</a>
-            </dt>
-            <dd>Maximum jump of the normal field across the interface.</dd>
             <dt id="a6ccecf169e044f4f450c9464a7b78234">
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6ccecf169e044f4f450c9464a7b78234" class="m-doc-self">energy</a>
             </dt>
@@ -399,7 +385,7 @@ $C=D_\infty/h_0^{p+1}$
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a57ab76d79693e69e9084cf581648e65e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Report::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57ab76d79693e69e9084cf581648e65e" class="m-doc-self">getReasonString</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const char* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57ab76d79693e69e9084cf581648e65e" class="m-doc-self">getReasonString</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Stable log token for the typed stopping reason.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -450,13 +436,20 @@ $C=D_\infty/h_0^{p+1}$
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>

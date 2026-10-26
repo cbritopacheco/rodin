@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Rodin::Variational::ShapeFunction&lt;Derived, P1&lt;Range, Mesh&gt;, Space&gt;::Cache::ValueKey struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="rodin.css" />
+  <link rel="stylesheet" href="rodin-e6524bc0dfe4.css" />
+  <link rel="stylesheet" href="rodin-theme-a31a2c4268f0.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
+  <meta name="theme-color" content="#20252d" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -33,7 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
-                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -41,25 +43,20 @@
             <li>
               <a href="modules.html">Modules</a>
               <ol>
-                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
-              </ol>
-            </li>
-            <li>
-              <a href="namespaces.html">Namespaces</a>
-              <ol>
-                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
-                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
-                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
-                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
-                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
-                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
-                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
               </ol>
             </li>
           </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="4">
+          <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
             <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
             <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -74,11 +71,8 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4_00_01_space_01_4.html">ShapeFunction&lt;Derived, P1&lt;Range, Mesh&gt;, Space&gt;</a>::<wbr/></span><span class="m-breadcrumb"><a href="struct_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4_00_01_space_01_4_1_1_cache.html">Cache</a>::<wbr/></span>ValueKey <span class="m-thin">struct</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_shape_function_8h.html">&lt;Rodin/Variational/P1/ShapeFunction.h&gt;</a></div>
-        </h1>
-        <p>Key identifying the cached shape function values.</p>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a><span>›</span><a href="class_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4_00_01_space_01_4.html">ShapeFunction&lt;Derived, P1&lt;Range, Mesh&gt;, Space&gt;</a><span>›</span><a href="struct_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4_00_01_space_01_4_1_1_cache.html">Cache</a></div><h1>ValueKey</h1><p class="rodin-reference-brief">Key identifying the cached shape function values.</p><p class="rodin-reference-include">Defined in <a href="_p1_2_shape_function_8h.html"><code>Rodin/Variational/P1/ShapeFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><a href="struct_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4dd69914d93b038828febb657a4e0d821.html#a68db69756c54954535e96fe72585d1ce"><span class="nc">ValueKey</span></a><span class="p">;</span>
+</pre>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -109,11 +103,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0abd27bc6a55759cb95f8c903c121845" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4dd69914d93b038828febb657a4e0d821.html" class="m-doc">ValueKey</a>&amp; o) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0abd27bc6a55759cb95f8c903c121845" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="#a68db69756c54954535e96fe72585d1ce" class="m-doc">ValueKey</a>&amp; o) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Equality comparison.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#abfa40337d74c7c435c9e38d7e9261dcd" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;int&gt; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a20194325f0380eb3bbc6bc6c8b2697d9">
+              <span class="m-doc-wrap-bumper">void <a href="#a20194325f0380eb3bbc6bc6c8b2697d9" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Resets the key, invalidating the cached entry.</dd>
           </dl>
@@ -121,14 +115,10 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="ab2e4eb3abb2817e7d639cba351011926">
-              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* <a href="#ab2e4eb3abb2817e7d639cba351011926" class="m-doc-self">qf</a>
+            <dt id="abfde9ddf20b6129f21ee0262e60f45ec">
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>* <a href="#abfde9ddf20b6129f21ee0262e60f45ec" class="m-doc-self">qf</a>
             </dt>
             <dd>Quadrature formula the cached tabulation belongs to.</dd>
-            <dt id="ab981138940a0ba1939f5d2772977bf62">
-              size_t <a href="#ab981138940a0ba1939f5d2772977bf62" class="m-doc-self">identity</a>
-            </dt>
-            <dd>Logical lifetime and assignment identity of the formula.</dd>
             <dt id="a297742246078ea1aafc48fad7f473148">
               size_t <a href="#a297742246078ea1aafc48fad7f473148" class="m-doc-self">qp</a>
             </dt>
@@ -143,7 +133,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a420e60e9788bfa3b52aa3aab72ea3a5e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ShapeFunction&lt;Derived, P1&lt;Range, Mesh&gt;, Space&gt;::<wbr />Cache::<wbr />ValueKey::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a420e60e9788bfa3b52aa3aab72ea3a5e" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a420e60e9788bfa3b52aa3aab72ea3a5e" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Tests whether the key holds a cached entry.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -157,7 +147,7 @@
           </div></section>
           <section class="m-doc-details" id="a0abd27bc6a55759cb95f8c903c121845"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Variational::<wbr />ShapeFunction&lt;Derived, P1&lt;Range, Mesh&gt;, Space&gt;::<wbr />Cache::<wbr />ValueKey::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0abd27bc6a55759cb95f8c903c121845" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_shape_function_3_01_derived_00_01_p1_3_01_range_00_01_mesh_01_4dd69914d93b038828febb657a4e0d821.html" class="m-doc">ValueKey</a>&amp; o) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0abd27bc6a55759cb95f8c903c121845" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="#a68db69756c54954535e96fe72585d1ce" class="m-doc">ValueKey</a>&amp; o) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Equality comparison.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -176,23 +166,6 @@
                   <td>Whether the operands compare equal.</td>
                 </tr>
               </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="abfa40337d74c7c435c9e38d7e9261dcd"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />ShapeFunction&lt;Derived, P1&lt;Range, Mesh&gt;, Space&gt;::<wbr />Cache::<wbr />ValueKey::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfa40337d74c7c435c9e38d7e9261dcd" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;int&gt; other) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Resets the key, invalidating the cached entry.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">other</td>
-                  <td>Object to copy from.</td>
-                </tr>
-              </tbody>
             </table>
           </div></section>
         </section>
@@ -234,13 +207,20 @@
     </div>
   </div>
 </div>
-<script src="search-v2.js"></script>
+<script src="search-v2-8a8941761f97.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+</div>
       </div>
     </div>
   </div>
