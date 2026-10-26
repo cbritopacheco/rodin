@@ -8,11 +8,11 @@
  * @brief Quasistatic atrial wall contraction driven by a prescribed plane wave.
  *
  * A NeoHookean wall is augmented by ActiveContraction's static fiber branch.
- * The prescribed active extension is c = -cmax exp(-((z-zfront)/width)^2).
+ * The prescribed active extension follows a plane moving inward from basal label 6.
  * This is a demonstration with prescribed activation and target fiber strain;
  * it does not solve electrophysiology or evolve Hill-Maxwell internal states.
  * Coordinates and displacement are in mm, time in s, and stresses in kPa.
- * Circumferential fibers are tangent to the wall around the increasing-z axis.
+ * Simple circumferential fibers follow a harmonic base-to-appendage coordinate.
  * The inlet/outlet rim faces (labels 1,2,3,5,6) are fixed. Wall faces are free.
  */
 #include <algorithm>
@@ -27,6 +27,8 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <set>
+#include <Eigen/Eigenvalues>
 
 #include <Rodin/Alert.h>
 #include <Rodin/Geometry.h>
@@ -52,6 +54,10 @@ namespace
     std::string output = "output/atrium-contraction/Contraction";
     size_t steps = 24;
     size_t stopAfter = 0;
+    Attribute baseLabel = 6;
+    Vec appendageApex = Vec(46.39638367, 187.44307667, -205.03317767);
+    Real apexRadius = 3;
+    bool fibersOnly = false;
     Real contraction = 0.03;
     Real speed = 200;
     Real width = 6;
@@ -71,8 +77,24 @@ namespace
         std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
                      "  [--contraction .03] [--speed 200] [--width 6]\n"
                      "  [--young 50] [--poisson .3] [--active-stiffness 20]\n"
-                     "  [--stop-after n]\n";
+                     "  [--stop-after n] [--base-label 6] [--apex x y z]\n"
+                     "  [--apex-radius 3] [--fibers-only]\n";
         std::exit(0);
+      }
+      if (key == "--fibers-only")
+      {
+        out.fibersOnly = true;
+        continue;
+      }
+      if (key == "--apex")
+      {
+        if (i + 3 >= argc)
+        {
+          Alert::Exception() << "--apex requires three coordinates in mm" << Alert::Raise;
+        }
+        for (size_t j = 0; j < 3; ++j)
+          out.appendageApex(j) = std::stod(argv[++i]);
+        continue;
       }
       if (++i == argc)
       {
@@ -87,6 +109,10 @@ namespace
         out.steps = std::stoul(value);
       else if (key == "--stop-after")
         out.stopAfter = std::stoul(value);
+      else if (key == "--base-label")
+        out.baseLabel = std::stoul(value);
+      else if (key == "--apex-radius")
+        out.apexRadius = std::stod(value);
       else if (key == "--contraction")
         out.contraction = std::stod(value);
       else if (key == "--speed")
@@ -109,12 +135,19 @@ namespace
       !std::isfinite(out.width) || out.width <= 0 || !std::isfinite(out.young) ||
       out.young <= 0 || !std::isfinite(out.poisson) || out.poisson <= -1 ||
       out.poisson >= 0.5 || !std::isfinite(out.activeStiffness) ||
-      out.activeStiffness <= 0)
+      out.activeStiffness <= 0 || !out.appendageApex.allFinite() ||
+      !std::isfinite(out.apexRadius) || out.apexRadius <= 0)
     {
       Alert::Exception() << "Invalid material, wave, or time discretization parameters"
                          << Alert::Raise;
     }
     return out;
+  }
+
+  Vec point3(const LocalMesh& mesh, Index vertex)
+  {
+    const auto x = mesh.getVertexCoordinates(vertex);
+    return Vec(x(0), x(1), x(2));
   }
 
   // The wedge determinant is affine in triangle coordinates and quadratic
@@ -157,7 +190,9 @@ int main(int argc, char** argv)
       Alert::Exception() << "Expected a 3D wall volume mesh" << Alert::Raise;
     }
     mesh.getConnectivity().compute(2, 3);
-    std::vector<Vec> directions(mesh.getCellCount());
+    std::vector<Vec> directions(mesh.getCellCount()), normals(mesh.getCellCount());
+    std::vector<bool> innerVertex(mesh.getVertexCount(), false);
+    std::set<Index> baseVertices, baseAllVertices;
     size_t badCells = 0, rimFaces = 0;
     Real minimumReferenceJacobian = std::numeric_limits<Real>::infinity();
     for (auto cell = mesh.getCell(); cell; ++cell)
@@ -180,12 +215,10 @@ int main(int argc, char** argv)
       minimumReferenceJacobian = std::min(minimumReferenceJacobian, determinant / area);
       if (!(determinant > 0) || !std::isfinite(determinant))
         ++badCells;
-      Vec normal = ((q[3] - q[0]) + (q[4] - q[1]) + (q[5] - q[2])).normalized();
-      Vec fiber = Vec::UnitZ().cross(normal);
-      constexpr Real DirectionTolerance = 1e-12;
-      if (fiber.norm() < DirectionTolerance)
-        fiber = Vec::UnitX() - normal.x() * normal;
-      directions[cell->getIndex()] = fiber.normalized();
+      normals[cell->getIndex()] =
+        ((q[3] - q[0]) + (q[4] - q[1]) + (q[5] - q[2])).normalized();
+      for (size_t j = 0; j < 3; ++j)
+        innerVertex[cell->getVertices()(j)] = true;
     }
     if (badCells != 0)
     {
@@ -196,6 +229,16 @@ int main(int argc, char** argv)
     for (auto face = mesh.getBoundary(); face; ++face)
     {
       const auto tag = face->getAttribute();
+      if (tag == cfg.baseLabel)
+      {
+        for (Index vertex : face->getVertices())
+        {
+          baseAllVertices.insert(vertex);
+          if (innerVertex[vertex])
+            baseVertices.insert(vertex);
+        }
+      }
+
       if (tag == Attribute{1} || tag == Attribute{2} || tag == Attribute{3} ||
         tag == Attribute{5} || tag == Attribute{6})
         ++rimFaces;
@@ -205,6 +248,36 @@ int main(int argc, char** argv)
       Alert::Exception() << "No tagged inlet/outlet rim support faces found"
                          << Alert::Raise;
     }
+    if (baseVertices.size() < 3)
+    {
+      Alert::Exception() << "Base label " << cfg.baseLabel
+                         << " needs at least three inner-rim vertices" << Alert::Raise;
+    }
+    Vec baseOrigin = Vec::Zero(), wallCenter = Vec::Zero();
+    for (Index v : baseVertices)
+      baseOrigin += point3(mesh, v);
+    baseOrigin /= baseVertices.size();
+    Eigen::Matrix3d covariance = Eigen::Matrix3d::Zero();
+    for (Index v : baseVertices)
+    {
+      const Vec dx = point3(mesh, v) - baseOrigin;
+      covariance += dx * dx.transpose();
+    }
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> plane(covariance);
+    if (plane.info() != Eigen::Success || plane.eigenvalues()(1) <= 0)
+    {
+      Alert::Exception() << "The basal rim does not define a plane" << Alert::Raise;
+    }
+    Vec waveDirection = plane.eigenvectors().col(0);
+    for (auto v = mesh.getVertex(); v; ++v)
+      wallCenter += point3(mesh, v->getIndex());
+    wallCenter /= mesh.getVertexCount();
+    if (waveDirection.dot(wallCenter - baseOrigin) < 0)
+      waveDirection *= -1;
+    const auto waveCoordinateAt = [&](const Point& point) {
+      const auto x = point.getPhysicalCoordinates();
+      return waveDirection.dot(Vec(x(0), x(1), x(2)) - baseOrigin);
+    };
     const auto parent = std::filesystem::path(cfg.output).parent_path();
     if (!parent.empty())
       std::filesystem::create_directories(parent);
@@ -224,39 +297,184 @@ int main(int argc, char** argv)
     displacement.setName("Displacement");
     activation.setName("Activation");
     extension.setName("ActiveExtension");
-    GridFunction fiberField(fiberSpace);
-    fiberField.setName("FiberDirection");
-    fiberField = VectorFunction(3, [&](const Point& point) {
-      Math::SpatialVector<Real> result(3);
-      result = directions.at(point.getPolytope().getIndex());
-      return result;
-    });
-    Real zmin = std::numeric_limits<Real>::infinity(), zmax = -zmin;
-    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+    // One harmonic base-to-appendage coordinate supplies a simple anatomical
+    // direction field. This omits the paper's regional bundle classifications.
+    constexpr Attribute ApexPatchLabel = 8;
+    std::set<std::array<Index, 3>> apexKeys;
+    for (auto cell = mesh.getCell(); cell; ++cell)
     {
-      const Real z = vertex->getCoordinates()(2);
-      zmin = std::min(zmin, z);
-      zmax = std::max(zmax, z);
+      Vec center = Vec::Zero();
+      for (size_t j = 0; j < 3; ++j)
+        center += point3(mesh, cell->getVertices()(j));
+      center /= 3;
+      if ((center - cfg.appendageApex).norm() > cfg.apexRadius)
+        continue;
+      for (size_t layer = 0; layer < 2; ++layer)
+      {
+        std::array<Index, 3> key;
+        for (size_t j = 0; j < 3; ++j)
+          key[j] = cell->getVertices()(3 * layer + j);
+        std::sort(key.begin(), key.end());
+        apexKeys.insert(key);
+      }
     }
-    // Three pulse widths before and after the wall makes the initial/final
-    // Gaussian tail smaller than exp(-9) throughout the wall.
+    std::vector<std::pair<Index, Optional<Attribute>>> restoredLabels;
+    std::set<Index> apexVertices;
+    for (auto face = mesh.getBoundary(); face; ++face)
+    {
+      if (face->getAttribute() == ApexPatchLabel)
+      {
+        Alert::Exception() << "Boundary label 8 is reserved for the temporary apex patch"
+                           << Alert::Raise;
+      }
+      if (face->getGeometry() != Polytope::Type::Triangle)
+        continue;
+      std::array<Index, 3> key;
+      for (size_t j = 0; j < 3; ++j)
+        key[j] = face->getVertices()(j);
+      std::sort(key.begin(), key.end());
+      if (!apexKeys.contains(key))
+        continue;
+      restoredLabels.emplace_back(face->getIndex(), face->getAttribute());
+      apexVertices.insert(key.begin(), key.end());
+    }
+    if (restoredLabels.empty())
+    {
+      Alert::Exception() << "No wall triangles lie in the appendage-apex patch; check "
+                            "--apex and --apex-radius"
+                         << Alert::Raise;
+    }
+    for (Index vertex : apexVertices)
+    {
+      if (baseAllVertices.contains(vertex))
+      {
+        Alert::Exception() << "The appendage patch overlaps the base rim" << Alert::Raise;
+      }
+    }
+    for (const auto& item : restoredLabels)
+      mesh.setAttribute({2, item.first}, ApexPatchLabel);
+    TrialFunction coordinate(scalarSpace);
+    TestFunction coordinateTest(scalarSpace);
+    Problem laplace(coordinate, coordinateTest);
+    laplace = Integral(Grad(coordinate), Grad(coordinateTest)) +
+      DirichletBC(coordinate, RealFunction(0)).on(cfg.baseLabel) +
+      DirichletBC(coordinate, RealFunction(1)).on(ApexPatchLabel);
+    Solver::SparseLU coordinateSolver(laplace);
+    coordinateSolver.solve();
+    const auto& coordinateSystem = laplace.getLinearSystem();
+    const Real coordinateResidual =
+      (coordinateSystem.getOperator() * coordinateSystem.getSolution() -
+        coordinateSystem.getVector())
+        .norm() /
+      std::max<Real>(1, coordinateSystem.getVector().norm());
+    if (!std::isfinite(coordinateResidual) || coordinateResidual > 1e-8)
+    {
+      Alert::Exception() << "The fiber-coordinate Laplace solve failed: "
+                         << coordinateResidual << Alert::Raise;
+    }
+    for (const auto& item : restoredLabels)
+      mesh.setAttribute({2, item.first}, item.second);
+    GridFunction fiberCoordinate(scalarSpace);
+    fiberCoordinate = coordinate.getSolution();
+    fiberCoordinate.setName("FiberCoordinate");
+    const auto coordinateGradient = Grad(fiberCoordinate);
+    std::vector<Vec> longitudinal(mesh.getCellCount());
+    std::vector<Real> fallback(mesh.getCellCount(), 0);
+    size_t fallbackCells = 0;
+    constexpr Real DirectionTolerance = 1e-10;
+    const Real gradientTolerance = DirectionTolerance /
+      std::max(cfg.apexRadius, (cfg.appendageApex - baseOrigin).norm());
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      const auto gradient = coordinateGradient.getValue(point);
+      Vec direction(gradient(0), gradient(1), gradient(2));
+      const Vec normal = normals[cell->getIndex()];
+      if (direction.norm() > gradientTolerance)
+        direction.normalize();
+      else
+        direction.setZero();
+      direction -= direction.dot(normal) * normal;
+      if (direction.norm() < DirectionTolerance)
+      {
+        fallback[cell->getIndex()] = 1;
+        ++fallbackCells;
+        const auto x = point.getPhysicalCoordinates();
+        direction = cfg.appendageApex - Vec(x(0), x(1), x(2));
+        if (direction.norm() > 0)
+          direction.normalize();
+        direction -= direction.dot(normal) * normal;
+      }
+      if (direction.norm() < DirectionTolerance)
+      {
+        fallback[cell->getIndex()] = 2;
+        Eigen::Index axis;
+        normal.cwiseAbs().minCoeff(&axis);
+        direction = Vec::Unit(axis) - normal(axis) * normal;
+      }
+      longitudinal[cell->getIndex()] = direction.normalized();
+      directions[cell->getIndex()] = direction.normalized().cross(normal).normalized();
+    }
+    const auto vectorField = [&](const std::vector<Vec>& values) {
+      return VectorFunction(3, [&values](const Point& point) {
+        Math::SpatialVector<Real> result(3);
+        result = values.at(point.getPolytope().getIndex());
+        return result;
+      });
+    };
+    GridFunction fiberField(fiberSpace), normalField(fiberSpace),
+      longitudinalField(fiberSpace);
+    fiberField.setName("FiberDirection");
+    fiberField = vectorField(directions);
+    normalField.setName("WallNormal");
+    normalField = vectorField(normals);
+    longitudinalField.setName("LongitudinalDirection");
+    longitudinalField = vectorField(longitudinal);
+    P0 diagnosticSpace(mesh);
+    GridFunction fallbackField(diagnosticSpace);
+    fallbackField.setName("FiberFallback");
+    fallbackField = [&](const Point& point) {
+      return fallback.at(point.getPolytope().getIndex());
+    };
+    GridFunction waveCoordinate(scalarSpace);
+    waveCoordinate.setName("WaveCoordinate");
+    waveCoordinate = waveCoordinateAt;
+    const Real minimumProjection = waveCoordinate.getData().minCoeff();
+    const Real maximumProjection = waveCoordinate.getData().maxCoeff();
     constexpr Real PulsePadding = 3;
-    const Real zstart = zmin - PulsePadding * cfg.width;
-    const Real endTime = (zmax - zmin + 2 * PulsePadding * cfg.width) / cfg.speed;
+    const Real endTime = (maximumProjection + PulsePadding * cfg.width) / cfg.speed;
     const Real dt = endTime / cfg.steps;
     Real time = 0;
-    const auto activate = [&](Real z) {
-      if (time == 0)
-        return Real(0);
-      const Real argument = (z - zstart - cfg.speed * time) / cfg.width;
+    const auto activate = [&](const Point& point) {
+      const Real argument = (waveCoordinateAt(point) - cfg.speed * time) / cfg.width;
       return std::exp(-argument * argument);
     };
     const auto updateActivation = [&] {
-      activation = [&](const Point& point) { return activate(point.z()); };
-      extension = [&](const Point& point) {
-        return -cfg.contraction * activate(point.z());
-      };
+      activation = [&](const Point& point) { return activate(point); };
+      extension = [&](const Point& point) { return -cfg.contraction * activate(point); };
     };
+    std::ofstream metadata(cfg.output + ".geometry.json");
+    metadata << std::setprecision(17) << "{\n  \"base_label\": " << cfg.baseLabel
+             << ",\n  \"base_origin_mm\": [" << baseOrigin(0) << ',' << baseOrigin(1)
+             << ',' << baseOrigin(2) << "],\n  \"wave_direction\": [" << waveDirection(0)
+             << ',' << waveDirection(1) << ',' << waveDirection(2)
+             << "],\n  \"appendage_apex_mm\": [" << cfg.appendageApex(0) << ','
+             << cfg.appendageApex(1) << ',' << cfg.appendageApex(2)
+             << "],\n  \"apex_radius_mm\": " << cfg.apexRadius
+             << ",\n  \"apex_patch_faces\": " << restoredLabels.size()
+             << ",\n  \"fiber_fallback_cells\": " << fallbackCells
+             << ",\n  \"fiber_coordinate_residual\": " << coordinateResidual
+             << ",\n  \"minimum_wave_coordinate_mm\": " << minimumProjection
+             << ",\n  \"maximum_wave_coordinate_mm\": " << maximumProjection
+             << ",\n  \"speed_mm_per_s\": " << cfg.speed
+             << ",\n  \"width_mm\": " << cfg.width << "\n}\n";
+    metadata.close();
+    std::cout << "Base label " << cfg.baseLabel << ": origin=" << baseOrigin.transpose()
+              << "; inward normal=" << waveDirection.transpose()
+              << "; appendage projection="
+              << waveDirection.dot(cfg.appendageApex - baseOrigin)
+              << " mm; harmonic residual=" << coordinateResidual
+              << "; fiber fallback cells=" << fallbackCells << std::endl;
     const Real mu = cfg.young / (2 * (1 + cfg.poisson));
     const Real lambda =
       cfg.young * cfg.poisson / ((1 + cfg.poisson) * (1 - 2 * cfg.poisson));
@@ -269,7 +487,7 @@ int main(int argc, char** argv)
       Math::SpatialVector<Real> fiber(3);
       fiber = directions.at(point.getPolytope().getIndex());
       cp.set<Solid::Tags::FiberDirection>(fiber);
-      cp.set<Solid::Tags::ActiveExtension>(-cfg.contraction * activate(point.z()));
+      cp.set<Solid::Tags::ActiveExtension>(-cfg.contraction * activate(point));
     };
     TrialFunction increment(vectorSpace);
     TestFunction test(vectorSpace);
@@ -295,24 +513,34 @@ int main(int argc, char** argv)
     grid.add(activation);
     grid.add(extension);
     grid.add(fiberField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
+    grid.add(normalField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
+    grid.add(
+      longitudinalField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
+    grid.add(fallbackField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
+    grid.add(fiberCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
+    grid.add(waveCoordinate, IO::XDMF::Center::Node, IO::XDMF::AttributePolicy::Static);
     updateActivation();
-    output.write(0).flush();
+    if (cfg.fibersOnly)
+    {
+      output.write(0).close();
+      std::cout << "Fiber inspection only: no mechanical equilibrium solve" << std::endl;
+      return 0;
+    }
     std::ofstream log(cfg.output + ".csv");
     log << "time_s,max_displacement_mm,activation_max,newton_iterations,residual,min_"
            "scaled_jacobian_mm\n";
-    log << "0,0,0,0,0," << minimumReferenceJacobian << '\n';
     log.flush();
     const size_t count = cfg.stopAfter ? std::min(cfg.steps, cfg.stopAfter) : cfg.steps;
     std::cout << std::setprecision(9) << "Wall: " << mesh.getCellCount() << " wedges, "
               << mesh.getVertexCount() << " vertices; fixed rim faces=" << rimFaces
               << "; minimum reference scaled Jacobian=" << minimumReferenceJacobian
               << "; dt=" << dt << "; end=" << endTime << std::endl;
-    for (size_t step = 1; step <= count; ++step)
+    for (size_t step = 0; step <= count; ++step)
     {
       time = step * dt;
       updateActivation();
       std::cout << "Step " << step << '/' << cfg.steps << " time=" << time
-                << " front_z=" << zstart + cfg.speed * time << std::endl;
+                << " front_distance_from_base=" << cfg.speed * time << std::endl;
       newton.solve(displacement);
       if (!newton.getReport().converged)
       {

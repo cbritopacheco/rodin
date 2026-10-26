@@ -1,37 +1,107 @@
 # Atrial wall contraction demo
 
 `AtriumContraction.cpp` solves quasistatic, finite-strain contraction on the
-material-4 wedge wall. It uses Rodin's `NeoHookean`, `ActiveFiberLaw`,
-`ActiveContraction`, `InternalVirtualWork`, `NewtonSolver`, and native XDMF
-writer. The delivered run was built against develop revision `6d0d0fe78b`.
+material-4 wedge wall with Rodin's `NeoHookean`, static `ActiveFiberLaw`,
+`ActiveContraction`, `InternalVirtualWork`, `NewtonSolver`, and XDMF writer.
+Activation is prescribed; no electrophysiology equation or evolving
+Hill–Maxwell internal state is solved.
 
-The activation is prescribed. No electrophysiology equation or evolving
-Hill–Maxwell internal state is solved. At reference position \(z\),
+## A plane wave starting at the anatomical base
+
+In the original `Coarse.mesh` volume, label 6 identifies the basal cap. The
+original tetrahedra have volume material 1. In the wedge-only wall, the cap
+is absent and its boundary label is preserved on the adjoining rim faces.
+The wave uses this rim, rather than a Cartesian coordinate axis.
+
+The inner vertices of rim 6 define a least-squares plane through their mean
+position \(b\). Its unit normal \(d\) is oriented toward the wall centroid.
+The projected coordinate and activation are
 
 \[
-a(z,t)=\exp\!\left[-\left(\frac{z-z_0-vt}{w}\right)^2\right],
-\qquad c(z,t)=-c_{\max}a(z,t).
+s(X)=d\cdot(X-b),\qquad
+ a(X,t)=\exp\!\left[-\left(\frac{s(X)-vt}{w}\right)^2\right],
+\qquad c(X,t)=-c_{\max}a(X,t).
 \]
 
-The active fiber branch uses the prescribed Green–Lagrange target strain
-\(c\). Its stress is computed from the actual mechanical fiber strain, and
-the equilibrium displacement is solved by Newton's method. The initial
-snapshot is exactly unactivated. The wave starts three widths below the wall
-and finishes three widths above it.
+The wave crest starts on the fitted basal plane at \(t=0\) and moves in the
+positive \(d\)-direction. The first stored state is an equilibrium solve with
+that basal activation; it is not an unactivated initial snapshot. The last
+crest position is three widths past the maximum wall projection.
 
-The reference fiber direction is circumferential around the positive
-\(z\)-axis, projected into each wedge's wall tangent plane. At a pole, the
-projected Cartesian \(x\)-direction supplies a tangent direction. This is an
-illustrative fiber field, rather than an anatomical fiber reconstruction.
+This is a strict planar pulse. A portion of the appendage lies behind the
+basal plane and therefore receives only the initial Gaussian tail. The
+appendage-apex landmark has projection about \(-8.18\ \mathrm{mm}\) on this
+mesh. Complete base-to-appendage propagation would require a different
+activation construction, such as a wall-distance wave.
 
-All inlet/outlet rim faces with labels 1, 2, 3, 5, and 6 are fixed. The inner
-and outer wall faces, labeled 4 and 7, are mechanically free. The input must
-contain only six-node wedges with volume material label 4.
+The fitted origin, inward normal, projected coordinate range, and landmark
+information are written to `<stem>.geometry.json`. `WaveCoordinate` is a
+static nodal XDMF field for checking the plane orientation.
 
-## Parameters and units
+## Simple landmark-based fibers
 
-Coordinates and displacement are in mm, time is in seconds, and stresses are
-in kPa. Defaults are demonstration values:
+The supplied appendage-apex landmark is the centroid of the three picked
+points:
+
+\[
+X_{\mathrm{LAA}}=(46.39638367,187.44307667,-205.03317767)\ \mathrm{mm}.
+\]
+
+Coordinates are used instead of vertex or triangle numbers because MMG
+renumbers entities. An apex patch is selected using inner-triangle centroids
+within 3 mm of this point, together with the corresponding outer triangles.
+A finite patch avoids imposing a point-only Dirichlet condition in the wall
+volume. Its radius and center can be changed from the command line.
+
+A single harmonic coordinate is solved with Rodin:
+
+\[
+-\Delta\psi=0\quad\text{in }\Omega_{\mathrm{wall}},\qquad
+\psi=0\quad\text{on rim 6},\qquad
+\psi=1\quad\text{on the appendage patch},
+\]
+
+with zero normal flux on the remaining boundary. A temporary boundary label
+8 is used for this solve and then restored, preserving all original wall and
+rim labels.
+
+For each wedge, the known extrusion vectors supply a unit transmural
+normal \(m\). The harmonic gradient is projected into the wall tangent
+plane and the fiber is constructed as
+
+\[
+\ell=\frac{(I-mm^T)\nabla\psi}{\|(I-mm^T)\nabla\psi\|},
+\qquad f=\ell\times m.
+\]
+
+Thus the fibers are tangent to the wall and follow contours of the
+base-to-appendage coordinate. They are stored as one constant unit direction
+per wedge. There is no transmural rotation in this one-layer model.
+
+This is a simplified use of the Laplace-gradient frame in Piersanti et al.,
+*Modeling cardiac muscle fibers in ventricular and atrial electrophysiology
+simulations*, [arXiv:2101.10960v1](https://arxiv.org/abs/2101.10960v1), equations
+(3) and (5). It does not implement their regional atrial bundle selection,
+pulmonary-vein rules, or a validated anatomical fiber reconstruction.
+
+Critical points are handled explicitly. If the harmonic tangent vanishes,
+the projected direction toward the apex is used; at a remaining pole, a
+Cartesian tangent is chosen. `FiberFallback` flags these cells: 0 means the
+harmonic construction, 1 the geometric-apex fallback, and 2 the pole fallback.
+The supplied mesh has one fallback cell, inside the constant-potential apex
+patch. `FiberCoordinate`, `LongitudinalDirection`, `WallNormal`, and
+`FiberDirection` are exported for inspection.
+
+## Mechanics, parameters, and units
+
+The active branch uses the prescribed Green–Lagrange target strain \(c\).
+Stress depends on the actual fiber strain, and Newton's method solves the
+mechanical equilibrium. All rim faces with labels 1, 2, 3, 5, and 6 are fixed.
+The inner and outer wall faces, labeled 4 and 7, are free. The input must
+contain only six-node wedges with volume material 4.
+
+Coordinates and displacement are in mm, time in seconds, and stresses in
+kPa. Defaults are demonstration values:
 
 | Parameter | Default |
 |---|---:|
@@ -41,13 +111,14 @@ in kPa. Defaults are demonstration values:
 | Maximum target Green–Lagrange strain magnitude | \(0.03\) |
 | Wave speed | \(200\ \mathrm{mm/s}\) |
 | Gaussian width | \(6\ \mathrm{mm}\) |
-| Time intervals over one complete passage | \(24\) |
+| Basal boundary label | \(6\) |
+| Appendage patch radius | \(3\ \mathrm{mm}\) |
+| Time intervals | \(24\) |
 
-The model uses a compressible wall, prescribed activation, and quasistatic
-equilibrium without chamber pressure or fluid coupling. Quadrature order 4
-is a numerical policy for this example, not an exactness guarantee for the
-non-polynomial hyperelastic response. Quantitative use requires spatial,
-quadrature, and time refinement plus material/fiber calibration.
+The wall is compressible, with quasistatic equilibrium and no chamber
+pressure or fluid coupling. Mechanical quadrature order 4 is an example
+policy, not an exactness guarantee for hyperelasticity. Quantitative use
+requires spatial, quadrature, and time refinement and material calibration.
 
 ## Build and run
 
@@ -57,19 +128,23 @@ With a recent develop checkout containing the XDMF interpolation-order fix:
 cmake --build build --target AtriumContraction -j4
 build/examples/Heart/AtriumContraction \
   --mesh resources/examples/Heart/Atrium/AtriumWall_Repaired_Wedges_1mm.mesh \
-  --output output/atrium-contraction/Contraction \
-  --steps 24 --contraction 0.03 --speed 200 --width 6
+  --output output/atrium-base6-plane/Contraction \
+  --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \
+  --apex-radius 3 --steps 24 --contraction 0.03 --speed 200 --width 6
 ```
 
 `--young`, `--poisson`, and `--active-stiffness` configure the material.
-`--stop-after` truncates a run for a short numerical check while preserving
-the complete-passage time step. `--help` lists options.
+`--stop-after` truncates the positive-time steps, including the initial
+activated equilibrium in the stored series. `--fibers-only` exports the
+geometry and fiber fields without solving mechanics; its zero displacement
+is an inspection placeholder. `--help` lists the options.
 
 The preflight check finds the exact minimum of each six-node wedge's
 Jacobian determinant over its reference cell. The determinant is affine in
-the triangle coordinates and quadratic through the thickness, so checking
-the three triangle vertices and the thickness quadratic's minima is
-sufficient. A nonpositive reference determinant rejects the mechanics input.
+the triangle coordinates and quadratic through the thickness, so evaluating
+the triangle vertices and thickness-quadratic minima is sufficient. A
+nonpositive reference determinant rejects the input. The same test is applied
+to each converged deformed cell before saving a mechanics snapshot.
 
 ## Mesh repair used for the demonstration
 
@@ -103,29 +178,36 @@ repaired-vertex to original-surface distances have mean 0.024 mm and maximum
 bounds. Inspect the repaired patch before using the mesh for anatomical
 conclusions. Earlier source and combined meshes remain separate artifacts.
 
+## Reference run
+
+With the default basal plane and harmonic fibers, all 25 stored equilibria
+converged over \(0.452633\ \mathrm{s}\). The maximum nodal displacement was
+\(0.284546\ \mathrm{mm}\). Independent ParaView readback found 11,924
+six-node wedges and 12,102 shared vertices, zero displacement on every rim
+vertex, and positive Jacobians throughout every deformed reference cell.
+The minimum deformed determinant divided by the deformed base-triangle
+double area was \(0.0438848\ \mathrm{mm}\). Activation values agreed with
+the prescribed plane to within \(3.0\times10^{-15}\).
+
+The harmonic linear-system relative residual was
+\(3.56\times10^{-15}\). Fiber vectors were unit length and orthogonal to
+the exported wall normals and longitudinal directions. One apex-patch cell
+used the explicitly flagged geometric fallback. These checks verify the
+specified demonstration, not anatomical fiber accuracy or numerical
+convergence under mesh refinement.
+
 ## ParaView
 
-Open `output/atrium-contraction/Contraction.xdmf`, keeping all companion HDF5
-files in the same directory. Apply **Warp By Vector**, choose `Displacement`,
-and use scale factor 1 for physical displacement in mm. Color by `Activation`
-and play the time series. `FiberDirection` is a cell vector field and can be
-viewed with cell-center glyphs. `ActiveExtension` stores the prescribed target
-strain. The CSV beside the XDMF records time, maximum displacement,
-activation maximum, Newton iterations, and final residual for each saved step.
+Open `<stem>.xdmf`, keeping its companion HDF5 files in the same directory.
+Apply **Warp By Vector**, choose `Displacement`, and use scale factor 1 for
+physical displacement in mm. Color by `Activation` and play the time series.
 
+For fibers, apply **Cell Centers**, then line glyphs oriented by the cell
+vector `FiberDirection`. Color the wall by `FiberCoordinate` and inspect
+`FiberFallback` near the apex patch. `ActiveExtension` stores the prescribed
+target strain. The CSV records time, maximum displacement, activation
+maximum, Newton iterations, final residual, and minimum scaled Jacobian.
 
-## Reference numerical run
-
-The final run contains 25 snapshots spanning approximately 0.49708 s, on
-11,924 wedges with 12,102 shared vertices. All 24 nonlinear equilibrium
-steps converged. Peak nodal displacement is approximately 0.429981 mm.
-Independent ParaView/VTK checks confirm zero motion on every supported rim
-node and positive deformed Jacobians throughout every cell at every stored
-time. The smallest normalized deformed determinant is approximately
-0.0438773 mm. Activation-weighted centroid fiber strains are negative during
-the active passage, confirming mechanical shortening.
-
-These checks were performed independently on the stored XDMF fields using
-ParaView/VTK. They establish solver and export consistency for this reference
-run, without establishing spatial or quadrature convergence. The smaller
-preview run was a workflow check, not a spatial convergence study.
+The geometry repair above and the prescribed fibers are demonstration
+choices. Inspect the repaired surface and the fiber field before drawing
+anatomical conclusions.
