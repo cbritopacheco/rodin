@@ -1,0 +1,10 @@
+<p>Diagonal-preconditioner setup and application on constrained operators.</p>
+<h2>Measured operation</h2>
+<p>Separates diagonal setup from iteration-time application.</p>
+<p>The Eigen backend and lower/upper policy match Solver::CG&#x27;s current native implementation. This executable uses that backend&#x27;s preconditioner type; it does not add a source inspection API or a second Rodin solver path. Mesh/space setup, manufactured assembly and reference checks are untimed.</p>
+<h3>Lifetimes</h3>
+<p>OwnedCompute includes local construction, compute and destruction. RetainedCompute reuses the already-sized diagonal storage, as in repeated fixed-size CG calls. Apply overwrites a preallocated output and excludes compute. OwnedCompute is not process-first or allocator-cold measurement. Fresh and retained instances are checked before and after the timed loop.</p>
+<h3>Numerical guards</h3>
+<p>The independent result is \(y_j=x_j/A_{jj}\). These manufactured SPD systems must have finite, nonzero diagonal entries. Wrong outputs are rejected. Recomputing on \(1.5A\) must produce \(y/1.5\), followed by restoration of the original result. Thus stale retained diagonal data is not accepted. No timing gate or CTest entry is added.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

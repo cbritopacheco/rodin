@@ -299,14 +299,18 @@ namespace Rodin::Examples::Heart
     if (tau < cfg.tRampStart)
       return 0.0;
     if (tau < cfg.tRampEnd)
+    {
       return cfg.positiveValue *
         ss((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
+    }
     if (tau < cfg.tPlateauEnd)
       return cfg.positiveValue;
     if (tau < cfg.tRelaxEnd)
+    {
       return cfg.positiveValue +
         (cfg.negativeValue - cfg.positiveValue) *
         ss((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
+    }
     if (tau < cfg.tNegativeEnd)
       return cfg.negativeValue;
     return cfg.negativeValue *
@@ -497,8 +501,10 @@ namespace Rodin::Examples::Heart
     m_mitralZ = m_cfg.mitralResistanceOpen * m_outletArea;
 
     if (isRoot())
+    {
       Alert::Info() << "[outlet] area = " << m_outletArea << " m^2  pv0 = " << m_pOut
                     << " Pa" << Alert::Raise;
+    }
   }
 
   Atrium::Real Atrium::boundaryArea(Attribute tag)
@@ -558,14 +564,14 @@ namespace Rodin::Examples::Heart
       Integral(Div(m_u), m_q) +
       m_cfg.pressurePenalty * Integral(m_p, m_q)
 
-           // PSPG. Required by the equal-order pair.
+      // PSPG. Required by the equal-order pair.
       + Integral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
       BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
 
-           // Source impedance of the pressure inlets and mitral resistance,
-           // both positive semidefinite and assembled implicitly.
+      // Source impedance of the pressure inlets and mitral resistance,
+      // both positive semidefinite and assembled implicitly.
       + m_cfg.inletImpedance * BoundaryIntegral(Dot(uNormal, m_v)).over(m_inletSet) +
       BoundaryIntegral(mitralFn * Dot(uNormal, m_v)).over(m_cfg.outlet)
 
@@ -827,9 +833,11 @@ namespace Rodin::Examples::Heart
     (void)ierr;
 
     if (isRoot())
+    {
       KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
                 << "  iterations = " << iterations << "  (" << m_timing.solve << " s)"
                 << Alert::Raise;
+    }
 
     m_uOld.setData(m_u.getSolution().getData());
     if (m_cfg.useVMS)
@@ -1020,10 +1028,12 @@ namespace Rodin::Examples::Heart
     const int totalSteps = totalCycles * stepsPerCycle;
 
     if (isRoot())
+    {
       Alert::Info() << "[run] " << totalCycles << " cycles of " << stepsPerCycle
                     << " steps (" << totalSteps << " total); species from cycle "
                     << (m_cfg.flowCycles + 1) << " on; XDMF every " << m_cfg.outputEvery
                     << " steps and at every cycle boundary" << Alert::Raise;
+    }
 
     Real cycleElapsed = 0.0;
     const auto runStart = CoronaryClock::now();
@@ -1094,9 +1104,11 @@ namespace Rodin::Examples::Heart
         const Real maxActivation = m_activation.max();
 
         if (isRoot())
+        {
           Alert::Info() << "[cycle " << (cycle + 1) << "/" << totalCycles
                         << "] maxTAWSS=" << maxTawss << " Pa  maxOSI=" << maxOsi
                         << "  maxActivation=" << maxActivation << Alert::Raise;
+        }
       }
 
       if (m_cfg.solveKinetics && cycle >= m_cfg.flowCycles)

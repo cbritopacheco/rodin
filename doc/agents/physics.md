@@ -20,8 +20,8 @@ Layered like the mathematics:
   `SaintVenantKirchhoff`, `HolzapfelOgden` (one fiber family),
   `ActiveFiberLaw` (1D Hill–Maxwell active contraction law with internal
   state γ, β), `ActiveContraction` (wraps any passive law + active fiber
-  law; static path takes activation via tags, dynamic path runs a local
-  update).
+  law; the dynamic path reads independent discontinuous extension, gamma and
+  beta fields and exposes their uneliminated residual/tangent blocks).
 - **Local/** — `ConstitutivePoint`: the *tag-based input injection*
   mechanism. Integrators stamp tags (CellIndex, QuadraturePointIndex,
   TimeStep, ElectricalActivation, previous internal state, ...) onto the

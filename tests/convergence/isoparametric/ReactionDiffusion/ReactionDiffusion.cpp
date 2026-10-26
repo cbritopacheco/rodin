@@ -104,8 +104,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
             return P1(m_mesh);
           else
 #endif
+          {
             return H1<K, Real, Mesh<ContextType>>(
               std::integral_constant<size_t, K>{}, m_mesh);
+          }
         }();
 #ifdef RODIN_CURVED_REACTION_DIFFUSION_PETSC
         PETSc::Variational::TrialFunction u(space), w(space);
@@ -169,16 +171,16 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
           // Adapter selects a scalar component without duplicating analytic data.
           struct Component
           {
-              const Data& data;
-              size_t index;
-              Real getSolution(const Math::SpatialPoint& x) const
-              {
-                return data.getSolution(x, index);
-              }
-              auto getGradient(const Math::SpatialPoint& x) const
-              {
-                return data.getGradient(x, index);
-              }
+            const Data& data;
+            size_t index;
+            Real getSolution(const Math::SpatialPoint& x) const
+            {
+              return data.getSolution(x, index);
+            }
+            auto getGradient(const Math::SpatialPoint& x) const
+            {
+              return data.getGradient(x, index);
+            }
           };
           (*lifted)[0] = LiftedErrorNorm::compute(*m_reference, m_mesh, u.getSolution(),
             Component{data, 0}, SineMap(), integrationOrder);
@@ -198,8 +200,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_CURVED_REACTION_DIFFUSION_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       Mesh<ContextType> m_mesh;

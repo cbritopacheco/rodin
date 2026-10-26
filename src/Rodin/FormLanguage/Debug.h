@@ -25,7 +25,7 @@ namespace Rodin::FormLanguage
    * form language types during compilation and runtime. Specialize this template
    * for specific types to provide custom debugging information.
    *
-   * ## Usage
+   * # Usage
    * This template is primarily used during development to understand type
    * transformations and check template instantiations. When instantiated,
    * compiler errors will reveal the actual type of T.

@@ -11,7 +11,7 @@
  * This header provides the HouseholderQR solver class for dense matrices,
  * implementing QR decomposition using Householder reflections.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   A = QR
@@ -19,13 +19,13 @@
  * where @f$ Q @f$ is orthogonal and @f$ R @f$ is upper triangular, using
  * Householder reflections for numerical stability.
  *
- * ## Applicability
+ * # Applicability
  * - General dense matrices
  * - Overdetermined least-squares problems
  * - Small to medium-sized systems
  * - When numerical stability is important
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

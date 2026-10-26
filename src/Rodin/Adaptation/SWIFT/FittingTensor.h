@@ -27,11 +27,14 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief Parent class type.
       using Parent = Variational::MatrixFunctionBase<ScalarType,
         FittingTensor<GradDerived, Displacement, LocatorType>>;
+
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
@@ -48,7 +51,8 @@ namespace Rodin::Adaptation::SWIFT
         const LocatorType& locator, const Parameters& parameters, Real normalization,
         std::size_t dimension)
         : m_grad(grad.copy()),
-          m_deformation(current, locator),
+          m_current(current),
+          m_locator(locator),
           m_parameters(parameters),
           m_normalization(normalization),
           m_dimension(dimension)
@@ -61,7 +65,8 @@ namespace Rodin::Adaptation::SWIFT
       FittingTensor(const FittingTensor& other)
         : Parent(other),
           m_grad(other.m_grad->copy()),
-          m_deformation(other.m_deformation),
+          m_current(other.m_current),
+          m_locator(other.m_locator),
           m_parameters(other.m_parameters),
           m_normalization(other.m_normalization),
           m_dimension(other.m_dimension)
@@ -69,6 +74,9 @@ namespace Rodin::Adaptation::SWIFT
 
       /**
        * @brief Evaluates the coefficient at a point.
+       *
+       * Point preparation belongs to this evaluation. The coefficient retains
+       * only read-only dependencies, with one location per evaluation.
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
@@ -79,7 +87,9 @@ namespace Rodin::Adaptation::SWIFT
         RangeType m = RangeType::Identity(d, d);
         m.setZero();
 
-        const auto g = m_grad->getValue(m_deformation.getMovedPoint(ip));
+        DeformationMap deformation(m_current.get(), m_locator.get());
+        deformation.setIntegrationPoint(ip);
+        const auto g = m_grad->getValue(deformation.getPoint());
         const Real scale = params.model.fit * m_normalization;
         for (std::uint8_t r = 0; r < d; ++r)
         {
@@ -135,11 +145,13 @@ namespace Rodin::Adaptation::SWIFT
 
     private:
       std::unique_ptr<GradType> m_grad;
-      DeformationMap<Displacement, LocatorType> m_deformation;
+      std::reference_wrapper<const Displacement> m_current;
+      std::reference_wrapper<const LocatorType> m_locator;
       std::reference_wrapper<const Parameters> m_parameters;
       Real m_normalization;
       std::size_t m_dimension;
   };
+
   /**
    * @brief Deduction guide for FittingTensor.
    * @param grad Gradient of the observation field.

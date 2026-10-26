@@ -457,9 +457,7 @@ mesh factory, integration cache or library-source path is introduced.
 
 The `LiftedSmoothP3Q2` extension retains the same physical sine field,
 manufactured sources, essential traces and quadratic sine-map approximation,
-but uses field degree $p=3$. The complete numerical matrix is locally verified
-in native and real-PETSc local/MPI contexts, including ranks one through four
-and both assembly thread modes; hosted CI certification remains separate.
+but uses field degree $p=3$.
 The three-level sequence is $n=3,5,9$, with $n=5,9,17$
 for Segment. Each solve supplies the represented-domain error and all
 three exact-domain defects to the shared `LiftedConvergence` history.

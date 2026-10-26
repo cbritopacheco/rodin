@@ -9,18 +9,12 @@
 
 /**
  * @file
- * @brief Top level include for the Rodin::Threads module.
+ * @brief Legacy threading header whose component headers are no longer shipped.
  *
- * The Threads module provides thread-safety utilities for multi-threaded
- * finite element computations. It includes mutex wrappers, thread-safe
- * containers, and synchronization primitives.
- *
- * Components include:
- * - **Mutex**: Mutual exclusion primitives
- * - **Unsafe**: Markers for non-thread-safe operations
- * - **Mutable**: Thread-safe mutable state wrappers
- *
- * @see <a href="namespace_rodin_1_1_threads.html">Rodin::Threads</a>
+ * Current synchronization contracts are documented by the owning classes.
+ * See @ref guides-thread-safety "Thread safety and parallelism" for assembly
+ * and shared-state requirements. This legacy header is not a supported entry
+ * point for the current source distribution.
  */
 
 #include "Threads/Mutex.h"

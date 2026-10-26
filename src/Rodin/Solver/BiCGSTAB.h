@@ -12,7 +12,7 @@
  * solving non-symmetric linear systems with better convergence properties
  * than the standard Bi-Conjugate Gradient method.
  *
- * ## Algorithm
+ * # Algorithm
  * BiCGSTAB solves:
  * @f[
  *   Ax = b
@@ -20,13 +20,13 @@
  * for non-symmetric matrices @f$ A @f$. It combines BiCG with stabilization
  * to avoid the irregular convergence patterns often seen in BiCG.
  *
- * ## Applicability
+ * # Applicability
  * - Non-symmetric sparse matrices
  * - Large systems where direct solvers are expensive
  * - Convection-dominated problems
  * - Advection-diffusion equations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) + Integral(beta * Grad(u), v) - Integral(f, v);

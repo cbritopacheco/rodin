@@ -59,14 +59,15 @@ namespace Rodin::Adaptation
       /**
        * @brief Sets the displacement gradient @f$H=\nabla u@f$, giving
        * @f$F=I+H@f$, and invalidates the derived quantities.
+       * @note H may reference the gradient returned by getDeformationGradient().
        * @returns Reference to this object after the operation.
        * @param H Displacement-gradient matrix.
        */
       CellDeformation& setDisplacementGradient(const Math::SpatialMatrix<Real>& H)
       {
         m_F = Math::SpatialMatrix<Real>::Identity(
-          static_cast<std::uint8_t>(m_d), static_cast<std::uint8_t>(m_d));
-        m_F += H;
+                static_cast<std::uint8_t>(m_d), static_cast<std::uint8_t>(m_d)) +
+          H;
         invalidate();
         return *this;
       }
@@ -103,7 +104,7 @@ namespace Rodin::Adaptation
 
       /**
        * @brief The Jacobian @f$j=\det F@f$, computed once and cached.
-       * @returns Derivative evaluated at the supplied point.
+       * @returns Determinant of the deformation gradient.
        */
       Real getJacobian() const
       {
@@ -256,7 +257,8 @@ namespace Rodin::Adaptation
       /// @brief Below this @f$|j|@f$ the cofactor via the inverse is unreliable.
       static constexpr Real singularTolerance = Real(1e-14);
 
-      void invalidate() const
+      /// @brief Clears derived quantities after changing the deformation gradient.
+      void invalidate()
       {
         m_j.reset();
         m_FinvT.reset();

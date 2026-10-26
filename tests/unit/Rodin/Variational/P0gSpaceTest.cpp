@@ -8,6 +8,8 @@
 /** @file @brief Real and complex global constant spaces on every cell type. */
 
 #include <gtest/gtest.h>
+#include <memory>
+#include <type_traits>
 
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
@@ -89,6 +91,64 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(std::abs(complexValue(0) - Complex(1.25, 2)), 0, 1e-12);
       EXPECT_NEAR(std::abs(complexValue(1) - Complex(-2.5, -3)), 0, 1e-12);
     }
+  }
+
+  /**
+   * @brief Certifies zero divergence without mutating a borrowed operand.
+   *
+   * A globally constant vector basis has identically zero divergence on cells
+   * and facets. Binding, copying, moving and cloning the derivative must not
+   * require binding the const shape function from which it was constructed.
+   * Real and complex coefficients exercise the same exact-zero contract.
+   */
+  TEST_P(P0gSpaceTest, VectorDivergenceBindsConstOperand)
+  {
+    auto mesh = makeP0gMesh(GetParam());
+    const auto check = [&]<class Scalar>() {
+      P0g<Math::SpatialVector<Scalar>, LocalMesh> space(mesh, mesh.getSpaceDimension());
+      const TestFunction operand(space);
+      auto expression = Div(operand);
+      GridFunction field(space);
+      for (size_t a = 0; a < field.getSize(); ++a)
+      {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          field[a] = Scalar(a + 1, 2 * a + 1);
+        else
+          field[a] = Scalar(a + 1);
+      }
+      const auto derivative = Div(field);
+      for (const size_t dimension : {mesh.getDimension(), mesh.getDimension() - 1})
+      {
+        for (auto entity = mesh.getPolytope(dimension); !entity.end(); ++entity)
+        {
+          const auto& formula = QF::QuadratureFormula::get(2, entity->getGeometry());
+          const PolytopeQuadrature quadrature(*entity, formula);
+          for (size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const IntegrationPoint point(quadrature, q);
+            expression.setIntegrationPoint(point);
+            auto copied(expression);
+            auto moved(std::move(copied));
+            std::unique_ptr<decltype(expression)> cloned(expression.copy());
+            moved.setIntegrationPoint(point);
+            cloned->setIntegrationPoint(point);
+            EXPECT_EQ(&expression.getOperand(), &operand);
+            EXPECT_EQ(&expression.getIntegrationPoint(), &point);
+            ASSERT_EQ(expression.getDOFs(*entity), space.getVectorDimension());
+            for (size_t a = 0; a < expression.getDOFs(*entity); ++a)
+            {
+              EXPECT_EQ(expression.getBasis(a), Scalar(0));
+              EXPECT_EQ(moved.getBasis(a), Scalar(0));
+              EXPECT_EQ(cloned->getBasis(a), Scalar(0));
+            }
+            EXPECT_EQ(derivative.getValue(point), Scalar(0));
+            EXPECT_EQ(derivative.getValue(point.getPoint()), Scalar(0));
+          }
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, P0gSpaceTest,

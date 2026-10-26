@@ -1,0 +1,35 @@
+<p>Measures the finite-mesh stability of the Stokes velocity–pressure coupling through independently checked spectral calculations.</p>
+<p>A mixed discretization must control every nonconstant pressure mode through
+the discrete divergence pairing. The finite-mesh stability constant is
+\(\beta_h=\inf_{q_h\ne0}\sup_{v_h\ne0}|b(v_h,q_h)|/(\|v_h\|_V\|q_h\|_Q)\)
+on the zero-mean pressure and essential-boundary velocity spaces.</p>
+<h2>Discretizations</h2>
+<p>Velocity degrees two, three and four are paired with pressure degree one
+lower on six cell geometries, affine and quadratic maps, several mesh
+resolutions, and quadrature orders sixteen and twenty. Velocity gradient energy,
+divergence and pressure mass matrices are assembled before timing, with unit
+viscosity in the energy convention.</p>
+<h2>Generalized pressure spectrum</h2>
+<p>Essential velocity degrees of freedom are removed. If \(c\) represents
+constant pressure, a basis \(T\) satisfying \(T^{\mathsf T}Mc=0\) defines
+\(M_0=T^{\mathsf T}MT\) and
+\(S_0=T^{\mathsf T}BA^{-1}B^{\mathsf T}T\). The generalized spectrum solves
+\(S_0z_i=\lambda_iM_0z_i\); its smallest eigenvalue gives \(\beta_h^2\)
+for the stated velocity and pressure norms.</p>
+<h3>Generalized Schur spectrum</h3>
+<p>Sparse LDLT factorization and blocked solves form the pressure-sized Schur
+operator without explicitly computing an inverse. A generalized self-adjoint
+eigensolver obtains its spectrum in the pressure mass metric.</p>
+<h3>Independent singular-value route</h3>
+<p>Independent Cholesky factorization and pressure whitening give
+\(D=C^{-1}T^{\mathsf T}BP^{\mathsf T}L^{-\mathsf T}\), where
+\(PAP^{\mathsf T}=LL^{\mathsf T}\) and \(M_0=CC^{\mathsf T}\).
+Incremental Givens QR retains a pressure-sized triangular factor for the SVD;
+squared singular values are compared with the Schur eigenvalues. The full
+dense velocity–pressure coupling is not retained.</p>
+<h2>Measurement contract</h2>
+<p>Each timed invocation includes reduction, the zero-mean basis, both spectral
+routes, and residual diagnostics. Mesh construction, assembly, constant-pressure
+interpolation and outer warmup/repeat checks are excluded. Wall time is reported.
+The calculation is rank-local on complete matrices, with no MPI collectives.
+These finite spectra do not prove mesh-uniform inf-sup stability.</p>

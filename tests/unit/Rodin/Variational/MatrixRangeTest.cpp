@@ -5,6 +5,11 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /** @file @brief Matrix finite element, tensor operator, and backend regressions. */
+#include <array>
+#include <string>
+#include <type_traits>
+#include <typeinfo>
+
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
@@ -219,6 +224,101 @@ TEST(MatrixRange, RejectsInvalidDimensions)
   EXPECT_THROW(P0(mesh, 3, 4), std::exception);
   EXPECT_THROW(P0g(mesh, 4, 3), std::exception);
   EXPECT_THROW((H1(std::integral_constant<size_t, 3>{}, mesh, 3, 0)), std::exception);
+}
+
+/// @brief Element guards reject invalid extents and values without poisoning reusable functionals.
+TEST(MatrixRange, ReferenceElementMatrixGuardsAndRecovery)
+{
+  const auto reject = [](auto&& operation, const std::string& diagnostic) {
+    try
+    {
+      operation();
+      FAIL() << "An incompatible matrix range was accepted";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(message.find("In member function"), std::string::npos);
+      EXPECT_NE(message.find(diagnostic), std::string::npos);
+    }
+  };
+  const auto checkScalar = [&]<class Scalar>() {
+    using Value = Math::SpatialMatrix<Scalar>;
+    const auto checkElement = [&]<class Element>() {
+      SCOPED_TRACE(typeid(Element).name());
+      for (const G geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
+             G::Tetrahedron, G::Pyramid, G::Wedge, G::Hexahedron})
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        const typename Element::ScalarElement scalar(geometry);
+        for (const auto& [rows, columns] : std::array<std::pair<size_t, size_t>, 5>{
+               {{0, 1}, {1, 0}, {4, 1}, {1, 4}, {4, 4}}})
+        {
+          SCOPED_TRACE(rows);
+          SCOPED_TRACE(columns);
+          reject([&] { const Element invalid(geometry, rows, columns); },
+            "SpatialMatrix ranges require 1 to 3 rows and columns");
+          reject([&] { const Element invalid(scalar, rows, columns); },
+            "SpatialMatrix ranges require 1 to 3 rows and columns");
+        }
+        const Element element(scalar, 2, 3);
+        Value value(2, 3);
+        for (size_t row = 0; row < 2; ++row)
+        {
+          for (size_t column = 0; column < 3; ++column)
+          {
+            if constexpr (std::is_same_v<Scalar, Complex>)
+            {
+              value(row, column) =
+                Complex(1 + 7 * row + column, Real(-5) - Real(2 * row) + Real(column));
+            }
+            else
+              value(row, column) = Real(1 + 7 * row + column);
+          }
+        }
+        ASSERT_EQ(element.getCount(), scalar.getCount() * 6);
+        for (size_t local = 0; local < element.getCount(); ++local)
+        {
+          SCOPED_TRACE(local);
+          const auto functional = element.getLinearForm(local);
+          const auto& scalarFunctional = scalar.getLinearForm(local / 6);
+          const Scalar expected = scalarFunctional(
+            [&](const Math::SpatialPoint&) { return value((local % 6) / 3, local % 3); });
+          for (const auto& [rows, columns] : std::array<std::pair<size_t, size_t>, 5>{
+                 {{0, 3}, {2, 0}, {1, 3}, {2, 2}, {3, 2}}})
+          {
+            SCOPED_TRACE(rows);
+            SCOPED_TRACE(columns);
+            Value incompatible(rows, columns);
+            incompatible.setConstant(Scalar(99));
+            size_t calls = 0;
+            reject(
+              [&] {
+                functional([&](const Math::SpatialPoint&) {
+                  ++calls;
+                  return incompatible;
+                });
+              },
+              "Matrix value does not match the finite element range");
+            EXPECT_EQ(calls, 1u);
+            EXPECT_EQ(
+              functional([&](const Math::SpatialPoint&) { return value; }), expected);
+          }
+        }
+        EXPECT_EQ(element.getRows(), 2u);
+        EXPECT_EQ(element.getColumns(), 3u);
+        EXPECT_EQ(element.getOrder(), scalar.getOrder());
+      }
+    };
+    checkElement.template operator()<P0Element<Value>>();
+    checkElement.template operator()<P0gElement<Value>>();
+    checkElement.template operator()<P1Element<Value>>();
+    checkElement.template operator()<H1Element<1, Value>>();
+    checkElement.template operator()<H1Element<2, Value>>();
+    checkElement.template operator()<H1Element<3, Value>>();
+  };
+  checkScalar.template operator()<Real>();
+  checkScalar.template operator()<Complex>();
 }
 
 TEST(MatrixRange, ComponentAndTransposeForms)
@@ -478,11 +578,13 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
           {
             value(row, col) = 1 + row + col;
             if (!constant)
+            {
               for (size_t k = 0; k < dimension; ++k)
               {
                 value(row, col) +=
                   (row + 1) * (col + 2) * (k + 1) * point.getPhysicalCoordinates()(k);
               }
+            }
           }
         }
         return value;
@@ -836,7 +938,7 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
       auto stiffness = Integral(Grad(trial), Grad(test));
       stiffness.setOrder(6);
       stiffness.setPolytope(*cell);
-      const auto& formula = QF::PolytopeQuadratureFormula::get(6, G::Triangle);
+      const auto& formula = QF::QuadratureFormula::get(6, G::Triangle);
       const auto& quadrature = cell->getQuadrature(formula);
       Real integratedGradient = 0, scalarGradientEnergy = 0;
       for (size_t q = 0; q < quadrature.getSize(); ++q)

@@ -11,7 +11,7 @@
  * This header provides the SparseQR solver class, which implements QR decomposition
  * with numerical column pivoting for sparse matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   AP = QR
@@ -19,14 +19,14 @@
  * where @f$ P @f$ is a permutation matrix, @f$ Q @f$ is orthogonal, and @f$ R @f$ is
  * upper triangular. The left-looking algorithm proceeds column by column.
  *
- * ## Applicability
+ * # Applicability
  * - General sparse matrices (no symmetry required)
  * - Rank-deficient systems
  * - Least-squares problems
  * - Overdetermined systems
  * - Systems where LU factorization is numerically unstable
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

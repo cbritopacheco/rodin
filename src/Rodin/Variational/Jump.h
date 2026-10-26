@@ -25,6 +25,7 @@
 #include "ForwardDecls.h"
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
+#include "InterfaceShapeFunction.h"
 
 namespace Rodin::Variational
 {
@@ -51,7 +52,7 @@ namespace Rodin::Variational
    * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from the two sides
    * of the interface (with a chosen orientation).
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * In Discontinuous Galerkin (DG) methods, functions are allowed to be
    * discontinuous across element interfaces. The jump operator captures this
    * discontinuity and is used in:
@@ -61,7 +62,7 @@ namespace Rodin::Variational
    *
    * where @f$ \Gamma_h @f$ denotes the set of interior faces.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // Evaluate jump of a function on an interface
    * auto jump_u = Jump(u);
@@ -90,8 +91,7 @@ namespace Rodin::Variational
        * @brief Constructs a jump operator for the given function.
        * @param[in] op Function to compute the jump of across interfaces
        */
-      constexpr
-      Jump(const OperandType& op)
+      constexpr Jump(const OperandType& op)
         : m_operand(op.copy())
       {}
 
@@ -99,8 +99,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Jump operator to copy
        */
-      constexpr
-      Jump(const Jump& other)
+      constexpr Jump(const Jump& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
@@ -109,8 +108,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Jump operator to move
        */
-      constexpr
-      Jump(Jump&& other)
+      constexpr Jump(Jump&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
@@ -119,8 +117,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns Const reference to the operand
        */
-      constexpr
-      const auto& getOperand() const
+      constexpr const auto& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -139,7 +136,8 @@ namespace Rodin::Variational
         const auto& face = p.getPolytope();
         const size_t d = face.getDimension();
         const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex());
+        const auto& inc =
+          mesh.getConnectivity().getIncidence({d, d + 1}, face.getIndex());
         assert(inc.size() == 2);
         const Index idx1 = *inc.begin();
         const Index idx2 = *std::next(inc.begin());
@@ -154,7 +152,10 @@ namespace Rodin::Variational
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
         const auto v1 = getOperand().getValue(p1);
         const auto v2 = getOperand().getValue(p2);
-        return v1 - v2;
+        if constexpr (requires { (v1 - v2).eval(); })
+          return (v1 - v2).eval();
+        else
+          return v1 - v2;
       }
 
       /**
@@ -169,7 +170,8 @@ namespace Rodin::Variational
         const auto& face = p.getPolytope();
         const size_t d = face.getDimension();
         const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex());
+        const auto& inc =
+          mesh.getConnectivity().getIncidence({d, d + 1}, face.getIndex());
         assert(inc.size() == 2);
         const Index idx1 = *inc.begin();
         const Index idx2 = *std::next(inc.begin());
@@ -183,12 +185,14 @@ namespace Rodin::Variational
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
         const auto* qf = ip.getQuadratureFormula();
-        assert(qf);
         const IntegrationPoint ip1(p1, qf, ip.getIndex());
         const IntegrationPoint ip2(p2, qf, ip.getIndex());
         const auto v1 = getOperand().getValue(ip1);
         const auto v2 = getOperand().getValue(ip2);
-        return v1 - v2;
+        if constexpr (requires { (v1 - v2).eval(); })
+          return (v1 - v2).eval();
+        else
+          return v1 - v2;
       }
 
       /**
@@ -196,8 +200,7 @@ namespace Rodin::Variational
        * @param p Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }
@@ -230,7 +233,7 @@ namespace Rodin::Variational
    * interfaces in finite element formulations. This is used in DG bilinear
    * and linear form assembly.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // DG interior penalty term
    * auto penalty = InterfaceIntegral(Jump(u), Jump(v));
@@ -242,173 +245,30 @@ namespace Rodin::Variational
    */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   class Jump<ShapeFunctionBase<NestedDerived, FES, Space>> final
-    : public ShapeFunctionBase<Jump<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
+    : public InterfaceShapeFunctionBase<
+        Jump<ShapeFunctionBase<NestedDerived, FES, Space>>,
+        ShapeFunctionBase<NestedDerived, FES, Space>>
   {
     public:
-      /// @brief Finite element space type.
-      using FESType = FES;
-
-      /// @brief Operand type.
+      /// @brief Cell-local shape expression.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
-      /// @brief Parent class type.
-      using Parent = ShapeFunctionBase<Jump<OperandType>, FES, Space>;
+      /// @brief Two-sided evaluation base.
+      using Parent = InterfaceShapeFunctionBase<Jump, OperandType>;
 
       /**
-       * @brief Constructs the jump of a shape function.
-       * @param[in] op Shape function to compute the jump of
+       * @brief Constructs a two-sided jump.
+       * @param operand Cell-local shape expression.
        */
-      constexpr
-      Jump(const OperandType& op)
-        : Parent(op.getFiniteElementSpace()),
-          m_operand(op.copy()),
-          m_ip(nullptr)
+      explicit Jump(const OperandType& operand)
+        : Parent(operand, 1, -1)
       {}
 
-      /**
-       * @brief Copy constructor.
-       * @param other Object to copy from.
-       */
-      constexpr
-      Jump(const Jump& other)
-        : Parent(other),
-          m_operand(other.m_operand->copy()),
-          m_ip(nullptr)
-      {}
-
-      /**
-       * @brief Move constructor.
-       * @param other Object to move from.
-       */
-      constexpr
-      Jump(Jump&& other)
-        : Parent(std::move(other)),
-          m_operand(std::move(other.m_operand)),
-          m_ip(std::exchange(other.m_ip, nullptr))
-      {}
-
-      /**
-       * @brief Gets the underlying shape function.
-       * @returns Reference to the operand
-       */
-      constexpr
-      const OperandType& getOperand() const
-      {
-        assert(m_operand);
-        return *m_operand;
-      }
-
-      /**
-       * @brief Gets the leaf (underlying trial/test function).
-       * @returns Reference to the leaf function
-       */
-      constexpr
-      const auto& getLeaf() const
-      {
-        return getOperand().getLeaf();
-      }
-
-      /**
-       * @brief Gets number of degrees of freedom on a polytope.
-       * @param[in] element Mesh polytope
-       * @returns Number of DOFs
-       */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
-      {
-        return getOperand().getDOFs(element);
-      }
-
-      /**
-       * @brief Gets the current integration point.
-       * @returns Reference to the integration point
-       */
-      const IntegrationPoint& getIntegrationPoint() const
-      {
-        assert(m_ip);
-        return *m_ip;
-      }
-
-      /**
-       * @brief Sets the integration point for evaluation.
-       * @param[in] ip Integration point on an interface face
-       * @returns Reference to this jump operator
-       */
-      Jump& setIntegrationPoint(const IntegrationPoint& ip)
-      {
-        m_ip = &ip;
-        return *this;
-      }
-
-      /**
-       * @brief Gets the jump of the basis function for local DOF.
-       * @param[in] local Local DOF index
-       * @returns Jump of the basis function @f$ \phi^+(p) - \phi^-(p) @f$
-       *
-       * Evaluates the operand's basis function at the same physical point
-       * mapped to both adjacent elements, and returns the difference.
-       */
-      auto getBasis(size_t local) const
-      {
-        assert(m_ip);
-        const auto& p = m_ip->getPoint();
-        assert(p.getPolytope().isFace());
-        const auto& face = p.getPolytope();
-        const size_t d = face.getDimension();
-        const auto& mesh = face.getMesh();
-        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex());
-        assert(inc.size() == 2);
-        const Index idx1 = *inc.begin();
-        const Index idx2 = *std::next(inc.begin());
-        const auto it1 = mesh.getPolytope(d + 1, idx1);
-        const auto it2 = mesh.getPolytope(d + 1, idx2);
-        const auto& pc = p.getPhysicalCoordinates();
-        Math::SpatialPoint rc1;
-        Math::SpatialPoint rc2;
-        it1->getTransformation().inverse(rc1, pc);
-        it2->getTransformation().inverse(rc2, pc);
-        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
-        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        const auto* qf = m_ip->getQuadratureFormula();
-        assert(qf);
-        const IntegrationPoint ip1(p1, qf, m_ip->getIndex());
-        const IntegrationPoint ip2(p2, qf, m_ip->getIndex());
-        m_operand->setIntegrationPoint(ip1);
-        const auto val1 = m_operand->getBasis(local);
-        m_operand->setIntegrationPoint(ip2);
-        const auto val2 = m_operand->getBasis(local);
-        return val1 - val2;
-      }
-
-      /**
-       * @brief Gets the finite element space.
-       * @returns Reference to the FE space
-       */
-      constexpr
-      const FES& getFiniteElementSpace() const
-      {
-        return getOperand().getFiniteElementSpace();
-      }
-
-      /**
-       * @brief Returns the polynomial order used on a mesh entity.
-       * @param p Mesh entity used by this operation.
-       * @returns Polynomial order on the entity, or an empty optional when no order is available.
-       */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
-      {
-        return this->getOperand().getOrder(p);
-      }
-
+      /// @returns An independent expression copy, without borrowed evaluation state.
       Jump* copy() const noexcept override
       {
         return new Jump(*this);
       }
-
-    private:
-      std::unique_ptr<OperandType> m_operand;
-      const IntegrationPoint* m_ip;
   };
 
   /**

@@ -44,8 +44,8 @@ namespace Rodin::MMG
       MMG5Exception(const FuncName& funcName)
       {
         const auto& className = boost::typeindex::type_id_with_cvr<MMG5>().pretty_name();
-        *this << "In " << Alert::Identifier::Function(funcName)
-              << " of class " << Alert::Identifier::Class(className) << ": ";
+        *this << "In " << Alert::Identifier::Function(funcName) << " of class "
+              << Alert::Identifier::Class(className) << ": ";
       }
   };
 
@@ -77,11 +77,15 @@ namespace Rodin::MMG
       /**
        * @brief Allocates and initializes an MMG mesh object.
        * @param[in] version MMG mesh version.
-       * @param[in] dim Topological mesh dimension.
-       * @param[in] spaceDim Optional embedding space dimension.
-       * @returns Newly allocated MMG mesh pointer.
+       * @param[in] dim Topological dimension of a planar, surface, or volume mesh.
+       * @param[in] spaceDim Embedding dimension, defaulting to @p dim. Supported
+       * topology/embedding pairs are @f$(2,2)@f$, @f$(2,3)@f$ and @f$(3,3)@f$.
+       * @returns Newly allocated mesh, owned by the caller and released with
+       * @ref destroyMesh.
+       * @throws Alert::Exception if the supplied dimensions are unsupported.
        */
-      static MMG5_pMesh createMesh(size_t version, size_t dim, Optional<size_t> spaceDim = {});
+      static MMG5_pMesh createMesh(
+        size_t version, size_t dim, Optional<size_t> spaceDim = {});
 
       /**
        * @brief Copies source mesh to a destination mesh.
@@ -89,6 +93,8 @@ namespace Rodin::MMG
        * @param[out] dst Destination MMG mesh.
        *
        * Performs deep-copy allocation for dynamically owned MMG arrays.
+       * Cached cell adjacencies use MMG's three entries per triangle or four
+       * entries per tetrahedron, with five additional array entries.
        */
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 
@@ -141,7 +147,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Copies values from MMG solution to Rodin MMG grid function.
-       * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
+       * @tparam Range Grid function range type (`Real` or `Math::SpatialVector<Real>`).
        * @param[in] src Source MMG solution.
        * @param[out] dst Destination grid function.
        *
@@ -156,22 +162,19 @@ namespace Rodin::MMG
         {
           assert(src->type == MMG5_Scalar);
           assert(dst.getFiniteElementSpace().getVectorDimension() == 1);
-          Math::Matrix<Real>& data = dst.getData();
-          assert(data.rows() == 1);
-          data.resize(1, src->np);
+          auto& data = dst.getData();
+          data.resize(src->np);
           // MMG5_pSol->m is 1 indexed. We must start at m + 1 and finish at m
           // + np + 1.
           std::copy(src->m + 1, src->m + src->np + 1, data.data());
         }
-        else if constexpr (std::is_same_v<Math::Vector<Real>, Range>)
+        else if constexpr (std::is_same_v<Math::SpatialVector<Real>, Range>)
         {
           const size_t vdim = src->size;
           assert(src->type == MMG5_Vector);
           assert(vdim == dst.getFiniteElementSpace().getVectorDimension());
-          Math::Matrix<Real>& data = dst.getData();
-          assert(data.rows() >= 0);
-          assert(static_cast<size_t>(data.rows()) == vdim);
-          data.resize(vdim, src->np);
+          auto& data = dst.getData();
+          data.resize(vdim * src->np);
           // MMG5_pSol->m is 1 indexed. We must start at m + vdim and finish at
           // m + vdim * (src->np + 1).
           std::copy(src->m + vdim, src->m + vdim * (src->np + 1), data.data());
@@ -184,7 +187,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Copies values from Rodin MMG grid function to MMG solution.
-       * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
+       * @tparam Range Grid function range type (`Real` or `Math::SpatialVector<Real>`).
        * @param[in] src Source grid function.
        * @param[out] dst Destination MMG solution.
        *
@@ -199,13 +202,13 @@ namespace Rodin::MMG
         {
           assert(dst->type == MMG5_Scalar);
           assert(src.getFiniteElementSpace().getVectorDimension() == 1);
-          const Math::Matrix<Real>& data = src.getData();
+          const auto& data = src.getData();
           assert(data.cols() == 1);
           assert(dst->size == 1);
           const size_t n = data.size();
           if (n)
           {
-            dst->np  = n;
+            dst->np = n;
             dst->npi = n;
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
             assert(dst->size == 1);
@@ -214,29 +217,29 @@ namespace Rodin::MMG
             {
               // So 2 * (dst->np + 1) seems to work for most applications
               MMG5_SAFE_CALLOC(dst->m, 2 * (dst->npmax + 1), Real,
-                Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m." << Alert::Raise);
+                Alert::Exception()
+                  << "Failed to allocate memory for MMG5_pSol->m." << Alert::Raise);
             }
             std::copy(data.data(), data.data() + n, dst->m + 1);
           }
           else
           {
-            dst->np  = 0;
+            dst->np = 0;
             dst->npi = 0;
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           }
         }
-        else if constexpr (std::is_same_v<Math::Vector<Real>, Range>)
+        else if constexpr (std::is_same_v<Math::SpatialVector<Real>, Range>)
         {
           assert(dst->type == MMG5_Vector);
           [[maybe_unused]] const size_t vdim =
             src.getFiniteElementSpace().getVectorDimension();
           assert(dst->size >= 0);
           assert(vdim == static_cast<size_t>(dst->size));
-          const Math::Matrix<Real>& data = src.getData();
-          assert(dst->size == data.rows());
-          const size_t n = data.cols();
-          assert(n > 0);
-          dst->np  = n;
+          const auto& data = src.getData();
+          assert(data.size() % vdim == 0);
+          const size_t n = data.size() / vdim;
+          dst->np = n;
           dst->npi = n;
           dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           assert(dst->np < dst->npmax);
@@ -247,13 +250,14 @@ namespace Rodin::MMG
               // So (dst->size + 1) * (dst->np + 1) seems to work for most
               // applications
               MMG5_SAFE_CALLOC(dst->m, (dst->size + 1) * (dst->npmax + 1), Real,
-                Alert::Exception() << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
+                Alert::Exception()
+                  << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
             }
             std::copy(data.data(), data.data() + data.size(), dst->m + dst->size);
           }
           else
           {
-            dst->np  = 0;
+            dst->np = 0;
             dst->npi = 0;
             dst->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
           }
@@ -404,7 +408,8 @@ namespace Rodin::MMG
       MMG5& setParameters(MMG5_pMesh mesh);
 
     private:
-      Optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad; ///< Optional MMG scalar parameters.
+      Optional<Real> m_hmin, m_hmax, m_hausd,
+        m_hgrad; ///< Optional MMG scalar parameters.
       bool m_ridgeDetection; ///< Whether ridge angle detection is enabled.
   };
 }

@@ -1,0 +1,10 @@
+<p>Scalar and one-component contraction representation measurements.</p>
+<h2>Measured operation</h2>
+<p>Measures one-component pair contractions without finite-element setup.</p>
+<h3>Mathematical foundation</h3>
+<p>A complete batch computes \(D_{ba}=z_b\overline{y_a}\) or replaces a zeroed output by \(D_{ba}\mathrel{+}=wz_b\overline{y_a}\). Seeded scopes additionally form \(0+z_b\overline{y_a}\) before storing or weighting it. These represent scalar arithmetic, fixed-size Eigen views and the public one-component spatial-vector operation. No mathematical equality of their general floating-point algorithms is assumed.</p>
+<h3>Architecture</h3>
+<p>Raw scalar arrays are shared by the scalar and fixed-view protocols. Spatial protocols instead retain arrays of one-component spatial values; their object footprint is reported separately. Dyadic inputs give exact finite reference values, including genuinely complex right operands and real-valued right operands representing reference basis values. A perturbed output must fail qualification. This does not certify arbitrary complex, nonfinite or rounding-mode behavior across representations.</p>
+<p>Setup and qualification are untimed. Each iteration includes pair traversal and output stores; weighted scopes also include output zeroing. Barriers surround a batch rather than each contraction. No geometry, quadrature, basis scaling, matrix scatter or solving is measured.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

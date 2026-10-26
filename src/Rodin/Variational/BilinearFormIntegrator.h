@@ -16,6 +16,7 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <memory>
 #include <type_traits>
 
@@ -42,13 +43,13 @@ namespace Rodin::Variational
    * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test
    * basis functions on element @f$ K @f$.
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During finite element assembly:
    * 1. The integrator is called for each element in the mesh
    * 2. Local element matrices are computed using quadrature
    * 3. Local matrices are assembled into the global system matrix
    *
-   * ## Common Bilinear Forms
+   * # Common Bilinear Forms
    * - **Mass matrix**: @f$ \int_K u \cdot v \, dx @f$
    * - **Stiffness matrix**: @f$ \int_K \nabla u \cdot \nabla v \, dx @f$
    * - **Advection**: @f$ \int_K (\beta \cdot \nabla u) v \, dx @f$
@@ -102,7 +103,8 @@ namespace Rodin::Variational
       template <class OtherNumber, class OtherDerived>
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase<OtherNumber, OtherDerived>& other)
         : Parent(other),
-          m_u(other.m_u->copy()), m_v(other.m_v->copy())
+          m_u(other.getTrialFunction().copy()),
+          m_v(other.getTestFunction().copy())
       {}
 
       /**
@@ -121,7 +123,8 @@ namespace Rodin::Variational
       template <class OtherNumber, class OtherDerived>
       BilinearFormIntegratorBase(BilinearFormIntegratorBase<OtherNumber, OtherDerived>&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u)), m_v(std::move(other.m_v))
+          m_u(other.getTrialFunction().copy()),
+          m_v(other.getTestFunction().copy())
       {}
 
       /// @brief Virtual destructor
@@ -187,13 +190,43 @@ namespace Rodin::Variational
       using Parent::Parent;
 
       /**
+       * @brief Copies the integrator without retaining a borrowed local numbering.
+       * @param other Integrator to copy.
+       */
+      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase& other)
+        : Parent(other),
+          m_attrs(other.m_attrs)
+      {}
+
+      /**
+       * @brief Moves the integrator without retaining a borrowed local numbering.
+       * @param other Integrator to move.
+       */
+      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase&& other)
+        : Parent(std::move(other)),
+          m_attrs(std::move(other.m_attrs))
+      {}
+
+      /// @returns The bound trial numbering, or no override for ordinary element DOFs.
+      Utility::OptionalReference<const IndexArray> getTrialDOFIndices() const
+      {
+        return m_trialDOFs;
+      }
+
+      /// @returns The bound test numbering, or no override for ordinary element DOFs.
+      Utility::OptionalReference<const IndexArray> getTestDOFIndices() const
+      {
+        return m_testDOFs;
+      }
+
+      /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
       template <class OtherNumber>
       LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
-          m_attrs(other.m_attrs)
+          m_attrs(other.getAttributes())
       {}
 
       /**
@@ -203,7 +236,7 @@ namespace Rodin::Variational
       template <class OtherNumber>
       LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
-          m_attrs(std::move(other.m_attrs))
+          m_attrs(other.getAttributes())
       {}
 
       /**
@@ -286,7 +319,21 @@ namespace Rodin::Variational
       virtual
       LocalBilinearFormIntegratorBase* copy() const noexcept override = 0;
 
+    protected:
+      /**
+       * @brief Binds the numberings prepared by a two-sided integrand.
+       * @param trial Trial numbering, absent for ordinary element bases.
+       * @param test Test numbering, absent for ordinary element bases.
+       */
+      void setDOFIndices(Utility::OptionalReference<const IndexArray> trial,
+        Utility::OptionalReference<const IndexArray> test)
+      {
+        m_trialDOFs = trial;
+        m_testDOFs = test;
+      }
+
     private:
+      Utility::OptionalReference<const IndexArray> m_trialDOFs, m_testDOFs;
       FlatSet<Geometry::Attribute> m_attrs;
   };
 
@@ -314,8 +361,8 @@ namespace Rodin::Variational
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
-          m_trialAttrs(other.m_trialAttrs),
-          m_testAttrs(other.m_testAttrs)
+          m_trialAttrs(other.getTrialAttributes()),
+          m_testAttrs(other.getTestAttributes())
       {}
 
       /**
@@ -325,8 +372,8 @@ namespace Rodin::Variational
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(GlobalBilinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
-          m_trialAttrs(std::move(other.m_trialAttrs)),
-          m_testAttrs(std::move(other.m_testAttrs))
+          m_trialAttrs(other.getTrialAttributes()),
+          m_testAttrs(other.getTestAttributes())
       {}
 
       /**

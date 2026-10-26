@@ -16,8 +16,6 @@
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/Identifiable.h"
-#include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
 
@@ -34,7 +32,7 @@ namespace Rodin::FormLanguage
    * @warning The FormLanguage::Base class is not thread safe. Only one thread
    * should access the methods of a FormLanguage object at a time.
    *
-   * ## Key Features
+   * # Key Features
    * - **Unique Identification**: Each instance receives a unique UUID for tracking
    * - **Polymorphic Operations**: Support for copying and cloning operations
    */
@@ -102,7 +100,6 @@ namespace Rodin::FormLanguage
        * @note This is a CRTP function to be overridden in derived classes.
        */
       virtual Base* copy() const noexcept override = 0;
-
   };
 }
 

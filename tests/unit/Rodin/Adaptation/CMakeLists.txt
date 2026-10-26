@@ -1,7 +1,7 @@
 add_executable(RodinAdaptationDeformationMapTest DeformationMapTest.cpp)
 target_link_libraries(RodinAdaptationDeformationMapTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationDeformationMapTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinAdaptationDeformationMapTest PROPERTIES LABELS unit)
 
 add_executable(RodinAdaptationCellDeformationTest CellDeformationTest.cpp)
 target_link_libraries(RodinAdaptationCellDeformationTest
@@ -9,7 +9,7 @@ target_link_libraries(RodinAdaptationCellDeformationTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinAdaptationCellDeformationTest
+rodin_discover_tests(RodinAdaptationCellDeformationTest
   PROPERTIES
     LABELS unit
 )
@@ -21,7 +21,7 @@ target_link_libraries(RodinAdaptationSWIFTHingeStateTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTHingeStateTest
+rodin_discover_tests(RodinAdaptationSWIFTHingeStateTest
   PROPERTIES
     LABELS unit
 )
@@ -32,7 +32,7 @@ target_link_libraries(RodinAdaptationSWIFTLossTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTLossTest
+rodin_discover_tests(RodinAdaptationSWIFTLossTest
   PROPERTIES
     LABELS unit
 )
@@ -41,27 +41,27 @@ add_executable(RodinAdaptationSWIFTSolverTest SWIFTSolverTest.cpp)
 add_executable(RodinAdaptationSWIFTAdaptTest SWIFTAdaptTest.cpp)
 target_link_libraries(RodinAdaptationSWIFTAdaptTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTAdaptTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinAdaptationSWIFTAdaptTest PROPERTIES LABELS unit)
 
 add_executable(RodinAdaptationSWIFTExampleParametersTest SWIFTExampleParametersTest.cpp)
 target_link_libraries(RodinAdaptationSWIFTExampleParametersTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
 
 add_executable(RodinAdaptationSWIFTRegularityMetricTest SWIFTRegularityMetricTest.cpp)
 add_executable(RodinAdaptationSWIFTDirectionalNewtonTest SWIFTDirectionalNewtonTest.cpp)
 target_link_libraries(RodinAdaptationSWIFTDirectionalNewtonTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTDirectionalNewtonTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinAdaptationSWIFTDirectionalNewtonTest PROPERTIES LABELS unit)
 target_link_libraries(RodinAdaptationSWIFTRegularityMetricTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTRegularityMetricTest PROPERTIES LABELS unit)
+rodin_discover_tests(RodinAdaptationSWIFTRegularityMetricTest PROPERTIES LABELS unit)
 target_link_libraries(RodinAdaptationSWIFTSolverTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationSWIFTSolverTest
+rodin_discover_tests(RodinAdaptationSWIFTSolverTest
   PROPERTIES
     LABELS unit
 )
@@ -98,3 +98,18 @@ if(TARGET SWIFT_ReconstructionP1)
     endforeach()
   endforeach()
 endif()
+
+add_executable(RodinAdaptationSWIFTReportTest SWIFTReportTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTReportTest PRIVATE
+  GTest::gtest_main Rodin::Adaptation)
+rodin_discover_tests(RodinAdaptationSWIFTReportTest PROPERTIES LABELS unit)
+
+add_executable(RodinAdaptationSWIFTLinearSolverTest SWIFTLinearSolverTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTLinearSolverTest PRIVATE
+  GTest::gtest_main Rodin::Adaptation)
+rodin_discover_tests(RodinAdaptationSWIFTLinearSolverTest PROPERTIES LABELS unit)
+
+add_executable(RodinAdaptationSWIFTFittingCoefficientTest SWIFTFittingCoefficientTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTFittingCoefficientTest
+  PRIVATE GTest::gtest_main Rodin::Adaptation)
+rodin_discover_tests(RodinAdaptationSWIFTFittingCoefficientTest PROPERTIES LABELS unit)

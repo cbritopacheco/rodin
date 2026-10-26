@@ -1,0 +1,35 @@
+name: Labeler Rules
+'on':
+  pull_request: null
+  push:
+    branches:
+    - master
+    - develop
+permissions:
+  contents: read
+jobs:
+  Rules:
+    name: Regression Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out proposed rules and regression tests
+      uses: actions/checkout@v4
+      with:
+        lfs: false
+        persist-credentials: false
+    - name: Check out the pinned labeler for offline API tests
+      uses: actions/checkout@v4
+      with:
+        repository: actions/labeler
+        ref: b8dd2d9be0f68b860e7dae5dae7d772984eacd6d
+        path: .labeler-action
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - name: Install workflow parser
+      run: python3 dev/ci_environment.py python
+    - name: Test label matching and API behavior serially
+      env:
+        LABELER_ACTION_PATH: ${{ github.workspace }}/.labeler-action
+      run: python3 -m unittest discover -s dev -p test_labeler.py -v

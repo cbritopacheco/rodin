@@ -1,0 +1,5 @@
+<p>CPU-time benchmarks for complete cell-local hyperelastic tangents.</p>
+<h2>Measured operation</h2>
+<p>Mesh, fields, quadrature and reference tabulation are prepared before timing. Each iteration binds one cell and computes all local matrix entries, including constitutive binding, tangent actions and test-gradient contractions. Sparse assembly, solving and matrix reads are excluded. Each case runs on one thread; use the CPU column and run benchmark executables serially. The postcondition checks repeatability; the unit tests supply the component-contraction oracle.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

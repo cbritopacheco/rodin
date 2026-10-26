@@ -17,7 +17,7 @@
  * - **Constitutive**: Hyperelastic laws and linear Hooke's law
  * - **Fields**: Green-Lagrange strain, Piola-Kirchhoff stress, Cauchy stress
  *
- * ## Usage
+ * # Usage
  * @code
  * #include <Rodin/Solid.h>
  * using namespace Rodin::Solid;

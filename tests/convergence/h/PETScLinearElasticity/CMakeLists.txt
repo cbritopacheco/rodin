@@ -1,5 +1,20 @@
 include(../../PETScRefinement.cmake)
-rodin_add_petsc_refinement(RodinConvergenceHPETScLinearElasticityBoundary Traction.cpp)
+rodin_add_petsc_refinement(RodinConvergenceHPETScLinearElasticityBoundary Traction.cpp
+  RATE_CASES MixedTractionP1Rates MixedTractionP2Rates NearlyIncompressibleP2Rates)
+# A single tetrahedral P1 history exceeded thirty minutes in CI. Give each
+# three-dimensional rate study its own three-hour scheduling allowance.
+foreach(geometry Tetrahedron Pyramid Hexahedron Wedge)
+  foreach(study MixedTractionP1Rates MixedTractionP2Rates NearlyIncompressibleP2Rates)
+    set_tests_properties(RodinConvergenceHPETScLinearElasticityBoundary_${study}_${geometry}
+      PROPERTIES TIMEOUT 10800)
+    if(RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        set_tests_properties(RodinConvergenceHPETScLinearElasticityBoundary_MPI_np${np}_${study}_${geometry}
+          PROPERTIES TIMEOUT 10800)
+      endforeach()
+    endif()
+  endforeach()
+endforeach()
 
 add_executable(RodinConvergenceHPETScLinearElasticity LinearElasticity.cpp)
 target_link_libraries(RodinConvergenceHPETScLinearElasticity

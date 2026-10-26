@@ -148,6 +148,30 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+
+    solver.setMaxThreads(2)
+      .setOrdering(decltype(solver)::Ordering::AMD)
+      .factorize(system);
+    ASSERT_TRUE(solver.success());
+    auto copied = solver;
+    solver.clear(Symbolic);
+    auto check = [&](auto& instance) {
+      EXPECT_EQ(instance.getMaxThreads(), 2);
+      EXPECT_EQ(instance.getOrdering(), decltype(solver)::Ordering::AMD);
+      EXPECT_FALSE(instance.getInfo().factorization.has_value());
+      EXPECT_EQ(instance.getResources().symbolic, nullptr);
+      EXPECT_EQ(instance.getResources().numeric, nullptr);
+      system.getSolution().setZero();
+      instance.solve(system);
+      ASSERT_TRUE(instance.success());
+      EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    };
+    check(copied);
+    auto moved = std::move(copied);
+    check(moved);
+    std::unique_ptr<decltype(solver)> clone(moved.copy());
+    moved.clear(Symbolic);
+    check(*clone);
   }
 
   class Rodin_Solver_ParU_AllGeometries : public ::testing::TestWithParam<Polytope::Type>

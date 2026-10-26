@@ -1,0 +1,9 @@
+<p>Serial sparse elimination by system size and constraint distribution.</p>
+<h2>Measured operation</h2>
+<p>Measures arbitrary directed CSC storage, including missing diagonals.</p>
+<p># Architecture</p>
+<p>Upper-band columns have no guaranteed stored transpose. Every seventh diagonal and every seventeenth column are omitted in the second pattern. Prescribed coefficients define an algebraically exact solution. Independent projectors check the entire result before and after measurement.</p>
+<p># Implementation</p>
+<p>Each invocation receives an exact-capacity copy of the original CSC matrix outside timing. Scratch and missing-diagonal growth belong to the measured call; assembly, restoration and verification do not. The calling thread&#x27;s CPU time is recorded, with no worker pool.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

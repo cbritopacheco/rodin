@@ -252,40 +252,30 @@ namespace Rodin::Tests::Convergence::H::Stokes
       }
 
       template <size_t K>
-      void checkHigherOrderHierarchy() const
+      void checkHigherOrderHierarchy(size_t n, bool curved) const
       {
-        // Three resolved levels are independent of the degree-two coarse-grid
-        // rank obstruction. The pressure constant is interpolated in its actual
-        // basis; its higher-order coefficients are not assumed to be ones.
-        for (bool curved : {false, true})
+        SCOPED_TRACE(::testing::Message()
+          << "velocity degree=" << K << " curved=" << curved << " n=" << n);
+        std::array<MixedStability::Result, 2> measurements;
+        for (size_t i = 0; i < measurements.size(); ++i)
         {
-          for (size_t n : {3u, 4u, 5u})
-          {
-            SCOPED_TRACE(::testing::Message()
-              << "velocity degree=" << K << " curved=" << curved << " n=" << n);
-            std::array<MixedStability::Result, 2> measurements;
-            for (size_t i = 0; i < measurements.size(); ++i)
-            {
-              measure<K>(
-                measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
-              ASSERT_FALSE(::testing::Test::HasFatalFailure());
-              SCOPED_TRACE(::testing::Message()
-                << "freeVelocity=" << measurements[i].freeVelocity
-                << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
-                << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
-              MixedStability::expectConsistent(measurements[i]);
-              EXPECT_FALSE(measurements[i].isDimensionObstructed());
-              EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(measurements[i]));
-            }
-            ASSERT_EQ(measurements[0].freeVelocity, measurements[1].freeVelocity);
-            ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
-            ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
-            EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
-                          measurements[0].eigenvalues.minCoeff() -
-                        1),
-              QuadratureTolerance);
-          }
+          measure<K>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
+          ASSERT_FALSE(::testing::Test::HasFatalFailure());
+          SCOPED_TRACE(::testing::Message()
+            << "freeVelocity=" << measurements[i].freeVelocity
+            << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
+            << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
+          MixedStability::expectConsistent(measurements[i]);
+          EXPECT_FALSE(measurements[i].isDimensionObstructed());
+          EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(measurements[i]));
         }
+        ASSERT_EQ(measurements[0].freeVelocity, measurements[1].freeVelocity);
+        ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
+        ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
+        EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
+                      measurements[0].eigenvalues.minCoeff() -
+                    1),
+          QuadratureTolerance);
       }
 
       template <size_t K>
@@ -364,7 +354,11 @@ namespace Rodin::Tests::Convergence::H::Stokes
 
   TEST_P(StokesStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels)
   {
-    checkHigherOrderHierarchy<3>();
+    for (bool curved : {false, true})
+    {
+      for (size_t n : {3u, 4u, 5u})
+        checkHigherOrderHierarchy<3>(n, curved);
+    }
   }
 
   TEST_P(StokesStabilityTest, P3P2MissingDivergenceRejected)
@@ -372,9 +366,34 @@ namespace Rodin::Tests::Convergence::H::Stokes
     checkHigherOrderMissingDivergence<3>();
   }
 
-  TEST_P(StokesStabilityTest, P4P3PressureSpectrumAcrossRefinementLevels)
+  TEST_P(StokesStabilityTest, P4P3PressureSpectrumAffineN3)
   {
-    checkHigherOrderHierarchy<4>();
+    checkHigherOrderHierarchy<4>(3, false);
+  }
+
+  TEST_P(StokesStabilityTest, P4P3PressureSpectrumAffineN4)
+  {
+    checkHigherOrderHierarchy<4>(4, false);
+  }
+
+  TEST_P(StokesStabilityTest, P4P3PressureSpectrumAffineN5)
+  {
+    checkHigherOrderHierarchy<4>(5, false);
+  }
+
+  TEST_P(StokesStabilityTest, P4P3PressureSpectrumCurvedN3)
+  {
+    checkHigherOrderHierarchy<4>(3, true);
+  }
+
+  TEST_P(StokesStabilityTest, P4P3PressureSpectrumCurvedN4)
+  {
+    checkHigherOrderHierarchy<4>(4, true);
+  }
+
+  TEST_P(StokesStabilityTest, P4P3PressureSpectrumCurvedN5)
+  {
+    checkHigherOrderHierarchy<4>(5, true);
   }
 
   TEST_P(StokesStabilityTest, P4P3MissingDivergenceRejected)

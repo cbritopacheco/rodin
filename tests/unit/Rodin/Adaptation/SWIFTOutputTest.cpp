@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/HDF5.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 
 namespace Rodin::Tests::Unit
 {
@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
     };
     classifier.setParameters(parameters);
     const auto expected = classifier.classify([&](const Geometry::Polytope& cell) {
-      const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+      const auto& formula = QF::QuadratureFormula::get(2, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(formula);
       Real integral = 0;
       for (size_t q = 0; q < quadrature.getSize(); ++q)

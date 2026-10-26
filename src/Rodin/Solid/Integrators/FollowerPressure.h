@@ -78,7 +78,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Polytope.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -338,7 +338,7 @@ namespace Rodin::Solid
         Internal::surfaceCross(cr, t1, t2, sdim);
 
         const Real p = m_pressure.get();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(2, face.getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(2, face.getGeometry());
         const size_t nqp = qf.getSize();
 
         for (size_t q = 0; q < nqp; ++q)
@@ -505,7 +505,7 @@ namespace Rodin::Solid
         }
 
         const Real p = m_pressure.get();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(2, face.getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(2, face.getGeometry());
         const size_t nqp = qf.getSize();
 
         Math::SpatialVector<Real> e(sdim), d1(sdim), d2(sdim), c1, c2, dcr(sdim);

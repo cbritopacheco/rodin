@@ -12,19 +12,19 @@
  * comparison operation between functions. This operator creates a boolean
  * function indicating where one function does not exceed another.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the LEQ operator:
  * @f[
  *   (f \leq g)(x) = \begin{cases} 1 & \text{if } f(x) \leq g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]
  *
- * ## Applications
+ * # Applications
  * - Bounded region indicators: @f$ \mathbb{1}_{u \leq M} @f$
  * - Feasibility checking for optimization problems
  * - Level set definitions: @f$ \{x : \phi(x) \leq 0\} @f$
  * - Truncation and clipping operations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * auto bounded_region = (u <= 1.0);  // Boolean: true where u ≤ 1
  * ```

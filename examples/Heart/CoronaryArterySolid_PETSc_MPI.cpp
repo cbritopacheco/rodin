@@ -480,8 +480,10 @@ int main(int argc, char** argv)
     if (!rep.converged)
     {
       if (isRoot)
+      {
         std::cerr << "0D solver failed to converge at step " << step
                   << ", t = " << model.getState().t << "\n";
+      }
       break;
     }
     const auto& s = model.getState();
@@ -524,13 +526,17 @@ int main(int argc, char** argv)
     if (!snes.converged())
     {
       if (isRoot)
+      {
         std::cerr << "SNES failed to converge at step " << step << " after "
                   << snes.getIterationNumber() << " iterations.\n";
+      }
       break;
     }
     if (isRoot)
+    {
       std::cout << "Step " << step << ", time " << t
                 << ", SNES iterations = " << snes.getIterationNumber() << std::endl;
+    }
 
     // ---- Newmark correctors ----------------------------------------------
     // aNew = (1/(beta*dt^2)) * (u - uPred)

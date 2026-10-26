@@ -210,8 +210,7 @@ namespace Rodin::Tests::Convergence::Isoparametric
       {
         const auto referenceCell = reference.getCell(index);
         const auto curvedCell = curved.getCell(index);
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(8, referenceCell->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(8, referenceCell->getGeometry());
         const Geometry::PolytopeQuadrature quadrature(*referenceCell, qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {

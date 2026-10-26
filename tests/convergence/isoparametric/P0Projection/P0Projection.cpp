@@ -36,10 +36,11 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
 #endif
   struct Errors
   {
-      Real l2;
-      Real moment;
-      Real globalMean;
+    Real l2;
+    Real moment;
+    Real globalMean;
   };
+
   /** @brief Curved scalar/vector projection with independently integrated moments.
    * @par Architecture
    * A fresh mapped mesh owns P2 geometry. Each solve assembles a mass problem.
@@ -129,6 +130,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
           uh = exact;
         Real momentSquared = 0;
         if constexpr (!Global)
+        {
           for (auto cell = m_mesh.getCell(); cell; ++cell)
           {
             if constexpr (requires { m_mesh.getShard(); })
@@ -136,8 +138,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
               if (!m_mesh.getShard().isOwned(dim, cell->getIndex()))
                 continue;
             }
-            const auto& qf =
-              QF::PolytopeQuadratureFormula::get(OracleOrder, cell->getGeometry());
+            const auto& qf = QF::QuadratureFormula::get(OracleOrder, cell->getGeometry());
             const Geometry::PolytopeQuadrature quadrature(*cell, qf);
             auto moment = exact(quadrature.getPoint(0));
             moment *= 0;
@@ -153,16 +154,21 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
             EXPECT_GT(volume, 0);
             momentSquared += ErrorNorm::squaredMagnitude(moment) / volume;
           }
+        }
 #ifdef RODIN_USE_MPI
         if constexpr (requires { m_mesh.getShard(); })
+        {
           momentSquared = boost::mpi::all_reduce(
             m_mesh.getContext().getCommunicator(), momentSquared, std::plus<Real>());
+        }
 #endif
         const Real error = ErrorNorm::computeL2(m_mesh, uh, exact, OracleOrder);
         Real meanError = 0;
         if constexpr (Global)
+        {
           meanError = ErrorNorm::computeL2(
             m_mesh, uh, field<Scalar, Vector>(dim, constant, true), OracleOrder);
+        }
         return {error, std::sqrt(momentSquared), meanError};
       }
 
@@ -195,10 +201,12 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
             return value;
           }
           else
+          {
             return coefficient<Scalar>(1.25, 0.5) +
               (constant ? Scalar(0)
                         : coefficient<Scalar>(1, -0.75) * x +
                     coefficient<Scalar>(0.3, 0.2) * y);
+          }
         };
         if constexpr (Vector)
           return VectorFunction<decltype(callback)>(2, callback);
@@ -213,8 +221,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_CURVED_P0_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       Mesh<ContextType> m_mesh;

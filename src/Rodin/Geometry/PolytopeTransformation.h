@@ -8,6 +8,7 @@
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
 #include <vector>
+#include <type_traits>
 
 /**
  * @file
@@ -61,9 +62,9 @@ namespace Rodin::Geometry
    *
    * # Thread Safety
    *
-   * Transformation objects are immutable after construction and are thread-safe
-   * for concurrent read access. The transform(), jacobian(), and inverse()
-   * methods can be called concurrently from multiple threads.
+   * Concurrent read access is supported. Mutating a derived map requires
+   * exclusive access and fresh point/quadrature and cell bindings before
+   * evaluation resumes. Geometry must remain fixed during each binding.
    *
    * @see <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html">IdentityTransformation</a>
    * @see <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html">ParametricTransformation</a>
@@ -72,56 +73,70 @@ namespace Rodin::Geometry
   class PolytopeTransformation : public Copyable
   {
     friend class boost::serialization::access;
-    friend class PointBase;
 
-  public:
+    public:
       /**
        * @brief Constructs a transformation with given dimensions.
        * @param[in] rdim Reference dimension @f$ k @f$
        * @param[in] pdim Physical dimension @f$ s @f$
        */
-    constexpr PolytopeTransformation(size_t rdim, size_t pdim)
-      : m_rdim(rdim),
-        m_pdim(pdim)
-    {}
+      constexpr PolytopeTransformation(size_t rdim, size_t pdim)
+        : m_rdim(rdim),
+          m_pdim(pdim)
+      {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-    constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
+      constexpr PolytopeTransformation(const PolytopeTransformation& other) noexcept
+        : Copyable(other),
+          m_rdim(other.m_rdim),
+          m_pdim(other.m_pdim)
+      {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-    constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
+      constexpr PolytopeTransformation(PolytopeTransformation&& other) noexcept
+        : Copyable(std::move(other)),
+          m_rdim(other.m_rdim),
+          m_pdim(other.m_pdim)
+      {}
 
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to move from.
        */
-    PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
+      PolytopeTransformation& operator=(PolytopeTransformation&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_rdim = other.m_rdim;
+          m_pdim = other.m_pdim;
+        }
+        return *this;
+      }
 
       /// @brief Virtual destructor.
-    virtual ~PolytopeTransformation() = default;
+      virtual ~PolytopeTransformation() = default;
 
       /**
        * @brief Gets the reference dimension @f$ k @f$.
        * @returns Reference dimension (topological dimension of reference element)
        */
-    constexpr size_t getReferenceDimension() const
-    {
-      return m_rdim;
-    }
+      constexpr size_t getReferenceDimension() const
+      {
+        return m_rdim;
+      }
 
       /**
        * @brief Gets the physical dimension @f$ s @f$.
        * @returns Physical dimension (spatial dimension of physical element)
        */
-      constexpr
-      size_t getPhysicalDimension() const
+      constexpr size_t getPhysicalDimension() const
       {
         return m_pdim;
       }
@@ -160,7 +175,8 @@ namespace Rodin::Geometry
        * @f]
        * The output vector is resized to the physical dimension @f$ s @f$.
        */
-      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
+      virtual void transform(
+        Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -180,7 +196,8 @@ namespace Rodin::Geometry
        * The output matrix is resized to @f$ s \times k @f$ where @f$ k @f$ is
        * the reference dimension and @f$ s @f$ is the physical dimension.
        */
-      virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
+      virtual void jacobian(
+        Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobians at a reference quadrature's points.
@@ -194,7 +211,7 @@ namespace Rodin::Geometry
        * @param[in] qf Reference quadrature formula defining the points.
        */
       virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-        const QF::QuadratureFormulaBase& qf) const;
+        const QF::QuadratureFormula& qf) const;
 
       /**
        * @brief Computes the reference coordinates from physical coordinates.
@@ -231,21 +248,20 @@ namespace Rodin::Geometry
        */
       virtual PolytopeTransformation* copy() const noexcept override = 0;
 
-    protected:
       /**
        * @brief Maps an owned reference sample using available reference data.
        *
-       * Called only by a point whose constructor established the provenance
-       * of @p rc. Cache misses retain direct pointwise evaluation. The logical
-       * identity is a value, not a borrowed formula or table pointer.
+       * The caller must establish that @p rc is the sample at @p qp in the
+       * persistent @p formula. Cache misses retain direct pointwise evaluation.
+       * No reference-table storage is retained by the point.
        *
        * @param[out] pc Physical coordinates.
        * @param rc Owned reference coordinates of the sample.
-       * @param identity Formula lifetime/assignment identity.
+       * @param formula Persistent immutable reference formula.
        * @param qp Logical reference-sample index.
        */
       virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
-        size_t identity, size_t qp) const;
+        const QF::QuadratureFormula& formula, size_t qp) const;
 
     private:
       size_t m_rdim; ///< Reference dimension @f$ k @f$

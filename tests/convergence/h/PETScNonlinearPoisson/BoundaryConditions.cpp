@@ -5,10 +5,15 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Semilinear natural-boundary rates and Newton tangent oracles. */
+/**
+ * @file BoundaryConditions.cpp
+ * @brief Semilinear natural-boundary rates and Newton tangent oracles.
+ */
 
 #include "../../PETScNonlinearPoisson.h"
 #include "../../FieldConvergence.h"
+#include <chrono>
+#include <iostream>
 #ifdef RODIN_NONLINEAR_BOUNDARY_CURVED
 #include "../../CurvedGeometry.h"
 #endif
@@ -102,9 +107,27 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
         for (size_t n : levels)
         {
           SCOPED_TRACE(::testing::Message() << "degree=" << K << " n=" << n);
+          const auto start = std::chrono::steady_clock::now();
+          const auto report = [&](const char* phase) {
+#ifdef RODIN_USE_MPI
+            if (world->rank() != 0)
+              return;
+#endif
+            std::cout << "[nonlinear-boundary-rate] degree=" << K << " n=" << n
+                      << " phase=" << phase << " wall_seconds="
+                      << std::chrono::duration<Real>(
+                           std::chrono::steady_clock::now() - start)
+                           .count()
+                      << std::endl;
+          };
+          report("begin");
           const auto mesh = makeMesh<ContextType>(this->GetParam(), n);
+          report("mesh");
           auto problem = makeProblem<K>(mesh, boundary);
-          history.append(Real(1) / Real(n - 1), {measure(problem)});
+          report("assembled");
+          const auto errors = measure(problem);
+          report("solved-and-measured");
+          history.append(Real(1) / Real(n - 1), {errors});
         }
         history.expectAlgebraicFloor({K == 1 ? Real(1.65) : Real(K) + Real(0.45),
           K == 1 ? Real(0.75) : Real(K) - Real(0.45)});

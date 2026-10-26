@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Adapt.h"
 
 namespace Rodin::MMG
@@ -38,9 +39,8 @@ namespace Rodin::MMG
 
     if (retcode != MMG5_SUCCESS)
     {
-      Alert::Exception()
-        << "Failed to adapt the mesh."
-        << Alert::Raise;
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed to adapt the mesh." << Alert::Raise;
     }
 
     mesh = meshToRodin(mmgMesh);

@@ -1,136 +1,255 @@
+# Alternative paths use OR matching. Module rules include nested MPI/PETSc test directories.
+# Maintenance and regression instructions: dev/labeler.md.
 docs:
-- any:
-  - 'doc/**/*'
-  - '*.md'
-  - '*.cff'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - doc/**
+    - '**/*.md'
+    - '**/*.cff'
 examples:
-- any:
-  - 'examples/**/*'
-  - 'resources/examples/**/*'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - examples/**
+    - resources/examples/**
 benchmarks:
-- any: ['tests/benchmarks/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/benchmarks/**
 unit-tests:
-- any: ['tests/unit/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/unit/**
 manufactured-tests:
-- any: ['tests/manufactured/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/manufactured/**
+convergence-tests:
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/convergence/**
+installation-tests:
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/installation/**
+nafems-tests:
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/nafems/**
 cmake:
-- any:
-  - 'CMakeLists.txt'
-  - 'cmake/**/*'
-  - 'doc/CMakeLists.txt'
-  - 'examples/CMakeLists.txt'
-  - 'py/CMakeLists.txt'
-  - 'src/CMakeLists.txt'
-  - 'src/Rodin/CMakeLists.txt'
-  - 'src/Rodin/**/CMakeLists.txt'
-  - 'tests/CMakeLists.txt'
-  - 'tests/**/CMakeLists.txt'
-  - 'third-party/**/CMakeLists.txt'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/CMakeLists.txt'
+    - '**/*.cmake'
+    - cmake/**
+    - tests/cmake/**
+ci:
+- changed-files:
+  - any-glob-to-any-file:
+    - .github/workflows/**
+    - .github/actions/**
+    - .github/ci/**
+    - .github/labeler.yml
+    - .github/dependabot.yml
+    - codecov.yml
+developer-tooling:
+- changed-files:
+  - any-glob-to-any-file:
+    - dev/**
+    - .claude/**
+    - .github/agents/**
+    - .github/copilot-instructions.md
+    - .clang-*
+    - .clangd
+    - AGENTS.md
+    - doc/agents/**
+python:
+- changed-files:
+  - any-glob-to-any-file:
+    - py/**
+dependencies:
+- changed-files:
+  - any-glob-to-any-file:
+    - third-party/**
+    - .gitmodules
+resources:
+- changed-files:
+  - any-glob-to-any-file:
+    - resources/**
+core:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/{Array,Cast,Common,Configure,Copyable,FlatSet,ForwardDecls,Identifiable,Moveable,Pair,Threads,Tuple,Types}.*
+    - tests/**/Rodin/*.*
+    - tests/**/Rodin/{Core,Threads}/**
+adaptation:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Adaptation/**
+    - src/Rodin/Adaptation.h
+    - tests/**/Rodin/**/Adaptation/**
 advection:
-- any: ['src/Rodin/Advection/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Advection/**
+    - src/Rodin/Advection.h
+    - tests/**/Rodin/**/Advection/**
 alerts:
-- any:
-  - 'src/Rodin/Alert/**/*'
-  - 'src/Rodin/Alert.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Alert/**
+    - src/Rodin/Alert.h
+    - tests/**/Rodin/**/Alert/**
 assembly:
-- any:
-  - 'src/Rodin/Assembly/**/*'
-  - 'src/Rodin/Assembly.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Assembly/**
+    - src/Rodin/Assembly.h
+    - tests/**/Rodin/**/Assembly/**
 context:
-- any:
-  - 'src/Rodin/Context/**/*'
-  - 'src/Rodin/Context.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Context/**
+    - src/Rodin/Context.h
+    - tests/**/Rodin/**/Context/**
 distance:
-- any: ['src/Rodin/Distance/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Distance/**
+    - src/Rodin/Distance.h
+    - tests/**/Rodin/**/Distance/**
 eikonal:
-- any: ['src/Rodin/Eikonal/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Eikonal/**
+    - src/Rodin/Eikonal.h
+    - tests/**/Rodin/**/Eikonal/**
 form-language:
-- any:
-  - 'src/Rodin/FormLanguage/**/*'
-  - 'src/Rodin/FormLanguage.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/FormLanguage/**
+    - src/Rodin/FormLanguage.h
+    - tests/**/Rodin/**/FormLanguage/**
 geometry:
-- any:
-  - 'src/Rodin/Geometry/**/*'
-  - 'src/Rodin/Geometry.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Geometry/**
+    - src/Rodin/Geometry.h
+    - tests/**/Rodin/**/Geometry/**
+    - tests/convergence/**/GeometryApproximation/**
+heart:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Heart/**
+    - src/Rodin/Heart.h
+    - tests/**/Rodin/**/Heart/**
 hilbert:
-- any: ['src/Rodin/Hilbert/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Hilbert/**
+    - src/Rodin/Hilbert.h
+    - tests/**/Rodin/**/Hilbert/**
 io:
-- any:
-  - 'src/Rodin/IO/**/*'
-  - 'src/Rodin/IO.h'
-
-linear-elasticity:
-- any:
-  - 'src/Rodin/LinearElasticity/**/*'
-  - 'src/Rodin/LinearElasticity.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/IO/**
+    - src/Rodin/IO.h
+    - tests/**/Rodin/**/IO/**
+location:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Location/**
+    - src/Rodin/Location.h
+    - tests/**/Rodin/**/Location/**
 math:
-- any:
-  - 'src/Rodin/Math/**/*'
-  - 'src/Rodin/Math.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Math/**
+    - src/Rodin/Math.h
+    - tests/**/Rodin/**/Math/**
 mfem:
-- any: ['src/Rodin/MFEM/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/MFEM/**
+    - src/Rodin/MFEM.h
+    - tests/**/Rodin/**/MFEM/**
 mmg:
-- any:
-  - 'src/Rodin/MMG/**/*'
-  - 'src/Rodin/MMG.h'
-  - 'third-party/mmg/**/*'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/MMG/**
+    - src/Rodin/MMG.h
+    - tests/**/Rodin/**/MMG/**
+    - third-party/mmg/**
 mpi:
-- any:
-  - 'src/Rodin/MPI/**/*'
-  - 'src/Rodin/MPI.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/MPI/**
+    - src/Rodin/MPI.h
+    - tests/**/Rodin/**/MPI/**
+    - tests/**/Rodin/**/*MPI*
+    - tests/convergence/**/PETScMPI*/**
 petsc:
-- any:
-  - 'src/Rodin/PETSc/**/*'
-  - 'src/Rodin/PETSc.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/PETSc/**
+    - src/Rodin/PETSc.h
+    - tests/**/Rodin/**/PETSc/**
+    - tests/convergence/**/PETSc*/**
 qf:
-- any:
-  - 'src/Rodin/QF/**/*'
-  - 'src/Rodin/QF.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/QF/**
+    - src/Rodin/QF.h
+    - tests/**/Rodin/**/QF/**
 scotch:
-- any:
-  - 'src/Rodin/Scotch/**/*'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Scotch/**
+    - src/Rodin/Scotch.h
+    - tests/**/Rodin/**/Scotch/**
 serialization:
-- any: ['src/Rodin/Serialization/**/*']
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Serialization/**
+    - src/Rodin/Serialization.h
+    - tests/**/Rodin/**/Serialization/**
+solid:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Solid/**
+    - src/Rodin/Solid.h
+    - tests/**/Rodin/**/Solid/**
+    - tests/**/Rodin/**/LinearElasticity*/**
+    - tests/**/Rodin/**/*LinearElasticity*
+    - tests/convergence/**/*LinearElasticity*/**
 solver:
-- any:
-  - 'src/Rodin/Solver/**/*'
-  - 'src/Rodin/Solver.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Solver/**
+    - src/Rodin/Solver.h
+    - tests/**/Rodin/**/Solver/**
 test:
-- any:
-  - 'src/Rodin/Test/**/*'
-  - 'src/Rodin/Test.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Test/**
+    - src/Rodin/Test.h
+    - tests/**/Rodin/**/Test/**
 utility:
-- any:
-  - 'src/Rodin/Utility/**/*'
-  - 'src/Rodin/Utility.h'
-
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Utility/**
+    - src/Rodin/Utility.h
+    - tests/**/Rodin/**/Utility/**
 variational:
-- any:
-  - 'src/Rodin/Variational/**/*'
-  - 'src/Rodin/Variational.h'
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Variational/**
+    - src/Rodin/Variational.h
+    - tests/**/Rodin/**/Variational/**
+    - tests/**/Rodin/**/{P0,P0g,P1,H1,P0_P1,P1_H1,PreassembledMixed}/**
+    - tests/convergence/**
+linear-elasticity:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Solid/Linear/**
+    - tests/**/*LinearElasticity*/**
+    - tests/**/*LinearElasticity*

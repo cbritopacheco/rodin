@@ -39,7 +39,7 @@ namespace Rodin::Assembly
    * and test finite element spaces, as well as lists of local and global
    * bilinear form integrators.
    *
-   * ## Local vs Global Integrators
+   * # Local vs Global Integrators
    * - **Local integrators**: Operate on individual elements @f$ K @f$, computing
    *   contributions @f$ a_K(\phi_j, \psi_i) @f$ for basis functions with support
    *   on @f$ K @f$.
@@ -49,7 +49,7 @@ namespace Rodin::Assembly
    * @tparam TrialFES Trial finite element space type
    * @tparam TestFES Test finite element space type
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Uh(mesh), Vh(mesh);
    * auto lbfis = // list of local integrators
@@ -180,7 +180,7 @@ namespace Rodin::Assembly
    *
    * @tparam FES Finite element space type
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);
    * auto lfis = // list of linear form integrators

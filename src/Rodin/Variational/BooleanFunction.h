@@ -40,7 +40,7 @@ namespace Rodin::Variational
    *
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Usage Examples
+   * # Usage Examples
    * ```
    * // Constant boolean function
    * BooleanFunction<Boolean> isActive(true);

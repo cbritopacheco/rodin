@@ -16,10 +16,10 @@
  *
  * IDRstab(l) is a stabilized variant in the IDR family (similar spirit to BiCGSTAB(l)).
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported IDRSTABL.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Solver::IDRSTABL solver(problem);
  * solver.setTolerance(1e-10).setMaxIterations(1000).setL(4).solve();

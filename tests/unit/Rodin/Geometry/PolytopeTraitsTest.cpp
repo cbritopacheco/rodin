@@ -12,6 +12,32 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Reference coordinates have exactly the topological dimension.
+   *
+   * The zero-dimensional reference point has one vertex in the singleton
+   * space of empty coordinate tuples, not a one-dimensional zero coordinate.
+   * The same dimension contract holds for every vertex and centroid of all
+   * reference families, independently of their physical embedding.
+   */
+  TEST(Geometry_PolytopeTraits, ReferenceCoordinateDimensions)
+  {
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const Polytope::Traits traits(geometry);
+      EXPECT_EQ(traits.getCentroid().size(), traits.getDimension());
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+      {
+        SCOPED_TRACE(vertex);
+        EXPECT_EQ(traits.getVertex(vertex).size(), traits.getDimension());
+      }
+    }
+  }
+
   // ============================================================================
   // Polytope::Traits Tests
   // ============================================================================
@@ -167,12 +193,12 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PolytopeTraits, TriangleVertices)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
-    
+
     // Check that we can retrieve vertices
     const auto& v0 = traits.getVertex(0);
     const auto& v1 = traits.getVertex(1);
     const auto& v2 = traits.getVertex(2);
-    
+
     // Vertices should be accessible (we don't check exact values, just accessibility)
     EXPECT_GE(v0.size(), 0);
     EXPECT_GE(v1.size(), 0);
@@ -183,10 +209,10 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PolytopeTraits, HalfSpaceAccessible)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
-    
+
     // Check that half space is accessible
     const auto& halfSpace = traits.getHalfSpace();
-    
+
     // Matrix and vector should be initialized (we don't check exact values)
     EXPECT_GE(halfSpace.matrix.rows(), 0);
     EXPECT_GE(halfSpace.vector.size(), 0);
@@ -222,7 +248,7 @@ namespace Rodin::Tests::Unit
     for (auto type : Polytope::Types)
     {
       // Just check that we can iterate through the array
-      (void)type;  // Suppress unused variable warning
+      (void)type; // Suppress unused variable warning
       ++count;
     }
     EXPECT_EQ(count, 8);

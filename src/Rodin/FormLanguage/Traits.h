@@ -13,7 +13,7 @@
  * Specialized versions of Traits are defined throughout the library for
  * specific form language types.
  *
- * ## Design Pattern
+ * # Design Pattern
  * The Traits system follows the trait-based design pattern common in C++
  * template metaprogramming. Each form language type can specialize the
  * Traits template to expose:
@@ -21,7 +21,7 @@
  * - Compile-time properties (e.g., space type, dimension)
  * - Type transformations
  *
- * ## Usage
+ * # Usage
  * @code{.cpp}
  * // Query traits of a form language object
  * using MyFES = typename Traits<MyFormObject>::FESType;
@@ -52,20 +52,20 @@ namespace Rodin::FormLanguage
    * the primary (unspecialized) template; specific types require explicit
    * specializations to be useful.
    *
-   * ## Common Trait Members
+   * # Common Trait Members
    * While the primary template is intentionally incomplete, specializations
    * typically provide some or all of the following:
    *
-   * ### Type Members
+   * ## Type Members
    * - **FESType**: Associated finite element space type
    * - **ScalarType**: Scalar type for numerical values
    * - **RangeType**: Range type for function evaluations
    *
-   * ### Static Constants
+   * ## Static Constants
    * - **SpaceType**: Indicates trial space, test space, or other
    * - **Dimension**: Spatial or value dimension
    *
-   * ## Specialization Example
+   * # Specialization Example
    * @code{.cpp}
    * template <class Derived, class FES>
    * struct Traits<MyFormType<Derived, FES>>
@@ -99,15 +99,21 @@ namespace Rodin::FormLanguage
     private:
       /**
        * @brief Deduces the derived parameter of a function base.
+       *
+       * A pointer return type permits abstract base parameters on compilers
+       * that reject abstract value returns during template substitution.
+       * The declaration is used only in an unevaluated expression; no pointer
+       * is constructed and no allocation is performed.
+       *
        * @param function Function whose base parameter is deduced.
-       * @returns The deduced derived type; used only in an unevaluated expression.
+       * @returns A pointer to the deduced derived type.
        */
       template <class D>
-      static D deduce(const Variational::FunctionBase<D>& function);
+      static D* deduce(const Variational::FunctionBase<D>& function);
 
     public:
       /// @brief The FunctionBase parameter of @c T.
-      using Type = decltype(deduce(std::declval<const T&>()));
+      using Type = std::remove_pointer_t<decltype(deduce(std::declval<const T&>()))>;
   };
 
   /**
@@ -126,8 +132,8 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsNamedForm : std::false_type
   {
-      /// @brief False for types that are not named forms.
-      static constexpr bool Value = false;
+    /// @brief False for types that are not named forms.
+    static constexpr bool Value = false;
   };
 }
 

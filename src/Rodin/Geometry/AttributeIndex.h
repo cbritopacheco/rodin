@@ -33,15 +33,13 @@ namespace Rodin::Geometry
    * attributes indexed by polytope index. Attributes are typically used as
    * material-region ids, boundary markers, or any other user-defined tags.
    *
-   * Data layout
-   * -----------
+   * # Data layout
    * The storage is organized by dimension:
    * - For each @c d in @c [0, meshDim], a @c Dimension stores:
    *   - @c slots: stable attribute slots indexed by polytope index.
    *   - @c mutex: a mutex protecting storage growth.
    *
-   * Thread-Safety Model
-   * -------------------
+   * # Thread-Safety Model
    * This class provides fine-grained thread-safety at the level of individual
    * dimensions. Slot values and the published storage extent are atomic, so
    * repeated reads require no lock. Storage growth and writes are serialized per
@@ -56,8 +54,7 @@ namespace Rodin::Geometry
    * - @ref get(const std::pair<size_t,Index>&,size_t) const
    * - @ref getAttributes(size_t) const
    *
-   * Structural Immutability
-   * -----------------------
+   * # Structural Immutability
    * After @ref initialize() completes, the number of stored dimensions
    * (i.e. @c m_dimensions.size()) is immutable for the lifetime of the object.
    * This avoids requiring a global lock on the dimension vector itself.
@@ -67,8 +64,7 @@ namespace Rodin::Geometry
    * - @ref initialize() is not thread-safe and must not be called concurrently.
    * - The mesh dimension must remain constant for the lifetime of the object.
    *
-   * Copy and Move Semantics
-   * -----------------------
+   * # Copy and Move Semantics
    * Copy construction:
    * - Copies per-dimension storage while serializing source storage growth.
    *
@@ -84,8 +80,7 @@ namespace Rodin::Geometry
    * - Require external synchronization: no other thread may access either object
    *   concurrently with the move.
    *
-   * Usage Contract
-   * --------------
+   * # Usage Contract
    * 1. Call initialize() exactly once (or idempotently with the same
    *    value) before any concurrent use.
    * 2. Do not change the mesh dimension after initialization.

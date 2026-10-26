@@ -7,7 +7,7 @@ target_link_libraries(RodinConvergenceHLinearElasticity
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergenceHLinearElasticity
+rodin_discover_tests(RodinConvergenceHLinearElasticity
   PROPERTIES
     LABELS "convergence;slow"
 )

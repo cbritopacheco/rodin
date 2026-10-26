@@ -27,7 +27,7 @@ namespace Rodin::PETSc::Assembly
    * size; this precondition is checked by a debug assertion. A change of finite
    * element space or mesh requires a new @c LinearSystem.
    *
-   * ## Zeroing
+   * # Zeroing
    *
    * The right-hand side and residual vectors are rebuilt from scratch on every
    * assembly and must therefore be zeroed each time (@c zeroOnReuse = true, the

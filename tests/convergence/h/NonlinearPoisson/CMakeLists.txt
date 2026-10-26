@@ -6,5 +6,5 @@ target_link_libraries(RodinConvergenceHNonlinearPoisson
     RodinConvergenceH
     Rodin::Solver
 )
-gtest_discover_tests(RodinConvergenceHNonlinearPoisson
+rodin_discover_tests(RodinConvergenceHNonlinearPoisson
   PROPERTIES LABELS convergence)

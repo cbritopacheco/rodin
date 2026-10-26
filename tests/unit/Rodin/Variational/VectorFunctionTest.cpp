@@ -1,3 +1,7 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
@@ -60,7 +64,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{1.0, 2.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -76,7 +80,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{3.14, -2.71, 1.41};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -93,7 +97,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{1.0, 2.5, 3.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -112,7 +116,7 @@ namespace Rodin::Tests::Unit
     auto x_comp = vf.x();
     auto y_comp = vf.y();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.3, 0.7}};
@@ -129,7 +133,7 @@ namespace Rodin::Tests::Unit
     auto y_comp = vf.y();
     auto z_comp = vf.z();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.1, 0.9}};
@@ -147,7 +151,7 @@ namespace Rodin::Tests::Unit
     auto comp1 = vf(1);
     auto comp2 = vf(2);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.6, 0.4}};
@@ -163,7 +167,7 @@ namespace Rodin::Tests::Unit
     VectorFunction vf{7.5, -12.3};
     VectorFunction vf_copy(vf);
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 1.0}};
@@ -180,7 +184,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{42.0, 84.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{1.0, 0.0}};
@@ -199,7 +203,7 @@ namespace Rodin::Tests::Unit
     VectorFunction vf{99.9, -77.7, 55.5};
     auto copied = vf.copy();
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.25, 0.75}};
@@ -218,7 +222,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_VectorFunction, TraceToBoundary)
   {
     const Attribute interior_attr = 1;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, D);
     for (auto it = mesh.getCell(); !it.end(); ++it)
@@ -240,7 +244,7 @@ namespace Rodin::Tests::Unit
   {
     VectorFunction vf{0.0, 0.0, 0.0};
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.8, 0.2}};
@@ -252,15 +256,14 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies component callables use integration point fast path for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, ComponentCallables_UseIntegrationPointFastPath)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 5);
 
-    VectorFunction vf{
-      IntegrationPointFirstComponentCallable{},
+    VectorFunction vf{IntegrationPointFirstComponentCallable{},
       IntegrationPointSecondComponentCallable{}};
 
     const auto pointValue = vf.getValue(p);
@@ -275,11 +278,11 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies callable uses integration point fast path for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, Callable_UsesIntegrationPointFastPath)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
-    QF::Centroid qf(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
     IntegrationPoint ip(p, &qf, 6);
 
     VectorFunction vf(size_t{2}, IntegrationPointVectorCallable{});
@@ -292,4 +295,48 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(ipValue(0), 16.0, 1e-10);
     EXPECT_NEAR(ipValue(1), 26.0, 1e-10);
   }
+}
+
+TEST(VectorFunction, IntegerLiteralDimensionSelectsVectorCallable)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto cell = *mesh.getCell();
+  const Point point(cell, Polytope::Traits(cell.getGeometry()).getCentroid());
+  const VectorFunction vector(2, [](const Point&) {
+    Math::SpatialVector<Real> value(2);
+    value[0] = 3;
+    value[1] = 4;
+    return value;
+  });
+  EXPECT_EQ(vector(point)[0], 3);
+  EXPECT_EQ(vector(point)[1], 4);
+  const VectorFunction components(2, [](const Point&) -> Real { return 5; });
+  EXPECT_EQ(components(point)[0], 2);
+  EXPECT_EQ(components(point)[1], 5);
+}
+
+/// @brief Temporary constants survive expression copying while lvalues remain borrowed.
+TEST(Rodin_Variational_VectorFunction, DenseVectorOwnership)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  const Point point(*mesh.getCell(), Math::SpatialVector<Real>{0.5});
+  const auto retained = [] {
+    const VectorFunction original(Math::Vector<Real>{{2, 3, 5}});
+    return VectorFunction(original);
+  }();
+  auto moved = VectorFunction(retained);
+  const VectorFunction destination(std::move(moved));
+  const auto value = destination.getValue(point);
+  EXPECT_EQ(value[0], 2);
+  EXPECT_EQ(value[1], 3);
+  EXPECT_EQ(value[2], 5);
+  Math::Vector<Real> source{{7, 11}};
+  const VectorFunction borrowed(source);
+  source[1] = 13;
+  EXPECT_EQ(borrowed.getValue(point)[1], 13);
+  const auto immutable = []() -> const Math::Vector<Real> {
+    return Math::Vector<Real>{{17, 19}};
+  };
+  const VectorFunction constTemporary(immutable());
+  EXPECT_EQ(constTemporary.getValue(point)[1], 19);
 }

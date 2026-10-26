@@ -1,13 +1,11 @@
-# Rodin house style. Derived empirically from the existing codebase — when in
-# doubt, match the surrounding code, not this file. Enforcement in CI is on
-# changed lines only (git clang-format); see CONTRIBUTING.md.
+# Rodin house style for new and changed code. Untouched legacy layout does not
+# override this configuration. Enforcement in CI is on changed lines only
+# (dev/check_format.py); see CONTRIBUTING.md.
 #
 # Requires clang-format >= 16 (AlignTrailingComments: Leave); CI uses 18.
 #
 # Known deviations clang-format cannot express (accepted, low-churn under
 # changed-lines enforcement):
-#  - members of access-specifier-less structs (Traits blocks) sit at +2 in
-#    the codebase but IndentAccessModifiers indents them to +4;
 #  - the codebase sometimes places `constexpr` on its own line before the
 #    declaration; clang-format joins it;
 #  - manually broken template-argument lists may be repacked.
@@ -22,12 +20,15 @@ TabWidth: 2
 UseTab: Never
 ContinuationIndentWidth: 2
 NamespaceIndentation: All
+# Access labels are inset by two spaces; their members by four spaces.
+# Implicit-access members use two spaces inside the record. dev/format_cpp.py
+# removes clang-format's extra level before the first explicit access section.
 IndentAccessModifiers: true
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 # Braces: Allman everywhere; empty bodies "{}" stay together on their own line.
-# A for body may omit braces only if the whole body statement occupies one
+# A for/if/else body may omit braces only if its whole statement occupies one
 # physical line. style_lint.py enforces this; clang-format does not insert braces.
 BreakBeforeBraces: Custom
 BraceWrapping:

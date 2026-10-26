@@ -9,14 +9,21 @@
 
 /**
  * @file
- * @brief Euclidean geometry utilities for the Rodin::Geometry module.
- *
- * This umbrella header includes only the common utilities. The
- * individual geometric primitive headers (Point2D, Line2D, Circle,
- * LineSegment2D, Rectangle) depend on the optional Magnum library
- * and must be included explicitly when Magnum is available.
+ * @brief Euclidean primitives with arbitrary compile-time dimensions.
+ * Points, affine lines and segments, spheres, hyperplanes, and axis-aligned
+ * boxes use compile-time Math::FixedSizeVector coordinates. The planar names
+ * Point2D, Line2D, LineSegment2D, Circle, and Rectangle alias dimension two.
  */
 
 #include "Euclidean/Common.h"
+#include "Euclidean/Point.h"
+#include "Euclidean/LineSegment.h"
+#include "Euclidean/Line.h"
+#include "Euclidean/Sphere.h"
+#include "Euclidean/Hyperplane.h"
+#include "Euclidean/Box.h"
+#include "Euclidean/Line2D.h"
+#include "Euclidean/Circle.h"
+#include "Euclidean/Rectangle.h"
 
 #endif

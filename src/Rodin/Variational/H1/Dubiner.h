@@ -8,7 +8,9 @@
 #define RODIN_VARIATIONAL_H1_DUBINER_H
 
 #include <cstddef>
+#include <array>
 #include <type_traits>
+#include "Rodin/Alert/NamespacedException.h"
 
 #include "Rodin/Math/Common.h"
 #include "Rodin/Math/Matrix.h"
@@ -73,7 +75,8 @@ namespace Rodin::Variational
         Real psi_q;
         JacobiPolynomial<Q>::getValue(psi_q, unused, 2.0 * P + 1.0, 0.0, b);
 
-        basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        basis =
+          psi_p * psi_q * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
       }
 
       /**
@@ -118,7 +121,10 @@ namespace Rodin::Variational
         // \partialψ/\partialb
         Real dscale_db = 0.0;
         if constexpr (P > 0)
-          dscale_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+        {
+          dscale_db = P *
+            Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+        }
 
         dpsi_db = Pa * (dPb * scaleB + Pb * dscale_db);
       }
@@ -285,7 +291,8 @@ namespace Rodin::Variational
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();
@@ -321,6 +328,111 @@ namespace Rodin::Variational
   template <size_t K>
   class DubinerTetrahedron
   {
+    public:
+      /**
+       * @brief Fixed modal rows containing a value followed by three derivatives.
+       *
+       * Row @f$m@f$ contains @f$(\psi_m,\partial_0\psi_m,
+       * \partial_1\psi_m,\partial_2\psi_m)@f$. Its compile-time layout
+       * retains the original point-local modal workspace.
+       */
+      using Tabulation = std::array<std::array<Real, 4>, (K + 1) * (K + 2) * (K + 3) / 6>;
+
+      /// @brief Selects the value column of caller-owned modal rows.
+      struct Values
+      {
+        Tabulation&
+          data; ///< Caller-owned modal rows; derivative columns are untouched.
+      };
+
+      /// @brief Selects the three derivative columns of caller-owned modal rows.
+      struct Gradients
+      {
+        Tabulation& data; ///< Caller-owned modal rows; the value column is untouched.
+      };
+
+      /**
+       * @brief Tabulates all four modal columns with shared point-local work.
+       * @param output Caller-owned fixed-layout modal rows.
+       * @param rc Three reference coordinates, with optional trailing padding.
+       * @throws Alert::Exception If coordinates are invalid.
+       */
+      static void tabulate(Tabulation& output, const Math::SpatialPoint& rc)
+      {
+        tabulate<Tabulation&>(output, rc);
+      }
+
+      /**
+       * @brief Tabulates modal values at one point.
+       * @param values Mode-indexed output.
+       * @param rc Reference coordinates.
+       * @throws Alert::Exception If coordinates are invalid.
+       */
+      static void tabulate(Values values, const Math::SpatialPoint& rc)
+      {
+        tabulate<Values>(values, rc);
+      }
+
+      /**
+       * @brief Tabulates modal reference gradients at one point.
+       * @param gradients Mode-major output.
+       * @param rc Reference coordinates.
+       * @throws Alert::Exception If coordinates are invalid.
+       */
+      static void tabulate(Gradients gradients, const Math::SpatialPoint& rc)
+      {
+        tabulate<Gradients>(gradients, rc);
+      }
+
+    private:
+      /**
+       * @brief Computes the requested modal quantities with compile-time selection.
+       * @tparam Output Selected modal columns or the complete tabulation reference.
+       * @param output Caller-owned modal quantities.
+       * @param rc Three reference coordinates.
+       * @throws Alert::Exception If reference coordinates are missing.
+       */
+      template <class Output>
+      static void tabulate(Output output, const Math::SpatialPoint& rc)
+      {
+        constexpr bool HasValues = !std::is_same_v<Output, Gradients>;
+        constexpr bool HasGradients = !std::is_same_v<Output, Values>;
+        auto& modal = [&]() -> Tabulation& {
+          if constexpr (std::is_same_v<Output, Tabulation&>)
+            return output;
+          else
+            return output.data;
+        }();
+        if (rc.size() < 3)
+        {
+          Alert::NamespacedException("Rodin::Variational::DubinerTetrahedron::tabulate")
+            << "Modal tabulation requires three reference coordinates." << Alert::Raise;
+          return;
+        }
+        Real a, b, c;
+        getCollapsed(a, b, c, rc.x(), rc.y(), rc.z());
+        const Real s1 = 1.0 - rc.y() - rc.z();
+        const Real s2 = 1.0 - rc.z();
+        size_t mode = 0;
+        Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+          constexpr size_t P = pIdx.value;
+          Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+            constexpr size_t Q = qIdx.value;
+            Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
+              constexpr size_t R = rIdx.value;
+              if constexpr (HasValues)
+                getBasis<P, Q, R>(modal[mode][0], a, b, c);
+              if constexpr (HasGradients)
+              {
+                getReferenceGradientFromCollapsed<P, Q, R>(
+                  modal[mode][1], modal[mode][2], modal[mode][3], a, b, c, s1, s2);
+              }
+              ++mode;
+            });
+          });
+        });
+      }
+
     public:
       /**
        * @brief Evaluates the Dubiner basis function @f$ \psi_{P,Q,R}(a,b,c) @f$.
@@ -366,10 +478,8 @@ namespace Rodin::Variational
        * @param c Coordinate at which the basis is evaluated.
        */
       template <size_t P, size_t Q, size_t R>
-      static constexpr void getGradient(Real& dpsi_da,
-                                        Real& dpsi_db,
-                                        Real& dpsi_dc,
-                                        Real a, Real b, Real c)
+      static constexpr void getGradient(
+        Real& dpsi_da, Real& dpsi_db, Real& dpsi_dc, Real a, Real b, Real c)
       {
         Real pA, dPA;
         JacobiPolynomial<P>::getValue(pA, dPA, 0.0, 0.0, a);
@@ -391,17 +501,21 @@ namespace Rodin::Variational
         // \partialψ / \partialb
         Real dscaleBDb = 0.0;
         if constexpr (P > 0)
+        {
           dscaleBDb = P *
             Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+        }
 
         dpsi_db = pA * (dPB * scaleB + pB * dscaleBDb) * pC * scaleC;
 
         // \partialψ / \partialc
         Real dscaleCDc = 0.0;
         if constexpr (P + Q > 0)
+        {
           dscaleCDc = (P + Q) *
             Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q - 1>{}) *
             (-0.5);
+        }
 
         dpsi_dc = pA * pB * (dPC * scaleC + pC * dscaleCDc) * scaleB;
       }
@@ -507,12 +621,8 @@ namespace Rodin::Variational
        * @param y Coordinate at which the basis is evaluated.
        * @param z Coordinate at which the basis is evaluated.
        */
-      static constexpr void getCollapsed(Real& a,
-                                         Real& b,
-                                         Real& c,
-                                         Real x,
-                                         Real y,
-                                         Real z)
+      static constexpr void getCollapsed(
+        Real& a, Real& b, Real& c, Real x, Real y, Real z)
       {
         c = 2.0 * z - 1.0;
 
@@ -590,7 +700,8 @@ namespace Rodin::Variational
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();

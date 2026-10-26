@@ -1,0 +1,183 @@
+/* Use the documentation grid and sidebar; retain only benchmark-specific UI. */
+.rodin-benchmarks [data-rodin-content]
+{
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.rodin-benchmarks h2[id],
+.rodin-benchmarks h3[id]
+{
+  scroll-margin-top: 1rem;
+}
+
+.benchmark-children
+{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.benchmark-children > .m-frame
+{
+  min-width: 0;
+  margin: 0;
+}
+
+.benchmark-children h3 a
+{
+  overflow-wrap: anywhere;
+}
+
+@container (min-width: 48rem)
+{
+  .benchmark-children
+  {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.benchmark-configuration,
+.benchmark-contract
+{
+  color: var(--dim-color);
+}
+
+.benchmark-breadcrumb
+{
+  margin-bottom: 1.5rem;
+}
+
+.rodin-benchmarks pre.m-code
+{
+  white-space: pre-wrap;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+
+.rodin-benchmarks .m-math,
+.rodin-benchmarks mjx-container
+{
+  max-width: 100%;
+  overflow: visible;
+}
+
+.benchmark-chart { position: relative; height: 22rem; }
+.benchmark-chart-status { color: var(--dim-color); }
+
+#navigation .benchmark-search-trigger .benchmark-magnifier-icon
+{
+  width: .9rem;
+  height: .9rem;
+  flex-shrink: 0;
+  fill: currentColor;
+  stroke: none;
+}
+
+#navigation .benchmark-search-trigger .rodin-benchmark-icon
+{
+  position: absolute;
+  left: 2.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--danger-color);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#navigation .benchmark-search-trigger
+{
+  position: relative;
+  min-width: 4.65rem;
+  flex-shrink: 0;
+  padding-right: 2.75rem;
+  margin-right: -1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#navigation .benchmark-search-trigger:hover,
+#navigation .benchmark-search-trigger:focus,
+#navigation .benchmark-search-trigger:active
+{
+  color: var(--header-link-active-color);
+  background: var(--header-link-active-background-color);
+}
+
+.rodin-benchmarks [data-rodin-content] :is(h2, h3),
+.rodin-benchmarks [data-rodin-content] :is(h2, h3) > a
+{
+  color: var(--category-color, var(--link-color));
+}
+
+.benchmark-search-trigger:focus-visible
+{
+  outline: 2px solid var(--link-color);
+}
+
+.rodin-benchmarks .m-doc-search #search-results .benchmark-search-path
+{
+  direction: ltr;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.rodin-benchmarks .m-doc-search #search-results .benchmark-search-brief
+{
+  margin: .4rem 0 0;
+  text-indent: 0;
+  white-space: normal;
+  font-size: .9rem;
+  color: var(--dim-color);
+}
+
+.benchmark-search-close
+{
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--color);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.benchmark-search-close svg
+{
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+@media (max-width: 767px)
+{
+  .benchmark-search-shortcuts { display: none; }
+}
+
+.rodin-benchmarks .m-doc-search-header
+{
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  height: 2.5rem;
+  background: var(--search-background-color);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.rodin-benchmarks .m-doc-search-header > .benchmark-search-shortcuts
+{
+  float: none;
+  order: 1;
+}
+
+.rodin-benchmarks #search-symbolcount { flex: 1; }
+.rodin-benchmarks .benchmark-search-close { order: 2; }
+.rodin-benchmarks .m-doc-search-content { border-top-left-radius: 0; border-top-right-radius: 0; }

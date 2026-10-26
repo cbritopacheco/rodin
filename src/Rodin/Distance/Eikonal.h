@@ -38,12 +38,12 @@ namespace Rodin::Distance
    * @tparam FES Finite element space type
    * @tparam Data Data storage type for the solution
    *
-   * ## Mathematical Background
+   * # Mathematical Background
    * The Eikonal equation describes the propagation of wavefronts with unit
    * speed, which is equivalent to computing distances. The Fast Marching Method
    * solves this equation efficiently on unstructured meshes.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 fes(mesh);
    * GridFunction u(fes);

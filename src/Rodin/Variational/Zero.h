@@ -168,15 +168,20 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the zero vector function at a point
        * @returns Zero SpatialVector of dimension m_d
+       * @param point Reference coordinates of the evaluation point.
        */
-      VectorType getValue(const Geometry::Point&) const
+      VectorType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         VectorType v(static_cast<std::uint8_t>(m_d));
         v.setZero();
         return v;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Polytope on which the order is requested.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {

@@ -85,6 +85,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_rowDeformation.isAdmissible();
       }
+
       /**
        * @brief Negative Jacobian differential at the frozen outer state.
        * @param gradient Incremental deformation gradient.
@@ -94,6 +95,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return -m_rowDeformation.getJacobianAction(gradient);
       }
+
       /**
        * @brief Distortion differential at the frozen outer state.
        * @param gradient Incremental deformation gradient.
@@ -103,6 +105,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_rowDeformation.getRelativeDistortionAction(gradient);
       }
+
       /**
        * @brief The jacobian action.
        * @returns The negative determinant differential on the inner increment.
@@ -111,6 +114,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jAction;
       }
+
       /**
        * @brief The distortion action.
        * @returns The distortion differential on the inner increment.
@@ -119,6 +123,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_qAction;
       }
+
       /**
        * @brief The jacobian slack.
        * @returns The affine distance above the Jacobian floor.
@@ -127,6 +132,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jSlack;
       }
+
       /**
        * @brief The distortion slack.
        * @returns The affine distance below the distortion ceiling.
@@ -135,6 +141,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_qSlack;
       }
+
       /**
        * @brief The jacobian hessian.
        * @returns The active Jacobian hinge curvature coefficient, or zero.
@@ -143,6 +150,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jHessian;
       }
+
       /**
        * @brief The distortion hessian.
        * @returns The active distortion hinge curvature coefficient, or zero.
@@ -151,6 +159,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_qHessian;
       }
+
       /**
        * @brief The jacobian force.
        * @returns The coefficient of the Jacobian row in the Newton load.
@@ -159,6 +168,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jForce;
       }
+
       /**
        * @brief The distortion force.
        * @returns The coefficient of the distortion row in the Newton load.

@@ -18,10 +18,10 @@
  * DGMRES accelerates restarted GMRES by deflating (approximations of) invariant
  * subspaces associated with slow-to-converge eigencomponents.
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported DGMRES.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Solver::DGMRES solver(problem);
  * solver.setTolerance(1e-10).setMaxIterations(1000).setRestart(50).solve();
@@ -48,8 +48,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::DGMRES<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 }
 
@@ -82,19 +82,25 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class DGMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
@@ -105,25 +111,49 @@ namespace Rodin::Solver
        * @param pb Variational problem to operate on.
        */
       DGMRES(ProblemBaseType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_maxIterations(),
+          m_restart(),
+          m_deflationSize()
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the problem and configured settings into a fresh backend.
        * @param other Object to copy from.
        */
       DGMRES(const DGMRES& other)
-        : Parent(other)
-      {}
+        : Parent(other),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart),
+          m_deflationSize(other.m_deflationSize)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+        if (m_deflationSize)
+          setEigenv(*m_deflationSize);
+      }
 
       /**
-       * @brief Move constructor.
+       * @brief Transfers the problem and configured settings into a fresh backend.
        * @param other Object to move from.
        */
       DGMRES(DGMRES&& other)
         : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart),
+          m_deflationSize(other.m_deflationSize)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+        if (m_deflationSize)
+          setEigenv(*m_deflationSize);
+      }
 
       /// @brief Destructor.
       ~DGMRES() = default;
@@ -146,6 +176,7 @@ namespace Rodin::Solver
        */
       DGMRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -157,6 +188,7 @@ namespace Rodin::Solver
        */
       DGMRES& setRestart(size_t restart)
       {
+        m_restart = restart;
         m_solver.set_restart(restart);
         return *this;
       }
@@ -170,6 +202,7 @@ namespace Rodin::Solver
        */
       DGMRES& setEigenv(size_t d)
       {
+        m_deflationSize = d;
         m_solver.setEigenv(d);
         return *this;
       }
@@ -206,6 +239,11 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t>
+        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
+      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
+      Optional<size_t>
+        m_deflationSize; ///< Explicit number of eigenvalues requested for deflation.
       Eigen::DGMRES<OperatorType> m_solver;
   };
 
@@ -217,19 +255,25 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class DGMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Problem type solved by this solver.
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
@@ -240,26 +284,49 @@ namespace Rodin::Solver
        * @param pb Variational problem to operate on.
        */
       DGMRES(ProblemType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_maxIterations(),
+          m_restart(),
+          m_deflationSize()
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the problem and configured settings into a fresh backend.
        * @param other Object to copy from.
        */
       DGMRES(const DGMRES& other)
         : Parent(other),
-          m_solver(other.m_solver)
-      {}
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart),
+          m_deflationSize(other.m_deflationSize)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+        if (m_deflationSize)
+          setDeflationSize(*m_deflationSize);
+      }
 
       /**
-       * @brief Move constructor.
+       * @brief Transfers the problem and configured settings into a fresh backend.
        * @param other Object to move from.
        */
       DGMRES(DGMRES&& other)
         : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart),
+          m_deflationSize(other.m_deflationSize)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+        if (m_deflationSize)
+          setDeflationSize(*m_deflationSize);
+      }
 
       /// @brief Destructor.
       ~DGMRES() = default;
@@ -282,6 +349,7 @@ namespace Rodin::Solver
        */
       DGMRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -293,6 +361,7 @@ namespace Rodin::Solver
        */
       DGMRES& setRestart(size_t restart)
       {
+        m_restart = restart;
         m_solver.set_restart(restart);
         return *this;
       }
@@ -304,7 +373,8 @@ namespace Rodin::Solver
        */
       DGMRES& setDeflationSize(size_t d)
       {
-        m_solver.set_d(d);
+        m_deflationSize = d;
+        m_solver.setEigenv(d);
         return *this;
       }
 
@@ -340,6 +410,11 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t>
+        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
+      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
+      Optional<size_t>
+        m_deflationSize; ///< Explicit number of eigenvalues requested for deflation.
       Eigen::DGMRES<OperatorType> m_solver;
   };
 }

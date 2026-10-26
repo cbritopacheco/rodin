@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_PROBLEM_H
 #define RODIN_ADAPTATION_SWIFT_PROBLEM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -65,8 +66,13 @@ namespace Rodin::Adaptation::SWIFT
     {
       const auto cell = mesh.getCell(index);
       const Geometry::Polytope::Traits traits(cell->getGeometry());
-      const auto evaluate = [&](const Geometry::Point& point) {
-        const auto value = step.getValue(point);
+      const auto evaluate = [&](const auto& point) {
+        const auto value = [&]() {
+          if constexpr (requires { step.getValue(point); })
+            return step.getValue(point);
+          else
+            return step.getValue(point.getPoint());
+        }();
         Real norm = 0;
         for (std::size_t component = 0; component < mesh.getDimension(); ++component)
         {
@@ -83,13 +89,16 @@ namespace Rodin::Adaptation::SWIFT
       }
       const auto& fe = fes.getFiniteElement(cell->getDimension(), index);
       // This is a polynomial FE field, not the composed level-set residual.
-      const auto& qf = QF::PolytopeQuadratureFormula::get(validationOrder > 0
+      const auto& qf = QF::QuadratureFormula::get(validationOrder > 0
           ? validationOrder
           : std::max<size_t>(6, 2 * fe.getOrder() + 4),
         cell->getGeometry());
       const auto& quadrature = cell->getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-        maximum = std::max(maximum, evaluate(quadrature.getPoint(q)));
+      {
+        maximum =
+          std::max(maximum, evaluate(Variational::IntegrationPoint(quadrature, q)));
+      }
     }
     return maximum;
   }
@@ -566,6 +575,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Model, convergence and backend configuration.
       using Parameters = SWIFT::Parameters;
+
       /// @brief Accepted-geometry and iteration diagnostics.
       using Report = SWIFT::Report;
 
@@ -618,39 +628,39 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief Mesh-validity summary of a displacement.
       struct AdmissibilityState
       {
-          /// @brief Smallest Jacobian over all quality witnesses.
-          Real minJ = std::numeric_limits<Real>::infinity();
+        /// @brief Smallest Jacobian over all quality witnesses.
+        Real minJ = std::numeric_limits<Real>::infinity();
 
-          /// @brief Largest Jacobian over all quality witnesses.
-          Real maxJ = -std::numeric_limits<Real>::infinity();
+        /// @brief Largest Jacobian over all quality witnesses.
+        Real maxJ = -std::numeric_limits<Real>::infinity();
 
-          /// @brief Largest relative distortion over the non-inverted points.
-          Real maxQ = 0;
+        /// @brief Largest relative distortion over the non-inverted points.
+        Real maxQ = 0;
 
-          /// @brief Number of quality witnesses at or below the Jacobian floor.
-          std::size_t inadmissibleCount = 0;
-          Real affineMinJ = std::numeric_limits<Real>::infinity();
-          Real affineMaxQ = 0;
-          Index qualityCell = 0;
-          Real qualityCurrent = 0;
-          Real qualityLinearChange = 0;
-          Real qualityQuadraticChange = 0;
+        /// @brief Number of quality witnesses at or below the Jacobian floor.
+        std::size_t inadmissibleCount = 0;
+        Real affineMinJ = std::numeric_limits<Real>::infinity();
+        Real affineMaxQ = 0;
+        Index qualityCell = 0;
+        Real qualityCurrent = 0;
+        Real qualityLinearChange = 0;
+        Real qualityQuadraticChange = 0;
       };
 
       /// @brief Interface-fit summary of a displacement.
       struct SurfaceState
       {
-          /// @brief Fixed-scale energy used by the current Armijo search.
-          Real energy = 0;
+        /// @brief Fixed-scale energy used by the current Armijo search.
+        Real energy = 0;
 
-          /// @brief Measure of the whole interface.
-          Real totalLen = 0;
+        /// @brief Measure of the whole interface.
+        Real totalLen = 0;
 
-          /// @brief Root-mean-square residual over the complete interface.
-          Real residualRMS = 0;
+        /// @brief Root-mean-square residual over the complete interface.
+        Real residualRMS = 0;
 
-          /// @brief Supremum residual over the complete interface.
-          Real residualSup = 0;
+        /// @brief Supremum residual over the complete interface.
+        Real residualSup = 0;
       };
 
     public:
@@ -678,6 +688,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param other Problem that cannot be copied.
        */
       Problem(const Problem& other) = delete;
+
       /**
        * @brief Copy assignment of a problem with owned solver bindings is disabled.
        * @param other Problem that cannot be assigned.
@@ -727,8 +738,10 @@ namespace Rodin::Adaptation::SWIFT
       Problem& operator+=(const Variational::DirichletBCBase<Real>& condition)
       {
         if (condition.getOperand().getUUID() != m_trialUUID)
-          Alert::Exception() << "SWIFT boundary conditions must use its trial function."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT boundary conditions must use its trial function." << Alert::Raise;
+        }
         m_boundaryConditions.add(condition);
         return *this;
       }
@@ -742,12 +755,16 @@ namespace Rodin::Adaptation::SWIFT
       {
 #ifndef RODIN_USE_MUMPS
         if (parameters.linear.solver == Parameters::LinearSolver::MUMPS)
-          Alert::Exception() << "SWIFT MUMPS solves require RODIN_USE_MUMPS."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT MUMPS solves require RODIN_USE_MUMPS." << Alert::Raise;
+        }
 #endif
         if (!std::isfinite(parameters.model.fit) || !(parameters.model.fit > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive fitting weight."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive fitting weight." << Alert::Raise;
+        }
         for (const Real value :
           {parameters.model.hinge.jacobian, parameters.model.hinge.distortion,
             parameters.model.distribution.deviatoric,
@@ -758,9 +775,11 @@ namespace Rodin::Adaptation::SWIFT
             parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
         {
           if (!std::isfinite(value) || value < Real(0))
-            Alert::Exception()
+          {
+            Alert::MemberFunctionException(*this, __func__)
               << "SWIFT weights and tolerances must be finite and nonnegative."
               << Alert::Raise;
+          }
         }
         if (!std::isfinite(parameters.convergence.tolerance.innerRelative) ||
           !(parameters.convergence.tolerance.innerRelative > Real(0)) ||
@@ -770,14 +789,18 @@ namespace Rodin::Adaptation::SWIFT
             parameters.globalization.armijo < Real(1)) ||
           parameters.convergence.iterations.inner == 0 ||
           parameters.convergence.iterations.stagnation == 0)
-          Alert::Exception()
+        {
+          Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires valid residual tolerances, budgets and line search."
             << Alert::Raise;
+        }
         if (!std::isfinite(parameters.globalization.maxStepOverH) ||
           parameters.globalization.maxStepOverH < Real(0))
-          Alert::Exception()
+        {
+          Alert::MemberFunctionException(*this, __func__)
             << "Directional Newton requires a finite nonnegative step/h bound."
             << Alert::Raise;
+        }
         if (!(parameters.model.qualityGuard > Real(0) &&
               parameters.model.qualityGuard < Real(1)) ||
           !(parameters.model.jacobian > Real(0) && parameters.model.jacobian < Real(1)) ||
@@ -785,10 +808,12 @@ namespace Rodin::Adaptation::SWIFT
           !std::isfinite(parameters.model.distortion) ||
           !std::isfinite(parameters.convergence.tolerance.geometric) ||
           parameters.convergence.tolerance.geometric < Real(0))
-          Alert::Exception()
+        {
+          Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires 0 < guard,jacobian < 1, finite distortion > 1 and "
                "nonnegative penalty/fit tolerance."
             << Alert::Raise;
+        }
         m_parameters = parameters;
         return *this;
       }
@@ -837,8 +862,10 @@ namespace Rodin::Adaptation::SWIFT
         Report rep;
         const Real h = p.model.h;
         if (!std::isfinite(h) || !(h > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive reference mesh size."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive reference mesh size." << Alert::Raise;
+        }
         assembleBoundaryConditions();
         const Real acceptedJacobianFloor = p.model.jacobian;
         const Real stepTol = p.convergence.tolerance.step;
@@ -887,8 +914,10 @@ namespace Rodin::Adaptation::SWIFT
           : geometricScale;
         if (!std::isfinite(geometricScale) || !(geometricScale > Real(0)) ||
           !std::isfinite(geometricTarget) || !(geometricTarget > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive geometric target."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive geometric target." << Alert::Raise;
+        }
         rep.geometricSupTarget = geometricTarget;
         const auto robustScale = getRobustScale(mesh, fes, phi, grad, interfaceFacets, h);
         if (!(robustScale.gradientScale > Real(0)) ||
@@ -1194,10 +1223,12 @@ namespace Rodin::Adaptation::SWIFT
               rep.innerConverged = innerConverged;
               rep.innerRelativeCorrection = Real(0);
               if (p.trace)
+              {
                 std::cout << "        hinge skip: outer=" << rep.iterations
                           << "  reason=inactive-hinges  residual=" << rep.innerResidual
                           << "  rel=" << rep.innerRelativeResidual
                           << "  converged=" << innerConverged << '\n';
+              }
               if (innerConverged)
                 ++rep.inactiveHingeSkips;
             }
@@ -1256,10 +1287,12 @@ namespace Rodin::Adaptation::SWIFT
                 if (!solveOk)
                 {
                   if (p.trace)
+                  {
                     std::cout << "        hinge inner=" << (newtonReport.iterations + 1)
                               << "  outer=" << rep.iterations << "  linear_ok=0"
                               << "  cg_it=" << linearIterations
                               << "  cg_err=" << linearError << std::endl;
+                  }
                   rep.reason = Report::Reason::LinearFailure;
                   return typename Newton::StepResult{false, false, Real(0)};
                 }
@@ -1336,10 +1369,12 @@ namespace Rodin::Adaptation::SWIFT
                   if (!meritAccepted)
                   {
                     if (p.trace)
+                    {
                       std::cout << "        hinge inner=" << (newtonReport.iterations + 1)
                                 << "  outer=" << rep.iterations << "  linear_ok=1"
                                 << "  merit_ok=0  converged=0  cg_it=" << linearIterations
                                 << "  cg_err=" << linearError << std::endl;
+                    }
                     rep.reason = Report::Reason::InnerLineSearchFailure;
                     solveOk = false;
                     return typename Newton::StepResult{false, false, Real(0)};
@@ -1458,6 +1493,7 @@ namespace Rodin::Adaptation::SWIFT
                           << "  energy_checked=" << (jOK && qOK)
                           << "  e_ok=" << (jOK && qOK && eOK) << std::endl;
                 if (p.traceQualityWitness)
+                {
                   std::cout << "      swift quality witness: outer=" << rep.iterations
                             << "  alpha=" << alpha << "  cell=" << adm.qualityCell
                             << "  current_q=" << adm.qualityCurrent
@@ -1468,6 +1504,7 @@ namespace Rodin::Adaptation::SWIFT
                             << adm.maxQ - adm.qualityCurrent - adm.qualityLinearChange
                             << "  current_margin="
                             << p.model.distortion - adm.qualityCurrent << std::endl;
+                }
                 std::cout.precision(precision);
               }
               if (jOK && qOK && eOK)
@@ -1547,6 +1584,7 @@ namespace Rodin::Adaptation::SWIFT
             break;
           }
           if (p.trace)
+          {
             std::cout << "      swift it=" << std::setw(3) << rep.iterations
                       << "  E=" << std::scientific << std::setprecision(3) << eNow
                       << "  residualRMS=" << surf.residualRMS << "  residualRMS/(hG)="
@@ -1569,6 +1607,7 @@ namespace Rodin::Adaptation::SWIFT
                       << "  rejQ=" << rep.distortionRejections
                       << "  rejE=" << rep.energyRejections << "  min_j=" << rep.minJ
                       << "  max_j=" << rep.maxJ << "  max_Q=" << rep.maxQRel << '\n';
+          }
 
           if (geometricTargetReached)
           {
@@ -1632,9 +1671,9 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief Geometric discrepancy of the complete fitted interface.
       struct InterfaceGeometryState
       {
-          Real rms = std::numeric_limits<Real>::infinity();
-          Real sup = std::numeric_limits<Real>::infinity();
-          Real normalRMS = std::numeric_limits<Real>::infinity();
+        Real rms = std::numeric_limits<Real>::infinity();
+        Real sup = std::numeric_limits<Real>::infinity();
+        Real normalRMS = std::numeric_limits<Real>::infinity();
       };
 
       /**
@@ -1682,8 +1721,8 @@ namespace Rodin::Adaptation::SWIFT
             for (size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
-              const auto value = direction.getValue(point);
+              const Variational::IntegrationPoint ip(quadrature, q);
+              const auto value = direction.getValue(ip);
               const ResidualState state(phi, grad, deformation, ip, loss);
               const Real residual = state.getResidual();
               const Real action = state.getGradient().dot(value);
@@ -1709,7 +1748,7 @@ namespace Rodin::Adaptation::SWIFT
        * @returns The cached surface or volume quadrature formula.
        */
       template <class FES>
-      const QF::QuadratureFormulaBase& getQuadrature(
+      const QF::QuadratureFormula& getQuadrature(
         const Geometry::Polytope& polytope, const FES& fes) const
       {
         const auto& fe =
@@ -1723,7 +1762,7 @@ namespace Rodin::Adaptation::SWIFT
               fe.getOrder(), polytope.getTransformation().getOrder(), simplex)
           : m_parameters.quadrature.getVolumeOrder(
               fe.getOrder(), polytope.getTransformation().getOrder(), simplex);
-        return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+        return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
       /**
@@ -1733,7 +1772,7 @@ namespace Rodin::Adaptation::SWIFT
        * @returns The cached geometric-response quadrature formula.
        */
       template <class FES>
-      const QF::QuadratureFormulaBase& getGeometricValidationQuadrature(
+      const QF::QuadratureFormula& getGeometricValidationQuadrature(
         const Geometry::Polytope& polytope, const FES& fes) const
       {
         const auto& fe =
@@ -1741,7 +1780,7 @@ namespace Rodin::Adaptation::SWIFT
         const std::size_t order = m_parameters.quadrature.validation > 0
           ? m_parameters.quadrature.validation
           : Parameters::Quadrature::getValidationOrder(fe.getOrder());
-        return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+        return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
       /**
@@ -1822,9 +1861,9 @@ namespace Rodin::Adaptation::SWIFT
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
+              const Variational::IntegrationPoint ip(quadrature, q);
               facetAction += qf.getWeight(q) * point.getDistortion() *
-                force.getValue(ip).dot(direction.getValue(point));
+                force.getValue(ip).dot(direction.getValue(ip));
             }
           }
         }
@@ -1956,8 +1995,8 @@ namespace Rodin::Adaptation::SWIFT
         std::size_t inadmissibleCount = 0;
         struct Witness
         {
-            Real actual = 0, current = 0, linear = 0, quadratic = 0;
-            Index cell = 0;
+          Real actual = 0, current = 0, linear = 0, quadratic = 0;
+          Index cell = 0;
         };
         const bool recordWitness = current && m_parameters.traceQualityWitness;
         std::vector<Witness> witnesses(recordWitness ? validationCells.size() : 0);
@@ -2011,12 +2050,14 @@ namespace Rodin::Adaptation::SWIFT
                   auto& witness = witnesses[static_cast<size_t>(i)];
                   const Real actual = deformation.getRelativeDistortion();
                   if (actual > witness.actual)
+                  {
                     witness = {actual, currentDeformation.getRelativeDistortion(),
                       currentDeformation.getRelativeDistortionAction(increment),
                       Real(0.5) *
                         currentDeformation.getRelativeDistortionSecondAction(
                           increment, increment),
                       cellIndex};
+                  }
                 }
               }
             });
@@ -2068,8 +2109,8 @@ namespace Rodin::Adaptation::SWIFT
           phi.acquire();
         struct SurfaceAccumulation
         {
-            SurfaceState state;
-            Real squaredResidual = 0;
+          SurfaceState state;
+          Real squaredResidual = 0;
         };
         std::vector<SurfaceAccumulation> facetStates(interfaceFacets.size());
 #ifdef RODIN_USE_OPENMP
@@ -2087,9 +2128,9 @@ namespace Rodin::Adaptation::SWIFT
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
             const auto& src = quad.getPoint(q);
-            const Variational::IntegrationPoint ip(src, &qf, q);
+            const Variational::IntegrationPoint ip(quad, q);
             const Real w = qf.getWeight(q) * src.getDistortion();
-            const Real r = phi.getValue(deformation.getMovedPoint(ip));
+            const Real r = phi.getValue(deformation.setIntegrationPoint(ip).getPoint());
             facetState.totalLen += w;
             facetState.energy += w * normalization * loss.getValue(r);
             accumulation.squaredResidual += w * r * r;
@@ -2155,11 +2196,11 @@ namespace Rodin::Adaptation::SWIFT
 
         struct Accumulation
         {
-            Real measure = 0;
-            Real squaredDistance = 0;
-            Real maximumDistance = 0;
-            Real squaredNormal = 0;
-            std::size_t invalidCount = 0;
+          Real measure = 0;
+          Real squaredDistance = 0;
+          Real maximumDistance = 0;
+          Real squaredNormal = 0;
+          std::size_t invalidCount = 0;
         };
         std::vector<Accumulation> facetStates(interfaceFacets.size());
         constexpr Real gradientFloor = Real(1e-14);
@@ -2186,7 +2227,8 @@ namespace Rodin::Adaptation::SWIFT
             {
               const Geometry::Point point(*face, traits.getVertex(vertex));
               const auto& moved =
-                deformation.getMovedPoint(Variational::IntegrationPoint(point));
+                deformation.setIntegrationPoint(Variational::IntegrationPoint(point))
+                  .getPoint();
               const Real norm = grad.getValue(moved).norm();
               const Real distance = std::abs(phi.getValue(moved)) / norm;
               if (!(norm > gradientFloor) || !std::isfinite(norm) ||
@@ -2198,21 +2240,36 @@ namespace Rodin::Adaptation::SWIFT
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
+              const Variational::IntegrationPoint ip(quadrature, q);
               const auto& J = point.getJacobian();
               SpatialMat mappedJacobian = J;
-              const auto& rc = point.getReferenceCoordinates();
               for (std::size_t local = 0; local < fe.getCount(); ++local)
               {
                 const Index dof =
                   fes.getGlobalIndex({face->getDimension(), facetIndex}, local);
-                for (std::size_t axis = 0; axis < face->getDimension(); ++axis)
+                const auto coefficient = u[dof];
+                if constexpr (requires { fe.getBasis(local).getJacobian()(qf, q); })
                 {
-                  for (std::size_t component = 0; component < dimension; ++component)
+                  const auto derivative = fe.getBasis(local).getJacobian()(qf, q);
+                  for (std::size_t axis = 0; axis < face->getDimension(); ++axis)
                   {
-                    mappedJacobian(static_cast<Eigen::Index>(component),
-                      static_cast<Eigen::Index>(axis)) += u[dof] *
-                      fe.getBasis(local).template getDerivative<1>(component, axis)(rc);
+                    for (std::size_t component = 0; component < dimension; ++component)
+                    {
+                      mappedJacobian(component, axis) +=
+                        coefficient * derivative(component, axis);
+                    }
+                  }
+                }
+                else
+                {
+                  const auto& rc = point.getReferenceCoordinates();
+                  for (std::size_t axis = 0; axis < face->getDimension(); ++axis)
+                  {
+                    for (std::size_t component = 0; component < dimension; ++component)
+                    {
+                      mappedJacobian(component, axis) += coefficient *
+                        fe.getBasis(local).template getDerivative<1>(component, axis)(rc);
+                    }
                   }
                 }
               }
@@ -2246,7 +2303,8 @@ namespace Rodin::Adaptation::SWIFT
                 mappedMeasure = fittedNormal.norm();
               }
 
-              const Geometry::Point movedPoint = deformation.getMovedPoint(ip);
+              const Geometry::Point movedPoint =
+                deformation.setIntegrationPoint(ip).getPoint();
               const SpatialVec targetGradient = grad.getValue(movedPoint);
               const Real gradientNorm = targetGradient.norm();
               const Real fittedNormalNorm = fittedNormal.norm();
@@ -2312,10 +2370,11 @@ namespace Rodin::Adaptation::SWIFT
        */
       struct RobustScale
       {
-          /// @brief Fixed robust-loss scale in level-set units.
-          Real sigma = 0;
-          /// @brief Maximum sampled target-gradient norm.
-          Real gradientScale = 0;
+        /// @brief Fixed robust-loss scale in level-set units.
+        Real sigma = 0;
+
+        /// @brief Maximum sampled target-gradient norm.
+        Real gradientScale = 0;
       };
 
       /**
@@ -2341,9 +2400,15 @@ namespace Rodin::Adaptation::SWIFT
           const auto& quad = face->getQuadrature(qf);
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
-            const auto& point = quad.getPoint(q);
-            residuals.push_back(std::abs(phi.getValue(point)));
-            gradientScale = std::max(gradientScale, grad.getValue(point).norm());
+            const Variational::IntegrationPoint ip(quad, q);
+            const auto evaluate = [&](const auto& function) {
+              if constexpr (requires { function.getValue(ip); })
+                return function.getValue(ip);
+              else
+                return function.getValue(ip.getPoint());
+            };
+            residuals.push_back(std::abs(evaluate(phi)));
+            gradientScale = std::max(gradientScale, evaluate(grad).norm());
           }
         }
 
@@ -2370,13 +2435,17 @@ namespace Rodin::Adaptation::SWIFT
             std::get_if<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
               &condition.getDOFs());
           if (!values)
-            Alert::Exception() << "SWIFT supports homogeneous value conditions only."
-                               << Alert::Raise;
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "SWIFT supports homogeneous value conditions only." << Alert::Raise;
+          }
           for (const auto& [dof, value] : *values)
           {
             if (value != Real(0))
-              Alert::Exception()
+            {
+              Alert::MemberFunctionException(*this, __func__)
                 << "SWIFT boundary increments must be zero." << Alert::Raise;
+            }
             m_fixedIncrementDOFs[dof] = Real(0);
           }
         }
@@ -2423,16 +2492,22 @@ namespace Rodin::Adaptation::SWIFT
 
       /// Dimensionless sufficient-decrease coefficient for the frozen inner merit.
       static constexpr Real InnerArmijoCoefficient = Real(1e-4);
+
       /// Safeguard on trials per inner correction, independent of the Newton cap.
       static constexpr size_t InnerMaxBacktracks = 32;
+
       /// Dimensionless reduction shared by the inner and outer Armijo searches.
       static constexpr Real BacktrackingReduction = Real(0.5);
+
       /// Relative floating-point allowance in the quadratic inner merit.
       static constexpr Real MeritRoundoffFactor = Real(64);
+
       /// Dimensionless tolerance for reporting an undamped inner correction.
       static constexpr Real FullStepTolerance = Real(1e-12);
+
       /// Minimum robust scale in units of the reference mesh spacing.
       static constexpr Real RobustScaleMeshFloor = Real(3);
+
       /// Residual quantile used by automatic robust-scale selection.
       static constexpr Real RobustScaleQuantile = Real(0.9);
 
@@ -2445,6 +2520,7 @@ namespace Rodin::Adaptation::SWIFT
       LinearSolver m_linearSolver;
       BilinearFormType m_distributionForm;
       Math::Matrix<Real> m_centering;
+
       /**
        * @brief Fitting metric and fitting force at the outer displacement.
        * Both depend on the outer displacement only, so they are assembled once

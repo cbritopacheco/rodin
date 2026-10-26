@@ -36,7 +36,7 @@ namespace Rodin::Variational
    * | @ref H1Element "H1Element<K, Scalar>" | Scalar-valued H1-conforming Lagrange element of degree `K`. |
    * | @ref H1Element "H1Element<K, SpatialVector<Scalar>>" | Vector-valued H1-conforming Lagrange element of degree `K`. |
    *
-   * @see H1ElementSpecializations
+   * @see @ref H1ElementSpecializations "H1Element Template Specializations"
    */
   template <size_t K, class Range>
   class H1Element;
@@ -61,7 +61,7 @@ namespace Rodin::Variational
    * | @ref H1 "H1<K, Scalar, Mesh<Context::MPI>>" | Scalar-valued distributed H1-conforming space of degree `K`. |
    * | @ref H1 "H1<K, SpatialVector<Scalar>, Mesh<Context::MPI>>" | Vector-valued distributed H1-conforming space of degree `K`. |
    *
-   * @see H1Specializations
+   * @see @ref H1Specializations "H1 Template Specializations"
    */
   template <size_t K, class Range, class Mesh>
   class H1;

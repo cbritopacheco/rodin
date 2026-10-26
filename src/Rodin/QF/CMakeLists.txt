@@ -15,7 +15,7 @@ set(RodinQF_HEADERS
   XiaoGimbutasData.h
   WitherdenVincent.h
   WitherdenVincentData.h
-  PolytopeQuadratureFormula.h
+  QuadratureFormula.h
 )
 
 set(RodinQF_SRCS
@@ -25,7 +25,7 @@ set(RodinQF_SRCS
   GrundmannMoller.cpp
   XiaoGimbutas.cpp
   WitherdenVincent.cpp
-  PolytopeQuadratureFormula.cpp
+  QuadratureFormula.cpp
 )
 
 add_library(RodinQF

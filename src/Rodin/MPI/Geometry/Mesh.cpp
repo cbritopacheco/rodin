@@ -44,6 +44,7 @@ namespace Rodin::Geometry
     mesh.m_quadratures.initialize(mesh.getSpaceDimension());
     return mesh;
   }
+
   /// @endcond
 
   MPIMesh::Mesh(const Mesh& other)
@@ -95,6 +96,7 @@ namespace Rodin::Geometry
   MPIMesh& MPIMesh::scale(Real c)
   {
     this->getShard().scale(c);
+    m_quadratures.clear();
     return *this;
   }
 
@@ -232,8 +234,8 @@ namespace Rodin::Geometry
   PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return PolytopeIterator(
-        dimension, *this, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
+    return PolytopeIterator(dimension, *this,
+      BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
   }
 
   FaceIterator MPIMesh::getBoundary() const
@@ -311,7 +313,7 @@ namespace Rodin::Geometry
 
   Real MPIMesh::getVolume(const FlatSet<Attribute>& attrs) const
   {
-    const auto& comm  = m_context.getCommunicator();
+    const auto& comm = m_context.getCommunicator();
     const auto& shard = this->getShard();
 
     Real local = 0;
@@ -394,7 +396,7 @@ namespace Rodin::Geometry
 
   Real MPIMesh::getArea(const FlatSet<Attribute>& attrs) const
   {
-    const auto& comm  = m_context.getCommunicator();
+    const auto& comm = m_context.getCommunicator();
     const auto& shard = this->getShard();
 
     Real local = 0;
@@ -443,7 +445,7 @@ namespace Rodin::Geometry
 
   Real MPIMesh::getMeasure(size_t d, const FlatSet<Attribute>& attrs) const
   {
-    const auto& comm  = m_context.getCommunicator();
+    const auto& comm = m_context.getCommunicator();
     const auto& shard = this->getShard();
 
     Real local = 0;
@@ -462,16 +464,15 @@ namespace Rodin::Geometry
   }
 
   const PolytopeTransformation& MPIMesh::getPolytopeTransformation(
-      size_t dimension, Index localIdx) const
+    size_t dimension, Index localIdx) const
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));
     return shard.getPolytopeTransformation(dimension, localIdx);
   }
 
-  const PolytopeQuadrature&
-  MPIMesh::getQuadrature(
-      size_t dimension, Index localIdx, const QF::QuadratureFormulaBase& qf) const
+  const PolytopeQuadrature& MPIMesh::getQuadrature(
+    size_t dimension, Index localIdx, const QF::QuadratureFormula& qf) const
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));
@@ -497,13 +498,12 @@ namespace Rodin::Geometry
   }
 
   MPIMesh& MPIMesh::setAttribute(
-      const std::pair<size_t, Index>& p,
-      const Optional<Attribute>& attr)
+    const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
   {
     const auto& [d, localIdx] = p;
     auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(d));
-    shard.setAttribute({ d, localIdx }, attr);
+    shard.setAttribute({d, localIdx}, attr);
     return *this;
   }
 
@@ -512,6 +512,7 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     shard.setVertexCoordinates(localIdx, s, i);
+    m_quadratures.clear();
     return *this;
   }
 
@@ -520,16 +521,18 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     shard.setVertexCoordinates(localIdx, coords);
+    m_quadratures.clear();
     return *this;
   }
 
   MPIMesh& MPIMesh::setPolytopeTransformation(
-      const std::pair<size_t, Index> p, PolytopeTransformation* trans)
+    const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
     const auto& [d, localIdx] = p;
     auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(d));
-    shard.setPolytopeTransformation({ d, localIdx }, trans);
+    shard.setPolytopeTransformation({d, localIdx}, trans);
+    m_quadratures.clear();
     return *this;
   }
 
@@ -596,10 +599,10 @@ namespace Rodin::Geometry
   Mesh<Context::MPI>& MPIMesh::reconcile(size_t d, const ReconcileOptions& options)
   {
     auto& shard = this->getShard();
-    auto& conn  = shard.getConnectivity();
+    auto& conn = shard.getConnectivity();
 
     const auto& comm = m_context.getCommunicator();
-    const int rank   = comm.rank();
+    const int rank = comm.rank();
 
     const size_t D = getDimension();
     assert(d <= D);
@@ -626,10 +629,8 @@ namespace Rodin::Geometry
     const auto& d20 = conn.getIncidence(d, 0);
 
     using Key = Polytope::Key;
-    using KeyMap = UnorderedMap<
-        Key, Index,
-        Polytope::Key::SymmetricHash,
-        Polytope::Key::SymmetricEquality>;
+    using KeyMap = UnorderedMap<Key, Index, Polytope::Key::SymmetricHash,
+      Polytope::Key::SymmetricEquality>;
 
     static constexpr int kInfOwner = std::numeric_limits<int>::max();
     static constexpr Index kInvalidId = std::numeric_limits<Index>::max();
@@ -644,12 +645,13 @@ namespace Rodin::Geometry
     {
       UnorderedSet<int> nbrs;
 
-      const auto& cellHalo  = shard.getHalo(D);   // owned top cell -> remote ranks that also store it
+      const auto& cellHalo =
+        shard.getHalo(D);   // owned top cell -> remote ranks that also store it
       const auto& cellOwner = shard.getOwner(D);  // ghost top cell -> owner rank
 
       for (const auto& [cell, rs] : cellHalo)
       {
-        (void) cell;
+        (void)cell;
         for (const Index r : rs)
         {
           const int rr = static_cast<int>(r);
@@ -660,7 +662,7 @@ namespace Rodin::Geometry
 
       for (const auto& [cell, r] : cellOwner)
       {
-        (void) cell;
+        (void)cell;
         const int rr = static_cast<int>(r);
         if (rr != rank)
           nbrs.insert(rr);
@@ -694,7 +696,7 @@ namespace Rodin::Geometry
 
       keys[i] = key;
       const auto [it, inserted] = key2local.emplace(keys[i], i);
-      (void) it;
+      (void)it;
       assert(inserted);
     }
 
@@ -705,7 +707,7 @@ namespace Rodin::Geometry
     std::vector<std::vector<Index>> entitiesToSend(neighbors.size());
 
     {
-      const auto& cellHalo  = shard.getHalo(D);
+      const auto& cellHalo = shard.getHalo(D);
       const auto& cellOwner = shard.getOwner(D);
 
       for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
@@ -778,7 +780,7 @@ namespace Rodin::Geometry
       {
         sendbuf[k].reserve(entitiesToSend[k].size());
         for (const Index i : entitiesToSend[k])
-          sendbuf[k].push_back({ keys[i], { inLocalPartition[i], i } });
+          sendbuf[k].push_back({keys[i], {inLocalPartition[i], i}});
       }
 
       const int tagKeys = 1000 + static_cast<int>(d);
@@ -796,7 +798,7 @@ namespace Rodin::Geometry
 
         const int nbr = neighbors[k];
         auto& rtl = remoteToLocal[k];
-        auto& cs  = convergeSend[k];
+        auto& cs = convergeSend[k];
 
         rtl.reserve(recvbuf.size());
         cs.reserve(recvbuf.size());
@@ -847,16 +849,15 @@ namespace Rodin::Geometry
           {
             if (options.strictRoundCap)
             {
-              throw std::runtime_error(
-                  "MPIMesh::reconcile owner convergence exceeded maxOwnerRounds");
+              Alert::MemberFunctionException(*this, __func__)
+                << "Owner convergence exceeded maxOwnerRounds." << Alert::Raise;
             }
             roundsThisEpoch = 0;
           }
           else
           {
-            roundsThisEpoch = std::min(
-                roundsThisEpoch,
-                options.maxOwnerRounds - ownerRounds);
+            roundsThisEpoch =
+              std::min(roundsThisEpoch, options.maxOwnerRounds - ownerRounds);
           }
         }
 
@@ -873,7 +874,7 @@ namespace Rodin::Geometry
             auto& sb = sendbuf[k];
             sb.reserve(convergeSend[k].size());
             for (const Index i : convergeSend[k])
-              sb.push_back({ i, ownerRank[i] });
+              sb.push_back({i, ownerRank[i]});
           }
 
           const int tagOwner = 1500 + static_cast<int>(d);
@@ -913,7 +914,7 @@ namespace Rodin::Geometry
 
         bool globallyChanged = false;
         boost::mpi::all_reduce(
-            comm, epochChanged, globallyChanged, std::logical_or<bool>());
+          comm, epochChanged, globallyChanged, std::logical_or<bool>());
 
         if (!globallyChanged)
           break;
@@ -969,16 +970,14 @@ namespace Rodin::Geometry
           {
             if (options.strictRoundCap)
             {
-              throw std::runtime_error(
-                  "MPIMesh::reconcile gid convergence exceeded maxGidRounds");
+              Alert::MemberFunctionException(*this, __func__)
+                << "Global-ID convergence exceeded maxGidRounds." << Alert::Raise;
             }
             roundsThisEpoch = 0;
           }
           else
           {
-            roundsThisEpoch = std::min(
-                roundsThisEpoch,
-                options.maxGidRounds - gidRounds);
+            roundsThisEpoch = std::min(roundsThisEpoch, options.maxGidRounds - gidRounds);
           }
         }
 
@@ -997,7 +996,7 @@ namespace Rodin::Geometry
             for (const Index i : convergeSend[k])
             {
               if (distId[i] != kInvalidId)
-                sb.push_back({ i, distId[i] });
+                sb.push_back({i, distId[i]});
             }
           }
 
@@ -1042,7 +1041,7 @@ namespace Rodin::Geometry
 
         bool globallyChanged = false;
         boost::mpi::all_reduce(
-            comm, epochChanged, globallyChanged, std::logical_or<bool>());
+          comm, epochChanged, globallyChanged, std::logical_or<bool>());
 
         if (!globallyChanged)
           break;
@@ -1095,7 +1094,7 @@ namespace Rodin::Geometry
           for (const Index i : convergeSend[k])
           {
             for (const Index h : holderSet[i])
-              sb.push_back({ i, h });
+              sb.push_back({i, h});
           }
         }
 
@@ -1129,7 +1128,7 @@ namespace Rodin::Geometry
 
         bool globallyChanged = false;
         boost::mpi::all_reduce(
-            comm, epochChanged, globallyChanged, std::logical_or<bool>());
+          comm, epochChanged, globallyChanged, std::logical_or<bool>());
 
         if (!globallyChanged)
           break;
@@ -1148,8 +1147,8 @@ namespace Rodin::Geometry
       for (Index i = 0; i < static_cast<Index>(nd); ++i)
       {
         map.left[i] = distId[i];
-        const auto [it, inserted] = map.right.insert({ distId[i], i });
-        (void) it;
+        const auto [it, inserted] = map.right.insert({distId[i], i});
+        (void)it;
         assert(inserted);
       }
 
@@ -1157,7 +1156,7 @@ namespace Rodin::Geometry
       state.assign(nd, Shard::State::Ghost);
 
       auto& owner = shard.getOwner(d);
-      auto& halo  = shard.getHalo(d);
+      auto& halo = shard.getHalo(d);
       owner.clear();
       halo.clear();
 
@@ -1170,9 +1169,7 @@ namespace Rodin::Geometry
         }
         else
         {
-          state[i] = inLocalPartition[i]
-            ? Shard::State::Shared
-            : Shard::State::Ghost;
+          state[i] = inLocalPartition[i] ? Shard::State::Shared : Shard::State::Ghost;
 
           owner.emplace(i, static_cast<Index>(ownerRank[i]));
         }
@@ -1195,7 +1192,7 @@ namespace Rodin::Geometry
   }
 
   MPIMesh MPIMesh::UniformGrid(
-      const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape)
+    const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape)
   {
     const auto& comm = context.getCommunicator();
     const int rank = comm.rank();
@@ -1204,7 +1201,7 @@ namespace Rodin::Geometry
     struct Interval
     {
       size_t begin = 0;
-      size_t end   = 0; // half-open [begin, end)
+      size_t end = 0; // half-open [begin, end)
 
       size_t size() const
       {
@@ -1222,43 +1219,33 @@ namespace Rodin::Geometry
       }
     };
 
-    const auto makeIndexArray = [](auto... xs)
-    {
+    const auto makeIndexArray = [](auto... xs) {
       IndexArray res(sizeof...(xs));
-      const Index data[] = { static_cast<Index>(xs)... };
+      const Index data[] = {static_cast<Index>(xs)...};
       for (size_t i = 0; i < sizeof...(xs); ++i)
         res(static_cast<Eigen::Index>(i)) = data[i];
       return res;
     };
 
-    const auto finish = [&](Shard&& shard) -> MPIMesh
-    {
-      return MPIMesh::Builder(context)
-        .initialize(std::move(shard))
-        .finalize();
+    const auto finish = [&](Shard&& shard) -> MPIMesh {
+      return MPIMesh::Builder(context).initialize(std::move(shard)).finalize();
     };
 
-    const auto splitRange = [](size_t n, int r, int p) -> Interval
-    {
-      const size_t q   = n / static_cast<size_t>(p);
+    const auto splitRange = [](size_t n, int r, int p) -> Interval {
+      const size_t q = n / static_cast<size_t>(p);
       const size_t rem = n % static_cast<size_t>(p);
-      const size_t b   = static_cast<size_t>(r) * q + std::min(static_cast<size_t>(r), rem);
-      const size_t c   = q + (static_cast<size_t>(r) < rem ? 1 : 0);
-      return Interval{ b, b + c };
+      const size_t b = static_cast<size_t>(r) * q + std::min(static_cast<size_t>(r), rem);
+      const size_t c = q + (static_cast<size_t>(r) < rem ? 1 : 0);
+      return Interval{b, b + c};
     };
 
-    const auto expandByOne = [](const Interval& I, size_t n) -> Interval
-    {
+    const auto expandByOne = [](const Interval& I, size_t n) -> Interval {
       if (I.empty())
         return I;
-      return Interval{
-        I.begin > 0 ? I.begin - 1 : 0,
-        I.end   < n ? I.end + 1   : n
-      };
+      return Interval{I.begin > 0 ? I.begin - 1 : 0, I.end < n ? I.end + 1 : n};
     };
 
-    const auto factorize = [](int n)
-    {
+    const auto factorize = [](int n) {
       std::vector<int> f;
       for (int p = 2; p * p <= n; ++p)
       {
@@ -1274,8 +1261,7 @@ namespace Rodin::Geometry
       return f;
     };
 
-    const auto chooseProcShape = [&](size_t dim, const std::vector<size_t>& cells)
-    {
+    const auto chooseProcShape = [&](size_t dim, const std::vector<size_t>& cells) {
       std::vector<int> ps(dim, 1);
       auto factors = factorize(size);
 
@@ -1287,7 +1273,8 @@ namespace Rodin::Geometry
         for (size_t d = 0; d < dim; ++d)
         {
           const double score = static_cast<double>(cells[d]) / static_cast<double>(ps[d]);
-          const bool feasible = (static_cast<size_t>(ps[d] * f) <= std::max<size_t>(cells[d], 1));
+          const bool feasible =
+            (static_cast<size_t>(ps[d] * f) <= std::max<size_t>(cells[d], 1));
           const double adjusted = feasible ? score : 0.5 * score;
 
           if (adjusted > bestScore)
@@ -1303,8 +1290,7 @@ namespace Rodin::Geometry
       return ps;
     };
 
-    const auto rankToProcCoord = [](int r, const std::vector<int>& ps)
-    {
+    const auto rankToProcCoord = [](int r, const std::vector<int>& ps) {
       std::vector<int> c(ps.size(), 0);
       for (size_t d = 0; d < ps.size(); ++d)
       {
@@ -1314,8 +1300,8 @@ namespace Rodin::Geometry
       return c;
     };
 
-    const auto procCoordToRank = [](const std::vector<int>& c, const std::vector<int>& ps)
-    {
+    const auto procCoordToRank = [](const std::vector<int>& c,
+                                   const std::vector<int>& ps) {
       int r = 0;
       int stride = 1;
       for (size_t d = 0; d < ps.size(); ++d)
@@ -1326,34 +1312,27 @@ namespace Rodin::Geometry
       return r;
     };
 
-    const auto uniqueSort = [](std::vector<int>& v)
-    {
+    const auto uniqueSort = [](std::vector<int>& v) {
       std::sort(v.begin(), v.end());
       v.erase(std::unique(v.begin(), v.end()), v.end());
     };
 
-    const auto sp0 = []()
-    {
-      return Math::SpatialPoint();
-    };
+    const auto sp0 = []() { return Math::SpatialPoint(); };
 
-    const auto sp1 = [](Real x0)
-    {
+    const auto sp1 = [](Real x0) {
       Math::SpatialPoint x(1);
       x(0) = x0;
       return x;
     };
 
-    const auto sp2 = [](Real x0, Real x1)
-    {
+    const auto sp2 = [](Real x0, Real x1) {
       Math::SpatialPoint x(2);
       x(0) = x0;
       x(1) = x1;
       return x;
     };
 
-    const auto sp3 = [](Real x0, Real x1, Real x2)
-    {
+    const auto sp3 = [](Real x0, Real x1, Real x2) {
       Math::SpatialPoint x(3);
       x(0) = x0;
       x(1) = x1;
@@ -1361,28 +1340,22 @@ namespace Rodin::Geometry
       return x;
     };
 
-    const auto vid1 = [](size_t i) -> Index
-    {
-      return static_cast<Index>(i);
-    };
+    const auto vid1 = [](size_t i) -> Index { return static_cast<Index>(i); };
 
-    const auto vid2 = [](size_t i, size_t j, size_t nx) -> Index
-    {
+    const auto vid2 = [](size_t i, size_t j, size_t nx) -> Index {
       return static_cast<Index>(i + j * nx);
     };
 
-    const auto vid3 = [](size_t i, size_t j, size_t k, size_t nx, size_t ny) -> Index
-    {
+    const auto vid3 = [](size_t i, size_t j, size_t k, size_t nx, size_t ny) -> Index {
       return static_cast<Index>(i + j * nx + k * nx * ny);
     };
 
-    const auto macroId2 = [](size_t i, size_t j, size_t cx) -> Index
-    {
+    const auto macroId2 = [](size_t i, size_t j, size_t cx) -> Index {
       return static_cast<Index>(i + j * cx);
     };
 
-    const auto macroId3 = [](size_t i, size_t j, size_t k, size_t cx, size_t cy) -> Index
-    {
+    const auto macroId3 = [](
+                            size_t i, size_t j, size_t k, size_t cx, size_t cy) -> Index {
       return static_cast<Index>(i + j * cx + k * cx * cy);
     };
 
@@ -1393,9 +1366,8 @@ namespace Rodin::Geometry
         if (shape.size() != 0)
         {
           Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
-            << "Expected 0 dimensions for geometry type " << g
-            << ", but got " << shape.size() << "."
-            << Alert::Raise;
+            << "Expected 0 dimensions for geometry type " << g << ", but got "
+            << shape.size() << "." << Alert::Raise;
         }
 
         Shard::Builder sb;
@@ -1424,21 +1396,19 @@ namespace Rodin::Geometry
         if (shape.size() != 1)
         {
           Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
-            << "Expected 1 dimension for geometry type " << g
-            << ", but got " << shape.size() << "."
-            << Alert::Raise;
+            << "Expected 1 dimension for geometry type " << g << ", but got "
+            << shape.size() << "." << Alert::Raise;
         }
 
         const size_t nx = shape.coeff(0);
         if (nx < 2)
         {
           Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
-            << "Segment uniform grid requires at least 2 vertices."
-            << Alert::Raise;
+            << "Segment uniform grid requires at least 2 vertices." << Alert::Raise;
         }
 
         const size_t dim = 1;
-        const std::vector<size_t> nCells = { nx - 1 };
+        const std::vector<size_t> nCells = {nx - 1};
         const std::vector<int> procShape = chooseProcShape(dim, nCells);
         const std::vector<int> procCoord = rankToProcCoord(rank, procShape);
 
@@ -1453,18 +1423,13 @@ namespace Rodin::Geometry
         const Interval ownedCells = cellSplits[0][procCoord[0]];
         const Interval ghostCells = expandByOne(ownedCells, nCells[0]);
 
-        const Interval localVerts = Interval{
-          ownedCells.begin,
-          ownedCells.empty() ? ownedCells.end : std::min(nx, ownedCells.end + 1)
-        };
+        const Interval localVerts = Interval{ownedCells.begin,
+          ownedCells.empty() ? ownedCells.end : std::min(nx, ownedCells.end + 1)};
 
-        const Interval ghostVerts = Interval{
-          ghostCells.begin,
-          ghostCells.empty() ? ghostCells.end : std::min(nx, ghostCells.end + 1)
-        };
+        const Interval ghostVerts = Interval{ghostCells.begin,
+          ghostCells.empty() ? ghostCells.end : std::min(nx, ghostCells.end + 1)};
 
-        const auto ownerOfCell = [&](size_t i) -> int
-        {
+        const auto ownerOfCell = [&](size_t i) -> int {
           for (int px = 0; px < procShape[0]; ++px)
           {
             if (cellSplits[0][px].contains(i))
@@ -1474,8 +1439,7 @@ namespace Rodin::Geometry
           return 0;
         };
 
-        const auto ownerOfVertex = [&](size_t i) -> int
-        {
+        const auto ownerOfVertex = [&](size_t i) -> int {
           std::vector<int> rs;
           if (i > 0 && i - 1 < nCells[0])
             rs.push_back(ownerOfCell(i - 1));
@@ -1487,16 +1451,12 @@ namespace Rodin::Geometry
           return rs.front();
         };
 
-        const auto holdersOfVertex = [&](size_t i)
-        {
+        const auto holdersOfVertex = [&](size_t i) {
           std::vector<int> res;
           for (int p = 0; p < procShape[0]; ++p)
           {
             const Interval Gc = expandByOne(cellSplits[0][p], nCells[0]);
-            const Interval Gv{
-              Gc.begin,
-              Gc.empty() ? Gc.end : std::min(nx, Gc.end + 1)
-            };
+            const Interval Gv{Gc.begin, Gc.empty() ? Gc.end : std::min(nx, Gc.end + 1)};
             if (Gv.contains(i))
               res.push_back(p);
           }
@@ -1504,16 +1464,14 @@ namespace Rodin::Geometry
           return res;
         };
 
-        const auto stateOfVertex = [&](size_t i) -> Shard::State
-        {
+        const auto stateOfVertex = [&](size_t i) -> Shard::State {
           const int owner = ownerOfVertex(i);
           if (localVerts.contains(i))
             return owner == rank ? Shard::State::Owned : Shard::State::Shared;
           return Shard::State::Ghost;
         };
 
-        const auto holdersOfCell = [&](size_t i)
-        {
+        const auto holdersOfCell = [&](size_t i) {
           std::vector<int> res;
           const int owner = ownerOfCell(i);
           const std::vector<int> oc = rankToProcCoord(owner, procShape);
@@ -1570,10 +1528,7 @@ namespace Rodin::Geometry
             (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
 
           const Index gcid = static_cast<Index>(i);
-          const IndexArray vs = makeIndexArray(
-            gv2lv.at(vid1(i)),
-            gv2lv.at(vid1(i + 1))
-          );
+          const IndexArray vs = makeIndexArray(gv2lv.at(vid1(i)), gv2lv.at(vid1(i + 1)));
 
           const Index lc = sb.polytope(1, gcid, Polytope::Type::Segment, vs, state);
 
@@ -1600,9 +1555,8 @@ namespace Rodin::Geometry
         if (shape.size() != 2)
         {
           Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
-            << "Expected 2 dimensions for geometry type " << g
-            << ", but got " << shape.size() << "."
-            << Alert::Raise;
+            << "Expected 2 dimensions for geometry type " << g << ", but got "
+            << shape.size() << "." << Alert::Raise;
         }
 
         const size_t nx = shape.coeff(0);
@@ -1618,7 +1572,7 @@ namespace Rodin::Geometry
         const size_t cy = ny - 1;
 
         const size_t dim = 2;
-        const std::vector<size_t> nCells = { cx, cy };
+        const std::vector<size_t> nCells = {cx, cy};
         const std::vector<int> procShape = chooseProcShape(dim, nCells);
         const std::vector<int> procCoord = rankToProcCoord(rank, procShape);
 
@@ -1636,48 +1590,52 @@ namespace Rodin::Geometry
         const Interval ghostY = expandByOne(ownedY, cy);
 
         const Interval localVertX{
-          ownedX.begin,
-          ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)
-        };
+          ownedX.begin, ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)};
         const Interval localVertY{
-          ownedY.begin,
-          ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)
-        };
+          ownedY.begin, ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)};
 
         const Interval vertX{
-          ghostX.begin,
-          ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)
-        };
+          ghostX.begin, ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)};
         const Interval vertY{
-          ghostY.begin,
-          ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)
-        };
+          ghostY.begin, ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)};
 
-        const auto ownerOfCell = [&](size_t i, size_t j) -> int
-        {
+        const auto ownerOfCell = [&](size_t i, size_t j) -> int {
           int px = -1, py = -1;
           for (int p = 0; p < procShape[0]; ++p)
-            if (cellSplits[0][p].contains(i)) { px = p; break; }
+          {
+            if (cellSplits[0][p].contains(i))
+            {
+              px = p;
+              break;
+            }
+          }
           for (int p = 0; p < procShape[1]; ++p)
-            if (cellSplits[1][p].contains(j)) { py = p; break; }
+          {
+            if (cellSplits[1][p].contains(j))
+            {
+              py = p;
+              break;
+            }
+          }
           assert(px >= 0 && py >= 0);
-          return procCoordToRank({ px, py }, procShape);
+          return procCoordToRank({px, py}, procShape);
         };
 
-        const auto ownerOfVertex = [&](size_t i, size_t j) -> int
-        {
+        const auto ownerOfVertex = [&](size_t i, size_t j) -> int {
           std::vector<int> rs;
           const size_t ix0 = (i > 0 ? i - 1 : i);
           const size_t ix1 = std::min(i, cx ? cx - 1 : 0);
           const size_t jy0 = (j > 0 ? j - 1 : j);
           const size_t jy1 = std::min(j, cy ? cy - 1 : 0);
 
-          for (size_t ii : { ix0, ix1 })
+          for (size_t ii : {ix0, ix1})
           {
-            if (ii >= cx) continue;
-            for (size_t jj : { jy0, jy1 })
+            if (ii >= cx)
+              continue;
+            for (size_t jj : {jy0, jy1})
             {
-              if (jj >= cy) continue;
+              if (jj >= cy)
+                continue;
               rs.push_back(ownerOfCell(ii, jj));
             }
           }
@@ -1688,44 +1646,35 @@ namespace Rodin::Geometry
           return rs.front();
         };
 
-        const auto holdersOfVertex = [&](size_t i, size_t j)
-        {
+        const auto holdersOfVertex = [&](size_t i, size_t j) {
           std::vector<int> res;
           for (int px = 0; px < procShape[0]; ++px)
           {
             const Interval Gx = expandByOne(cellSplits[0][px], cx);
-            const Interval Vx{
-              Gx.begin,
-              Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)
-            };
+            const Interval Vx{Gx.begin, Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)};
             if (!Vx.contains(i))
               continue;
 
             for (int py = 0; py < procShape[1]; ++py)
             {
               const Interval Gy = expandByOne(cellSplits[1][py], cy);
-              const Interval Vy{
-                Gy.begin,
-                Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)
-              };
+              const Interval Vy{Gy.begin, Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)};
               if (Vy.contains(j))
-                res.push_back(procCoordToRank({ px, py }, procShape));
+                res.push_back(procCoordToRank({px, py}, procShape));
             }
           }
           uniqueSort(res);
           return res;
         };
 
-        const auto stateOfVertex = [&](size_t i, size_t j) -> Shard::State
-        {
+        const auto stateOfVertex = [&](size_t i, size_t j) -> Shard::State {
           const int owner = ownerOfVertex(i, j);
           if (localVertX.contains(i) && localVertY.contains(j))
             return owner == rank ? Shard::State::Owned : Shard::State::Shared;
           return Shard::State::Ghost;
         };
 
-        const auto holdersOfCell = [&](size_t i, size_t j)
-        {
+        const auto holdersOfCell = [&](size_t i, size_t j) {
           std::vector<int> res;
           const int owner = ownerOfCell(i, j);
           const std::vector<int> oc = rankToProcCoord(owner, procShape);
@@ -1737,8 +1686,10 @@ namespace Rodin::Geometry
               std::vector<int> pc = oc;
               pc[0] += dx;
               pc[1] += dy;
-              if (pc[0] < 0 || pc[0] >= procShape[0]) continue;
-              if (pc[1] < 0 || pc[1] >= procShape[1]) continue;
+              if (pc[0] < 0 || pc[0] >= procShape[0])
+                continue;
+              if (pc[1] < 0 || pc[1] >= procShape[1])
+                continue;
 
               const Interval GX = expandByOne(cellSplits[0][pc[0]], cx);
               const Interval GY = expandByOne(cellSplits[1][pc[1]], cy);
@@ -1765,10 +1716,8 @@ namespace Rodin::Geometry
             const int owner = ownerOfVertex(i, j);
             const Shard::State state = stateOfVertex(i, j);
 
-            const Index lv = sb.vertex(
-              gvid,
-              sp2(static_cast<Real>(i), static_cast<Real>(j)),
-              state);
+            const Index lv =
+              sb.vertex(gvid, sp2(static_cast<Real>(i), static_cast<Real>(j)), state);
             gv2lv.emplace(gvid, lv);
 
             if (state == Shard::State::Owned)
@@ -1797,18 +1746,16 @@ namespace Rodin::Geometry
 
             if (g == Polytope::Type::Triangle)
             {
-              const Index v00 = gv2lv.at(vid2(i,     j,     nx));
-              const Index v10 = gv2lv.at(vid2(i + 1, j,     nx));
-              const Index v01 = gv2lv.at(vid2(i,     j + 1, nx));
+              const Index v00 = gv2lv.at(vid2(i, j, nx));
+              const Index v10 = gv2lv.at(vid2(i + 1, j, nx));
+              const Index v01 = gv2lv.at(vid2(i, j + 1, nx));
               const Index v11 = gv2lv.at(vid2(i + 1, j + 1, nx));
 
-              const Index lc0 = sb.polytope(
-                2, static_cast<Index>(2 * mid + 0), Polytope::Type::Triangle,
-                makeIndexArray(v00, v10, v01), state);
+              const Index lc0 = sb.polytope(2, static_cast<Index>(2 * mid + 0),
+                Polytope::Type::Triangle, makeIndexArray(v00, v10, v01), state);
 
-              const Index lc1 = sb.polytope(
-                2, static_cast<Index>(2 * mid + 1), Polytope::Type::Triangle,
-                makeIndexArray(v10, v11, v01), state);
+              const Index lc1 = sb.polytope(2, static_cast<Index>(2 * mid + 1),
+                Polytope::Type::Triangle, makeIndexArray(v10, v11, v01), state);
 
               if (state == Shard::State::Owned)
               {
@@ -1830,14 +1777,12 @@ namespace Rodin::Geometry
             }
             else
             {
-              const IndexArray vs = makeIndexArray(
-                gv2lv.at(vid2(i,     j,     nx)),
-                gv2lv.at(vid2(i + 1, j,     nx)),
-                gv2lv.at(vid2(i + 1, j + 1, nx)),
-                gv2lv.at(vid2(i,     j + 1, nx))
-              );
+              const IndexArray vs =
+                makeIndexArray(gv2lv.at(vid2(i, j, nx)), gv2lv.at(vid2(i + 1, j, nx)),
+                  gv2lv.at(vid2(i + 1, j + 1, nx)), gv2lv.at(vid2(i, j + 1, nx)));
 
-              const Index lc = sb.polytope(2, mid, Polytope::Type::Quadrilateral, vs, state);
+              const Index lc =
+                sb.polytope(2, mid, Polytope::Type::Quadrilateral, vs, state);
 
               if (state == Shard::State::Owned)
               {
@@ -1866,9 +1811,8 @@ namespace Rodin::Geometry
         if (shape.size() != 3)
         {
           Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
-            << "Expected 3 dimensions for geometry type " << g
-            << ", but got " << shape.size() << "."
-            << Alert::Raise;
+            << "Expected 3 dimensions for geometry type " << g << ", but got "
+            << shape.size() << "." << Alert::Raise;
         }
 
         const size_t nx = shape.coeff(0);
@@ -1886,7 +1830,7 @@ namespace Rodin::Geometry
         const size_t cz = nz - 1;
 
         const size_t dim = 3;
-        const std::vector<size_t> nCells = { cx, cy, cz };
+        const std::vector<size_t> nCells = {cx, cy, cz};
         const std::vector<int> procShape = chooseProcShape(dim, nCells);
         const std::vector<int> procCoord = rankToProcCoord(rank, procShape);
 
@@ -1907,61 +1851,68 @@ namespace Rodin::Geometry
         const Interval ghostZ = expandByOne(ownedZ, cz);
 
         const Interval localVertX{
-          ownedX.begin,
-          ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)
-        };
+          ownedX.begin, ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)};
         const Interval localVertY{
-          ownedY.begin,
-          ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)
-        };
+          ownedY.begin, ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)};
         const Interval localVertZ{
-          ownedZ.begin,
-          ownedZ.empty() ? ownedZ.end : std::min(nz, ownedZ.end + 1)
-        };
+          ownedZ.begin, ownedZ.empty() ? ownedZ.end : std::min(nz, ownedZ.end + 1)};
 
         const Interval vertX{
-          ghostX.begin,
-          ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)
-        };
+          ghostX.begin, ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)};
         const Interval vertY{
-          ghostY.begin,
-          ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)
-        };
+          ghostY.begin, ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)};
         const Interval vertZ{
-          ghostZ.begin,
-          ghostZ.empty() ? ghostZ.end : std::min(nz, ghostZ.end + 1)
-        };
+          ghostZ.begin, ghostZ.empty() ? ghostZ.end : std::min(nz, ghostZ.end + 1)};
 
-        const auto ownerOfCell = [&](size_t i, size_t j, size_t k) -> int
-        {
+        const auto ownerOfCell = [&](size_t i, size_t j, size_t k) -> int {
           int px = -1, py = -1, pz = -1;
           for (int p = 0; p < procShape[0]; ++p)
-            if (cellSplits[0][p].contains(i)) { px = p; break; }
+          {
+            if (cellSplits[0][p].contains(i))
+            {
+              px = p;
+              break;
+            }
+          }
           for (int p = 0; p < procShape[1]; ++p)
-            if (cellSplits[1][p].contains(j)) { py = p; break; }
+          {
+            if (cellSplits[1][p].contains(j))
+            {
+              py = p;
+              break;
+            }
+          }
           for (int p = 0; p < procShape[2]; ++p)
-            if (cellSplits[2][p].contains(k)) { pz = p; break; }
+          {
+            if (cellSplits[2][p].contains(k))
+            {
+              pz = p;
+              break;
+            }
+          }
           assert(px >= 0 && py >= 0 && pz >= 0);
-          return procCoordToRank({ px, py, pz }, procShape);
+          return procCoordToRank({px, py, pz}, procShape);
         };
 
-        const auto ownerOfVertex = [&](size_t i, size_t j, size_t k) -> int
-        {
+        const auto ownerOfVertex = [&](size_t i, size_t j, size_t k) -> int {
           std::vector<int> rs;
 
-          std::array<size_t, 2> ii = { i > 0 ? i - 1 : i, std::min(i, cx ? cx - 1 : 0) };
-          std::array<size_t, 2> jj = { j > 0 ? j - 1 : j, std::min(j, cy ? cy - 1 : 0) };
-          std::array<size_t, 2> kk = { k > 0 ? k - 1 : k, std::min(k, cz ? cz - 1 : 0) };
+          std::array<size_t, 2> ii = {i > 0 ? i - 1 : i, std::min(i, cx ? cx - 1 : 0)};
+          std::array<size_t, 2> jj = {j > 0 ? j - 1 : j, std::min(j, cy ? cy - 1 : 0)};
+          std::array<size_t, 2> kk = {k > 0 ? k - 1 : k, std::min(k, cz ? cz - 1 : 0)};
 
           for (size_t a : ii)
           {
-            if (a >= cx) continue;
+            if (a >= cx)
+              continue;
             for (size_t b : jj)
             {
-              if (b >= cy) continue;
+              if (b >= cy)
+                continue;
               for (size_t c : kk)
               {
-                if (c >= cz) continue;
+                if (c >= cz)
+                  continue;
                 rs.push_back(ownerOfCell(a, b, c));
               }
             }
@@ -1973,26 +1924,19 @@ namespace Rodin::Geometry
           return rs.front();
         };
 
-        const auto holdersOfVertex = [&](size_t i, size_t j, size_t k)
-        {
+        const auto holdersOfVertex = [&](size_t i, size_t j, size_t k) {
           std::vector<int> res;
           for (int px = 0; px < procShape[0]; ++px)
           {
             const Interval Gx = expandByOne(cellSplits[0][px], cx);
-            const Interval Vx{
-              Gx.begin,
-              Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)
-            };
+            const Interval Vx{Gx.begin, Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)};
             if (!Vx.contains(i))
               continue;
 
             for (int py = 0; py < procShape[1]; ++py)
             {
               const Interval Gy = expandByOne(cellSplits[1][py], cy);
-              const Interval Vy{
-                Gy.begin,
-                Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)
-              };
+              const Interval Vy{Gy.begin, Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)};
               if (!Vy.contains(j))
                 continue;
 
@@ -2000,11 +1944,9 @@ namespace Rodin::Geometry
               {
                 const Interval Gz = expandByOne(cellSplits[2][pz], cz);
                 const Interval Vz{
-                  Gz.begin,
-                  Gz.empty() ? Gz.end : std::min(nz, Gz.end + 1)
-                };
+                  Gz.begin, Gz.empty() ? Gz.end : std::min(nz, Gz.end + 1)};
                 if (Vz.contains(k))
-                  res.push_back(procCoordToRank({ px, py, pz }, procShape));
+                  res.push_back(procCoordToRank({px, py, pz}, procShape));
               }
             }
           }
@@ -2012,16 +1954,14 @@ namespace Rodin::Geometry
           return res;
         };
 
-        const auto stateOfVertex = [&](size_t i, size_t j, size_t k) -> Shard::State
-        {
+        const auto stateOfVertex = [&](size_t i, size_t j, size_t k) -> Shard::State {
           const int owner = ownerOfVertex(i, j, k);
           if (localVertX.contains(i) && localVertY.contains(j) && localVertZ.contains(k))
             return owner == rank ? Shard::State::Owned : Shard::State::Shared;
           return Shard::State::Ghost;
         };
 
-        const auto holdersOfCell = [&](size_t i, size_t j, size_t k)
-        {
+        const auto holdersOfCell = [&](size_t i, size_t j, size_t k) {
           std::vector<int> res;
           const int owner = ownerOfCell(i, j, k);
           const std::vector<int> oc = rankToProcCoord(owner, procShape);
@@ -2036,9 +1976,12 @@ namespace Rodin::Geometry
                 pc[0] += dx;
                 pc[1] += dy;
                 pc[2] += dz;
-                if (pc[0] < 0 || pc[0] >= procShape[0]) continue;
-                if (pc[1] < 0 || pc[1] >= procShape[1]) continue;
-                if (pc[2] < 0 || pc[2] >= procShape[2]) continue;
+                if (pc[0] < 0 || pc[0] >= procShape[0])
+                  continue;
+                if (pc[1] < 0 || pc[1] >= procShape[1])
+                  continue;
+                if (pc[2] < 0 || pc[2] >= procShape[2])
+                  continue;
 
                 const Interval GX = expandByOne(cellSplits[0][pc[0]], cx);
                 const Interval GY = expandByOne(cellSplits[1][pc[1]], cy);
@@ -2070,8 +2013,7 @@ namespace Rodin::Geometry
               const int owner = ownerOfVertex(i, j, k);
               const Shard::State state = stateOfVertex(i, j, k);
 
-              const Index lv = sb.vertex(
-                gvid,
+              const Index lv = sb.vertex(gvid,
                 sp3(static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)),
                 state);
               gv2lv.emplace(gvid, lv);
@@ -2142,17 +2084,18 @@ namespace Rodin::Geometry
 
               if (g == Polytope::Type::Hexahedron)
               {
-                const Index v0 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
-                const Index v1 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
-                const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
-                const Index v3 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
-                const Index v4 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
-                const Index v5 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+                const Index v0 = gv2lv.at(vid3(i, j, k, nx, ny));
+                const Index v1 = gv2lv.at(vid3(i + 1, j, k, nx, ny));
+                const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k, nx, ny));
+                const Index v3 = gv2lv.at(vid3(i, j + 1, k, nx, ny));
+                const Index v4 = gv2lv.at(vid3(i, j, k + 1, nx, ny));
+                const Index v5 = gv2lv.at(vid3(i + 1, j, k + 1, nx, ny));
                 const Index v6 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
-                const Index v7 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+                const Index v7 = gv2lv.at(vid3(i, j + 1, k + 1, nx, ny));
 
                 const IndexArray vs = makeIndexArray(v0, v1, v2, v3, v4, v5, v6, v7);
-                const Index lc = sb.polytope(3, mid, Polytope::Type::Hexahedron, vs, state);
+                const Index lc =
+                  sb.polytope(3, mid, Polytope::Type::Hexahedron, vs, state);
 
                 if (state == Shard::State::Owned)
                 {
@@ -2169,22 +2112,22 @@ namespace Rodin::Geometry
               }
               else if (g == Polytope::Type::Wedge)
               {
-                const Index v0  = gv2lv.at(vid3(i,     j,     k,     nx, ny));
-                const Index v1  = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
-                const Index v2  = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
-                const Index v3  = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
-                const Index v0p = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
-                const Index v1p = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
-                const Index v2p = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+                const Index v0 = gv2lv.at(vid3(i, j, k, nx, ny));
+                const Index v1 = gv2lv.at(vid3(i + 1, j, k, nx, ny));
+                const Index v2 = gv2lv.at(vid3(i, j + 1, k, nx, ny));
+                const Index v3 = gv2lv.at(vid3(i + 1, j + 1, k, nx, ny));
+                const Index v0p = gv2lv.at(vid3(i, j, k + 1, nx, ny));
+                const Index v1p = gv2lv.at(vid3(i + 1, j, k + 1, nx, ny));
+                const Index v2p = gv2lv.at(vid3(i, j + 1, k + 1, nx, ny));
                 const Index v3p = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
 
-                const Index lc0 = sb.polytope(
-                  3, static_cast<Index>(2 * mid + 0), Polytope::Type::Wedge,
-                  makeIndexArray(v0, v1, v2, v0p, v1p, v2p), state);
+                const Index lc0 =
+                  sb.polytope(3, static_cast<Index>(2 * mid + 0), Polytope::Type::Wedge,
+                    makeIndexArray(v0, v1, v2, v0p, v1p, v2p), state);
 
-                const Index lc1 = sb.polytope(
-                  3, static_cast<Index>(2 * mid + 1), Polytope::Type::Wedge,
-                  makeIndexArray(v1, v3, v2, v1p, v3p, v2p), state);
+                const Index lc1 =
+                  sb.polytope(3, static_cast<Index>(2 * mid + 1), Polytope::Type::Wedge,
+                    makeIndexArray(v1, v3, v2, v1p, v3p, v2p), state);
 
                 if (state == Shard::State::Owned)
                 {
@@ -2259,34 +2202,34 @@ namespace Rodin::Geometry
               }
               else // Tetrahedron
               {
-                const Index v000 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
-                const Index v100 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
-                const Index v010 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
-                const Index v110 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+                const Index v000 = gv2lv.at(vid3(i, j, k, nx, ny));
+                const Index v100 = gv2lv.at(vid3(i + 1, j, k, nx, ny));
+                const Index v010 = gv2lv.at(vid3(i, j + 1, k, nx, ny));
+                const Index v110 = gv2lv.at(vid3(i + 1, j + 1, k, nx, ny));
 
-                const Index v001 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
-                const Index v101 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
-                const Index v011 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+                const Index v001 = gv2lv.at(vid3(i, j, k + 1, nx, ny));
+                const Index v101 = gv2lv.at(vid3(i + 1, j, k + 1, nx, ny));
+                const Index v011 = gv2lv.at(vid3(i, j + 1, k + 1, nx, ny));
                 const Index v111 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
 
-                const Index lc0 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 0), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v100, v110, v111), state);
-                const Index lc1 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 1), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v110, v010, v111), state);
-                const Index lc2 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 2), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v010, v011, v111), state);
-                const Index lc3 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 3), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v011, v001, v111), state);
-                const Index lc4 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 4), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v001, v101, v111), state);
-                const Index lc5 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 5), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v101, v100, v111), state);
+                const Index lc0 = sb.polytope(3, static_cast<Index>(6 * mid + 0),
+                  Polytope::Type::Tetrahedron, makeIndexArray(v000, v100, v110, v111),
+                  state);
+                const Index lc1 = sb.polytope(3, static_cast<Index>(6 * mid + 1),
+                  Polytope::Type::Tetrahedron, makeIndexArray(v000, v110, v010, v111),
+                  state);
+                const Index lc2 = sb.polytope(3, static_cast<Index>(6 * mid + 2),
+                  Polytope::Type::Tetrahedron, makeIndexArray(v000, v010, v011, v111),
+                  state);
+                const Index lc3 = sb.polytope(3, static_cast<Index>(6 * mid + 3),
+                  Polytope::Type::Tetrahedron, makeIndexArray(v000, v011, v001, v111),
+                  state);
+                const Index lc4 = sb.polytope(3, static_cast<Index>(6 * mid + 4),
+                  Polytope::Type::Tetrahedron, makeIndexArray(v000, v001, v101, v111),
+                  state);
+                const Index lc5 = sb.polytope(3, static_cast<Index>(6 * mid + 5),
+                  Polytope::Type::Tetrahedron, makeIndexArray(v000, v101, v100, v111),
+                  state);
 
                 if (state == Shard::State::Owned)
                 {
@@ -2324,8 +2267,7 @@ namespace Rodin::Geometry
       default:
       {
         Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
-          << "Unsupported geometry type " << g << "."
-          << Alert::Raise;
+          << "Unsupported geometry type " << g << "." << Alert::Raise;
         return MPIMesh(context);
       }
     }

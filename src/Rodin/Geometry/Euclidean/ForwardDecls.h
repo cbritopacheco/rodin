@@ -1,77 +1,70 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file
- * @brief Forward declarations for Euclidean geometry classes.
+ * @file ForwardDecls.h
+ * @brief Euclidean geometry declarations and definitions.
  */
-
 #ifndef RODIN_GEOMETRY_EUCLIDEAN_FORWARDDECLS_H
 #define RODIN_GEOMETRY_EUCLIDEAN_FORWARDDECLS_H
 
+#include <cstddef>
+#include "Rodin/Types.h"
+
 namespace Rodin::Geometry::Euclidean
 {
-  /**
-   * @brief Base class for Euclidean geometric objects using CRTP.
-   * @tparam T Scalar type (e.g., float, double)
-   * @tparam Derived Derived class type
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_rectangle.html">Rectangle</a>
-   */
-  template <class T, class Derived>
+  template <class Derived, class T>
   class Base;
+  template <size_t Dimension, class T = Real>
+  class Point;
+  template <size_t Dimension, class T = Real>
+  class LineSegment;
+  template <size_t Dimension, class T = Real>
+  class Line;
+  template <size_t Dimension, class T = Real>
+  class Sphere;
+  template <size_t Dimension, class T = Real>
+  class Hyperplane;
+  template <size_t Dimension, class T = Real>
+  class Box;
 
   /**
-   * @brief Circle in 2D Euclidean space.
-   * @tparam T Scalar type
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
+   * @brief Point in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
    */
   template <class T>
-  class Circle;
+  using Point2D = Point<2, T>;
 
   /**
-   * @brief Infinite line in 2D Euclidean space.
-   * @tparam T Scalar type
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
+   * @brief Line segment in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
    */
   template <class T>
-  class Line2D;
+  using LineSegment2D = LineSegment<2, T>;
 
   /**
-   * @brief Point in 2D Euclidean space.
-   * @tparam T Scalar type
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
+   * @brief Affine line in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
    */
   template <class T>
-  class Point2D;
+  using Line2D = Line<2, T>;
 
   /**
-   * @brief Line segment in 2D Euclidean space.
-   * @tparam T Scalar type
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
+   * @brief Circle in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
    */
   template <class T>
-  class LineSegment2D;
+  using Circle = Sphere<2, T>;
 
   /**
-   * @brief Axis-aligned rectangle in 2D Euclidean space.
-   * @tparam T Scalar type
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
+   * @brief Axis-aligned box in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
    */
   template <class T>
-  class Rectangle;
+  using Rectangle = Box<2, T>;
 }
 
 #endif

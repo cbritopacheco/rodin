@@ -16,6 +16,7 @@
 #include <type_traits>
 
 #include "Rodin/Math/Common.h"
+#include "Rodin/Types.h"
 
 #include "Concepts.h"
 
@@ -34,11 +35,11 @@ namespace Rodin::Geometry::Euclidean
    * @note This is an abstract base class with no functionality, serving
    * only to establish the type hierarchy for Euclidean geometric objects.
    *
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
-   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_rectangle.html">Rectangle</a>
+   * @see @ref Rodin::Geometry::Euclidean::Point2D "Point2D"
+   * @see @ref Rodin::Geometry::Euclidean::Circle "Circle"
+   * @see @ref Rodin::Geometry::Euclidean::Line2D "Line2D"
+   * @see @ref Rodin::Geometry::Euclidean::LineSegment2D "LineSegment2D"
+   * @see @ref Rodin::Geometry::Euclidean::Rectangle "Rectangle"
    */
   template <class Derived, class T>
   class Base

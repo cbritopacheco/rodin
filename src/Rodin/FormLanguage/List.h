@@ -13,12 +13,12 @@
  * ownership of its elements through unique pointers and supports standard
  * container operations.
  *
- * ## Design
+ * # Design
  * The List class is designed to work with types derived from FormLanguage::Base,
  * leveraging the copy() method for proper polymorphic copying. Elements are
  * stored as unique_ptr instances, ensuring automatic memory management.
  *
- * ## Usage Example
+ * # Usage Example
  * @code{.cpp}
  * List<BoundaryCondition> bcList;
  * bcList.add(DirichletBC(...));
@@ -32,6 +32,8 @@
  */
 #include <vector>
 #include <memory>
+
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Base.h"
 
@@ -48,18 +50,18 @@ namespace Rodin::FormLanguage
    * objects with value semantics. The container manages object lifetimes
    * through unique pointers and provides deep copying capabilities.
    *
-   * ## Features
+   * # Features
    * - **Polymorphic Storage**: Stores derived types through base class pointers
    * - **Value Semantics**: Copy constructor and assignment perform deep copies
    * - **Iterator Support**: Provides standard forward iterators
    * - **Type Safety**: Elements are accessed through their stored type T
    *
-   * ## Memory Management
+   * # Memory Management
    * - Elements are stored as std::unique_ptr<T>
    * - Copy operations use the polymorphic copy() method
    * - Automatic cleanup on destruction
    *
-   * ## Complexity
+   * # Complexity
    * - Access: @f$ O(1) @f$ for at()
    * - Insertion: @f$ O(1) @f$ amortized for add()
    * - Copy: @f$ O(n) @f$ where @f$ n @f$ is the number of elements
@@ -83,7 +85,7 @@ namespace Rodin::FormLanguage
        */
       class Iterator
       {
-          using InternalIterator = typename std::vector<std::unique_ptr<T>>::iterator;
+        using InternalIterator = typename std::vector<std::unique_ptr<T>>::iterator;
 
         public:
           /**
@@ -98,7 +100,11 @@ namespace Rodin::FormLanguage
            * @brief Pre-increment operator.
            * @return Reference to this iterator after increment
            */
-          constexpr Iterator& operator++() { m_it++; return *this; }
+          constexpr Iterator& operator++()
+          {
+            m_it++;
+            return *this;
+          }
 
           /**
            * @brief Post-increment operator.
@@ -117,20 +123,31 @@ namespace Rodin::FormLanguage
            * @param[in] other Iterator to compare with
            * @return True if iterators point to the same element
            */
-          constexpr bool operator==(const Iterator& other) const { return m_it == other.m_it; }
+          constexpr bool operator==(const Iterator& other) const
+          {
+            return m_it == other.m_it;
+          }
 
           /**
            * @brief Inequality comparison operator.
            * @param[in] other Iterator to compare with
            * @return True if iterators point to different elements
            */
-          constexpr bool operator!=(const Iterator& other) const { return !(*this == other); }
+          constexpr bool operator!=(const Iterator& other) const
+          {
+            return !(*this == other);
+          }
 
           /**
            * @brief Dereference operator.
            * @return Reference to the element at the current position
            */
-          constexpr reference operator*() const { assert(*m_it); return static_cast<reference>(**m_it); }
+          constexpr reference operator*() const
+          {
+            assert(*m_it);
+            return static_cast<reference>(**m_it);
+          }
+
         private:
           InternalIterator m_it;
       };
@@ -143,8 +160,8 @@ namespace Rodin::FormLanguage
        */
       class ConstIterator
       {
-          using InternalConstIterator =
-            typename std::vector<std::unique_ptr<T>>::const_iterator;
+        using InternalConstIterator =
+          typename std::vector<std::unique_ptr<T>>::const_iterator;
 
         public:
           /**
@@ -159,7 +176,11 @@ namespace Rodin::FormLanguage
            * @brief Pre-increment operator.
            * @return Reference to this iterator after increment
            */
-          constexpr ConstIterator& operator++() { m_it++; return *this; }
+          constexpr ConstIterator& operator++()
+          {
+            m_it++;
+            return *this;
+          }
 
           /**
            * @brief Post-increment operator.
@@ -178,20 +199,31 @@ namespace Rodin::FormLanguage
            * @param[in] other Iterator to compare with
            * @return True if iterators point to the same element
            */
-          constexpr bool operator==(const ConstIterator& other) const { return m_it == other.m_it; }
+          constexpr bool operator==(const ConstIterator& other) const
+          {
+            return m_it == other.m_it;
+          }
 
           /**
            * @brief Inequality comparison operator.
            * @param[in] other Iterator to compare with
            * @return True if iterators point to different elements
            */
-          constexpr bool operator!=(const ConstIterator& other) const { return !(*this == other); }
+          constexpr bool operator!=(const ConstIterator& other) const
+          {
+            return !(*this == other);
+          }
 
           /**
            * @brief Dereference operator.
            * @return Const reference to the element at the current position
            */
-          constexpr const_reference operator*() const { assert(*m_it); return static_cast<const_reference>(**m_it); }
+          constexpr const_reference operator*() const
+          {
+            assert(*m_it);
+            return static_cast<const_reference>(**m_it);
+          }
+
         private:
           InternalConstIterator m_it;
       };
@@ -261,22 +293,34 @@ namespace Rodin::FormLanguage
        * @brief Accesses element at specified index with bounds checking.
        * @param[in] i Index of element to access
        * @return Reference to element at index i
-       * @throws std::out_of_range if i >= size()
+       * @throws Alert::Exception if i >= size()
        */
       constexpr reference at(size_t i)
       {
-        return *m_list.at(i);
+        if (i >= m_list.size())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Element index " << i << " is outside list size " << m_list.size() << '.'
+            << Alert::Raise;
+        }
+        return *m_list[i];
       }
 
       /**
        * @brief Accesses element at specified index with bounds checking (const version).
        * @param[in] i Index of element to access
        * @return Const reference to element at index i
-       * @throws std::out_of_range if i >= size()
+       * @throws Alert::Exception if i >= size()
        */
       constexpr const_reference at(size_t i) const
       {
-        return *m_list.at(i);
+        if (i >= m_list.size())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Element index " << i << " is outside list size " << m_list.size() << '.'
+            << Alert::Raise;
+        }
+        return *m_list[i];
       }
 
       /**

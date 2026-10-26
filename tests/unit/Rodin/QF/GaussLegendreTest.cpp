@@ -5,7 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
 #include <cmath>
+#include <thread>
 
 #include "Rodin/QF/GaussLegendre.h"
 
@@ -58,7 +60,12 @@ TEST_F(GaussLegendreTest, BasicConstruction)
 }
 
 // Test Point geometry
-/// @brief Verifies point geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
+/**
+ * @brief Checks unit mass and empty reference coordinates for Point.
+ *
+ * A point has zero reference dimension regardless of the requested Gaussian
+ * count. In particular, a one-entry zero is not a point in @f$\mathbb{R}^0@f$.
+ */
 TEST_F(GaussLegendreTest, PointGeometry)
 {
   GaussLegendre gl_point(Polytope::Type::Point);
@@ -67,8 +74,7 @@ TEST_F(GaussLegendreTest, PointGeometry)
   EXPECT_EQ(gl_point.getGeometry(), Polytope::Type::Point);
 
   const auto& point = gl_point.getPoint(0);
-  EXPECT_EQ(point.size(), 1);
-  EXPECT_DOUBLE_EQ(point[0], 0.0);
+  EXPECT_EQ(point.size(), 0);
   EXPECT_DOUBLE_EQ(gl_point.getWeight(0), 1.0);
 }
 
@@ -130,12 +136,12 @@ TEST_F(GaussLegendreTest, QuadrilateralGeometry)
 {
   // Test uniform order
   GaussLegendre gl_uniform(Polytope::Type::Quadrilateral, 2);
-  EXPECT_EQ(gl_uniform.getSize(), 4);  // 2x2 points
+  EXPECT_EQ(gl_uniform.getSize(), 4); // 2x2 points
   EXPECT_EQ(gl_uniform.getGeometry(), Polytope::Type::Quadrilateral);
 
   // Test different orders in x and y
   GaussLegendre gl_mixed(Polytope::Type::Quadrilateral, 2, 3);
-  EXPECT_EQ(gl_mixed.getSize(), 6);  // 2x3 points
+  EXPECT_EQ(gl_mixed.getSize(), 6); // 2x3 points
 
   // Check that all points are 2D
   for (size_t i = 0; i < gl_uniform.getSize(); ++i)
@@ -162,7 +168,7 @@ TEST_F(GaussLegendreTest, QuadrilateralGeometry)
 TEST_F(GaussLegendreTest, TriangleGeometry)
 {
   GaussLegendre gl_tri(Polytope::Type::Triangle, 2);
-  EXPECT_EQ(gl_tri.getSize(), 4);  // 2x2 points
+  EXPECT_EQ(gl_tri.getSize(), 4); // 2x2 points
   EXPECT_EQ(gl_tri.getGeometry(), Polytope::Type::Triangle);
 
   // Check that all points are 2D and within unit triangle
@@ -172,7 +178,7 @@ TEST_F(GaussLegendreTest, TriangleGeometry)
     EXPECT_EQ(point.size(), 2);
     EXPECT_GE(point[0], 0.0);
     EXPECT_GE(point[1], 0.0);
-    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14);  // Allow small numerical error
+    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14); // Allow small numerical error
   }
 
   // Check that weights sum to 0.5 (area of unit triangle)
@@ -189,7 +195,7 @@ TEST_F(GaussLegendreTest, TriangleGeometry)
 TEST_F(GaussLegendreTest, TetrahedronGeometry)
 {
   GaussLegendre gl_tet(Polytope::Type::Tetrahedron, 2, 2, 2);
-  EXPECT_EQ(gl_tet.getSize(), 8);  // 2x2x2 points
+  EXPECT_EQ(gl_tet.getSize(), 8); // 2x2x2 points
   EXPECT_EQ(gl_tet.getGeometry(), Polytope::Type::Tetrahedron);
 
   // Check that all points are 3D and within unit tetrahedron
@@ -200,7 +206,7 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
     EXPECT_GE(point[0], 0.0);
     EXPECT_GE(point[1], 0.0);
     EXPECT_GE(point[2], 0.0);
-    EXPECT_LE(point[0] + point[1] + point[2], 1.0 + 1e-14);  // Allow small numerical error
+    EXPECT_LE(point[0] + point[1] + point[2], 1.0 + 1e-14); // Allow small numerical error
   }
 
   // Check that weights sum to 1/6 (volume of unit tetrahedron)
@@ -209,15 +215,15 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
   {
     total_weight += gl_tet.getWeight(i);
   }
-  EXPECT_NEAR(total_weight, 1.0/6.0, 1e-12);
+  EXPECT_NEAR(total_weight, 1.0 / 6.0, 1e-12);
 }
 
 // Test Wedge geometry
 /// @brief Verifies wedge geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
 TEST_F(GaussLegendreTest, WedgeGeometry)
 {
-  GaussLegendre gl_wedge(Polytope::Type::Wedge, 2, 3);
-  EXPECT_EQ(gl_wedge.getSize(), 12);  // 2x2x3 points (triangle base * height)
+  GaussLegendre gl_wedge(Polytope::Type::Wedge, 2, 2, 3);
+  EXPECT_EQ(gl_wedge.getSize(), 12); // 2x2x3 points (triangle base * height)
   EXPECT_EQ(gl_wedge.getGeometry(), Polytope::Type::Wedge);
 
   // Check that all points are 3D
@@ -229,7 +235,7 @@ TEST_F(GaussLegendreTest, WedgeGeometry)
     EXPECT_GE(point[1], 0.0);
     EXPECT_GE(point[2], 0.0);
     EXPECT_LE(point[2], 1.0);
-    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14);  // Triangle constraint in xy
+    EXPECT_LE(point[0] + point[1], 1.0 + 1e-14); // Triangle constraint in xy
   }
 
   // Check that weights sum to 0.5 (volume of unit wedge)
@@ -349,8 +355,8 @@ TEST_F(GaussLegendreTest, SymmetryProperties)
     size_t mirror_i = gl.getSize() - 1 - i;
     double x1 = gl.getPoint(i)[0];
     double x2 = gl.getPoint(mirror_i)[0];
-    EXPECT_NEAR(x1 + x2, 1.0, 1e-14);  // Symmetric around 0.5
-    EXPECT_NEAR(gl.getWeight(i), gl.getWeight(mirror_i), 1e-14);  // Equal weights
+    EXPECT_NEAR(x1 + x2, 1.0, 1e-14); // Symmetric around 0.5
+    EXPECT_NEAR(gl.getWeight(i), gl.getWeight(mirror_i), 1e-14); // Equal weights
   }
 }
 
@@ -364,32 +370,46 @@ TEST_F(GaussLegendreTest, EdgeCases)
   EXPECT_DOUBLE_EQ(gl_min.getWeight(0), 1.0);
 }
 
-/// @brief Copies and moves receive identities distinct from their source.
-TEST_F(GaussLegendreTest, CacheIdentityDistinguishesCopiesAndMoves)
+/// @brief Copies and moves preserve owned numerical samples.
+TEST_F(GaussLegendreTest, CopiesAndMovesPreserveSamples)
 {
   GaussLegendre original(Polytope::Type::Segment, 2);
-  const size_t originalIdentity = original.getCacheIdentity();
   GaussLegendre copied(original);
-  const size_t copiedIdentity = copied.getCacheIdentity();
-  EXPECT_NE(copiedIdentity, originalIdentity);
   GaussLegendre moved(std::move(copied));
-  EXPECT_NE(moved.getCacheIdentity(), copiedIdentity);
-  EXPECT_NE(moved.getCacheIdentity(), originalIdentity);
-  EXPECT_EQ(original.getCacheIdentity(), originalIdentity);
-  EXPECT_NEAR(moved.getPoint(0)(0), original.getPoint(0)(0), 1e-14);
+  EXPECT_EQ(moved.getPoint(0)(0), original.getPoint(0)(0));
 }
 
-/// @brief Replacing rule contents changes its cache identity at the same address.
-TEST_F(GaussLegendreTest, AssignmentInvalidatesCacheIdentity)
+/// @brief Assignment replaces the owned sample collection.
+TEST_F(GaussLegendreTest, AssignmentReplacesSamples)
 {
   GaussLegendre destination(Polytope::Type::Segment, 1);
   GaussLegendre source(Polytope::Type::Segment, 2);
-  const size_t previousIdentity = destination.getCacheIdentity();
-  const size_t sourceIdentity = source.getCacheIdentity();
   destination = source;
-  EXPECT_NE(destination.getCacheIdentity(), previousIdentity);
-  EXPECT_NE(destination.getCacheIdentity(), sourceIdentity);
-  EXPECT_EQ(source.getCacheIdentity(), sourceIdentity);
   EXPECT_EQ(destination.getSize(), source.getSize());
-  EXPECT_NEAR(destination.getPoint(0)(0), source.getPoint(0)(0), 1e-14);
+  EXPECT_EQ(destination.getPoint(0)(0), source.getPoint(0)(0));
+}
+
+/// @brief Move assignment preserves the destination samples on all reference cells.
+TEST_F(GaussLegendreTest, MoveAssignmentPreservesSamples)
+{
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(int(geometry));
+    GaussLegendre source(geometry, 2);
+    const GaussLegendre expected(source);
+    GaussLegendre destination(Polytope::Type::Segment, 1);
+    destination = std::move(source);
+    ASSERT_EQ(destination.getSize(), expected.getSize());
+    EXPECT_EQ(destination.getGeometry(), geometry);
+    for (size_t qp = 0; qp < expected.getSize(); ++qp)
+    {
+      EXPECT_EQ(destination.getWeight(qp), expected.getWeight(qp));
+      ASSERT_EQ(destination.getPoint(qp).size(), expected.getPoint(qp).size());
+      for (size_t j = 0; j < expected.getPoint(qp).size(); ++j)
+        EXPECT_EQ(destination.getPoint(qp)(j), expected.getPoint(qp)(j));
+    }
+  }
 }

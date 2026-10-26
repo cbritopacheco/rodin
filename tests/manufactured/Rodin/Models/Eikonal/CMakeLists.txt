@@ -6,7 +6,7 @@ target_link_libraries(RodinManufacturedEikonalFMMTest
   Rodin::Rodin
   Rodin::Eikonal
 )
-gtest_discover_tests(RodinManufacturedEikonalFMMTest
+rodin_discover_tests(RodinManufacturedEikonalFMMTest
   PROPERTIES
     LABELS manufactured
 )
@@ -19,7 +19,7 @@ target_link_libraries(RodinManufacturedEikonal2D3DTest
   Rodin::Rodin
   Rodin::Eikonal
 )
-gtest_discover_tests(RodinManufacturedEikonal2D3DTest
+rodin_discover_tests(RodinManufacturedEikonal2D3DTest
   PROPERTIES
     LABELS manufactured
 )

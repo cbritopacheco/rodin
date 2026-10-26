@@ -32,7 +32,7 @@ namespace Rodin::Solid
    *   \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I})
    * @f]
    *
-   * ## Usage
+   * # Usage
    * @code
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);

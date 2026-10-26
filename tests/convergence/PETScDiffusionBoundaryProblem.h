@@ -118,8 +118,10 @@ namespace Rodin::Tests::Convergence
         {
           Problem problem(u, v);
           if (m_condition == Condition::Neumann)
+          {
             problem = stiffness - load - natural.over(NaturalAttribute) +
               DirichletBC(u, exact).on(DirichletAttribute);
+          }
           else
           {
             auto mass = BoundaryIntegral(u, v);
@@ -187,7 +189,8 @@ namespace Rodin::Tests::Convergence
         return measure();
 #else
         ADD_FAILURE() << "Pure Neumann certification requires PETSc MUMPS";
-        return {};
+        return ErrorNorms(
+          std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::infinity());
 #endif
       }
 

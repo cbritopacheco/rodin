@@ -23,30 +23,66 @@
 namespace Rodin::IO
 {
   /**
+   * @brief Escapes XML text and attribute values without changing filesystem names.
+   * @param value Unescaped UTF-8 name or HDF5 filename.
+   * @returns XML representation preserving the original decoded string.
+   */
+  static std::string escapeXML(const std::string& value)
+  {
+    std::string result;
+    result.reserve(value.size());
+    for (const char character : value)
+    {
+      switch (character)
+      {
+        case '&':
+          result += "&amp;";
+          break;
+        case '<':
+          result += "&lt;";
+          break;
+        case '>':
+          result += "&gt;";
+          break;
+        case '"':
+          result += "&quot;";
+          break;
+        case '\'':
+          result += "&apos;";
+          break;
+        default:
+          result += character;
+          break;
+      }
+    }
+    return result;
+  }
+
+  /**
    * @brief Formats an index with leading zeros.
    * @param index Degree-of-freedom index.
    * @param width Minimum number of decimal digits.
    * @returns Decimal index padded to at least the requested width.
    */
 
-  static
-  std::string padIndex(size_t index, size_t width)
+  static std::string padIndex(size_t index, size_t width)
   {
     std::ostringstream oss;
     oss << std::setw(static_cast<int>(width)) << std::setfill('0') << index;
     return oss.str();
   }
+
   /**
    * @brief Formats the optional MPI rank suffix.
    * @param rank Rank identifier; an empty string omits the rank suffix.
    * @returns An empty string for an empty rank, otherwise the rank prefixed by .r.
    */
 
-  static
-  std::string makeRankSuffix(const std::string& rank)
+  static std::string makeRankSuffix(const std::string& rank)
   {
     return rank.empty() ? std::string() : ".r" + rank;
   }
+
   /**
    * @brief Expands XDMF filename placeholders and normalizes separators.
    * @param pattern Filename pattern containing named placeholders.
@@ -58,20 +94,14 @@ namespace Rodin::IO
    * @returns Expanded filename with separators introduced by empty placeholders normalized.
    */
 
-  static
-  std::string expandPattern(
-      const std::string& pattern,
-      const std::string& stem,
-      const std::string& grid,
-      const std::string& name,
-      const std::string& index,
-      const std::string& rank = "")
+  static std::string expandPattern(const std::string& pattern, const std::string& stem,
+    const std::string& grid, const std::string& name, const std::string& index,
+    const std::string& rank = "")
   {
     std::string result = pattern;
 
-    auto replace = [&](const std::string& placeholder, const std::string& value)
-    {
-      for (std::string::size_type pos = 0; ;)
+    auto replace = [&](const std::string& placeholder, const std::string& value) {
+      for (std::string::size_type pos = 0;;)
       {
         pos = result.find(placeholder, pos);
         if (pos == std::string::npos)
@@ -108,47 +138,47 @@ namespace Rodin::IO
 
     return result;
   }
+
   /**
    * @brief Writes the XDMF XML declaration and root opening tag.
    * @param os Output stream receiving the formatted data.
    */
 
-  static
-  void writeXMLHeader(std::ostream& os)
+  static void writeXMLHeader(std::ostream& os)
   {
     os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     os << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
     os << "<Xdmf Version=\"3.0\" xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n";
   }
+
   /**
    * @brief Writes the XDMF root closing tag.
    * @param os Output stream receiving the formatted data.
    */
 
-  static
-  void writeXMLFooter(std::ostream& os)
+  static void writeXMLFooter(std::ostream& os)
   {
     os << "</Xdmf>\n";
   }
+
   /**
    * @brief Constructs indentation for an XML nesting level.
    * @param level Indentation level, with two spaces per level.
    * @returns A string containing two spaces per nesting level.
    */
 
-  static
-  std::string indent(size_t level)
+  static std::string indent(size_t level)
   {
     return std::string(level * 2, ' ');
   }
+
   /**
    * @brief Selects the XDMF coordinate-layout name.
    * @param sdim Spatial coordinate dimension, from one to three.
    * @returns X, XY, or XYZ for spatial dimensions one, two, or three.
    */
 
-  static
-  const char* getGeometryType(size_t sdim)
+  static const char* getGeometryType(size_t sdim)
   {
     switch (sdim)
     {
@@ -159,13 +189,13 @@ namespace Rodin::IO
       case 3:
         return "XYZ";
       default:
-        Alert::Exception()
-          << "Unsupported space dimension for XDMF geometry: " << sdim
-          << Alert::Raise;
+        Alert::Exception() << "Unsupported space dimension for XDMF geometry: " << sdim
+                           << Alert::Raise;
     }
     assert(false);
     return nullptr;
   }
+
   /**
    * @brief Constructs a grid-piece name for an MPI rank.
    * @param gridName Grid name, possibly empty.
@@ -173,8 +203,7 @@ namespace Rodin::IO
    * @returns Grid name followed by _r and the rank, or r and the rank when the grid name is empty.
    */
 
-  static
-  std::string makeGridPieceName(const std::string& gridName, size_t rank)
+  static std::string makeGridPieceName(const std::string& gridName, size_t rank)
   {
     if (gridName.empty())
       return "r" + std::to_string(rank);
@@ -183,10 +212,16 @@ namespace Rodin::IO
 
   // ---- XDMF::Grid ----------------------------------------------------------
 
-  XDMF::Grid::Grid(XDMF& owner, size_t index) noexcept
+  XDMF::Grid::Grid(XDMF& owner, size_t index)
     : m_owner(&owner),
       m_index(index)
-  {}
+  {
+    if (index >= owner.m_grids.size())
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "XDMF grid index " << index << " is not registered." << Alert::Raise;
+    }
+  }
 
   std::string_view XDMF::Grid::getName() const noexcept
   {
@@ -240,9 +275,7 @@ namespace Rodin::IO
   {}
 
 #ifdef RODIN_USE_MPI
-  XDMF::XDMF(MPI_Comm comm,
-             const boost::filesystem::path& stem,
-             size_t rootRank)
+  XDMF::XDMF(MPI_Comm comm, const boost::filesystem::path& stem, size_t rootRank)
     : m_stem(stem),
       m_distributed(true),
       m_rootRank(rootRank),
@@ -256,9 +289,10 @@ namespace Rodin::IO
 
     // Use {rank_suffix} so that the same expansion logic can omit the rank
     // cleanly when rank == "".
-    m_patterns.staticMesh    = "{stem}.{grid}{rank_suffix}.mesh.h5";
+    m_patterns.staticMesh = "{stem}.{grid}{rank_suffix}.mesh.h5";
     m_patterns.transientMesh = "{stem}.{grid}{rank_suffix}.mesh.{index}.h5";
-    m_patterns.attribute     = "{stem}.{grid}.{name}{rank_suffix}.{index}.h5";
+    m_patterns.attribute = "{stem}.{grid}.{name}{rank_suffix}.{index}.h5";
+    m_patterns.staticAttribute = "{stem}.{grid}.{name}{rank_suffix}.h5";
   }
 #endif
 
@@ -323,21 +357,19 @@ namespace Rodin::IO
     if (m_closed)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Cannot write to a closed XDMF writer."
-        << Alert::Raise;
+        << "Cannot write to a closed XDMF writer." << Alert::Raise;
     }
 
-    const std::string stemStr  = m_stem.filename().string();
+    const std::string stemStr = m_stem.filename().string();
     const std::string indexStr = padIndex(m_snapshotCount, m_padding);
-    const std::string rankStr  = m_distributed ? std::to_string(m_rank) : std::string();
+    const std::string rankStr = m_distributed ? std::to_string(m_rank) : std::string();
 
     for (auto& gr : m_grids)
     {
       if (!gr.mesh)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Grid \"" << gr.name << "\" has no mesh set."
-          << Alert::Raise;
+          << "Grid \"" << gr.name << "\" has no mesh set." << Alert::Raise;
       }
 
       const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
@@ -364,13 +396,8 @@ namespace Rodin::IO
       {
         if (!gr.staticMeshWritten)
         {
-          const auto meshFile = expandPattern(
-              patterns.staticMesh,
-              stemStr,
-              gr.name,
-              "",
-              "",
-              rankStr);
+          const auto meshFile =
+            expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rankStr);
           const auto meshPath = m_stem.parent_path() / meshFile;
 
           HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
@@ -383,13 +410,8 @@ namespace Rodin::IO
       }
       else
       {
-        const auto meshFile = expandPattern(
-            patterns.transientMesh,
-            stemStr,
-            gr.name,
-            "",
-            indexStr,
-            rankStr);
+        const auto meshFile =
+          expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rankStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
         HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
@@ -423,12 +445,7 @@ namespace Rodin::IO
           if (!attr.staticWritten)
           {
             const auto attrFile = expandPattern(
-                patterns.staticAttribute,
-                stemStr,
-                gr.name,
-                attr.name,
-                "",
-                rankStr);
+              patterns.staticAttribute, stemStr, gr.name, attr.name, "", rankStr);
             const auto attrPath = m_stem.parent_path() / attrFile;
 
             attr.write(attrPath, attr.center);
@@ -443,12 +460,7 @@ namespace Rodin::IO
         else
         {
           const auto attrFile = expandPattern(
-              patterns.attribute,
-              stemStr,
-              gr.name,
-              attr.name,
-              indexStr,
-              rankStr);
+            patterns.attribute, stemStr, gr.name, attr.name, indexStr, rankStr);
           const auto attrPath = m_stem.parent_path() / attrFile;
 
           attr.write(attrPath, attr.center);
@@ -467,15 +479,13 @@ namespace Rodin::IO
     return *this;
   }
 
-  void XDMF::writeUniformGrid(
-      std::ostream& os,
-      const std::string& gridName,
-      const SnapshotRecord& snap,
-      size_t bi) const
+  void XDMF::writeUniformGrid(std::ostream& os, const std::string& gridName,
+    const SnapshotRecord& snap, size_t bi) const
   {
     const auto meshH5 = snap.meshFile.string();
 
-    os << indent(bi) << "<Grid Name=\"" << gridName << "\" GridType=\"Uniform\">\n";
+    os << indent(bi) << "<Grid Name=\"" << escapeXML(gridName)
+       << "\" GridType=\"Uniform\">\n";
     os << indent(bi + 1) << "<Time Value=\"" << snap.time << "\" />\n";
 
     os << indent(bi + 1) << "<Topology TopologyType=\"" << snap.topologyType
@@ -489,16 +499,16 @@ namespace Rodin::IO
       os << snap.topologyRows << " " << snap.topologyColumns;
     else
       os << snap.topologySize;
-    os << "\">" << meshH5 << ":" << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
+    os << "\">" << escapeXML(meshH5) << ":" << HDF5::Path::MeshXDMFTopology
+       << "</DataItem>\n";
     os << indent(bi + 1) << "</Topology>\n";
 
     os << indent(bi + 1) << "<Geometry GeometryType=\""
        << getGeometryType(snap.spaceDimension) << "\">\n";
-    os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-       << snap.vertexCount << " " << snap.spaceDimension
-       << "\">"
-       << meshH5 << ":" << HDF5::Path::MeshGeometryVertices
-       << "</DataItem>\n";
+    os << indent(bi + 2)
+       << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
+       << snap.vertexCount << " " << snap.spaceDimension << "\">" << escapeXML(meshH5)
+       << ":" << HDF5::Path::MeshGeometryVertices << "</DataItem>\n";
     os << indent(bi + 1) << "</Geometry>\n";
 
     for (const auto& attr : snap.meshAttributes)
@@ -507,13 +517,13 @@ namespace Rodin::IO
       std::ostringstream dimStr;
       dimStr << ((attr.center == Center::Node) ? snap.vertexCount : snap.cellCount);
 
-      os << indent(bi + 1) << "<Attribute Name=\"" << attr.name
+      os << indent(bi + 1) << "<Attribute Name=\"" << escapeXML(attr.name)
          << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
       // Same reason as topology: the mesh attribute is stored as U64 in HDF5.
-      os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
-         << dimStr.str() << "\">"
-         << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)
-         << "</DataItem>\n";
+      os << indent(bi + 2)
+         << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
+         << dimStr.str() << "\">" << escapeXML(meshH5) << ":"
+         << HDF5::attributePath(attr.topologicalDimension) << "</DataItem>\n";
       os << indent(bi + 1) << "</Attribute>\n";
     }
 
@@ -526,8 +536,8 @@ namespace Rodin::IO
         : ((attr.dimension == 1) ? "Scalar" : "Vector");
 
       std::ostringstream dimStr;
-      const size_t count = (attr.center == Center::Node)
-          ? snap.vertexCount : snap.cellCount;
+      const size_t count =
+        (attr.center == Center::Node) ? snap.vertexCount : snap.cellCount;
       if (attr.rows)
         dimStr << count << " " << attr.rows << " " << attr.columns;
       else if (attr.dimension == 1)
@@ -535,20 +545,19 @@ namespace Rodin::IO
       else
         dimStr << count << " " << attr.dimension;
 
-      os << indent(bi + 1) << "<Attribute Name=\"" << attr.name
-         << "\" AttributeType=\"" << attrType
-         << "\" Center=\"" << centerStr << "\">\n";
-      os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-         << dimStr.str() << "\">"
-         << attrH5 << ":" << HDF5::Path::GridFunctionValuesData
-         << "</DataItem>\n";
+      os << indent(bi + 1) << "<Attribute Name=\"" << escapeXML(attr.name)
+         << "\" AttributeType=\"" << attrType << "\" Center=\"" << centerStr << "\">\n";
+      os << indent(bi + 2)
+         << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
+         << dimStr.str() << "\">" << escapeXML(attrH5) << ":"
+         << HDF5::Path::GridFunctionValuesData << "</DataItem>\n";
       os << indent(bi + 1) << "</Attribute>\n";
     }
 
     os << indent(bi) << "</Grid>\n";
   }
 
-  void XDMF::flush() const
+  void XDMF::flush()
   {
     if (m_distributed)
     {
@@ -556,16 +565,14 @@ namespace Rodin::IO
       if (m_comm == MPI_COMM_NULL)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Distributed flush requires a valid MPI communicator."
-          << Alert::Raise;
+          << "Distributed flush requires a valid MPI communicator." << Alert::Raise;
       }
       MPI_Barrier(m_comm);
       if (m_rank != m_rootRank)
         return;
 #else
       Alert::MemberFunctionException(*this, __func__)
-        << "Distributed XDMF requires MPI support (RODIN_USE_MPI)."
-        << Alert::Raise;
+        << "Distributed XDMF requires MPI support (RODIN_USE_MPI)." << Alert::Raise;
 #endif
     }
 
@@ -577,8 +584,7 @@ namespace Rodin::IO
     if (!os)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Failed to open XDMF output file: " << xdmfPath
-        << Alert::Raise;
+        << "Failed to open XDMF output file: " << xdmfPath << Alert::Raise;
     }
 
     writeXMLHeader(os);
@@ -590,8 +596,7 @@ namespace Rodin::IO
       {
         const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
 
-        os << indent(2)
-           << "<Grid Name=\"" << gridName
+        os << indent(2) << "<Grid Name=\"" << escapeXML(gridName)
            << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
         for (const auto& snap : gr.snapshots)
@@ -607,8 +612,7 @@ namespace Rodin::IO
         const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
         const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
 
-        os << indent(2)
-           << "<Grid Name=\"" << gridName
+        os << indent(2) << "<Grid Name=\"" << escapeXML(gridName)
            << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
         for (size_t s = 0; s < gr.snapshots.size(); ++s)
@@ -624,30 +628,33 @@ namespace Rodin::IO
           {
             const std::string rStr = std::to_string(r);
 
-            const std::string meshH5 =
-              (gr.options.meshPolicy == MeshPolicy::Static)
+            const std::string meshH5 = (gr.options.meshPolicy == MeshPolicy::Static)
               ? expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rStr)
-              : expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
+              : expandPattern(
+                  patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
 
             const auto& meta = snap.pieces[r];
 
-            os << indent(5) << "<Grid Name=\"" << makeGridPieceName(gridName, r)
+            os << indent(5) << "<Grid Name=\""
+               << escapeXML(makeGridPieceName(gridName, r))
                << "\" GridType=\"Uniform\">\n";
 
             os << indent(6) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
                << meta.cellCount << "\">\n";
-            os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
-               << meta.topologySize << "\">"
-               << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
-               << "</DataItem>\n";
+            os << indent(7)
+               << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
+                  "Dimensions=\""
+               << meta.topologySize << "\">" << escapeXML(meshH5) << ":"
+               << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
             os << indent(6) << "</Topology>\n";
 
             os << indent(6) << "<Geometry GeometryType=\""
                << getGeometryType(meta.spaceDimension) << "\">\n";
-            os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-               << meta.vertexCount << " " << meta.spaceDimension
-               << "\">"
-               << meshH5 << ":" << HDF5::Path::MeshGeometryVertices
+            os << indent(7)
+               << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
+                  "Dimensions=\""
+               << meta.vertexCount << " " << meta.spaceDimension << "\">"
+               << escapeXML(meshH5) << ":" << HDF5::Path::MeshGeometryVertices
                << "</DataItem>\n";
             os << indent(6) << "</Geometry>\n";
 
@@ -655,14 +662,16 @@ namespace Rodin::IO
             {
               const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
               std::ostringstream dimStr;
-              dimStr << ((attr.center == Center::Node) ? meta.vertexCount : meta.cellCount);
+              dimStr << ((attr.center == Center::Node) ? meta.vertexCount
+                                                       : meta.cellCount);
 
-              os << indent(6) << "<Attribute Name=\"" << attr.name
+              os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
                  << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
-              os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
-                 << dimStr.str() << "\">"
-                 << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)
-                 << "</DataItem>\n";
+              os << indent(7)
+                 << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
+                    "Dimensions=\""
+                 << dimStr.str() << "\">" << escapeXML(meshH5) << ":"
+                 << HDF5::attributePath(attr.topologicalDimension) << "</DataItem>\n";
               os << indent(6) << "</Attribute>\n";
             }
 
@@ -680,8 +689,8 @@ namespace Rodin::IO
                 : ((attr.dimension == 1) ? "Scalar" : "Vector");
 
               std::ostringstream dimStr;
-              const std::uint64_t count = (attr.center == Center::Node)
-                  ? meta.vertexCount : meta.cellCount;
+              const std::uint64_t count =
+                (attr.center == Center::Node) ? meta.vertexCount : meta.cellCount;
               if (attr.rows)
                 dimStr << count << " " << attr.rows << " " << attr.columns;
               else if (attr.dimension == 1)
@@ -689,13 +698,14 @@ namespace Rodin::IO
               else
                 dimStr << count << " " << attr.dimension;
 
-              os << indent(6) << "<Attribute Name=\"" << attr.name
-                 << "\" AttributeType=\"" << attrType
-                 << "\" Center=\"" << centerStr << "\">\n";
-              os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-                 << dimStr.str() << "\">"
-                 << attrH5 << ":" << HDF5::Path::GridFunctionValuesData
-                 << "</DataItem>\n";
+              os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
+                 << "\" AttributeType=\"" << attrType << "\" Center=\"" << centerStr
+                 << "\">\n";
+              os << indent(7)
+                 << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
+                    "Dimensions=\""
+                 << dimStr.str() << "\">" << escapeXML(attrH5) << ":"
+                 << HDF5::Path::GridFunctionValuesData << "</DataItem>\n";
               os << indent(6) << "</Attribute>\n";
             }
 
@@ -716,8 +726,7 @@ namespace Rodin::IO
     if (!os)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Failed while writing XDMF output file: " << xdmfPath
-        << Alert::Raise;
+        << "Failed while writing XDMF output file: " << xdmfPath << Alert::Raise;
     }
   }
 
@@ -776,7 +785,7 @@ namespace Rodin::IO
 
     if (!m_distributed)
     {
-      snap.pieces = { local };
+      snap.pieces = {local};
       return;
     }
 
@@ -784,23 +793,18 @@ namespace Rodin::IO
     if (m_comm == MPI_COMM_NULL)
     {
       Alert::MemberFunctionException(*this, __func__)
-        << "Distributed write requires a valid MPI communicator."
-        << Alert::Raise;
+        << "Distributed write requires a valid MPI communicator." << Alert::Raise;
     }
 
     // Pack 5 uint64_t values
-    std::array<std::uint64_t, 5> localBuf = {
-      local.vertexCount, local.cellCount, local.meshDimension,
-      local.spaceDimension, local.topologySize
-    };
+    std::array<std::uint64_t, 5> localBuf = {local.vertexCount, local.cellCount,
+      local.meshDimension, local.spaceDimension, local.topologySize};
 
     std::vector<std::uint64_t> recvBuf;
     if (m_rank == m_rootRank)
       recvBuf.resize(5 * m_numRanks);
 
-    MPI_Gather(
-      localBuf.data(), 5, MPI_UINT64_T,
-      recvBuf.data(), 5, MPI_UINT64_T,
+    MPI_Gather(localBuf.data(), 5, MPI_UINT64_T, recvBuf.data(), 5, MPI_UINT64_T,
       static_cast<int>(m_rootRank), m_comm);
 
     if (m_rank == m_rootRank)
@@ -809,17 +813,16 @@ namespace Rodin::IO
       for (size_t r = 0; r < m_numRanks; ++r)
       {
         auto& p = snap.pieces[r];
-        p.vertexCount    = recvBuf[r * 5 + 0];
-        p.cellCount      = recvBuf[r * 5 + 1];
-        p.meshDimension  = recvBuf[r * 5 + 2];
+        p.vertexCount = recvBuf[r * 5 + 0];
+        p.cellCount = recvBuf[r * 5 + 1];
+        p.meshDimension = recvBuf[r * 5 + 2];
         p.spaceDimension = recvBuf[r * 5 + 3];
-        p.topologySize   = recvBuf[r * 5 + 4];
+        p.topologySize = recvBuf[r * 5 + 4];
       }
     }
 #else
     Alert::MemberFunctionException(*this, __func__)
-      << "Distributed XDMF requires MPI support (RODIN_USE_MPI)."
-      << Alert::Raise;
+      << "Distributed XDMF requires MPI support (RODIN_USE_MPI)." << Alert::Raise;
 #endif
   }
 }

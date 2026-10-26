@@ -6,7 +6,7 @@ target_link_libraries(RodinConvergenceHPHelmholtz
     RodinConvergence
     Rodin::Solver
 )
-gtest_discover_tests(RodinConvergenceHPHelmholtz
+rodin_discover_tests(RodinConvergenceHPHelmholtz
   PROPERTIES
     LABELS convergence
 )

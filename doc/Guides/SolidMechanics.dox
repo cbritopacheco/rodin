@@ -135,6 +135,36 @@
   auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
   @endcode
 
+  Direct constitutive evaluation binds inputs once, then reads the prepared
+  law through const methods:
+
+  @code{.cpp}
+  Solid::KinematicState state(3);
+  state.setDisplacementGradient(gradient);
+  Solid::ConstitutivePoint point(state);
+  Solid::NeoHookean law(lambda, mu);
+  law.setConstitutivePoint(point);
+  Math::SpatialMatrix<Real> stress, increment;
+  law.getFirstPiolaKirchhoffStress(stress);
+  law.getMaterialTangent(increment, deformationIncrement);
+  const Real energy = law.getStrainEnergyDensity();
+  @endcode
+
+  The law owns its kinematic snapshot and keeps intermediate data private.
+  Changing a point or its borrowed state affects evaluation only after the
+  next non-const @c setConstitutivePoint() call. Binding compares the consumed
+  kinematics and auxiliary inputs exactly and reuses unchanged data; no
+  address or cache identity determines validity. Spatially graded laws sample
+  their coefficient on each binding. Copies have independent prepared state,
+  and assembly uses separate working laws per worker. The same law must not
+  be rebound concurrently without external synchronization; const reads of
+  an already prepared law perform no cache updates.
+
+  An output supplied to @c InternalVirtualWork::setOutput() receives the
+  constitutive point and a const prepared law, from which it can read stresses,
+  energy or active residuals. Both references are valid for the callback;
+  retain a law copy if its prepared response is needed afterwards.
+
   This keeps laws pure functions of local state (unit-testable against
   finite differences at a single point) and keeps integrators ignorant of
   constitutive details. <a href="_fiber_kinematics_8h.html">Solid/Local/FiberKinematics.h</a>

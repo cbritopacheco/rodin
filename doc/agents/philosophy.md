@@ -207,10 +207,12 @@ rather than extended:
 
 ## Surface style (imitate exactly)
 
-- A `for` body may omit braces only when the entire body statement occupies
-  one physical line. Wrapped statements and outer loops containing nested
-  loops on subsequent lines require Allman braces. The loop header's line
-  count does not affect this rule; a one-line inner body may remain unbraced.
+- A `for`, `if`, or `else` body may omit braces only when the entire body
+  statement occupies one physical line. Wrapped single statements and outer
+  controls containing nested statements on subsequent lines require Allman
+  braces. The condition or loop header's line count does not affect this rule.
+  Conventional `else if` chains remain unwrapped; each branch body follows
+  the same rule.
 - Boost Software License header block at the top of every file; include
   guards `RODIN_<NAMESPACE>_<FILE>_H` (no `#pragma once`).
 - Members `m_camelCase`; accessors `getX()`/`setX(...)`, setters return a
@@ -221,6 +223,9 @@ rather than extended:
   deleted or omitted.
 - Use `/** ... */` for multiline Doxygen documentation and `///` for
   single-line documentation. Use `///<` for trailing member documentation.
+  Leave a blank line between each declaration or definition and the next
+  standalone documentation block, including individually documented aliases
+  and data members. Keep each block attached to its own declaration.
   Integrate API contracts and explanatory prose into the relevant Doxygen block;
   remove redundant ordinary comments beside it.
   Document every parameter, including intentionally unused inputs and deduction

@@ -45,16 +45,56 @@
 
   @section guides-getting-started-first-steps-modules Rodin Modules
 
-  Rodin is organized into several modules. Each module has a well-defined
-  responsibility, and you link only the modules you need:
+  Rodin modules have public headers that can be included directly in application
+  code. The tables list umbrella headers and focused component headers, together
+  with representative APIs. The <a href="modules.html">Modules overview</a> describes their
+  responsibilities and uses; @ref configuration "Configuration" explains the
+  build features required by optional backends.
 
-  | Module | Header | Purpose | Key classes |
-  |--------|--------|---------|-------------|
-  | @ref Rodin::Geometry "Geometry" | `<Rodin/Geometry.h>` | Meshes, polytopes, connectivity | @ref Rodin::Geometry::Mesh "Mesh", @ref Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Connectivity "Connectivity" |
-  | @ref Rodin::Variational "Variational" | `<Rodin/Variational.h>` | Finite element spaces, forms, problems | `P1`, `P0`, `H1`, `TrialFunction`, `TestFunction`, `GridFunction` |
-  | @ref Rodin::Solver "Solver" | `<Rodin/Solver.h>` | Linear system solvers | @ref Rodin::Solver::CG "CG", @ref Rodin::Solver::SparseLU "SparseLU", `UMFPack` |
-  | @ref Rodin::IO "IO" | `<Rodin/IO/XDMF.h>` | Input/output and visualization | @ref Rodin::IO::XDMF "XDMF" |
-  | @ref Rodin::Assembly "Assembly" | (used internally) | Matrix and vector assembly | Assemblers (not used directly) |
+  @subsection guides-getting-started-first-steps-modules-core Core
+
+  | Module | Public headers | Purpose | Key APIs |
+  |--------|----------------|---------|----------|
+  | @ref Rodin::Geometry "Geometry" | <a href="_geometry_8h.html"><code>&lt;Rodin/Geometry.h&gt;</code></a> | Meshes, topology, and mappings | @ref Rodin::Geometry::Mesh "Mesh", @ref Rodin::Geometry::Connectivity "Connectivity", @ref Rodin::Geometry::Point "Point" |
+  | @ref Rodin::Variational "Variational" | <a href="_variational_8h.html"><code>&lt;Rodin/Variational.h&gt;</code></a> | Finite element fields and weak forms | @ref Rodin::Variational::H1 "H1", @ref Rodin::Variational::GridFunction "GridFunction", @ref Rodin::Variational::Problem "Problem" |
+  | @ref Rodin::Assembly "Assembly" | <a href="_assembly_8h.html"><code>&lt;Rodin/Assembly.h&gt;</code></a> | Local integration and global assembly | @ref Rodin::Assembly::Sequential "Sequential", @ref Rodin::Assembly::Default "Default" |
+  | @ref Rodin::Solver "Solver" | <a href="_solver_8h.html"><code>&lt;Rodin/Solver.h&gt;</code></a> | Linear and nonlinear systems | @ref Rodin::Solver::CG "CG", @ref Rodin::Solver::SparseLU "SparseLU", @ref Rodin::Solver::NewtonSolver "NewtonSolver" |
+  | @ref Rodin::QF "QF" | <a href="_q_f_8h.html"><code>&lt;Rodin/QF.h&gt;</code></a> | Reference quadrature rules | @ref Rodin::QF::QuadratureFormula "QuadratureFormula", @ref Rodin::QF::QuadratureFormula "QuadratureFormula" |
+  | @ref Rodin::Math "Math" | <a href="_math_8h.html"><code>&lt;Rodin/Math.h&gt;</code></a> | Dense, sparse, and spatial algebra | @ref Rodin::Math::Matrix "Matrix", @ref Rodin::Math::SpatialVector "SpatialVector", @ref Rodin::Math::LinearSystem "LinearSystem" |
+  | @ref Rodin::FormLanguage "FormLanguage" | <a href="_form_language_8h.html"><code>&lt;Rodin/FormLanguage.h&gt;</code></a><br/><a href="_form_language_2_traits_8h.html"><code>&lt;Rodin/FormLanguage/Traits.h&gt;</code></a> | Typed expression-node interfaces | @ref Rodin::FormLanguage::Base "Base", @ref Rodin::FormLanguage::Traits "Traits" |
+  | @ref Rodin::IO "IO" | <a href="_i_o_8h.html"><code>&lt;Rodin/IO.h&gt;</code></a> | Mesh and field input/output | @ref Rodin::IO::MeshLoader "MeshLoader", @ref Rodin::IO::GridFunctionPrinter "GridFunctionPrinter", @ref Rodin::IO::XDMF "XDMF" |
+
+  @subsection guides-getting-started-first-steps-modules-models Models
+
+  | Module | Public headers | Purpose | Key APIs |
+  |--------|----------------|---------|----------|
+  | @ref Rodin::Solid "Solid" | <a href="_solid_8h.html"><code>&lt;Rodin/Solid.h&gt;</code></a> | Constitutive laws and solid mechanics | @ref Rodin::Solid::KinematicState "KinematicState", @ref Rodin::Solid::NeoHookean "NeoHookean", @ref Rodin::Solid::InternalVirtualWork "InternalVirtualWork" |
+  | @ref Rodin::Advection "Advection" | <a href="_lagrangian_8h.html"><code>&lt;Rodin/Advection/Lagrangian.h&gt;</code></a> | Characteristic-based field transport | @ref Rodin::Advection::Lagrangian "Lagrangian" |
+  | @ref Rodin::Eikonal "Eikonal" | <a href="_f_m_m_8h.html"><code>&lt;Rodin/Eikonal/FMM.h&gt;</code></a> | Fast marching and arrival times | @ref Rodin::Eikonal::FMM "FMM" |
+  | @ref Rodin::Distance "Distance" | <a href="_eikonal_8h.html"><code>&lt;Rodin/Distance/Eikonal.h&gt;</code></a><br/><a href="_poisson_8h.html"><code>&lt;Rodin/Distance/Poisson.h&gt;</code></a> | Distance-field construction | @ref Rodin::Distance::Eikonal "Eikonal", @ref Rodin::Distance::Poisson "Poisson" |
+  | @ref Rodin::Hilbert "Hilbert" | <a href="_h1a_8h.html"><code>&lt;Rodin/Hilbert/H1a.h&gt;</code></a> | Field extension and regularization | @ref Rodin::Hilbert::H1a "H1a" |
+  | @ref Rodin::Adaptation "Adaptation" | <a href="_adaptation_8h.html"><code>&lt;Rodin/Adaptation.h&gt;</code></a> | Moving-interface mesh fitting | @ref Rodin::Adaptation::SWIFT::Adapt "SWIFT::Adapt", @ref Rodin::Adaptation::DeformationMap "DeformationMap" |
+  | @ref Rodin::Heart "Heart" | <a href="_heart_8h.html"><code>&lt;Rodin/Heart.h&gt;</code></a> | Reduced cardiac-cycle models | @ref Rodin::Heart::CCMLC2014T "CCMLC2014T", @ref Rodin::Heart::HolzapfelReducedLaw "HolzapfelReducedLaw" |
+
+  @subsection guides-getting-started-first-steps-modules-integrations Parallelism and integrations
+
+  | Module | Public headers | Purpose | Key APIs |
+  |--------|----------------|---------|----------|
+  | @ref Rodin::MPI "MPI" | <a href="_m_p_i_8h.html"><code>&lt;Rodin/MPI.h&gt;</code></a> | Distributed meshes and assembly | @ref Rodin::Context::MPI "Context::MPI", @ref Rodin::MPI::Sharder "Sharder" |
+  | @ref Rodin::PETSc "PETSc" | <a href="_p_e_t_sc_8h.html"><code>&lt;Rodin/PETSc.h&gt;</code></a> | PETSc algebra and solver backends | @ref Rodin::PETSc::Math::LinearSystem "LinearSystem", @ref Rodin::Solver::KSP "KSP", @ref Rodin::Solver::SNES "SNES" |
+  | @ref Rodin::MMG "MMG" | <a href="_m_m_g_8h.html"><code>&lt;Rodin/MMG.h&gt;</code></a> | Remeshing and interface discretization | @ref Rodin::MMG::Adapt "Adapt", @ref Rodin::MMG::Optimizer "Optimizer", @ref Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" |
+  | @ref Rodin::Scotch "Scotch" | <a href="_scotch_2_mesh_partitioner_8h.html"><code>&lt;Rodin/Scotch/MeshPartitioner.h&gt;</code></a> | Graph-based mesh partitioning | @ref Rodin::Scotch::Partitioner "Partitioner" |
+
+  @subsection guides-getting-started-first-steps-modules-infrastructure Infrastructure
+
+  | Module | Public headers | Purpose | Key APIs |
+  |--------|----------------|---------|----------|
+  | @ref Rodin::Context "Context" | <a href="_context_8h.html"><code>&lt;Rodin/Context.h&gt;</code></a> | Local execution context | @ref Rodin::Context::Local "Local" |
+  | @ref Rodin::Alert "Alert" | <a href="_alert_8h.html"><code>&lt;Rodin/Alert.h&gt;</code></a> | Exceptions and diagnostic messages | @ref Rodin::Alert::Exception "Exception", @ref Rodin::Alert::MemberFunctionException "MemberFunctionException" |
+  | @ref Rodin::Location "Location" | <a href="_location_8h.html"><code>&lt;Rodin/Location.h&gt;</code></a> | Spatial search and point location | @ref Rodin::Location::AABB "AABB" |
+  | @ref Rodin::Utility "Utility" | <a href="_utility_8h.html"><code>&lt;Rodin/Utility.h&gt;</code></a> | Generic programming helpers | @ref Rodin::Utility::Overloaded "Overloaded", @ref Rodin::Utility::IsSpecialization "IsSpecialization" |
+  | @ref RodinSerialization "Serialization" | <a href="_serialization_2_array_8h.html"><code>&lt;Rodin/Serialization/Array.h&gt;</code></a><br/><a href="_eigen_matrix_8h.html"><code>&lt;Rodin/Serialization/EigenMatrix.h&gt;</code></a> | Boost.Serialization adapters | @ref Rodin::Math::Matrix "Matrix" |
+  | @ref Rodin::Test "Test" | <a href="_f_d_probe_8h.html"><code>&lt;Rodin/Test/FDProbe.h&gt;</code></a><br/><a href="_test_2_utility_8h.html"><code>&lt;Rodin/Test/Utility.h&gt;</code></a> | Numerical validation helpers | @ref Rodin::Test::FDProbe "FDProbe", @ref Rodin::Test::Utility::ExpectedResultTable "ExpectedResultTable" |
 
   @section guides-getting-started-first-steps-hello Hello Rodin
 

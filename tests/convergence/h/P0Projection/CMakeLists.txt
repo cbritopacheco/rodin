@@ -6,7 +6,7 @@ target_link_libraries(RodinConvergenceHP0Projection
     RodinConvergenceH
     Rodin::Solver
 )
-gtest_discover_tests(RodinConvergenceHP0Projection
+rodin_discover_tests(RodinConvergenceHP0Projection
   PROPERTIES
     LABELS convergence
 )

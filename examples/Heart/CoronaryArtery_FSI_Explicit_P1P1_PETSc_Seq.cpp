@@ -100,22 +100,23 @@ namespace
 
   struct BoundaryFluid
   {
-      static constexpr Attribute FSI = 2;
-      static constexpr Attribute Inlet = 4;
-      static constexpr std::array<Attribute, 6> Outlets{{7, 8, 9, 10, 14, 15}};
-      static constexpr Attribute FSIRing = 99;
+    static constexpr Attribute FSI = 2;
+    static constexpr Attribute Inlet = 4;
+    static constexpr std::array<Attribute, 6> Outlets{{7, 8, 9, 10, 14, 15}};
+    static constexpr Attribute FSIRing = 99;
   };
 
   struct BoundarySolid
   {
-      static constexpr Attribute FSI = 1;
-      static constexpr Attribute Inlet = 150;
-      static constexpr std::array<Attribute, 6> Outlets{{151, 152, 153, 154, 155, 156}};
-      static constexpr Attribute FSIRing = 99;
-      static constexpr std::array<Attribute, 1> Contact{{101}};
-      /// Outer (adventitial) surface pieces; xi = 1 there for the transmural
-      /// coordinate (xi = 0 on the FSI/luminal surface).
-      static constexpr std::array<Attribute, 2> Outer{{2, 101}};
+    static constexpr Attribute FSI = 1;
+    static constexpr Attribute Inlet = 150;
+    static constexpr std::array<Attribute, 6> Outlets{{151, 152, 153, 154, 155, 156}};
+    static constexpr Attribute FSIRing = 99;
+    static constexpr std::array<Attribute, 1> Contact{{101}};
+
+    /// Outer (adventitial) surface pieces; xi = 1 there for the transmural
+    /// coordinate (xi = 0 on the FSI/luminal surface).
+    static constexpr std::array<Attribute, 2> Outer{{2, 101}};
   };
 
   // --------------------------------------------------------------------------
@@ -132,49 +133,63 @@ namespace
   // --------------------------------------------------------------------------
   struct RCR
   {
-      /// Microvascular transmural pressure p_tm = p_c - p_im.  THE state.
-      Real ptm = 0.0;
-      /// Diagnostic: microvascular pressure, p_c = p_tm + p_im.
-      Real pc = 0.0;
-      /// Outlet pressure applied to the 3D model (the p_c part; R_a Phi_a Q is
-      /// assembled implicitly, see Ra below).
-      Real pout = 0.0;
-      /// Flow leaving the compartment towards the right atrium (Starling).
-      Real qd = 0.0;
-      /// Intramyocardial (tissue) pressure, p_im = alpha p_LV.
-      Real pim = 0.0;
-      /// Arteriolar lumped resistance at the reference viscosity (implicit).
-      Real Ra = 0.0;
-      /// Venular lumped resistance at the reference viscosity.
-      Real Rv = 0.0;
-      /// Microvascular compliance, C_tot weighted by the Murray split.
-      Real C = 0.0;
-      /// Measured outlet area; scales the implicit term R_a Phi_a A (u.n)(v.n).
-      Real area = 0.0;
-      /// Calibrated branch flow, reference point of the modulation Phi(q).
-      Real q0 = 0.0;
-      /// Derived resting wall shear rate of the arteriolar limb (1/s).
-      Real gammaA = 0.0;
-      /// Derived resting wall shear rate of the venular limb (1/s).
-      Real gammaV = 0.0;
-      /// Diagnostic: apparent-viscosity multiplier of the arteriolar limb.
-      Real muA = 1.0;
-      /// Diagnostic: apparent-viscosity multiplier of the venular limb.
-      Real muV = 1.0;
-      /// Diagnostic: stored microvascular volume, V = C p_tm.
-      Real vol = 0.0;
+    /// Microvascular transmural pressure p_tm = p_c - p_im.  THE state.
+    Real ptm = 0.0;
+
+    /// Diagnostic: microvascular pressure, p_c = p_tm + p_im.
+    Real pc = 0.0;
+
+    /// Outlet pressure applied to the 3D model (the p_c part; R_a Phi_a Q is
+    /// assembled implicitly, see Ra below).
+    Real pout = 0.0;
+
+    /// Flow leaving the compartment towards the right atrium (Starling).
+    Real qd = 0.0;
+
+    /// Intramyocardial (tissue) pressure, p_im = alpha p_LV.
+    Real pim = 0.0;
+
+    /// Arteriolar lumped resistance at the reference viscosity (implicit).
+    Real Ra = 0.0;
+
+    /// Venular lumped resistance at the reference viscosity.
+    Real Rv = 0.0;
+
+    /// Microvascular compliance, C_tot weighted by the Murray split.
+    Real C = 0.0;
+
+    /// Measured outlet area; scales the implicit term R_a Phi_a A (u.n)(v.n).
+    Real area = 0.0;
+
+    /// Calibrated branch flow, reference point of the modulation Phi(q).
+    Real q0 = 0.0;
+
+    /// Derived resting wall shear rate of the arteriolar limb (1/s).
+    Real gammaA = 0.0;
+
+    /// Derived resting wall shear rate of the venular limb (1/s).
+    Real gammaV = 0.0;
+
+    /// Diagnostic: apparent-viscosity multiplier of the arteriolar limb.
+    Real muA = 1.0;
+
+    /// Diagnostic: apparent-viscosity multiplier of the venular limb.
+    Real muV = 1.0;
+
+    /// Diagnostic: stored microvascular volume, V = C p_tm.
+    Real vol = 0.0;
   };
 
   // Carreau-Yasuda blood viscosity, UNIFIED with CoupledLV0DCoronary3D's
   // defaults so the two solvers integrate the same fluid.
   struct CarreauYasuda
   {
-      Real mu0 = 0.301;
-      Real muInf = 0.0055;
-      Real lambda = 16.15;
-      Real n = 0.21;
-      Real yasuda = 0.77;
-      Real gammaRegularization = 1.0e-3;
+    Real mu0 = 0.301;
+    Real muInf = 0.0055;
+    Real lambda = 16.15;
+    Real n = 0.21;
+    Real yasuda = 0.77;
+    Real gammaRegularization = 1.0e-3;
   };
 
   /// Rheological model used by the 0D outlet closure.
@@ -188,11 +203,11 @@ namespace
   /// CoupledLV0DCoronary3D.h for the rationale and the Cokelet correlations.
   struct Quemada
   {
-      Real plasmaViscosity = 0.0017963;
-      Real hematocrit = 0.45;
-      Real k0 = 3.7;      // derived from phi if <= 0
-      Real kInf = 1.66;   // derived from phi if <= 0
-      Real gammaC = 2.29; // derived from phi if <= 0
+    Real plasmaViscosity = 0.0017963;
+    Real hematocrit = 0.45;
+    Real k0 = 3.7;      // derived from phi if <= 0
+    Real kInf = 1.66;   // derived from phi if <= 0
+    Real gammaC = 2.29; // derived from phi if <= 0
   };
 
   /// Tabulated WRMS closure and scalar-solve tolerances for the 0D outlet.
@@ -200,190 +215,190 @@ namespace
   /// and branch), so it is tabulated ONCE and the outlet only interpolates.
   struct OutletFlowLaw
   {
-      Real tableTauMin = 1.0e-6;
-      Real tableTauMax = 1.0e4;
-      int tableNodes = 241;
-      int integralSteps = 2000;
-      Real shearStepTolerance = 1.0e-12;
-      int shearMaxIterations = 200;
-      Real outletStepTolerance = 1.0e-9;
-      int outletMaxIterations = 50;
-      Real zeroFlowTolerance = 1.0e-16;
+    Real tableTauMin = 1.0e-6;
+    Real tableTauMax = 1.0e4;
+    int tableNodes = 241;
+    int integralSteps = 2000;
+    Real shearStepTolerance = 1.0e-12;
+    int shearMaxIterations = 200;
+    Real outletStepTolerance = 1.0e-9;
+    int outletMaxIterations = 50;
+    Real zeroFlowTolerance = 1.0e-16;
   };
 
   /// Universal WRMS apparent-viscosity table, log-log interpolated in the
   /// nominal shear rate gammadot = 4Q/(pi R^3).  Clamped, not extrapolated.
   struct WRMSTable
   {
-      std::vector<Real> logGamma;
-      std::vector<Real> logMu;
+    std::vector<Real> logGamma;
+    std::vector<Real> logMu;
 
-      Real operator()(Real gamma) const
-      {
-        if (logGamma.size() < 2)
-          return std::exp(logMu.empty() ? 0.0 : logMu.front());
+    Real operator()(Real gamma) const
+    {
+      if (logGamma.size() < 2)
+        return std::exp(logMu.empty() ? 0.0 : logMu.front());
 
-        const Real lg = std::log(std::max(gamma, 1e-300));
+      const Real lg = std::log(std::max(gamma, 1e-300));
 
-        if (lg <= logGamma.front())
-          return std::exp(logMu.front());
-        if (lg >= logGamma.back())
-          return std::exp(logMu.back());
+      if (lg <= logGamma.front())
+        return std::exp(logMu.front());
+      if (lg >= logGamma.back())
+        return std::exp(logMu.back());
 
-        const auto it = std::upper_bound(logGamma.begin(), logGamma.end(), lg);
-        const std::size_t i = static_cast<std::size_t>(it - logGamma.begin()) - 1;
-        const Real w = (lg - logGamma[i]) / (logGamma[i + 1] - logGamma[i]);
+      const auto it = std::upper_bound(logGamma.begin(), logGamma.end(), lg);
+      const std::size_t i = static_cast<std::size_t>(it - logGamma.begin()) - 1;
+      const Real w = (lg - logGamma[i]) / (logGamma[i + 1] - logGamma[i]);
 
-        return std::exp(logMu[i] + w * (logMu[i + 1] - logMu[i]));
-      }
+      return std::exp(logMu[i] + w * (logMu[i + 1] - logMu[i]));
+    }
   };
 
   struct Config
   {
-  // All outputs go under resultsDir so the P2/P1 and P1/P1 runs can execute
-  // concurrently (different cores) without clobbering each other's files.
-      std::string resultsDir = "results_p1p1_laplacian";
-      std::string xdmfBasename =
-        "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1";
-      std::string csvPath = "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1.csv";
-      Real meshScale = 1.0e-3;
+    // All outputs go under resultsDir so the P2/P1 and P1/P1 runs can execute
+    // concurrently (different cores) without clobbering each other's files.
+    std::string resultsDir = "results_p1p1_laplacian";
+    std::string xdmfBasename =
+      "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1";
+    std::string csvPath = "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1.csv";
+    Real meshScale = 1.0e-3;
 
-      Real dt = 1.0e-3;
-      size_t nsteps = 4 * static_cast<int>(0.85 / 1.0e-3);
+    Real dt = 1.0e-3;
+    size_t nsteps = 4 * static_cast<int>(0.85 / 1.0e-3);
 
-      Real pressureDropScale = 1.0;
+    Real pressureDropScale = 1.0;
 
-  // Fixed epicardial forward pressure drop [Pa] subtracted from EVERY outlet:
-  //   p_out_3D = par - pressureDropScale*(par - p_out_RCR) - epicardialDrop.
-      Real epicardialDrop = 0.0;
+    // Fixed epicardial forward pressure drop [Pa] subtracted from EVERY outlet:
+    //   p_out_3D = par - pressureDropScale*(par - p_out_RCR) - epicardialDrop.
+    Real epicardialDrop = 0.0;
 
-  // Automatic anatomical outlet calibration (CoupledLV0DCoronary3D scheme):
-  // outlet areas measured on the mesh, Murray split Q_i ~ r_i^3, and the three
-  // lumped quantities that appear in the balance -- R_a, R_v, C -- built from
-  // the resting pressure budget dP = par(0) - P_RA:
-  //   R_v,i = f_v dP / Q_i,  R_a,i = (1 - f_v) dP / Q_i,  C_i = C_tot w_i.
-      bool autoCalibrateOutlets = true;
-      Real lcaTargetFlow = 1.5e-6;     // m^3/s  (~90 mL/min; LCA rest ~150-250)
+    // Automatic anatomical outlet calibration (CoupledLV0DCoronary3D scheme):
+    // outlet areas measured on the mesh, Murray split Q_i ~ r_i^3, and the three
+    // lumped quantities that appear in the balance -- R_a, R_v, C -- built from
+    // the resting pressure budget dP = par(0) - P_RA:
+    //   R_v,i = f_v dP / Q_i,  R_a,i = (1 - f_v) dP / Q_i,  C_i = C_tot w_i.
+    bool autoCalibrateOutlets = true;
+    Real lcaTargetFlow = 1.5e-6;     // m^3/s  (~90 mL/min; LCA rest ~150-250)
 
-  // Newtonian calibration viscosity mu_N: R_a and R_v are the NEWTONIAN
-  // resistances of the budget, so a change of blood properties moves Phi and
-  // therefore the flow (normalizing by the running rheology would absorb it).
-      Real newtonianCalibrationViscosity = 0.0035;
-  // Total microvascular compliance (m^3/Pa), split by the Murray weight.
-      Real coronaryComplianceTotal = 4e-10;
-  // Venular share of the microvascular pressure budget (head-loss split).
-      Real venularPressureFraction = 0.13;
-  // Fraction of LV pressure transmitted to the intramyocardial compartment,
-  // p_im = intramyocardialFraction * p_LV (bed-averaged, 0.5-0.7).
-      Real intramyocardialFraction = 0.7;
-  // Right atrial (coronary sinus) drainage pressure.
-      Real rightAtrialPressure = 1800.0;
+    // Newtonian calibration viscosity mu_N: R_a and R_v are the NEWTONIAN
+    // resistances of the budget, so a change of blood properties moves Phi and
+    // therefore the flow (normalizing by the running rheology would absorb it).
+    Real newtonianCalibrationViscosity = 0.0035;
+    // Total microvascular compliance (m^3/Pa), split by the Murray weight.
+    Real coronaryComplianceTotal = 4e-10;
+    // Venular share of the microvascular pressure budget (head-loss split).
+    Real venularPressureFraction = 0.13;
+    // Fraction of LV pressure transmitted to the intramyocardial compartment,
+    // p_im = intramyocardialFraction * p_LV (bed-averaged, 0.5-0.7).
+    Real intramyocardialFraction = 0.7;
+    // Right atrial (coronary sinus) drainage pressure.
+    Real rightAtrialPressure = 1800.0;
 
-  // Morphometric operating point (r, v) of each limb: intravital-microscopy
-  // measurables from which gamma_0 = 4v/r, N, L and T are derived.
-      Real arteriolarRadius = 25.0e-6;
-      Real arteriolarVelocity = 5.0e-3;
-      Real venularRadius = 30.0e-6;
-      Real venularVelocity = 3.0e-3;
-  // Reference mean transit time for the calibration consistency check (s).
-      Real referenceTransitTime = 1.5;
+    // Morphometric operating point (r, v) of each limb: intravital-microscopy
+    // measurables from which gamma_0 = 4v/r, N, L and T are derived.
+    Real arteriolarRadius = 25.0e-6;
+    Real arteriolarVelocity = 5.0e-3;
+    Real venularRadius = 30.0e-6;
+    Real venularVelocity = 3.0e-3;
+    // Reference mean transit time for the calibration consistency check (s).
+    Real referenceTransitTime = 1.5;
 
-  // Rheological model of the 0D outlet closure.
-      RheologyModel rheologyModel = RheologyModel::CarreauYasuda;
-      Quemada quemada;
+    // Rheological model of the 0D outlet closure.
+    RheologyModel rheologyModel = RheologyModel::CarreauYasuda;
+    Quemada quemada;
 
-      Real fluidDensity = 1060.0;
-      Real pressurePenalty = 0.0;
-      Real inletBackflowStabilization = 1.0;
-      Real outletBackflowStabilization = 1.0;
-      CarreauYasuda viscosity;
+    Real fluidDensity = 1060.0;
+    Real pressurePenalty = 0.0;
+    Real inletBackflowStabilization = 1.0;
+    Real outletBackflowStabilization = 1.0;
+    CarreauYasuda viscosity;
 
-      OutletFlowLaw outletFlowLaw;
+    OutletFlowLaw outletFlowLaw;
 
-      Real inletImpedance = 1e3;
-      Real inletTangentialDamping = 1e3;
+    Real inletImpedance = 1e3;
+    Real inletTangentialDamping = 1e3;
 
-      Real outletResistanceScale = 1.0;
+    Real outletResistanceScale = 1.0;
 
-  // Static follower-pressure prestress: ramp 0 -> par(0) in this many
-  // increments (0 = disabled)
-      size_t prestressSteps = 50;
+    // Static follower-pressure prestress: ramp 0 -> par(0) in this many
+    // increments (0 = disabled)
+    size_t prestressSteps = 50;
 
-  // Prestress STATICALLY to prestressFraction*par, then ramp the remaining
-  // (1 - prestressFraction) of the loads smoothly from prestressFraction -> 1
+    // Prestress STATICALLY to prestressFraction*par, then ramp the remaining
+    // (1 - prestressFraction) of the loads smoothly from prestressFraction -> 1
 
-      Real prestressFraction = 0.975;
-      size_t prestressRampSteps = 10;
+    Real prestressFraction = 0.975;
+    size_t prestressRampSteps = 10;
 
-  // Projected-VMS convective stabilization scale (lagged Oseen, ported from
-  // the working CoupledLV0DCoronary3D fluid).  0 disables the VMS terms and
-  // recovers the plain Temam-stabilized fluid; 1 is the nominal scaling.
-      Real vmsScale = 1.0;
+    // Projected-VMS convective stabilization scale (lagged Oseen, ported from
+    // the working CoupledLV0DCoronary3D fluid).  0 disables the VMS terms and
+    // recovers the plain Temam-stabilized fluid; 1 is the nominal scaling.
+    Real vmsScale = 1.0;
 
-  // Grad-div (continuity / "div-u") stabilization scale.
-      Real gradDivScale = 1.0;
+    // Grad-div (continuity / "div-u") stabilization scale.
+    Real gradDivScale = 1.0;
 
-  // ALE mesh-motion (harmonic extension) stiffening.  The lift is
-  //   int  w(x) grad d : grad v ,   w(x) = (aleRefSize / h_K)^aleStiffPower ,
-  // i.e. Jacobian/element-size stiffening (Stein-Tezduyar-Benney)
-      Real aleStiffPower = 0.75;
-      Real aleRefSize = 5.0e-4;
+    // ALE mesh-motion (harmonic extension) stiffening.  The lift is
+    //   int  w(x) grad d : grad v ,   w(x) = (aleRefSize / h_K)^aleStiffPower ,
+    // i.e. Jacobian/element-size stiffening (Stein-Tezduyar-Benney)
+    Real aleStiffPower = 0.75;
+    Real aleRefSize = 5.0e-4;
 
-  // Kinematic interface velocity for the fluid no-slip / Robin data.  By the
-  // geometric conservation law the ALE mesh boundary moves at the BDF1 rate
-  //   w|FSI = (d^{n+1} - d^n)/dt = meshVelocity ,
-  // so the FLUID at the wall must move with exactly that.
-      bool meshConsistentInterfaceVelocity = true;
+    // Kinematic interface velocity for the fluid no-slip / Robin data.  By the
+    // geometric conservation law the ALE mesh boundary moves at the BDF1 rate
+    //   w|FSI = (d^{n+1} - d^n)/dt = meshVelocity ,
+    // so the FLUID at the wall must move with exactly that.
+    bool meshConsistentInterfaceVelocity = true;
 
-      bool subtractHeartHandoffOffset = true;
+    bool subtractHeartHandoffOffset = true;
 
-      Real pgpScale = 1.0;
+    Real pgpScale = 1.0;
 
-      Real solidDensity = 1060.0;
+    Real solidDensity = 1060.0;
 
-      Real solidViscosity = 4.e3;
+    Real solidViscosity = 4.e3;
 
-      Real newmarkBeta = 0.25;
-      Real newmarkGamma = 0.5;
+    Real newmarkBeta = 0.25;
+    Real newmarkGamma = 0.5;
 
-      size_t couplingIterations = 1; // Picard passes; snes.solve() re-evaluates each pass
-      Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
+    size_t couplingIterations = 1; // Picard passes; snes.solve() re-evaluates each pass
+    Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
 
-      Real robinAlpha = 0.0;
-      Real robinGamma = 1.0; // scales the Robin alpha = gamma*sqrt(rho_s E); raise
-        // to enforce no-slip harder (smaller interface slip)
+    Real robinAlpha = 0.0;
+    Real robinGamma = 1.0; // scales the Robin alpha = gamma*sqrt(rho_s E); raise
+    // to enforce no-slip harder (smaller interface slip)
 
-      Real heartDisplacementPenalty = 1.e7;
-      Real heartDisplacementScale = 1.0;
+    Real heartDisplacementPenalty = 1.e7;
+    Real heartDisplacementScale = 1.0;
 
-      // Viscoelastic outlet tethering (spring/dashpot per unit area on the cap
-      // annuli).  With the ring band now confined to the INLET, these springs are
-      // the ONLY thing holding the outlet ends: 5e1 Pa/m left them essentially
-      // free-flying, so the defaults are raised to a perivascular-tethering level
-      // (1e4-1e6 Pa/m is the physiological ballpark).
-      Real aViscCondition = 1.0e5;
-      Real bViscCondition = 1.0e3;
+    // Viscoelastic outlet tethering (spring/dashpot per unit area on the cap
+    // annuli).  With the ring band now confined to the INLET, these springs are
+    // the ONLY thing holding the outlet ends: 5e1 Pa/m left them essentially
+    // free-flying, so the defaults are raised to a perivascular-tethering level
+    // (1e4-1e6 Pa/m is the physiological ballpark).
+    Real aViscCondition = 1.0e5;
+    Real bViscCondition = 1.0e3;
 
-      // Transmural grading of the wall constitutive law, applied as a spatial
-      // multiplier m(xi) on the Yeoh energy (see GradedYeoh.h), where xi in [0,1]
-      // is the harmonic through-thickness coordinate (0 = lumen/intima side,
-      // 1 = adventitia).  Bands: xi < 1/3 intima, middle third media (reference),
-      // xi > 2/3 adventitia, blended with smoothsteps of half-width
-      // gradeTransitionWidth.
-      //
-      // Defaults follow the classical healthy-artery picture (Holzapfel-Gasser-
-      // Ogden 2000): a thin, mechanically insignificant intima (soft), the
-      // load-bearing media as reference, and a stiffer collagenous adventitial
-      // sleeve, normalized so the thickness-weighted mean is ~1 and the global
-      // compliance of the tuned homogenized wall is preserved.  NOTE: for aged /
-      // atherosclerotic coronaries Holzapfel et al. (2005) measured the OPPOSITE
-      // low-strain ordering (ground-matrix mu: intima 27.9, media 1.27,
-      // adventitia 7.56 kPa); to run that profile set roughly
-      // (intima, media, adventitia) = (2.3, 0.10, 0.76).
-      Real gradeIntima = 0.5;
-      Real gradeMedia = 1.0;
-      Real gradeAdventitia = 1.5;
-      Real gradeTransitionWidth = 0.08;
+    // Transmural grading of the wall constitutive law, applied as a spatial
+    // multiplier m(xi) on the Yeoh energy (see GradedYeoh.h), where xi in [0,1]
+    // is the harmonic through-thickness coordinate (0 = lumen/intima side,
+    // 1 = adventitia).  Bands: xi < 1/3 intima, middle third media (reference),
+    // xi > 2/3 adventitia, blended with smoothsteps of half-width
+    // gradeTransitionWidth.
+    //
+    // Defaults follow the classical healthy-artery picture (Holzapfel-Gasser-
+    // Ogden 2000): a thin, mechanically insignificant intima (soft), the
+    // load-bearing media as reference, and a stiffer collagenous adventitial
+    // sleeve, normalized so the thickness-weighted mean is ~1 and the global
+    // compliance of the tuned homogenized wall is preserved.  NOTE: for aged /
+    // atherosclerotic coronaries Holzapfel et al. (2005) measured the OPPOSITE
+    // low-strain ordering (ground-matrix mu: intima 27.9, media 1.27,
+    // adventitia 7.56 kPa); to run that profile set roughly
+    // (intima, media, adventitia) = (2.3, 0.10, 0.76).
+    Real gradeIntima = 0.5;
+    Real gradeMedia = 1.0;
+    Real gradeAdventitia = 1.5;
+    Real gradeTransitionWidth = 0.08;
   };
 
   // C1-continuous (smoothstep) LV activation, UNIFIED with the
@@ -411,9 +426,11 @@ namespace
     if (tau < tPlateauEnd)
       return positiveValue;
     if (tau < tRelaxEnd)
+    {
       return positiveValue +
         (negativeValue - positiveValue) *
         ss((tau - tPlateauEnd) / (tRelaxEnd - tPlateauEnd));
+    }
     if (tau < tNegativeEnd)
       return negativeValue;
     return negativeValue * (1.0 - ss((tau - tNegativeEnd) / (T - tNegativeEnd)));
@@ -651,15 +668,15 @@ namespace
   // --------------------------------------------------------------------------
   struct InterfaceSegment
   {
-      Index fluid;
-      Index solid;
+    Index fluid;
+    Index solid;
   };
 
   struct InterfaceMap
   {
-      std::unordered_map<Index, Index> fluidToSolid;
-      std::unordered_map<Index, Index> solidToFluid;
-      std::vector<InterfaceSegment> segments;
+    std::unordered_map<Index, Index> fluidToSolid;
+    std::unordered_map<Index, Index> solidToFluid;
+    std::vector<InterfaceSegment> segments;
   };
 
   static Math::SpatialPoint centroid(const MeshType& mesh, const Polytope& polytope)
@@ -927,8 +944,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_coupling_iterations",
       &couplingIterations, &couplingIterationsSet);
     if (couplingIterationsSet)
+    {
       cfg.couplingIterations =
         static_cast<size_t>(std::max<PetscInt>(1, couplingIterations));
+    }
 
     PetscReal couplingTolerance = cfg.couplingTolerance;
     PetscBool couplingToleranceSet = PETSC_FALSE;
@@ -956,8 +975,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_prestress_ramp_steps",
       &prestressRampSteps, &prestressRampStepsSet);
     if (prestressRampStepsSet)
+    {
       cfg.prestressRampSteps =
         static_cast<size_t>(std::max<PetscInt>(0, prestressRampSteps));
+    }
 
     PetscReal vmsScale = cfg.vmsScale;
     PetscBool vmsScaleSet = PETSC_FALSE;
@@ -1459,8 +1480,10 @@ int main(int argc, char** argv)
       std::error_code ec;
       std::filesystem::create_directories(cfg.resultsDir, ec);
       if (ec && isRoot)
+      {
         std::cerr << "Warning: could not create results directory '" << cfg.resultsDir
                   << "': " << ec.message() << '\n';
+      }
     }
 
     Model::Input modelInput = makeModelInput();
@@ -1498,8 +1521,10 @@ int main(int argc, char** argv)
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
       BoundarySolid::FSIRing, BoundarySolid::Inlet, solidInletOnly);
     if (isRoot)
+    {
       std::cout << "FSI ring band: fluid=" << fluidRingFaces
                 << " face(s), solid=" << solidRingFaces << " face(s)\n";
+    }
 
     std::vector<Math::SpatialPoint> referenceVertices;
     saveReferenceVertices(meshFluid, referenceVertices);
@@ -1754,6 +1779,7 @@ int main(int argc, char** argv)
         bc.muV = phiV0;
 
         if (isRoot)
+        {
           Alert::Info() << "  [calib] outlet " << tag << "  A=" << bc.area << " m^2"
                         << "  Q=" << (Qi * 6.0e7) << " mL/min"
                         << "  Ra=" << bc.Ra << "  Rv=" << bc.Rv << " Pa s/m^3"
@@ -1762,6 +1788,7 @@ int main(int argc, char** argv)
                         << "  ptm0=" << ptmRest << "  pc0/pout0=" << bc.pc << "/"
                         << bc.pout << " Pa (par=" << par0 << ", pim=" << pimRest << ")"
                         << Alert::Raise;
+        }
       }
 
       if (isRoot)
@@ -1777,10 +1804,12 @@ int main(int argc, char** argv)
 
         const Real Tref = cfg.referenceTransitTime;
         if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref || Tv > 2.0 * Tref)
+        {
           Alert::Warning()
             << "  [calib] el tiempo de transito derivado se aparta mas de 2x "
             << "de la referencia: calibre, velocidad y reparto de presion no "
             << "son consistentes con un solo tramo efectivo por rama." << Alert::Raise;
+        }
       }
     }
     else
@@ -1849,9 +1878,11 @@ int main(int argc, char** argv)
       ? cfg.robinAlpha
       : cfg.robinGamma * std::sqrt(cfg.solidDensity * solidYoungEquiv);
     if (isRoot)
+    {
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
                     << "  (gamma * sqrt(rho_s E_eq), gamma = " << cfg.robinGamma
                     << ", E_eq = " << solidYoungEquiv << " Pa)" << Alert::Raise;
+    }
     const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
 
     const auto& cy = cfg.viscosity;
@@ -2513,11 +2544,13 @@ int main(int argc, char** argv)
     Solver::KSP(thickness).solve();
     xi.setData(xiT.getSolution().getData());
     if (isRoot)
+    {
       Alert::Info() << "  [grade] transmural xi solved; multipliers"
                     << "  intima=" << cfg.gradeIntima << "  media=" << cfg.gradeMedia
                     << "  adventitia=" << cfg.gradeAdventitia
                     << "  (transition half-width " << cfg.gradeTransitionWidth << ")"
                     << Alert::Raise;
+    }
 
     xdmf_laplacian.add("xi", xi);
     xdmf_laplacian.write().flush();
@@ -2579,15 +2612,19 @@ int main(int argc, char** argv)
         if (!snesPre.converged())
         {
           if (isRoot)
+          {
             std::cerr << "Prestress SNES failed at increment " << k << " / "
                       << cfg.prestressSteps << "; continuing with the last "
                       << "converged (partial) prestress state.\n";
+          }
           break;
         }
       }
       if (isRoot)
+      {
         Alert::Info() << "Prestressed wall to " << prestressPressure << " Pa in "
                       << cfg.prestressSteps << " increment(s)" << Alert::Raise;
+      }
 
       // Commit the prestressed state as the dynamic initial condition (zero
       // velocity / acceleration are already set) and lift the fluid mesh.
@@ -2719,9 +2756,11 @@ int main(int argc, char** argv)
           if (!snes.converged())
           {
             if (isRoot)
+            {
               std::cerr << "Solid SNES failed at step " << step << " (coupling iterate "
                         << couple << ") after " << snes.getIterationNumber()
                         << " iterations.\n";
+            }
             stepFailed = true;
             break;
           }
@@ -2773,11 +2812,13 @@ int main(int argc, char** argv)
             if (!std::isfinite(static_cast<Real>(aleNorm)))
             {
               if (isRoot)
+              {
                 std::cerr << "ALE lift non-finite at step " << step
                           << " (coupling iterate " << couple
                           << "): the fluid mesh is tangling -- reduce the "
                           << "imposed interface displacement (e.g. "
                           << "-coronary_heart_disp_scale) or the time step.\n";
+              }
               stepFailed = true;
               break;
             }
@@ -2949,6 +2990,7 @@ int main(int argc, char** argv)
         VecMin(pCur.getData(), PETSC_NULLPTR, &pMin);
         VecMax(pCur.getData(), PETSC_NULLPTR, &pMax);
         if (isRoot)
+        {
           Alert::Info() << "  [diag] p in [" << pMin << ", " << pMax << "] Pa"
                         << "  mass(qIn+qOut) = " << (qIn + qOutSum)
                         << "  E_iface = " << eInterface << " W"
@@ -2956,6 +2998,7 @@ int main(int argc, char** argv)
                         << "  | coupling: iters = " << couplesDone << "/"
                         << cfg.couplingIterations << "  interface change = " << lastRel
                         << Alert::Raise;
+        }
       }
 
       // R-mu outlet update from the converged interface flux: advances p_tm

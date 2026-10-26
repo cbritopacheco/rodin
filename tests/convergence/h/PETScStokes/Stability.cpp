@@ -5,7 +5,13 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief PETSc local/MPI finite pressure spectra independent of Stokes solves. */
+/**
+ * @file
+ * @brief PETSc local/MPI finite pressure spectra independent of Stokes solves.
+ */
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
 #include "../../PETScStokesProblem.h"
 #include "../../CurvedGeometry.h"
 #include "../../PETScMixedStability.h"
@@ -98,6 +104,37 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
       void measure(MixedStability::Result& result, size_t n, bool curved, size_t order,
         bool omitDivergence = false) const
       {
+        using Clock = std::chrono::steady_clock;
+        const char* setting = std::getenv("RODIN_PROFILE_STABILITY");
+        int rank = 0;
+        Optional<PetscInt> velocityCount, pressureCount;
+        Optional<Clock::time_point> previous;
+        if (setting && StringView(setting) == "1")
+        {
+          previous = Clock::now();
+#ifdef RODIN_USE_MPI
+          if constexpr (!std::is_same_v<ContextType, Context::Local>)
+            rank = world->rank();
+#endif
+        }
+        const auto report = [&](const char* phase) {
+          if (!previous)
+            return;
+          const Real seconds =
+            std::chrono::duration<Real>(Clock::now() - *previous).count();
+          std::cout << "[pressure-measure] rank=" << rank << " phase=" << phase
+                    << " seconds=" << seconds << " velocity_degree=" << K
+                    << " pressure_degree=" << K - 1 << " points_per_axis=" << n
+                    << " curved=" << curved << " quadrature_order=" << order
+                    << " geometry=" << UniformGrid::getGeometryName(this->GetParam());
+          if (velocityCount)
+            std::cout << " global_velocity=" << *velocityCount;
+          if (pressureCount)
+            std::cout << " global_pressure=" << *pressureCount;
+          std::cout << std::endl;
+          previous = Clock::now();
+        };
+        report("begin");
         const auto initialize = [curved](auto& mesh) {
           if (curved)
           {
@@ -114,13 +151,17 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
           }
 #ifdef RODIN_USE_MPI
           else
+          {
             return DistributedUniformGrid(
               Context::MPI(*environment, *world), this->GetParam())
               .makeMesh(n, initialize);
+          }
 #endif
         }();
+        report("mesh");
         H1 velocitySpace(std::integral_constant<size_t, K>{}, mesh, mesh.getDimension());
         H1 pressureSpace(std::integral_constant<size_t, K - 1>{}, mesh);
+        report("spaces");
         PETSc::Variational::TrialFunction u(velocitySpace);
         PETSc::Variational::TrialFunction p(pressureSpace);
         PETSc::Variational::TestFunction v(velocitySpace);
@@ -137,17 +178,37 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
         a = diffusion;
         b = divergence;
         mass = pressureMass;
+        report("forms");
         a.assemble();
+        if (previous)
+        {
+          PetscInt velocityRows = 0;
+          ASSERT_EQ(MatGetSize(a.getOperator(), &velocityRows, nullptr), PETSC_SUCCESS);
+          velocityCount = velocityRows;
+        }
+        report("velocity-energy-assembly");
         b.assemble();
+        report("divergence-assembly");
         mass.assemble();
+        if (previous)
+        {
+          PetscInt pressureRows = 0;
+          ASSERT_EQ(
+            MatGetSize(mass.getOperator(), &pressureRows, nullptr), PETSC_SUCCESS);
+          pressureCount = pressureRows;
+        }
+        report("pressure-mass-assembly");
         auto boundary = DirichletBC(u, Zero());
         boundary.assemble();
+        report("boundary-constraints");
         PETSc::Variational::GridFunction constant(pressureSpace);
         constant = RealFunction(Real(1));
         constant.sync();
+        report("constant-interpolation");
         PETScMixedStability::compute(result, a.getOperator(), b.getOperator(),
           mass.getOperator(), std::get<IndexMap<Real>>(boundary.getDOFs()),
           constant.getData());
+        report("global-spectrum");
       }
 
       void checkHierarchy() const
@@ -203,37 +264,30 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
       }
 
       template <size_t K = 3>
-      void checkHigherOrderHierarchy() const
+      void checkHigherOrderHierarchy(size_t n, bool curved) const
       {
-        for (bool curved : {false, true})
+        SCOPED_TRACE(::testing::Message()
+          << "velocity degree=" << K << " curved=" << curved << " n=" << n);
+        std::array<MixedStability::Result, 2> measurements;
+        for (size_t i = 0; i < measurements.size(); ++i)
         {
-          for (size_t n : {3u, 4u, 5u})
-          {
-            SCOPED_TRACE(::testing::Message()
-              << "velocity degree=" << K << " curved=" << curved << " n=" << n);
-            std::array<MixedStability::Result, 2> measurements;
-            for (size_t i = 0; i < measurements.size(); ++i)
-            {
-              measure<K>(
-                measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
-              ASSERT_FALSE(::testing::Test::HasFatalFailure());
-              SCOPED_TRACE(::testing::Message()
-                << "freeVelocity=" << measurements[i].freeVelocity
-                << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
-                << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
-              MixedStability::expectConsistent(measurements[i]);
-              EXPECT_FALSE(measurements[i].isDimensionObstructed());
-              EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(measurements[i]));
-            }
-            ASSERT_EQ(measurements[0].freeVelocity, measurements[1].freeVelocity);
-            ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
-            ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
-            EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
-                          measurements[0].eigenvalues.minCoeff() -
-                        1),
-              QuadratureTolerance);
-          }
+          measure<K>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
+          ASSERT_FALSE(::testing::Test::HasFatalFailure());
+          SCOPED_TRACE(::testing::Message()
+            << "freeVelocity=" << measurements[i].freeVelocity
+            << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
+            << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
+          MixedStability::expectConsistent(measurements[i]);
+          EXPECT_FALSE(measurements[i].isDimensionObstructed());
+          EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(measurements[i]));
         }
+        ASSERT_EQ(measurements[0].freeVelocity, measurements[1].freeVelocity);
+        ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
+        ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
+        EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
+                      measurements[0].eigenvalues.minCoeff() -
+                    1),
+          QuadratureTolerance);
       }
 
       template <size_t K = 3>
@@ -265,15 +319,44 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
   }
   TEST_P(LocalStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels)
   {
-    checkHigherOrderHierarchy();
+    for (bool curved : {false, true})
+    {
+      for (size_t n : {3u, 4u, 5u})
+        checkHigherOrderHierarchy(n, curved);
+    }
   }
   TEST_P(LocalStabilityTest, P3P2MissingDivergenceRejected)
   {
     checkHigherOrderMissingDivergence();
   }
-  TEST_P(LocalStabilityTest, P4P3PressureSpectrumAcrossRefinementLevels)
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumAffineN3)
   {
-    checkHigherOrderHierarchy<4>();
+    checkHigherOrderHierarchy<4>(3, false);
+  }
+
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumAffineN4)
+  {
+    checkHigherOrderHierarchy<4>(4, false);
+  }
+
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumAffineN5)
+  {
+    checkHigherOrderHierarchy<4>(5, false);
+  }
+
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumCurvedN3)
+  {
+    checkHigherOrderHierarchy<4>(3, true);
+  }
+
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumCurvedN4)
+  {
+    checkHigherOrderHierarchy<4>(4, true);
+  }
+
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumCurvedN5)
+  {
+    checkHigherOrderHierarchy<4>(5, true);
   }
   TEST_P(LocalStabilityTest, P4P3MissingDivergenceRejected)
   {
@@ -298,15 +381,44 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
   }
   TEST_P(MPIStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels)
   {
-    checkHigherOrderHierarchy();
+    for (bool curved : {false, true})
+    {
+      for (size_t n : {3u, 4u, 5u})
+        checkHigherOrderHierarchy(n, curved);
+    }
   }
   TEST_P(MPIStabilityTest, P3P2MissingDivergenceRejected)
   {
     checkHigherOrderMissingDivergence();
   }
-  TEST_P(MPIStabilityTest, P4P3PressureSpectrumAcrossRefinementLevels)
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumAffineN3)
   {
-    checkHigherOrderHierarchy<4>();
+    checkHigherOrderHierarchy<4>(3, false);
+  }
+
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumAffineN4)
+  {
+    checkHigherOrderHierarchy<4>(4, false);
+  }
+
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumAffineN5)
+  {
+    checkHigherOrderHierarchy<4>(5, false);
+  }
+
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumCurvedN3)
+  {
+    checkHigherOrderHierarchy<4>(3, true);
+  }
+
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumCurvedN4)
+  {
+    checkHigherOrderHierarchy<4>(4, true);
+  }
+
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumCurvedN5)
+  {
+    checkHigherOrderHierarchy<4>(5, true);
   }
   TEST_P(MPIStabilityTest, P4P3MissingDivergenceRejected)
   {

@@ -91,8 +91,10 @@ function(rodin_add_mcss configuration)
   find_package(LATEX REQUIRED COMPONENTS PDFLATEX)
   add_custom_target(RodinDoxygen
     COMMAND ${Python3_EXECUTABLE}
-      ${PROJECT_SOURCE_DIR}/third-party/m.css/documentation/doxygen.py
+      ${PROJECT_SOURCE_DIR}/dev/build_documentation.py
       "${configuration}"
+      --renderer "${PROJECT_SOURCE_DIR}/third-party/m.css/documentation/doxygen.py"
+      --templates "${PROJECT_SOURCE_DIR}/doc/templates"
     COMMENT "Generate API documentation with m.css"
     VERBATIM)
 endfunction()
