@@ -1545,7 +1545,7 @@ namespace Rodin::Tests::Unit
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     const size_t D = mpiMesh.getDimension();
-    const auto& qf = QF::QuadratureFormula::get(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get(1, Polytope::Type::Triangle);
 
     const auto& pq = mpiMesh.getQuadrature(D, 0, qf);
 
