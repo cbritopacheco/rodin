@@ -67,6 +67,25 @@ def install_python():
     raise RuntimeError('Could not install and import PyYAML==' + YAML_VERSION) from last_error
 
 
+def select_compiler(compiler):
+    """Verify a matched GCC toolchain and export it for subsequent CMake steps."""
+    match = re.fullmatch(r'gcc-([0-9]+)', compiler)
+    if not match:
+        raise ValueError('Expected an explicit GCC major version')
+    cxx = compiler.replace('gcc-', 'g++-', 1)
+    versions = [subprocess.check_output([tool, '-dumpfullversion', '-dumpversion'],
+                                      text=True, timeout=30).strip() for tool in [compiler, cxx]]
+    if any(version.split('.')[0] != match[1] for version in versions) or versions[0] != versions[1]:
+        raise RuntimeError('Requested GCC and G++ versions do not match: ' + repr(versions))
+    subprocess.run(['cmake', '--version'], check=True, timeout=30)
+    output = os.environ.get('GITHUB_ENV')
+    if not output:
+        raise RuntimeError('Compiler selection requires GITHUB_ENV')
+    with Path(output).open('a') as stream:
+        stream.write(f'CC={compiler}\nCXX={cxx}\n')
+    print(f'Selected {compiler} / {cxx}: {versions[0]}', flush=True)
+
+
 def disk_space(path, minimum_gib=MIN_FREE_GIB):
     """Delete allowlisted unused tools only below the explicit free-space floor."""
     required = int(minimum_gib * GIB)
@@ -276,8 +295,9 @@ def install(archives, state):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install', 'python'])
+    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install', 'python', 'compiler'])
     parser.add_argument('--packages', default='')
+    parser.add_argument('--compiler', default='')
     parser.add_argument('--minimum-gib', type=float, default=MIN_FREE_GIB)
     args = parser.parse_args()
     if args.minimum_gib <= 0:
@@ -289,6 +309,8 @@ def main():
         disk_space(Path.cwd(), args.minimum_gib)
     elif args.operation == 'python':
         install_python()
+    elif args.operation == 'compiler':
+        select_compiler(args.compiler)
     elif args.operation == 'prepare':
         prepare(packages(args.packages), root / 'rodin-apt-archives', root / 'rodin-apt-state')
     else:

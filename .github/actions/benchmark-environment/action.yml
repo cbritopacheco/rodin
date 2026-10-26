@@ -8,10 +8,6 @@ runs:
   using: composite
   steps:
     - uses: ./.github/actions/prepare-apt
-    - uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
     - name: Select benchmark dependencies
       id: packages
       shell: bash
@@ -28,3 +24,6 @@ runs:
     - uses: ./.github/actions/apt-dependencies
       with:
         packages: ${{ steps.packages.outputs.packages }}
+    - name: Select and verify benchmark compiler
+      shell: bash
+      run: python3 dev/ci_environment.py compiler --compiler gcc-14

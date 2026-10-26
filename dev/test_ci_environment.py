@@ -75,6 +75,55 @@ class EnvironmentTest(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 environment.packages(value)
 
+    def test_matching_compilers_are_selected_explicitly_after_verification(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                patch.object(environment.subprocess, 'check_output', side_effect=['14.2.0\n', '14.2.0\n']) as probe, \
+                patch.object(environment.subprocess, 'run') as cmake:
+            environment.select_compiler('gcc-14')
+            self.assertEqual(Path(os.environ['GITHUB_ENV']).read_text(), 'CC=gcc-14\nCXX=g++-14\n')
+            self.assertEqual([call.args[0][0] for call in probe.call_args_list], ['gcc-14', 'g++-14'])
+            cmake.assert_called_once_with(['cmake', '--version'], check=True, timeout=30)
+
+    def test_mismatched_or_missing_compilers_cannot_export_a_fallback(self):
+        for versions in [['13.3.0', '13.3.0'], ['14.2.0', '14.3.0'], FileNotFoundError('g++-14')]:
+            with self.subTest(versions=versions), tempfile.TemporaryDirectory() as folder, \
+                    patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                    patch.object(environment.subprocess, 'check_output', side_effect=versions), \
+                    patch.object(environment.subprocess, 'run'):
+                with self.assertRaises((RuntimeError, FileNotFoundError)):
+                    environment.select_compiler('gcc-14')
+                self.assertFalse(Path(os.environ['GITHUB_ENV']).exists())
+
+    def test_compiler_arguments_cannot_inject_environment_variables(self):
+        with patch.object(environment.subprocess, 'check_output') as probe:
+            for compiler in ['gcc', 'gcc-14\nCXX=clang', 'clang-19', 'gcc-14; true']:
+                with self.subTest(compiler=compiler), self.assertRaises(ValueError):
+                    environment.select_compiler(compiler)
+            probe.assert_not_called()
+
+    def test_each_shared_backend_requests_the_explicit_compiler_pair(self):
+        document = yaml.safe_load((ROOT / '.github/actions/test-environment/action.yml').read_text())
+        command = next(step['run'] for step in document['runs']['steps'] if step.get('id') == 'packages')
+        for mode in ['native', 'mpi', 'petsc', 'complex', 'ranges_real', 'ranges_complex', 'optional', 'default', 'baseline']:
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as folder:
+                output = Path(folder) / 'output'
+                subprocess.run(['bash', '-e', '-c', command], check=True,
+                               env=dict(os.environ, MODE=mode, COMPILER='gcc-14', GITHUB_OUTPUT=str(output)))
+                requested = environment.packages(output.read_text().strip().split('=', 1)[1])
+                self.assertIn('gcc-14', requested)
+                self.assertIn('g++-14', requested)
+                self.assertIn('lcov', requested)
+
+    def test_shared_linux_environments_do_not_download_another_compiler_action(self):
+        for name in ['test-environment', 'benchmark-environment']:
+            text = (ROOT / '.github/actions' / name / 'action.yml').read_text()
+            self.assertNotIn('aminya/setup-cpp', text)
+            document = yaml.safe_load(text)
+            steps = document['runs']['steps']
+            install = next(i for i, step in enumerate(steps) if step.get('uses') == './.github/actions/apt-dependencies')
+            select = next(i for i, step in enumerate(steps) if 'ci_environment.py compiler' in step.get('run', ''))
+            self.assertLess(install, select)
+
     def test_ample_space_never_removes_tools_or_requires_hosted_runner(self):
         with patch.object(environment.shutil, 'disk_usage', return_value=SimpleNamespace(free=20 * environment.GIB)), \
                 patch.object(environment.subprocess, 'run') as run, patch.dict(os.environ, {}, clear=True):

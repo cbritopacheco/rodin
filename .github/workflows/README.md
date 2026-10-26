@@ -55,6 +55,14 @@ under `runner.temp/rodin-apt-archives`, outside the system cache removed by
 `apt-get clean`. Locks and partial downloads are not cached. A missing cache
 changes performance only, never the tests or their acceptance conditions.
 
+Shared Linux test and benchmark environments obtain their requested GCC/G++
+packages through the same signed APT plan and cached archives. They select the
+explicit compiler pair through `CC` and `CXX`, verify matching full versions and
+log the runner-provided CMake version. They do not download `setup-cpp` merely
+to select tools already present on the hosted image. This avoids an additional
+action-archive transfer at every shared producer and consumer while preserving
+the configured compiler major version and all numerical test selections.
+
 Index attempts have a 90-second budget and complete package-download attempts a
 300-second budget. GNU `timeout` terminates the privileged APT process group
 before fallback. After the runner's original sources, fallback uses the official
