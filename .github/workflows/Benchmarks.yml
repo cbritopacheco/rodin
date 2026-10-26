@@ -76,10 +76,9 @@ jobs:
           name: benchmark-complete
           path: benchmark-complete
           if-no-files-found: error
-  Publish:
-    name: Publish documentation and benchmark histories
-    needs: [Documentation, Pool]
-    if: always()
+  PublishDocumentation:
+    name: Publish documentation
+    needs: Documentation
     runs-on: ubuntu-24.04
     concurrency:
       group: rodin-gh-pages-publication
@@ -88,11 +87,6 @@ jobs:
       contents: write
       pages: write
     steps:
-      - name: Require complete documentation and benchmark results
-        env:
-          DOCUMENTATION: ${{ needs.Documentation.result }}
-          POOL: ${{ needs.Pool.result }}
-        run: test "$DOCUMENTATION" = success && test "$POOL" = success
       - uses: actions/checkout@v4
         with:
           lfs: false
@@ -104,6 +98,55 @@ jobs:
         with:
           name: documentation
           path: documentation-site
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: .ci-pages
+          lfs: false
+      - name: Integrate documentation with the latest complete benchmark histories
+        env:
+          REF: ${{ github.ref }}
+        run: python3 dev/benchmark_publish.py --documentation-only --site documentation-site --pages .ci-pages --ref "$REF"
+      - name: Publish documentation Pages update
+        working-directory: .ci-pages
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish documentation $SHA"
+            git push origin HEAD:gh-pages
+          fi
+      - name: Deploy and verify the published Pages commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 dev/deploy_pages.py --checkout .ci-pages
+  Publish:
+    name: Publish complete benchmark histories
+    needs: [PublishDocumentation, Pool]
+    if: always()
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: rodin-gh-pages-publication
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - name: Require published documentation and complete benchmark results
+        env:
+          DOCUMENTATION: ${{ needs.PublishDocumentation.result }}
+          POOL: ${{ needs.Pool.result }}
+        run: test "$DOCUMENTATION" = success && test "$POOL" = success
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
       - uses: actions/download-artifact@v4
         with:
           name: benchmark-complete
@@ -113,11 +156,11 @@ jobs:
           ref: gh-pages
           path: .ci-pages
           lfs: false
-      - name: Update complete histories and integrate documentation
+      - name: Update complete benchmark histories
         env:
           REF: ${{ github.ref }}
           RUN: ${{ github.run_id }}.${{ github.run_attempt }}
-        run: python3 dev/benchmark_publish.py --results benchmark-complete --site documentation-site --pages .ci-pages --ref "$REF" --run "$RUN"
+        run: python3 dev/benchmark_publish.py --results benchmark-complete --site ".ci-pages/docs/$REF" --pages .ci-pages --ref "$REF" --run "$RUN"
       - name: Publish one atomic Pages update
         working-directory: .ci-pages
         env:
@@ -127,7 +170,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "Publish documentation and complete benchmark campaign $SHA"
+            git commit -m "Publish complete benchmark campaign $SHA"
             git push origin HEAD:gh-pages
           fi
       - name: Deploy and verify the published Pages commit

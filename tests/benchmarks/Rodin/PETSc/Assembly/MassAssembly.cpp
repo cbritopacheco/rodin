@@ -10,6 +10,7 @@
  */
 #include <chrono>
 #include <iostream>
+#include <sstream>
 #include <boost/mpi.hpp>
 #include "Rodin/PETSc.h"
 #include "Rodin/MPI/Variational.h"
@@ -346,7 +347,10 @@ int main(int argc, char** argv)
           std::to_string(PETSC_VERSION_MAJOR) + "." +
             std::to_string(PETSC_VERSION_MINOR) + "." +
             std::to_string(PETSC_VERSION_SUBMINOR));
+        // Listing writes directly to the reporter stream, bypassing ReportRuns.
+        std::ostringstream listing;
         MassSilentReporter silent;
+        silent.SetOutputStream(&listing);
         const auto cases = world.rank() == 0 ? benchmark::RunSpecifiedBenchmarks()
                                              : benchmark::RunSpecifiedBenchmarks(&silent);
         result = !cases || petscMassCheckFailed ? 1 : 0;

@@ -127,7 +127,7 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (std::is_same_v<Formula, QF::GaussLegendre>)
             return QF::QuadratureFormula::get<Formula>(geometry, size_t(state.range(1)));
           else
-            return QF::QuadratureFormula::get<Formula>(size_t(state.range(1)), geometry);
+            return QF::QuadratureFormula::get(size_t(state.range(1)), geometry);
         }();
         std::vector<Math::SpatialMatrix<Real>> reference(formula.getSize()), result;
         for (size_t qp = 0; qp < formula.getSize(); ++qp)

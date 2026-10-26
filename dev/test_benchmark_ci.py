@@ -202,6 +202,19 @@ class BenchmarkCampaignTest(unittest.TestCase):
             subprocess.run(['cmake','-S',str(root),'-B',str(build)],check=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
             self.assertEqual(ci.library_targets(build,['Benchmark']),['Used','Vendor'])
 
+    def test_distributed_discovery_accepts_root_listing_and_diagnoses_corruption(self):
+        entry = dict(target='DistributedFixture', executable='fixture', args='', format='googlecpp')
+        with patch.object(ci, 'command', return_value=['fixture']), patch.object(ci.subprocess, 'check_output') as output:
+            names = ['Kernel/3', 'Kernel/30']
+            output.return_value = '\n'.join(names)
+            self.assertEqual(ci.discover(entry, 4), names)
+            output.return_value = '\n'.join(names * 4)
+            with self.assertRaisesRegex(ValueError, "DistributedFixture ranks=4.*'Kernel/3': 4"):
+                ci.discover(entry, 4)
+            output.return_value = 'Kernel/3Kernel/30\nKernel/3\nKernel/3\n'
+            with self.assertRaisesRegex(ValueError, "DistributedFixture ranks=4.*'Kernel/3': 2"):
+                ci.discover(entry, 4)
+
     def test_execution_discovers_exact_names_and_writes_a_validated_receipt(self):
         with tempfile.TemporaryDirectory() as folder, patch.object(ci.archive, 'restore') as restore, patch.object(ci.archive, 'commit', return_value=COMMIT):
             root = Path(folder)

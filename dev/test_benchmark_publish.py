@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from benchmark_ci import dump, configuration
-from benchmark_publish import publish, HISTORY_COMMITS
+from benchmark_publish import publish, publish_documentation, HISTORY_COMMITS
 from ci_builds import digest
 
 COMMIT = 'c' * 40
@@ -62,6 +62,63 @@ class BenchmarkPublicationTest(unittest.TestCase):
             self.assertEqual(len(entries), 1)
             self.assertEqual(entries[0]['run'], '123.2')
             self.assertEqual(master.read_text(), 'Other branch documentation')
+
+    def test_documentation_deploys_without_a_campaign(self):
+        with tempfile.TemporaryDirectory() as folder:
+            site, pages, results = self.fixture(Path(folder))
+            (site / 'index.html').write_text('New documentation')
+            publish_documentation(site, pages, 'refs/heads/develop')
+            destination = pages / 'docs/refs/heads/develop'
+            self.assertEqual((destination / 'index.html').read_text(), 'New documentation')
+            self.assertFalse((pages / 'benchmark-data').exists())
+            self.assertNotIn('data-history-index', (destination / 'benchmarks/Rodin/Math/SpatialMatrix/index.html').read_text())
+
+    def test_new_documentation_keeps_existing_complete_measurements(self):
+        with tempfile.TemporaryDirectory() as folder, patch('benchmark_publish.subprocess.check_output', return_value=COMMIT):
+            site, pages, results = self.fixture(Path(folder))
+            publish(results, site, pages, 'refs/heads/develop', '1')
+            data = pages / 'benchmark-data'
+            before = {str(path.relative_to(data)): path.read_bytes() for path in data.rglob('*.json')}
+            (site / 'index.html').write_text('Newer documentation')
+            for _ in range(2):
+                publish_documentation(site, pages, 'refs/heads/develop')
+            self.assertEqual(before, {str(path.relative_to(data)): path.read_bytes() for path in data.rglob('*.json')})
+            page = pages / 'docs/refs/heads/develop/benchmarks/Rodin/Math/SpatialMatrix/index.html'
+            self.assertEqual(page.read_text().count('data-history-index='), 1)
+            import re
+            from html import unescape
+            url = unescape(re.search(r'data-history-index="([^"]+)"', page.read_text()).group(1))
+            self.assertTrue((page.parent / url).resolve().is_file())
+
+    def test_campaign_updates_published_site_without_replacing_documentation(self):
+        with tempfile.TemporaryDirectory() as folder, patch('benchmark_publish.subprocess.check_output', return_value=COMMIT):
+            site, pages, results = self.fixture(Path(folder))
+            (site / 'index.html').write_text('Documentation before measurements')
+            publish_documentation(site, pages, 'refs/heads/develop')
+            destination = pages / 'docs/refs/heads/develop'
+            (destination / 'index.html').write_text('Newest documentation must survive')
+            publish(results, destination, pages, 'refs/heads/develop', '1')
+            self.assertEqual((destination / 'index.html').read_text(), 'Newest documentation must survive')
+            self.assertIn('data-history-index=', (destination / 'benchmarks/Rodin/Math/SpatialMatrix/index.html').read_text())
+            self.assertEqual(json.loads((pages / 'benchmark-data/refs/heads/develop/complete.json').read_text())['commit'], COMMIT)
+            next(results.glob('**/results.json')).unlink()
+            with self.assertRaises(ValueError):
+                publish(results, destination, pages, 'refs/heads/develop', '2')
+            self.assertEqual((destination / 'index.html').read_text(), 'Newest documentation must survive')
+
+    def test_invalid_documentation_cannot_erase_published_site(self):
+        with tempfile.TemporaryDirectory() as folder:
+            site, pages, results = self.fixture(Path(folder))
+            publish_documentation(site, pages, 'refs/heads/develop')
+            destination = pages / 'docs/refs/heads/develop'
+            with self.assertRaises(ValueError):
+                publish_documentation(destination, pages, 'refs/heads/develop')
+            with self.assertRaises(ValueError):
+                publish_documentation(site, pages, '../escape')
+            (site / 'benchmarks/index.html').unlink()
+            with self.assertRaises(ValueError):
+                publish_documentation(site, pages, 'refs/heads/develop')
+            self.assertTrue((destination / 'benchmarks/index.html').is_file())
 
     def test_case_histories_are_independent_and_have_a_bounded_window(self):
         with tempfile.TemporaryDirectory() as folder, patch('benchmark_publish.subprocess.check_output', return_value=COMMIT):

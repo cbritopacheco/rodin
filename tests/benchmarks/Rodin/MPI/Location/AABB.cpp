@@ -384,6 +384,14 @@ int main(int argc, char** argv)
     pointers.push_back(arg.data());
   pointers.push_back(nullptr);
   benchmark::Initialize(&argc, pointers.data());
-  benchmark::RunSpecifiedBenchmarks();
+  // Keep every rank active, but emit the shared case catalogue only once.
+  std::ostringstream listing;
+  benchmark::ConsoleReporter reporter;
+  if (world.rank() != 0)
+    reporter.SetOutputStream(&listing);
+  if (world.rank() == 0)
+    benchmark::RunSpecifiedBenchmarks();
+  else
+    benchmark::RunSpecifiedBenchmarks(&reporter);
   benchmark::Shutdown();
 }
