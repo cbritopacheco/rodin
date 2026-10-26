@@ -1,4 +1,4 @@
-add_subdirectory(AtriumContraction)
+add_subdirectory(Atrium)
 add_subdirectory(CCMLC2014_0D)
 add_subdirectory(CoronarySolid)
 
@@ -9,7 +9,6 @@ if (RODIN_USE_PETSC)
 endif()
 
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)
-  add_subdirectory(Atrium)
   add_subdirectory(CoronaryArtery)
   add_subdirectory(CoronaryArterySolid_PETSc_MPI)
   add_subdirectory(CoronaryArtery_FSI_PETSc_MPI)

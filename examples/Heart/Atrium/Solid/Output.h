@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ATRIUMCONTRACTION_OUTPUT_H
-#define RODIN_ATRIUMCONTRACTION_OUTPUT_H
+#ifndef RODIN_ATRIUM_SOLID_OUTPUT_H
+#define RODIN_ATRIUM_SOLID_OUTPUT_H
 
 #include <fstream>
 #include <Rodin/IO/XDMF.h>

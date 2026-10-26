@@ -94,7 +94,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
               << " wedges, " << m_data.mesh.getVertexCount()
               << " vertices; fixed rim faces=" << m_data.rimFaces
               << "; minimum reference scaled Jacobian=" << m_data.minimumReferenceJacobian
-              << "; dt=" << timeStep << "; end=" << m_data.endTime << std::endl;
+              << "; dt=" << timeStep << "; run end=" << timeStep * cfg.steps
+              << "; wave end=" << m_data.endTime << std::endl;
   }
 
   void Output::write(Real time, size_t iterations, Real residual)

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ATRIUMCONTRACTION_PROBLEMDATA_H
-#define RODIN_ATRIUMCONTRACTION_PROBLEMDATA_H
+#ifndef RODIN_ATRIUM_SOLID_PROBLEMDATA_H
+#define RODIN_ATRIUM_SOLID_PROBLEMDATA_H
 
 #include <array>
 #include <limits>
@@ -35,6 +35,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
     std::string output = "output/atrium-contraction/Contraction";
     size_t steps = 24;
     size_t stopAfter = 0;
+    Real timeStep = 0; // Zero uses the wave-duration time step.
     Geometry::Attribute baseLabel = 6;
     Vec appendageApex = Vec(46.39638367, 187.44307667, -205.03317767);
     Real apexRadius = 3;
@@ -55,6 +56,13 @@ namespace Rodin::Examples::Heart::AtriumContraction
    * @returns Validated input configuration.
    */
   Options readOptions(int argc, char** argv);
+
+  /**
+   * @brief Validates a programmatic configuration.
+   * @param cfg Material, wave, and time parameters.
+   * @returns Validated configuration.
+   */
+  Options validateOptions(const Options& cfg);
 
   /**
    * @brief Loads the wedge wall and computes boundary connectivity.

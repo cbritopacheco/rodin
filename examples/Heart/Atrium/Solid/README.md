@@ -98,11 +98,10 @@ vanish at every fixed rim. The first XDMF state records these initial data;
 each subsequent state follows one nonlinear time step.
 
 The pulse traverses the wall over
-$T=(\max_X s(X)+3w)/v$. `--steps N` sets $\Delta t=T/N$ and writes $N+1$
-states including the initial data. The default $N=24$ is a coarse smoke test;
-it does not establish time accuracy for inertial oscillations. Time-step
-refinement is required for quantitative dynamics. Stability properties of the
-linear Newmark scheme do not guarantee nonlinear convergence or temporal
+$T=(\max_X s(X)+3w)/v$. `--steps N` advances $N$ time intervals and writes $N+1$ states including the
+initial data. By default $\Delta t=T/N$; `--dt` sets the time step directly in
+seconds. Time-step refinement is required for quantitative dynamics. The
+linear Newmark scheme does not guarantee nonlinear convergence or temporal
 resolution for this wall.
 
 ### Parameters and units
@@ -139,8 +138,9 @@ refinement and material calibration.
 The example centers on the active solid constitutive model and its inertial
 weak form. The implementation is organized by role:
 
-- [`AtriumContraction.cpp`](AtriumContraction.cpp): active/passive law,
-  constitutive inputs, momentum equation, nonlinear solve, and Newmark updates.
+- [`Solid.h`](Solid.h) and [`Solid.cpp`](Solid.cpp): retained solid problem,
+  active/passive law, momentum equation, nonlinear solve, and Newmark updates.
+- [`AtriumContraction.cpp`](AtriumContraction.cpp): command-line entry point.
 - [`ProblemData.h`](ProblemData.h) and [`ProblemData.cpp`](ProblemData.cpp):
   configuration, mesh checks, reference fibers, and prescribed activation.
 - [`Output.h`](Output.h) and [`Output.cpp`](Output.cpp): XDMF fields, geometry
@@ -151,7 +151,9 @@ The driver supplies the fiber direction and active target through
 residual and tangent. The prescribed data are fixed in the reference
 configuration, and output observes the evolving mechanical state.
 
-The CMake target links Rodin's Solid, Variational, IO, and Solver modules.
+The `AtriumSolid` library exposes the reusable `Solid` component, including
+`initialize()`, `step()`, and `finish()`. It links Rodin's Solid, Variational,
+IO, and Solver modules.
 The mesh resources are in `resources/examples/Heart/Atrium/`:
 
 - `Coarse.mesh`: source atrial volume and labeled boundary.
@@ -254,7 +256,7 @@ From the repository root, using a configured build tree:
 
 ```sh
 cmake --build build --target AtriumContraction -j4
-build/examples/Heart/AtriumContraction/AtriumContraction \
+build/examples/Heart/Atrium/Solid/AtriumContraction \
   --mesh resources/examples/Heart/Atrium/AtriumWall_Repaired_Wedges_1mm.mesh \
   --output output/atrium-transient/Contraction \
   --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \

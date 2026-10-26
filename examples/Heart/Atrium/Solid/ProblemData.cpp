@@ -33,7 +33,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
                      "  [--contraction .03] [--speed 200] [--width 6]\n"
                      "  [--young 50] [--poisson .3] [--active-stiffness 20]\n"
                      "  [--density 1060 (kg/m^3)]\n"
-                     "  [--stop-after n] [--base-label 6] [--apex x y z]\n"
+                     "  [--stop-after n] [--dt seconds] [--base-label 6] [--apex x y z]\n"
                      "  [--apex-radius 3] [--fibers-only]\n";
         std::exit(0);
       }
@@ -65,6 +65,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
         out.steps = std::stoul(value);
       else if (key == "--stop-after")
         out.stopAfter = std::stoul(value);
+      else if (key == "--dt")
+        out.timeStep = std::stod(value);
       else if (key == "--base-label")
         out.baseLabel = std::stoul(value);
       else if (key == "--apex-radius")
@@ -88,19 +90,24 @@ namespace Rodin::Examples::Heart::AtriumContraction
         Alert::Exception() << "Unknown option " + key << Alert::Raise;
       }
     }
-    if (out.steps == 0 || !std::isfinite(out.contraction) || out.contraction <= 0 ||
-      out.contraction >= 0.5 || !std::isfinite(out.speed) || out.speed <= 0 ||
-      !std::isfinite(out.width) || out.width <= 0 || !std::isfinite(out.young) ||
-      out.young <= 0 || !std::isfinite(out.poisson) || out.poisson <= -1 ||
-      out.poisson >= 0.5 || !std::isfinite(out.activeStiffness) ||
-      out.activeStiffness <= 0 || !out.appendageApex.allFinite() ||
-      !std::isfinite(out.apexRadius) || out.apexRadius <= 0 ||
-      !std::isfinite(out.density) || out.density <= 0)
+    return validateOptions(out);
+  }
+
+  Options validateOptions(const Options& cfg)
+  {
+    if (cfg.steps == 0 || !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
+      !std::isfinite(cfg.contraction) || cfg.contraction <= 0 || cfg.contraction >= 0.5 ||
+      !std::isfinite(cfg.speed) || cfg.speed <= 0 || !std::isfinite(cfg.width) ||
+      cfg.width <= 0 || !std::isfinite(cfg.young) || cfg.young <= 0 ||
+      !std::isfinite(cfg.poisson) || cfg.poisson <= -1 || cfg.poisson >= 0.5 ||
+      !std::isfinite(cfg.activeStiffness) || cfg.activeStiffness <= 0 ||
+      !cfg.appendageApex.allFinite() || !std::isfinite(cfg.apexRadius) ||
+      cfg.apexRadius <= 0 || !std::isfinite(cfg.density) || cfg.density <= 0)
     {
       Alert::Exception() << "Invalid material, wave, or time discretization parameters"
                          << Alert::Raise;
     }
-    return out;
+    return cfg;
   }
 
   Vec point3(const LocalMesh& mesh, Index vertex)
