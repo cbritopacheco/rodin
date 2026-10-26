@@ -51,6 +51,7 @@ async function downloadArtifacts(client, names, destination, core,
       }
       await fs.rm(target, {recursive: true, force: true});
       await fs.rename(staging, target);
+      core.info(`Published mandatory artifact ${name} to ${target}`);
     } finally {
       await fs.rm(staging, {recursive: true, force: true});
     }

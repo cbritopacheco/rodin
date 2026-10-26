@@ -26,6 +26,47 @@ class EnvironmentTest(unittest.TestCase):
         self.release.start()
         self.addCleanup(self.release.stop)
 
+    def test_python_dependency_reuses_exact_importable_version(self):
+        with patch.object(environment.subprocess, 'run', return_value=SimpleNamespace(returncode=0)) as run:
+            environment.install_python()
+        run.assert_called_once()
+        self.assertIn(environment.YAML_VERSION, run.call_args.args[0][-1])
+
+    def test_python_install_retries_metadata_errors_and_timeouts_without_cached_responses(self):
+        for error in [subprocess.CalledProcessError(2, 'pip'), subprocess.TimeoutExpired('pip', 180)]:
+            with self.subTest(error=type(error).__name__), \
+                    patch.object(environment.subprocess, 'run', side_effect=[
+                        SimpleNamespace(returncode=1), error, SimpleNamespace(returncode=0),
+                        SimpleNamespace(returncode=0)]) as run, \
+                    patch.object(environment.time, 'sleep') as sleep:
+                environment.install_python()
+                first, second = run.call_args_list[1:3]
+                self.assertEqual(first.args, second.args)
+                self.assertIn('--no-cache-dir', first.args[0])
+                self.assertIn('PyYAML==' + environment.YAML_VERSION, first.args[0])
+                self.assertTrue(first.kwargs['check'])
+                self.assertEqual(first.kwargs['timeout'], environment.PYTHON_INSTALL_TIMEOUT)
+                sleep.assert_called_once_with(environment.PYTHON_RETRY_DELAY)
+
+    def test_python_install_permanent_failure_is_not_accepted(self):
+        with patch.object(environment.subprocess, 'run', side_effect=[
+                SimpleNamespace(returncode=1), *[
+                    subprocess.CalledProcessError(2, 'pip')
+                    for _ in range(environment.PYTHON_INSTALL_ATTEMPTS)]]) as run, \
+                patch.object(environment.time, 'sleep'):
+            with self.assertRaisesRegex(RuntimeError, 'Could not install and import PyYAML'):
+                environment.install_python()
+        self.assertEqual(run.call_count, 1 + environment.PYTHON_INSTALL_ATTEMPTS)
+
+    def test_python_install_verifies_import_after_pip_succeeds(self):
+        outcomes = [SimpleNamespace(returncode=1)]
+        for _ in range(environment.PYTHON_INSTALL_ATTEMPTS):
+            outcomes.extend([SimpleNamespace(returncode=0), subprocess.CalledProcessError(1, 'import yaml')])
+        with patch.object(environment.subprocess, 'run', side_effect=outcomes), \
+                patch.object(environment.time, 'sleep'):
+            with self.assertRaisesRegex(RuntimeError, 'Could not install and import PyYAML'):
+                environment.install_python()
+
     def test_package_input_is_canonical_and_rejects_shell_or_apt_options(self):
         self.assertEqual(environment.packages('libx-dev lcov libx-dev'), ['lcov', 'libx-dev'])
         self.assertEqual(environment.packages('libx:amd64=1:2.3-4~ubuntu1'),

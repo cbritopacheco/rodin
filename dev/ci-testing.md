@@ -227,7 +227,7 @@ From the repository root, inspect the generated plan outside the source tree
 (Python requires the same pinned PyYAML as the workflow preflight):
 
 ```sh
-python3 -m pip install PyYAML==6.0.2
+python3 dev/ci_environment.py python
 mkdir -p /tmp/rodin-ci-plan
 python3 dev/ci_test_plan.py --output /tmp/rodin-ci-plan/ci-test-plan.json
 ```

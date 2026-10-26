@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Install pinned lane selection dependency
       shell: bash
-      run: python3 -m pip install PyYAML==6.0.2
+      run: python3 dev/ci_environment.py python
     - name: Identify build backend
       id: configuration
       shell: bash

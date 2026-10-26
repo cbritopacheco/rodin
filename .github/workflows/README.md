@@ -248,6 +248,17 @@ and `build.tar.gz`; source/configuration, runtime compatibility and archive
 SHA256 validation remain mandatory. Incomplete restoration fails the lane.
 The downloader's official client dependency is pinned in a lockfile and installed
 once per runner in `RUNNER_TEMP`; its JavaScript action uses Node 24.
+Client 4.0.0 rejects interrupted streams that could leave 2.3.2 with an unresolved
+promise and a successful process exit. The planning job tests both a complete ZIP
+transfer and an interrupted transfer against the real pinned client on localhost.
+The latter must reject before process exit; mock-client tests also protect exact
+name resolution, retry cleanup and mandatory-artifact handling.
+
+Planning and execution bootstrap PyYAML through
+`python3 dev/ci_environment.py python`. This reuses the exact importable pinned
+version when present. Otherwise it retries bounded pip invocations without the
+HTTP cache, including package-index JSON failures, and verifies the installed
+version in a fresh Python process. Exhausted retries fail the job.
 
 Regular and Slow variants share executables. MPI ranks, geometries and study
 partitions remain execution coordinates with their CMake-defined timeouts and

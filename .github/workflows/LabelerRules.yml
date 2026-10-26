@@ -28,7 +28,7 @@ jobs:
       with:
         node-version: '24'
     - name: Install workflow parser
-      run: python3 -m pip install PyYAML==6.0.2
+      run: python3 dev/ci_environment.py python
     - name: Test label matching and API behavior serially
       env:
         LABELER_ACTION_PATH: ${{ github.workspace }}/.labeler-action

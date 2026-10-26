@@ -16,6 +16,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from urllib.parse import urlsplit
@@ -35,6 +36,35 @@ INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
 UBUNTU_URI = re.compile(r'https?://(?:azure\.archive|archive|security)\.ubuntu\.com/ubuntu/?')
+YAML_VERSION = '6.0.2'
+# A wheel install normally takes seconds. Bound network stalls to three minutes
+# per attempt and retry whole pip invocations, including malformed index JSON.
+PYTHON_INSTALL_TIMEOUT = 180
+PYTHON_INSTALL_ATTEMPTS = 3
+PYTHON_RETRY_DELAY = 2
+
+
+def install_python():
+    """Reuse the exact working PyYAML version or install it with bounded retries."""
+    probe = [sys.executable, '-c',
+             f'import yaml; raise SystemExit(yaml.__version__ != {YAML_VERSION!r})']
+    if subprocess.run(probe, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                      timeout=30).returncode == 0:
+        return
+    command = [sys.executable, '-m', 'pip', 'install', '--disable-pip-version-check',
+               '--no-cache-dir', '--retries', '3', '--timeout', '30', 'PyYAML==' + YAML_VERSION]
+    last_error = None
+    for attempt in range(1, PYTHON_INSTALL_ATTEMPTS + 1):
+        try:
+            subprocess.run(command, check=True, timeout=PYTHON_INSTALL_TIMEOUT)
+            subprocess.run(probe, check=True, timeout=30)
+            return
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            last_error = error
+            print(f'Pinned PyYAML installation attempt {attempt} failed.', flush=True)
+            if attempt < PYTHON_INSTALL_ATTEMPTS:
+                time.sleep(PYTHON_RETRY_DELAY * attempt)
+    raise RuntimeError('Could not install and import PyYAML==' + YAML_VERSION) from last_error
 
 
 def disk_space(path, minimum_gib=MIN_FREE_GIB):
@@ -246,7 +276,7 @@ def install(archives, state):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install'])
+    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install', 'python'])
     parser.add_argument('--packages', default='')
     parser.add_argument('--minimum-gib', type=float, default=MIN_FREE_GIB)
     args = parser.parse_args()
@@ -257,6 +287,8 @@ def main():
         setup_sources()
     elif args.operation == 'disk':
         disk_space(Path.cwd(), args.minimum_gib)
+    elif args.operation == 'python':
+        install_python()
     elif args.operation == 'prepare':
         prepare(packages(args.packages), root / 'rodin-apt-archives', root / 'rodin-apt-state')
     else:
