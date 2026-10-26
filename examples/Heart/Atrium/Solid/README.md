@@ -1,234 +1,217 @@
-# Atrial solid activation
+# Atrial solid electromechanics
 
-This example showcases `ActiveContraction<NeoHookean, ActiveFiberLaw>` in a
-transient atrial wall problem. Prescribed reference fibers and activation
-supply material inputs; Rodin's `InternalVirtualWork`, `Integral`, `SparseLU`,
-and `NewtonSolver` assemble and solve the momentum equation. Newmark average
-acceleration advances the mechanical state.
+This example couples finite-strain atrial wall motion to independent active
+fiber variables. Demiray–Gasser elasticity and Green–Lagrange strain-rate
+viscosity form the passive tissue response. Rodin's `ActiveFiberLaw` supplies
+the Hill–Maxwell equations. Displacement uses continuous linear wedge shape
+functions; active extension, stiffness, and stress variables use discontinuous
+cellwise constants. The coupled Newton problem retains its spaces, forms,
+fields, and solvers across time steps.
 
-## Active solid model
+## Passive material and dissipation
 
-Let $F=I+\nabla_Xu$, $C=F^TF$, and $J=\det F$. For a unit reference fiber
-$f_0$, the fiber Green–Lagrange strain is
-
-$$
-e_f=\frac{f_0\cdot C f_0-1}{2}.
-$$
-
-The passive Neo-Hookean energy and prescribed active branch are
+For displacement $u$, reference fiber $f_0$, and reference velocity $v$,
 
 $$
-W_{\mathrm{NH}}=
-\frac{\mu}{2}(\mathrm{tr}\,C-3)-\mu\log J
-+\frac{\lambda}{2}(\log J)^2,
+F=I+\nabla_Xu,\quad C=F^TF,\quad J=\det F,\quad
+E=\frac{C-I}{2},\quad
+\bar I_1=J^{-2/3}\mathrm{tr}C,\quad
+\bar I_4=J^{-2/3}f_0\cdot Cf_0.
+$$
+
+The three-dimensional Demiray–Gasser stored energy is
+
+$$
+W_p=\frac{a}{2b}\left[e^{b(\bar I_1-3)}-1\right]
+ +\frac{a_f}{2b_f}\left[e^{b_f(\bar I_4-1)^2}-1\right]
+ +\mu_v(\log J)^2.
+$$
+
+The exponential terms use their continuous limits when an exponent is zero.
+The volumetric coefficient gives initial bulk modulus $2\mu_v$. The fiber
+term acts in extension and compression. Reference energy and stress vanish
+at $F=I$.
+
+The viscous dissipation potential and its associated stresses are
+
+$$
+\Phi=\frac{\nu}{2}\dot E:\dot E,\qquad
+\dot E=\frac{F^T\nabla_Xv+(\nabla_Xv)^TF}{2},\qquad
+\Sigma_v=\nu\dot E,\qquad P_v=\nu F\dot E.
+$$
+
+Thus $P_v:\nabla_Xv=\nu\dot E:\dot E\geq0$ for $\nu\geq0$.
+This is a finite-strain constitutive viscosity. Stored energy excludes the
+dissipation potential. The tangent includes changes of both $F$ and the
+velocity gradient through the time integrator.
+
+## Active fiber model
+
+The fiber Green–Lagrange strain is $e_f=f_0\cdot Ef_0$. The active second
+Piola stress and serial constitutive relation are
+
+$$
+\Sigma_a=\sigma_{1D}f_0\otimes f_0,\qquad
+\sigma_{1D}=E_s\frac{e_f-e_c}{(1+2e_c)^2},\qquad
+\tau_c+\mu_c\dot e_c=
+E_s\frac{(e_f-e_c)(1+2e_f)}{(1+2e_c)^3}.
+$$
+
+The internal contractile stiffness and stress obey
+
+$$
+\dot k_c=n_0k_0u_e^+-(|u_e|+\alpha|\dot e_c|)k_c,
+$$
+
+$$
+\dot\tau_c=n_0\sigma_0u_e^+-(|u_e|+\alpha|\dot e_c|)\tau_c
+ +\dot e_c k_c.
+$$
+
+Here $u_e^+=\max(u_e,0)$, $n_0$ is Rodin's length-dependent Starling factor,
+$E_s$ is serial stiffness, $\mu_c$ is the contractile dashpot coefficient,
+and $\sigma_0$ controls the active stress source. The numerical unknowns are
+
+$$
+e_c,\qquad \gamma=\sqrt{k_c},\qquad \beta=\frac{\tau_c}{\gamma}.
+$$
+
+All three are independent discontinuous finite-element fields participating
+in the global Newton solve with displacement. Their residuals and all
+cross derivatives come from `ActiveFiberLaw`; no active field is eliminated
+at a quadrature point. The library's small positive stiffness floor regularizes
+the stress transformation at zero contractile stiffness. Admissible iterates
+have $\gamma>0$, $1+2e_c>0$, and positive deformed wedge Jacobians.
+
+## Mechanical problem and initialization
+
+The first Piola stress and momentum residual are
+
+$$
+P=\frac{\partial W_p}{\partial F}+\nu F\dot E+F\Sigma_a,
 \qquad
-W_a=\frac{k_f}{2}\frac{(e_f-c)^2}{(1+2c)^2}.
+R(u;w)=\int_{\Omega_0}\rho_0\ddot u\cdot w+P:\nabla_Xw\,dX.
 $$
 
-Here $\lambda$ and $\mu$ are the Lamé parameters, $k_f$ is the active fiber
-stiffness, and $c=-c_{\max}a(X,t)$ is a prescribed target strain. The
-restriction $0\leq c_{\max}<1/2$ keeps $1+2c$ positive. At fixed $c$, the active
-first Piola stress is
+Rim faces with labels 1, 2, 3, 5, and 6 have fixed displacement. Inner and
+outer wall faces, labeled 4 and 7, are traction-free in the solid-only problem.
+Chamber pressure and fluid interface forces belong to the fluid/coupling model.
 
-$$
-P_a=\frac{k_f(e_f-c)}{(1+2c)^2}\,F(f_0\otimes f_0),
-\qquad P=\frac{\partial(W_{\mathrm{NH}}+W_a)}{\partial F}.
-$$
+Initialization solves the passive static problem with no active stress and
+zero rate. With these unloaded wall boundaries the reference configuration is
+an equilibrium. The active extension is initialized to the passive fiber strain,
+$e_c=e_f$, and the contractile stress is zero. Initial velocity and acceleration
+are zero. Electrical drive subsequently evolves the internal variables; it
+does not impose an instantaneous target contraction at the initial state.
 
-The driver injects $f_0$ and $c$ through `FiberDirection` and `ActiveExtension`
-constitutive-point tags. `InternalVirtualWork` evaluates the stress and its
-consistent tangent from the same material inputs. The static branch of
-`ActiveFiberLaw` is used: the target is prescribed, while displacement,
-velocity, and acceleration evolve through momentum balance. Electrophysiology
-and active internal-variable kinetics are outside this model.
+## Time integration and nonlinear solve
 
-## Transient mechanics
-
-With damping disabled, displacement $u$ on the reference wall $\Omega_0$ satisfies
-
-$$
-\rho_0\ddot u-\mathrm{Div}_X P(F,a)=0,
-\qquad F=I+\nabla_X u.
-$$
-
-With optional Rayleigh damping, the weak residual is
-
-$$
-R(u;w)=\int_{\Omega_0}\rho_0\ddot u\cdot w\,dX
-       +\int_{\Omega_0}P(F,a):\nabla_Xw\,dX
-       +\alpha_R\int_{\Omega_0}\rho_0\dot u\cdot w\,dX
-       +\beta_R a_0(\dot u,w).
-$$
-
-All rim faces with labels 1, 2, 3, 5, and 6 have fixed displacement; the inner
-and outer wall faces, labeled 4 and 7, are traction-free. Chamber pressure
-and fluid coupling are absent. Optional Rayleigh damping acts on velocity.
-
-### Time integration and initial conditions
-
-Newmark average acceleration uses $\beta_N=1/4$ and $\gamma_N=1/2$. With
-$\Delta t$ the time step, the predictors are
+Newmark average acceleration uses $\beta_N=1/4$ and $\gamma_N=1/2$:
 
 $$
 u^*=u_n+\Delta t\,v_n+\Delta t^2(1/2-\beta_N)\ddot u_n,
-\qquad
-v^*=v_n+\Delta t(1-\gamma_N)\ddot u_n.
+\qquad v^*=v_n+\Delta t(1-\gamma_N)\ddot u_n,
 $$
 
-Newton's method solves for $u_{n+1}$ with
-
 $$
-\ddot u_{n+1}=\frac{u_{n+1}-u^*}{\beta_N\Delta t^2},
-\qquad
+\ddot u_{n+1}=\frac{u_{n+1}-u^*}{\beta_N\Delta t^2},\qquad
 v_{n+1}=v^*+\gamma_N\Delta t\,\ddot u_{n+1}.
 $$
 
-The tangent contains the elastic tangent, the consistent mass matrix
-scaled by $1/(\beta_N\Delta t^2)$, and the damping matrix scaled by
-$\gamma_N/(\beta_N\Delta t)$. The last accepted displacement is the
-initial Newton iterate; the kinematic predictor enters the inertial residual.
-Rayleigh damping uses
+The mechanical residual uses the current deformation and Newmark velocity.
+The active law uses its compatible history-dependent update: backward Euler
+for stiffness and transformed stress, midpoint active extension and the mean
+of current/previous fiber strains in the serial relation. The first-order
+active updates limit the temporal order of the coupled method.
 
-$$
-C_R=\alpha_R M+\beta_R K_0,\qquad
- a_0(v,w)=\int_{\Omega_0}
- \lambda\,\mathrm{div}_Xv\,\mathrm{div}_Xw
- +2\mu\,\varepsilon_X(v):\varepsilon_X(w)\,dX,
-$$
+Rodin's `InternalVirtualWork`, `Integral`, `SparseLU`, and `NewtonSolver`
+assemble and solve the four-field system. Every nonlinear and coupling term
+uses the same order-four quadrature policy. Backtracking enforces admissible
+active stretches, positive wedges, and a decreasing residual norm. An electrical
+upper bound over each wedge supplies only an initial Newton predictor; the
+active equations always evaluate their source at quadrature points.
 
-where $\varepsilon_X(v)=(\nabla_Xv+(\nabla_Xv)^T)/2$ and $K_0$ is the passive
-stiffness at the undeformed reference state. For nonnegative coefficients,
-$\dot u^T C_R\dot u\geq0$. The current nonlinear active tangent is not used
-as the damping matrix. This damping model is linear in reference strains and requires assessment
-when wall rotations are large. Newmark parameters retain average acceleration;
-physical dissipation is controlled by `--rayleigh-alpha` in $\mathrm{s^{-1}}$
-and `--rayleigh-beta` in seconds. Both default to zero.
+The pulse traversal time is $T=(\max_X s(X)+3w)/v$. By default, `--steps N`
+sets $\Delta t=T/N$ and writes $N+1$ states including initialization.
+`--dt` instead sets the physical time increment in seconds. `--stop-after`
+limits completed intervals without changing the chosen time step. Temporal,
+spatial, and quadrature refinement are needed for quantitative dynamics.
 
-For a passive reference mode of angular frequency $\omega$, the damping ratio is
-
-$$
-\zeta(\omega)=\frac{\alpha_R}{2\omega}+\frac{\beta_R\omega}{2}.
-$$
-
-The coefficients are demonstration parameters and require calibration. A moving
-prescribed activation supplies mechanical work, so the total mechanical energy
-need not decrease while the wave is active. Time-step refinement is needed to
-distinguish resolved motion from temporal discretization effects.
-
-The initial state has $u_0=v_0=0$. Because the activation pulse is already
-present at the base, its consistent acceleration is computed from
-
-$$
-M\ddot u_0=-f_{\mathrm{int}}(u_0,a(0))
-$$
-
-on the free degrees of freedom. Displacement, velocity, and acceleration
-vanish at every fixed rim. The first XDMF state records these initial data;
-each subsequent state follows one nonlinear time step.
-
-The pulse traverses the wall over
-$T=(\max_X s(X)+3w)/v$. `--steps N` advances $N$ time intervals and writes
-$N+1$ states including the
-initial data. By default $\Delta t=T/N$; `--dt` sets the time step directly in
-seconds. Time-step refinement is required for quantitative dynamics. The
-linear Newmark scheme does not guarantee nonlinear convergence or temporal
-resolution for this wall.
-
-### Parameters and units
+## Parameters and units
 
 Coordinates are in mm, time in seconds, and stresses in kPa. `--density`
-accepts reference mass density in $\mathrm{kg/m^3}$. Its internal value is
+accepts reference density in $\mathrm{kg/m^3}$ and converts it using
 
 $$
-\rho_{\mathrm{internal}}=10^{-9}\rho_{\mathrm{SI}},
-\qquad
-1060\,\mathrm{kg/m^3}
-=1.06\times10^{-6}\,\mathrm{kPa\,s^2/mm^2}.
+\rho_{\mathrm{internal}}=10^{-9}\rho_{\mathrm{SI}},\qquad
+1060\,\mathrm{kg/m^3}=1.06\times10^{-6}\,\mathrm{kPa\,s^2/mm^2}.
 $$
 
-| Parameter | Default |
-|---|---:|
-| Passive Young's modulus | $50\,\mathrm{kPa}$ |
-| Passive Poisson ratio | $0.3$ |
-| Active fiber stiffness | $20\,\mathrm{kPa}$ |
-| Peak target Green–Lagrange strain magnitude | $0.03$ |
-| Reference mass density | $1060\,\mathrm{kg/m^3}$ |
-| Mass-proportional Rayleigh coefficient | $0\,\mathrm{s^{-1}}$ |
-| Stiffness-proportional Rayleigh coefficient | $0\,\mathrm{s}$ |
-| Wave speed | $200\,\mathrm{mm/s}$ |
-| Gaussian width | $6\,\mathrm{mm}$ |
-| Basal boundary label | 6 |
-| Appendage patch radius | $3\,\mathrm{mm}$ |
-| Time intervals | 24 |
+The defaults below are demonstration coefficients, not a calibrated atrial dataset.
 
-Mechanical quadrature order 4 is an example policy for the non-polynomial
-constitutive law. Quantitative use requires spatial, quadrature, and temporal
-refinement and material calibration.
+| Parameter | Default | Option |
+|---|---:|---|
+| Matrix scale $a$ | $20\,\mathrm{kPa}$ | `--matrix-scale` |
+| Matrix exponent $b$ | $5$ | `--matrix-exponent` |
+| Fiber scale $a_f$ | $20\,\mathrm{kPa}$ | `--fiber-scale` |
+| Fiber exponent $b_f$ | $10$ | `--fiber-exponent` |
+| Volume penalty $\mu_v$ | $500\,\mathrm{kPa}$ | `--volume-penalty` |
+| Tissue viscosity $\nu$ | $0.2\,\mathrm{kPa\,s}$ | `--viscosity` |
+| Serial stiffness $E_s$ | $20\,\mathrm{kPa}$ | `--active-stiffness` |
+| Contractile viscosity $\mu_c$ | $3\,\mathrm{kPa\,s}$ | `--active-damping` |
+| Cross-bridge stiffness source $k_0$ | $100\,\mathrm{kPa}$ | `--cross-bridge-stiffness` |
+| Contractility source $\sigma_0$ | $20\,\mathrm{kPa}$ | `--contractility` |
+| Destruction factor $\alpha$ | $0.4$ | `--destruction-rate` |
+| Positive electrical peak $A_+$ | $20\,\mathrm{s^{-1}}$ | `--activation` |
+| Resting drive magnitude $A_-$ | $10\,\mathrm{s^{-1}}$ | `--relaxation` |
+| Reference density | $1060\,\mathrm{kg/m^3}$ | `--density` |
+
+`--contractility` controls stress generation. Active extension is a solved
+field and has no prescribed target-strain amplitude option. Setting
+`--activation 0` supplies no positive electrical drive for a resting-state check.
 
 ## Architecture and geometry
 
-The example centers on the active solid constitutive model and its inertial
-weak form. The implementation is organized by role:
-
-- [`Solid.h`](Solid.h) and [`Solid.cpp`](Solid.cpp): retained solid problem,
-  active/passive law, momentum equation, nonlinear solve, and Newmark updates.
+- [`Solid.h`](Solid.h) and [`Solid.cpp`](Solid.cpp): directly owned mechanical
+  and active fields, constitutive inputs, retained coupled problem, nonlinear
+  solve, passive initialization, and Newmark updates.
 - [`AtriumContraction.cpp`](AtriumContraction.cpp): command-line entry point.
 - [`ProblemData.h`](ProblemData.h) and [`ProblemData.cpp`](ProblemData.cpp):
-  configuration, mesh checks, reference fibers, and prescribed activation.
-- [`Output.h`](Output.h) and [`Output.cpp`](Output.cpp): XDMF fields, geometry
-  metadata, deformed-cell checks, and CSV diagnostics.
+  mesh checks, reference fibers, basal plane, and electrical source.
+- [`Output.h`](Output.h) and [`Output.cpp`](Output.cpp): observation of solved
+  fields, XDMF export, metadata, and mechanical diagnostics.
 
-The driver supplies the fiber direction and active target through
-`ConstitutivePoint` tags. `InternalVirtualWork` uses these inputs in both the
-residual and tangent. The prescribed data are fixed in the reference
-configuration, and output observes the evolving mechanical state.
-
-The `AtriumSolid` library exposes the reusable `Solid` component, including
-`initialize()`, `step()`, and `finish()`. It links Rodin's Solid, Variational,
-IO, and Solver modules.
-The mesh resources are in `resources/examples/Heart/Atrium/`:
+The reusable `AtriumSolid` component exposes `initialize()`, `step()`, and
+`finish()`. The mesh resources are in `resources/examples/Heart/Atrium/`:
 
 - `Coarse.mesh`: source atrial volume and labeled boundary.
-- `AtriumWall_Repaired_Surface.mesh`: wall surface prepared with a local
-  handle-to-disk repair and MMGS adaptation.
+- `AtriumWall_Repaired_Surface.mesh`: prepared atrial wall surface.
 - `AtriumWall_Repaired_Wedges_1mm.mesh`: one outward layer of six-node wedges,
   with a nodal extrusion distance of $1\,\mathrm{mm}$.
 
 The wall construction uses the material-4 surface. Inlet and outlet regions
-are open, with their labels transferred to rim quadrilaterals. The local
-surface repair changes the source topology; the resulting geometry is a
-modeling assumption requiring anatomical assessment.
+are open, with their labels transferred to rim quadrilaterals. The surface
+preparation includes a local handle-to-disk repair and MMGS adaptation, so its
+topology is a modeling assumption requiring anatomical assessment.
 
-## A plane wave starting at the anatomical base
+## Plane electrical wave from the anatomical base
 
-In the original `Coarse.mesh` volume, label 6 identifies the basal cap. The
-original tetrahedra have volume material 1. In the wedge-only wall, the cap
-is absent and its boundary label is preserved on the adjoining rim faces.
-The wave direction is determined by the basal rim.
-
-The inner vertices of rim 6 define a least-squares plane through their mean
-position $b$. Its unit normal $d$ is oriented toward the wall centroid.
-The projected coordinate and activation are
+Label 6 is the basal cap in the source volume. In the wedge wall, its label
+is preserved on the adjacent rim. Inner rim vertices define a least-squares
+plane through their mean $b$. Its normal $d$ points toward the wall centroid.
 
 $$
 s(X)=d\cdot(X-b),\qquad
- a(X,t)=\exp\!\left[-\left(\frac{s(X)-vt}{w}\right)^2\right],
-\qquad c(X,t)=-c_{\max}a(X,t).
+ a(X,t)=\exp\left[-\left(\frac{s(X)-vt}{w}\right)^2\right],\qquad
+ u_e(X,t)=(A_++A_-)a(X,t)-A_-.
 $$
 
-The wave crest starts on the fitted basal plane at $t=0$ and moves in the
-positive $d$-direction. The initial displacement and velocity are zero;
-the initial acceleration balances the basal active force. The last crest
-position is three widths past the maximum wall projection.
-
-This pulse propagates only in the positive $d$-direction. Points with
-$s(X)<0$ receive only the initial Gaussian tail. Complete propagation along
-the wall requires a different activation construction, such as a wall-distance
-wave.
-
-The fitted origin, inward normal, projected coordinate range, and landmark
-information are written to `<stem>.geometry.json`. `WaveCoordinate` is a
-static nodal XDMF field for checking the plane orientation.
+The crest starts at the basal plane and travels along positive $d$. The signed
+electrical input permits cross-bridge formation near the wave crest and
+relaxation behind it. Points with $s(X)<0$ receive only the initial tail of this
+one-direction pulse. A wall-distance wave would be a different prescribed input.
+The fitted plane and coordinate range are recorded in geometry metadata;
+`WaveCoordinate` is a static nodal inspection field.
 
 ## Simple landmark-based fibers
 
@@ -284,45 +267,39 @@ harmonic construction, 1 the geometric-apex fallback, and 2 the pole fallback.
 
 ## Build and run
 
-From the repository root, using a configured build tree:
+From the repository root with a configured build tree:
 
 ```sh
 cmake --build build --target AtriumContraction -j4
 build/examples/Heart/Atrium/Solid/AtriumContraction \
   --mesh resources/examples/Heart/Atrium/AtriumWall_Repaired_Wedges_1mm.mesh \
-  --output output/atrium-transient/Contraction \
+  --output output/atrium-active/Contraction \
   --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \
-  --apex-radius 3 --steps 24 --contraction 0.06 --density 1060 \
-  --speed 200 --width 6 --rayleigh-alpha 20 --rayleigh-beta 0.001
+  --apex-radius 3 --steps 24 --activation 20 --relaxation 10 \
+  --contractility 20 --viscosity 0.2 --active-damping 3
 ```
 
-`--young`, `--poisson`, and `--active-stiffness` configure the material.
-`--contraction 0` disables the prescribed contraction target for a resting-state
-check.
-`--stop-after` limits the number of positive-time steps while retaining the
-initial state and the time step set by `--steps`. `--fibers-only` exports the
-geometry and fiber fields without solving mechanics; its zero displacement,
-velocity, and acceleration are inspection placeholders. `--help` lists the
-options.
-
-The preflight check finds the exact minimum of each six-node wedge's
-Jacobian determinant over its reference cell. The determinant is affine in
-the triangle coordinates and quadratic through the thickness, so evaluating
-the triangle vertices and thickness-quadratic minima is sufficient. A
-nonpositive reference determinant rejects the input. The same test is applied
-to each converged deformed cell before saving a mechanics snapshot.
+`--fibers-only` exports reference geometry and fiber diagnostics without advancing
+mechanics. `--help` lists all model and source parameters. Output geometry checks
+use the exact minimum of each six-node wedge's Jacobian determinant over its
+reference cell, including possible thickness-interior minima.
 
 ## ParaView
 
-Open `<stem>.xdmf`, keeping its companion HDF5 files in the same directory.
-Apply **Warp By Vector**, choose `Displacement`, and use scale factor 1 for
-physical displacement in mm. Color by `Activation` and play the time series.
+Open `<stem>.xdmf` with its companion HDF5 files in the same directory. Apply
+**Warp By Vector**, select `Displacement`, and use scale factor 1 for physical
+motion in mm. `Velocity` and `Acceleration` use mm/s and mm/s². `Activation`
+is the dimensionless Gaussian shape; `ElectricalActivation` is the signed
+source in inverse seconds.
 
-For fibers, apply **Cell Centers**, then line glyphs oriented by the cell
-vector `FiberDirection`. Color the wall by `FiberCoordinate` and inspect
-`FiberFallback` near the apex patch. `ActiveExtension` stores the prescribed
-target strain. `Velocity` and `Acceleration` are nodal fields in
-$\mathrm{mm/s}$ and $\mathrm{mm/s^2}$. The CSV records their maximum magnitudes,
-time, maximum displacement, activation maximum, Newton iterations, final
-residual, and minimum scaled Jacobian. Geometry metadata also records density,
-time step, Newmark parameters, and Rayleigh damping coefficients.
+`ActiveExtension`, `ActiveGamma`, and `ActiveBeta` are solved cell fields.
+`ContractileStiffness` stores $k_c=\gamma^2$ and `ContractileStress` stores
+$\tau_c=\gamma\beta$; the latter is an internal contractile stress, distinct
+from the serial fiber stress $\sigma_{1D}$. For fibers, apply **Cell Centers**
+and line glyphs oriented by `FiberDirection`. `FiberCoordinate`, `WallNormal`,
+`LongitudinalDirection`, and `FiberFallback` describe the reference frame.
+
+The CSV records time, displacement/velocity/acceleration maxima, activation,
+active-extension extrema, contractile stress, Newton residuals, and minimum
+scaled Jacobian. Metadata records geometry, material coefficients, electrical
+source parameters, density, and time-integration coefficients.

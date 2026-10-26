@@ -2,7 +2,8 @@
 
 The atrium examples contain a distributed fluid model and a separate
 [active solid model](Solid/README.md). The fluid model uses a fixed tetrahedral
-mesh. The solid model uses a wedge wall and prescribed fibers and activation.
+mesh. The solid model uses a wedge wall, prescribed fibers and electrical drive, and
+solved active internal fields.
 Each can be run independently; fluid–structure coupling is not implemented.
 
 ## Fluid model

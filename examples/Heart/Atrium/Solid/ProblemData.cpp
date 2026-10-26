@@ -30,10 +30,13 @@ namespace Rodin::Examples::Heart::AtriumContraction
       if (key == "--help")
       {
         std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
-                     "  [--contraction .03] [--speed 200] [--width 6]\n"
-                     "  [--young 50] [--poisson .3] [--active-stiffness 20]\n"
-                     "  [--rayleigh-alpha 0 (1/s)] [--rayleigh-beta 0 (s)]\n"
-                     "  [--density 1060 (kg/m^3)]\n"
+                     "  [--activation 20] [--relaxation 10] (1/s)\n"
+                     "  [--matrix-scale 20] [--matrix-exponent 5]\n"
+                     "  [--fiber-scale 20] [--fiber-exponent 10] [--volume-penalty 500]\n"
+                     "  [--viscosity .2] [--active-damping 3] (kPa s)\n"
+                     "  [--active-stiffness 20] [--cross-bridge-stiffness 100]\n"
+                     "  [--contractility 20] [--destruction-rate .4]\n"
+                     "  [--density 1060] (kg/m^3) [--speed 200] [--width 6]\n"
                      "  [--stop-after n] [--dt seconds] [--base-label 6] [--apex x y z]\n"
                      "  [--apex-radius 3] [--fibers-only]\n";
         std::exit(0);
@@ -72,20 +75,34 @@ namespace Rodin::Examples::Heart::AtriumContraction
         out.baseLabel = std::stoul(value);
       else if (key == "--apex-radius")
         out.apexRadius = std::stod(value);
-      else if (key == "--contraction")
-        out.contraction = std::stod(value);
+      else if (key == "--activation")
+        out.activation = std::stod(value);
+      else if (key == "--relaxation")
+        out.relaxation = std::stod(value);
       else if (key == "--speed")
         out.speed = std::stod(value);
       else if (key == "--width")
         out.width = std::stod(value);
-      else if (key == "--young")
-        out.young = std::stod(value);
-      else if (key == "--poisson")
-        out.poisson = std::stod(value);
-      else if (key == "--rayleigh-alpha")
-        out.rayleighAlpha = std::stod(value);
-      else if (key == "--rayleigh-beta")
-        out.rayleighBeta = std::stod(value);
+      else if (key == "--matrix-scale")
+        out.passive.matrixScale = std::stod(value);
+      else if (key == "--matrix-exponent")
+        out.passive.matrixExponent = std::stod(value);
+      else if (key == "--fiber-scale")
+        out.passive.fiberScale = std::stod(value);
+      else if (key == "--fiber-exponent")
+        out.passive.fiberExponent = std::stod(value);
+      else if (key == "--volume-penalty")
+        out.passive.volumePenalty = std::stod(value);
+      else if (key == "--viscosity")
+        out.viscosity = std::stod(value);
+      else if (key == "--active-damping")
+        out.activeDamping = std::stod(value);
+      else if (key == "--cross-bridge-stiffness")
+        out.crossBridgeStiffness = std::stod(value);
+      else if (key == "--contractility")
+        out.contractility = std::stod(value);
+      else if (key == "--destruction-rate")
+        out.destructionRate = std::stod(value);
       else if (key == "--density")
         out.density = std::stod(value);
       else if (key == "--active-stiffness")
@@ -100,14 +117,17 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
   Options validateOptions(const Options& cfg)
   {
-    if (!std::isfinite(cfg.rayleighAlpha) || cfg.rayleighAlpha < 0 ||
-      !std::isfinite(cfg.rayleighBeta) || cfg.rayleighBeta < 0 || cfg.steps == 0 ||
-      !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
-      !std::isfinite(cfg.contraction) || cfg.contraction < 0 || cfg.contraction >= 0.5 ||
+    (void)Rodin::Solid::DemirayGasser(cfg.passive);
+    if (cfg.steps == 0 || !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
+      !std::isfinite(cfg.activation) || cfg.activation < 0 ||
+      !std::isfinite(cfg.relaxation) || cfg.relaxation < 0 ||
+      !std::isfinite(cfg.viscosity) || cfg.viscosity < 0 ||
+      !std::isfinite(cfg.activeDamping) || cfg.activeDamping < 0 ||
+      !std::isfinite(cfg.crossBridgeStiffness) || cfg.crossBridgeStiffness <= 0 ||
+      !std::isfinite(cfg.contractility) || cfg.contractility < 0 ||
+      !std::isfinite(cfg.destructionRate) || cfg.destructionRate < 0 ||
       !std::isfinite(cfg.speed) || cfg.speed <= 0 || !std::isfinite(cfg.width) ||
-      cfg.width <= 0 || !std::isfinite(cfg.young) || cfg.young <= 0 ||
-      !std::isfinite(cfg.poisson) || cfg.poisson <= -1 || cfg.poisson >= 0.5 ||
-      !std::isfinite(cfg.activeStiffness) || cfg.activeStiffness <= 0 ||
+      cfg.width <= 0 || !std::isfinite(cfg.activeStiffness) || cfg.activeStiffness <= 0 ||
       !cfg.appendageApex.allFinite() || !std::isfinite(cfg.apexRadius) ||
       cfg.apexRadius <= 0 || !std::isfinite(cfg.density) || cfg.density <= 0)
     {
@@ -429,4 +449,49 @@ namespace Rodin::Examples::Heart::AtriumContraction
     fiber = directions.at(point.getPolytope().getIndex());
     return fiber;
   }
+  Real ProblemData::electricalAt(const Point& point, Real time) const
+  {
+    return (cfg.activation + cfg.relaxation) * activationAt(point, time) - cfg.relaxation;
+  }
+
+  Real ProblemData::maximumElectrical(const Polytope& cell, Real time) const
+  {
+    Real lower = std::numeric_limits<Real>::infinity(), upper = -lower;
+    for (Index vertex : cell.getVertices())
+    {
+      const Real coordinate = waveDirection.dot(point3(mesh, vertex) - baseOrigin);
+      lower = std::min(lower, coordinate);
+      upper = std::max(upper, coordinate);
+    }
+    const Real center = cfg.speed * time;
+    const Real distance = std::clamp(center, lower, upper) - center;
+    const Real scaled = distance / cfg.width;
+    return (cfg.activation + cfg.relaxation) * std::exp(-scaled * scaled) -
+      cfg.relaxation;
+  }
+
+  Optional<Real> ProblemData::minimumDeformedJacobian(
+    const VectorField& displacement) const
+  {
+    Real minimum = std::numeric_limits<Real>::infinity();
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      std::array<Vec, 6> q;
+      for (size_t j = 0; j < 6; ++j)
+      {
+        const Index vertex = cell->getVertices()(j);
+        const auto x = mesh.getVertexCoordinates(vertex);
+        const auto& dofs = displacement.getFiniteElementSpace().getDOFs(0, vertex);
+        for (size_t k = 0; k < 3; ++k)
+          q[j](k) = x(k) + displacement.getData()(dofs(k));
+      }
+      const Real determinant = minimumJacobian(q);
+      const Real area = (q[1] - q[0]).cross(q[2] - q[0]).norm();
+      if (!std::isfinite(determinant) || !std::isfinite(area) || area <= 0)
+        return std::nullopt;
+      minimum = std::min(minimum, determinant / area);
+    }
+    return minimum;
+  }
+
 }

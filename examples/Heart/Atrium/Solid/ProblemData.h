@@ -14,6 +14,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include <Rodin/Geometry.h>
+#include <Rodin/Solid/Constitutive/DemirayGasser.h>
 #include <Rodin/Variational.h>
 
 namespace Rodin::Examples::Heart::AtriumContraction
@@ -40,14 +41,17 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Vec appendageApex = Vec(46.39638367, 187.44307667, -205.03317767);
     Real apexRadius = 3;
     bool fibersOnly = false;
-    Real contraction = 0.03;
+    Real activation = 20; // Positive electrical peak, in 1/s.
+    Real relaxation = 10; // Magnitude of the resting electrical drive, in 1/s.
     Real speed = 200;
     Real width = 6;
-    Real young = 50;
-    Real poisson = 0.3;
-    Real activeStiffness = 20;
-    Real rayleighAlpha = 0; // Mass-proportional damping, in 1/s.
-    Real rayleighBeta = 0; // Reference-stiffness-proportional damping, in s.
+    Rodin::Solid::DemirayGasser::Parameters passive;
+    Real viscosity = 0.2; // Tissue viscosity, in kPa s.
+    Real activeStiffness = 20; // Serial elastic stiffness, in kPa.
+    Real activeDamping = 3; // Contractile dashpot, in kPa s.
+    Real crossBridgeStiffness = 100; // Cross-bridge stiffness source, in kPa.
+    Real contractility = 20; // Cross-bridge stress source, in kPa.
+    Real destructionRate = 0.4; // Dimensionless strain-rate destruction factor.
     Real density = 1060; // Reference mass density in kg/m^3.
   };
 
@@ -130,6 +134,29 @@ namespace Rodin::Examples::Heart::AtriumContraction
      * @returns Dimensionless activation.
      */
     Real activationAt(const Geometry::Point& point, Real time) const;
+
+    /**
+     * @brief Evaluates the electrical source for the active internal equations.
+     * @param point Reference material point.
+     * @param time Physical time in seconds.
+     * @returns Electrical drive in inverse seconds, negative during relaxation.
+     */
+    Real electricalAt(const Geometry::Point& point, Real time) const;
+
+    /**
+     * @brief Bounds electrical drive over a wedge for an admissible Newton predictor.
+     * @param cell Wedge whose reference vertices define the projection interval.
+     * @param time Current physical time in seconds.
+     * @returns Maximum drive in inverse seconds; residuals still use quadrature values.
+     */
+    Real maximumElectrical(const Geometry::Polytope& cell, Real time) const;
+
+    /**
+     * @brief Checks each deformed wedge over its entire reference cell.
+     * @param displacement Current nodal displacement in mm.
+     * @returns Minimum scaled determinant in mm, or no value for nonfinite geometry.
+     */
+    Optional<Real> minimumDeformedJacobian(const VectorField& displacement) const;
 
     private:
       /// @brief Validates the wall and identifies its basal plane and normals.

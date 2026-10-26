@@ -14,6 +14,8 @@ set(RodinSolid_HEADERS
   Kinematics/Invariants.h
   Constitutive/HyperElasticLaw.h
   Constitutive/NeoHookean.h
+  Constitutive/DemirayGasser.h
+  Constitutive/KelvinVoigt.h
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
   Constitutive/Yeoh.h

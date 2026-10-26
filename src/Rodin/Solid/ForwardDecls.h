@@ -26,6 +26,8 @@ namespace Rodin::Solid
     struct ActiveExtension;
     struct PreviousActiveExtension;
     struct TimeStep;
+    struct VelocityGradient;
+    struct VelocityGradientDerivative;
     struct ElectricalActivation;
     struct PreviousActiveGamma;
     struct PreviousActiveBeta;
@@ -44,6 +46,11 @@ namespace Rodin::Solid
   class Hooke;
 
   class HolzapfelOgden;
+
+  class DemirayGasser;
+
+  template <class Law>
+  class KelvinVoigt;
 
   class ActiveFiberLaw;
 

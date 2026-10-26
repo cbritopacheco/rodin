@@ -21,21 +21,30 @@ namespace Rodin::Examples::Heart::AtriumContraction
 {
   Output::Output(const Options& cfg, const ProblemData& data,
     const VectorField& displacement, const VectorField& velocity,
-    const VectorField& acceleration, Real timeStep, Real density, Real beta, Real gamma)
+    const VectorField& acceleration, const CellScalarField& extension,
+    const CellScalarField& gammaField, const CellScalarField& betaField, Real timeStep,
+    Real density, Real beta, Real gamma)
     : m_cfg(cfg),
       m_data(data),
       m_displacement(displacement),
       m_velocity(velocity),
       m_acceleration(acceleration),
+      m_extension(extension),
+      m_gamma(gammaField),
+      m_beta(betaField),
       m_activation(data.scalarSpace),
-      m_extension(data.scalarSpace),
+      m_electrical(data.scalarSpace),
+      m_contractileStress(data.diagnosticSpace),
+      m_contractileStiffness(data.diagnosticSpace),
       m_output(cfg.output)
   {
     const auto parent = std::filesystem::path(cfg.output).parent_path();
     if (!parent.empty())
       std::filesystem::create_directories(parent);
     m_activation.setName("Activation");
-    m_extension.setName("ActiveExtension");
+    m_electrical.setName("ElectricalActivation");
+    m_contractileStress.setName("ContractileStress");
+    m_contractileStiffness.setName("ContractileStiffness");
     std::ofstream metadata(m_cfg.output + ".geometry.json");
     metadata << std::setprecision(17) << "{\n  \"base_label\": " << m_cfg.baseLabel
              << ",\n  \"base_origin_mm\": [" << m_data.baseOrigin(0) << ','
@@ -52,8 +61,19 @@ namespace Rodin::Examples::Heart::AtriumContraction
              << ",\n  \"maximum_wave_coordinate_mm\": " << m_data.maximumProjection
              << ",\n  \"speed_mm_per_s\": " << m_cfg.speed
              << ",\n  \"width_mm\": " << m_cfg.width
-             << ",\n  \"rayleigh_alpha_per_s\": " << m_cfg.rayleighAlpha
-             << ",\n  \"rayleigh_beta_s\": " << m_cfg.rayleighBeta
+             << ",\n  \"activation_peak_per_s\": " << m_cfg.activation
+             << ",\n  \"relaxation_drive_per_s\": " << m_cfg.relaxation
+             << ",\n  \"matrix_scale_kPa\": " << m_cfg.passive.matrixScale
+             << ",\n  \"matrix_exponent\": " << m_cfg.passive.matrixExponent
+             << ",\n  \"fiber_scale_kPa\": " << m_cfg.passive.fiberScale
+             << ",\n  \"fiber_exponent\": " << m_cfg.passive.fiberExponent
+             << ",\n  \"volume_penalty_kPa\": " << m_cfg.passive.volumePenalty
+             << ",\n  \"tissue_viscosity_kPa_s\": " << m_cfg.viscosity
+             << ",\n  \"active_stiffness_kPa\": " << m_cfg.activeStiffness
+             << ",\n  \"active_damping_kPa_s\": " << m_cfg.activeDamping
+             << ",\n  \"cross_bridge_stiffness_kPa\": " << m_cfg.crossBridgeStiffness
+             << ",\n  \"contractility_kPa\": " << m_cfg.contractility
+             << ",\n  \"destruction_rate\": " << m_cfg.destructionRate
              << ",\n  \"reference_density_kg_per_m3\": " << m_cfg.density
              << ",\n  \"density_kPa_s2_per_mm2\": " << density
              << ",\n  \"time_step_s\": " << timeStep << ",\n  \"newmark_beta\": " << beta
@@ -72,7 +92,12 @@ namespace Rodin::Examples::Heart::AtriumContraction
     grid.add(m_velocity);
     grid.add(m_acceleration);
     grid.add(m_activation);
-    grid.add(m_extension);
+    grid.add(m_electrical);
+    grid.add(m_extension, IO::XDMF::Center::Cell);
+    grid.add(m_gamma, IO::XDMF::Center::Cell);
+    grid.add(m_beta, IO::XDMF::Center::Cell);
+    grid.add(m_contractileStress, IO::XDMF::Center::Cell);
+    grid.add(m_contractileStiffness, IO::XDMF::Center::Cell);
     grid.add(
       m_data.fiberField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
     grid.add(
@@ -89,7 +114,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
     {
       m_log.open(cfg.output + ".csv");
       m_log << "time_s,max_displacement_mm,activation_max,newton_iterations,residual,min_"
-               "scaled_jacobian_mm,max_velocity_mm_per_s,max_acceleration_mm_per_s2\n";
+               "scaled_jacobian_mm,max_velocity_mm_per_s,max_acceleration_mm_per_s2,"
+               "min_active_extension,max_active_extension,max_contractile_stress_kPa\n";
       m_log.flush();
     }
     std::cout << std::setprecision(9) << "Wall: " << m_data.mesh.getCellCount()
@@ -103,9 +129,9 @@ namespace Rodin::Examples::Heart::AtriumContraction
   void Output::write(Real time, size_t iterations, Real residual)
   {
     m_activation = [&](const Point& point) { return m_data.activationAt(point, time); };
-    m_extension = [&](const Point& point) {
-      return -m_cfg.contraction * m_data.activationAt(point, time);
-    };
+    m_electrical = [&](const Point& point) { return m_data.electricalAt(point, time); };
+    m_contractileStress = m_gamma * m_beta;
+    m_contractileStiffness = m_gamma * m_gamma;
     if (m_cfg.fibersOnly)
     {
       m_output.write(time).flush();
@@ -127,31 +153,17 @@ namespace Rodin::Examples::Heart::AtriumContraction
       maximumVelocity = std::max(maximumVelocity, v.norm());
       maximumAcceleration = std::max(maximumAcceleration, a.norm());
     }
-    Real minimumCurrentJacobian = std::numeric_limits<Real>::infinity();
-    for (auto cell = m_data.mesh.getCell(); cell; ++cell)
-    {
-      std::array<Vec, 6> q;
-      for (size_t j = 0; j < 6; ++j)
-      {
-        const Index vertex = cell->getVertices()(j);
-        const auto x = m_data.mesh.getVertexCoordinates(vertex);
-        const auto& dofs = m_displacement.getFiniteElementSpace().getDOFs(0, vertex);
-        for (size_t k = 0; k < 3; ++k)
-          q[j](k) = x(k) + m_displacement.getData()(dofs(k));
-      }
-      const Real determinant = minimumJacobian(q);
-      if (!(determinant > 0) || !std::isfinite(determinant))
-      {
-        Alert::Exception() << "The contraction produced a folded wedge" << Alert::Raise;
-      }
-      const Real area = (q[1] - q[0]).cross(q[2] - q[0]).norm();
-      minimumCurrentJacobian = std::min(minimumCurrentJacobian, determinant / area);
-    }
+    const auto minimum = m_data.minimumDeformedJacobian(m_displacement);
+    if (!minimum || *minimum <= 0)
+      Alert::Exception() << "The contraction produced a folded wedge" << Alert::Raise;
+    const Real minimumCurrentJacobian = *minimum;
     m_output.write(time).flush();
     m_log << std::setprecision(17) << time << ',' << maximum << ','
           << m_activation.getData().maxCoeff() << ',' << iterations << ',' << residual
           << ',' << minimumCurrentJacobian << ',' << maximumVelocity << ','
-          << maximumAcceleration << '\n';
+          << maximumAcceleration << ',' << m_extension.getData().minCoeff() << ','
+          << m_extension.getData().maxCoeff() << ','
+          << m_contractileStress.getData().maxCoeff() << '\n';
     m_log.flush();
     std::cout << "  max displacement=" << maximum << " mm" << std::endl;
   }

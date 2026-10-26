@@ -34,14 +34,19 @@ namespace Rodin::Examples::Heart::AtriumContraction
        * @param displacement Current displacement.
        * @param velocity Current velocity.
        * @param acceleration Current acceleration.
+       * @param extension Solved active extension.
+       * @param gammaField Square root of contractile stiffness.
+       * @param betaField Contractile stress divided by square root of stiffness.
        * @param timeStep Time step in seconds.
        * @param density Density in kPa s^2/mm^2.
        * @param beta Newmark displacement parameter.
        * @param gamma Newmark velocity parameter.
        */
       Output(const Options& cfg, const ProblemData& data, const VectorField& displacement,
-        const VectorField& velocity, const VectorField& acceleration, Real timeStep,
-        Real density, Real beta, Real gamma);
+        const VectorField& velocity, const VectorField& acceleration,
+        const CellScalarField& extension, const CellScalarField& gammaField,
+        const CellScalarField& betaField, Real timeStep, Real density, Real beta,
+        Real gamma);
 
       /**
        * @brief Writes a mechanical state and its diagnostics.
@@ -60,7 +65,11 @@ namespace Rodin::Examples::Heart::AtriumContraction
       const VectorField& m_displacement;
       const VectorField& m_velocity;
       const VectorField& m_acceleration;
-      ScalarField m_activation, m_extension;
+      const CellScalarField& m_extension;
+      const CellScalarField& m_gamma;
+      const CellScalarField& m_beta;
+      ScalarField m_activation, m_electrical;
+      CellScalarField m_contractileStress, m_contractileStiffness;
       std::ofstream m_log;
       IO::XDMF m_output;
   };
