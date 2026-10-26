@@ -165,8 +165,11 @@ def discover(entry, ranks):
         output = subprocess.check_output(argv + ['--benchmark_list_tests=true'], text=True)
         names = [line.strip() for line in output.splitlines() if line.strip()]
         counts = Counter(names)
-        if any(count not in (1, ranks) for count in counts.values()):
-            raise ValueError('Ambiguous or inconsistent distributed benchmark discovery')
+        inconsistent = {name: count for name, count in counts.items() if count not in (1, ranks)}
+        if inconsistent:
+            sample = dict(list(inconsistent.items())[:8])
+            raise ValueError('Ambiguous or inconsistent distributed benchmark discovery: '
+                             + entry['target'] + ' ranks=' + str(ranks) + ' counts=' + repr(sample))
         names = sorted(counts)
     if not names or len(names) != len(set(names)):
         raise ValueError('Empty or duplicate benchmark case discovery')

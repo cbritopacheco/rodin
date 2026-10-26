@@ -16,6 +16,7 @@
  */
 
 #include <chrono>
+#include <sstream>
 
 #include <benchmark/benchmark.h>
 #include <string_view>
@@ -90,6 +91,13 @@ int main(int argc, char** argv)
   int argumentCount = static_cast<int>(arguments.size());
   arguments.push_back(nullptr);
   benchmark::Initialize(&argumentCount, arguments.data());
-  benchmark::RunSpecifiedBenchmarks();
+  std::ostringstream listing;
+  benchmark::ConsoleReporter reporter;
+  if (world.rank() != 0)
+    reporter.SetOutputStream(&listing);
+  if (world.rank() == 0)
+    benchmark::RunSpecifiedBenchmarks();
+  else
+    benchmark::RunSpecifiedBenchmarks(&reporter);
   benchmark::Shutdown();
 }

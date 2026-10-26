@@ -83,7 +83,14 @@ Google Benchmark field explicitly; `auto` follows the driver's `UseRealTime` or
 labeled `manual_time`: their scientific meaning comes from the driver and is
 not assumed to be wall time. `RANKS` preserves the required launcher counts.
 `ARGS` applies to every invocation; `MPI_ARGS` additionally applies above one
-rank. `CASE_BATCH` is the maximum number of discovered cases per execution lane,
+rank.
+
+Non-root display reporters must redirect their output stream as well as suppress
+measurement callbacks: Google Benchmark writes `--benchmark_list_tests` output
+directly to that stream. Only the root catalogue should reach launcher stdout;
+every rank still participates in measurement and its numerical checks.
+
+`CASE_BATCH` is the maximum number of discovered cases per execution lane,
 not a sample reduction. The single-argument selector-size budget may split a
 batch further. Expensive spectral cases use one case per Slow lane.
 
