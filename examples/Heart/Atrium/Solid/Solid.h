@@ -115,8 +115,12 @@ namespace Rodin::Examples::Heart::AtriumContraction
       static constexpr Real DensityConversion = 1e-9;
       // Quadrature policy for nonlinear constitutive terms on nonaffine wedges.
       static constexpr size_t QuadratureOrder = 4;
+      // Heuristic work caps; reaching either limit fails the time step.
       static constexpr size_t MaximumNewtonIterations = 80;
       static constexpr size_t MaximumBacktracks = 60;
+      // Absolute assembled residual tolerance in the example's mm/kPa/s units.
+      // Relative stopping is disabled because the initial active residual can
+      // be large while a mechanically unresolved residual remains significant.
       static constexpr Real AbsoluteResidualTolerance = 1e-8;
 
       /**

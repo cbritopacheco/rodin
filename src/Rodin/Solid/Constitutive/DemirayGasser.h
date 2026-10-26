@@ -44,7 +44,15 @@ namespace Rodin::Solid
        * @param parameters Elastic coefficients; scales have stress units.
        */
       explicit DemirayGasser(const Parameters& parameters)
-        : m_parameters(parameters)
+        : m_parameters(parameters),
+          m_logJ(0),
+          m_scale(1),
+          m_first(3),
+          m_fourth(1),
+          m_firstDerivative(0),
+          m_fiberDerivative(0),
+          m_fiberCurvature(0),
+          m_volumeStress(0)
       {
         const auto& p = m_parameters;
         if (!std::isfinite(p.matrixScale) || p.matrixScale <= 0 ||
@@ -184,9 +192,9 @@ namespace Rodin::Solid
       Parameters m_parameters;
       Optional<KinematicState> m_state;
       Math::SpatialVector<Real> m_fiber;
-      Real m_logJ = 0, m_scale = 1, m_first = 3, m_fourth = 1;
-      Real m_firstDerivative = 0, m_fiberDerivative = 0, m_fiberCurvature = 0;
-      Real m_volumeStress = 0;
+      Real m_logJ, m_scale, m_first, m_fourth;
+      Real m_firstDerivative, m_fiberDerivative, m_fiberCurvature;
+      Real m_volumeStress;
   };
 }
 
