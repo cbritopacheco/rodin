@@ -401,10 +401,14 @@ MPI and PETSc ranks remain explicit benchmark registrations.
 Every enabled benchmark executable must be registered. Discovery determines all
 case partitions, and the pooling gate requires every raw report, checksum and
 current-commit receipt. Documentation generation runs in parallel using the
-same descriptions. A single publisher requires both complete results and
-successful documentation before updating `gh-pages`. Both this publisher and
-Static Analysis hold the same `rodin-gh-pages-publication` lock while writing and
-deploying. A push made with `GITHUB_TOKEN` does not trigger legacy Pages builds:
+same descriptions. Documentation publishes immediately after its own validated
+build, reconnecting the new pages to the latest complete benchmark histories.
+It does not wait for benchmark builds, execution or pooling. After documentation
+publication and successful pooling, a separate publisher updates only complete
+benchmark histories; it cannot replace newer documentation. Missing or failed
+benchmark contributions leave the previous complete results intact. Both
+publishers and Static Analysis hold the same `rodin-gh-pages-publication` lock
+while writing and deploying. A push made with `GITHUB_TOKEN` does not trigger legacy Pages builds:
 `dev/deploy_pages.py` explicitly requests a build using `pages: write`, then waits
 for a successful build of the exact published `gh-pages` commit. A stale success,
 failed build or timeout fails publication. No personal access token is needed;

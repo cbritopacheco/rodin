@@ -129,9 +129,11 @@ remain separate.
 ```text
 Benchmarks
 ├── Infrastructure checks
-├── Documentation ── Doxygen XML + m.css + benchmark descriptions ───────────┐
-├── Local / Release / GCC 14                                              │
-│   └── Shared libraries (Rodin + Google Benchmark, compiled once)         │
+├── Documentation ── Doxygen XML + m.css + benchmark descriptions
+│   └── Publish documentation immediately
+│       └── Retain the latest complete benchmark histories
+├── Local / Release / GCC 14
+│   └── Shared libraries (Rodin + Google Benchmark, compiled once)
 │       ├── Modules / Assembly ── shared component build ── Regular/Slow lanes
 │       ├── Modules / Geometry ── shared component build ── Regular/Slow lanes
 │       ├── Modules / IO       ── shared component build ── Regular/Slow lanes
@@ -151,9 +153,18 @@ Benchmarks
                            ▼
                  Validate complete campaign
               exact discovery + every raw report
-                           │                                             │
-                           └────── Publish documentation and histories ◄─┘
+                           │
+                           ▼
+                 Publish complete benchmark histories
+                  (after documentation publication)
 ```
+
+Documentation deploys as soon as its own build and navigation checks pass;
+benchmark failures cannot block that deployment. Fresh pages reconnect to the
+last published complete histories, retaining their measured commit and date.
+Once every benchmark contribution is validated, a second deployment updates
+the histories without replacing the documentation. Both publishers and Static
+Analysis use the same Pages publication lock and verify their deployed commit.
 
 CMake's configured dependency graph selects only libraries needed by that
 configuration's benchmark targets, including linked third-party libraries.
