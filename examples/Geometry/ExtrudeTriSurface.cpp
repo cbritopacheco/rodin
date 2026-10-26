@@ -32,31 +32,31 @@ namespace
 {
   struct Options
   {
-      std::string input;
-      std::string output;
-      Real thickness = 0;
-      size_t layers = 1;
-      bool centered = false;
-      bool zDirection = false;
-      Optional<Attribute> wedgeAttribute;
-      Attribute bottomAttribute = 1;
-      Attribute topAttribute = 2;
-      Attribute sideAttribute = 3;
-      IO::FileFormat inputFormat = IO::FileFormat::MEDIT;
-      IO::FileFormat outputFormat = IO::FileFormat::MEDIT;
+    std::string input;
+    std::string output;
+    Real thickness = 0;
+    size_t layers = 1;
+    bool centered = false;
+    bool zDirection = false;
+    Optional<Attribute> wedgeAttribute;
+    Attribute bottomAttribute = 1;
+    Attribute topAttribute = 2;
+    Attribute sideAttribute = 3;
+    IO::FileFormat inputFormat = IO::FileFormat::MEDIT;
+    IO::FileFormat outputFormat = IO::FileFormat::MEDIT;
   };
 
   struct TriangleData
   {
-      std::array<Index, 3> vertices;
-      Attribute attribute;
+    std::array<Index, 3> vertices;
+    Attribute attribute;
   };
 
   struct EdgeData
   {
-      Index first;
-      Index second;
-      size_t count;
+    Index first;
+    Index second;
+    size_t count;
   };
 
   void usage(const char* exe)
@@ -151,8 +151,10 @@ namespace
         else if (value == "z")
           options.zDirection = true;
         else
+        {
           Alert::Exception() << "Invalid --direction: " << value
                              << ". Expected normal or z." << Alert::Raise;
+        }
       }
       else if (arg == "--input-format" || arg.rfind("--input-format=", 0) == 0)
       {
@@ -273,8 +275,10 @@ namespace
     for (Index v = 0; v < static_cast<Index>(normals.size()); ++v)
     {
       if (normals[v].norm() == 0)
+      {
         Alert::Exception() << "Vertex " << v << " has no usable incident normal."
                            << Alert::Raise;
+      }
       normals[v] /= normals[v].norm();
     }
     return normals;

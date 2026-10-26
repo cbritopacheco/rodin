@@ -395,23 +395,23 @@ namespace Rodin::Geometry
         assert(getCount() == other.getCount());
         if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
-        return (this->getMatrix().cwiseProduct(other.getMatrix())).sum();
+        return Math::dot(this->getMatrix(), other.getMatrix());
       }
 
       /**
-       * @brief Returns the Frobenius inner product of the active coordinates with an Eigen matrix.
+       * @brief Returns the Frobenius inner product of the active coordinates with an Eigen matrix, conjugating its entries.
        * @param other Other operand.
        * @returns The Frobenius inner product of the active coordinates with an Eigen matrix.
        */
       template <class EigenDerived>
-      [[nodiscard]] inline
-      Scalar dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      [[nodiscard]] inline auto dot(
+        const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
         assert(static_cast<std::uint8_t>(other.rows()) == m_dimension);
         assert(static_cast<Eigen::Index>(other.cols()) == getCount());
         if (m_dimension == 0 || getCount() == 0)
-          return Scalar(0);
-        return (this->getMatrix().cwiseProduct(other)).sum();
+          return decltype(Math::dot(this->getMatrix(), other))(0);
+        return Math::dot(this->getMatrix(), other);
       }
 
       /**

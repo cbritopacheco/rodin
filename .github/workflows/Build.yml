@@ -35,24 +35,16 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - uses: ./.github/actions/prepare-apt
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
       - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          libboost1.74-all-dev
-          libsuitesparse-dev
-          libeigen3-dev
-          libscotch-dev
-          libmetis-dev
-          libhdf5-dev
-          libomp-dev
-          petsc-dev
-          mpich
-          lcov
+        uses: ./.github/actions/apt-dependencies
+        with:
+          packages: libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov
       - name: Configure CMake
         run: >
           cmake

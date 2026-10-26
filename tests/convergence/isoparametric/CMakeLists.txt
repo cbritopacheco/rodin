@@ -7,7 +7,7 @@ target_link_libraries(RodinConvergenceIsoparametric
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergenceIsoparametric
+rodin_discover_tests(RodinConvergenceIsoparametric
   PROPERTIES
     LABELS "convergence;slow"
 )

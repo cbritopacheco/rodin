@@ -1,0 +1,6 @@
+<p>Fixed-capacity spatial arithmetic and contraction timings.</p>
+<h2>Measured operation</h2>
+<p>Times spatial value operations with runtime extents and escaping results.</p>
+<p>Operand initialization and independent contraction checks precede timing. Compiler barriers expose operands and results on every iteration so neither constant folding nor dead-store removal can eliminate the measured operation.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

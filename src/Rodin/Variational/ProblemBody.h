@@ -13,7 +13,7 @@
  * comprise a variational problem. The ProblemBody serves as a container
  * and coordinator for all components of a finite element formulation.
  *
- * ## Role in Problem Assembly
+ * # Role in Problem Assembly
  * ProblemBody acts as an intermediate layer that:
  * 1. Collects all bilinear form integrators (matrix terms)
  * 2. Collects all linear form integrators (load vector terms)
@@ -21,7 +21,7 @@
  * 4. Manages periodic boundary conditions
  * 5. Coordinates the assembly process
  *
- * ## Design Pattern
+ * # Design Pattern
  * The separation of ProblemBody from Problem follows the Bridge pattern,
  * allowing:
  * - Shared state between different problem types

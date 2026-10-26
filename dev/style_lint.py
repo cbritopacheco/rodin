@@ -8,6 +8,7 @@ Checks the rules that clang-format and clang-tidy cannot express:
   filedoc    every header under src/Rodin carries Doxygen @brief documentation
   docstyle   multiline Doxygen uses /** ... */; one-line Doxygen uses ///
   forbraces  for-loop bodies spanning multiple physical lines require braces
+  ifbraces   if/else bodies spanning multiple physical lines require braces
   pragma     include guards, never #pragma once
   petsc      PETSc headers are only included under src/Rodin/PETSc/
 
@@ -88,7 +89,7 @@ def expected_guard(relpath):
 
 
 CPP_COMMENTS = re.compile(
-    r'R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
+    r'(?:u8|u|U|L)?R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
     r'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\''
     r'|(?P<comment>//[^\n]*|/\*.*?\*/)', re.DOTALL)
 
@@ -98,8 +99,8 @@ CPP_TOKENS = re.compile(
     + r'|(?P<token>[A-Za-z_]\w*|[^\s])', re.DOTALL | re.MULTILINE)
 
 
-def multiline_for_bodies(text):
-    """Yield unbraced for bodies whose code spans multiple physical lines.
+def multiline_control_bodies(text, keywords):
+    """Yield selected unbraced control bodies spanning multiple physical lines.
 
     Match complete statements, including nested controls, rather than counting
     semicolons inside loop headers, calls, initializers, or lambda bodies.
@@ -174,9 +175,12 @@ def multiline_for_bodies(text):
         return None
 
     for i, (keyword, start, _) in enumerate(tokens):
-        if keyword != "for":
+        if keyword not in keywords:
             continue
-        body = control_body(i)
+        # Keep conventional else-if chains; each condition's body is checked.
+        if keyword == "else" and value(i + 1) == "if":
+            continue
+        body = i + 1 if keyword == "else" else control_body(i)
         if body is None or value(skip_attributes(body)) == "{":
             continue
         end = statement_end(body)
@@ -184,6 +188,16 @@ def multiline_for_bodies(text):
             body_start, body_end = tokens[body][1], tokens[end][2]
             if "\n" in text[body_start:body_end]:
                 yield start, body_start, body_end
+
+
+def multiline_for_bodies(text):
+    """Yield multiline unbraced for bodies."""
+    yield from multiline_control_bodies(text, {"for"})
+
+
+def multiline_if_bodies(text):
+    """Yield multiline unbraced if and else bodies, preserving else-if chains."""
+    yield from multiline_control_bodies(text, {"if", "else"})
 
 
 def doxygen_style_edits(text):
@@ -244,8 +258,22 @@ def for_brace_findings(relpath, lines):
                        "on one physical line may omit them")
 
 
+def if_brace_findings(relpath, lines):
+    """Check conditional bodies without library-only header conventions."""
+    text = "\n".join(lines)
+    for start, _, _ in multiline_if_bodies(text):
+        line = text.count("\n", 0, start) + 1
+        yield Finding(
+            "ifbraces", relpath, line,
+            "if/else bodies spanning multiple physical lines require braces",
+            source=lines[line - 1],
+            suggestion="enclose the body in Allman braces; only a body "
+                       "on one physical line may omit them")
+
+
 def check_file(relpath, lines):
-    findings = list(for_brace_findings(relpath, lines))
+    findings = [*for_brace_findings(relpath, lines),
+                *if_brace_findings(relpath, lines)]
     text = "\n".join(lines)
     is_header = relpath.endswith((".h", ".hpp"))
 
@@ -392,14 +420,15 @@ def main():
     for path in files:
         all_findings.extend(check_file(rel(path), read_lines(path)))
 
-    # Tests, examples, bindings, and development utilities follow the same loop
-    # rule, without inheriting the library's include-guard and header-doc rules.
+    # Tests, examples, bindings, and development utilities follow the same control
+    # body rules, without inheriting library include-guard and header-doc rules.
     if args.update_baseline or not args.paths:
         extra_files = collect_files([os.path.join(REPO, root)
                                      for root in ("tests", "examples", "py", "dev",
                                                   "src/Rodin.h")])
         for path in extra_files:
             all_findings.extend(for_brace_findings(rel(path), read_lines(path)))
+            all_findings.extend(if_brace_findings(rel(path), read_lines(path)))
         files.extend(extra_files)
 
     if args.update_baseline:

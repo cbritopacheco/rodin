@@ -12,7 +12,7 @@
  * supernodal LU factorization for general (non-symmetric) matrices using
  * Eigen's SparseLU solver.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver performs LU decomposition:
  * @f[
  *   PA = LU
@@ -20,12 +20,12 @@
  * where @f$ P @f$ is a permutation matrix for numerical stability,
  * @f$ L @f$ is lower triangular, and @f$ U @f$ is upper triangular.
  *
- * ## Applicability
+ * # Applicability
  * - General sparse matrices (non-symmetric)
  * - Problems where iterative solvers fail to converge
  * - Small to medium-sized systems
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(beta * Grad(u), Grad(v)) + Integral(gamma * u, v) - Integral(f, v);

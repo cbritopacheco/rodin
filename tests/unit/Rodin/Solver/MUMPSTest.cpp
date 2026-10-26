@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <limits>
+#include <string>
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Geometry/Mesh.h"
@@ -159,6 +161,43 @@ namespace Rodin::Tests::Unit::Solver
     solver.solve(system);
     ASSERT_TRUE(solver.success());
     expectSolution(system, expected);
+  }
+
+  /// @brief Copied, moved and cloned solvers rebuild independent backend resources.
+  TEST(Rodin_Solver_MUMPS, IndependentCopiesPreserveConfiguration)
+  {
+    auto mesh = makeMesh(Polytope::Type::Segment);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    Problem problem(u, v);
+    auto system = makeUnsymmetricSystem();
+    MUMPSSolver source(problem);
+    source.setMaxThreads(2)
+      .setOrdering(MUMPSSolver::Ordering::AMD)
+      .setWorkspacePercentage(120)
+      .solve(system);
+    ASSERT_TRUE(source.success());
+    MUMPSSolver copied(source);
+    source.clear(Factorization::Symbolic);
+    auto check = [&](auto& solver) {
+      EXPECT_EQ(solver.getMaxThreads(), 2);
+      EXPECT_EQ(solver.getOrdering(), MUMPSSolver::Ordering::AMD);
+      EXPECT_EQ(solver.getWorkspacePercentage(), 120);
+      expectResourceState(solver, false, false, false, {});
+      system.getSolution().setZero();
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      Math::Vector<Real> expected(3);
+      expected << 1, 2, 3;
+      expectSolution(system, expected);
+    };
+    check(copied);
+    MUMPSSolver moved(std::move(copied));
+    check(moved);
+    std::unique_ptr<MUMPSSolver> clone(moved.copy());
+    moved.clear(Factorization::Symbolic);
+    check(*clone);
   }
 
   TEST(Rodin_Solver_MUMPS, DefaultWorkspaceMarginIsPreservedAndRestored)
@@ -498,4 +537,65 @@ namespace Rodin::Tests::Unit::Solver
     ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
+
+  /// @brief Rejected options preserve retained factors and permit another right-hand side.
+  TEST(Rodin_Solver_MUMPS, InvalidOptionsPreserveFactorizationAndPermitRecovery)
+  {
+    auto mesh = makeMesh(Polytope::Type::Segment);
+    P1 fes(mesh);
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    Problem problem(trial, test);
+    MUMPSSolver solver(problem);
+    auto system = makeUnsymmetricSystem();
+    solver.setMaxThreads(1).setWorkspacePercentage(40).solve(system);
+    ASSERT_TRUE(solver.success());
+    const auto reject = [&](auto&& configure, const char* method) {
+      try
+      {
+        configure();
+        FAIL() << "Out-of-range MUMPS option was accepted";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("member function"), std::string::npos);
+        EXPECT_NE(message.find(method), std::string::npos);
+      }
+      EXPECT_EQ(solver.getMaxThreads(), 1u);
+      EXPECT_EQ(solver.getWorkspacePercentage(), 40);
+      expectResourceState(solver, true, true, true, Factorization::Numeric);
+    };
+    if constexpr (std::numeric_limits<Index>::max() >
+      static_cast<Index>(std::numeric_limits<MUMPS_INT>::max()))
+    {
+      reject(
+        [&] {
+          solver.setMaxThreads(
+            static_cast<Index>(std::numeric_limits<MUMPS_INT>::max()) + 1);
+        },
+        "setMaxThreads");
+    }
+    reject([&] { solver.setWorkspacePercentage(-1); }, "setWorkspacePercentage");
+    if constexpr (std::numeric_limits<Integer>::max() >
+      std::numeric_limits<MUMPS_INT>::max())
+    {
+      reject(
+        [&] {
+          Integer percentage = std::numeric_limits<MUMPS_INT>::max();
+          ++percentage;
+          solver.setWorkspacePercentage(percentage);
+        },
+        "setWorkspacePercentage");
+    }
+    Math::Vector<Real> expected(3);
+    expected << -2, Real(0.5), 4;
+    system.getVector() = system.getOperator() * expected;
+    system.getSolution().setConstant(-99);
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, expected);
+    EXPECT_LT(
+      (system.getOperator() * system.getSolution() - system.getVector()).norm(), 1e-12);
+  }
 }

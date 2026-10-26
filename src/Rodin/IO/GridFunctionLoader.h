@@ -9,7 +9,7 @@
 
 #include <functional>
 
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -52,13 +52,16 @@ namespace Rodin::IO
 
       void load(std::istream&) override
       {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "No GridFunctionLoader specialization for this format/FES/Data combination."
           << Alert::Raise;
       }
 
     protected:
-      ObjectType& getObject() override { return m_gf.get(); }
+      ObjectType& getObject() override
+      {
+        return m_gf.get();
+      }
 
     private:
       std::reference_wrapper<ObjectType> m_gf;

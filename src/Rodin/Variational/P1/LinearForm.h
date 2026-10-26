@@ -12,7 +12,7 @@
  * P1 linear forms are assembled using nodal integration with the
  * appropriate quadrature rules.
  *
- * ## Mathematical Background
+ * # Mathematical Background
  * A linear form @f$ L(v) @f$ for test functions @f$ v \in \mathbb{P}_1 @f$
  * is typically of the form:
  * @f[

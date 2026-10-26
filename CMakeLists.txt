@@ -226,21 +226,43 @@ if(RODIN_CODE_COVERAGE)
   # RODIN_LCOV_FLAGS is already a cache var in CI; make list
   string(REPLACE " " ";" RODIN_LCOV_FLAGS_LIST "${RODIN_LCOV_FLAGS}")
 
+  add_custom_target(RodinCoverageInitial
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
+            --gcov-tool ${GCOV}
+            --capture --initial
+            --directory ${CMAKE_BINARY_DIR}
+            --base-directory ${CMAKE_SOURCE_DIR}
+            --include "${PROJECT_SOURCE_DIR}/src/Rodin/*"
+            --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
+            --output-file RodinCoverage.initial.info
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    VERBATIM
+  )
+
   add_custom_target(RodinCoverage
     COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
             --gcov-tool ${GCOV}
             --capture
             --directory ${CMAKE_BINARY_DIR}
             --base-directory ${CMAKE_SOURCE_DIR}
+            --include "${PROJECT_SOURCE_DIR}/src/Rodin/*"
+            --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
+            --output-file RodinCoverage.runtime.info
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
+            --add-tracefile RodinCoverage.initial.info
+            --add-tracefile RodinCoverage.runtime.info
             --output-file RodinCoverage.base.info
     COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
             --gcov-tool ${GCOV}
-            --remove RodinCoverage.base.info
-            '/usr/*' '/opt/*' '/Library/*' '/Applications/*'
-            '*/tests/*' '*/third-party/*'
+            --extract RodinCoverage.base.info
+            "${PROJECT_SOURCE_DIR}/src/Rodin/*"
+            --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
             --output-file RodinCoverage.info
-    COMMAND rm -f RodinCoverage.base.info
+    COMMAND ${CMAKE_COMMAND} -E rm -f RodinCoverage.base.info
+            RodinCoverage.initial.info RodinCoverage.runtime.info
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS RodinCoverageInitial
+    VERBATIM
   )
 endif()
 
@@ -361,6 +383,11 @@ endif()
 
 if (RODIN_BUILD_DOC)
   add_subdirectory(doc)
+endif()
+
+if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_MANUFACTURED_TESTS OR
+    RODIN_BUILD_CONVERGENCE_TESTS)
+  include(RodinTestManifest)
 endif()
 
 if (RODIN_FEATURE_SUMMARY)

@@ -79,7 +79,7 @@ namespace Rodin::Tests::Unit
     h(0, 1) = 0;
     h(1, 0) = 0;
     h(1, 1) = 1;
-      // H = I gives F = 2I, so j = 4.
+    // H = I gives F = 2I, so j = 4.
     def.setDisplacementGradient(h);
     EXPECT_NEAR(def.getJacobian(), 4.0, 1e-14);
   }
@@ -99,7 +99,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(def.isAdmissible());
     EXPECT_TRUE(def.isInvertible());
 
-      // Defined on an inverted cell; must not trip the admissibility assert.
+    // Defined on an inverted cell; must not trip the admissibility assert.
     const auto& FinvT = def.getInverseTranspose();
     EXPECT_NEAR(FinvT(0, 0), -1.0, 1e-14);
   }
@@ -244,7 +244,7 @@ namespace Rodin::Tests::Unit
     CellDeformation def(2);
 
     def.setDeformationGradient(matrix2(2, 0, 0, 2));
-      // Populate every cache before changing state.
+    // Populate every cache before changing state.
     const Real j0 = def.getJacobian();
     const Real q0 = def.getRelativeDistortion();
     const auto finvT0 = def.getInverseTranspose();
@@ -258,6 +258,55 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(def.getInverseTranspose()(0, 0), 0.2, 1e-14);
     EXPECT_GT(std::abs(def.getRelativeDistortionGradient()(0, 0) - dQdF0(0, 0)), 1e-9);
     EXPECT_NEAR(finvT0(0, 0), 0.5, 1e-14);
+  }
+
+  /// @brief A borrowed owned gradient remains a valid setter input and copies retain their state.
+  TEST(Rodin_Adaptation_CellDeformation, AliasedDisplacementGradientPreservesInput)
+  {
+    for (const std::uint8_t d : {1, 2, 3})
+    {
+      SCOPED_TRACE(d);
+      auto initial = Math::SpatialMatrix<Real>::Identity(d, d);
+      Real oldJacobian = 1, newJacobian = 1;
+      for (std::uint8_t i = 0; i < d; ++i)
+      {
+        initial(i, i) = Real(i + 2);
+        oldJacobian *= Real(i + 2);
+        newJacobian *= Real(i + 3);
+      }
+      if (d > 1)
+        initial(0, 1) = Real(0.5);
+      CellDeformation deformation(d);
+      deformation.setDeformationGradient(initial);
+      EXPECT_DOUBLE_EQ(deformation.getJacobian(), oldJacobian);
+      const Real oldDistortion = deformation.getRelativeDistortion();
+      const auto oldInverse = deformation.getInverseTranspose();
+      (void)deformation.getRelativeDistortionGradient();
+      const CellDeformation copied(deformation);
+      const auto& borrowed = deformation.getDeformationGradient();
+      const auto* storage = &borrowed;
+      EXPECT_EQ(&deformation.setDisplacementGradient(borrowed), &deformation);
+      EXPECT_EQ(&deformation.getDeformationGradient(), storage);
+      for (std::uint8_t i = 0; i < d; ++i)
+      {
+        for (std::uint8_t j = 0; j < d; ++j)
+        {
+          EXPECT_DOUBLE_EQ(deformation.getDeformationGradient()(i, j),
+            initial(i, j) + (i == j ? Real(1) : Real(0)));
+        }
+      }
+      EXPECT_DOUBLE_EQ(deformation.getJacobian(), newJacobian);
+      EXPECT_TRUE(std::isfinite(deformation.getRelativeDistortion()));
+      EXPECT_LT((deformation.getDeformationGradient().transpose() *
+                    deformation.getInverseTranspose() -
+                  Math::SpatialMatrix<Real>::Identity(d, d))
+                  .norm(),
+        1e-13);
+      EXPECT_LT((copied.getDeformationGradient() - initial).norm(), 1e-14);
+      EXPECT_DOUBLE_EQ(copied.getJacobian(), oldJacobian);
+      EXPECT_DOUBLE_EQ(copied.getRelativeDistortion(), oldDistortion);
+      EXPECT_LT((copied.getInverseTranspose() - oldInverse).norm(), 1e-14);
+    }
   }
 
   /// @brief Repeated reads return the cached value unchanged.

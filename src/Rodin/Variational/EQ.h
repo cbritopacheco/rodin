@@ -12,22 +12,22 @@
  * operation between functions. This operator tests whether two function values
  * are equal at each point in the domain.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the equality operator:
  * @f[
  *   (f = g)(x) = \begin{cases} 1 & \text{if } f(x) = g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]
  *
- * ## Numerical Considerations
+ * # Numerical Considerations
  * For floating-point comparisons, consider using approximate equality with
  * a tolerance due to numerical precision limitations.
  *
- * ## Applications
+ * # Applications
  * - Indicator functions for specific values
  * - Level set definitions
  * - Region identification based on function values
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * auto is_zero = (u == 0.0);  // Boolean function, true where u equals zero
  * ```

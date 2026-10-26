@@ -365,21 +365,7 @@ its four controls, as specified in the flat Stokes suite. Each group retains the
 1800-second watchdog, MPI processor count and common pyramid resource lock.
 No refinement level, finite-element degree, quadrature order, solver setting
 or numerical assertion is changed. The distinction bounds process lifetime,
-not the mathematical workload. An isolated OpenMP two-rank hexahedral P6/P5
-patch passed with sampled aggregate participant RSS of approximately
-1.01 GiB; the earlier combined process exceeded the 3 GiB validation limit
-after preceding rate studies. This comparison motivates fresh-process
-validation but does not identify the allocation or retention mechanism.
-The current-source combined rate process additionally exceeded the same
-memory guard at OpenMP MPI rank four on hexahedra. An isolated full P3/P2
-hierarchy passed with sampled aggregate participant RSS of approximately
-2.57 GiB, retaining all three levels and the same solver. This supports
-separating the two rate processes without reducing their mathematical scope;
-it does not identify a particular retained allocation. Earlier complete
-matrix records are preserved, but current-source verification of the revised
-process partition remains a separate gate and is not yet certified. Hosted
-CI certification is also separate. Sampled RSS is a resource-guard observation,
-not a continuous peak-memory measurement or a performance benchmark.
+not the mathematical workload.
 
 ## Higher-order mixed fields on quadratic approximated geometry
 
@@ -526,14 +512,7 @@ process isolation changes neither the discrete problem nor its acceptance
 criteria. These registrations cover six applicable geometries, native and
 real-PETSc local execution, MPI ranks one through four and both thread
 configurations. They retain slow labels, processor counts, pyramid locks and
-1800-second watchdogs. The complete six-case finite matrix is locally verified:
-216 process groups select 432 configurations with 864 successful rank-local
-reports. Both thread configurations were compiled freshly for native and
-real-PETSc execution. Source identity, dependency freshness, exact case
-selection, runtime results and resource guards were audited independently.
-The retained dependency libraries and finite mesh sequences do not constitute
-a complete dependency-library rebuild, hosted-CI certification or a uniform
-stability proof.
+1800-second watchdogs.
 
 ## Higher-order pressure forward accuracy
 
@@ -574,10 +553,4 @@ applicable geometries, in Local and MPI rank-one-through-four contexts.
 Represented, lifted-field and total pressure errors must each satisfy
 $E_0<10^{-11}$ and $E_1<10^{-11}$, using dimensionless absolute budgets.
 This fixed-mesh regression supplements the three-level $n=3,5,9$ geometry
-study without relaxing its $10^{-9}$ reproduction budget. Fresh focused
-quadratic-geometry verification passed all 60 process groups, 120 configurations
-and 264 rank-local reports across the six geometries, Local/MPI
-rank-one-through-four contexts and sequential/OpenMP builds. The uncorrected
-OpenMP tetrahedral control failed the stricter pressure regression in all five
-contexts. This is a fixed-mesh forward-accuracy certificate, not renewed
-certification of the complete higher-order rate matrix or hosted PETSc 3.19 CI.
+study without relaxing its $10^{-9}$ reproduction budget.

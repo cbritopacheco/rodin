@@ -14,7 +14,11 @@
 #ifndef RODIN_MATH_ROOTFINDING_NEWTONRAPHSON_H
 #define RODIN_MATH_ROOTFINDING_NEWTONRAPHSON_H
 
+#include "Rodin/Types.h"
+#include <cassert>
 #include <cmath>
+#include <limits>
+#include <numeric>
 #include <optional>
 
 namespace Rodin::Math::RootFinding
@@ -26,25 +30,28 @@ namespace Rodin::Math::RootFinding
    * finding roots of equations @f$ f(x) = 0 @f$. The method combines Newton's
    * method with interval bracketing and automatic fallbacks to ensure convergence.
    *
-   * ## Algorithm
+   * # Algorithm
    * The Newton-Raphson iteration is:
    * @f[
    *   x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
    * @f]
    *
-   * ## Robustness Features
+   * # Robustness Features
    * - **Interval bracketing**: Maintains a bracket @f$ [a, b] @f$ where @f$ f(a)f(b) \leq 0 @f$
    * - **Safeguards**: Falls back to bisection if Newton step goes outside bracket
    * - **Secant fallback**: Uses secant method if derivative is too small
+   * - **Bracket signs**: Compares residual signs directly without multiplying them
+   * - **Midpoint safety**: Forms finite midpoints without overflowing finite endpoints
    * - **Convergence checks**: Multiple criteria for termination
    *
-   * ## Convergence Criteria
+   * # Convergence Criteria
    * The algorithm terminates when any of these conditions are met:
-   * 1. **Function tolerance**: @f$ |f(x)| < \varepsilon_{\text{abs}} @f$
+   * 1. **Function tolerance**: @f$ f(x)=0 @f$ or
+   *    @f$ |f(x)| < \varepsilon_{\text{abs}} @f$
    * 2. **Interval tolerance**: @f$ |b - a| < \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| @f$
    * 3. **Maximum iterations**: Iteration count exceeds maximum
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * // Find root of f(x) = x^2 - 2 in [1, 2]
    * NewtonRaphson<Real> solver(1e-12, 1e-9, 1e-12, 25);
@@ -68,7 +75,8 @@ namespace Rodin::Math::RootFinding
        *
        * @param[in] absTTol Absolute tolerance for interval width (default: @f$ 10^{-12} @f$)
        * @param[in] relTTol Relative tolerance for interval width (default: @f$ 10^{-9} @f$)
-       * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$)
+       * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$).
+       * Exact zeros are accepted also when this tolerance is zero.
        * @param[in] maxIter Maximum number of iterations (default: 25)
        */
       NewtonRaphson(Scalar absTTol = DefaultAbsoluteIntervalTolerance,
@@ -101,7 +109,7 @@ namespace Rodin::Math::RootFinding
        * for the derivative component and the method will use secant approximation.
        */
       template <class F>
-      std::optional<Scalar> solve(const F& f, Scalar t0, Scalar lo, Scalar hi) const
+      Optional<Scalar> solve(const F& f, Scalar t0, Scalar lo, Scalar hi) const
       {
         // basic interval sanity
         assert(std::isfinite(lo) && std::isfinite(hi));
@@ -120,13 +128,20 @@ namespace Rodin::Math::RootFinding
         assert(std::isfinite(fav) && std::isfinite(fbv));
 
         // either already bracketed or caller misused the API
-        assert(fav * fbv <= 0); // Root not bracketed at [lo, hi]
+        const bool bracketed = (fav <= Scalar(0) && fbv >= Scalar(0)) ||
+          (fav >= Scalar(0) && fbv <= Scalar(0));
+        assert(bracketed);
 
-        if (!(fav * fbv <= 0))
+        if (!bracketed)
           return {};
 
+        if (fav == Scalar(0) || std::fabs(fav) < m_absGTol)
+          return a;
+        if (fbv == Scalar(0) || std::fabs(fbv) < m_absGTol)
+          return b;
+
         if (!(t0 > a && t0 < b))
-          t0 = 0.5 * (a + b);
+          t0 = std::midpoint(a, b);
 
         Scalar t = t0, tPrev = t;
         Scalar gPrev = std::numeric_limits<Scalar>::quiet_NaN();
@@ -142,15 +157,15 @@ namespace Rodin::Math::RootFinding
           assert(std::isfinite(fv));
           assert(std::isfinite(fg) || std::isnan(fg)); // allow NaN to trigger safeguards
 
-          if (std::fabs(fv) < m_absGTol)
+          if (fv == Scalar(0) || std::fabs(fv) < m_absGTol)
             return t;
 
           const Scalar at = m_absTTol + m_relTTol * std::fabs(t);
           if ((b - a) < at)
-            return 0.5 * (a + b);
+            return std::midpoint(a, b);
 
           // Maintain bracket using *current* endpoint values
-          if (fv * fav < 0)
+          if ((fv < Scalar(0)) != (fav < Scalar(0)))
           {
             b = t;
             fbv = fv;
@@ -167,13 +182,15 @@ namespace Rodin::Math::RootFinding
           if (std::fabs(fbv) < m_absGTol)
             return b;
 
-          if (fav * fbv > 0)
+          if ((fav < Scalar(0) && fbv < Scalar(0)) ||
+            (fav > Scalar(0) && fbv > Scalar(0)))
             return {};
 
           // Newton step with scale-aware guard on gp
           Scalar dt;
+          const Scalar derivativeScale = std::isfinite(fg) ? std::fabs(fg) : Scalar(0);
           const Scalar gpTol = std::numeric_limits<Scalar>::epsilon() *
-            (static_cast<Scalar>(1) + std::fabs(fg));
+            (static_cast<Scalar>(1) + derivativeScale);
           if (std::fabs(fg) > gpTol)
           {
             dt = -fv / fg;
@@ -194,10 +211,11 @@ namespace Rodin::Math::RootFinding
           Scalar tNew = t + dt;
 
           // Safeguard: keep inside (a,b). If outside or too big, bisect.
-          const Scalar mid = 0.5 * (a + b);
+          const Scalar mid = std::midpoint(a, b);
           const Scalar half = 0.5 * (b - a);
 
-          if (tNew <= a || tNew >= b || std::fabs(tNew - t) > half)
+          if (!std::isfinite(tNew) || tNew <= a || tNew >= b ||
+            std::fabs(tNew - t) > half)
             tNew = mid;
 
           if (std::fabs(tNew - t) < at)
@@ -214,10 +232,13 @@ namespace Rodin::Math::RootFinding
     private:
       /// @brief Absolute bracket-width tolerance in root-coordinate units.
       static constexpr Scalar DefaultAbsoluteIntervalTolerance = 1e-12;
+
       /// @brief Dimensionless bracket-width tolerance relative to the root-coordinate scale.
       static constexpr Scalar DefaultRelativeIntervalTolerance = 1e-9;
+
       /// @brief Absolute root residual tolerance in function-value units.
       static constexpr Scalar DefaultAbsoluteFunctionTolerance = 1e-12;
+
       /// @brief Root-solve work budget; does not guarantee convergence.
       static constexpr std::size_t DefaultMaxIterations = 25;
 

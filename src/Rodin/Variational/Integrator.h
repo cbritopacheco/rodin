@@ -32,14 +32,14 @@ namespace Rodin::Variational
    * (element-level) contributions that are then assembled into global matrices
    * and vectors.
    *
-   * ## Integrator Types
+   * # Integrator Types
    * There are two main types of integrators:
    * - **Linear Integrators**: Compute contributions to the load vector (RHS)
    *   - Example: @f$ b_i = \int_K f \psi_i \, dx @f$
    * - **Bilinear Integrators**: Compute contributions to the system matrix
    *   - Example: @f$ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx @f$
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During the assembly process:
    * 1. Integrators are iterated over mesh elements
    * 2. Local contributions are computed using numerical quadrature

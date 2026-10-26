@@ -6,6 +6,7 @@
  */
 #include <cassert>
 #include <cstring>
+#include <utility>
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscksp.h>
@@ -32,6 +33,39 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
     (void)ierr;
   }
+
+  KSP::KSP(const KSP& other)
+    : Parent(other),
+      PETSc::Object<::KSP>(other),
+      m_ksp(other.m_ksp),
+      m_type(other.m_type),
+      m_rtol(other.m_rtol),
+      m_abstol(other.m_abstol),
+      m_dtol(other.m_dtol),
+      m_maxIt(other.m_maxIt),
+      m_preconditioner(other.m_preconditioner),
+      m_prefix(other.m_prefix)
+  {
+    if (m_ksp)
+    {
+      const auto ierr = PetscObjectReference(reinterpret_cast<PetscObject>(m_ksp));
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+    }
+  }
+
+  KSP::KSP(KSP&& other) noexcept
+    : Parent(std::move(other)),
+      PETSc::Object<::KSP>(std::move(other)),
+      m_ksp(std::exchange(other.m_ksp, PETSC_NULLPTR)),
+      m_type(other.m_type),
+      m_rtol(other.m_rtol),
+      m_abstol(other.m_abstol),
+      m_dtol(other.m_dtol),
+      m_maxIt(other.m_maxIt),
+      m_preconditioner(std::move(other.m_preconditioner)),
+      m_prefix(std::move(other.m_prefix))
+  {}
 
   KSP::~KSP()
   {
@@ -73,11 +107,8 @@ namespace Rodin::Solver
       assert(ierr == PETSC_SUCCESS);
     }
 
-    if (m_prefix)
-    {
-      ierr = KSPSetOptionsPrefix(m_ksp, m_prefix->c_str());
-      assert(ierr == PETSC_SUCCESS);
-    }
+    ierr = KSPSetOptionsPrefix(m_ksp, m_prefix ? m_prefix->c_str() : nullptr);
+    assert(ierr == PETSC_SUCCESS);
 
     // Programmatic default, still overridable from options.
     if (m_type)
@@ -118,11 +149,9 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
 
     // PREONLY must not be used with a nonzero initial guess.
-    if (!ksptype || std::strcmp(ksptype, KSPPREONLY) != 0)
-    {
-      ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
-      assert(ierr == PETSC_SUCCESS);
-    }
+    ierr = KSPSetInitialGuessNonzero(
+      m_ksp, ksptype && std::strcmp(ksptype, KSPPREONLY) == 0 ? PETSC_FALSE : PETSC_TRUE);
+    assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);

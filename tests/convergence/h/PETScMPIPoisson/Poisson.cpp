@@ -129,8 +129,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
       if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
+      {
         for (Index dof : space.getDOFs(mesh.getDimension(), cell->getIndex()))
           required.insert(dof);
+      }
     }
     for (const Index slave : all)
     {

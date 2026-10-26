@@ -15,19 +15,19 @@
  * @f]
  * for general (possibly non-symmetric) matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * GMRES builds a Krylov subspace and computes the iterate that minimizes the
  * residual norm over that subspace.
  *
- * ## Applicability
+ * # Applicability
  * - Non-symmetric or indefinite matrices
  * - Large sparse systems
  * - Convection-diffusion, saddle-point systems (when used appropriately)
  *
- * ## Notes
+ * # Notes
  * - Restarted GMRES is typically used to bound memory; Eigen's GMRES supports restart.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -62,8 +62,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::GMRES<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 }
 
@@ -97,19 +97,25 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
@@ -120,25 +126,42 @@ namespace Rodin::Solver
        * @param pb Variational problem to operate on.
        */
       GMRES(ProblemBaseType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_maxIterations(),
+          m_restart()
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the problem and configured settings into a fresh backend.
        * @param other Object to copy from.
        */
       GMRES(const GMRES& other)
-        : Parent(other)
-      {}
+        : Parent(other),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /**
-       * @brief Move constructor.
+       * @brief Transfers the problem and configured settings into a fresh backend.
        * @param other Object to move from.
        */
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /// @brief Destructor.
       ~GMRES() = default;
@@ -161,6 +184,7 @@ namespace Rodin::Solver
        */
       GMRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -174,6 +198,7 @@ namespace Rodin::Solver
        */
       GMRES& setRestart(size_t restart)
       {
+        m_restart = restart;
         m_solver.set_restart(restart);
         return *this;
       }
@@ -201,6 +226,28 @@ namespace Rodin::Solver
       }
 
       /**
+       * @brief Returns Eigen's iteration count for the most recent solve.
+       * @returns Solver-reported iteration count, without reinterpretation.
+       */
+      size_t getIterationNumber() const
+      {
+        return m_solver.iterations();
+      }
+
+      /**
+       * @brief Returns Eigen's relative error estimate for the most recent solve.
+       *
+       * This backend estimate is not an independently evaluated true residual.
+       * Both diagnostics require a completed solve.
+       *
+       * @returns Solver-reported relative error estimate.
+       */
+      Real getError() const
+      {
+        return m_solver.error();
+      }
+
+      /**
        * @brief Returns a polymorphic copy of this solver.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
@@ -210,6 +257,9 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t>
+        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
+      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
       Eigen::GMRES<OperatorType> m_solver;
   };
 
@@ -221,19 +271,25 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Problem type solved by this solver.
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
@@ -244,25 +300,42 @@ namespace Rodin::Solver
        * @param pb Variational problem to operate on.
        */
       GMRES(ProblemType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_maxIterations(),
+          m_restart()
       {}
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the problem and configured settings into a fresh backend.
        * @param other Object to copy from.
        */
       GMRES(const GMRES& other)
-        : Parent(other)
-      {}
+        : Parent(other),
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /**
-       * @brief Move constructor.
+       * @brief Transfers the problem and configured settings into a fresh backend.
        * @param other Object to move from.
        */
       GMRES(GMRES&& other)
         : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+          m_maxIterations(other.m_maxIterations),
+          m_restart(other.m_restart)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (m_maxIterations)
+          setMaxIterations(*m_maxIterations);
+        if (m_restart)
+          setRestart(*m_restart);
+      }
 
       /// @brief Destructor.
       ~GMRES() = default;
@@ -285,6 +358,7 @@ namespace Rodin::Solver
        */
       GMRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -296,6 +370,7 @@ namespace Rodin::Solver
        */
       GMRES& setRestart(size_t restart)
       {
+        m_restart = restart;
         m_solver.set_restart(restart);
         return *this;
       }
@@ -323,6 +398,28 @@ namespace Rodin::Solver
       }
 
       /**
+       * @brief Returns Eigen's iteration count for the most recent solve.
+       * @returns Solver-reported iteration count, without reinterpretation.
+       */
+      size_t getIterationNumber() const
+      {
+        return m_solver.iterations();
+      }
+
+      /**
+       * @brief Returns Eigen's relative error estimate for the most recent solve.
+       *
+       * This backend estimate is not an independently evaluated true residual.
+       * Both diagnostics require a completed solve.
+       *
+       * @returns Solver-reported relative error estimate.
+       */
+      Real getError() const
+      {
+        return m_solver.error();
+      }
+
+      /**
        * @brief Returns a polymorphic copy of this solver.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
@@ -332,6 +429,9 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t>
+        m_maxIterations; ///< Explicit iteration limit; absence retains Eigen's size-dependent default.
+      Optional<size_t> m_restart; ///< Explicit Krylov restart dimension.
       Eigen::GMRES<OperatorType> m_solver;
   };
 }

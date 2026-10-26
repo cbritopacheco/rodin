@@ -95,3 +95,28 @@ TEST(Rodin_Variational_UnaryMinus, GetOrder)
   EXPECT_TRUE(order.has_value());
   EXPECT_EQ(*order, 0u);
 }
+
+/// @brief Negating integrator lists preserves every term with the opposite sign.
+TEST(Rodin_Variational_UnaryMinus, IntegratorLists)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  P1<Real> space(mesh);
+  TrialFunction u(space);
+  TestFunction v(space);
+  FormLanguage::List<LinearFormIntegratorBase<Real>> linear;
+  linear.add(Integral(RealFunction(2), v));
+  LinearForm load(v), negativeLoad(v);
+  load = linear;
+  negativeLoad = -linear;
+  load.assemble();
+  negativeLoad.assemble();
+  EXPECT_LT((load.getVector() + negativeLoad.getVector()).norm(), 1e-12);
+  FormLanguage::List<LocalBilinearFormIntegratorBase<Real>> bilinear;
+  bilinear.add(Integral(u, v));
+  BilinearForm form(u, v), negativeForm(u, v);
+  form = bilinear;
+  negativeForm = -bilinear;
+  form.assemble();
+  negativeForm.assemble();
+  EXPECT_LT((form.getOperator() + negativeForm.getOperator()).norm(), 1e-12);
+}

@@ -27,7 +27,6 @@ static constexpr int ROOT_RANK = 0;
 
 static constexpr int n = 16;
 
-
 int main(int argc, char** argv)
 {
   mpi::environment env(argc, argv);
@@ -42,9 +41,11 @@ int main(int argc, char** argv)
   if (world.rank() == ROOT_RANK)
   {
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { n, n, n });
-    Alert::Info() << "Number of cells in the mesh: " << mesh.getCellCount() << Alert::Raise;
-    Alert::Info() << "Number of vertices in the mesh: " << mesh.getVertexCount() << Alert::Raise;
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, {n, n, n});
+    Alert::Info() << "Number of cells in the mesh: " << mesh.getCellCount()
+                  << Alert::Raise;
+    Alert::Info() << "Number of vertices in the mesh: " << mesh.getVertexCount()
+                  << Alert::Raise;
     mesh.scale(1.0 / (n - 1));
     Alert::Info() << "Computing mesh connectivity..." << Alert::Raise;
     auto t0 = std::chrono::high_resolution_clock::now();
@@ -52,9 +53,10 @@ int main(int argc, char** argv)
     mesh.getConnectivity().compute(cellDim, cellDim);
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    Alert::Success() << "Computed mesh connectivity in "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-              << " ms." << Alert::Raise;
+    Alert::Success()
+      << "Computed mesh connectivity in "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() << " ms."
+      << Alert::Raise;
 
     Alert::Info() << "Partitioning mesh..." << Alert::Raise;
     t0 = std::chrono::high_resolution_clock::now();
@@ -62,9 +64,10 @@ int main(int argc, char** argv)
     partitioner.partition(world.size());
     t1 = std::chrono::high_resolution_clock::now();
 
-    Alert::Success() << "Partitioned mesh in "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-              << " ms." << Alert::Raise;
+    Alert::Success()
+      << "Partitioned mesh in "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() << " ms."
+      << Alert::Raise;
 
     Alert::Info() << "Sharding mesh..." << Alert::Raise;
 
@@ -72,9 +75,10 @@ int main(int argc, char** argv)
     sharder.shard(partitioner);
     t1 = std::chrono::high_resolution_clock::now();
 
-    Alert::Success() << "Sharded mesh in "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-              << " ms." << Alert::Raise;
+    Alert::Success()
+      << "Sharded mesh in "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() << " ms."
+      << Alert::Raise;
 
     Alert::Info() << "Scattering mesh to all processes..." << Alert::Raise;
 
@@ -82,9 +86,10 @@ int main(int argc, char** argv)
     sharder.scatter(ROOT_RANK);
     t1 = std::chrono::high_resolution_clock::now();
 
-    Alert::Success() << "Scattered mesh to all processes in "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-              << " ms." << Alert::Raise;
+    Alert::Success()
+      << "Scattered mesh to all processes in "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() << " ms."
+      << Alert::Raise;
     Alert::Info() << "Mesh partitioned and scattered to all processes." << Alert::Raise;
   }
 
@@ -123,15 +128,13 @@ int main(int argc, char** argv)
 
   {
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
 
     xdmf.add("u", u.getSolution());
 
     // Define problem
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
 
     if (world.rank() == ROOT_RANK)
       Alert::Info() << "Assembling linear system..." << Alert::Raise;
@@ -141,9 +144,12 @@ int main(int argc, char** argv)
     auto t1 = std::chrono::high_resolution_clock::now();
 
     if (world.rank() == ROOT_RANK)
-      Alert::Success() << "Assembled linear system in "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-                << " ms." << Alert::Raise;
+    {
+      Alert::Success()
+        << "Assembled linear system in "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
+        << " ms." << Alert::Raise;
+    }
 
     if (world.rank() == ROOT_RANK)
       Alert::Info() << "Solving linear system..." << Alert::Raise;
@@ -153,9 +159,12 @@ int main(int argc, char** argv)
     t1 = std::chrono::high_resolution_clock::now();
 
     if (world.rank() == ROOT_RANK)
-      Alert::Success() << "Solved linear system in "
-                << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-                << " ms." << Alert::Raise;
+    {
+      Alert::Success()
+        << "Solved linear system in "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
+        << " ms." << Alert::Raise;
+    }
 
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
 
@@ -165,6 +174,6 @@ int main(int argc, char** argv)
 
   xdmf.close();
 
-  (void) ierr;
+  (void)ierr;
   PetscFinalize();
 }

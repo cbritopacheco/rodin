@@ -16,6 +16,9 @@
 #ifndef RODIN_VARIATIONAL_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_SHAPEFUNCTION_H
 
+#include <type_traits>
+#include "Rodin/Utility/OptionalReference.h"
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/Point.h"
@@ -37,23 +40,24 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    using DerivedType = Derived;
 
     /// @brief Finite element space type.
-      using FESType = FES;
+    using FESType = FES;
+
     /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-      using ResultType =
-        typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+    using ResultType =
+      typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-      using RangeType =
-        typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+    using RangeType =
+      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
   /**
@@ -65,24 +69,213 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    using DerivedType = Derived;
 
     /// @brief Finite element space type.
-      using FESType = FES;
+    using FESType = FES;
+
     /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-      using ResultType = typename ResultOf<Variational::ShapeFunctionBase<
-        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+    using ResultType = typename ResultOf<Variational::ShapeFunctionBase<
+      Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-      using RangeType = typename RangeOf<Variational::ShapeFunctionBase<
-        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+    using RangeType = typename RangeOf<Variational::ShapeFunctionBase<
+      Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
+
+  /**
+   * @brief Detects shape expressions whose basis spans two incident cells.
+   * @tparam T Expression type.
+   *
+   * This is a property of the form-language expression, not a runtime cache
+   * test. Ordinary expressions compile without interface maps or branches.
+   */
+  template <class T>
+  struct IsInterfaceShapeFunction
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value = false;
+  };
+
+  /**
+   * @brief Propagates two-cell support through a shape expression.
+   * @tparam Derived Concrete expression type.
+   * @tparam FES Finite element space.
+   * @tparam Space Trial or test grading.
+   */
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct IsInterfaceShapeFunction<Variational::ShapeFunctionBase<Derived, FES, Space>>
+    : IsInterfaceShapeFunction<Derived>
+  {};
+
+  /**
+   * @brief Propagates two-cell support through a shape expression.
+   * @tparam Derived Concrete expression type.
+   * @tparam FES Finite element space.
+   * @tparam Space Trial or test grading.
+   */
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct IsInterfaceShapeFunction<
+    Variational::Average<Variational::ShapeFunctionBase<Derived, FES, Space>>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value = true;
+  };
+
+  /**
+   * @brief Propagates two-cell support through a shape expression.
+   * @tparam Derived Concrete expression type.
+   * @tparam FES Finite element space.
+   * @tparam Space Trial or test grading.
+   */
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct IsInterfaceShapeFunction<
+    Variational::Jump<Variational::ShapeFunctionBase<Derived, FES, Space>>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value = true;
+  };
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Conjugate<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Transpose<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Trace<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::UnaryMinus<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Grad<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Div<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Jacobian<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Propagates the operand's support through a unary expression.
+   * @tparam Operand Operand expression.
+   */
+  template <class Operand>
+  struct IsInterfaceShapeFunction<Variational::Derivative<Operand>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Sum<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Mult<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Division<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Detects two-cell support in either binary operand.
+   * @tparam LHS Left expression.
+   * @tparam RHS Right expression.
+   */
+  template <class LHS, class RHS>
+  struct IsInterfaceShapeFunction<Variational::Dot<LHS, RHS>>
+  {
+    /// @brief Whether the expression requires two-cell support numbering.
+    static constexpr Boolean Value =
+      IsInterfaceShapeFunction<LHS>::Value || IsInterfaceShapeFunction<RHS>::Value;
+  };
+
+  /**
+   * @brief Propagates support through component selection.
+   * @tparam Operand Operand expression.
+   * @tparam Indices Component index types.
+   */
+  template <class Operand, class... Indices>
+  struct IsInterfaceShapeFunction<Variational::Component<Operand, Indices...>>
+    : IsInterfaceShapeFunction<Operand>
+  {};
+
 }
 
 namespace Rodin::Variational
@@ -109,7 +302,7 @@ namespace Rodin::Variational
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
     /// @brief Whether the trait holds.
-      static constexpr Boolean Value = true;
+    static constexpr Boolean Value = true;
   };
 
   /**
@@ -128,7 +321,7 @@ namespace Rodin::Variational
   struct IsTestFunction<TestFunction<FES>>
   {
     /// @brief Whether the trait holds.
-      static constexpr Boolean Value = true;
+    static constexpr Boolean Value = true;
   };
 
   /**
@@ -139,7 +332,7 @@ namespace Rodin::Variational
    * basis functions (shape functions) in both trial and test spaces. Shape 
    * functions are the building blocks of finite element approximations.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * In the finite element method, functions are approximated using a linear
    * combination of basis functions (shape functions):
    * @f[
@@ -155,7 +348,7 @@ namespace Rodin::Variational
    * - **Partition of unity**: @f$ \sum_{i=1}^N \phi_i(x) = 1 @f$ for all @f$ x @f$
    * - **Nodal property**: For Lagrange elements, @f$ \phi_i(x_j) = \delta_{ij} @f$
    *
-   * ## Usage
+   * # Usage
    * ShapeFunctionBase is a CRTP base class. Derived classes include:
    * - TrialFunction: Represents @f$ u @f$ in the trial space
    * - TestFunction: Represents @f$ v @f$ in the test space
@@ -167,9 +360,7 @@ namespace Rodin::Variational
    *
    * @see TrialFunction, TestFunction
    */
-  template <
-    class Derived,
-    class FES = typename FormLanguage::Traits<Derived>::FESType,
+  template <class Derived, class FES = typename FormLanguage::Traits<Derived>::FESType,
     ShapeFunctionSpaceType SpaceType = FormLanguage::Traits<Derived>::SpaceType>
   class ShapeFunctionBase : public FormLanguage::Base
   {
@@ -181,19 +372,16 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar type from the finite element space
-      using ScalarType =
-        typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Parent class type
-      using Parent =
-        FormLanguage::Base;
+      using Parent = FormLanguage::Base;
 
       /**
        * @brief Constructs a shape function in the given finite element space.
        * @param[in] fes Finite element space
        */
-      constexpr
-      ShapeFunctionBase(const FES& fes)
+      constexpr ShapeFunctionBase(const FES& fes)
         : m_fes(fes)
       {}
 
@@ -201,8 +389,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Shape function to copy
        */
-      constexpr
-      ShapeFunctionBase(const ShapeFunctionBase& other)
+      constexpr ShapeFunctionBase(const ShapeFunctionBase& other)
         : Parent(other),
           m_fes(other.m_fes)
       {}
@@ -211,8 +398,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Shape function to move
        */
-      constexpr
-      ShapeFunctionBase(ShapeFunctionBase&& other)
+      constexpr ShapeFunctionBase(ShapeFunctionBase&& other)
         : Parent(std::move(other)),
           m_fes(std::move(other.m_fes))
       {}
@@ -221,8 +407,7 @@ namespace Rodin::Variational
        * @brief Indicates whether the shape function is part of a trial or test space.
        * @returns The space type (TrialSpace or TestSpace)
        */
-      constexpr
-      ShapeFunctionSpaceType getSpaceType() const
+      constexpr ShapeFunctionSpaceType getSpaceType() const
       {
         return Space;
       }
@@ -258,8 +443,7 @@ namespace Rodin::Variational
        * @brief Gets the transpose of a matrix-valued shape function.
        * @returns Transpose expression
        */
-      constexpr
-      auto T() const
+      constexpr auto T() const
       {
         return Transpose(*this);
       }
@@ -269,8 +453,7 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in the Derived class.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
@@ -281,10 +464,24 @@ namespace Rodin::Variational
        * @returns Number of degrees of freedom
        * @note CRTP function to be overriden in the Derived class.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
+      constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return static_cast<const Derived&>(*this).getDOFs(polytope);
+      }
+
+      /**
+       * @brief Returns a bound interface numbering when the expression has one.
+       * @returns Borrowed union indices, or no override for ordinary element numbering.
+       *
+       * Interface nodes implement this CRTP operation explicitly. Ordinary
+       * nodes compile to an empty optional without dispatch or allocation.
+       */
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        if constexpr (FormLanguage::IsInterfaceShapeFunction<Derived>::Value)
+          return static_cast<const Derived&>(*this).getDOFIndices();
+        else
+          return {};
       }
 
       /**
@@ -292,10 +489,23 @@ namespace Rodin::Variational
        * @returns Reference to the point
        * @note CRTP function to be overriden in the Derived class.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         return static_cast<const Derived&>(*this).getIntegrationPoint();
+      }
+
+      /**
+       * @brief Starts a cell evaluation binding on the derived shape expression.
+       *
+       * Every shape leaf implements this operation, including an explicit no-op
+       * for stateless leaves. Composite expressions propagate it to their operands. Physical data may be reused only within this binding; the
+       * geometry must remain unchanged until the next binding.
+       * @param polytope Cell or facet whose basis will be evaluated.
+       * @returns The derived shape expression.
+       */
+      Derived& setPolytope(const Geometry::Polytope& polytope)
+      {
+        return static_cast<Derived&>(*this).setPolytope(polytope);
       }
 
       /**
@@ -310,8 +520,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
-      constexpr
-      Derived& setIntegrationPoint(const IntegrationPoint& ip)
+      constexpr Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
@@ -333,8 +542,7 @@ namespace Rodin::Variational
        * @returns Expression representing the basis function
        * @note CRTP function to be overriden in the Derived class.
        */
-      constexpr
-      decltype(auto) getBasis(size_t local) const
+      constexpr decltype(auto) getBasis(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
       }
@@ -346,8 +554,7 @@ namespace Rodin::Variational
        *
        * This is a synonym for getBasis(size_t).
        */
-      constexpr
-      decltype(auto) operator()(size_t local) const
+      constexpr decltype(auto) operator()(size_t local) const
       {
         return static_cast<const Derived&>(*this).getBasis(local);
       }
@@ -356,8 +563,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space to which the shape function belongs.
        * @returns Const reference to the finite element space
        */
-      constexpr
-      const FES& getFiniteElementSpace() const
+      constexpr const FES& getFiniteElementSpace() const
       {
         return m_fes.get();
       }
@@ -395,8 +601,7 @@ namespace Rodin::Variational
        * @param poly Polytope on which the order is queried.
        * @return Polynomial order bound, or std::nullopt if not polynomial.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
       }

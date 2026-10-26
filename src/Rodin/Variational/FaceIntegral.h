@@ -13,7 +13,7 @@
  * Face integrals are crucial for coupling elements in DG methods where
  * solutions are discontinuous across element boundaries.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * Face integrals compute:
  * @f[
  *   \int_{\mathcal{F}_h} f(x) \, ds
@@ -21,14 +21,14 @@
  * where @f$ \mathcal{F}_h @f$ is the set of all mesh faces (both interior
  * and boundary faces).
  *
- * ## Discontinuous Galerkin Context
+ * # Discontinuous Galerkin Context
  * In DG methods, face integrals handle:
  * - **Numerical fluxes**: Coupling between elements
  * - **Jump terms**: @f$ \int_{\mathcal{F}_h} [\![u]\!] \cdot [\![v]\!] \, ds @f$
  * - **Average terms**: @f$ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds @f$
  * - **Penalty terms**: Interior penalty for stability
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Interior penalty DG method
  * auto penalty = FaceIntegral(Jump(u), Jump(v));

@@ -113,8 +113,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             return P1(m_mesh);
           else
 #endif
+          {
             return H1<K, Real, Mesh<ContextType>>(
               std::integral_constant<size_t, K>{}, m_mesh);
+          }
         }();
 #ifdef RODIN_CURVED_DIFFUSION_PETSC
         PETSc::Variational::TrialFunction u(space);
@@ -180,8 +182,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           return UniformGrid(geometry).makeMesh(n);
 #if defined(RODIN_CURVED_DIFFUSION_PETSC) && defined(RODIN_USE_MPI)
         else
+        {
           return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
             .makeMesh(n);
+        }
 #endif
       }
       // The continuous dimension is fixed by the grid family. Empty shards
@@ -589,6 +593,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
         const auto& mesh = problem.getMesh();
         const size_t dim = problem.getDimension();
         if (map == Map::Sine)
+        {
           for (size_t d = 1; d <= dim; ++d)
           {
             for (auto polytope = mesh.getPolytope(d); polytope; ++polytope)
@@ -608,6 +613,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
               }
             }
           }
+        }
         H1<2, Real, Mesh<ContextType>> space(std::integral_constant<size_t, 2>{}, mesh);
 #ifdef RODIN_CURVED_DIFFUSION_PETSC
         PETSc::Variational::GridFunction u(space);
@@ -636,8 +642,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           {
             const RealH1Element<2> element(polytope->getGeometry());
             EXPECT_EQ(polytope->getTransformation().getOrder(), element.getOrder());
-            const auto& qf = QF::PolytopeQuadratureFormula::get(
-              GeometryCheckOrder, polytope->getGeometry());
+            const auto& qf =
+              QF::QuadratureFormula::get(GeometryCheckOrder, polytope->getGeometry());
             const Geometry::PolytopeQuadrature quadrature(*polytope, qf);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {

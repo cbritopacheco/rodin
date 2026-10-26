@@ -11,6 +11,7 @@
 #ifndef RODIN_HEART_CCMLC2014_MODEL_HISTORY_H
 #define RODIN_HEART_CCMLC2014_MODEL_HISTORY_H
 
+#include "Rodin/Types.h"
 #include <optional>
 
 namespace Rodin::Heart::CCMLC2014::Model
@@ -25,7 +26,7 @@ namespace Rodin::Heart::CCMLC2014::Model
   {
     State n; ///< State at level @f$ n @f$.
     State nm1; ///< State at level @f$ n-1 @f$.
-    std::optional<State> nm2; ///< Optional state at level @f$ n-2 @f$.
+    Optional<State> nm2; ///< Optional state at level @f$ n-2 @f$.
   };
 }
 

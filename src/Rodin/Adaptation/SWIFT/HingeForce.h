@@ -19,6 +19,7 @@ namespace Rodin::Adaptation::SWIFT
     public:
       /// @brief Scalar value type.
       using ScalarType = typename TestFunction::ScalarType;
+
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
@@ -29,7 +30,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param inner Current inner displacement increment.
        * @param predictor Frozen directionally scaled predictor.
        * @param parameters Quality budgets and hinge activation weights.
-       * @param hingeCoefficient Effective hinge coefficient for this outer model.
+       * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
        */
       HingeForce(const TestFunction& z, const Displacement& current,
         const Displacement& inner, const Displacement& predictor,
@@ -77,6 +78,7 @@ namespace Rodin::Adaptation::SWIFT
         m_vector.resize(static_cast<Eigen::Index>(fe.getCount()));
         m_vector.setZero();
         auto testJacobian = Variational::Jacobian(m_z);
+        testJacobian.setPolytope(polytope);
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto innerJacobian = Variational::Jacobian(m_inner.get());
         auto predictorJacobian = Variational::Jacobian(m_predictor.get());

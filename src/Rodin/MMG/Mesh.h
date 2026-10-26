@@ -580,6 +580,13 @@ namespace Rodin::MMG
          IO::FileFormat fmt) override;
 
     private:
+      /**
+       * @brief Requires a valid entity index of the metadata's geometric type.
+       * @param index Zero-based mesh entity index.
+       * @param type Required entity geometry.
+       */
+      void require(Index index, Geometry::Polytope::Type type) const;
+
       CornerIndex m_cornerIndex; ///< Corner vertex indices (`MG_CRN`).
       RequiredVertexIndex m_requiredVertexIndex; ///< Required vertex indices (`MG_REQ` on vertices).
       RequiredTriangleIndex

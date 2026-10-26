@@ -5,12 +5,17 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <vector>
 
 #include "Rodin/Context/Local.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
+#include "../QF/RepeatedFormula.h"
 #include "Rodin/Variational/H1.h"
 
 using namespace Rodin;
@@ -142,9 +147,9 @@ TEST(Geometry_Point, LazyPhysicalMapMatchesEveryDirectSample)
         for (const size_t order : {8u, 16u, 18u})
         {
           SCOPED_TRACE(order);
-          const QF::PolytopeQuadratureFormula formula(order, geometry);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
           const PolytopeQuadrature quadrature(cell, formula);
-          ASSERT_TRUE(element.findTabulation(formula.getCacheIdentity()));
+          ASSERT_TRUE(element.findTabulation(formula));
           for (size_t qp = 0; qp < formula.getSize(); ++qp)
           {
             SCOPED_TRACE(qp);
@@ -202,17 +207,18 @@ TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
       mesh.setPolytopeTransformation(
         {0, 0}, new ParametricTransformation(controls, element));
       Optional<Point> retained;
-      size_t identity = 0;
+      const QF::QuadratureFormula* formulaPointer = nullptr;
       {
-        QF::PolytopeQuadratureFormula formula(8, Polytope::Type::Point);
-        identity = formula.getCacheIdentity();
+        const auto& formula =
+          QF::QuadratureFormula::get(size_t{8}, Polytope::Type::Point);
+        formulaPointer = &formula;
         const PolytopeQuadrature quadrature(vertex, formula);
         ASSERT_EQ(quadrature.getSize(), 1);
         const auto& sample = quadrature.getPoint(0);
         EXPECT_EQ(sample.getReferenceCoordinates().size(), 0);
         EXPECT_EQ(sample.getJacobian().rows(), physicalDimension);
         EXPECT_EQ(sample.getJacobian().cols(), 0);
-        ASSERT_TRUE(element.findTabulation(identity));
+        ASSERT_TRUE(element.findTabulation(*formulaPointer));
         retained.emplace(sample);
         for (size_t j = 0; j < physicalDimension; ++j)
           EXPECT_EQ(sample.getPhysicalCoordinates()(j), controls(j, 0));
@@ -220,10 +226,12 @@ TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
       // Nine distinct insertions exceed the eight-entry reference cache.
       for (size_t i = 0; i < 9; ++i)
       {
-        QF::PolytopeQuadratureFormula replacement(8, Polytope::Type::Point);
+        const auto& replacement =
+          QF::QuadratureFormula::get<Tests::RepeatedQuadratureFormula>(
+            *formulaPointer, i + 20);
         static_cast<void>(element.getTabulation(replacement));
       }
-      ASSERT_FALSE(element.findTabulation(identity));
+      ASSERT_FALSE(element.findTabulation(*formulaPointer));
       const auto& coordinates = retained->getPhysicalCoordinates();
       ASSERT_EQ(coordinates.size(), physicalDimension);
       for (size_t j = 0; j < physicalDimension; ++j)
@@ -258,14 +266,15 @@ TEST(Geometry_Point, ReferenceTableLookupUsesIdentityAndGeometry)
     const auto otherGeometry =
       geometry == Polytope::Type::Point ? Polytope::Type::Segment : Polytope::Type::Point;
     Variational::H1Element<K, Scalar> other(otherGeometry);
-    QF::PolytopeQuadratureFormula formula(0, geometry);
-    QF::PolytopeQuadratureFormula absent(0, geometry);
+    const auto& formula = QF::QuadratureFormula::get(size_t{0}, geometry);
+    const auto& absent =
+      QF::QuadratureFormula::get<Tests::RepeatedQuadratureFormula>(formula, size_t{101});
     const auto& expected = element.getTabulation(formula);
-    const auto found = element.findTabulation(formula.getCacheIdentity());
+    const auto found = element.findTabulation(formula);
     ASSERT_TRUE(found);
     EXPECT_EQ(&found->get(), &expected);
-    EXPECT_FALSE(element.findTabulation(absent.getCacheIdentity()));
-    EXPECT_FALSE(other.findTabulation(formula.getCacheIdentity()));
+    EXPECT_FALSE(element.findTabulation(absent));
+    EXPECT_FALSE(other.findTabulation(formula));
   };
   for (const auto geometry :
     {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -449,7 +458,6 @@ TEST(Geometry_Point, CopyConstruction)
   builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
 
   mesh = builder.finalize();
-
 
   auto it = mesh.getCell();
   Polytope tri = *it;
@@ -1277,4 +1285,89 @@ TEST(Geometry_Point, GetPolytope_ValidReference)
   const Polytope& polyRef = p.getPolytope();
   EXPECT_EQ(polyRef.getIndex(), tri.getIndex());
   EXPECT_EQ(&polyRef.getMesh(), &tri.getMesh());
+}
+
+/// @brief Physical point ordering matches an independent lexicographic grid oracle.
+TEST(Geometry_Point, PhysicalOrderingIsStrictAcrossEmbeddingDimensions)
+{
+  for (size_t dimension = 1; dimension <= 3; ++dimension)
+  {
+    SCOPED_TRACE(dimension);
+    size_t count = 1;
+    for (size_t d = 0; d < dimension; ++d)
+      count *= 3;
+    std::vector<std::vector<Real>> coordinates;
+    Mesh<Context::Local>::Builder builder;
+    builder.initialize(dimension).nodes(count);
+    for (size_t index = 0; index < count; ++index)
+    {
+      Math::SpatialPoint coordinate(static_cast<std::uint8_t>(dimension));
+      size_t remaining = index;
+      for (size_t d = 0; d < dimension; ++d)
+      {
+        coordinate[d] = Real(remaining % 3) / Real(2);
+        remaining /= 3;
+      }
+      std::vector<Real> expectedCoordinate(dimension);
+      for (size_t d = 0; d < dimension; ++d)
+        expectedCoordinate[d] = coordinate[d];
+      coordinates.push_back(std::move(expectedCoordinate));
+      builder.vertex(coordinate);
+    }
+    auto mesh = builder.finalize();
+    std::vector<Point> points;
+    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      points.emplace_back(*mesh.getVertex(vertex), Math::SpatialPoint{});
+    const auto less = [&](size_t lhs, size_t rhs) {
+      return std::lexicographical_compare(coordinates[lhs].data(),
+        coordinates[lhs].data() + dimension, coordinates[rhs].data(),
+        coordinates[rhs].data() + dimension);
+    };
+    for (size_t lhs = 0; lhs < count; ++lhs)
+    {
+      EXPECT_FALSE(points[lhs] < points[lhs]);
+      for (size_t rhs = 0; rhs < count; ++rhs)
+      {
+        ASSERT_EQ(points[lhs] < points[rhs], less(lhs, rhs))
+          << "lhs=" << lhs << ", rhs=" << rhs;
+        if (points[lhs] < points[rhs])
+        {
+          EXPECT_FALSE(points[rhs] < points[lhs]);
+        }
+      }
+    }
+    // Exhaustive agreement above establishes a valid comparator before STL use.
+    std::vector<size_t> expected(count);
+    std::iota(expected.begin(), expected.end(), size_t(0));
+    std::sort(expected.begin(), expected.end(), less);
+    std::vector<size_t> actualOrder(count);
+    std::iota(actualOrder.begin(), actualOrder.end(), size_t(0));
+    std::reverse(actualOrder.begin(), actualOrder.end());
+    std::sort(actualOrder.begin(), actualOrder.end(),
+      [&](size_t lhs, size_t rhs) { return points[lhs] < points[rhs]; });
+    for (size_t i = 0; i < count; ++i)
+    {
+      const auto& actual = points[actualOrder[i]].getPhysicalCoordinates();
+      for (size_t d = 0; d < dimension; ++d)
+        EXPECT_EQ(actual[d], coordinates[expected[i]][d]);
+    }
+    std::set<Point> distinct;
+    for (const auto& point : points)
+    {
+      distinct.insert(point);
+      distinct.insert(point);
+    }
+    EXPECT_EQ(distinct.size(), count);
+  }
+}
+
+/// @brief Empty physical coordinates compare equal without indexing absent entries.
+TEST(Geometry_Point, ZeroDimensionOrdering)
+{
+  auto mesh = LocalMesh::Builder().initialize(0).nodes(1).vertex({}).finalize();
+  const Vertex vertex(0, mesh);
+  const Point point(vertex, Math::SpatialPoint{}, Math::SpatialPoint{});
+  const Point copy(point);
+  EXPECT_FALSE(point < copy);
+  EXPECT_FALSE(copy < point);
 }

@@ -111,11 +111,13 @@ namespace Rodin::Tests::Convergence
               Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
               value.setZero();
               if (!omitTraction)
+              {
                 for (size_t i = 0; i < dim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)
                     value(i) += stress(i, j) * outward(j);
                 }
+              }
               return value;
             });
           auto boundaryLoad = BoundaryIntegral(traction, v);

@@ -8,7 +8,7 @@ target_link_libraries(RodinConvergencePPoisson
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergencePPoisson
+rodin_discover_tests(RodinConvergencePPoisson
   PROPERTIES
     LABELS convergence
 )

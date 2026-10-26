@@ -1,0 +1,10 @@
+<p>Full two-field reaction--diffusion assembly, separately from solving.</p>
+<h2>Measured operation</h2>
+<p>Measures the public coupled problem assembly and block completion.</p>
+<h3>Architecture</h3>
+<p>The shared workload defines two diffusion blocks, two diagonal and two off-diagonal reaction terms, two loads and both Dirichlet traces. Original local operator kernels independently qualify the complete matrix. Loads share their production integration path and are also checked through the analytic manufactured patch, not an independent load algorithm. The manufactured block vector is gathered by the public problem assembly, rather than constructing an assumed component ordering.</p>
+<p>An omitted-coupling problem retains the original sources and traces. Its residual is normalized by the independently assembled omitted mass action. Only essential output rows are masked: prescribed input coefficients still contribute to the missing physical reaction. Logical boundary DOFs and the problem&#x27;s test offsets determine these rows. No coordinate tests are used.</p>
+<p>Repeated full assembly is timed after setup; no solve or numerical guard is timed. The operation includes block offsets, insertion, constraints and initial-guess gathering. It is opt-in and is not a CTest timing gate.</p>
+<p>real test-side weighting, exercising generic physical-gradient preparation.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

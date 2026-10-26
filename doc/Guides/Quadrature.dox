@@ -24,6 +24,61 @@
   for how quadrature interacts with interpolation, projection,
   manufactured solutions, and specialized integrators.
 
+  @section guides-quadrature-objects Formulas, mapped points, and basis tables
+
+  @ref Rodin::QF::QuadratureFormulaBase provides read-only access to reference
+  points and weights. Concrete families such as @ref Rodin::QF::GaussLegendre
+  can be constructed locally for immediate calculations. The interface carries
+  no polymorphic-copy or cache-identity contract.
+
+  @ref Rodin::QF::QuadratureFormula owns immutable reference samples retained
+  until process termination. Its factory constructs a concrete family on demand:
+
+  @code{.cpp}
+  const auto& formula = QF::QuadratureFormula::get<QF::GaussLegendre>(
+    geometry, size_t{4});
+  @endcode
+
+  The family and constructor argument value types select a shared pool. Integer
+  and enum values, and references to published formulas, form its tuple key.
+  The pool uses FlatMap with ordinary tuple comparison; formula references use
+  total pointer ordering internally. A bounded thread-local lookup avoids
+  repeated locking. Construction occurs outside the pool mutex; insertion
+  publishes one immutable object even when several threads miss concurrently.
+  Each pool entry constructs its concrete family and published interface in one
+  allocation. The interface reads the retained rule directly; no second point
+  or weight array is created. Optional read-only sample views provide direct
+  point access and strided weight access, including uniform weights, without
+  per-sample virtual dispatch. Pointwise-only families remain supported.
+  Generators must own their samples or borrow only
+  storage with process lifetime, must not retain caller-owned constructor
+  arguments, and must be determined by their arguments and safe to construct
+  concurrently. Counts and orders should be passed as size_t.
+
+  @ref Rodin::QF::QuadratureFormula selects a family from geometry and
+  requested exactness. Its get operation, and @ref Rodin::QF::GaussLobatto::get,
+  return published formulas through the same factory. Changing an integrator's
+  order chooses another formula; it never modifies an existing formula.
+
+  @ref Rodin::Geometry::PolytopeQuadrature owns points mapped to one physical
+  polytope. It accepts only a published formula, so its borrowed source cannot
+  expire. Mesh-owned quadratures remain valid until geometry flush; assembly
+  rules instead own quadratures for their currently bound polytope.
+
+  @ref Rodin::Variational::ReferenceTabulation stores basis values and reference
+  derivatives at those reference samples. Persistent table lookup accepts only
+  a published formula. Tables belong to a bounded thread-local cache: formula
+  permanence does not extend a borrowed table's lifetime across eviction.
+  Immediate element.tabulate(table, localFormula) accepts a caller-owned
+  QuadratureFormulaBase and leaves the result in caller-owned numerical storage.
+
+  @ref Rodin::Variational::QuadratureRule binds the integrand and physical
+  polytope, selects the reference formula, and consumes mapped points and basis
+  values during integration. Geometry-specific quantities remain separate from
+  reusable reference-element values. A copied geometric point owns its reference
+  coordinates and may retain a permanent formula pointer and index for lazy
+  coordinate evaluation; if its basis table is absent, direct evaluation applies.
+
   @section guides-quadrature-dispatch Default dispatch
 
   <table>
@@ -89,17 +144,17 @@
   @code{.cpp}
   using namespace Rodin;
 
-  const auto& cached = QF::PolytopeQuadratureFormula::get(
+  const auto& cached = QF::QuadratureFormula::get(
     8, Geometry::Polytope::Type::Tetrahedron);
 
-  QF::PolytopeQuadratureFormula owned(
-    8, Geometry::Polytope::Type::Tetrahedron);
+  const auto& explicitFamily = QF::QuadratureFormula::get<QF::XiaoGimbutas>(
+    size_t{8}, Geometry::Polytope::Type::Tetrahedron);
   @endcode
 
-  `PolytopeQuadratureFormula::get` returns a process-wide canonical formula.
+  `QuadratureFormula::get` returns a process-wide canonical formula.
   Repeated per-thread requests are served by a small thread-local cache.
-  `PolytopeQuadratureFormula::build` and the constructor return owned
-  formulas. `XiaoGimbutas`, `WitherdenVincent`, `GaussLegendre`,
+  Published formulas are immutable and cannot be copied or moved. Concrete
+  family constructors remain available for locally owned formulas. `XiaoGimbutas`, `WitherdenVincent`, `GaussLegendre`,
   `GaussLobatto`, and `GrundmannMoller` can also be selected explicitly.
   Grundmann--Moller is not a default because its weights are signed above
   degree one.

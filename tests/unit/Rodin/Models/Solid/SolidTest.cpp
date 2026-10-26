@@ -6,10 +6,15 @@
  */
 #include <gtest/gtest.h>
 #include <cmath>
+#include <complex>
+#include <array>
+#include <type_traits>
 
 #include <Rodin/Solid.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Solver/NewtonSolver.h>
+#include <Rodin/Solver/SparseLU.h>
 
 namespace Rodin::Tests::Unit
 {
@@ -65,9 +70,9 @@ namespace Rodin::Tests::Unit
 
     // C = F^T F = [[1, 0.1], [0.1, 1.01]]
     const auto& C = state.getRightCauchyGreenTensor();
-    EXPECT_NEAR(C(0, 0), 1.0,  1e-14);
-    EXPECT_NEAR(C(0, 1), 0.1,  1e-14);
-    EXPECT_NEAR(C(1, 0), 0.1,  1e-14);
+    EXPECT_NEAR(C(0, 0), 1.0, 1e-14);
+    EXPECT_NEAR(C(0, 1), 0.1, 1e-14);
+    EXPECT_NEAR(C(1, 0), 0.1, 1e-14);
     EXPECT_NEAR(C(1, 1), 1.01, 1e-14);
   }
 
@@ -153,7 +158,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.0;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.0;
     state.setDisplacementGradient(H);
 
     Math::SpatialVector<Real> a0(2);
@@ -204,18 +212,18 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 1.0, mu = 0.5;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     // At zero deformation, P should be zero
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
     for (int i = 0; i < 2; ++i)
     {
       for (int j = 0; j < 2; ++j)
@@ -223,7 +231,7 @@ namespace Rodin::Tests::Unit
     }
 
     // Energy should also be zero
-    EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
+    EXPECT_NEAR(prepared.getStrainEnergyDensity(), 0.0, 1e-14);
   }
 
   /// @brief Verifies stress symmetry under pure stretch for solid neo hookean by checking tolerance-based numerical results.
@@ -231,17 +239,20 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.1;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.1;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     // Under uniform stretch, P should be diagonal
     EXPECT_NEAR(P(0, 1), 0.0, 1e-13);
@@ -258,33 +269,39 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
 
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     // Test tangent via finite differences
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+    prepared.getMaterialTangent(dP_analytical, dF);
 
     // Finite difference approximation
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus);
-    Solid::NeoHookean::Cache cache_plus;
+    auto prepared_plus = law;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    prepared_plus.setConstitutivePoint(cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+    prepared_plus.getFirstPiolaKirchhoffStress(P_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
@@ -304,25 +321,25 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 1.0, mu = 0.5;
     Solid::SaintVenantKirchhoff law(lambda, mu);
-    Solid::SaintVenantKirchhoff::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     // At zero deformation, P should be zero (E = 0, S = 0)
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
     for (int i = 0; i < 2; ++i)
     {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
     }
 
-    EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
+    EXPECT_NEAR(prepared.getStrainEnergyDensity(), 0.0, 1e-14);
   }
 
   /// @brief Verifies tangent finite difference for solid saint venant kirchhoff by checking tolerance-based numerical results.
@@ -333,32 +350,38 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
 
-    Solid::SaintVenantKirchhoff::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+    prepared.getMaterialTangent(dP_analytical, dF);
 
     // Finite difference
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus);
-    Solid::SaintVenantKirchhoff::Cache cache_plus;
+    auto prepared_plus = law;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    prepared_plus.setConstitutivePoint(cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+    prepared_plus.getFirstPiolaKirchhoffStress(P_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
@@ -379,20 +402,24 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
     const Real eps = 1e-6;
-    H(0,0)=eps; H(0,1)=0.5*eps; H(1,0)=0.5*eps; H(1,1)=2.0*eps;
+    H(0, 0) = eps;
+    H(0, 1) = 0.5 * eps;
+    H(1, 0) = 0.5 * eps;
+    H(1, 1) = 2.0 * eps;
     state.setDisplacementGradient(H);
 
-    Solid::SaintVenantKirchhoff::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     // For infinitesimal strain, P ~ sigma = lambda tr(epsilon) I + 2 mu epsilon
     // where epsilon = 0.5 (H + H^T)
     Math::SpatialMatrix<Real> epsilon = 0.5 * (H + H.transpose());
-    Math::SpatialMatrix<Real> I2(2,2); I2.setIdentity();
+    Math::SpatialMatrix<Real> I2(2, 2);
+    I2.setIdentity();
     Math::SpatialMatrix<Real> sigma = lambda * epsilon.trace() * I2 + 2.0 * mu * epsilon;
 
     for (int i = 0; i < 2; ++i)
@@ -411,18 +438,18 @@ namespace Rodin::Tests::Unit
   {
     const Real c1 = 0.5, c2 = 0.1, kappa = 10.0;
     Solid::MooneyRivlin law(c1, c2, kappa);
-    Solid::MooneyRivlin::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     // At zero deformation, P should be zero
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
     for (int i = 0; i < 2; ++i)
     {
       for (int j = 0; j < 2; ++j)
@@ -438,32 +465,38 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
 
-    Solid::MooneyRivlin::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+    prepared.getMaterialTangent(dP_analytical, dF);
 
     // Finite difference
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus);
-    Solid::MooneyRivlin::Cache cache_plus;
+    auto prepared_plus = law;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    prepared_plus.setConstitutivePoint(cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+    prepared_plus.getFirstPiolaKirchhoffStress(P_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
@@ -495,11 +528,11 @@ namespace Rodin::Tests::Unit
     fiber[2] = 0.0;
     cp.set<Solid::Tags::FiberDirection>(fiber);
 
-    Solid::HolzapfelOgden::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -533,8 +566,8 @@ namespace Rodin::Tests::Unit
     fiber[2] = 0.2;
     cp.set<Solid::Tags::FiberDirection>(fiber);
 
-    Solid::HolzapfelOgden::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0, 0) = 0.2;
@@ -548,20 +581,29 @@ namespace Rodin::Tests::Unit
     dF(2, 2) = 0.12;
 
     Math::SpatialMatrix<Real> dP;
-    law.getMaterialTangent(dP, cache, cp, dF);
+    prepared.getMaterialTangent(dP, dF);
 
-    const Real eps = 1e-7;
+    const Real eps = 1e-5;
     Solid::KinematicState statePlus(3);
     statePlus.setDisplacementGradient(H + eps * dF);
     Solid::ConstitutivePoint cpPlus(statePlus);
     cpPlus.set<Solid::Tags::FiberDirection>(fiber);
-    Solid::HolzapfelOgden::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    auto preparedPlus = law;
+    preparedPlus.setConstitutivePoint(cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
-    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
-    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+    prepared.getFirstPiolaKirchhoffStress(P);
+    preparedPlus.getFirstPiolaKirchhoffStress(PPlus);
+    Solid::KinematicState stateMinus(3);
+    stateMinus.setDisplacementGradient(H + (-eps) * dF);
+    Solid::ConstitutivePoint cpMinus(stateMinus);
+    cpMinus.set<Solid::Tags::FiberDirection>(fiber);
+    auto preparedMinus = law;
+    preparedMinus.setConstitutivePoint(cpMinus);
+    Math::SpatialMatrix<Real> PMinus;
+    preparedMinus.getFirstPiolaKirchhoffStress(PMinus);
+    // A centered difference avoids the forward oracle's truncation error.
+    Math::SpatialMatrix<Real> dPfd = (0.5 / eps) * PPlus + (-0.5 / eps) * PMinus;
 
     for (int i = 0; i < 3; ++i)
     {
@@ -593,11 +635,11 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::ActiveExtension>(0.0);
 
-    typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     const Real strain = 0.5 * (1.1 * 1.1 - 1.0);
     const Real stress = activeInput.stiffness * strain;
@@ -634,8 +676,8 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::ActiveExtension>(-0.06);
 
-    typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0, 0) = 0.21;
@@ -644,7 +686,7 @@ namespace Rodin::Tests::Unit
     dF(1, 1) = 0.18;
 
     Math::SpatialMatrix<Real> dP;
-    law.getMaterialTangent(dP, cache, cp, dF);
+    prepared.getMaterialTangent(dP, dF);
 
     const Real eps = 1e-7;
     Solid::KinematicState statePlus(2);
@@ -652,12 +694,12 @@ namespace Rodin::Tests::Unit
     Solid::ConstitutivePoint cpPlus(statePlus);
     cpPlus.set<Solid::Tags::FiberDirection>(fiber);
     cpPlus.set<Solid::Tags::ActiveExtension>(-0.06);
-    typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    auto preparedPlus = law;
+    preparedPlus.setConstitutivePoint(cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
-    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    prepared.getFirstPiolaKirchhoffStress(P);
+    preparedPlus.getFirstPiolaKirchhoffStress(PPlus);
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
@@ -699,8 +741,8 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::ActiveExtension>(-0.04);
 
-    typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0, 0) = 0.18;
@@ -714,7 +756,7 @@ namespace Rodin::Tests::Unit
     dF(2, 2) = 0.10;
 
     Math::SpatialMatrix<Real> dP;
-    law.getMaterialTangent(dP, cache, cp, dF);
+    prepared.getMaterialTangent(dP, dF);
 
     const Real eps = 1e-7;
     Solid::KinematicState statePlus(3);
@@ -722,12 +764,12 @@ namespace Rodin::Tests::Unit
     Solid::ConstitutivePoint cpPlus(statePlus);
     cpPlus.set<Solid::Tags::FiberDirection>(fiber);
     cpPlus.set<Solid::Tags::ActiveExtension>(-0.04);
-    typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    auto preparedPlus = law;
+    preparedPlus.setConstitutivePoint(cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
-    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    prepared.getFirstPiolaKirchhoffStress(P);
+    preparedPlus.getFirstPiolaKirchhoffStress(PPlus);
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
@@ -737,12 +779,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies that, after the per-quadrature-point local Newton on c.
+  /// @brief Verifies the displacement tangent at fixed active fields.
   TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference2D)
   {
-    // Verifies that, after the per-quadrature-point local Newton on c
-    // converges, the Schur-condensed material tangent matches a finite
-    // difference of P with respect to F at fixed previous state.
+    // The displacement block holds all three independent active fields fixed.
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
     activeInput.stiffness = 200.0;
@@ -772,14 +812,19 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
       cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
       cp.set<Solid::Tags::ElectricalActivation>(0.7);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
       return cp;
     };
 
     Solid::ConstitutivePoint cp = buildPoint(state);
-    typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
-    EXPECT_TRUE(cache.dynamic);
-    EXPECT_LT(cache.localIterations, 30u);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
+    EXPECT_TRUE(prepared.isDynamic());
+    EXPECT_DOUBLE_EQ(prepared.getActiveExtension(), -0.025);
+    EXPECT_DOUBLE_EQ(prepared.getActiveState().gamma, 1.8);
+    EXPECT_DOUBLE_EQ(prepared.getActiveState().beta, 0.95);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0, 0) = 0.21;
@@ -788,18 +833,18 @@ namespace Rodin::Tests::Unit
     dF(1, 1) = 0.18;
 
     Math::SpatialMatrix<Real> dP;
-    law.getMaterialTangent(dP, cache, cp, dF);
+    prepared.getMaterialTangent(dP, dF);
 
     const Real eps = 1e-7;
     Solid::KinematicState statePlus(2);
     statePlus.setDisplacementGradient(H + eps * dF);
     Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
-    typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    auto preparedPlus = law;
+    preparedPlus.setConstitutivePoint(cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
-    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    prepared.getFirstPiolaKirchhoffStress(P);
+    preparedPlus.getFirstPiolaKirchhoffStress(PPlus);
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
@@ -847,13 +892,16 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::PreviousActiveGamma>(1.5);
       cp.set<Solid::Tags::PreviousActiveBeta>(0.8);
       cp.set<Solid::Tags::ElectricalActivation>(1.2);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
       return cp;
     };
 
     Solid::ConstitutivePoint cp = buildPoint(state);
-    typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
-    EXPECT_TRUE(cache.dynamic);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
+    EXPECT_TRUE(prepared.isDynamic());
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0, 0) = 0.18;
@@ -867,18 +915,18 @@ namespace Rodin::Tests::Unit
     dF(2, 2) = 0.10;
 
     Math::SpatialMatrix<Real> dP;
-    law.getMaterialTangent(dP, cache, cp, dF);
+    prepared.getMaterialTangent(dP, dF);
 
     const Real eps = 1e-7;
     Solid::KinematicState statePlus(3);
     statePlus.setDisplacementGradient(H + eps * dF);
     Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
-    typename decltype(law)::Cache cachePlus;
-    law.setCache(cachePlus, cpPlus);
+    auto preparedPlus = law;
+    preparedPlus.setConstitutivePoint(cpPlus);
 
     Math::SpatialMatrix<Real> P, PPlus;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
-    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    prepared.getFirstPiolaKirchhoffStress(P);
+    preparedPlus.getFirstPiolaKirchhoffStress(PPlus);
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
@@ -888,11 +936,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief After the local Newton converges, the dynamic residual should be at.
-  TEST(Rodin_Solid_ActiveContraction, DynamicLocalSolveResidualIsZero)
+  /// @brief Independent active fields remain unchanged away from equilibrium.
+  TEST(Rodin_Solid_ActiveContraction, DynamicFieldsAreNotEliminated)
   {
-    // After the local Newton converges, the dynamic residual should be at
-    // machine precision regardless of where the global state sits.
+    // Evaluation must preserve the independent fields, even away from equilibrium.
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
     activeInput.stiffness = 200.0;
@@ -921,12 +968,18 @@ namespace Rodin::Tests::Unit
     cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
     cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
     cp.set<Solid::Tags::ElectricalActivation>(0.9);
+    cp.set<Solid::Tags::ActiveExtension>(-0.025);
+    cp.set<Solid::Tags::ActiveGamma>(1.8);
+    cp.set<Solid::Tags::ActiveBeta>(0.95);
 
-    typename decltype(law)::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
 
-    EXPECT_TRUE(cache.dynamic);
-    EXPECT_NEAR(cache.active.residual, 0.0, 1e-11);
+    EXPECT_TRUE(prepared.isDynamic());
+    EXPECT_GT(std::abs(prepared.getActiveResponse().residual), 1e-3);
+    EXPECT_EQ(
+      prepared.getActiveResponse().residual, prepared.getActiveResidual().value[0]);
+    EXPECT_DOUBLE_EQ(prepared.getActiveExtension(), -0.025);
   }
 
   /// @brief Verifies static stress derivative finite difference for solid active fiber law by checking tolerance-based numerical results.
@@ -971,7 +1024,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::Hooke hooke(1.0, 0.5);
     Math::SpatialMatrix<Real> epsilon(2, 2);
-    epsilon(0,0)=0.1; epsilon(0,1)=0.05; epsilon(1,0)=0.05; epsilon(1,1)=0.2;
+    epsilon(0, 0) = 0.1;
+    epsilon(0, 1) = 0.05;
+    epsilon(1, 0) = 0.05;
+    epsilon(1, 1) = 0.2;
 
     Math::SpatialMatrix<Real> sigma;
     hooke.getStress(sigma, epsilon);
@@ -1026,7 +1082,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.0;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.0;
     state.setDisplacementGradient(H);
 
     Solid::GreenLagrangeStrain gl;
@@ -1046,18 +1105,21 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
-    Solid::CauchyStress<Solid::NeoHookean> cauchy(law);
+    Solid::CauchyStress<Solid::NeoHookean> cauchy(prepared);
     Math::SpatialMatrix<Real> sigma;
-    cauchy.getCauchyStress(sigma, cache, cp);
+    cauchy.getCauchyStress(sigma);
 
     // Cauchy stress must be symmetric
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
@@ -1275,7 +1337,8 @@ namespace Rodin::Tests::Unit
     force.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
       Math::SpatialVector<Real> fiber(2);
-      fiber[0] = 1.0; fiber[1] = 0.0;
+      fiber[0] = 1.0;
+      fiber[1] = 0.0;
       cp.set<Solid::Tags::FiberDirection>(fiber);
     });
 
@@ -1498,36 +1561,48 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.1; H(0,1)=0.05; H(0,2)=-0.02;
-    H(1,0)=-0.02; H(1,1)=0.15; H(1,2)=0.03;
-    H(2,0)=0.01; H(2,1)=-0.01; H(2,2)=0.08;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(0, 2) = -0.02;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
+    H(1, 2) = 0.03;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.01;
+    H(2, 2) = 0.08;
     state.setDisplacementGradient(H);
 
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
-    dF(1,0)=0.1; dF(1,1)=0.4; dF(1,2)=-0.15;
-    dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(0, 2) = 0.1;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
+    dF(1, 2) = -0.15;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.2;
+    dF(2, 2) = 0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+    prepared.getMaterialTangent(dP_analytical, dF);
 
     // Finite difference
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus);
-    Solid::NeoHookean::Cache cache_plus;
+    auto prepared_plus = law;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    prepared_plus.setConstitutivePoint(cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+    prepared_plus.getFirstPiolaKirchhoffStress(P_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
@@ -1546,35 +1621,47 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.1; H(0,1)=0.05; H(0,2)=-0.02;
-    H(1,0)=-0.02; H(1,1)=0.15; H(1,2)=0.03;
-    H(2,0)=0.01; H(2,1)=-0.01; H(2,2)=0.08;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(0, 2) = -0.02;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
+    H(1, 2) = 0.03;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.01;
+    H(2, 2) = 0.08;
     state.setDisplacementGradient(H);
 
-    Solid::SaintVenantKirchhoff::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
-    dF(1,0)=0.1; dF(1,1)=0.4; dF(1,2)=-0.15;
-    dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(0, 2) = 0.1;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
+    dF(1, 2) = -0.15;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.2;
+    dF(2, 2) = 0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+    prepared.getMaterialTangent(dP_analytical, dF);
 
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus);
-    Solid::SaintVenantKirchhoff::Cache cache_plus;
+    auto prepared_plus = law;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    prepared_plus.setConstitutivePoint(cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+    prepared_plus.getFirstPiolaKirchhoffStress(P_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
@@ -1593,35 +1680,47 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.1; H(0,1)=0.05; H(0,2)=-0.02;
-    H(1,0)=-0.02; H(1,1)=0.15; H(1,2)=0.03;
-    H(2,0)=0.01; H(2,1)=-0.01; H(2,2)=0.08;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(0, 2) = -0.02;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
+    H(1, 2) = 0.03;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.01;
+    H(2, 2) = 0.08;
     state.setDisplacementGradient(H);
 
-    Solid::MooneyRivlin::Cache cache;
+    auto prepared = law;
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
-    dF(1,0)=0.1; dF(1,1)=0.4; dF(1,2)=-0.15;
-    dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
+    dF(0, 0) = 0.3;
+    dF(0, 1) = -0.2;
+    dF(0, 2) = 0.1;
+    dF(1, 0) = 0.1;
+    dF(1, 1) = 0.4;
+    dF(1, 2) = -0.15;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.2;
+    dF(2, 2) = 0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+    prepared.getMaterialTangent(dP_analytical, dF);
 
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus);
-    Solid::MooneyRivlin::Cache cache_plus;
+    auto prepared_plus = law;
     Solid::ConstitutivePoint cp_plus(state_plus);
-    law.setCache(cache_plus, cp_plus);
+    prepared_plus.setConstitutivePoint(cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+    prepared_plus.getFirstPiolaKirchhoffStress(P_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
 
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
@@ -1641,17 +1740,20 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.3;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     // Energy should be positive for non-zero deformation
-    EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
+    EXPECT_GT(prepared.getStrainEnergyDensity(), 0.0);
   }
 
   /// @brief Verifies energy positive under deformation for solid saint venant kirchhoff.
@@ -1659,16 +1761,19 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 2.0, mu = 1.0;
     Solid::SaintVenantKirchhoff law(lambda, mu);
-    Solid::SaintVenantKirchhoff::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.3;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
-    EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
+    EXPECT_GT(prepared.getStrainEnergyDensity(), 0.0);
   }
 
   /// @brief Verifies energy positive under deformation for solid mooney rivlin.
@@ -1676,16 +1781,19 @@ namespace Rodin::Tests::Unit
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
     Solid::MooneyRivlin law(c1, c2, kappa);
-    Solid::MooneyRivlin::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.3;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.3;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
-    EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
+    EXPECT_GT(prepared.getStrainEnergyDensity(), 0.0);
   }
 
   /// @brief For isotropic material: K = lambda + 2*mu/d (2D), K = lambda + 2*mu/3 (3D).
@@ -1709,18 +1817,21 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 2.0, mu = 1.0;
     Solid::SaintVenantKirchhoff law(lambda, mu);
-    Solid::SaintVenantKirchhoff::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
-    Solid::CauchyStress<Solid::SaintVenantKirchhoff> cauchy(law);
+    Solid::CauchyStress<Solid::SaintVenantKirchhoff> cauchy(prepared);
     Math::SpatialMatrix<Real> sigma;
-    cauchy.getCauchyStress(sigma, cache, cp);
+    cauchy.getCauchyStress(sigma);
 
     // Cauchy stress must be symmetric
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
@@ -1731,18 +1842,21 @@ namespace Rodin::Tests::Unit
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
     Solid::MooneyRivlin law(c1, c2, kappa);
-    Solid::MooneyRivlin::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
-    Solid::CauchyStress<Solid::MooneyRivlin> cauchy(law);
+    Solid::CauchyStress<Solid::MooneyRivlin> cauchy(prepared);
     Math::SpatialMatrix<Real> sigma;
-    cauchy.getCauchyStress(sigma, cache, cp);
+    cauchy.getCauchyStress(sigma);
 
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
   }
@@ -1752,23 +1866,26 @@ namespace Rodin::Tests::Unit
   {
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
+    auto prepared = law;
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
+    H(0, 0) = 0.1;
+    H(0, 1) = 0.05;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.15;
     state.setDisplacementGradient(H);
     Solid::ConstitutivePoint cp(state);
-    law.setCache(cache, cp);
+    prepared.setConstitutivePoint(cp);
 
     // Direct from law
     Math::SpatialMatrix<Real> P_direct;
-    law.getFirstPiolaKirchhoffStress(P_direct, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P_direct);
 
     // Via Field wrapper
-    Solid::FirstPiolaKirchhoffStress<Solid::NeoHookean> pk1(law);
+    Solid::FirstPiolaKirchhoffStress<Solid::NeoHookean> pk1(prepared);
     Math::SpatialMatrix<Real> P_wrapper;
-    pk1.getFirstPiolaKirchhoffStress(P_wrapper, cache, cp);
+    pk1.getFirstPiolaKirchhoffStress(P_wrapper);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -1818,20 +1935,20 @@ namespace Rodin::Tests::Unit
     /// @brief A tag declared outside the library, of a declared value type.
     struct UserScalarTag
     {
-        using Type = Real;
+      using Type = Real;
     };
 
     /// @brief A tag declared outside the library, of a type no library tag uses.
     struct UserMatrixTag
     {
-        using Type = Math::SpatialMatrix<Real>;
+      using Type = Math::SpatialMatrix<Real>;
     };
 
     /// @brief A family of distinct tag types, used to exceed ReservedTags.
     template <std::size_t I>
     struct OverflowTag
     {
-        using Type = Real;
+      using Type = Real;
     };
 
     Solid::KinematicState makeIdentityState()
@@ -1883,8 +2000,10 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cp.get<Solid::Tags::PreviousActiveBeta>(), 2.5, 1e-14);
   }
 
-  /// @brief Verifies an unset tag reports absent, and a set tag does not make
-  ///        an unrelated tag appear present.
+  /**
+   * @brief Verifies an unset tag reports absent, and a set tag does not make
+   *        an unrelated tag appear present.
+   */
   TEST(Rodin_Solid_ConstitutivePoint, UnsetTagIsAbsent)
   {
     auto state = makeIdentityState();
@@ -1897,8 +2016,10 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cp.has<Solid::Tags::FiberDirection>());
   }
 
-  /// @brief Verifies the tag set is open: tags declared outside the library,
-  ///        including one whose value type no library tag uses, round-trip.
+  /**
+   * @brief Verifies the tag set is open: tags declared outside the library,
+   *        including one whose value type no library tag uses, round-trip.
+   */
   TEST(Rodin_Solid_ConstitutivePoint, UserDefinedTagRoundTrips)
   {
     auto state = makeIdentityState();
@@ -1917,9 +2038,11 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cp.get<UserMatrixTag>()(0, 1), 0.0, 1e-14);
   }
 
-  /// @brief Boundary: ReservedTags is a capacity hint, not a limit. Setting
-  ///        more tags than are reserved must still round-trip; the storage
-  ///        reallocates.
+  /**
+   * @brief Boundary: ReservedTags is a capacity hint, not a limit. Setting
+   *        more tags than are reserved must still round-trip; the storage
+   *        reallocates.
+   */
   TEST(Rodin_Solid_ConstitutivePoint, ExceedingReservedTagsStillRoundTrips)
   {
     auto state = makeIdentityState();
@@ -1966,18 +2089,18 @@ namespace Rodin::Tests::Unit
   //
   // The series law is evaluated at e_1D^{n+1/2} when Tags::PreviousFiberStrain
   // is supplied (Chapelle, Le Tallec, Moireau, Sorine 2012, eq. 26). These
-  // pin that directly rather than through finite differences: the local solve
-  // depends on the evaluation strain alone, so supplying a previous strain
-  // must give the same active extension as evaluating at the midpoint with no
-  // tag at all.
+  // pin the evaluation strain and its chain-rule factor directly.
+  // Equal evaluation strains give equal stresses at fixed active fields.
   // ========================================================================
 
   namespace
   {
-    /// @brief Builds a kinematic state with a prescribed fiber strain along x.
-    ///
-    /// For F = diag(1+a,1,1) and fiber (1,0,0): I4 = (1+a)^2, so the
-    /// Green-Lagrange fiber strain is ((1+a)^2 - 1)/2. Invert for a.
+    /**
+     * @brief Builds a kinematic state with a prescribed fiber strain along x.
+     *
+     * For F = diag(1+a,1,1) and fiber (1,0,0): I4 = (1+a)^2, so the
+     * Green-Lagrange fiber strain is ((1+a)^2 - 1)/2. Invert for a.
+     */
     Solid::KinematicState makeUniaxialStateWithFiberStrain(Real strain)
     {
       const Real a = std::sqrt(1.0 + 2.0 * strain) - 1.0;
@@ -2000,7 +2123,6 @@ namespace Rodin::Tests::Unit
       p.crossBridgeStiffness = 60.0;
       p.contractility = 40.0;
       Solid::ActiveContraction law(passive, Solid::ActiveFiberLaw(p));
-      law.setLocalTolerance(1e-14).setLocalMaxIterations(80);
       return law;
     }
 
@@ -2016,12 +2138,17 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
       cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
       cp.set<Solid::Tags::ElectricalActivation>(1.1);
+      cp.set<Solid::Tags::ActiveExtension>(-0.025);
+      cp.set<Solid::Tags::ActiveGamma>(1.8);
+      cp.set<Solid::Tags::ActiveBeta>(0.95);
     }
   }
 
-  /// @brief Verifies the series law is evaluated at the midpoint fiber strain:
-  ///        supplying a previous strain must reproduce the active extension
-  ///        obtained by evaluating at the midpoint directly.
+  /**
+   * @brief Verifies the series law is evaluated at the midpoint fiber strain:
+   *        supplying a previous strain must reproduce the active extension
+   *        obtained by evaluating at the midpoint directly.
+   */
   TEST(Rodin_Solid_ActiveContraction, MidpointStrainIsUsedForTheSeriesLaw)
   {
     auto law = makeActiveContractionLaw();
@@ -2035,31 +2162,36 @@ namespace Rodin::Tests::Unit
     Solid::ConstitutivePoint cpA(stateA);
     setDynamicTags(cpA);
     cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
-    decltype(law)::Cache cacheA;
-    law.setCache(cacheA, cpA);
+    auto preparedA = law;
+    preparedA.setConstitutivePoint(cpA);
 
     // The same evaluation strain, reached directly with no tag.
     auto stateB = makeUniaxialStateWithFiberStrain(eMid);
     Solid::ConstitutivePoint cpB(stateB);
     setDynamicTags(cpB);
-    decltype(law)::Cache cacheB;
-    law.setCache(cacheB, cpB);
+    auto preparedB = law;
+    preparedB.setConstitutivePoint(cpB);
 
-    ASSERT_TRUE(cacheA.dynamic);
-    ASSERT_TRUE(cacheB.dynamic);
+    ASSERT_TRUE(preparedA.isDynamic());
+    ASSERT_TRUE(preparedB.isDynamic());
 
-    // cache.strain is the *current* fiber strain, so these differ ...
-    EXPECT_NEAR(cacheA.strain, eCurr, 1e-12);
-    EXPECT_NEAR(cacheB.strain, eMid, 1e-12);
+    // prepared.getFiberStrain() is the *current* fiber strain, so these differ ...
+    EXPECT_NEAR(preparedA.getFiberStrain(), eCurr, 1e-12);
+    EXPECT_NEAR(preparedB.getFiberStrain(), eMid, 1e-12);
 
-    // ... but the local solve sees the same evaluation strain, so the
-    // converged active extension must agree.
-    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+    // The independent fields are unchanged and the evaluated stresses agree.
+    EXPECT_DOUBLE_EQ(preparedA.getActiveExtension(), preparedB.getActiveExtension());
+    EXPECT_NEAR(
+      preparedA.getActiveResponse().stress, preparedB.getActiveResponse().stress, 1e-12);
+    EXPECT_NEAR(preparedA.getActiveResidual().value[0],
+      preparedB.getActiveResidual().value[0], 1e-12);
   }
 
-  /// @brief Verifies the condensed tangent carries the 1/2 chain-rule factor
-  ///        when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.
-  TEST(Rodin_Solid_ActiveContraction, MidpointStrainHalvesTheCondensedTangent)
+  /**
+   * @brief Verifies the partial tangent carries the 1/2 chain-rule factor
+   *        when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.
+   */
+  TEST(Rodin_Solid_ActiveContraction, MidpointStrainHalvesThePartialTangent)
   {
     auto law = makeActiveContractionLaw();
 
@@ -2071,23 +2203,26 @@ namespace Rodin::Tests::Unit
     Solid::ConstitutivePoint cpA(stateA);
     setDynamicTags(cpA);
     cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
-    decltype(law)::Cache cacheA;
-    law.setCache(cacheA, cpA);
+    auto preparedA = law;
+    preparedA.setConstitutivePoint(cpA);
 
     auto stateB = makeUniaxialStateWithFiberStrain(eMid);
     Solid::ConstitutivePoint cpB(stateB);
     setDynamicTags(cpB);
-    decltype(law)::Cache cacheB;
-    law.setCache(cacheB, cpB);
+    auto preparedB = law;
+    preparedB.setConstitutivePoint(cpB);
 
-    EXPECT_GT(std::abs(cacheB.active.tangent), 1e-8);
-    EXPECT_NEAR(cacheA.active.tangent, 0.5 * cacheB.active.tangent, 1e-9);
+    EXPECT_GT(std::abs(preparedB.getActiveResponse().tangent), 1e-8);
+    EXPECT_NEAR(preparedA.getActiveResponse().tangent,
+      0.5 * preparedB.getActiveResponse().tangent, 1e-9);
   }
 
-  /// @brief Regression: omitting Tags::PreviousFiberStrain must reproduce the
-  ///        pre-midpoint behaviour exactly -- the series law falls back to the
-  ///        current strain and the tangent carries no 1/2 factor. Existing
-  ///        callers that never set the tag must be unaffected.
+  /**
+   * @brief Regression: omitting Tags::PreviousFiberStrain must reproduce the
+   *        pre-midpoint behaviour exactly -- the series law falls back to the
+   *        current strain and the tangent carries no 1/2 factor. Existing
+   *        callers that never set the tag must be unaffected.
+   */
   TEST(Rodin_Solid_ActiveContraction, OmittingPreviousFiberStrainFallsBackToCurrentStrain)
   {
     auto law = makeActiveContractionLaw();
@@ -2098,22 +2233,344 @@ namespace Rodin::Tests::Unit
     auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
     Solid::ConstitutivePoint cpA(stateA);
     setDynamicTags(cpA);
-    decltype(law)::Cache cacheA;
-    law.setCache(cacheA, cpA);
+    auto preparedA = law;
+    preparedA.setConstitutivePoint(cpA);
 
     // Tag equal to the current strain: the midpoint *is* the current strain,
-    // so the local solve must agree, while the tangent picks up the 1/2.
+    // so the stress agrees while the partial tangent picks up the 1/2.
     auto stateB = makeUniaxialStateWithFiberStrain(eCurr);
     Solid::ConstitutivePoint cpB(stateB);
     setDynamicTags(cpB);
     cpB.set<Solid::Tags::PreviousFiberStrain>(eCurr);
-    decltype(law)::Cache cacheB;
-    law.setCache(cacheB, cpB);
+    auto preparedB = law;
+    preparedB.setConstitutivePoint(cpB);
 
-    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+    EXPECT_NEAR(preparedA.getActiveExtension(), preparedB.getActiveExtension(), 1e-12);
     // Guard: without this the tangent comparison would pass trivially if the
     // tangent were near zero.
-    EXPECT_GT(std::abs(cacheA.active.tangent), 1e-8);
-    EXPECT_NEAR(cacheB.active.tangent, 0.5 * cacheA.active.tangent, 1e-9);
+    EXPECT_GT(std::abs(preparedA.getActiveResponse().tangent), 1e-8);
+    EXPECT_NEAR(preparedB.getActiveResponse().tangent,
+      0.5 * preparedA.getActiveResponse().tangent, 1e-9);
   }
+}
+
+namespace Rodin::Tests::Unit
+{
+  template <class Scalar>
+  class DistinctSpaceElasticity : public ::testing::Test
+  {};
+
+  using ElasticityScalars = ::testing::Types<Real, Complex>;
+  TYPED_TEST_SUITE(DistinctSpaceElasticity, ElasticityScalars);
+
+  /// @brief Distinct spaces reproduce affine strain work without nodal-layout assumptions.
+  TYPED_TEST(DistinctSpaceElasticity, AffineStrainWork)
+  {
+    using Scalar = TypeParam;
+    auto value = [](Real real, Real imaginary = 0) -> Scalar {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(real, imaginary);
+      else
+        return real;
+    };
+    auto conjugate = [](Scalar scalar) -> Scalar {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return std::conj(scalar);
+      else
+        return scalar;
+    };
+    auto coefficient = [](Real scalar) {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Variational::ComplexFunction(Complex(scalar));
+      else
+        return Variational::RealFunction(scalar);
+    };
+    for (const auto geometry : {Geometry::Polytope::Type::Segment,
+           Geometry::Polytope::Type::Triangle, Geometry::Polytope::Type::Quadrilateral,
+           Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Hexahedron,
+           Geometry::Polytope::Type::Pyramid, Geometry::Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Geometry::Polytope::Traits(geometry).getDimension();
+      auto mesh =
+        Geometry::LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+      for (size_t d = 1; d <= dimension; ++d)
+      {
+        mesh.getConnectivity().compute(dimension, d);
+        for (size_t lower = 0; lower < d; ++lower)
+          mesh.getConnectivity().compute(d, lower);
+      }
+      Math::SpatialMatrix<Scalar> first(dimension, dimension),
+        second(dimension, dimension);
+      Scalar divergenceFirst = 0, divergenceSecond = 0, strainWork = 0;
+      for (size_t row = 0; row < dimension; ++row)
+      {
+        for (size_t col = 0; col < dimension; ++col)
+        {
+          first(row, col) =
+            value(Real(0.2) * (row + 1) + Real(0.3) * col, Real(0.1) * (row + col + 1));
+          second(row, col) = value(Real(0.4) * (col + 1) - Real(0.15) * row,
+            Real(-0.2) * (row + 1) + Real(0.05) * col);
+        }
+        divergenceFirst += first(row, row);
+        divergenceSecond += second(row, row);
+      }
+      for (size_t row = 0; row < dimension; ++row)
+      {
+        for (size_t col = 0; col < dimension; ++col)
+        {
+          const Scalar firstStrain = (first(row, col) + first(col, row)) / Real(2);
+          const Scalar secondStrain = (second(row, col) + second(col, row)) / Real(2);
+          strainWork += firstStrain * conjugate(secondStrain);
+        }
+      }
+      const Scalar expected =
+        Real(2) * divergenceFirst * conjugate(divergenceSecond) + Real(6) * strainWork;
+      auto check = [&](auto makeSpace) {
+        auto trialSpace = makeSpace();
+        auto testSpace = makeSpace();
+        ASSERT_FALSE(trialSpace == testSpace);
+        Variational::TrialFunction trial(trialSpace);
+        Variational::TestFunction test(testSpace);
+        Variational::GridFunction testField(testSpace);
+        trial.getSolution() = Variational::VectorFunction(
+          dimension, [first, value](const Geometry::Point& point) {
+            Math::SpatialVector<Scalar> result = first * point.getPhysicalCoordinates();
+            for (size_t i = 0; i < result.size(); ++i)
+              result[i] += value(Real(0.7), Real(-0.3));
+            return result;
+          });
+        testField = Variational::VectorFunction(
+          dimension, [second, value](const Geometry::Point& point) {
+            Math::SpatialVector<Scalar> result = second * point.getPhysicalCoordinates();
+            for (size_t i = 0; i < result.size(); ++i)
+              result[i] += value(Real(-0.2), Real(0.4));
+            return result;
+          });
+        Variational::BilinearForm form(trial, test);
+        form = Variational::LinearElasticityIntegral(trial, test)(
+          coefficient(Real(2)), coefficient(Real(3)));
+        for (size_t repeat = 0; repeat < 2; ++repeat)
+        {
+          form.assemble();
+          const Scalar actual = Math::dot(
+            form.getOperator() * trial.getSolution().getData(), testField.getData());
+          EXPECT_LT(std::abs(actual - expected), Real(1e-10));
+        }
+        Variational::TestFunction sharedTest(trialSpace);
+        Variational::GridFunction sharedField(trialSpace);
+        sharedField = Variational::VectorFunction(
+          dimension, [second, value](const Geometry::Point& point) {
+            Math::SpatialVector<Scalar> result = second * point.getPhysicalCoordinates();
+            for (size_t i = 0; i < result.size(); ++i)
+              result[i] += value(Real(-0.2), Real(0.4));
+            return result;
+          });
+        Variational::BilinearForm sharedForm(trial, sharedTest);
+        sharedForm = Variational::LinearElasticityIntegral(trial, sharedTest)(
+          coefficient(Real(2)), coefficient(Real(3)));
+        sharedForm.assemble();
+        const Scalar sharedAction =
+          Math::dot(sharedForm.getOperator() * trial.getSolution().getData(),
+            sharedField.getData());
+        EXPECT_LT(std::abs(sharedAction - expected), Real(1e-10));
+      };
+      check(
+        [&] { return Variational::P1<Math::SpatialVector<Scalar>>(mesh, dimension); });
+      check([&] {
+        return Variational::H1<2, Math::SpatialVector<Scalar>>(
+          std::integral_constant<size_t, 2>{}, mesh, dimension);
+      });
+    }
+  }
+  TEST(Rodin_Solid_ActiveFiberLaw, CoupledResidualAllDerivativeBlocks)
+  {
+    Solid::ActiveFiberLaw::Parameters parameters;
+    parameters.stiffness = 80;
+    parameters.damping = 0.4;
+    parameters.destructionRate = 0.5;
+    parameters.crossBridgeStiffness = 60;
+    parameters.contractility = 40;
+    const Solid::ActiveFiberLaw law(parameters);
+    const Solid::ActiveFiberLaw::State oldState{1.7, 0.9};
+    constexpr Real Step = 1e-7;
+    for (Real extension : {Real(-0.015), Real(-0.055)})
+    {
+      const Solid::ActiveFiberLaw::State state{1.8, 0.95};
+      Solid::ActiveFiberLaw::Residual reference;
+      law.getResidual(
+        reference, 0.01, oldState, state, 0.06, -0.035, extension, 1.1, 0.5);
+      for (size_t column = 0; column < 4; ++column)
+      {
+        auto plusState = state;
+        auto minusState = state;
+        if (column == 1)
+        {
+          plusState.gamma += Step;
+          minusState.gamma -= Step;
+        }
+        if (column == 2)
+        {
+          plusState.beta += Step;
+          minusState.beta -= Step;
+        }
+        Solid::ActiveFiberLaw::Residual plus, minus;
+        law.getResidual(plus, 0.01, oldState, plusState,
+          0.06 + (column == 3 ? 0.5 * Step : 0), -0.035,
+          extension + (column == 0 ? Step : 0), 1.1, 0.5);
+        law.getResidual(minus, 0.01, oldState, minusState,
+          0.06 - (column == 3 ? 0.5 * Step : 0), -0.035,
+          extension - (column == 0 ? Step : 0), 1.1, 0.5);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          const Real analytic = column == 3 ? reference.strainDerivative[row]
+                                            : reference.derivative(row, column);
+          EXPECT_NEAR((plus.value[row] - minus.value[row]) / (2 * Step), analytic,
+            1e-7 * (1 + std::abs(analytic)))
+            << row << "," << column;
+        }
+      }
+    }
+  }
+
+  TEST(Rodin_Solid_ActiveFiberLaw, CoupledResidualPreservesRegularizedUpdate)
+  {
+    const Solid::ActiveFiberLaw law;
+    const Solid::ActiveFiberLaw::State previous{0, 0};
+    const auto state = law.update(0.01, previous, 0, 0, -1);
+    Solid::ActiveFiberLaw::Residual residual;
+    law.getResidual(residual, 0.01, previous, state, 0, 0, 0, -1);
+    EXPECT_NEAR(residual.value[1], 0, 1e-30);
+    EXPECT_EQ(residual.value[2], 0);
+    EXPECT_EQ(residual.derivative(1, 0), 0);
+    EXPECT_EQ(state.gamma, law.getMinimumGamma());
+    EXPECT_THROW(
+      law.getResidual(residual, 0, previous, state, 0, 0, 0, -1), Alert::Exception);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, GlobalDiscontinuousStateNewton)
+  {
+    using namespace Variational;
+    using namespace Geometry;
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+    P0 space(mesh);
+    GridFunction extension(space), gamma(space), beta(space);
+    extension = Real(-0.025);
+    gamma = Real(1.8);
+    beta = Real(0.95);
+    const Solid::ActiveFiberLaw::State previous{1.7, 0.9};
+    Solid::ActiveFiberLaw::Parameters parameters;
+    parameters.stiffness = 80;
+    parameters.damping = 0.4;
+    parameters.destructionRate = 0.5;
+    parameters.crossBridgeStiffness = 60;
+    parameters.contractility = 40;
+    const Solid::ActiveFiberLaw law(parameters);
+    const auto evaluate = [&](const Point& point) {
+      Solid::ActiveFiberLaw::Residual output;
+      const Solid::ActiveFiberLaw::State state{gamma(point), beta(point)};
+      law.getResidual(output, 0.01, previous, state, 0.06 + 0.02 * point(0), -0.035,
+        extension(point), 1.1);
+      return output;
+    };
+    const auto residual = [&](size_t row) {
+      return RealFunction(
+        [&, row](const Point& point) { return evaluate(point).value[row]; });
+    };
+    const auto derivative = [&](size_t row, size_t column) {
+      return RealFunction([&, row, column](const Point& point) {
+        return evaluate(point).derivative(row, column);
+      });
+    };
+    TrialFunction dc(space), dg(space), db(space);
+    TestFunction qc(space), qg(space), qb(space);
+    const std::array increments{std::ref(dc), std::ref(dg), std::ref(db)};
+    const std::array tests{std::ref(qc), std::ref(qg), std::ref(qb)};
+    constexpr size_t QuadratureOrder = 4; // Integrates the quadratic balance exactly.
+    Problem problem(dc, dg, db, qc, qg, qb);
+    auto firstLoad = Integral(residual(0), qc);
+    firstLoad.setOrder(QuadratureOrder);
+    auto firstBlock = Integral(derivative(0, 0) * dc, qc);
+    firstBlock.setOrder(QuadratureOrder);
+    problem = firstBlock + firstLoad;
+    for (size_t row = 0; row < 3; ++row)
+    {
+      if (row != 0)
+      {
+        auto load = Integral(residual(row), tests[row].get());
+        load.setOrder(QuadratureOrder);
+        problem += load;
+      }
+      for (size_t column = 0; column < 3; ++column)
+      {
+        if (row == 0 && column == 0)
+          continue;
+        auto block =
+          Integral(derivative(row, column) * increments[column].get(), tests[row].get());
+        block.setOrder(QuadratureOrder);
+        problem += block;
+      }
+    }
+    const Index count = extension.getData().size();
+    Math::Vector<Real> iterate(3 * count);
+    iterate << extension.getData(), gamma.getData(), beta.getData();
+    Solver::SparseLU linearSolver(problem);
+    Solver::NewtonSolver solver(linearSolver);
+    solver.setAbsoluteTolerance(1e-11).setRelativeTolerance(1e-11).setMaxIterations(30);
+    solver.setStepPolicy([&](auto& x, const auto& system, const auto&) {
+      const Real norm = system.getSolution().norm();
+      x += system.getSolution();
+      extension.getData() = x.head(count);
+      gamma.getData() = x.segment(count, count);
+      beta.getData() = x.tail(count);
+      return typename decltype(solver)::StepResult{.accepted = true, .stepNorm = norm};
+    });
+    solver.solve(iterate);
+    ASSERT_TRUE(solver.getReport().converged)
+      << "iterations=" << solver.getReport().iterations
+      << " residual=" << solver.getReport().finalResidual;
+    problem.assemble();
+    EXPECT_LT(problem.getLinearSystem().getVector().norm(), 1e-10);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      const auto expected = law.update(0.01, previous, -0.035, extension(point), 1.1);
+      EXPECT_NEAR(gamma(point), expected.gamma, 1e-10);
+      EXPECT_NEAR(beta(point), expected.beta, 1e-10);
+    }
+    const RealFunction balance([&](const Point& point) {
+      const Real c = extension(point);
+      const Real midpoint = 0.5 * (c - 0.035);
+      const Real d = 1 + 2 * midpoint;
+      const Real strain = 0.06 + 0.02 * point(0);
+      return d * d * d * (gamma(point) * beta(point) + 0.4 * (c + 0.035) / 0.01) -
+        80 * (strain - midpoint) * (1 + 2 * strain);
+    });
+    const auto& formula = QF::QuadratureFormula::get(4, Polytope::Type::Segment);
+    Real integratedBalance = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const auto& quadrature = cell->getQuadrature(formula);
+      for (size_t sample = 0; sample < formula.getSize(); ++sample)
+      {
+        const auto& point = quadrature.getPoint(sample);
+        integratedBalance +=
+          formula.getWeight(sample) * point.getDistortion() * balance(point);
+      }
+    }
+    EXPECT_NEAR(integratedBalance, 0, 1e-10);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, DynamicInputRequiresIndependentFields)
+  {
+    auto law = makeActiveContractionLaw();
+    const auto state = makeUniaxialStateWithFiberStrain(0.06);
+    Solid::ConstitutivePoint point(state);
+    point.set<Solid::Tags::TimeStep>(0.01);
+    auto prepared = law;
+    EXPECT_THROW(prepared.setConstitutivePoint(point), Alert::Exception);
+    setDynamicTags(point);
+    EXPECT_NO_THROW(prepared.setConstitutivePoint(point));
+  }
+
 }

@@ -107,6 +107,88 @@
   DirichletBC(u, prescribed).on(GammaD)
   @endcode
 
+  @subsection guides-bc-elimination Sparse algebraic elimination
+
+  @ref Rodin::Math::LinearSystem "Math::LinearSystem" also accepts an
+  arbitrary caller-supplied square CSC operator. Essential elimination does
+  not require symmetric coefficients, stored transpose entries, or an existing
+  constrained diagonal. Duplicate triplets must first be assembled into valid
+  sorted, unique-row sparse storage, as with Eigen's `setFromTriplets`.
+
+  # Architecture
+
+  Let @f$C@f$ denote the prescribed indices, @f$F@f$ the remaining indices,
+  and @f$g_C@f$ their prescribed coefficients. These are finite-element
+  coefficients, not necessarily nodal samples at high order. The free equations
+  follow by substituting @f$x_C=g_C@f$ into the original system:
+  @f[
+    A_{FF}x_F=b_F-A_{FC}g_C.
+  @f]
+  Define the diagonal constraint projector @f$Q@f$, its complement @f$P=I-Q@f$,
+  and extend @f$g_C@f$ by zero on @f$F@f$. Keeping the original system size gives
+  @f[
+    \widetilde A=PAP+Q,\qquad
+    \widetilde b=P(b-Ag)+g.
+  @f]
+  This leaves @f$A_{FF}@f$ unchanged and replaces constrained equations by
+  identities. The formula applies over both real and complex scalar fields;
+  prescribing a coefficient does not conjugate it. Symmetry or Hermitian
+  symmetry is preserved when present but is not required for correctness.
+
+  For example, prescribing @f$x_0=1@f$ in
+  @f[
+    A=\begin{pmatrix}2&3\\0&4\end{pmatrix},\qquad
+    b=\begin{pmatrix}5\\6\end{pmatrix}
+  @f]
+  produces @f$\widetilde A=\operatorname{diag}(1,4)@f$ and
+  @f$\widetilde b=(1,6)^T@f$, whether or not the zero at @f$(1,0)@f$ is
+  explicitly stored. Discovering constrained rows through their transpose
+  entries would miss the coefficient at @f$(0,1)@f$ in this example.
+
+  # Implementation
+
+  The operation validates the system dimensions and shifted constraint indices
+  before mutation, then compresses the operator. It traverses every constrained
+  column of the original matrix to accumulate the load lifting, recording its
+  diagonal position after the traversal. Only after all lifting is complete may
+  an absent diagonal be inserted. Missing diagonals are merged together into
+  the existing CSC arrays by moving entries backwards, avoiding repeated shifts
+  or a full matrix copy. Existing entries and explicit zeros are retained.
+
+  A temporary byte mask identifies constrained rows. Consecutive constrained
+  columns are cleared in coalesced storage ranges. Free storage between them
+  is examined in blocks: an empty row mask performs no coefficient stores,
+  while a nonempty mask visits only its set bits. The final scalar tail follows
+  the same zeroing rule. Actual zero assignment or bit clearing is required:
+  multiplication by zero would retain NaNs or create them from infinities.
+  Constraint diagonals and prescribed load entries are restored last.
+
+  A single contiguous constraint interval can select sorted row-range pruning.
+  The selection uses sixteen samples at equal stored-entry quantiles, requires
+  at least eight stored entries per column on average, and requires at least
+  half the usable samples to reject the interval. These are measured heuristics,
+  not correctness assumptions. Samples only select the clearing kernel;
+  actual column bounds certify every omission. Partial overlaps use binary
+  searches to locate the constrained coefficient range. Fragmented constraints
+  retain the block kernel. No particular FEM boundary numbering is assumed.
+
+  For @f$n@f$ rows, @f$m@f$ stored entries and @f$k@f$ constraints, block
+  clearing and batch insertion require @f$O(n+m+k)@f$ work and
+  @f$O(n+k)@f$ temporary storage. Pruning adds up to two binary searches per
+  overlapping free column. Operator storage grows only for absent constrained
+  diagonals. It remains compressed, with sorted row indices, after the call.
+  The solution vector is untouched, preserving warm starts. Repeating the same
+  constraints is idempotent up to floating-point rounding. An empty constraint
+  map only validates dimensions and compresses storage.
+
+  This algorithm is serial and constructs no persistent transpose index or
+  parallel worker pool. Its linear scan replaces repeated transpose searches;
+  it does not make a stronger asymptotic claim than linear stored-entry work.
+  Tests compare the matrix and load against independent projector constructions,
+  including asymmetric storage, missing diagonals, complex data, offsets and
+  mixed finite-element systems. The opt-in `RodinSparseEliminationBenchmarks`
+  executable measures the public operation with restoration outside timing.
+
   @section guides-bc-neumann Neumann Boundary Conditions
 
   Neumann conditions prescribe the normal derivative (or flux) on the

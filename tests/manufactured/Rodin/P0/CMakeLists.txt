@@ -7,7 +7,7 @@ target_link_libraries(RodinManufacturedP0L2
   Rodin::Variational
   Rodin::Solver
 )
-gtest_discover_tests(RodinManufacturedP0L2
+rodin_discover_tests(RodinManufacturedP0L2
   PROPERTIES
     LABELS manufactured
 )

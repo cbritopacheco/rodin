@@ -17,7 +17,7 @@ target_link_libraries(RodinConvergenceUtilitiesTest
     GTest::gtest_main
     RodinConvergence
 )
-gtest_discover_tests(RodinConvergenceUtilitiesTest
+rodin_discover_tests(RodinConvergenceUtilitiesTest
   PROPERTIES
     LABELS convergence
 )

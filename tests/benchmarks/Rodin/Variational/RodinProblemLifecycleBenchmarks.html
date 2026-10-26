@@ -1,0 +1,8 @@
+<p>Construction and ownership transfer of a coupled variational problem.</p>
+<h2>Measured operation</h2>
+<p>Measures public problem lifetimes, excluding mesh/space construction.</p>
+<h3>Architecture</h3>
+<p>Degree-two real/complex coupled reaction--diffusion fixtures supply the same formulation as the assembly/solve profilers. Sparse and dense native systems are distinguished. Empty and Defined include construction and destruction, with Defined also cloning the body. Copy includes copying the assembled system and owned body. Move starts from a fresh untimed copy; moved-result destruction is timed, moved-from cleanup is not. These are warmed allocator lifetimes, not process-first allocation. Assignment retains an existing destination: copy assignment may reuse fixed-size system buffers; move assignment replaces the previous value. Fresh staging copies and their moved-from cleanup remain untimed.</p>
+<p>Numerical qualification assembles a transferred body before and after measurement and compares the operator/load exactly with the fixture. Empty construction is qualified by subsequently assigning that body. A wrong empty body must fail the logical integrator-count guard. No PDE assembly, interpolation or numerical guard is included in lifecycle timing.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

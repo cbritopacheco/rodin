@@ -109,91 +109,92 @@ namespace
   ///        on the coronary example's header.
   struct CarreauYasudaParameters
   {
-      Real mu0 = 0.0720;
-      Real muInf = 0.0049;
-      Real lambda = 6.1529;
-      Real n = 0.2081;
-      Real yasuda = 1.4173;
-      Real gammaRegularization = 1.0e-3;
+    Real mu0 = 0.0720;
+    Real muInf = 0.0049;
+    Real lambda = 6.1529;
+    Real n = 0.2081;
+    Real yasuda = 1.4173;
+    Real gammaRegularization = 1.0e-3;
   };
 
   struct Config
   {
-      std::string meshPath = "../resources/examples/Heart/ProteinTest.mesh";
-      std::string xdmfBasename = "ProteinTest";
-      std::string csvPath = "ProteinTest.csv";
+    std::string meshPath = "../resources/examples/Heart/ProteinTest.mesh";
+    std::string xdmfBasename = "ProteinTest";
+    std::string csvPath = "ProteinTest.csv";
 
-      // ---- Fluid -----------------------------------------------------------
-      Real rho = 1060.0;
-      /// @brief Pressure stabilisation for the equal-order penalty term.
-      Real pressurePenalty = 1.0e-12;
-      CarreauYasudaParameters viscosity;
+    // ---- Fluid -----------------------------------------------------------
+    Real rho = 1060.0;
 
-      // ---- Driving ---------------------------------------------------------
-      /// @brief Mean inlet pressure (Pa) and pulse amplitude (Pa).
-      Real inletPressureMean = 100.0;
-      Real inletPressureAmplitude = 50.0;
-      Real period = 0.85;
+    /// @brief Pressure stabilisation for the equal-order penalty term.
+    Real pressurePenalty = 1.0e-12;
+    CarreauYasudaParameters viscosity;
 
-      Real dt = 1.0e-3;
-      int flowCycles = 3;
-      int speciesCycles = 12;
+    // ---- Driving ---------------------------------------------------------
+    /// @brief Mean inlet pressure (Pa) and pulse amplitude (Pa).
+    Real inletPressureMean = 100.0;
+    Real inletPressureAmplitude = 50.0;
+    Real period = 0.85;
 
-      // ---- Thrombosis ------------------------------------------------------
-      ThrombosisParameters thrombosis;
+    Real dt = 1.0e-3;
+    int flowCycles = 3;
+    int speciesCycles = 12;
 
-      bool solveKinetics = true;
-      bool solveWashout = true;
+    // ---- Thrombosis ------------------------------------------------------
+    ThrombosisParameters thrombosis;
 
-      Real maxVelocity = 5.0;
+    bool solveKinetics = true;
+    bool solveWashout = true;
 
-      /// @brief Boundary impedance, as a fraction of the conduit's own
-      ///        Poiseuille resistance. Z = fraction * R_pois * A [Pa s/m].
-      ///
-      /// @details A pressure-driven inlet with no impedance has no energy
-      ///          bound. With the Temam correction the convective operator is
-      ///          skew-symmetric inside the domain, so the only convective
-      ///          energy term left is the boundary flux
-      ///          (rho/2) \int_Gamma |u|^2 (u.n). At the inlet u.n < 0, so
-      ///          that is an energy INFLUX growing like |u|^3, while the only
-      ///          thing opposing it -- viscous dissipation -- grows like
-      ///          |u|^2. Nothing restores equilibrium and the flow runs away:
-      ///          exactly the 0.09 -> 0.43 -> 0.55 -> 6.5 m/s growth observed.
-      ///
-      ///          A prescribed-velocity inlet does not have this problem
-      ///          because u is fixed there. Both working examples in this tree
-      ///          drive their inlet with a pressure and therefore both add a
-      ///          positive-definite normal impedance Z (u.n)(v.n) --
-      ///          CoupledLV0DCoronary3D::inletImpedance = 5e2, and the P1/P1
-      ///          FSI's per-outlet Z = scale * R_pois * A. This example was the
-      ///          only one without it.
-      ///
-      ///          It is also the physical statement: a pressure source with
-      ///          zero source impedance is not realisable. Unlike a Windkessel
-      ///          this adds no state and no rheology dependence -- one number
-      ///          per boundary -- so the outlet stays clean.
-      Real boundaryImpedanceFraction = 0.5;
+    Real maxVelocity = 5.0;
 
-      /// @brief Tangential damping at the pressure-driven inlet [Pa s/m].
-      /// @details A pure traction inlet leaves u_tau completely unconstrained.
-      ///          Same value and role as CoupledLV0DCoronary3D's
-      ///          inletTangentialDamping.
-      Real inletTangentialDamping = 1.0e3;
+    /// @brief Boundary impedance, as a fraction of the conduit's own
+    ///        Poiseuille resistance. Z = fraction * R_pois * A [Pa s/m].
+    ///
+    /// @details A pressure-driven inlet with no impedance has no energy
+    ///          bound. With the Temam correction the convective operator is
+    ///          skew-symmetric inside the domain, so the only convective
+    ///          energy term left is the boundary flux
+    ///          (rho/2) \int_Gamma |u|^2 (u.n). At the inlet u.n < 0, so
+    ///          that is an energy INFLUX growing like |u|^3, while the only
+    ///          thing opposing it -- viscous dissipation -- grows like
+    ///          |u|^2. Nothing restores equilibrium and the flow runs away:
+    ///          exactly the 0.09 -> 0.43 -> 0.55 -> 6.5 m/s growth observed.
+    ///
+    ///          A prescribed-velocity inlet does not have this problem
+    ///          because u is fixed there. Both working examples in this tree
+    ///          drive their inlet with a pressure and therefore both add a
+    ///          positive-definite normal impedance Z (u.n)(v.n) --
+    ///          CoupledLV0DCoronary3D::inletImpedance = 5e2, and the P1/P1
+    ///          FSI's per-outlet Z = scale * R_pois * A. This example was the
+    ///          only one without it.
+    ///
+    ///          It is also the physical statement: a pressure source with
+    ///          zero source impedance is not realisable. Unlike a Windkessel
+    ///          this adds no state and no rheology dependence -- one number
+    ///          per boundary -- so the outlet stays clean.
+    Real boundaryImpedanceFraction = 0.5;
 
-      /// @brief Codina crosswind (discontinuity-capturing) constant. 0 disables.
-      ///
-      /// @details SUPG controls the streamline direction only; it leaves the
-      ///          crosswind direction free, which is why thrombin and fibrin
-      ///          came out NEGATIVE (-31% and -54% of their own maxima) in
-      ///          bands across the ectatic shoulder. Codina (CMAME 110, 1993,
-      ///          325-342) adds a nonlinear dissipation acting only on the
-      ///          crosswind component, designed from the discrete maximum
-      ///          principle, and less overdiffusive than earlier
-      ///          discontinuity-capturing schemes. C ~ 0.7 for linear elements.
-      ///
-      ///          This damps the oscillation; it does NOT resolve the 25 um
-      ///          concentration layer, which is 9x below the element size.
-      Real crosswindC = 0.7;
+    /// @brief Tangential damping at the pressure-driven inlet [Pa s/m].
+    /// @details A pure traction inlet leaves u_tau completely unconstrained.
+    ///          Same value and role as CoupledLV0DCoronary3D's
+    ///          inletTangentialDamping.
+    Real inletTangentialDamping = 1.0e3;
+
+    /// @brief Codina crosswind (discontinuity-capturing) constant. 0 disables.
+    ///
+    /// @details SUPG controls the streamline direction only; it leaves the
+    ///          crosswind direction free, which is why thrombin and fibrin
+    ///          came out NEGATIVE (-31% and -54% of their own maxima) in
+    ///          bands across the ectatic shoulder. Codina (CMAME 110, 1993,
+    ///          325-342) adds a nonlinear dissipation acting only on the
+    ///          crosswind component, designed from the discrete maximum
+    ///          principle, and less overdiffusive than earlier
+    ///          discontinuity-capturing schemes. C ~ 0.7 for linear elements.
+    ///
+    ///          This damps the oscillation; it does NOT resolve the 25 um
+    ///          concentration layer, which is 9x below the element size.
+    Real crosswindC = 0.7;
   };
 
   /// @brief Closed-reactor estimate of the conversion attainable in a pocket of
@@ -622,10 +623,12 @@ int main(int argc, char** argv)
                 << (0.2 / std::max(vPredicted, 1e-12) * cfg.inletPressureMean)
                 << " Pa for v=0.2 m/s." << Alert::Raise;
   if (0.5 * cfg.rho * vPredicted > boundaryZ)
+  {
     Alert::Warning() << "[inlet] Z is below the inflow kinetic flux scale "
                      << "(rho v / 2 = " << (0.5 * cfg.rho * vPredicted)
                      << "); the run may still diverge. Raise "
                      << "boundaryImpedanceFraction." << Alert::Raise;
+  }
 
   const auto uNormal = Dot(u, normal) * normal;
   const auto uTangential = u - uNormal;
@@ -649,20 +652,20 @@ int main(int argc, char** argv)
     + 2.0 * Integral(muLag * symU, symV) - Integral(p, Div(v)) + Integral(Div(u), q) +
     cfg.pressurePenalty * Integral(p, q)
 
-       // PSPG / grad-p. REQUIRED for the equal-order P1/P1 pair.
+    // PSPG / grad-p. REQUIRED for the equal-order P1/P1 pair.
     + Integral(vmsTauP.getSolution() * Grad(p), Grad(q))
 
     + BoundaryIntegral(pIn * Dot(v, normal)).over(INLET)
-       // No outlet traction term: p_out = 0 is still the free condition.
+    // No outlet traction term: p_out = 0 is still the free condition.
 
-       // Normal impedance at BOTH ends: the O(|u|^2) restoring term that the
-       // pressure-driven boundary needs. Positive semidefinite, so it can only
-       // help conditioning.
+    // Normal impedance at BOTH ends: the O(|u|^2) restoring term that the
+    // pressure-driven boundary needs. Positive semidefinite, so it can only
+    // help conditioning.
     + boundaryZ * BoundaryIntegral(Dot(uNormal, v)).over(INLET) +
     boundaryZ * BoundaryIntegral(Dot(uNormal, v)).over(OUTLET)
 
-       // A pure traction boundary says nothing about u_tau; without this the
-       // inlet plane can develop an unopposed swirl.
+    // A pure traction boundary says nothing about u_tau; without this the
+    // inlet plane can develop an unopposed swirl.
     + cfg.inletTangentialDamping * BoundaryIntegral(Dot(uTangential, v)).over(INLET)
 
     + BoundaryIntegral(inletBackflow * Dot(u, v)).over(INLET) +
@@ -973,9 +976,11 @@ int main(int argc, char** argv)
                 << totalSteps << " total); flow every step, "
                 << "species from cycle " << (cfg.flowCycles + 1) << " on" << Alert::Raise;
   if (cfg.flowCycles < 2)
+  {
     Alert::Warning() << "[run] fewer than two warm-up cycles: the wall-shear "
                      << "indices that arm the source carry the start-up "
                      << "transient" << Alert::Raise;
+  }
 
   Real t = 0.0;
   Real uSpeed = 0.0;      // max|u| of the current step: guard and progress line
@@ -1031,9 +1036,11 @@ int main(int argc, char** argv)
         KSPGetConvergedReason(flowKSP.getHandle(), &reason);
         KSPGetIterationNumber(flowKSP.getHandle(), &its);
         if (reason < 0)
+        {
           Alert::Warning() << "[flow] step " << step << " KSP DIVERGED ("
                            << static_cast<int>(reason) << ") after " << its << " its"
                            << Alert::Raise;
+        }
         else if (step == 0)
           Alert::Info() << "[chk] first flow solve ok, KSP its=" << its << Alert::Raise;
       }
@@ -1159,8 +1166,10 @@ int main(int argc, char** argv)
       // chaining several does not concatenate -- build the variable tail first.
       std::ostringstream tail;
       if (species)
+      {
         tail << "  |  washout R=" << residual << " tau=" << clearance
              << " s  Fn/Fg0=" << (fnCur.max() / fg0);
+      }
       else
         tail << "  |  (warm-up)";
 

@@ -1,0 +1,16 @@
+<p>The stationary Stokes model describes slow viscous flow of an incompressible
+Newtonian fluid, with inertia neglected. In a domain \(\Omega\), the velocity
+\(\boldsymbol{u}\) and pressure \(p\) satisfy momentum balance and
+incompressibility:</p>
+<div class="benchmark-representative">
+\[
+-\nu\Delta\boldsymbol{u}+\nabla p=\boldsymbol{f},
+\qquad \nabla\cdot\boldsymbol{u}=0.
+\]
+</div>
+<p>Here \(\nu&gt;0\) is the constant viscosity coefficient and
+\(\boldsymbol{f}\) is the applied force. Pressure enforces the incompressibility
+constraint. With homogeneous velocity prescribed on \(\partial\Omega\), pressure
+is determined up to an additive constant; the normalization
+\(\int_\Omega p\,\mathrm dx=0\) fixes that constant. The mixed velocity–pressure
+discretization must preserve this coupling to give a stable approximation.</p>

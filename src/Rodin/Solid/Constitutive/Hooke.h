@@ -35,7 +35,7 @@ namespace Rodin::Solid
    *                       + 2\mu \boldsymbol{\varepsilon}
    * @f]
    *
-   * ## Material parameter conversions
+   * # Material parameter conversions
    * From Young's modulus @f$ E @f$ and Poisson's ratio @f$ \nu @f$:
    * @f[
    *   \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad

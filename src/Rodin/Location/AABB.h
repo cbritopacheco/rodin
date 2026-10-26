@@ -121,14 +121,18 @@ namespace Rodin::Location
           if (candidates[d].empty())
             continue;
           if (d > mesh.getDimension())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "AABB candidate dimension exceeds the mesh dimension." << Alert::Raise;
+          }
           auto sorted = candidates[d];
           std::sort(sorted.begin(), sorted.end());
           if (sorted.back() >= mesh.getPolytopeCount(d) ||
             std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+          {
             Alert::MemberFunctionException(*this, __func__)
               << "AABB candidate indices must be distinct and in range." << Alert::Raise;
+          }
         }
         if (candidates.size() > m_index.size())
           m_index = std::vector<DimensionIndex>(candidates.size());
@@ -176,8 +180,10 @@ namespace Rodin::Location
       AABB& setTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "AABB physical tolerance must be finite and nonnegative." << Alert::Raise;
+        }
         m_tolerance = tolerance;
         invalidate();
         return *this;
@@ -200,8 +206,10 @@ namespace Rodin::Location
       AABB& setReferenceTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
+        {
           Alert::MemberFunctionException(*this, __func__)
             << "AABB reference tolerance must be finite and nonnegative." << Alert::Raise;
+        }
         m_referenceTolerance = tolerance;
         return *this;
       }
@@ -280,8 +288,10 @@ namespace Rodin::Location
     private:
       /// Ambient dimension supported by the spatial coordinate storage.
       static constexpr size_t MaxSpaceDimension = 3;
+
       /// Leaf capacity: a policy balance between tree traversal and candidate scans.
       static constexpr size_t LeafSize = 8;
+
       /**
        * Median splits give logarithmic depth; this capacity accommodates the
        * supported 32-bit entry range with spare traversal slots.
@@ -290,33 +300,43 @@ namespace Rodin::Location
 
       /// Default physical residual tolerance, relative to the mesh diagonal.
       static constexpr Real DefaultPhysicalTolerance = Real(1e-10);
+
       /// Default permitted reference-space overshoot before clipping.
       static constexpr Real DefaultReferenceTolerance = Real(1e-10);
+
       /// Work limit per Newton seed; it does not guarantee convergence.
       static constexpr size_t DefaultMaxNewtonIterations = 16;
+
       /**
        * Roundoff allowance in reference coordinates, measured in machine epsilons.
        * This is a numerical policy margin, not an error bound for the inverse map.
        */
       static constexpr Real ReferenceRoundoffFactor = Real(16);
+
       /**
        * Divergence guard: reference cells have coordinates of order one.
        * The generous radius permits intermediate overshoot without accepting it.
        */
       static constexpr Real MaxReferenceNorm = Real(1e3);
+
       /// Squared divergence radius, derived for squared-length comparisons.
       static constexpr Real MaxReferenceNormSquared = MaxReferenceNorm * MaxReferenceNorm;
+
       /// Try a vertex and its midpoint with the centroid after the centroid seed.
       static constexpr size_t SeedsPerVertex = 2;
+
       /// Equal weights place the second seed exactly at that midpoint.
       static constexpr Real SeedCentroidWeight = Real(0.5);
+
       /// Halve a rejected step to search toward the current iterate.
       static constexpr Real BacktrackingContraction = Real(0.5);
+
       /**
        * Work limit including the full-step trial; the last scale is 2^-23.
        * Exhausting this budget rejects the seed, rather than certifying a miss.
        */
       static constexpr size_t MaxBacktrackingTrials = 24;
+
       /**
        * Require the estimated correction to fit within one quarter of the
        * reference accuracy before skipping another Jacobian evaluation.
@@ -329,11 +349,13 @@ namespace Rodin::Location
        * This heuristic accounts for conditioning; it is not an interval proof.
        */
       static constexpr Real ControlRoundoffFactor = Real(32);
+
       /**
        * Cubic and higher tensor factors use line conversions. Small dense
        * products avoid the line-loop overhead on quadratic factors.
        */
       static constexpr size_t MinSeparableTensorDegree = 3;
+
       /**
        * Euclidean norm with the cheap squared-norm path at ordinary scales.
        * Scaling avoids overflow and avoids classifying nonzero tiny vectors as zero.
@@ -350,6 +372,7 @@ namespace Rodin::Location
           norm = std::hypot(norm, v[i]);
         return norm;
       }
+
       /**
        * @brief Tests whether every coordinate is finite.
        * @param v Vector whose norm or finiteness is tested.
@@ -365,6 +388,7 @@ namespace Rodin::Location
         }
         return true;
       }
+
       /**
        * @brief Tests whether every coordinate is finite.
        * @param m Matrix whose entries are tested for finiteness.
@@ -388,37 +412,38 @@ namespace Rodin::Location
 
       struct Node
       {
-          Bound lo;
-          Bound hi;
-          int32_t left;    ///< Left child, or -1 for a leaf
-          int32_t right;   ///< Right child (valid when left >= 0)
-          uint32_t begin;  ///< First entry (valid for leaves)
-          uint32_t end;    ///< One past last entry (valid for leaves)
+        Bound lo;
+        Bound hi;
+        int32_t left; ///< Left child, or -1 for a leaf
+        int32_t right; ///< Right child (valid when left >= 0)
+        uint32_t begin; ///< First entry (valid for leaves)
+        uint32_t end; ///< One past last entry (valid for leaves)
       };
 
       struct ProjectionBound
       {
-          Bound normal;
-          Real upper;
+        Bound normal;
+        Real upper;
       };
 
       struct ProjectionRange
       {
-          size_t begin = 0;
-          size_t end = 0;
+        size_t begin = 0;
+        size_t end = 0;
       };
 
       struct DimensionIndex
       {
-          std::vector<Node> nodes;
-          std::vector<Index> entries;      ///< Polytope indices, leaf-ordered
-          std::vector<Bound> entryLo;      ///< Per-entry box, leaf-ordered
-          std::vector<Bound> entryHi;
-          std::vector<ProjectionBound> projections;
-          std::vector<ProjectionRange> projectionRanges;
-          std::atomic<bool> built{false};
-          mutable std::mutex mutex;
+        std::vector<Node> nodes;
+        std::vector<Index> entries; ///< Polytope indices, leaf-ordered
+        std::vector<Bound> entryLo; ///< Per-entry box, leaf-ordered
+        std::vector<Bound> entryHi;
+        std::vector<ProjectionBound> projections;
+        std::vector<ProjectionRange> projectionRanges;
+        std::atomic<bool> built{false};
+        mutable std::mutex mutex;
       };
+
       /**
        * @brief Invalidates the spatial indexes and optionally updates the mesh scale.
        * @param updateScale Whether to recompute the mesh scale used by relative tolerances.
@@ -478,6 +503,7 @@ namespace Rodin::Location
       {
         return std::min(m_tolerance * m_scale, std::numeric_limits<Real>::max());
       }
+
       /**
        * @brief Builds the entity-dimension index on demand.
        * @param dimension Topological dimension of the indexed entities.
@@ -498,6 +524,7 @@ namespace Rodin::Location
         }
         return index;
       }
+
       /**
        * @brief Builds the spatial index for an entity dimension.
        * @param index Spatial index for the selected entity dimension.
@@ -527,8 +554,10 @@ namespace Rodin::Location
         const size_t sdim = mesh.getSpaceDimension();
         const std::vector<Index>* selected = nullptr;
         if constexpr (Restricted)
+        {
           selected =
             dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr;
+        }
         const size_t count = Restricted ? (selected ? selected->size() : 0)
                                         : mesh.getPolytopeCount(dimension);
         const bool projectionsEnabled =
@@ -604,6 +633,7 @@ namespace Rodin::Location
         if (index.projections.empty())
           std::vector<ProjectionRange>().swap(index.projectionRanges);
       }
+
       /**
        * @brief Partitions an entity range and builds a bounding-volume tree node.
        * @param index Spatial index for the selected entity dimension.
@@ -682,6 +712,7 @@ namespace Rodin::Location
         index.nodes[self].right = right;
         return self;
       }
+
       /**
        * @brief Evaluates a binomial coefficient.
        * @param n Polynomial degree.
@@ -987,11 +1018,11 @@ namespace Rodin::Location
        */
       struct ControlBasis
       {
-          std::vector<Math::SpatialPoint> samples;
-          Math::Matrix<Real> conversion;
-          Real roundoffAmplification = 0;
-          size_t tensorFactors = 0;
-          bool valid = false;
+        std::vector<Math::SpatialPoint> samples;
+        Math::Matrix<Real> conversion;
+        Real roundoffAmplification = 0;
+        size_t tensorFactors = 0;
+        bool valid = false;
       };
 
       /**
@@ -1067,6 +1098,7 @@ namespace Rodin::Location
         }
         return s_cache.emplace(key, std::move(basis)).first->second;
       }
+
       /**
        * @brief Expands a bounding box by the physical padding.
        * @param lo Lower bounding coordinates.
@@ -1151,6 +1183,7 @@ namespace Rodin::Location
           projections.push_back(bound);
         }
       }
+
       /**
        * @brief Bounds the physical image of a mesh entity.
        * @param polytope Mesh entity whose physical image is bounded.
@@ -1290,6 +1323,7 @@ namespace Rodin::Location
         lo.fill(-std::numeric_limits<Real>::infinity());
         hi.fill(std::numeric_limits<Real>::infinity());
       }
+
       /**
        * @brief Tests whether a physical point is inside an axis-aligned box.
        * @param lo Lower bounding coordinates.
@@ -1310,6 +1344,7 @@ namespace Rodin::Location
         }
         return true;
       }
+
       /**
        * @brief Tests whether a physical point is inside an axis-aligned box.
        * @param node Tree node whose box is tested.
@@ -1322,6 +1357,7 @@ namespace Rodin::Location
       {
         return boxContains(node.lo, node.hi, x, sdim);
       }
+
       /**
        * @brief Tests reference-cell containment with the configured tolerance.
        * @param traits Reference-cell geometry traits.
@@ -1349,6 +1385,7 @@ namespace Rodin::Location
         }
         return true;
       }
+
       /**
        * @brief Projects reference coordinates onto the reference-cell boundary.
        * @param geometry Reference-cell geometry.
@@ -1455,9 +1492,11 @@ namespace Rodin::Location
           else if (seed % SeedsPerVertex == 1)
             rc = traits.getVertex((seed - 1) / SeedsPerVertex);
           else
+          {
             rc = SeedCentroidWeight *
               (traits.getCentroid() +
                 traits.getVertex((seed - SeedsPerVertex) / SeedsPerVertex));
+          }
           transformation.transform(mapped, rc);
           if (!isFinite(mapped))
             continue;
@@ -1626,6 +1665,7 @@ namespace Rodin::Location
         }
         return false;
       }
+
       /**
        * @brief Certifies containment in one candidate mesh entity.
        * @param dimension Topological dimension of the indexed entities.
@@ -1655,6 +1695,7 @@ namespace Rodin::Location
           return {};
         return Geometry::Point(polytope, rc, x);
       }
+
       /**
        * @brief Traverses the spatial index and certifies candidate entities.
        * @param index Spatial index for the selected entity dimension.
@@ -1715,6 +1756,7 @@ namespace Rodin::Location
         }
         return {};
       }
+
       /**
        * @brief Tests every indexed entity when tree traversal does not locate the point.
        * @param index Spatial index for the selected entity dimension.

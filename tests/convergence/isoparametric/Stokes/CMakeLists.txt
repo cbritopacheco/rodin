@@ -55,6 +55,13 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     GEOMETRIES ${_RODIN_CURVED_STOKES_GEOMETRIES})
   target_compile_definitions(RodinConvergenceIsoparametricPETScStokesBoundary
     PRIVATE RODIN_STOKES_TRACTION_CURVED)
+  # Atomic coverage counters add substantial contention to the local threaded
+  # assembly. Retain the complete cubic rate hierarchy and use the existing
+  # high-order pyramid watchdog for this instrumented process only.
+  if (RODIN_CODE_COVERAGE)
+    set_tests_properties(RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Pyramid
+      PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+  endif()
   add_executable(RodinConvergenceIsoparametricPETScStokes Stokes.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScStokes
     PRIVATE RODIN_CURVED_STOKES_PETSC)

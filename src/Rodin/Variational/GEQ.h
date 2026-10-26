@@ -12,19 +12,19 @@
  * comparison operation between functions. This operator creates a boolean
  * function indicating where one function is at least as large as another.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the GEQ operator:
  * @f[
  *   (f \geq g)(x) = \begin{cases} 1 & \text{if } f(x) \geq g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]
  *
- * ## Applications
+ * # Applications
  * - Non-negative region indicators: @f$ \mathbb{1}_{u \geq 0} @f$
  * - Constraint satisfaction checking
  * - Admissible set definitions
  * - Complementarity conditions
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * auto non_negative = (u >= 0.0);  // Boolean: true where u is non-negative
  * ```

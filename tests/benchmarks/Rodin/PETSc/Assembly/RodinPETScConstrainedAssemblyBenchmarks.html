@@ -1,0 +1,5 @@
+<p>Full constrained PETSc local/MPI assembly, with aligned timing.</p>
+<h2>Measured operation</h2>
+<p>Measures complete PETSc problem assembly with independent patch checks. Fixed iterations align collective calls. The maximum rank duration includes constraint assembly and matrix/vector completion but excludes the preceding barrier, timing reduction, interpolation and numerical checks.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

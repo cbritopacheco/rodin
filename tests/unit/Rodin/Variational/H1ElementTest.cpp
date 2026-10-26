@@ -11,10 +11,14 @@
 
 #include <array>
 #include <complex>
+#include <sstream>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Rodin/Variational/P0/P0Element.h"
+#include "Rodin/Variational/P0g/P0gElement.h"
 #include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/Variational/H1/H1Element.h"
 
@@ -45,6 +49,11 @@ namespace Rodin::Tests::Unit
          * @brief Constructs a rule with one reference point.
          * @param point Reference point returned by the rule.
          */
+        ObservedH1Formula(Polytope::Type geometry, bool half)
+          : ObservedH1Formula(Math::SpatialPoint(
+              Polytope::Traits(geometry).getCentroid() * (half ? Real(0.5) : Real(1))))
+        {}
+
         explicit ObservedH1Formula(const Math::SpatialPoint& point)
           : m_point(point),
             m_requests(0)
@@ -120,7 +129,7 @@ namespace Rodin::Tests::Unit
          * @brief Creates an independently identified copy.
          * @returns Owned copy of this rule.
          */
-        ObservedH1Formula* copy() const noexcept override
+        ObservedH1Formula* copy() const noexcept
         {
           return new ObservedH1Formula(*this);
         }
@@ -152,15 +161,15 @@ namespace Rodin::Tests::Unit
           SCOPED_TRACE(::testing::Message()
             << "degree " << K << ", geometry " << static_cast<int>(geometry));
           H1Element<K, Scalar> element(geometry);
-          Optional<ObservedH1Formula> formula;
+          const QF::QuadratureFormula* formula = nullptr;
           const auto centroid = Polytope::Traits(geometry).getCentroid();
-          formula.emplace(centroid);
-          const auto* address = &*formula;
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, false);
+
           const auto check = [&](const Math::SpatialPoint& point) {
             const auto& table = element.getTabulation(*formula);
-            EXPECT_EQ(formula->getRequests(), 1);
+
             EXPECT_EQ(&element.getTabulation(*formula), &table);
-            EXPECT_EQ(formula->getRequests(), 1);
+
             for (size_t local = 0; local < element.getCount(); ++local)
             {
               const auto& basis = element.getBasis(local);
@@ -173,16 +182,16 @@ namespace Rodin::Tests::Unit
             }
           };
           check(centroid);
-          const auto previousIdentity = formula->getCacheIdentity();
+          const auto* previous = formula;
           const Math::SpatialPoint replacement = centroid * Real(0.5);
-          formula.emplace(replacement);
-          ASSERT_EQ(&*formula, address);
-          ASSERT_NE(formula->getCacheIdentity(), previousIdentity);
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, true);
+          ASSERT_NE(formula, nullptr);
+          ASSERT_NE(formula, previous);
           check(replacement);
-          const auto reconstructedIdentity = formula->getCacheIdentity();
-          *formula = ObservedH1Formula(centroid);
-          ASSERT_EQ(&*formula, address);
-          ASSERT_NE(formula->getCacheIdentity(), reconstructedIdentity);
+          const auto* reconstructed = formula;
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, false);
+          ASSERT_NE(formula, nullptr);
+          ASSERT_NE(formula, reconstructed);
           check(centroid);
         }
       };
@@ -202,10 +211,10 @@ namespace Rodin::Tests::Unit
 
     for (size_t i = 0; i < fe.getCount(); ++i)
     {
-      const auto& lf   = fe.getLinearForm(i);
+      const auto& lf = fe.getLinearForm(i);
       const auto& node = fe.getNode(i);
-      Real dof        = lf(f);
-      Real expected   = f(node);
+      Real dof = lf(f);
+      Real expected = f(node);
       EXPECT_NEAR(dof, expected, 1e-14) << "dof " << i << " is not nodal";
     }
   }
@@ -1344,8 +1353,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Wedge)
   {
     // Wedge: (k+1) * (k+1)(k+2)/2
-    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Wedge).getCount(), 75);  // 5 * 5*6/2 = 5 * 15 = 75
-    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Wedge).getCount(), 126); // 6 * 6*7/2 = 6 * 21 = 126
+    EXPECT_EQ(
+      RealH1Element<4>(Polytope::Type::Wedge).getCount(), 75); // 5 * 5*6/2 = 5 * 15 = 75
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Wedge).getCount(),
+      126); // 6 * 6*7/2 = 6 * 21 = 126
   }
 
   /// @brief Verifies DOF count higher orders pyramid for variational real H1 element by checking exact expected values.
@@ -1522,7 +1533,8 @@ namespace Rodin::Tests::Unit
           if (c == component)
           {
             // This component should match the scalar basis
-            EXPECT_NEAR(std::abs(vec_basis(c) - scalar_k.getBasis(node_idx)(node)), 0.0, RODIN_FUZZY_CONSTANT);
+            EXPECT_NEAR(std::abs(vec_basis(c) - scalar_k.getBasis(node_idx)(node)), 0.0,
+              RODIN_FUZZY_CONSTANT);
           }
           else
           {
@@ -1599,11 +1611,16 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies DOF count consistency for variational vector H1 element by checking exact expected values.
   TEST(Rodin_Variational_VectorH1Element, DOFCount_Consistency)
   {
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 2).getCount(), 6);   // 3 nodes * 2 components
-    EXPECT_EQ(VectorH1Element<3>(Polytope::Type::Segment, 2).getCount(), 8);   // 4 nodes * 2 components
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 3).getCount(), 9);   // 3 nodes * 3 components
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 2).getCount(), 12); // 6 nodes * 2 components
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 3).getCount(), 18); // 6 nodes * 3 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 2).getCount(),
+      6); // 3 nodes * 2 components
+    EXPECT_EQ(VectorH1Element<3>(Polytope::Type::Segment, 2).getCount(),
+      8); // 4 nodes * 2 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 3).getCount(),
+      9); // 3 nodes * 3 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 2).getCount(),
+      12); // 6 nodes * 2 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 3).getCount(),
+      18); // 6 nodes * 3 components
   }
 
   // Test higher-order vector elements
@@ -1928,10 +1945,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Triangle, vdim).getCount(), 21 * vdim);
 
     // P5 Quadrilateral: (k+1)^2 = 36 scalar DOFs
-    EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Quadrilateral, vdim).getCount(), 36 * vdim);
+    EXPECT_EQ(
+      VectorH1Element<5>(Polytope::Type::Quadrilateral, vdim).getCount(), 36 * vdim);
 
     // P5 Tetrahedron: (k+1)(k+2)(k+3)/6 = 6*7*8/6 = 56 scalar DOFs
-    EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Tetrahedron, vdim).getCount(), 56 * vdim);
+    EXPECT_EQ(
+      VectorH1Element<5>(Polytope::Type::Tetrahedron, vdim).getCount(), 56 * vdim);
 
     // P5 Pyramid: (K+1)(K+2)(2K+3)/6 = 6*7*13/6 = 91 scalar DOFs
     EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Pyramid, vdim).getCount(), 91 * vdim);
@@ -1961,7 +1980,8 @@ namespace Rodin::Tests::Unit
       expected(0) = a0 + b0 * x;
       expected(1) = a1 + b1 * x;
 
-      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim));
+      interpolated.setZero();
 
       for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
       {
@@ -2181,8 +2201,9 @@ namespace Rodin::Tests::Unit
     Real f0 = 1.0, f1 = 2.75, f2 = 6.0;
 
     Math::Vector<Real> p{{0.3}};
-    Real exact = 1.0 + 2.0 * 0.3 + 3.0 * 0.3 * 0.3;  // 1.87
-    Real interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
+    Real exact = 1.0 + 2.0 * 0.3 + 3.0 * 0.3 * 0.3; // 1.87
+    Real interpolated =
+      f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
 
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
@@ -2244,13 +2265,14 @@ namespace Rodin::Tests::Unit
     H1Element<2, Complex> elem(Polytope::Type::Segment);
 
     // Test complex quadratic: f(x) = (1+i) + (2+2i)*x + (3+3i)*x^2
-    Complex f0(1.0, 1.0);      // at x=0
-    Complex f1(2.75, 2.75);    // at x=0.5
-    Complex f2(6.0, 6.0);      // at x=1
+    Complex f0(1.0, 1.0); // at x=0
+    Complex f1(2.75, 2.75); // at x=0.5
+    Complex f2(6.0, 6.0); // at x=1
 
     Math::Vector<Real> p{{0.3}};
-    Complex exact(1.87, 1.87);  // (1+i) + (2+2i)*0.3 + (3+3i)*0.09
-    Complex interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
+    Complex exact(1.87, 1.87); // (1+i) + (2+2i)*0.3 + (3+3i)*0.09
+    Complex interpolated =
+      f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
 
     EXPECT_NEAR(interpolated.real(), exact.real(), RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated.imag(), exact.imag(), RODIN_FUZZY_CONSTANT);
@@ -2305,25 +2327,21 @@ namespace Rodin::Tests::Unit
   {
     H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, 2);
 
-    auto v = [](Real x)
-    {
+    auto v = [](Real x) {
       return Math::Vector<Real>{
-        { 1.0 + 2.0 * x + 3.0 * x * x,  // first component
-          4.0 + 5.0 * x + 6.0 * x * x } // second component
+        {1.0 + 2.0 * x + 3.0 * x * x, // first component
+          4.0 + 5.0 * x + 6.0 * x * x} // second component
       };
     };
 
     // Nodes: x = 0, 0.5, 1
-    std::vector<Math::Vector<Real>> node_values = {
-      v(0.0),
-      v(0.5),
-      v(1.0)
-    };
+    std::vector<Math::Vector<Real>> node_values = {v(0.0), v(0.5), v(1.0)};
 
     Math::Vector<Real> p{{0.3}};
     Math::Vector<Real> exact = v(p(0));
 
-    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2));
+    interpolated.setZero();
     for (size_t node = 0; node < 3; node++)
     {
       for (size_t comp = 0; comp < 2; comp++)
@@ -2343,7 +2361,7 @@ namespace Rodin::Tests::Unit
     // P3 on Triangle with 3D vectors
     {
       H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Triangle, 3);
-      EXPECT_EQ(elem.getCount(), 30);  // 10 nodes × 3 components
+      EXPECT_EQ(elem.getCount(), 30); // 10 nodes × 3 components
 
       Math::Vector<Real> p{{0.3, 0.4}};
 
@@ -2408,10 +2426,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Pyramid).getCount(), 30);
 
     // Vector Pk Elements
-    int count = H1Element<2, Math::SpatialVector<Real>>(Polytope::Type::Segment, 2).getCount();
+    int count =
+      H1Element<2, Math::SpatialVector<Real>>(Polytope::Type::Segment, 2).getCount();
     EXPECT_EQ(count, 6);
 
-    count = H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Segment, 3).getCount();
+    count =
+      H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Segment, 3).getCount();
     EXPECT_EQ(count, 12);
   }
 
@@ -3090,7 +3110,8 @@ namespace Rodin::Tests::Unit
     RealH1Element<2> elem(Polytope::Type::Triangle);
 
     Math::Vector<Real> p{{0.3, 0.4}};
-    Math::SpatialVector<Real> grad_sum(2);;
+    Math::SpatialVector<Real> grad_sum(2);
+    ;
     grad_sum.setZero();
 
     for (size_t i = 0; i < elem.getCount(); i++)
@@ -3345,7 +3366,8 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim));
+            interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3362,7 +3384,8 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim));
+            interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3379,7 +3402,8 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim));
+            interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3780,7 +3804,7 @@ namespace Rodin::Tests::Unit
       for (const size_t quadratureOrder : {size_t(8), size_t(16)})
       {
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
+          QF::QuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
         for (size_t point = 0; point < qf.getSize(); ++point)
           check(qf.getPoint(point));
       }
@@ -3929,5 +3953,162 @@ namespace Rodin::Tests::Unit
     checkReferenceGradient(
       Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
     checkReferenceGradient(Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
+  }
+}
+
+/**
+ * @brief Vector reference elements preserve their owned descriptors on copy assignment.
+ *
+ * Rebuilds over an existing element with a different geometry and component
+ * count. Basis values and interpolation functionals are compared to the source.
+ */
+TEST(VectorElementValueSemantics, CopyAssignmentPreservesDescriptors)
+{
+  const auto check = []<class Element>(const Element& source) {
+    Element assigned(Polytope::Type::Segment, 1);
+    assigned = source;
+    const auto& self = assigned;
+    assigned = self;
+    const auto compare = [&](const Element& actual) {
+      ASSERT_EQ(actual.getGeometry(), source.getGeometry());
+      ASSERT_EQ(actual.getCount(), source.getCount());
+      const auto point = Polytope::Traits(source.getGeometry()).getCentroid();
+      for (size_t i = 0; i < source.getCount(); ++i)
+      {
+        const auto expected = source.getBasis(i)(point);
+        const auto value = actual.getBasis(i)(point);
+        ASSERT_EQ(value.size(), expected.size());
+        for (size_t component = 0; component < expected.size(); ++component)
+          EXPECT_EQ(value[component], expected[component]);
+        const auto function = [&](const Math::SpatialPoint&) { return expected; };
+        EXPECT_EQ(actual.getLinearForm(i)(function), source.getLinearForm(i)(function));
+      }
+    };
+    compare(assigned);
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    check(H1Element<2, Math::SpatialVector<Real>>(geometry, 3));
+    check(P1Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P0Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P0gElement<Math::SpatialVector<Real>>(geometry, 3));
+    check(H1Element<2, Math::SpatialVector<Complex>>(geometry, 2));
+    check(P1Element<Math::SpatialVector<Complex>>(geometry, 2));
+    check(P0Element<Math::SpatialVector<Complex>>(geometry, 2));
+    check(P0gElement<Math::SpatialVector<Complex>>(geometry, 2));
+  }
+}
+
+/// @brief Archive loading reconstructs vector basis and functional storage from geometry and range size.
+TEST(VectorElementValueSemantics, ArchiveRebuildsDescriptors)
+{
+  const auto check = []<class Element>(const Element& source) {
+    std::stringstream stream;
+    {
+      boost::archive::text_oarchive archive(stream);
+      archive << source;
+    }
+    Element restored;
+    {
+      boost::archive::text_iarchive archive(stream);
+      archive >> restored;
+    }
+    const auto verify = [&](const Element& actual) {
+      ASSERT_EQ(actual.getCount(), source.getCount());
+      EXPECT_EQ(actual.getGeometry(), source.getGeometry());
+      const auto point = Polytope::Traits(source.getGeometry()).getCentroid();
+      for (size_t i = 0; i < source.getCount(); ++i)
+      {
+        const auto expected = source.getBasis(i)(point);
+        const auto value = actual.getBasis(i)(point);
+        ASSERT_EQ(value.size(), expected.size());
+        for (size_t j = 0; j < value.size(); ++j)
+          EXPECT_EQ(value[j], expected[j]);
+        const auto function = [&](const Math::SpatialPoint&) { return expected; };
+        EXPECT_EQ(actual.getLinearForm(i)(function), source.getLinearForm(i)(function));
+      }
+    };
+    verify(restored);
+    Element existing(Polytope::Type::Segment, 1);
+    std::stringstream second(stream.str());
+    {
+      boost::archive::text_iarchive archive(second);
+      archive >> existing;
+    }
+    verify(existing);
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    check(H1Element<2, Math::SpatialVector<Real>>(geometry, 3));
+    check(H1Element<3, Math::SpatialVector<Complex>>(geometry, 2));
+    check(P1Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P1Element<Math::SpatialVector<Complex>>(geometry, 2));
+  }
+}
+
+/// @brief Unsupported higher reference derivatives raise instead of returning incorrect zeros.
+TEST(H1ElementDerivatives, UnsupportedOrderRaises)
+{
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    H1Element<2, Real> element(geometry);
+    const auto point = Polytope::Traits(geometry).getCentroid();
+    EXPECT_THROW(element.getBasis(0).getDerivative<2>(0)(point), Alert::Exception);
+    H1Element<2, Complex> complexElement(geometry);
+    EXPECT_THROW(complexElement.getBasis(0).getDerivative<2>(0)(point), Alert::Exception);
+    H1Element<2, Math::SpatialVector<Real>> vectorElement(geometry, 2);
+    EXPECT_THROW(
+      vectorElement.getBasis(0).getDerivative<2>(0, 0)(point), Alert::Exception);
+    H1Element<2, Math::SpatialVector<Complex>> complexVectorElement(geometry, 2);
+    EXPECT_THROW(
+      complexVectorElement.getBasis(0).getDerivative<2>(0, 0)(point), Alert::Exception);
+  }
+}
+
+/// @brief Exact zeros remain supported, and degree-one rational derivatives match their analytic values.
+TEST(H1ElementDerivatives, HigherOrdersPreserveKnownValues)
+{
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    const auto point = Polytope::Traits(geometry).getCentroid();
+    H1Element<2, Real> quadratic(geometry);
+    EXPECT_EQ(quadratic.getBasis(0).getDerivative<3>(0)(point), 0);
+    H1Element<1, Real> linear(geometry);
+    EXPECT_EQ(linear.getBasis(0).getDerivative<2>(0)(point), 0);
+  }
+  const Math::SpatialPoint point{0.2, 0.3, 0.4};
+  const Real magnitude = 2 * point.x() * point.y() / std::pow(1 - point.z(), 3);
+  H1Element<1, Real> scalar(Polytope::Type::Pyramid);
+  H1Element<1, Math::SpatialVector<Complex>> vector(Polytope::Type::Pyramid, 2);
+  for (size_t vertex = 0; vertex < 5; ++vertex)
+  {
+    SCOPED_TRACE(vertex);
+    const Real expected = vertex == 4 ? 0
+      : (vertex == 0 || vertex == 3)  ? magnitude
+                                      : -magnitude;
+    EXPECT_NEAR(scalar.getBasis(vertex).getDerivative<2>(2)(point), expected, 1e-14);
+    auto before = point, after = point;
+    constexpr Real step = 1e-6;
+    before.z() -= step;
+    after.z() += step;
+    const Real difference = (scalar.getBasis(vertex).getDerivative<1>(2)(after) -
+                              scalar.getBasis(vertex).getDerivative<1>(2)(before)) /
+      (2 * step);
+    EXPECT_NEAR(difference, expected, 1e-8);
+    EXPECT_LE(
+      std::abs(vector.getBasis(2 * vertex).getDerivative<2>(0, 2)(point) - expected),
+      1e-14);
+    EXPECT_EQ(vector.getBasis(2 * vertex).getDerivative<2>(1, 2)(point), Complex(0));
   }
 }

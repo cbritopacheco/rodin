@@ -1,0 +1,8 @@
+<p>Separates fixed-capacity spatial-vector construction and storage costs.</p>
+<h2>Measured operation</h2>
+<p>Measures fixed-capacity values inside a reserved owning array.</p>
+<p>Each sweep creates or assigns a batch of spatial vectors. Array allocation and source preparation are untimed; append scopes include clearing the previous batch. TemporaryFillAppend constructs a zeroed local vector, fills its active components and moves it into the array. DirectFillAppend constructs the zeroed vector in the final array slot before filling it. CopyAppend uses preconstructed immutable vectors; CopyAssign retains both the size and capacity of the destination array throughout timing. ZeroResize constructs dimension zero and then changes the logical size. These are operation scopes, not isolated instruction or allocator timings.</p>
+<h3>Exact guard</h3>
+<p>Every component and logical size is checked exactly before and after the timed sweep, including the unused fixed capacity. All constructor-zeroed inactive components must remain zero. A perturbed active or inactive component must be rejected. Input pointers and memory barriers prevent invariant-output hoisting. Dimensions zero through three, both scalar fields and three batch sizes separate logical work from fixed storage.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

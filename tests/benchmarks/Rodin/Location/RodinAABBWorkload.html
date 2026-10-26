@@ -1,0 +1,5 @@
+<p>Paired AABB queries with and without projection pruning.</p>
+<h2>Measured operation</h2>
+<p>The CSV workload varies cell geometry, representation degree, grid resolution and distortion. Interior, shared-interface and nearby-miss queries compare pruning enabled and disabled on identical points; Point cells omit the inapplicable shared-interface family. Independent membership and returned-point checks precede measurement.</p><h3>Timing boundary</h3><p>Query blocks alternate the paired configurations and report median process-CPU nanoseconds per query. Separate repeated constructions report nanoseconds per index build. Geometry and query preparation are excluded. The original sample counts and block-duration policy are retained; <code>--list</code> enumerates the exact configurations without performing numerical work.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

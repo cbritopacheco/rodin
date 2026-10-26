@@ -56,3 +56,12 @@ foreach(np 1 2 4 5)
   rodin_suppress_external_mpi_lsan_for_test(
     RodinManufacturedPETScMPITargetedAssemblyTest_np${np})
 endforeach()
+
+add_executable(RodinManufacturedPETScMPINonlocalTest NonlocalTest.cpp)
+target_link_libraries(RodinManufacturedPETScMPINonlocalTest
+  PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI Rodin::PETSc)
+add_test(NAME RodinManufacturedPETScMPINonlocalTest
+  COMMAND $<TARGET_FILE:RodinManufacturedPETScMPINonlocalTest>)
+set_tests_properties(RodinManufacturedPETScMPINonlocalTest PROPERTIES
+  LABELS "manufactured;petsc;distributed" TIMEOUT 300)
+rodin_suppress_external_mpi_lsan_for_test(RodinManufacturedPETScMPINonlocalTest)

@@ -12,19 +12,19 @@
  * operation between functions. This operator creates a boolean function
  * indicating where one function is less than another.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the less-than operator:
  * @f[
  *   (f < g)(x) = \begin{cases} 1 & \text{if } f(x) < g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]
  *
- * ## Applications
+ * # Applications
  * - Negative region indicators: @f$ \mathbb{1}_{u < 0} @f$
  * - Subdomain identification
  * - Constraint violation detection
  * - Thresholding operations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * auto negative_region = (u < 0.0);  // Boolean: true where u is negative
  * ```

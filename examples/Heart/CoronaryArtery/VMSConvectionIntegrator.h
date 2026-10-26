@@ -109,7 +109,7 @@
 #include <Eigen/Dense>
 
 #include <Rodin/Math/SpatialVector.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Variational/H1/H1Element.h>
 #include <Rodin/Variational/IntegrationPoint.h>
 
@@ -235,13 +235,17 @@ namespace Rodin::Examples::Heart
         const size_t vdim = trialFES.getVectorDimension();
 
         if (vdim == 0 || vdim != testFES.getVectorDimension())
+        {
           throw std::runtime_error(
             "VMSConvectionBilinearIntegrator expects matching vector-valued spaces.");
+        }
 
         if (ntr != trialFE.getCount() || nte != testFE.getCount())
+        {
           throw std::runtime_error(
             "VMSConvectionBilinearIntegrator expects element-local DOFs to match "
             "finite-element basis count.");
+        }
 
         /*
          * Conservative quadrature choice for
@@ -258,7 +262,7 @@ namespace Rodin::Examples::Heart
         const size_t qOrder = tauOrder + derivativeOrder(trialFE.getOrder()) +
           derivativeOrder(testFE.getOrder()) + 2 * uOldOrder;
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -292,8 +296,10 @@ namespace Rodin::Examples::Heart
           const auto tau = m_tau.getValue(ip);
 
           if (uOld.size() != d)
+          {
             throw std::runtime_error("VMSConvectionBilinearIntegrator expects the frozen "
                                      "velocity dimension to match the cell dimension.");
+          }
 
           /*
            * Directional derivatives along frozen velocity:
@@ -505,22 +511,28 @@ namespace Rodin::Examples::Heart
         const size_t vdim = trialFES.getVectorDimension();
 
         if (vdim == 0 || vdim != testFES.getVectorDimension())
+        {
           throw std::runtime_error(
             "VMSGradDivBilinearIntegrator expects matching vector-valued spaces.");
+        }
 
         if (vdim != d)
+        {
           throw std::runtime_error("VMSGradDivBilinearIntegrator expects vector "
                                    "dimension to match the cell dimension.");
+        }
 
         if (ntr != trialFE.getCount() || nte != testFE.getCount())
+        {
           throw std::runtime_error("VMSGradDivBilinearIntegrator expects element-local "
                                    "DOFs to match finite-element basis count.");
+        }
 
         const size_t tauOrder = getFunctionOrder(m_tauC, polytope, size_t(0));
         const size_t qOrder = tauOrder + derivativeOrder(trialFE.getOrder()) +
           derivativeOrder(testFE.getOrder());
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -697,20 +709,26 @@ namespace Rodin::Examples::Heart
         const size_t vdim = fes.getVectorDimension();
 
         if (vdim == 0)
+        {
           throw std::runtime_error(
             "VMSGradDivLinearIntegrator expects a vector-valued test space.");
+        }
         if (vdim != d)
+        {
           throw std::runtime_error("VMSGradDivLinearIntegrator expects vector dimension "
                                    "to match the cell dimension.");
+        }
         if (nte != fe.getCount())
+        {
           throw std::runtime_error("VMSGradDivLinearIntegrator expects element-local "
                                    "DOFs to match finite-element basis count.");
+        }
 
         const size_t tauOrder = getFunctionOrder(m_tauC, polytope, size_t(0));
         const size_t xiOrder = getFunctionOrder(m_xi, polytope, size_t(0));
         const size_t qOrder = tauOrder + xiOrder + derivativeOrder(fe.getOrder());
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -915,12 +933,16 @@ namespace Rodin::Examples::Heart
         const size_t vdim = fes.getVectorDimension();
 
         if (vdim == 0)
+        {
           throw std::runtime_error(
             "VMSConvectionLinearIntegrator expects a vector-valued test space.");
+        }
 
         if (nte != fe.getCount())
+        {
           throw std::runtime_error("VMSConvectionLinearIntegrator expects element-local "
                                    "DOFs to match finite-element basis count.");
+        }
 
         /*
          * Conservative quadrature choice for
@@ -938,7 +960,7 @@ namespace Rodin::Examples::Heart
         const size_t qOrder =
           coefficientOrder + derivativeOrder(fe.getOrder()) + uOldOrder;
 
-        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::QuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -968,8 +990,10 @@ namespace Rodin::Examples::Heart
           const auto tau = m_tau.getValue(ip);
 
           if (uOld.size() != d)
+          {
             throw std::runtime_error("VMSConvectionLinearIntegrator expects the frozen "
                                      "velocity dimension to match the cell dimension.");
+          }
 
           /*
            * Directional derivative of test basis along frozen velocity:

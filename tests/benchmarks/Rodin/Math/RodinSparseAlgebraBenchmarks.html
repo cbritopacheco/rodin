@@ -1,0 +1,8 @@
+<p>Sparse products and reductions on manufactured finite-element systems.</p>
+<h2>Measured operation</h2>
+<p>Isolates the Math operations used inside constrained CG iterations.</p>
+<p>Matrices are the actual constrained Poisson, conductivity and scalar reaction--diffusion operators, not synthetic dimension-dependent stencils. Mesh/space construction, original-kernel comparison, matrix assembly, vector allocation and numerical checks precede timing. Products overwrite a preallocated output; reductions return a scalar. These scopes exclude preconditioner setup, solver control and assembly.</p>
+<h3>Numerical guards</h3>
+<p>An independent serial traversal accumulates products and Hermitian dot products using long double (whose precision is reported, not assumed). Non-collinear complex vector components exercise conjugation. Manufactured coefficients separately check the assembled equation. Wrong outputs must be rejected. No timing assertion, CTest entry, storage-layout change or relaxed arithmetic is introduced.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

@@ -17,7 +17,7 @@
  * the right-hand side @f$ \mathbf{b} @f$ of a discrete finite element
  * system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
- * ## Mathematical Background
+ * # Mathematical Background
  *
  * A form @f$ L : V_h \to \mathbb{K} @f$ takes a test function @f$ v \in V_h
  * @f$ and produces a scalar. It is linear over the reals and conjugate-linear
@@ -91,7 +91,6 @@ namespace Rodin::Variational
       /// @brief Parent class providing the generic `LinearFormBase<Vec>` interface.
       using Parent = LinearFormBase<VectorType>;
 
-      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;
@@ -114,7 +113,10 @@ namespace Rodin::Variational
         createVector();
       }
 
-      /// @brief Copy constructor (deep-copies the PETSc vector).
+      /**
+       * @brief Copy constructor (deep-copies the PETSc vector).
+       * @param other Source object to copy or move from.
+       */
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
@@ -137,7 +139,10 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
       LinearForm(LinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
@@ -235,25 +240,37 @@ namespace Rodin::Variational
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
-      /// @brief Returns a mutable reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+      /**
+       * @brief Returns a mutable reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+       * @returns PETSc vector storing the assembled linear form.
+       */
       VectorType& getVector() override
       {
         return m_vector;
       }
 
-      /// @brief Returns a read-only reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+      /**
+       * @brief Returns a read-only reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+       * @returns PETSc vector storing the assembled linear form.
+       */
       const VectorType& getVector() const override
       {
         return m_vector;
       }
 
-      /// @brief Returns a reference to the associated test function.
+      /**
+       * @brief Returns a reference to the associated test function.
+       * @returns Test function used by the assembled form.
+       */
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
-      /// @brief Creates a heap-allocated copy of this linear form.
+      /**
+       * @brief Creates a heap-allocated copy of this linear form.
+       * @returns Pointer to a newly allocated copy of this object.
+       */
       LinearForm* copy() const noexcept override
       {
         return new LinearForm(*this);

@@ -6,6 +6,9 @@
 
 #include "Rodin/Heart/CCMLC2014.h"
 #include "Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h"
+#include "Rodin/Heart/CCMLC2014/Physics/Kinematics.h"
+#include "Rodin/Heart/CCMLC2014/Physics/PassiveStress.h"
+#include "Rodin/Heart/CCMLC2014/Physics/ValveLaw.h"
 
 using namespace Rodin;
 
@@ -36,7 +39,7 @@ namespace
     cardiacInput.Cd = 1.0e-8;
 
     cardiacInput.Kat = 8.0e-7;
-    cardiacInput.Kp  = 5.0e-10;
+    cardiacInput.Kp = 5.0e-10;
     cardiacInput.Kar = 1.3e-5;
 
     cardiacInput.cavityCapacity = 5.0e-12;
@@ -312,28 +315,24 @@ namespace
    * @returns Relative matrix error
    * @f$ \|J_{analytic} - J_{fd}\| / \max(\|J_{fd}\|, 10^{-14}) @f$.
    */
-  Real computeDynamicJacobianRelativeError(
-      const Model::Input& cardiacInput,
-      const Model::DenseVector& candidateState,
-      const Model::State& currentState,
-      const Model::State& previousState,
-      Real dt,
-      Real relativePerturbation)
+  Real computeDynamicJacobianRelativeError(const Model::Input& cardiacInput,
+    const Model::DenseVector& candidateState, const Model::State& currentState,
+    const Model::State& previousState, Real dt, Real relativePerturbation)
   {
     using InputType = Model::Input;
-    Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
-        dynamicSystem(cardiacInput);
+    Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType> dynamicSystem(
+      cardiacInput);
     const Real nextTime = currentState.t + dt;
 
     Model::EvalData evaluationData;
     dynamicSystem.buildEvalData(
-        candidateState, currentState, previousState, nextTime, dt, evaluationData);
+      candidateState, currentState, previousState, nextTime, dt, evaluationData);
 
     Model::DenseMatrix analyticalJacobian;
     dynamicSystem.evaluateJacobian(evaluationData, analyticalJacobian, dt);
 
     Model::DenseMatrix finiteDifferenceJacobian(
-        CCMLC2014Vars::NumberOfVariables, CCMLC2014Vars::NumberOfVariables);
+      CCMLC2014Vars::NumberOfVariables, CCMLC2014Vars::NumberOfVariables);
     finiteDifferenceJacobian.setZero();
 
     for (Index j = 0; j < CCMLC2014Vars::NumberOfVariables; ++j)
@@ -348,9 +347,9 @@ namespace
       Model::EvalData evaluationDataPlus;
       Model::EvalData evaluationDataMinus;
       dynamicSystem.buildEvalData(
-          statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
+        statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
       dynamicSystem.buildEvalData(
-          stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
+        stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
 
       Model::DenseVector residualPlus;
       Model::DenseVector residualMinus;
@@ -360,8 +359,8 @@ namespace
         (residualPlus - residualMinus) / (2.0 * perturbation);
     }
 
-    return (analyticalJacobian - finiteDifferenceJacobian).norm()
-      / std::max<Real>(finiteDifferenceJacobian.norm(), 1e-14);
+    return (analyticalJacobian - finiteDifferenceJacobian).norm() /
+      std::max<Real>(finiteDifferenceJacobian.norm(), 1e-14);
   }
 }
 
@@ -440,10 +439,10 @@ TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 
   Model model(cardiacInput);
   model.setMaxIterations(200)
-       .setAbsoluteTolerance(1e-8)
-       .setRelativeTolerance(1e-8)
-       .setStepTolerance(1e-10)
-       .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   Model::State initial;
   initial.t = 0.0;
@@ -649,8 +648,87 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 
   const Real dt = 1e-3;
   const Real relativeError = computeDynamicJacobianRelativeError(
-      cardiacInput, candidateState, currentState, previousState, dt, 1e-7);
+    cardiacInput, candidateState, currentState, previousState, dt, 1e-7);
   EXPECT_LT(relativeError, 1e-3);
+}
+
+/// @brief Recruitment segments and instantaneous relaxation satisfy independent residual and tangent formulas.
+TEST(CCMLC2014Test, RecruitmentSegmentsAndInstantaneousRelaxation)
+{
+  auto input = makeGenericCardiacInput();
+  input.alpha = 0;
+  input.alphaR = 0;
+  // Keep active residual magnitudes comparable to their strain derivatives.
+  input.k0 = 1;
+  input.sigma0 = 2;
+  input.m0 = [](Real ec) { return 1.2 + 0.25 * ec; };
+  input.dm0 = [](Real) { return 0.25; };
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, Model::Input> system(input);
+  constexpr Real dt = 1e-3;
+  constexpr Real activation = 25;
+  constexpr Real perturbation = 1e-7;
+  constexpr std::array<Real, 7> strains{-0.45, -0.05, 0.515, 0.865, 1.15, 1.85, 2.5};
+  constexpr std::array<Real, 7> recruitment{0, 0.19, 0.56, 0.87, 1, 0.5, 0};
+  constexpr std::array<Real, 7> slopes{
+    0, 0.38 / 0.7, 0.36 / 0.43, 0.26 / 0.27, 0, -1 / 1.1, 0};
+  for (size_t i = 0; i < strains.size(); ++i)
+  {
+    SCOPED_TRACE(strains[i]);
+    auto candidate = makeCandidateState();
+    auto current = makeCurrentState();
+    auto previous = makePreviousState(current);
+    candidate[CCMLC2014Vars::FiberDeformation] = strains[i];
+    current.ec = previous.ec = strains[i];
+    Model::EvalData data;
+    system.buildEvalData(candidate, current, previous, current.t + dt, dt, data);
+    Model::DenseVector residual;
+    Model::DenseMatrix jacobian;
+    system.evaluateResidual(data, residual);
+    system.evaluateJacobian(data, jacobian, dt);
+    const Real kc = candidate[CCMLC2014Vars::ActiveStiffness];
+    const Real tauc = candidate[CCMLC2014Vars::ActiveStress];
+    const Real kcDot = (1.5 * kc - 2 * current.kc + 0.5 * previous.kc) / dt;
+    const Real taucDot = (1.5 * tauc - 2 * current.tauc + 0.5 * previous.tauc) / dt;
+    EXPECT_NEAR(residual[CCMLC2014Vars::ActiveStiffness],
+      kcDot + activation * kc - recruitment[i] * input.k0 * activation, 1e-8);
+    EXPECT_NEAR(residual[CCMLC2014Vars::ActiveStress],
+      taucDot + activation * tauc - recruitment[i] * input.sigma0 * activation, 1e-8);
+    EXPECT_NEAR(residual[CCMLC2014Vars::LoadDependentRelaxation],
+      candidate[CCMLC2014Vars::LoadDependentRelaxation] - (1.2 + 0.25 * strains[i]),
+      1e-14);
+    for (const Index column :
+      {CCMLC2014Vars::FiberDeformation, CCMLC2014Vars::LoadDependentRelaxation})
+    {
+      auto plus = candidate;
+      auto minus = candidate;
+      plus[column] += perturbation;
+      minus[column] -= perturbation;
+      Model::EvalData dataPlus, dataMinus;
+      Model::DenseVector residualPlus, residualMinus;
+      system.buildEvalData(plus, current, previous, current.t + dt, dt, dataPlus);
+      system.buildEvalData(minus, current, previous, current.t + dt, dt, dataMinus);
+      system.evaluateResidual(dataPlus, residualPlus);
+      system.evaluateResidual(dataMinus, residualMinus);
+      for (const Index row : {CCMLC2014Vars::ActiveStiffness, CCMLC2014Vars::ActiveStress,
+             CCMLC2014Vars::LoadDependentRelaxation})
+      {
+        const Real derivative =
+          (residualPlus[row] - residualMinus[row]) / (2 * perturbation);
+        EXPECT_NEAR(jacobian(row, column), derivative,
+          1e-6 * std::max<Real>(1, std::abs(derivative)));
+      }
+    }
+    EXPECT_NEAR(jacobian(CCMLC2014Vars::ActiveStiffness, CCMLC2014Vars::FiberDeformation),
+      -slopes[i] * input.k0 * activation, 1e-8);
+    EXPECT_NEAR(jacobian(CCMLC2014Vars::ActiveStress, CCMLC2014Vars::FiberDeformation),
+      -slopes[i] * input.sigma0 * activation - kc * 1.5 / dt, 1e-8);
+    EXPECT_EQ(
+      jacobian(CCMLC2014Vars::LoadDependentRelaxation, CCMLC2014Vars::FiberDeformation),
+      -0.25);
+    EXPECT_EQ(jacobian(CCMLC2014Vars::LoadDependentRelaxation,
+                CCMLC2014Vars::LoadDependentRelaxation),
+      1);
+  }
 }
 
 /// @brief Verifies windkessel residual and jacobian use branch flows and BDF 2 for CCMLC 2014 test by checking tolerance-based numerical results.
@@ -768,13 +846,8 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossPerturbationScal
   const std::array<Real, 3> perturbations{{1e-6, 1e-7, 1e-8}};
   for (const Real relativePerturbation : perturbations)
   {
-    const Real relativeError = computeDynamicJacobianRelativeError(
-        cardiacInput,
-        candidateState,
-        currentState,
-        previousState,
-        dt,
-        relativePerturbation);
+    const Real relativeError = computeDynamicJacobianRelativeError(cardiacInput,
+      candidateState, currentState, previousState, dt, relativePerturbation);
     EXPECT_LT(relativeError, 2e-3);
   }
 }
@@ -792,12 +865,251 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossDataScales)
     Model::State previousState = makePreviousState(currentState, pressureScale);
 
     const Real relativeError = computeDynamicJacobianRelativeError(
-        cardiacInput,
-        candidateState,
-        currentState,
-        previousState,
-        1e-3,
-        1e-7);
+      cardiacInput, candidateState, currentState, previousState, 1e-3, 1e-7);
     EXPECT_LT(relativeError, 3e-3);
+  }
+}
+
+namespace
+{
+  template <class Rheology>
+  void checkBranchFlowDerivative(const Model::Input& input, Real dp)
+  {
+    constexpr Real length = 0.1;
+    constexpr Real radius = 0.004;
+    constexpr Real resistance = 1e8;
+    constexpr Real relativeStep = 1e-5;
+    constexpr Real relativeTolerance = 1e-5;
+    const auto [flow, derivative] =
+      Rheology::flowLaw(dp, length, radius, resistance, input);
+    const auto [reverseFlow, reverseDerivative] =
+      Rheology::flowLaw(-dp, length, radius, resistance, input);
+    ASSERT_GT(flow, 0);
+    ASSERT_GT(derivative, 0);
+    EXPECT_DOUBLE_EQ(reverseFlow, -flow);
+    EXPECT_DOUBLE_EQ(reverseDerivative, derivative);
+    const Real step = relativeStep * dp;
+    const Real finiteDifference =
+      (Rheology::flowLaw(dp + step, length, radius, resistance, input).first -
+        Rheology::flowLaw(dp - step, length, radius, resistance, input).first) /
+      (2 * step);
+    EXPECT_NEAR(derivative / finiteDifference, 1, relativeTolerance);
+    for (const auto& [invalidLength, invalidRadius] :
+      {std::pair<Real, Real>{0, radius}, {length, 0}, {-length, radius}})
+    {
+      const auto fallback =
+        Rheology::flowLaw(dp, invalidLength, invalidRadius, resistance, input);
+      EXPECT_DOUBLE_EQ(fallback.first, dp / resistance);
+      EXPECT_DOUBLE_EQ(fallback.second, 1 / resistance);
+    }
+  }
+}
+
+/// @brief Checks power-law flow against Poiseuille's law and a nonlinear derivative.
+TEST(CCMLC2014Test, PowerLawBranchFlowAndNewtonianLimit)
+{
+  using Law = Heart::CCMLC2014::Physics::Rheology::PowerLaw;
+  Model::Input input;
+  input.m = 0.004;
+  input.n = 1;
+  constexpr Real length = 0.1;
+  constexpr Real radius = 0.004;
+  constexpr Real pressure = 1000;
+  constexpr Real fallbackResistance = 1e8;
+  const Real conductance =
+    std::numbers::pi_v<Real> * std::pow(radius, 4) / (8 * input.m * length);
+  const auto result = Law::flowLaw(pressure, length, radius, fallbackResistance, input);
+  EXPECT_NEAR(result.first / (conductance * pressure), 1, 1e-12);
+  EXPECT_NEAR(result.second / conductance, 1, 1e-12);
+  input.n = 0.75;
+  checkBranchFlowDerivative<Law>(input, pressure);
+  const auto zero = Law::flowLaw(0, length, radius, fallbackResistance, input);
+  EXPECT_EQ(zero.first, 0);
+  EXPECT_EQ(zero.second, 1 / fallbackResistance);
+}
+
+/// @brief Checks Cross flow symmetry, derivative and its constant-viscosity limit.
+TEST(CCMLC2014Test, CrossBranchFlowAndNewtonianLimit)
+{
+  using Law = Heart::CCMLC2014::Physics::Rheology::Cross;
+  Model::Input input;
+  input.mu_0 = 0.02;
+  input.mu_Inf = 0.004;
+  input.lambda = 1;
+  input.n = 0.6;
+  checkBranchFlowDerivative<Law>(input, 1000);
+  input.mu_0 = input.mu_Inf;
+  constexpr Real length = 0.1;
+  constexpr Real radius = 0.004;
+  const Real conductance =
+    std::numbers::pi_v<Real> * std::pow(radius, 4) / (8 * input.mu_0 * length);
+  const auto result = Law::flowLaw(1000, length, radius, 1e8, input);
+  EXPECT_NEAR(result.first / (1000 * conductance), 1, 1e-7);
+  EXPECT_NEAR(result.second / conductance, 1, 1e-7);
+  const auto zero = Law::flowLaw(0, length, radius, 1e8, input);
+  EXPECT_EQ(zero.first, 0);
+  EXPECT_NEAR(zero.second / conductance, 1, 1e-12);
+}
+
+/// @brief Checks both Quemada pressure regimes and the near-zero linear fallback.
+TEST(CCMLC2014Test, QuemadaBranchFlowDerivativeAcrossPressureRegimes)
+{
+  using Law = Heart::CCMLC2014::Physics::Rheology::Quemada;
+  Model::Input input;
+  input.k_0 = 3.5;
+  input.k_Inf = 2;
+  input.phi_quemada = 0.45;
+  input.gamma_c = 10;
+  input.mu_plasma = 0.0012;
+  input.mu_Inf = 0.004;
+  checkBranchFlowDerivative<Law>(input, 0.1);
+  checkBranchFlowDerivative<Law>(input, 1000);
+  const auto zero = Law::flowLaw(0, 0.1, 0.004, 1e8, input);
+  EXPECT_EQ(zero.first, 0);
+  EXPECT_EQ(zero.second, 1e-8);
+}
+
+namespace
+{
+  /// @brief Minimal evaluation record consumed by the standalone physics evaluators.
+  struct PhysicsEvaluation
+  {
+    Real y, yPrev, yMid, pv, pvPrev, pvMid, par, parPrev, parMid, pd, pdPrev, pdMid;
+    Real dt, vel, sqrtC, C, strain1D, diffGreen;
+    Real stressPassive, diffStressPassive, stressViscous, diffStressViscous;
+    Real pAtCur, pAtPrev, cavityFluxCur, cavityFluxPrev;
+    Real dCavityFluxCur_dPv, dCavityFluxCur_dPar;
+  };
+}
+
+/// @brief Midpoint kinematics satisfy displacement, pressure and strain identities.
+TEST(CCMLC2014Test, StandaloneMidpointKinematics)
+{
+  auto input = makeGenericCardiacInput();
+  input.R0 = 2;
+  PhysicsEvaluation data{};
+  data.y = 0.4;
+  data.yPrev = 0.1;
+  data.pv = 6;
+  data.pvPrev = 2;
+  data.par = 8;
+  data.parPrev = 4;
+  data.pd = 10;
+  data.pdPrev = 2;
+  data.dt = 0.3;
+  Heart::CCMLC2014::Physics::MidpointKinematics model(input);
+  model.evaluate(data);
+  EXPECT_DOUBLE_EQ(data.yMid, 0.25);
+  EXPECT_DOUBLE_EQ(data.pvMid, 4);
+  EXPECT_DOUBLE_EQ(data.parMid, 6);
+  EXPECT_DOUBLE_EQ(data.pdMid, 6);
+  EXPECT_NEAR(data.vel, 1, 1e-14);
+  EXPECT_DOUBLE_EQ(data.sqrtC, 1.125);
+  EXPECT_DOUBLE_EQ(data.C, 1.265625);
+  EXPECT_DOUBLE_EQ(data.strain1D, 0.1328125);
+  EXPECT_DOUBLE_EQ(data.diffGreen, 0.5625);
+}
+
+/// @brief Passive stress's stored tangent differentiates with respect to the new displacement.
+TEST(CCMLC2014Test, StandalonePassiveStressChainRule)
+{
+  auto input = makeGenericCardiacInput();
+  input.R0 = 2;
+  PhysicsEvaluation data{};
+  data.y = 0.4;
+  data.yPrev = 0.1;
+  data.dt = 0.3;
+  Heart::CCMLC2014::Physics::MidpointKinematics kinematics(input);
+  Heart::CCMLC2014::Physics::PassiveStressEvaluator<PassiveLaw, Model::Input> stress(
+    input);
+  auto evaluate = [&](PhysicsEvaluation& state) {
+    kinematics.evaluate(state);
+    stress.evaluate(state);
+  };
+  evaluate(data);
+  constexpr Real Step = 1e-6;
+  auto plus = data, minus = data;
+  plus.y += Step;
+  minus.y -= Step;
+  evaluate(plus);
+  evaluate(minus);
+  const Real derivative = (plus.stressPassive - minus.stressPassive) / (2 * Step);
+  EXPECT_GT(std::abs(data.stressPassive), 1);
+  EXPECT_GT(std::abs(derivative), 1);
+  EXPECT_NEAR(data.diffStressPassive / derivative, 1, 1e-7);
+}
+
+/// @brief Viscous stress and its midpoint derivative agree with an independent scalar law.
+TEST(CCMLC2014Test, StandaloneViscousStressMidpointDerivative)
+{
+  auto input = makeGenericCardiacInput();
+  input.R0 = 2;
+  input.eta = 0.7;
+  PhysicsEvaluation data{};
+  data.y = 0.4;
+  data.yPrev = 0.1;
+  data.dt = 0.3;
+  Heart::CCMLC2014::Physics::MidpointKinematics kinematics(input);
+  Heart::CCMLC2014::Physics::ViscousStressEvaluator stress(input);
+  kinematics.evaluate(data);
+  stress.evaluate(data);
+  const Real stretch = 1.125;
+  const Real exact = 2 * input.eta / input.R0 * (stretch + 2 * std::pow(stretch, -11));
+  EXPECT_NEAR(data.stressViscous, exact, 1e-12);
+  constexpr Real Step = 1e-6;
+  auto value = [&](Real midpoint) {
+    const Real s = 1 + midpoint / input.R0;
+    const Real velocity = 2 * (midpoint - data.yPrev) / data.dt;
+    return 2 * input.eta / input.R0 * (s + 2 * std::pow(s, -11)) * velocity;
+  };
+  const Real derivative =
+    (value(data.yMid + Step) - value(data.yMid - Step)) / (2 * Step);
+  EXPECT_NEAR(data.diffStressViscous, derivative, 1e-8);
+}
+
+/// @brief Current and previous valve branches are independent and retain exact pressure slopes.
+TEST(CCMLC2014Test, StandaloneValveBranchTransitions)
+{
+  auto input = makeGenericCardiacInput();
+  input.Kat = 3;
+  input.Kp = 0.2;
+  input.Kar = 1.7;
+  Heart::CCMLC2014::Physics::CavityFluxEvaluator model(input);
+  constexpr std::array<Real, 5> Pressure{1, 2, 3, 5, 6};
+  constexpr std::array<Real, 5> Flux{-3, 0, 0.2, 0.6, 2.3};
+  constexpr std::array<Real, 5> VentricularSlope{3, 3, 0.2, 0.2, 1.7};
+  constexpr std::array<Real, 5> ArterialSlope{0, 0, 0, 0, -1.5};
+  for (size_t current = 0; current < Pressure.size(); ++current)
+  {
+    for (size_t previous = 0; previous < Pressure.size(); ++previous)
+    {
+      PhysicsEvaluation data{};
+      data.pAtCur = data.pAtPrev = 2;
+      data.par = data.parPrev = 5;
+      data.pv = Pressure[current];
+      data.pvPrev = Pressure[previous];
+      model.evaluate(data);
+      EXPECT_NEAR(data.cavityFluxCur, Flux[current], 1e-14);
+      EXPECT_NEAR(data.cavityFluxPrev, Flux[previous], 1e-14);
+      EXPECT_DOUBLE_EQ(data.dCavityFluxCur_dPv, VentricularSlope[current]);
+      EXPECT_DOUBLE_EQ(data.dCavityFluxCur_dPar, ArterialSlope[current]);
+      if (current == 1 || current == 3)
+        continue;
+      constexpr Real Step = 1e-5;
+      auto plus = data, minus = data;
+      plus.pv += Step;
+      minus.pv -= Step;
+      model.evaluate(plus);
+      model.evaluate(minus);
+      EXPECT_NEAR((plus.cavityFluxCur - minus.cavityFluxCur) / (2 * Step),
+        data.dCavityFluxCur_dPv, 1e-9);
+      plus = minus = data;
+      plus.par += Step;
+      minus.par -= Step;
+      model.evaluate(plus);
+      model.evaluate(minus);
+      EXPECT_NEAR((plus.cavityFluxCur - minus.cavityFluxCur) / (2 * Step),
+        data.dCavityFluxCur_dPar, 1e-9);
+    }
   }
 }

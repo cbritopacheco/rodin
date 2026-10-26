@@ -7,6 +7,12 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Math/Unit.h"
+#include "Rodin/Math/Deg.h"
+
+#include <limits>
+#include <numbers>
+#include <type_traits>
+#include <vector>
 #include "Rodin/Types.h"
 
 using namespace Rodin;
@@ -196,7 +202,7 @@ TEST_F(UnitTest, TypeConversion)
 TEST_F(UnitTest, DifferentTypes)
 {
   // Test with integer type
-  class IntUnit : public Unit<IntUnit, int> 
+  class IntUnit : public Unit<IntUnit, int>
   {
     public:
       using Parent = Unit<IntUnit, int>;
@@ -242,7 +248,8 @@ TEST_F(UnitTest, EdgeCases)
   TestUnit zero(0.0);
   // Note: Division by zero is undefined behavior, but the operation should compile
   auto result = u1 / zero;
-  EXPECT_TRUE(std::isinf(static_cast<Real>(result)) || std::isnan(static_cast<Real>(result)));
+  EXPECT_TRUE(
+    std::isinf(static_cast<Real>(result)) || std::isnan(static_cast<Real>(result)));
 
   // Test with very small values
   TestUnit small1(1e-10);
@@ -253,4 +260,104 @@ TEST_F(UnitTest, EdgeCases)
   TestUnit large1(1e10);
   TestUnit large2(1e10);
   EXPECT_TRUE(large1 == large2);
+}
+
+/// @brief Concrete unit types exercise the CRTP result contract beyond base arithmetic.
+template <class T>
+class ConcreteUnitTest : public ::testing::Test
+{};
+
+/// @brief Instantiates the complete arithmetic surface for non-Real scalar storage.
+template <class T>
+class ScalarUnit : public Unit<ScalarUnit<T>, T>
+{
+  public:
+    using Parent = Unit<ScalarUnit<T>, T>;
+    using Parent::Parent;
+};
+using ConcreteUnits =
+  ::testing::Types<TestUnit, Rad, Deg, ScalarUnit<Float>, ScalarUnit<Integer>>;
+TYPED_TEST_SUITE(ConcreteUnitTest, ConcreteUnits);
+
+/// @brief Binary and unary arithmetic preserve the concrete unit type and value.
+TYPED_TEST(ConcreteUnitTest, ArithmeticRetainsConcreteUnit)
+{
+  const TypeParam a(12), b(3);
+  const auto check = [](const auto& result, Real expected) {
+    using Result = std::decay_t<decltype(result)>;
+    EXPECT_TRUE((std::is_same_v<Result, TypeParam>));
+    EXPECT_EQ(static_cast<typename TypeParam::Type>(result), expected);
+  };
+  check(a + b, 15);
+  check(a - b, 9);
+  check(a * b, 36);
+  check(a / b, 4);
+  check(+a, 12);
+  check(-a, -12);
+}
+
+/// @brief Compound operations return the original concrete object for chaining.
+TYPED_TEST(ConcreteUnitTest, CompoundOperationsRetainReferenceType)
+{
+  TypeParam a(12);
+  const TypeParam b(3);
+  const auto check = [&](auto&& result, Real expected) {
+    EXPECT_TRUE((std::is_same_v<decltype(result), TypeParam&>));
+    EXPECT_EQ(&result, &a);
+    EXPECT_EQ(static_cast<typename TypeParam::Type>(a), expected);
+  };
+  check(a += b, 15);
+  check(a -= b, 12);
+  check(a *= b, 36);
+  check(a /= b, 12);
+  check((a += b) -= b, 12);
+}
+
+/// @brief Finite degree conversion agrees with an independently ordered radian oracle.
+TEST_F(UnitTest, DegreeConversionPreservesFiniteScale)
+{
+  constexpr Real RoundingAllowance = 4 * std::numeric_limits<Real>::epsilon();
+  for (const Real degrees :
+    {Real(0), Real(90), Real(-90), Real(180), Real(360), Real(0.5), Real(-0.5),
+      std::numeric_limits<Real>::max() / 2, -std::numeric_limits<Real>::max() / 2,
+      std::numeric_limits<Real>::min() * 180, -std::numeric_limits<Real>::min() * 180})
+  {
+    SCOPED_TRACE(degrees);
+    const Real expected = static_cast<Real>(
+      (static_cast<long double>(degrees) / 180) * std::numbers::pi_v<long double>);
+    const Real actual = static_cast<Real>(Deg(degrees).toRad());
+    ASSERT_TRUE(std::isfinite(actual));
+    EXPECT_NEAR(actual, expected,
+      RoundingAllowance * std::abs(expected) + std::numeric_limits<Real>::denorm_min());
+  }
+}
+
+/// @brief Every unit comparison agrees with its scalar, including unordered floating values.
+TYPED_TEST(ConcreteUnitTest, ComparisonsMatchStoredScalar)
+{
+  using Scalar = typename TypeParam::Type;
+  std::vector<Scalar> values{std::numeric_limits<Scalar>::lowest(), Scalar(-1), Scalar(0),
+    Scalar(1), std::numeric_limits<Scalar>::max()};
+  if constexpr (std::is_floating_point_v<Scalar>)
+  {
+    const Scalar infinity = std::numeric_limits<Scalar>::infinity();
+    values.insert(values.end(),
+      {-infinity, infinity, -Scalar(0), -std::numeric_limits<Scalar>::denorm_min(),
+        std::numeric_limits<Scalar>::denorm_min(), std::nextafter(Scalar(1), Scalar(0)),
+        std::nextafter(Scalar(1), infinity), std::numeric_limits<Scalar>::quiet_NaN()});
+  }
+  for (const Scalar left : values)
+  {
+    for (const Scalar right : values)
+    {
+      SCOPED_TRACE(::testing::Message() << left << ", " << right);
+      const TypeParam a(left), b(right);
+      EXPECT_EQ(a == b, left == right);
+      EXPECT_EQ(a != b, left != right);
+      EXPECT_EQ(a < b, left < right);
+      EXPECT_EQ(a > b, left > right);
+      EXPECT_EQ(a <= b, left <= right);
+      EXPECT_EQ(a >= b, left >= right);
+    }
+  }
 }

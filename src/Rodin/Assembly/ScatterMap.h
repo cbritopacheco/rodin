@@ -131,7 +131,7 @@ namespace Rodin::Assembly
             for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
             {
               for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
-                values[m_indices[k++]] += Math::conj(local(r, c));
+                values[m_indices[k++]] += local(r, c);
             }
           }
           if (!stale && fingerprint == m_fingerprint)
@@ -223,7 +223,7 @@ namespace Rodin::Assembly
               {
                 for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
-                  const ScalarType s = Math::conj(local(r, c));
+                  const ScalarType s = local(r, c);
                   add(values[m_indices[k++]], s);
                 }
               }
@@ -275,6 +275,8 @@ namespace Rodin::Assembly
 #ifdef RODIN_USE_OPENMP
       /**
        * @brief Atomically accumulates @p s into @p value.
+       * @param[in,out] value Destination entry updated atomically.
+       * @param[in] s Contribution added to the destination.
        *
        * Only the OpenMP scatter needs this, and the @c omp @c atomic
        * directives are not valid outside an OpenMP build.
@@ -331,6 +333,8 @@ namespace Rodin::Assembly
       template <class TrialFES, class TestFES>
       static size_t getCapacity(const TrialFES& trialFES, const TestFES& testFES)
       {
+        if (trialFES.getSize() == 0 || testFES.getSize() == 0)
+          return 0;
         return testFES.getSize() * std::log(trialFES.getSize());
       }
 
@@ -354,7 +358,7 @@ namespace Rodin::Assembly
         for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
         {
           for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
-            triplets.emplace_back(rows(r), cols(c), Math::conj(local(r, c)));
+            triplets.emplace_back(rows(r), cols(c), local(r, c));
         }
         return hashCell(d, i, rows, cols);
       }

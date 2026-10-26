@@ -67,7 +67,7 @@ namespace Rodin::Variational
    *
    * @tparam Vector Vector type for the discrete representation
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A real linear form @f$ l(v) @f$ satisfies:
    * - **Linearity**: @f$ l(\alpha v_1 + \beta v_2) = \alpha l(v_1) + \beta l(v_2) @f$
    * - **Boundedness**: @f$ |l(v)| \leq C \|v\|_V @f$ for some constant @f$ C @f$
@@ -75,11 +75,11 @@ namespace Rodin::Variational
    * For complex scalars, the first identity instead carries conjugated
    * coefficients.
    *
-   * ## Discrete Representation
+   * # Discrete Representation
    * The discrete vector representation satisfies @f$ b_i = l(\psi_i) @f$ where
    * @f$ \psi_i @f$ are test basis functions.
    *
-   * ## Common Examples
+   * # Common Examples
    * - **Load vector**: @f$ l(v) = \int_\Omega f \cdot v \, dx @f$
    * - **Neumann boundary**: @f$ l(v) = \int_{\partial\Omega} g \cdot v \, ds @f$
    * - **Point sources**: @f$ l(v) = \sum_k f_k v(x_k) @f$
@@ -143,7 +143,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(other);
           m_lfis = other.m_lfis;
         }
         return *this;
@@ -158,7 +157,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(std::move(other));
           m_lfis = std::move(other.m_lfis);
         }
         return *this;
@@ -451,7 +449,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType operator()(const GridFunction<FES, Data>& u) const
       {
-        return u.getData().dot(this->getVector());
+        return Math::dot(this->getVector(), u.getData());
       }
 
       void assemble() override

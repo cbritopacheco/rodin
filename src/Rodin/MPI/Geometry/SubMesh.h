@@ -220,6 +220,8 @@ namespace Rodin::Geometry
        * @brief Gets the polytope index mapping for a dimension.
        * @param[in] d Topological dimension.
        * @returns Bidirectional mapping between submesh-local and parent-local indices.
+       * @throws Alert::Exception If no rank-local map slot exists for @p d.
+       * @note This query and its error handling are non-collective.
        *
        * The mapping allows efficient queries:
        * - `left[i]`: parent shard-local index for submesh shard-local index i
@@ -227,7 +229,13 @@ namespace Rodin::Geometry
        */
       const PolytopeMap& getPolytopeMap(size_t d) const override
       {
-        return m_s2ps.at(d);
+        if (d >= m_s2ps.size())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Polytope map dimension " << d << " is outside map count " << m_s2ps.size()
+            << '.' << Alert::Raise;
+        }
+        return m_s2ps[d];
       }
 
       /**
@@ -259,7 +267,7 @@ namespace Rodin::Geometry
 
     private:
       std::reference_wrapper<const Mesh<Context::MPI>>
-        m_parent;  ///< Parent mesh reference
+        m_parent; ///< Parent mesh reference
       std::vector<PolytopeMap> m_s2ps; ///< Submesh-to-parent index maps
       Deque<Ancestor> m_ancestors; ///< Ancestor mesh chain
   };

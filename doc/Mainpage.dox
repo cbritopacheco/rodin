@@ -8,19 +8,34 @@
   for solving partial differential equations (PDEs) and performing shape and
   topology optimization.
 
+  @m_class{rodin-logo-dark}
+
   @image html Images/Logo_Inverse.png width=210px
+
+  @m_class{rodin-logo-light}
+
+  @image html Images/Logo.png width=210px
 
   It is named after the French sculptor [Auguste
   Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
   of modern sculpture.
 
+  @m_class{m-block m-success m-badge}
+
+  @parblock
+  <img src="Images/Maintainer.png" alt="Carlos Brito-Pacheco's GitHub profile picture" />
+  <h2>Active development</h2>
+
+  The library is in active development and primarily maintained by
+  [Carlos Brito-Pacheco](https://cbritopacheco.github.io/), who is actively looking for
+  co-maintainers.
+  @endparblock
+
   @section poisson-example-mainpage A simple example
 
-  Rodin provides a compositional form language that lets
+  The library provides a compositional form language that lets
   you express variational problems in C++ code that closely mirrors the
-  mathematical notation.
-
-  For example, the Poisson problem with homogeneous Dirichlet boundary
+  mathematical notation. For example, the Poisson problem with homogeneous Dirichlet boundary
   conditions, in strong form, for a domain @f$\Omega@f$ with boundary
   @f$\partial\Omega@f$ is
 
@@ -46,9 +61,9 @@
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
   mesh.getConnectivity().compute(1, 2);
 
-  P1 Vh(mesh);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
+  P1 vh(mesh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
   Problem problem(u, v);
   problem = Integral(Grad(u), Grad(v))
@@ -60,33 +75,21 @@
 
   @section rodin-architecture Architecture
 
-  Rodin is organized as a set of orthogonal modules that remain composable:
+  The core modules form the central stack. Models build on these interfaces
+  to the left; third-party integrations and dependencies sit to the right.
+  Shared services support the library across these layers.
 
-  | Module | Responsibility |
-  |--------|----------------|
-  | @ref Rodin::Geometry "Geometry" | Meshes, polytopes, connectivity, geometric transformations |
-  | @ref Rodin::Variational "Variational" | Finite element spaces (P0, P1, H1), trial/test functions, forms, and problem composition |
-  | @ref Rodin::Assembly "Assembly" | Low-level assembly of stiffness matrices and load vectors |
-  | @ref Rodin::Solver "Solver" | Direct solvers (SparseLU, UMFPack) and iterative solvers (CG, GMRES) |
-  | @ref Rodin::QF "QF" | Published and arbitrary-order quadrature formulas on reference polytopes |
-  | @ref Rodin::IO "IO" | I/O in MFEM, MEDIT, HDF5, and XDMF (ParaView) formats |
-  | @ref Rodin::FormLanguage "FormLanguage" | Expression template infrastructure for the variational form language |
-  | @ref Rodin::Math "Math" | Mathematical constants, dense vector/matrix types, common functions |
-
-  Optional extension modules add capabilities without replacing core
-  functionality:
-
-  | Extension | Purpose |
-  |-----------|---------|
-  | @ref Rodin::MMG "MMG" | Mesh adaptation and optimization via the Mmg Platform |
-  | @ref Rodin::PETSc "PETSc" | Distributed solvers (KSP, SNES) and PETSc-backed variational forms for large-scale problems |
-  | @ref Rodin::MPI "MPI" | Distributed mesh partitioning, sharding, and parallel assembly via Boost.MPI |
-  | @ref Rodin::Solid "Solid" | Hyperelastic solid mechanics: NeoHookean, SaintVenantKirchhoff, MooneyRivlin constitutive laws |
-  | @ref Rodin::Advection "Advection" | Semi-Lagrangian transport via characteristic tracing |
-  | @ref Rodin::Eikonal "Eikonal" | Fast Marching Method for the Eikonal equation @f$ \lvert \nabla u \rvert = F @f$ |
-  | @ref Rodin::Distance "Distance" | Distance function computation (Eikonal, Poisson, level-set normalization) |
+  @image html Images/Architecture.svg width=100%
 
   @section download-and-build Download and build
+
+  See the @ref guides-getting-started-installation "Installation guide" for
+  detailed instructions, dependency lists, and platform-specific notes.
+
+  @m_class{m-block m-success}
+
+  @parblock
+  <h2>Bash installation</h2>
 
   @code{.bash}
   git clone --recursive https://github.com/cbritopacheco/rodin
@@ -97,56 +100,127 @@
   cmake .. -DCMAKE_BUILD_TYPE=Release
   make -j4
   @endcode
+  @endparblock
+
+  @m_class{m-block m-info}
+
+  @parblock
+  <h2>Git LFS</h2>
 
   If you only need the library and headers, configure with
   `-DRODIN_INSTALL_RESOURCES=OFF` and skip hydrating the Git LFS resources.
-
-  See the @ref guides-getting-started-installation "Installation guide" for
-  detailed instructions, dependency lists, and platform-specific notes.
+  @endparblock
 
   @section where-to-start Where to start?
 
-  - **New users**: Start with the @ref guides-getting-started-installation
-    "Installation guide" and the @ref guides-getting-started-first-steps
-    "First Steps" tutorial
-  - **Learn the concepts**: Read about @ref fem-ciarlet
-    "finite elements", @ref fem-spaces "finite element spaces", and
-    @ref guides-variational "variational formulations"
-  - **See examples**: Browse the @ref examples-index "examples and tutorials"
-    including the @ref examples-pdes-poisson "Poisson equation" and
-    @ref examples-pdes-elasticity "linear elasticity"
-  - **Visual showcase**: Visit the @ref gallery "Gallery" for images and
-    descriptions of simulations built with Rodin
-  - **I/O and visualization**: Learn how to export results using
-    @ref guides-io "XDMF for ParaView visualization"
-  - **Parallel computing**: See @ref guides-mpi "MPI distributed computing"
-    and @ref guides-petsc "PETSc solvers" for large-scale problems
-  - **Notation reference**: Consult the @ref notation-index "Notation" page
-    for the mathematical symbols used throughout the documentation
+  <strong>New to Rodin? Start by solving a complete problem.</strong> Follow the
+  steps below to install the library, build a first program, solve the Poisson
+  equation, and visualize the result.
+
+  @m_class{m-block m-default}
+
+  @parblock
+  <h2>1. Install Rodin</h2>
+
+  Set up the dependencies and build the library using the
+  @ref guides-getting-started-installation "Installation guide".
+  @endparblock
+
+  @m_class{m-block m-default}
+
+  @parblock
+  <h2>2. Build your first program</h2>
+
+  Follow @ref guides-getting-started-first-steps "First Steps" to learn how
+  meshes, finite element spaces, trial and test functions, and solvers fit together.
+  @endparblock
+
+  @m_class{m-block m-default}
+
+  @parblock
+  <h2>3. Solve and visualize a problem</h2>
+
+  Work through @ref guides-getting-started-first-problem "Your First Problem"
+  to solve the Poisson equation, then use the
+  @ref guides-io "I/O and visualization guide" to export the solution for
+  inspection in ParaView.
+  @endparblock
+
+  For examples of results produced with Rodin, visit the @ref gallery "Gallery".
 
   @section rodin-philosophy Philosophy behind Rodin
 
-  From its inception, Rodin was built with a ["batteries included, but screws
-  not glued in"](http://blog.mosra.cz/) philosophy. The design principles are:
+  The architecture follows [mosra](https://mosra.cz/)'s
+  ["batteries included, but screws not glued in"](https://magnum.graphics/)
+  philosophy from the Magnum Engine project. For Rodin it means meshes, finite
+  element spaces, forms, assembly, and solvers work together, while their
+  interfaces remain accessible for extensions. A custom solver, constitutive
+  law, or integrator can reuse the surrounding components.
 
-  - **Compositional**: Users build problems explicitly by composing trial/test
-    functions, integrals, boundary conditions, and solvers. Nothing is hidden
-    behind opaque orchestration objects.
-  - **Mathematically transparent**: The C++ form language mirrors the
-    mathematical notation. `Integral(Grad(u), Grad(v))` corresponds directly
-    to @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$.
-  - **Modular**: Each module (Geometry, Variational, Solver, etc.) has a
-    well-defined responsibility. New functionality extends existing
-    abstractions rather than duplicating them.
-  - **Readable**: Code should be well documented and stick very close to the
-    mathematical notation it represents.
+  The form language keeps the mathematics visible in C++. For real-valued
+  scalar fields @f$u@f$, @f$v@f$, and @f$f@f$ on @f$\Omega@f$,
+  @f[
+    \begin{aligned}
+      \texttt{Integral(Grad(u), Grad(v))}
+        &\quad\longleftrightarrow\quad
+        \int_\Omega \nabla u \cdot \nabla v \, dx, \\
+      \texttt{Integral(f, v)}
+        &\quad\longleftrightarrow\quad
+        \int_\Omega f v \, dx.
+    \end{aligned}
+  @f]
+  Spaces, integrals, and boundary conditions are composed explicitly; assembly
+  and the chosen solver realize the discrete problem. Module boundaries follow
+  these responsibilities, allowing new models to reuse existing geometry,
+  evaluation, and algebra.
 
-  @section development-status Development Status
+  @section who-can-use-it Who can use it?
 
-  The library is currently in very active development! Some interfaces are
-  likely to change. However, a lot of the functionality is already implemented
-  with various extension points. Contributors are always welcome! Currently it
-  is maintained (and primarily used) by [Carlos
-  Brito-Pacheco](https://github.com/cbritopacheco).
+  <strong>Anyone.</strong> Rodin is distributed under the
+  [Boost Software License 1.0](https://github.com/cbritopacheco/rodin/blob/master/LICENSE),
+  a permissive <strong>open-source</strong> license that allows its
+  <strong>use, modification, and redistribution in academic, industrial,
+  commercial, and proprietary projects</strong>.
+  The aim is to make Rodin useful for research and general-purpose finite
+  element applications with as few restrictions as possible.
+
+  @m_class{m-block m-success m-badge rodin-license-badge}
+
+  @parblock
+  <img src="Images/Boost.svg" alt="Boost logo" />
+
+  <strong>Software that uses or links against Rodin can retain its own license,
+  including a proprietary one.</strong> The
+  [Boost Software License](https://www.boost.org/doc/user-guide/bsl.html) is not copyleft:
+  it does not require the source code of that software to be released or its
+  license to be changed. When redistributing Rodin source code or modified
+  portions of it, retain the original copyright notices and the complete
+  license statement. This obligation applies to the redistributed Rodin code.
+  @endparblock
+
+  @subsection rodin-acknowledgement Acknowledgement
+
+  Acknowledgement is appreciated, but is not a licensing requirement.
+
+  @m_class{m-block m-info}
+
+  @parblock
+  If Rodin contributes to research, software, or other work, consider mentioning its use
+  and linking to the [project repository](https://github.com/cbritopacheco/rodin).
+  For academic work, a software citation is also welcome. These acknowledgements
+  make Rodin's use visible and support its continued development.
+
+  @code{.bib}
+  @misc{BritoPacheco2024Rodin,
+    author       = {Brito-Pacheco, Carlos},
+    title        = {{Rodin}: A modern C++ finite element framework for shape and topology optimization},
+    year         = {2024},
+    howpublished = {Computer software},
+    version      = {0.0.1},
+    url          = {https://github.com/cbritopacheco/rodin},
+    note         = {Open-source finite element framework}
+  }
+  @endcode
+  @endparblock
 
   */

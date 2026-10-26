@@ -17,7 +17,7 @@
  * the @c FieldSplits inner
  * class for block-preconditioner support.
  *
- * ## Usage
+ * # Usage
  *
  * This class is normally not instantiated directly; instead it is created
  * internally by @ref Rodin::Variational::Problem specializations.  Solvers
@@ -34,6 +34,7 @@
 #include <petscmat.h>
 #include <petscvec.h>
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/PETSc/Math/Matrix.h"
 #include "Rodin/PETSc/Math/Vector.h"
@@ -49,7 +50,7 @@ namespace Rodin::Math
    * the common @ref Rodin::Math::LinearSystemBase interface used by Rodin
    * variational problems and solvers.
    *
-   * ## Implementation Details
+   * # Implementation Details
    *
    * The linear system @f$ A\mathbf{x} = \mathbf{b} @f$ is stored as
    * three PETSc handles that are allocated in the constructor and
@@ -57,7 +58,7 @@ namespace Rodin::Math
    * enforces Dirichlet boundary conditions by zeroing rows of @f$ A @f$
    * and adjusting @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
    *
-   * ## Field-Split Support
+   * # Field-Split Support
    *
    * The inner @ref FieldSplits class stores named PETSc index sets
    * (`IS`) that can be passed to `PCFIELDSPLIT` for block
@@ -72,12 +73,10 @@ namespace Rodin::Math
   {
     public:
       /// @brief PETSc matrix type (@c Mat) for the system operator @f$ A @f$.
-      using MatrixType =
-        ::Mat;
+      using MatrixType = ::Mat;
 
       /// @brief PETSc vector type (@c Vec) for @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
-      using VectorType =
-        ::Vec;
+      using VectorType = ::Vec;
 
       /**
        * @brief Parent CRTP base class providing the generic
@@ -104,7 +103,7 @@ namespace Rodin::Math
           /// @brief A single named index set for field-split preconditioning.
           struct Split
           {
-            std::string name;        ///< Human-readable field name.
+            std::string name; ///< Human-readable field name.
             ::IS is = PETSC_NULLPTR; ///< PETSc index set for this field's DOFs.
           };
 
@@ -204,7 +203,7 @@ namespace Rodin::Math
               }
             }
             m_splits.clear();
-            (void) ierr;
+            (void)ierr;
           }
 
           /**
@@ -236,7 +235,7 @@ namespace Rodin::Math
               m_splits.push_back(std::move(out));
             }
 
-            (void) ierr;
+            (void)ierr;
           }
 
           /**
@@ -320,12 +319,17 @@ namespace Rodin::Math
        * @brief Enforces Dirichlet boundary conditions by eliminating
        *        constrained DOFs from the linear system.
        *
-       * For every entry @f$ (i, u_i) @f$ in @p dofs the method:
-       * 1. Sets @f$ x_i = u_i @f$ in the solution vector.
-       * 2. Zeros row @f$ i @f$ of the matrix and places a @f$ 1 @f$ on
-       *    the diagonal (`MatZeroRows` with `diag = 1.0`).
-       * 3. Adjusts @f$ \mathbf{b} @f$ so that @f$ x_i = u_i @f$ is
-       *    enforced after the solve.
+       * For every entry @f$ (i, u_i) @f$ in @p dofs, replaces row @f$i@f$
+       * by the unit diagonal row and sets @f$b_i=u_i@f$. Unconstrained rows
+       * and constrained columns retain their original entries. This row-only
+       * operation gives the prescribed solution for arbitrary square operators,
+       * but generally does not preserve matrix symmetry. The solution vector is
+       * not changed before the solve.
+       *
+       * Canonical variational assembly performs row-and-column elimination with
+       * right-hand-side lifting, preserving symmetry when the original operator
+       * is symmetric. The low-level PETSc operation documented here follows
+       * @c MatZeroRows instead.
        *
        * All indices in @p dofs are shifted by @p offset, which is useful
        * for block systems where each field starts at a non-zero position.
@@ -381,7 +385,7 @@ namespace Rodin::Math
         ierr = VecDestroy(&bc);
         assert(ierr == PETSC_SUCCESS);
 
-        (void) ierr;
+        (void)ierr;
 
         return *this;
       }
@@ -395,9 +399,11 @@ namespace Rodin::Math
        */
       template <class DOFScalar>
       LinearSystemBase& merge(
-          const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
+        const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs,
+        size_t offset = 0)
       {
-        throw "Unimplemented.";
+        Alert::MemberFunctionException(*this, __func__)
+          << "Periodic DOF constraint merging is not implemented." << Alert::Raise;
         return *this;
       }
 
@@ -405,8 +411,7 @@ namespace Rodin::Math
        * @brief Returns the MPI communicator of this linear system.
        * @returns The MPI communicator of this linear system.
        */
-      constexpr
-      MPI_Comm getCommunicator() const noexcept
+      constexpr MPI_Comm getCommunicator() const noexcept
       {
         return m_comm;
       }
@@ -415,8 +420,7 @@ namespace Rodin::Math
        * @brief Returns a mutable reference to the system matrix @f$ A @f$.
        * @returns A mutable reference to the system matrix @f$ A @f$.
        */
-      constexpr
-      MatrixType& getOperator()
+      constexpr MatrixType& getOperator()
       {
         return m_operator;
       }
@@ -425,8 +429,7 @@ namespace Rodin::Math
        * @brief Returns a read-only reference to the system matrix @f$ A @f$.
        * @returns A read-only reference to the system matrix @f$ A @f$.
        */
-      constexpr
-      const MatrixType& getOperator() const
+      constexpr const MatrixType& getOperator() const
       {
         return m_operator;
       }
@@ -435,8 +438,7 @@ namespace Rodin::Math
        * @brief Returns a mutable reference to the right-hand side vector @f$ b @f$.
        * @returns A mutable reference to the right-hand side vector @f$ b @f$.
        */
-      constexpr
-      VectorType& getVector()
+      constexpr VectorType& getVector()
       {
         return m_vector;
       }
@@ -445,8 +447,7 @@ namespace Rodin::Math
        * @brief Returns a read-only reference to the right-hand side vector @f$ b @f$.
        * @returns A read-only reference to the right-hand side vector @f$ b @f$.
        */
-      constexpr
-      const VectorType& getVector() const
+      constexpr const VectorType& getVector() const
       {
         return m_vector;
       }
@@ -455,8 +456,7 @@ namespace Rodin::Math
        * @brief Returns a mutable reference to the solution vector @f$ x @f$.
        * @returns A mutable reference to the solution vector @f$ x @f$.
        */
-      constexpr
-      VectorType& getSolution()
+      constexpr VectorType& getSolution()
       {
         return m_solution;
       }
@@ -465,8 +465,7 @@ namespace Rodin::Math
        * @brief Returns a read-only reference to the solution vector @f$ x @f$.
        * @returns A read-only reference to the solution vector @f$ x @f$.
        */
-      constexpr
-      const VectorType& getSolution() const
+      constexpr const VectorType& getSolution() const
       {
         return m_solution;
       }
@@ -495,7 +494,7 @@ namespace Rodin::Math
       MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
       VectorType m_solution; ///< The solution vector of the linear system.
-      VectorType m_vector;   ///< The vector of the linear system.
+      VectorType m_vector; ///< The vector of the linear system.
 
       FieldSplits m_fieldSplits; ///< The field splits for block preconditioning.
   };

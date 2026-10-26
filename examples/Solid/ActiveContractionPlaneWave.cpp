@@ -9,10 +9,10 @@
  * @brief Dynamic Hill-Maxwell active fiber contraction driven by repeated
  *        electrical activation plane waves with relaxation gaps.
  *
- * A unit square is clamped on its top edge (homogeneous Dirichlet) and is
+ * A unit cube is clamped on its top face (homogeneous Dirichlet) and is
  * otherwise free.  A passive NeoHookean response is augmented with the active
  * fiber stress of @ref Solid::ActiveContraction with a horizontal fiber
- * direction @f$ n_f = (1, 0) @f$.
+ * direction @f$ n_f = (1, 0, 0) @f$.
  *
  * The driver is the *electrical activation* @f$ u_1(y, t) @f$, modelled as
  * repeated Gaussian plane waves traveling upward from the bottom of the domain:
@@ -46,6 +46,7 @@
 #include <iomanip>
 #include <limits>
 #include <vector>
+#include <array>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
@@ -53,7 +54,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
-#include <Rodin/Solver/CG.h>
+#include <Rodin/Solver/SparseLU.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -62,23 +63,12 @@ using namespace Rodin::Solver;
 
 namespace
 {
-  struct LocalState
-  {
-      Real ec = 0.0;
-      Real gamma = 0.0;
-      Real beta = 0.0;
-      Real e1D = 0.0;   // committed fiber strain e_1D^n
-  };
-
-  using StateBuffer = std::vector<std::vector<LocalState>>;
-
   struct StepDiagnostics
   {
-      Real minActiveExtension = std::numeric_limits<Real>::infinity();
-      Real maxActiveExtension = -std::numeric_limits<Real>::infinity();
-      Real maxGamma = 0.0;
-      Real maxBeta = 0.0;
-      size_t maxLocalIterations = 0;
+    Real minActiveExtension = std::numeric_limits<Real>::infinity();
+    Real maxActiveExtension = -std::numeric_limits<Real>::infinity();
+    Real maxGamma = 0.0;
+    Real maxBeta = 0.0;
   };
 
   size_t parseSize(const char* value, const char* name)
@@ -195,7 +185,6 @@ int main(int argc, char** argv)
 
   Solid::ActiveContraction<Solid::NeoHookean, Solid::ActiveFiberLaw> law(
     passive, activeLaw);
-  law.setLocalTolerance(1e-14).setLocalMaxIterations(80);
 
   // ---- repeated electrical activation plane waves -------------------------
   // u_1(y, t) = U * exp(-((y - (y0 + c*(t - tk))) / w)^2).
@@ -203,11 +192,11 @@ int main(int argc, char** argv)
   // time so there is a quiet relaxation gap between waves.
   struct PlaneWaveParams
   {
-      Real amplitude;
-      Real speed;
-      Real width;
-      Real start;
-      Real gap;
+    Real amplitude;
+    Real speed;
+    Real width;
+    Real start;
+    Real gap;
   };
 
   const size_t nWaves = 2;
@@ -245,41 +234,30 @@ int main(int argc, char** argv)
 
   Real currentTime = 0.0;
 
-  // ---- per-quadrature-point state buffer ----------------------------------
-  StateBuffer state(mesh.getCellCount());
-
-  auto activeInput = [&](Solid::ConstitutivePoint& cp) {
-    const Index cellIdx = cp.get<Solid::Tags::CellIndex>();
-    const std::size_t qpIdx = cp.get<Solid::Tags::QuadraturePointIndex>();
-
-    if (cellIdx >= state.size())
-      state.resize(cellIdx + 1);
-    if (qpIdx >= state[cellIdx].size())
-      state[cellIdx].resize(qpIdx + 1, LocalState{});
-    const LocalState& s = state[cellIdx][qpIdx];
-
-    Math::SpatialVector<Real> n_f(static_cast<std::uint8_t>(dim));
-    n_f.setZero();
-    n_f[0] = 1.0;
-    cp.set<Solid::Tags::FiberDirection>(n_f);
-
-    Real y = 0.0;
-    if (cp.getPoint())
-      y = cp.getPoint()->get().getPhysicalCoordinates()(1);
-
-    cp.set<Solid::Tags::TimeStep>(dtStep);
-    cp.set<Solid::Tags::PreviousActiveExtension>(s.ec);
-    cp.set<Solid::Tags::PreviousActiveGamma>(s.gamma);
-    cp.set<Solid::Tags::PreviousActiveBeta>(s.beta);
-    // Evaluate the series law at the midpoint fiber strain.
-    cp.set<Solid::Tags::PreviousFiberStrain>(s.e1D);
-    cp.set<Solid::Tags::ElectricalActivation>(activationAt(y, currentTime));
-  };
+  // Independent discontinuous fields participate in the global Newton solve.
+  P0 activeSpace(mesh);
+  GridFunction extension(activeSpace), gamma(activeSpace), beta(activeSpace);
+  GridFunction previousExtension(activeSpace), previousGamma(activeSpace),
+    previousBeta(activeSpace);
+  extension.setName("ActiveExtension");
+  gamma.setName("ActiveGamma");
+  beta.setName("ActiveBeta");
+  extension = activeParams.initial.extension;
+  gamma = std::max(activeLaw.initialState().gamma, activeLaw.getMinimumGamma());
+  beta = Real(0);
+  previousExtension = extension;
+  previousGamma = gamma;
+  previousBeta = beta;
 
   // ---- solution fields ----------------------------------------------------
+  const VectorFunction zero(dim, [dim](const Point&) {
+    Math::SpatialVector<Real> value(dim);
+    value.setZero();
+    return value;
+  });
   GridFunction u(Vh);
   u.setName("Displacement");
-  u = VectorFunction{Zero(), Zero()};
+  u = zero;
 
   GridFunction uPrevious(Vh);
   uPrevious = u;
@@ -295,7 +273,12 @@ int main(int argc, char** argv)
 
   GridFunction fiberField(Vh);
   fiberField.setName("FiberDirection");
-  fiberField = VectorFunction{RealFunction(1.0), Zero()};
+  fiberField = VectorFunction(dim, [dim](const Point&) {
+    Math::SpatialVector<Real> value(dim);
+    value.setZero();
+    value[0] = 1;
+    return value;
+  });
 
   auto computeMaxNodalDisplacement = [&]() -> Real {
     Real maxDisplacement = 0.0;
@@ -314,45 +297,59 @@ int main(int argc, char** argv)
     return maxDisplacement;
   };
 
+  auto activeInput = [&](Solid::ConstitutivePoint& cp) {
+    const auto& point = cp.getPoint()->get();
+    const auto fiber = fiberField(point);
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::TimeStep>(dtStep);
+    cp.set<Solid::Tags::ActiveExtension>(extension(point));
+    cp.set<Solid::Tags::ActiveGamma>(gamma(point));
+    cp.set<Solid::Tags::ActiveBeta>(beta(point));
+    cp.set<Solid::Tags::PreviousActiveExtension>(previousExtension(point));
+    cp.set<Solid::Tags::PreviousActiveGamma>(previousGamma(point));
+    cp.set<Solid::Tags::PreviousActiveBeta>(previousBeta(point));
+    Solid::KinematicState previousKinematics(dim);
+    previousKinematics.setDisplacementGradient(Jacobian(uPrevious).getValue(point));
+    Solid::ConstitutivePoint previousPoint(point, previousKinematics);
+    previousPoint.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::PreviousFiberStrain>(
+      Solid::FiberKinematics(previousPoint).strain());
+    cp.set<Solid::Tags::ElectricalActivation>(activationAt(point(1), currentTime));
+  };
+
   // ---- XDMF output --------------------------------------------------------
   IO::XDMF xdmf("ActiveContractionPlaneWave");
   auto grid = xdmf.grid();
   grid.setMesh(mesh);
   grid.add(u);
   grid.add(activationField);
+  grid.add(extension, IO::XDMF::Center::Cell);
+  grid.add(gamma, IO::XDMF::Center::Cell);
+  grid.add(beta, IO::XDMF::Center::Cell);
   grid.add(fiberField, IO::XDMF::Center::Node,
     IO::XDMF::AttributePolicy::Static);   // written once, reused
   xdmf.write(0.0);
 
   // ---- commit sweep -------------------------------------------------------
-  // activeInput reads the state buffer as the previous step's values; this
-  // output writes it back from the converged evaluation. Both are driven by
-  // InternalVirtualWork over the same kinematics and the same quadrature
-  // rule, so the (cell, quadrature point) indexing agrees by construction.
   StepDiagnostics diagnostics;
 
-  auto commitOutput = [&](const Solid::ConstitutivePoint& cp, const auto& cache) {
-    auto& s = state[cp.get<Solid::Tags::CellIndex>()]
-                   [cp.get<Solid::Tags::QuadraturePointIndex>()];
-    s.ec = cache.activeExtension;
-    s.gamma = cache.newState.gamma;
-    s.beta = cache.newState.beta;
-    s.e1D = cache.strain;
-
+  auto commitOutput = [&]([[maybe_unused]] const Solid::ConstitutivePoint& cp,
+                        const auto& prepared) {
     diagnostics.minActiveExtension =
-      std::min(diagnostics.minActiveExtension, cache.activeExtension);
+      std::min(diagnostics.minActiveExtension, prepared.getActiveExtension());
     diagnostics.maxActiveExtension =
-      std::max(diagnostics.maxActiveExtension, cache.activeExtension);
-    diagnostics.maxGamma = std::max(diagnostics.maxGamma, std::abs(cache.newState.gamma));
-    diagnostics.maxBeta = std::max(diagnostics.maxBeta, std::abs(cache.newState.beta));
-    diagnostics.maxLocalIterations =
-      std::max(diagnostics.maxLocalIterations, cache.localIterations);
+      std::max(diagnostics.maxActiveExtension, prepared.getActiveExtension());
+    diagnostics.maxGamma =
+      std::max(diagnostics.maxGamma, std::abs(prepared.getActiveState().gamma));
+    diagnostics.maxBeta =
+      std::max(diagnostics.maxBeta, std::abs(prepared.getActiveState().beta));
   };
 
   // ---- time loop ----------------------------------------------------------
   TrialFunction du(Vh);
   TestFunction v(Vh);
-  auto zero = VectorFunction{Zero(), Zero()};
+  TrialFunction dc(activeSpace), dg(activeSpace), db(activeSpace);
+  TestFunction qc(activeSpace), qg(activeSpace), qb(activeSpace);
 
   std::cout << std::scientific << std::setprecision(6);
   std::cout << "Time steps: " << nSteps;
@@ -397,16 +394,126 @@ int main(int argc, char** argv)
     auto ivw =
       Solid::InternalVirtualWork(law, u).setInput(activeInput).setOutput(commitOutput);
 
-    Problem newton(du, v);
+    // A closed-form predictor initializes fields; all subsequent corrections
+    // solve the coupled global residual without eliminating any active field.
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      Solid::ActiveFiberLaw::State oldState;
+      oldState.gamma = previousGamma(point);
+      oldState.beta = previousBeta(point);
+      const Real oldExtension = previousExtension(point);
+      const auto predicted = activeLaw.update(dtStep, oldState, oldExtension,
+        extension(point), activationAt(point(1), currentTime));
+      const Index index =
+        activeSpace.getGlobalIndex({mesh.getDimension(), cell->getIndex()}, 0);
+      gamma[index] = predicted.gamma;
+      beta[index] = predicted.beta;
+    }
+
+    // Each coefficient evaluates the same uneliminated constitutive equations.
+    const auto evaluate = [&](const Point& point) {
+      Solid::KinematicState kinematics(dim);
+      kinematics.setDisplacementGradient(Jacobian(u).getValue(point));
+      Solid::ConstitutivePoint cp(point, kinematics);
+      activeInput(cp);
+      auto prepared = law;
+      prepared.setConstitutivePoint(cp);
+      return prepared;
+    };
+    const auto residual = [&](size_t row) {
+      return RealFunction([&, row](const Point& point) {
+        return evaluate(point).getActiveResidual().value[row];
+      });
+    };
+    const auto derivative = [&](size_t row, size_t column) {
+      return RealFunction([&, row, column](const Point& point) {
+        return evaluate(point).getActiveResidual().derivative(row, column);
+      });
+    };
+    const auto coupling = [&](bool momentum) {
+      return MatrixFunction(dim, dim, [&, momentum](const Point& point) {
+        const auto prepared = evaluate(point);
+        const auto& kinematics = prepared.getKinematicState();
+        const Real factor = momentum ? Real(0.5) * prepared.getActiveResponse().dStressDc
+                                     : prepared.getActiveResidual().strainDerivative[0];
+        Math::SpatialMatrix<Real> result = factor * kinematics.getDeformationGradient() *
+          prepared.getFiberKinematics().tensor();
+        return result;
+      });
+    };
+    // Callable activation is nonpolynomial. Order eight is an integration
+    // policy for this example, not an exactness guarantee; refine it with the mesh.
+    constexpr size_t ActiveQuadratureOrder = 8;
+    ivw.setQuadratureOrder(ActiveQuadratureOrder);
+    auto momentumCoupling = Integral(dc * coupling(true), Jacobian(v));
+    auto extensionCoupling = Integral(Dot(coupling(false), Jacobian(du)), qc);
+    momentumCoupling.setOrder(ActiveQuadratureOrder);
+    extensionCoupling.setOrder(ActiveQuadratureOrder);
+    Problem newton(du, dc, dg, db, v, qc, qg, qb);
     newton = ivw(du, v) + (rho * bdfA0 / dtStep) * Integral(du, v) +
       (rho / dtStep) *
         Integral(bdfA0 * u + bdfA1 * uPrevious + bdfA2 * uPreviousPrevious, v) +
-      DirichletBC(du, zero).on(topBC);
-
-    CG linearSolver(newton);
-    linearSolver.setTolerance(1e-8).setMaxIterations(2000);
+      momentumCoupling + extensionCoupling + DirichletBC(du, zero).on(topBC);
+    const std::array increments{std::ref(dc), std::ref(dg), std::ref(db)};
+    const std::array tests{std::ref(qc), std::ref(qg), std::ref(qb)};
+    for (size_t row = 0; row < 3; ++row)
+    {
+      auto load = Integral(residual(row), tests[row].get());
+      load.setOrder(ActiveQuadratureOrder);
+      newton += load;
+      for (size_t column = 0; column < 3; ++column)
+      {
+        auto block =
+          Integral(derivative(row, column) * increments[column].get(), tests[row].get());
+        block.setOrder(ActiveQuadratureOrder);
+        newton += block;
+      }
+    }
+    const Index displacementSize = u.getData().size();
+    const Index activeSize = extension.getData().size();
+    Math::Vector<Real> iterate(displacementSize + 3 * activeSize);
+    iterate << u.getData(), extension.getData(), gamma.getData(), beta.getData();
+    const auto scatter = [&] {
+      u.getData() = iterate.head(displacementSize);
+      extension.getData() = iterate.segment(displacementSize, activeSize);
+      gamma.getData() = iterate.segment(displacementSize + activeSize, activeSize);
+      beta.getData() = iterate.tail(activeSize);
+    };
+    SparseLU linearSolver(newton);
     NewtonSolver solver(linearSolver);
-    solver.setMaxIterations(50).setAbsoluteTolerance(1e-9).setRelativeTolerance(1e-7);
+    // A work budget for the coupled solve, with headroom near the gamma floor.
+    constexpr size_t MaximumNewtonIterations = 80;
+    constexpr Real AbsoluteResidualTolerance = 1e-9;
+    // The initial beta equation scales like 1/gamma. A relative criterion based
+    // on that large initial residual can accept an unresolved force balance.
+    solver.setMaxIterations(MaximumNewtonIterations)
+      .setAbsoluteTolerance(AbsoluteResidualTolerance)
+      .setRelativeTolerance(0);
+    solver.setStepPolicy([&](auto& x, const auto& system, const auto&) {
+      using Result = typename decltype(solver)::StepResult;
+      const Math::Vector<Real> saved = x;
+      const Math::Vector<Real> step = system.getSolution();
+      const Real residualNorm = system.getVector().norm();
+      constexpr size_t MaximumBacktracks = 60;
+      Real damping = 1;
+      for (size_t attempt = 0; attempt < MaximumBacktracks; ++attempt)
+      {
+        x = saved + damping * step;
+        scatter();
+        if (gamma.getData().minCoeff() > 0 &&
+          (extension.getData() + previousExtension.getData()).minCoeff() > -1)
+        {
+          newton.assemble();
+          if (newton.getLinearSystem().getVector().norm() < residualNorm)
+            return Result{.accepted = true, .stepNorm = damping * step.norm()};
+        }
+        damping *= Real(0.5);
+      }
+      x = saved;
+      scatter();
+      return Result{.accepted = false, .stepNorm = 0};
+    });
     Real previousNewtonResidual = std::numeric_limits<Real>::quiet_NaN();
     solver.setMonitor([&](const auto& report) {
       std::cout << "  Newton " << std::setw(2) << report.iterations
@@ -423,7 +530,7 @@ int main(int argc, char** argv)
       previousNewtonResidual = report.finalResidual;
     });
 
-    solver.solve(u);
+    solver.solve(iterate);
 
     if (!solver.getReport().converged)
     {
@@ -434,6 +541,9 @@ int main(int argc, char** argv)
 
     diagnostics = StepDiagnostics{};
     ivw.commit();
+    previousExtension = extension;
+    previousGamma = gamma;
+    previousBeta = beta;
     const auto& report = solver.getReport();
     const Real maxNodalDisplacement = computeMaxNodalDisplacement();
     peakMaxNodalDisplacement = std::max(peakMaxNodalDisplacement, maxNodalDisplacement);
@@ -452,8 +562,7 @@ int main(int argc, char** argv)
               << diagnostics.minActiveExtension << ", " << diagnostics.maxActiveExtension
               << "]"
               << " max|gamma| = " << diagnostics.maxGamma
-              << " max|beta| = " << diagnostics.maxBeta
-              << " max_local_newton = " << diagnostics.maxLocalIterations;
+              << " max|beta| = " << diagnostics.maxBeta;
     if (targetMaxDisplacement > 0.0 && peakMaxNodalDisplacement > 0.0)
     {
       const Real suggestedScale =

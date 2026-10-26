@@ -12,27 +12,27 @@
  * in finite element formulations. These integrals form the basis for defining
  * bilinear and linear forms in the weak formulation.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * Domain integrals compute:
  * @f[
  *   \int_\Omega f(x) \, dx
  * @f]
  * where @f$ \Omega @f$ is the computational domain and @f$ f @f$ is the integrand.
  *
- * ## Bilinear Form Integrals
+ * # Bilinear Form Integrals
  * For bilinear forms @f$ a(u,v) @f$:
  * @f[
  *   a(u,v) = \int_\Omega A(u) : B(v) \, dx
  * @f]
  * where @f$ A @f$ and @f$ B @f$ are operators on trial and test functions.
  *
- * ## Linear Form Integrals
+ * # Linear Form Integrals
  * For linear forms @f$ l(v) @f$:
  * @f[
  *   l(v) = \int_\Omega f \cdot v \, dx
  * @f]
  *
- * ## Usage Examples
+ * # Usage Examples
  * ```cpp
  * // Stiffness matrix: \int \nabla u\cdot\nabla v dx
  * auto stiffness = Integral(Grad(u), Grad(v));

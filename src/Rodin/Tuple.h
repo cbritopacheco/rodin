@@ -57,13 +57,17 @@ namespace Rodin
       constexpr
       Tuple() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      Tuple(const Tuple&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Source object to copy or move from.
+       */
+      constexpr Tuple([[maybe_unused]] const Tuple& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      Tuple(Tuple&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
+      constexpr Tuple([[maybe_unused]] Tuple&& other) = default;
 
       /**
        * @brief Computes the Cartesian product of two empty tuples.
@@ -71,9 +75,9 @@ namespace Rodin
        * The ignored argument is the other empty tuple.
        *
        * @return An empty Tuple.
+       * @param other Source object to copy or move from.
        */
-      constexpr
-      Tuple<> product(const Tuple<>&)
+      constexpr Tuple<> product([[maybe_unused]] const Tuple<>& other)
       {
         return Tuple<>{};
       }
@@ -135,9 +139,12 @@ namespace Rodin
        *
        * The archive and version arguments are ignored because an empty tuple
        * has no state.
+       * @param archive Serialization archive; unused because the tuple has no state.
+       * @param version Serialization format version; unused by this implementation.
        */
-      template<class Archive>
-      void serialize(Archive&, const unsigned int)
+      template <class Archive>
+      void serialize(
+        [[maybe_unused]] Archive& archive, [[maybe_unused]] const unsigned int version)
       {}
   };
 

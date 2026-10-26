@@ -39,14 +39,14 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::FunctionBase<Derived>>
   {
-      /// @brief Result type of the evaluation.
-      using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+    /// @brief Result type of the evaluation.
+    using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
+    /// @brief Range (evaluation value) type.
+    using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 }
 
@@ -63,7 +63,7 @@ namespace Rodin::Variational
    *
    * @tparam Derived Derived class following CRTP (Curiously Recurring Template Pattern)
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A function @f$ f : \Omega \to \mathbb{R}^n @f$ maps points in the domain 
    * @f$ \Omega @f$ to values in @f$ \mathbb{R}^n @f$. In finite element analysis,
    * functions serve various roles:
@@ -71,7 +71,7 @@ namespace Rodin::Variational
    * - **Discrete functions**: Finite element approximations @f$ u_h = \sum_i u_i \phi_i @f$
    * - **Test/Trial functions**: Basis functions @f$ \phi_i @f$ spanning finite element spaces
    *
-   * ## Key Features
+   * # Key Features
    * - **Domain support**: Functions can be restricted to subdomains or boundaries
    * - **Trace operations**: Support for function traces on mesh boundaries
    * - **Point evaluation**: Evaluation at arbitrary points within the domain
@@ -131,8 +131,7 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate the function
        * @returns Function value at the given point
        */
-      constexpr
-      auto operator()(const Geometry::Point& p) const
+      constexpr auto operator()(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -142,8 +141,7 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto operator()(const IntegrationPoint& ip) const
+      constexpr auto operator()(const IntegrationPoint& ip) const
       {
         return getValue(ip);
       }
@@ -180,8 +178,7 @@ namespace Rodin::Variational
        * @brief Convenience accessor for the first component (x-component).
        * @returns Component function for index 0
        */
-      constexpr
-      auto x() const
+      constexpr auto x() const
       {
         return Component(*this, 0);
       }
@@ -190,8 +187,7 @@ namespace Rodin::Variational
        * @brief Convenience accessor for the second component (y-component).
        * @returns Component function for index 1
        */
-      constexpr
-      auto y() const
+      constexpr auto y() const
       {
         return Component(*this, 1);
       }
@@ -200,8 +196,7 @@ namespace Rodin::Variational
        * @brief Convenience accessor for the third component (z-component).
        * @returns Component function for index 2
        */
-      constexpr
-      auto z() const
+      constexpr auto z() const
       {
         return Component(*this, 2);
       }
@@ -214,8 +209,7 @@ namespace Rodin::Variational
        * @returns Transposed function object
        * @see <a href="_transpose_8h.html">Transpose</a>
        */
-      constexpr
-      auto T() const
+      constexpr auto T() const
       {
         return Transpose(*this);
       }
@@ -231,10 +225,9 @@ namespace Rodin::Variational
        * @returns Reference to self (for method chaining)
        * @see getTraceDomain()
        */
-      constexpr
-      Derived& traceOf(const Geometry::Attribute& attr)
+      constexpr Derived& traceOf(const Geometry::Attribute& attr)
       {
-        return this->traceOf(FlatSet<Geometry::Attribute>{ attr });
+        return this->traceOf(FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -247,11 +240,11 @@ namespace Rodin::Variational
        * @param a2 Mesh attributes selecting the region.
        * @param as Mesh attributes selecting the region.
        */
-      template <class A1, class A2, class ... As>
-      constexpr
-      Derived& traceOf(const A1& a1, const A2& a2, const As& ... as)
+      template <class A1, class A2, class... As>
+      constexpr Derived& traceOf(const A1& a1, const A2& a2, const As&... as)
       {
-        return this->traceOf(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+        return this->traceOf(FlatSet<Geometry::Attribute>{
+          Geometry::Attribute(a1), Geometry::Attribute(a2), Geometry::Attribute(as)...});
       }
 
       /**
@@ -265,8 +258,7 @@ namespace Rodin::Variational
        * @returns Reference to self (for method chaining)
        * @see getTraceDomain()
        */
-      constexpr
-      Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)
+      constexpr Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         m_traceDomain = attr;
         return static_cast<Derived&>(*this);
@@ -282,8 +274,7 @@ namespace Rodin::Variational
        * semantic value that it has not been specified yet.
        * @returns The set of attributes which will be interpreted as the domains to "trace".
        */
-      constexpr
-      const TraceDomain& getTraceDomain() const
+      constexpr const TraceDomain& getTraceDomain() const
       {
         return m_traceDomain;
       }
@@ -294,8 +285,7 @@ namespace Rodin::Variational
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -305,10 +295,10 @@ namespace Rodin::Variational
        * @param ip Integration point at which the expression is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+        if constexpr (requires(
+                        const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
           return static_cast<const Derived&>(*this).getValue(ip);
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
@@ -349,7 +339,8 @@ namespace Rodin::Variational
            * @note The function is not owned and must outlive this cache.
            */
           explicit Cache(const FunctionBase& f)
-            : m_function(f)
+            : m_function(f),
+              m_bound(false)
           {}
 
           /**
@@ -380,7 +371,7 @@ namespace Rodin::Variational
           Cache& operator=(const Cache& other)
           {
             m_function = other.m_function;
-            m_value.reset();
+            m_bound = false;
             return *this;
           }
 
@@ -390,6 +381,17 @@ namespace Rodin::Variational
            * @returns This cache.
            */
           Cache& operator=(Cache&& other) = default;
+
+          /**
+           * @brief Invalidates the preceding cell snapshot while retaining owned storage.
+           * @param polytope Entity for the next evaluation pass.
+           * @returns This empty evaluation cache.
+           */
+          Cache& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+          {
+            m_bound = false;
+            return *this;
+          }
 
           /**
            * @brief Evaluates the bound function at an integration point.
@@ -404,6 +406,7 @@ namespace Rodin::Variational
            */
           Cache& setIntegrationPoint(const IntegrationPoint& ip)
           {
+            m_bound = false;
             if constexpr (Enabled)
             {
               if (!ip.getQuadratureFormula())
@@ -415,6 +418,7 @@ namespace Rodin::Variational
                 *m_value = m_function.get().getValue(ip);
               else
                 m_value.emplace(m_function.get().getValue(ip));
+              m_bound = true;
             }
             return *this;
           }
@@ -429,7 +433,7 @@ namespace Rodin::Variational
           {
             if constexpr (Enabled)
             {
-              if (m_value)
+              if (m_bound)
                 return &*m_value;
             }
             return nullptr;
@@ -437,7 +441,8 @@ namespace Rodin::Variational
 
         private:
           std::reference_wrapper<const FunctionBase> m_function;
-          std::optional<Value> m_value;
+          bool m_bound;
+          Optional<Value> m_value;
       };
 
       /**
@@ -455,8 +460,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry type.
        * @return Polynomial order bound, or std::nullopt if not polynomial.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
@@ -499,8 +503,8 @@ namespace Rodin::Variational
    * @returns Zero when the function is known to be elementwise constant, or an empty optional otherwise.
    */
   template <class Derived>
-  inline Optional<size_t>
-  GetOrderIfConstant(const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept
+  inline Optional<size_t> GetOrderIfConstant(
+    const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept
   {
     const auto o = f.getOrder(polytope);
     if (o && *o == 0)

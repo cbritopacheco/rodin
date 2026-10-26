@@ -35,6 +35,8 @@ namespace Rodin::FormLanguage
    * @brief Type traits for form language objects.
    * @tparam Args Template parameters for trait specializations
    * @see <a href="struct_rodin_1_1_form_language_1_1_traits.html">Traits</a>
+   *
+   * @see @ref TraitsSpecializations "Traits Template Specializations"
    */
   template <class ... Args>
   struct Traits;

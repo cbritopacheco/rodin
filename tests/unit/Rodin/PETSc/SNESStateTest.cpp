@@ -102,6 +102,96 @@ TEST(Rodin_PETSc_SNESState, DistinctIteratesWithEqualCountersAreNotCachedTogethe
   EXPECT_EQ(VecDestroy(&first), PETSC_SUCCESS);
 }
 
+/// @brief A manufactured constant root exercises the complete nonlinear solve.
+TEST(Rodin_PETSc_SNESState, CubicManufacturedRootAndWarmStart)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {3});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction state(space);
+  state = Zero();
+  PETSc::Variational::TrialFunction du(space);
+  PETSc::Variational::TestFunction v(space);
+  Problem problem(du, v);
+#ifdef PETSC_USE_COMPLEX
+  const auto one = ComplexFunction(1);
+#else
+  const auto one = RealFunction(1);
+#endif
+  problem = Integral((one + 3 * state * state) * du, v) +
+    Integral(state + state * state * state - 2 * one, v);
+  problem.assemble();
+  Solver::KSP ksp(problem);
+  Solver::SNES snes(ksp);
+  snes.setType(SNESNEWTONLS).setTolerances(1e-12, 1e-12, 1e-12, 30, 200);
+  snes.setStateUpdate([&](const PETSc::Math::Vector& x) { state.setData(x); });
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_GT(snes.getConvergedReason(), 0);
+  EXPECT_GT(snes.getIterationNumber(), 0);
+  ::Vec error = nullptr;
+  const auto solution = problem.getLinearSystem().getSolution();
+  ASSERT_EQ(VecDuplicate(solution, &error), PETSC_SUCCESS);
+  ASSERT_EQ(VecCopy(solution, error), PETSC_SUCCESS);
+  ASSERT_EQ(VecShift(error, -1), PETSC_SUCCESS);
+  PetscReal norm = 0;
+  ASSERT_EQ(VecNorm(error, NORM_INFINITY, &norm), PETSC_SUCCESS);
+  EXPECT_LT(norm, 1e-10);
+  EXPECT_EQ(VecDestroy(&error), PETSC_SUCCESS);
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_EQ(snes.getIterationNumber(), 0);
+}
+
+#ifdef PETSC_USE_COMPLEX
+/**
+ * @brief Newton solves recover the non-real manufactured root and preserve warm starts.
+ *
+ * The residual is @f$F(u)=u+u^3-(z+z^3)@f$, with
+ * @f$z=1+i/2@f$. Its tangent is @f$1+3u^2@f$.
+ */
+TEST(Rodin_PETSc_SNESState, CubicNonrealManufacturedRootAndWarmStart)
+{
+  constexpr Real residualTolerance = 1e-12;
+  constexpr Real solutionTolerance = 1e-10;
+  const PetscScalar exact(1, 0.5);
+  const PetscScalar initial(0.8, 0.4);
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {3});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction state(space);
+  state = ComplexFunction(initial);
+  PETSc::Variational::TrialFunction du(space);
+  PETSc::Variational::TestFunction v(space);
+  const auto one = ComplexFunction(1);
+  const auto forcing = ComplexFunction(exact + exact * exact * exact);
+  Problem problem(du, v);
+  problem = Integral((one + 3 * state * state) * du, v) +
+    Integral(state + state * state * state - forcing, v);
+  problem.assemble();
+  const auto solution = problem.getLinearSystem().getSolution();
+  ASSERT_EQ(VecSet(solution, initial), PETSC_SUCCESS);
+  Solver::KSP ksp(problem);
+  Solver::SNES snes(ksp);
+  snes.setType(SNESNEWTONLS)
+    .setTolerances(residualTolerance, residualTolerance, residualTolerance, 30, 200);
+  snes.setStateUpdate([&](const PETSc::Math::Vector& x) { state.setData(x); });
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_GT(snes.getConvergedReason(), 0);
+  EXPECT_GT(snes.getIterationNumber(), 0);
+  ::Vec error = nullptr;
+  ASSERT_EQ(VecDuplicate(solution, &error), PETSC_SUCCESS);
+  ASSERT_EQ(VecCopy(solution, error), PETSC_SUCCESS);
+  ASSERT_EQ(VecShift(error, -exact), PETSC_SUCCESS);
+  PetscReal norm = 0;
+  ASSERT_EQ(VecNorm(error, NORM_INFINITY, &norm), PETSC_SUCCESS);
+  EXPECT_LT(norm, solutionTolerance);
+  EXPECT_EQ(VecDestroy(&error), PETSC_SUCCESS);
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_EQ(snes.getIterationNumber(), 0);
+}
+#endif
+
 int main(int argc, char** argv)
 {
   if (PetscInitialize(&argc, &argv, nullptr, nullptr) != PETSC_SUCCESS)

@@ -28,6 +28,7 @@
  * No MPI communication is required during construction.
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <map>
 #include <cassert>
 #include <cstddef>
@@ -65,12 +66,16 @@ namespace Rodin::Variational
     public:
       /// @brief Scalar coefficient type.
       using ScalarType = Scalar;
+
       /// @brief Value type represented by the finite element space.
-      using RangeType   = ScalarType;
+      using RangeType = ScalarType;
+
       /// @brief Execution context type.
       using ContextType = Context::MPI;
+
       /// @brief Distributed mesh type.
-      using MeshType    = Geometry::Mesh<ContextType>;
+      using MeshType = Geometry::Mesh<ContextType>;
+
       /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
 
@@ -103,21 +108,31 @@ namespace Rodin::Variational
           m_fes(mesh.getShard())
       {}
 
-      /// @brief Copy-constructs the distributed scalar P0g space.
+      /**
+       * @brief Copy-constructs the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       */
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh),
           m_fes(other.m_fes)
       {}
 
-      /// @brief Move-constructs the distributed scalar P0g space.
+      /**
+       * @brief Move-constructs the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       */
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(other.m_mesh),
           m_fes(std::move(other.m_fes))
       {}
 
-      /// @brief Copy-assigns the distributed scalar P0g space.
+      /**
+       * @brief Copy-assigns the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -129,7 +144,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move-assigns the distributed scalar P0g space.
+      /**
+       * @brief Move-assigns the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       P0g& operator=(P0g&& other)
       {
         if (this != &other)
@@ -143,7 +162,10 @@ namespace Rodin::Variational
 
       ~P0g() override = default;
 
-      /// @brief Returns the underlying local shard P0g space.
+      /**
+       * @brief Returns the underlying local shard P0g space.
+       * @returns Finite element space on the local mesh shard.
+       */
       const FESType& getShard() const
       {
         return m_fes;
@@ -164,34 +186,48 @@ namespace Rodin::Variational
         if (rank == 0)
         {
           begin = 0;
-          end   = 1;
+          end = 1;
         }
         else
         {
           begin = 1;
-          end   = 1;
+          end = 1;
         }
       }
 
-      /// @brief Returns the global number of degrees of freedom (always 1).
+      /**
+       * @brief Returns the global number of degrees of freedom (always 1).
+       * @returns Total number of degrees of freedom in the space.
+       */
       size_t getSize() const override
       {
         return 1;
       }
 
-      /// @brief Returns the vector dimension (always 1 for scalar P0g).
+      /**
+       * @brief Returns the vector dimension (always 1 for scalar P0g).
+       * @returns Number of scalar components in the value range.
+       */
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
-      /// @brief Returns the distributed mesh on which the space is defined.
+      /**
+       * @brief Returns the distributed mesh on which the space is defined.
+       * @returns Mesh underlying the finite element space.
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      /// @brief Returns the finite element attached to local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns the finite element attached to local polytope @f$(d, i)@f$.
+       * @param d Entity dimension.
+       * @param i Local index of the polytope in its dimension.
+       * @returns Finite element associated with the specified polytope.
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return m_fes.getFiniteElement(d, i);
@@ -201,6 +237,9 @@ namespace Rodin::Variational
        * @brief Returns the global DOF array for local polytope @f$(d, i)@f$.
        *
        * For scalar P0g every polytope maps to the single global DOF 0.
+       * @param d Entity dimension.
+       * @param i Local polytope index.
+       * @returns Global degree-of-freedom indices associated with the specified local polytope.
        */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
@@ -214,8 +253,9 @@ namespace Rodin::Variational
        * returns 0 regardless of the local shard DOF index.
        *
        * @return Global distributed DOF index (always 0).
+       * @param localIdx Local shard degree-of-freedom index.
        */
-      Index getGlobalIndex(Index) const
+      Index getGlobalIndex([[maybe_unused]] Index localIdx) const
       {
         return Index(0);
       }
@@ -225,13 +265,22 @@ namespace Rodin::Variational
        * on polytope @f$(d, i)@f$.
        *
        * For scalar P0g this always returns 0.
+       * @param p Dimension and local index identifying the polytope.
+       * @param localDof Local basis-function index on the specified polytope.
+       * @returns Global distributed degree-of-freedom index.
        */
-      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
+      Index getGlobalIndex(
+        const std::pair<size_t, Index>& p, Index localDof) const override
       {
         return m_fes.getGlobalIndex(p, localDof);
       }
 
-      /// @brief Returns a pullback wrapper on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns a pullback wrapper on local polytope @f$(d, i)@f$.
+       * @param p Dimension and local index identifying the polytope.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pullback operation for the specified polytope.
+       */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
@@ -243,7 +292,12 @@ namespace Rodin::Variational
           *getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
-      /// @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+       * @param p Dimension and local index identifying the polytope.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pushforward operation for the specified polytope.
+       */
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& p, Callable&& v) const
       {
@@ -275,12 +329,16 @@ namespace Rodin::Variational
     public:
       /// @brief Scalar coefficient type.
       using ScalarType = Scalar;
+
       /// @brief Vector value type represented by the finite element space.
       using RangeType = Math::SpatialVector<Scalar>;
+
       /// @brief Execution context type.
       using ContextType = Context::MPI;
+
       /// @brief Distributed mesh type.
-      using MeshType    = Geometry::Mesh<ContextType>;
+      using MeshType = Geometry::Mesh<ContextType>;
+
       /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
 
@@ -406,12 +464,12 @@ namespace Rodin::Variational
         if (rank == 0)
         {
           begin = 0;
-          end   = static_cast<Index>(vdim);
+          end = static_cast<Index>(vdim);
         }
         else
         {
           begin = static_cast<Index>(vdim);
-          end   = static_cast<Index>(vdim);
+          end = static_cast<Index>(vdim);
         }
       }
 
@@ -489,7 +547,8 @@ namespace Rodin::Variational
        * @param p Entity identified by its dimension and local index.
        * @param localDof Index of the degree of freedom within the entity.
        */
-      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
+      Index getGlobalIndex(
+        const std::pair<size_t, Index>& p, Index localDof) const override
       {
         return m_fes.getGlobalIndex(p, localDof);
       }
@@ -535,7 +594,8 @@ namespace Rodin::MPI
   using P0g = Variational::P0g<Real, Geometry::Mesh<Context::MPI>>;
 
   /// @brief Convenience alias for the default distributed vector P0g space.
-  using VectorP0g = Variational::P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>;
+  using VectorP0g =
+    Variational::P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>;
 }
 
 namespace Rodin::Variational
@@ -549,21 +609,29 @@ namespace Rodin::Variational
     public:
       /// @brief Local matrix space on the mesh shard.
       using FESType = P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>;
+
       /// @brief Mesh and execution context of this specialization.
       using MeshType = Geometry::Mesh<Context::MPI>;
+
       /// @brief Scalar space supplying this family's DOF numbering.
       using ScalarSpace = P0g<Scalar, Geometry::Mesh<Context::MPI>>;
+
       /// @brief Matrix reference element for this family.
       using ElementType = P0gElement<Math::SpatialMatrix<Scalar>>;
+
       /// @brief Existing finite-element-space interface.
       using Parent = FiniteElementSpace<MeshType,
         P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>>;
+
       /// @brief Scalar type of matrix or tensor entries.
       using ScalarType = typename ScalarSpace::ScalarType;
+
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+
       /// @brief Local or distributed execution context.
       using ContextType = typename ScalarSpace::ContextType;
+
       /**
        * @brief Expands scalar DOF maps into interleaved row-major matrix components.
        * @param mesh Mesh on which the object is defined.
@@ -579,8 +647,10 @@ namespace Rodin::Variational
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
-          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
-                             << Alert::Raise;
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SpatialMatrix ranges require 1 to 3 rows and columns." << Alert::Raise;
+        }
         // Distributed scalar spaces may compute their size collectively.
         // Resolve it at construction, never from a local evaluation loop.
         m_size = m_scalar.getSize() * rows * cols;
@@ -611,17 +681,20 @@ namespace Rodin::Variational
        * @param other Object to copy from.
        */
       P0g(const P0g& other) = default;
+
       /**
        * @brief Moves the space and its DOF maps.
        * @param other Object to move from.
        */
       P0g(P0g&& other) = default;
+
       /**
        * @brief Copies the space and its DOF maps.
        * @returns Reference to this object after the operation.
        * @param other Object to copy from.
        */
       P0g& operator=(const P0g& other) = default;
+
       /**
        * @brief Moves the space and its DOF maps.
        * @returns Reference to this object after the operation.
@@ -637,6 +710,7 @@ namespace Rodin::Variational
       {
         return m_rows * m_cols;
       }
+
       /**
        * @brief Returns the number of matrix rows.
        * @returns The number of matrix rows.
@@ -645,6 +719,7 @@ namespace Rodin::Variational
       {
         return m_rows;
       }
+
       /**
        * @brief Returns the number of matrix columns.
        * @returns The number of matrix columns.
@@ -657,6 +732,7 @@ namespace Rodin::Variational
       {
         return m_scalar.getMesh();
       }
+
       /**
        * @brief Returns the scalar space supplying topology and component-independent maps.
        * @returns The scalar space supplying topology and component-independent maps.

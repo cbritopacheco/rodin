@@ -12,7 +12,7 @@
  * decomposition using simplicial factorization for symmetric positive definite
  * sparse matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   A = LL^T
@@ -20,13 +20,13 @@
  * where @f$ L @f$ is a lower triangular matrix. The simplicial algorithm processes
  * the matrix column by column without forming supernodes.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite sparse matrices
  * - Problems from elliptic PDEs
  * - Structural mechanics
  * - Heat transfer problems
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

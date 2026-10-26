@@ -39,10 +39,26 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsEigenObject
   {
-    /// @brief True if T is an Eigen object, false otherwise.
+    private:
+      /**
+       * @brief Recognizes an Eigen base, including Rodin's derived vector types.
+       * @tparam Derived Eigen expression type.
+       * @param object Pointer used only for type deduction.
+       * @returns A compile-time true type.
+       */
+      template <class Derived>
+      static std::true_type deduce(const Eigen::EigenBase<Derived>* object);
+
+      /**
+       * @brief Rejects types without an Eigen base.
+       * @returns A compile-time false type.
+       */
+      static std::false_type deduce(...);
+
+    public:
+      /// @brief True for Eigen objects and Rodin vectors, including cv/ref types.
       static constexpr bool Value =
-        std::is_base_of_v<Eigen::EigenBase<typename std::decay<T>::type>,
-          typename std::decay<T>::type>;
+        decltype(deduce(static_cast<const std::decay_t<T>*>(nullptr)))::value;
   };
 
   /// @brief Compile-time column count of a type; -1 when unavailable.

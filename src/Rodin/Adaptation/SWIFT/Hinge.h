@@ -20,8 +20,8 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Constructs the SWIFT hinge state.
        * @param deformation Frozen outer deformation.
        * @param innerGradient Gradient of the proposed inner increment.
-       * @param parameters Quality bounds, guard widths and relative hinge weights.
-       * @param hingeCoefficient Effective penalty coefficient for this outer model.
+       * @param parameters Quality bounds, guard widths and constraint strengths.
+       * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
        */
       HingeState(const CellDeformation& deformation,
         const Math::SpatialMatrix<Real>& innerGradient, const Parameters& parameters,
@@ -44,16 +44,16 @@ namespace Rodin::Adaptation::SWIFT
         };
         coefficients(m_jAction, m_jSlack,
           parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-          parameters.model.jacobianWeight, m_jHessian, m_jForce);
+          parameters.model.hinge.jacobian, m_jHessian, m_jForce);
         coefficients(m_qAction, m_qSlack,
           parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
-          parameters.model.distortionWeight, m_qHessian, m_qForce);
+          parameters.model.hinge.distortion, m_qHessian, m_qForce);
       }
 
       /**
        * @brief Affine quality energy with the construction parameters, evaluated only on demand.
-       * @param parameters Quality guards and relative hinge weights used at construction.
-       * @param hingeCoefficient Effective penalty coefficient used at construction.
+       * @param parameters Quality guards and constraint strengths used at construction.
+       * @param hingeCoefficient Predicted decrease per volume used at construction.
        * @param weightJ Frozen Jacobian witness measure.
        * @param weightQ Frozen distortion witness measure.
        * @returns The squared-hinge energy, or infinity for an inadmissible frozen state.
@@ -70,11 +70,11 @@ namespace Rodin::Adaptation::SWIFT
         return weightJ *
           energy(m_jSlack,
             parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-            parameters.model.jacobianWeight) +
+            parameters.model.hinge.jacobian) +
           weightQ *
           energy(m_qSlack,
             parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
-            parameters.model.distortionWeight);
+            parameters.model.hinge.distortion);
       }
 
       /**
@@ -85,6 +85,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_rowDeformation.isAdmissible();
       }
+
       /**
        * @brief Negative Jacobian differential at the frozen outer state.
        * @param gradient Incremental deformation gradient.
@@ -94,6 +95,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return -m_rowDeformation.getJacobianAction(gradient);
       }
+
       /**
        * @brief Distortion differential at the frozen outer state.
        * @param gradient Incremental deformation gradient.
@@ -103,6 +105,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_rowDeformation.getRelativeDistortionAction(gradient);
       }
+
       /**
        * @brief The jacobian action.
        * @returns The negative determinant differential on the inner increment.
@@ -111,6 +114,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jAction;
       }
+
       /**
        * @brief The distortion action.
        * @returns The distortion differential on the inner increment.
@@ -119,6 +123,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_qAction;
       }
+
       /**
        * @brief The jacobian slack.
        * @returns The affine distance above the Jacobian floor.
@@ -127,6 +132,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jSlack;
       }
+
       /**
        * @brief The distortion slack.
        * @returns The affine distance below the distortion ceiling.
@@ -135,6 +141,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_qSlack;
       }
+
       /**
        * @brief The jacobian hessian.
        * @returns The active Jacobian hinge curvature coefficient, or zero.
@@ -143,6 +150,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jHessian;
       }
+
       /**
        * @brief The distortion hessian.
        * @returns The active distortion hinge curvature coefficient, or zero.
@@ -151,6 +159,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_qHessian;
       }
+
       /**
        * @brief The jacobian force.
        * @returns The coefficient of the Jacobian row in the Newton load.
@@ -159,6 +168,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         return m_jForce;
       }
+
       /**
        * @brief The distortion force.
        * @returns The coefficient of the distortion row in the Newton load.

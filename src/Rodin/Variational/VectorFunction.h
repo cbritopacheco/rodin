@@ -15,6 +15,7 @@
 #ifndef RODIN_VARIATIONAL_VECTORFUNCTION_H
 #define RODIN_VARIATIONAL_VECTORFUNCTION_H
 
+#include "Rodin/Types.h"
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -23,6 +24,7 @@
 
 #include "Rodin/Alert.h"
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Utility/ForConstexpr.h"
 
 #include "Function.h"
@@ -34,10 +36,11 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::VectorFunctionBase<Scalar, Derived>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Derived CRTP function type.
+    using DerivedType = Derived;
   };
 }
 
@@ -73,7 +76,7 @@ namespace Rodin::Variational
    * @tparam Scalar The scalar component type (typically Real or Complex)
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Component Access
+   * # Component Access
    * Vector components can be accessed via:
    * - Index notation: `f(i)` for the i-th component
    * - Coordinate accessors: `f.x()`, `f.y()`, `f.z()` for first three components
@@ -119,8 +122,7 @@ namespace Rodin::Variational
        * @returns Component function for index 0
        * @pre getDimension() >= 1
        */
-      constexpr
-      auto x() const
+      constexpr auto x() const
       {
         assert(getDimension() >= 1);
         return operator()(0);
@@ -131,8 +133,7 @@ namespace Rodin::Variational
        * @returns Component function for index 1
        * @pre getDimension() >= 2
        */
-      constexpr
-      auto y() const
+      constexpr auto y() const
       {
         assert(getDimension() >= 2);
         return operator()(1);
@@ -143,8 +144,7 @@ namespace Rodin::Variational
        * @returns Component function for index 2
        * @pre getDimension() >= 3
        */
-      constexpr
-      auto z() const
+      constexpr auto z() const
       {
         assert(getDimension() >= 3);
         return operator()(2);
@@ -161,8 +161,7 @@ namespace Rodin::Variational
        * @pre i < getDimension()
        * @see <a href="_component_8h.html">Component</a>
        */
-      constexpr
-      auto operator()(size_t i) const
+      constexpr auto operator()(size_t i) const
       {
         assert(i < getDimension());
         return Component(*this, i);
@@ -175,8 +174,7 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Vector value at the point
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -186,10 +184,10 @@ namespace Rodin::Variational
        * @param[in] ip Integration point at which to evaluate
        * @returns Vector value at the integration point
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+        if constexpr (requires(
+                        const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
           return static_cast<const Derived&>(*this).getValue(ip);
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
@@ -199,8 +197,7 @@ namespace Rodin::Variational
        * @brief Gets the dimension of the vector object.
        * @returns Dimension of vector.
        */
-      constexpr
-      size_t getDimension() const
+      constexpr size_t getDimension() const
       {
         return static_cast<const Derived&>(*this).getDimension();
       }
@@ -210,8 +207,7 @@ namespace Rodin::Variational
        * @param[in] geom Entity whose local polynomial order is requested
        * @returns Polynomial order when known
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
@@ -236,6 +232,7 @@ namespace Rodin::Variational
 
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
@@ -249,8 +246,30 @@ namespace Rodin::Variational
        * Each value passed must be convertible to any specialization of
        * RealFunction.
        */
-      VectorFunction(const VectorType& v)
+      VectorFunction(const typename VectorType::Parent& v)
         : m_vector(v)
+      {}
+
+      /**
+       * @brief Retains a temporary dense vector for the lifetime of its expression copies.
+       * @param v Dense vector whose storage is transferred to the function.
+       *
+       * Lvalue construction continues to borrow its vector. Rvalue construction
+       * shares immutable owned storage across expression copies; evaluation uses
+       * the same direct reference in both cases.
+       */
+      VectorFunction(typename VectorType::Parent&& v)
+        : m_owned(std::make_shared<const VectorType>(std::move(v))),
+          m_vector(*m_owned)
+      {}
+
+      /**
+       * @brief Copies a const temporary into retained storage.
+       * @param v Temporary whose const qualification prevents moving its values.
+       */
+      VectorFunction(const typename VectorType::Parent&& v)
+        : m_owned(std::make_shared<const VectorType>(v)),
+          m_vector(*m_owned)
       {}
 
       /**
@@ -259,6 +278,7 @@ namespace Rodin::Variational
        */
       VectorFunction(const VectorFunction& other)
         : Parent(other),
+          m_owned(other.m_owned),
           m_vector(other.m_vector)
       {}
 
@@ -268,6 +288,7 @@ namespace Rodin::Variational
        */
       VectorFunction(VectorFunction&& other)
         : Parent(std::move(other)),
+          m_owned(std::move(other.m_owned)),
           m_vector(std::move(other.m_vector))
       {}
 
@@ -285,8 +306,7 @@ namespace Rodin::Variational
        * @brief Gets the vector dimension.
        * @returns Number of stored components
        */
-      constexpr
-      size_t getDimension() const
+      constexpr size_t getDimension() const
       {
         return m_vector.get().size();
       }
@@ -296,8 +316,7 @@ namespace Rodin::Variational
        * @returns Reference to this function
        * @param attr Mesh attribute selecting the region.
        */
-      constexpr
-      VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
+      constexpr VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }
@@ -319,7 +338,9 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const VectorType> m_vector;
+      /// @brief Optional immutable owner for vectors supplied as temporaries.
+      std::shared_ptr<const VectorType> m_owned;
+      std::reference_wrapper<const typename VectorType::Parent> m_vector;
   };
 
   /**
@@ -328,6 +349,14 @@ namespace Rodin::Variational
    */
   template <class Scalar>
   VectorFunction(const Math::Vector<Scalar>& v) -> VectorFunction<Math::Vector<Scalar>>;
+
+  /**
+   * @brief CTAD for native Eigen dense-vector constants.
+   * @tparam Scalar Vector scalar type.
+   * @param v Vector borrowed when an lvalue and retained when a temporary.
+   */
+  template <class Scalar>
+  VectorFunction(const Eigen::VectorX<Scalar>& v) -> VectorFunction<Math::Vector<Scalar>>;
 
   /**
    * @ingroup VectorFunctionSpecializations
@@ -349,7 +378,7 @@ namespace Rodin::Variational
    * auto v = VectorFunction{Dx(s), 42, s};
    * @endcode
    */
-  template <class V, class ... Values>
+  template <class V, class... Values>
   class VectorFunction<V, Values...> final
     : public VectorFunctionBase<Real, VectorFunction<V, Values...>>
   {
@@ -359,22 +388,24 @@ namespace Rodin::Variational
 
       /// @brief Number of vector components.
       static constexpr size_t Dimension = 1 + sizeof...(Values);
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
       /// @brief Range (evaluation value) type.
       using RangeType =
-        std::conditional_t<
-          Dimension <= Math::SpatialVector<ScalarType>::MaxSize,
-          SpatialVectorType,
-          VectorType>;
+        std::conditional_t<Dimension <= Math::SpatialVector<ScalarType>::MaxSize,
+          SpatialVectorType, VectorType>;
 
       /// @brief Fixed-size vector type used for storage decisions.
       using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, Dimension>;
 
       /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<V, Values...>>;
+
       /**
        * @brief Constructs a vector with the given values.
        * @param[in] v First component source
@@ -416,20 +447,15 @@ namespace Rodin::Variational
         if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
         {
           res.resize(Dimension);
-          Utility::ForIndex<Dimension>(
-            [&](auto i)
-            {
-              res[static_cast<std::uint8_t>(i)] = std::get<i>(m_fs).getValue(p);
-            });
+          Utility::ForIndex<Dimension>([&](auto i) {
+            res[static_cast<std::uint8_t>(i)] = std::get<i>(m_fs).getValue(p);
+          });
         }
         else
         {
           res.resize(Dimension);
           Utility::ForIndex<Dimension>(
-            [&](auto i)
-            {
-              res.coeffRef(i) = std::get<i>(m_fs).getValue(p);
-            });
+            [&](auto i) { res.coeffRef(i) = std::get<i>(m_fs).getValue(p); });
         }
         return res;
       }
@@ -445,28 +471,24 @@ namespace Rodin::Variational
         if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
         {
           res.resize(Dimension);
-          Utility::ForIndex<Dimension>(
-            [&](auto i)
-            {
-              const auto& f = std::get<i>(m_fs);
-              if constexpr (requires { f.getValue(ip); })
-                res[static_cast<std::uint8_t>(i)] = f.getValue(ip);
-              else
-                res[static_cast<std::uint8_t>(i)] = f.getValue(ip.getPoint());
-            });
+          Utility::ForIndex<Dimension>([&](auto i) {
+            const auto& f = std::get<i>(m_fs);
+            if constexpr (requires { f.getValue(ip); })
+              res[static_cast<std::uint8_t>(i)] = f.getValue(ip);
+            else
+              res[static_cast<std::uint8_t>(i)] = f.getValue(ip.getPoint());
+          });
         }
         else
         {
           res.resize(Dimension);
-          Utility::ForIndex<Dimension>(
-            [&](auto i)
-            {
-              const auto& f = std::get<i>(m_fs);
-              if constexpr (requires { f.getValue(ip); })
-                res.coeffRef(i) = f.getValue(ip);
-              else
-                res.coeffRef(i) = f.getValue(ip.getPoint());
-            });
+          Utility::ForIndex<Dimension>([&](auto i) {
+            const auto& f = std::get<i>(m_fs);
+            if constexpr (requires { f.getValue(ip); })
+              res.coeffRef(i) = f.getValue(ip);
+            else
+              res.coeffRef(i) = f.getValue(ip.getPoint());
+          });
         }
         return res;
       }
@@ -475,8 +497,7 @@ namespace Rodin::Variational
        * @brief Gets the vector dimension.
        * @returns Number of component functions
        */
-      constexpr
-      size_t getDimension() const
+      constexpr size_t getDimension() const
       {
         return Dimension;
       }
@@ -486,9 +507,8 @@ namespace Rodin::Variational
        * @param[in] attrs Trace-domain specification passed to components
        * @returns Reference to this function
        */
-      template <class ... Args>
-      constexpr
-      VectorFunction& traceOf(const Args&... attrs)
+      template <class... Args>
+      constexpr VectorFunction& traceOf(const Args&... attrs)
       {
         std::apply([&](auto&... s) { (s.traceOf(attrs...), ...); }, m_fs);
         return *this;
@@ -499,19 +519,17 @@ namespace Rodin::Variational
        * @param[in] geom Entity whose local polynomial order is requested
        * @returns Polynomial order when at least one component reports it
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        std::optional<size_t> res = std::nullopt;
+        Optional<size_t> res = std::nullopt;
         std::apply(
-          [&](const auto&... s)
-          {
-            (([&]
-              {
-                const auto o = s.getOrder(geom);
-                if (o)
-                  res = res ? std::max(*res, *o) : *o;
-              }()), ...);
+          [&](const auto&... s) {
+            (([&] {
+              const auto o = s.getOrder(geom);
+              if (o)
+                res = res ? std::max(*res, *o) : *o;
+            }()),
+              ...);
           },
           m_fs);
         return res;
@@ -532,6 +550,11 @@ namespace Rodin::Variational
    * @param values Parameter pack of values
    */
   template <class V, class... Values>
+    requires((std::is_convertible_v<V, Real> ||
+               std::is_invocable_r_v<Real, V, const Geometry::Point&>) &&
+              ((std::is_convertible_v<Values, Real> ||
+                 std::is_invocable_r_v<Real, Values, const Geometry::Point&>) &&
+                ...))
   VectorFunction(const V& v, const Values&... values) -> VectorFunction<V, Values...>;
 
   /**
@@ -564,7 +587,8 @@ namespace Rodin::Variational
        * @param[in] f Callable returning a vector value
        */
       VectorFunction(size_t vdim, F f)
-        : m_vdim(vdim), m_f(f)
+        : m_vdim(vdim),
+          m_f(f)
       {}
 
       /**
@@ -615,8 +639,7 @@ namespace Rodin::Variational
        * @returns Reference to this function
        * @param attr Mesh attribute selecting the region.
        */
-      constexpr
-      VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
+      constexpr VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }

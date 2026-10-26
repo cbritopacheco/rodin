@@ -29,6 +29,8 @@ namespace Rodin::Tests::Unit
         using namespace Variational;
         const auto space = [](const auto& fes) {
           constexpr Real tolerance = 1e-11; // Constant-reproduction roundoff budget.
+          // Twice the highest field degree exercised below; the fields are constant.
+          constexpr size_t quadratureOrder = 8;
 #ifdef PETSC_USE_COMPLEX
           const PetscScalar value(2, 3), scale(-1, 2);
 #else
@@ -37,7 +39,7 @@ namespace Rodin::Tests::Unit
           GridFunction<std::decay_t<decltype(fes)>, ::Vec> field(fes);
           field = value;
           auto integral = Integral(field);
-          integral.setOrder(18);
+          integral.setOrder(quadratureOrder);
           const auto verify = [&](PetscScalar expected) {
             const PetscScalar actual = integral.compute();
             EXPECT_NEAR(PetscRealPart(actual), PetscRealPart(expected), tolerance);

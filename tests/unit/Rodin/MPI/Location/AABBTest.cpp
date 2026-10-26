@@ -68,8 +68,10 @@ namespace
       {
         Math::SpatialPoint x = Math::SpatialPoint::Zero(sdim);
         if (d > 0)
+        {
           for (size_t j = 0; j < d; ++j)
             x[j] = traits.getVertex(v)[j];
+        }
         x[0] = CellSpacing * c + AxisCompression * x[0];
         builder.vertex(x);
         vertices[v] = c * nv + v;
@@ -289,11 +291,13 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
     if (world->rank() != owner)
       builder.setOwner(0, i, owner);
     else
+    {
       for (int r = 0; r < world->size(); ++r)
       {
         if (r != owner)
           builder.halo(0, i, r);
       }
+    }
   }
   for (Index c = 0; c < 2; ++c)
   {
@@ -303,11 +307,13 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
     if (world->rank() != owner)
       builder.setOwner(1, i, owner);
     else
+    {
       for (int r = 0; r < world->size(); ++r)
       {
         if (r != owner)
           builder.halo(1, i, r);
       }
+    }
   }
   auto mesh = MPIMesh::Builder(context).initialize(builder.finalize()).finalize();
   Location::AABB locator(mesh);

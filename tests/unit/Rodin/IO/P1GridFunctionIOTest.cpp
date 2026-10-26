@@ -19,46 +19,42 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  /**
-   * @brief Test saving and loading P1 GridFunction on triangle mesh (2D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on triangle mesh (2D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Triangle)
   {
     // Create 2D triangle mesh with >= 16 elements (4x4 grid = 32 triangles)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16u);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
+
     // P1 is linear, so use a linear function
-    RealFunction func([](const Geometry::Point& p) { 
-      return p.x() + 2.0 * p.y(); 
-    });
+    RealFunction func([](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
     gf.project(func);
-    
+
     std::stringstream ss;
     GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
     printer.print(ss);
-    
+
     // Verify header
     std::string line;
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementCollection: H1_2D_P1");
-    
+
     ss.clear();
     ss.seekg(0);
-    
+
     GridFunction gf_loaded(fes);
     GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
     loader.load(ss);
-    
+
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -66,44 +62,40 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on quadrilateral mesh (2D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on quadrilateral mesh (2D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Quadrilateral)
   {
     // Create 2D quad mesh with >= 16 elements (5x5 grid = 16 quads)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 5, 5 });
-    
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {5, 5});
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16u);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
-    RealFunction func([](const Geometry::Point& p) { 
-      return p.x() + 2.0 * p.y(); 
-    });
+
+    RealFunction func([](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
     gf.project(func);
-    
+
     std::stringstream ss;
     GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
     printer.print(ss);
-    
+
     std::string line;
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementCollection: H1_2D_P1");
-    
+
     ss.clear();
     ss.seekg(0);
-    
+
     GridFunction gf_loaded(fes);
     GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
     loader.load(ss);
-    
+
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -111,45 +103,42 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on tetrahedron mesh (3D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on tetrahedron mesh (3D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Tetrahedron)
   {
     // Create 3D tet mesh with >= 16 elements (3x3x3 grid = 162 tets)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
-    
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16u);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
-    RealFunction func([](const Geometry::Point& p) { 
-      return p.x() + 2.0 * p.y() + 3.0 * p.z(); 
-    });
+
+    RealFunction func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y() + 3.0 * p.z(); });
     gf.project(func);
-    
+
     std::stringstream ss;
     GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
     printer.print(ss);
-    
+
     std::string line;
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P1");
-    
+
     ss.clear();
     ss.seekg(0);
-    
+
     GridFunction gf_loaded(fes);
     GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
     loader.load(ss);
-    
+
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -157,45 +146,42 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on wedge mesh (3D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on wedge mesh (3D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Wedge)
   {
     // Create 3D wedge mesh with >= 16 elements (3x3x3 grid)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
-    
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, {3, 3, 3});
+
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16u);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
-    RealFunction func([](const Geometry::Point& p) { 
-      return p.x() + 2.0 * p.y() + 3.0 * p.z(); 
-    });
+
+    RealFunction func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y() + 3.0 * p.z(); });
     gf.project(func);
-    
+
     std::stringstream ss;
     GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
     printer.print(ss);
-    
+
     std::string line;
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P1");
-    
+
     ss.clear();
     ss.seekg(0);
-    
+
     GridFunction gf_loaded(fes);
     GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
     loader.load(ss);
-    
+
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -243,43 +229,39 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on segment mesh (1D)
-   */
+  /// @brief Test saving and loading P1 GridFunction on segment mesh (1D)
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Segment)
   {
     // Create 1D segment mesh with >= 16 elements (17 divisions = 16 segments)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 17 });
-    
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {17});
+
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16u);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
-    RealFunction func([](const Geometry::Point& p) { 
-      return 2.0 * p.x() + 1.0; 
-    });
+
+    RealFunction func([](const Geometry::Point& p) { return 2.0 * p.x() + 1.0; });
     gf.project(func);
-    
+
     std::stringstream ss;
     GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
     printer.print(ss);
-    
+
     std::string line;
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementCollection: H1_1D_P1");
-    
+
     ss.clear();
     ss.seekg(0);
-    
+
     GridFunction gf_loaded(fes);
     GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
     loader.load(ss);
-    
+
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -287,72 +269,88 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test saving and loading P1 GridFunction on mixed 2D mesh
-   */
+  /// @brief Test saving and loading P1 GridFunction on mixed 2D mesh
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Mixed2D)
   {
     // Create a mixed mesh with triangles and quads, >= 16 elements
     Mesh mesh = Mesh<Context::Local>::Builder()
-      .initialize(2)
-      .nodes(25)  // 5x5 grid of nodes
-      .vertex({0.0, 0.0}).vertex({0.25, 0.0}).vertex({0.5, 0.0}).vertex({0.75, 0.0}).vertex({1.0, 0.0})
-      .vertex({0.0, 0.25}).vertex({0.25, 0.25}).vertex({0.5, 0.25}).vertex({0.75, 0.25}).vertex({1.0, 0.25})
-      .vertex({0.0, 0.5}).vertex({0.25, 0.5}).vertex({0.5, 0.5}).vertex({0.75, 0.5}).vertex({1.0, 0.5})
-      .vertex({0.0, 0.75}).vertex({0.25, 0.75}).vertex({0.5, 0.75}).vertex({0.75, 0.75}).vertex({1.0, 0.75})
-      .vertex({0.0, 1.0}).vertex({0.25, 1.0}).vertex({0.5, 1.0}).vertex({0.75, 1.0}).vertex({1.0, 1.0})
-      // First row: triangles
-      .polytope(Polytope::Type::Triangle, {0, 1, 5})
-      .polytope(Polytope::Type::Triangle, {1, 6, 5})
-      .polytope(Polytope::Type::Triangle, {1, 2, 6})
-      .polytope(Polytope::Type::Triangle, {2, 7, 6})
-      // Second row: quads
-      .polytope(Polytope::Type::Quadrilateral, {5, 6, 11, 10})
-      .polytope(Polytope::Type::Quadrilateral, {6, 7, 12, 11})
-      .polytope(Polytope::Type::Quadrilateral, {7, 8, 13, 12})
-      .polytope(Polytope::Type::Quadrilateral, {8, 9, 14, 13})
-      // Third row: triangles
-      .polytope(Polytope::Type::Triangle, {10, 11, 15})
-      .polytope(Polytope::Type::Triangle, {11, 16, 15})
-      .polytope(Polytope::Type::Triangle, {11, 12, 16})
-      .polytope(Polytope::Type::Triangle, {12, 17, 16})
-      // Fourth row: quads
-      .polytope(Polytope::Type::Quadrilateral, {15, 16, 21, 20})
-      .polytope(Polytope::Type::Quadrilateral, {16, 17, 22, 21})
-      .polytope(Polytope::Type::Quadrilateral, {17, 18, 23, 22})
-      .polytope(Polytope::Type::Quadrilateral, {18, 19, 24, 23})
-      .finalize();
-    
+                  .initialize(2)
+                  .nodes(25) // 5x5 grid of nodes
+                  .vertex({0.0, 0.0})
+                  .vertex({0.25, 0.0})
+                  .vertex({0.5, 0.0})
+                  .vertex({0.75, 0.0})
+                  .vertex({1.0, 0.0})
+                  .vertex({0.0, 0.25})
+                  .vertex({0.25, 0.25})
+                  .vertex({0.5, 0.25})
+                  .vertex({0.75, 0.25})
+                  .vertex({1.0, 0.25})
+                  .vertex({0.0, 0.5})
+                  .vertex({0.25, 0.5})
+                  .vertex({0.5, 0.5})
+                  .vertex({0.75, 0.5})
+                  .vertex({1.0, 0.5})
+                  .vertex({0.0, 0.75})
+                  .vertex({0.25, 0.75})
+                  .vertex({0.5, 0.75})
+                  .vertex({0.75, 0.75})
+                  .vertex({1.0, 0.75})
+                  .vertex({0.0, 1.0})
+                  .vertex({0.25, 1.0})
+                  .vertex({0.5, 1.0})
+                  .vertex({0.75, 1.0})
+                  .vertex({1.0, 1.0})
+                  // First row: triangles
+                  .polytope(Polytope::Type::Triangle, {0, 1, 5})
+                  .polytope(Polytope::Type::Triangle, {1, 6, 5})
+                  .polytope(Polytope::Type::Triangle, {1, 2, 6})
+                  .polytope(Polytope::Type::Triangle, {2, 7, 6})
+                  // Second row: quads
+                  .polytope(Polytope::Type::Quadrilateral, {5, 6, 11, 10})
+                  .polytope(Polytope::Type::Quadrilateral, {6, 7, 12, 11})
+                  .polytope(Polytope::Type::Quadrilateral, {7, 8, 13, 12})
+                  .polytope(Polytope::Type::Quadrilateral, {8, 9, 14, 13})
+                  // Third row: triangles
+                  .polytope(Polytope::Type::Triangle, {10, 11, 15})
+                  .polytope(Polytope::Type::Triangle, {11, 16, 15})
+                  .polytope(Polytope::Type::Triangle, {11, 12, 16})
+                  .polytope(Polytope::Type::Triangle, {12, 17, 16})
+                  // Fourth row: quads
+                  .polytope(Polytope::Type::Quadrilateral, {15, 16, 21, 20})
+                  .polytope(Polytope::Type::Quadrilateral, {16, 17, 22, 21})
+                  .polytope(Polytope::Type::Quadrilateral, {17, 18, 23, 22})
+                  .polytope(Polytope::Type::Quadrilateral, {18, 19, 24, 23})
+                  .finalize();
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     ASSERT_GE(mesh.getCellCount(), 16u);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
-    RealFunction func([](const Geometry::Point& p) { 
-      return p.x() + 2.0 * p.y(); 
-    });
+
+    RealFunction func([](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
     gf.project(func);
-    
+
     std::stringstream ss;
     GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
     printer.print(ss);
-    
+
     std::string line;
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementSpace");
     std::getline(ss, line);
     EXPECT_EQ(line, "FiniteElementCollection: H1_2D_P1");
-    
+
     ss.clear();
     ss.seekg(0);
-    
+
     GridFunction gf_loaded(fes);
     GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
     loader.load(ss);
-    
+
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
@@ -360,25 +358,21 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /**
-   * @brief Test file-based I/O for P1 GridFunction
-   */
+  /// @brief Test file-based I/O for P1 GridFunction
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadFile)
   {
     // Create a simple 2D mesh
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     P1 fes(mesh);
     GridFunction gf(fes);
-    
-    RealFunction func([](const Geometry::Point& p) { 
-      return p.x() + 2.0 * p.y(); 
-    });
+
+    RealFunction func([](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); });
     gf.project(func);
-    
+
     // Save to file
     const std::string filename = "/tmp/test_p1.gf";
     {
@@ -386,22 +380,23 @@ namespace Rodin::Tests::Unit
       GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
       printer.print(ofs);
     }
-    
+
     // Load from file
     GridFunction gf_loaded(fes);
     {
       std::ifstream ifs(filename);
-      GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
+      GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(
+        gf_loaded);
       loader.load(ifs);
     }
-    
+
     // Verify the data matches
     ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
     for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
     {
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
     }
-    
+
     // Clean up
     std::remove(filename.c_str());
   }
@@ -411,11 +406,7 @@ namespace Rodin::Tests::Unit
     Mesh<Context::Local> makePointMesh()
     {
       Mesh<Context::Local>::Builder builder;
-      return builder
-        .initialize(1)
-        .nodes(1)
-        .vertex({ 0.0 })
-        .finalize();
+      return builder.initialize(1).nodes(1).vertex({0.0}).finalize();
     }
 
     Mesh<Context::Local> makeMeditCoverageMesh(Polytope::Type geometry)
@@ -425,15 +416,15 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Point:
           return makePointMesh();
         case Polytope::Type::Segment:
-          return LocalMesh::UniformGrid(geometry, { 5 });
+          return LocalMesh::UniformGrid(geometry, {5});
         case Polytope::Type::Triangle:
         case Polytope::Type::Quadrilateral:
-          return LocalMesh::UniformGrid(geometry, { 3, 3 });
+          return LocalMesh::UniformGrid(geometry, {3, 3});
         case Polytope::Type::Tetrahedron:
         case Polytope::Type::Pyramid:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
-          return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
+          return LocalMesh::UniformGrid(geometry, {2, 2, 2});
       }
       assert(false);
       return {};
@@ -443,15 +434,22 @@ namespace Rodin::Tests::Unit
     {
       switch (geometry)
       {
-        case Polytope::Type::Point:         return "Point";
-        case Polytope::Type::Segment:       return "Segment";
-        case Polytope::Type::Triangle:      return "Triangle";
-        case Polytope::Type::Quadrilateral: return "Quadrilateral";
-        case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Point:
+          return "Point";
+        case Polytope::Type::Segment:
+          return "Segment";
+        case Polytope::Type::Triangle:
+          return "Triangle";
+        case Polytope::Type::Quadrilateral:
+          return "Quadrilateral";
+        case Polytope::Type::Tetrahedron:
+          return "Tetrahedron";
         case Polytope::Type::Pyramid:
           return "Pyramid";
-        case Polytope::Type::Hexahedron:    return "Hexahedron";
-        case Polytope::Type::Wedge:         return "Wedge";
+        case Polytope::Type::Hexahedron:
+          return "Hexahedron";
+        case Polytope::Type::Wedge:
+          return "Wedge";
       }
       return "Unknown";
     }
@@ -493,10 +491,47 @@ namespace Rodin::Tests::Unit
       return meditGeometryName(info.param);
     });
 
+  /// @brief Loads both MFEM vector orderings from independently constructed coefficients.
+  TEST(Rodin_IO_MFEM_P1_GridFunction, VectorCoefficientOrderings)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    using FES = P1<Math::SpatialVector<Real>>;
+    FES fes(mesh, 3);
+    const size_t vertexCount = mesh.getVertexCount();
+    for (const int ordering : {0, 1})
+    {
+      SCOPED_TRACE(ordering);
+      std::stringstream stream;
+      stream << "# Independent vector fixture\n\nFiniteElementSpace\n"
+             << "FiniteElementCollection: H1_2D_P1\nVDim: 3\nOrdering: " << ordering
+             << "\n\n";
+      for (size_t i = 0; i < 3 * vertexCount; ++i)
+      {
+        const size_t vertex = ordering == 0 ? i % vertexCount : i / 3;
+        const size_t component = ordering == 0 ? i / vertexCount : i % 3;
+        stream << 100 * component + vertex + 1 << '\n';
+      }
+
+      GridFunction<FES, Math::Vector<Real>> loaded(fes);
+      loaded.getData().setConstant(-1.0);
+      GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Real>> loader(loaded);
+      loader.load(stream);
+      ASSERT_EQ(loaded.getSize(), 3 * vertexCount);
+      for (size_t component = 0; component < 3; ++component)
+      {
+        for (size_t vertex = 0; vertex < vertexCount; ++vertex)
+        {
+          EXPECT_DOUBLE_EQ(loaded[vertex + component * vertexCount],
+            static_cast<Real>(100 * component + vertex + 1));
+        }
+      }
+    }
+  }
+
   /// @brief Verifies vector 3 D round trip for IO MEDIT P1 grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_MEDIT_P1_GridFunction, Vector3DRoundTrip)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
 
     using FES = P1<Math::SpatialVector<Real>>;
     FES fes(mesh, 3);

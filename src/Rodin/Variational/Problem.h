@@ -52,20 +52,22 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Variational::ProblemBase<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 
   /// @brief Form-language traits for a two-field variational problem.
   template <class LinearSystem, class TrialFunction, class TestFunction>
   struct Traits<Variational::Problem<TrialFunction, TestFunction, LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
-      /// @brief Trial function type.
-      using TrialFunctionType = TrialFunction;
-      /// @brief Test function type.
-      using TestFunctionType = TestFunction;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
+
+    /// @brief Trial function type.
+    using TrialFunctionType = TrialFunction;
+
+    /// @brief Test function type.
+    using TestFunctionType = TestFunction;
   };
 
 }
@@ -81,7 +83,7 @@ namespace Rodin::Variational
    * of linear and nonlinear problems, boundary conditions, and various finite
    * element spaces.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * The module implements the standard finite element methodology:
    * - **Bilinear Forms**: @f$ a(u,v) : V \times V \to \mathbb{R} @f$
    * - **Linear Forms**: @f$ l(v) : V \to \mathbb{R} @f$ 
@@ -112,7 +114,7 @@ namespace Rodin::Variational
    *
    * @tparam LinearSystem Type of linear system (e.g., sparse or dense)
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // Define a problem and solve
    * auto problem = Problem(trialSpace, testSpace);
@@ -126,20 +128,16 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Matrix operator type from linear system traits
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
       /// @brief Vector type from linear system traits
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystem>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystem>::VectorType;
 
-      /// @brief Scalar type from linear system traits  
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+      /// @brief Scalar type from linear system traits
+      using ScalarType = typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
       /// @brief Problem body type containing bilinear and linear forms
-      using ProblemBodyType =
-        ProblemBody<OperatorType, VectorType, ScalarType>;
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Default constructor
       ProblemBase() = default;
@@ -178,7 +176,7 @@ namespace Rodin::Variational
        */
       virtual const ProblemBodyType& getBody() const
       {
-        Alert::Exception error;
+        Alert::MemberFunctionException error(*this, __func__);
         error << "This problem does not expose a variational body.";
         throw error;
       }
@@ -291,73 +289,58 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Trial function type.
-      using TrialFunctionType =
-        U;
+      using TrialFunctionType = U;
 
       /// @brief Test function type.
-      using TestFunctionType =
-        V;
+      using TestFunctionType = V;
 
       /// @brief Linear system type.
-      using LinearSystemType =
-        LinearSystem;
+      using LinearSystemType = LinearSystem;
 
       /// @brief Solver base class type.
-      using SolverBaseType =
-        Solver::LinearSolverBase<LinearSystem>;
+      using SolverBaseType = Solver::LinearSolverBase<LinearSystem>;
 
       /// @brief Solution vector type.
-      using SolutionType =
-        typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
+      using SolutionType = typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
 
       /// @brief Trial finite element space type.
-      using TrialFESType =
-        typename FormLanguage::Traits<U>::FESType;
+      using TrialFESType = typename FormLanguage::Traits<U>::FESType;
 
       /// @brief Test finite element space type.
-      using TestFESType =
-        typename FormLanguage::Traits<V>::FESType;
+      using TestFESType = typename FormLanguage::Traits<V>::FESType;
 
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystem>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystem>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
       /// @brief Scalar value type of the trial space.
-      using TrialFESScalarType =
-        typename FormLanguage::Traits<TrialFESType>::ScalarType;
+      using TrialFESScalarType = typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
       /// @brief Scalar value type of the test space.
-      using TestFESScalarType =
-        typename FormLanguage::Traits<TestFESType>::ScalarType;
+      using TestFESScalarType = typename FormLanguage::Traits<TestFESType>::ScalarType;
 
       /// @brief Linear form integrator base type.
-      using LinearFormIntegratorBaseType =
-        LinearFormIntegratorBase<TestFESScalarType>;
+      using LinearFormIntegratorBaseType = LinearFormIntegratorBase<TestFESScalarType>;
 
       /// @brief Problem body type.
-      using ProblemBodyType =
-        ProblemBody<OperatorType, VectorType, ScalarType>;
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Parent class type.
-      using Parent =
-        ProblemBase<LinearSystemType>;
+      using Parent = ProblemBase<LinearSystemType>;
 
       /**
        * @brief Constructs a problem base from trial and test functions.
        * @param u Trial shape function.
        * @param v Test shape function.
        */
-      constexpr
-      ProblemUVBase(U& u, V& v)
-        : m_trialFunction(u), m_testFunction(v)
+      constexpr ProblemUVBase(U& u, V& v)
+        : m_trialFunction(u),
+          m_testFunction(v)
       {}
 
       /**
@@ -414,8 +397,7 @@ namespace Rodin::Variational
        * @brief Returns the trial function.
        * @returns The trial function.
        */
-      constexpr
-      TrialFunctionType& getTrialFunction()
+      constexpr TrialFunctionType& getTrialFunction()
       {
         return m_trialFunction;
       }
@@ -424,8 +406,7 @@ namespace Rodin::Variational
        * @brief Returns the test function.
        * @returns The test function.
        */
-      constexpr
-      TestFunctionType& getTestFunction()
+      constexpr TestFunctionType& getTestFunction()
       {
         return m_testFunction;
       }
@@ -434,8 +415,7 @@ namespace Rodin::Variational
        * @brief Returns the trial function.
        * @returns The trial function.
        */
-      constexpr
-      const TrialFunctionType& getTrialFunction() const
+      constexpr const TrialFunctionType& getTrialFunction() const
       {
         return m_trialFunction.get();
       }
@@ -444,8 +424,7 @@ namespace Rodin::Variational
        * @brief Returns the test function.
        * @returns The test function.
        */
-      constexpr
-      const TestFunctionType& getTestFunction() const
+      constexpr const TestFunctionType& getTestFunction() const
       {
         return m_testFunction.get();
       }
@@ -472,17 +451,13 @@ namespace Rodin::Variational
   class Problem<LinearSystem, TrialFunction, TestFunction>
     : public ProblemUVBase<LinearSystem, TrialFunction, TestFunction>
   {
-    using TrialFESType =
-      typename FormLanguage::Traits<TrialFunction>::FESType;
+    using TrialFESType = typename FormLanguage::Traits<TrialFunction>::FESType;
 
-    using TestFESType =
-      typename FormLanguage::Traits<TestFunction>::FESType;
+    using TestFESType = typename FormLanguage::Traits<TestFunction>::FESType;
 
-    using TrialFESMeshType =
-      typename FormLanguage::Traits<TrialFESType>::MeshType;
+    using TrialFESMeshType = typename FormLanguage::Traits<TrialFESType>::MeshType;
 
-    using TestFESMeshType =
-      typename FormLanguage::Traits<TestFESType>::MeshType;
+    using TestFESMeshType = typename FormLanguage::Traits<TestFESType>::MeshType;
 
     using TrialFESContextType =
       typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
@@ -492,28 +467,22 @@ namespace Rodin::Variational
 
     public:
       /// @brief Linear system type.
-      using LinearSystemType =
-        LinearSystem;
+      using LinearSystemType = LinearSystem;
 
       /// @brief Linear solver base type.
-      using SolverBaseType =
-        Solver::LinearSolverBase<LinearSystemType>;
+      using SolverBaseType = Solver::LinearSolverBase<LinearSystemType>;
 
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystem>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystem>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
       /// @brief Problem body type.
-      using ProblemBodyType =
-        ProblemBody<OperatorType, VectorType, ScalarType>;
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Trial finite element mesh context type.
       using TrialFESMeshContextType =
@@ -524,21 +493,18 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
       /// @brief Assembly strategy type.
-      using AssemblyType =
-        typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
-          ::template Type<LinearSystem, Problem>;
+      using AssemblyType = typename Assembly::Default<TrialFESMeshContextType,
+        TestFESMeshContextType>::template Type<LinearSystem, Problem>;
 
       /// @brief Parent class type.
-      using Parent =
-        ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
+      using Parent = ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
 
       /**
        * @brief Constructs a two-field problem from trial and test functions.
        * @param u Function operand.
        * @param v Function operand.
        */
-      constexpr
-      Problem(TrialFunction& u, TestFunction& v)
+      constexpr Problem(TrialFunction& u, TestFunction& v)
         : Parent(u, v),
           m_assembled(false)
       {}
@@ -547,8 +513,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Problem(const Problem& other)
+      constexpr Problem(const Problem& other)
         : Parent(other),
           m_assembled(other.m_assembled),
           m_pb(other.m_pb),
@@ -559,8 +524,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Problem(Problem&& other) noexcept
+      constexpr Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(other.m_assembled),
           m_pb(std::move(other.m_pb)),
@@ -581,7 +545,7 @@ namespace Rodin::Variational
           m_assembled = other.m_assembled;
           m_pb = other.m_pb;
           m_axb = other.m_axb;
-          m_assembly.reset(other.m_assembly->copy());
+          m_assembly = other.m_assembly;
         }
         return *this;
       }
@@ -616,7 +580,8 @@ namespace Rodin::Variational
        */
       Problem& assemble() override
       {
-        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_assembly.execute(
+          m_axb, {m_pb, this->getTrialFunction(), this->getTestFunction()});
         m_axb.getSolution() = this->getTrialFunction().getSolution().getData();
         m_assembled = true;
         return *this;
@@ -646,11 +611,11 @@ namespace Rodin::Variational
        */
       void solve(SolverBaseType& solver) override
       {
-         auto& axb = this->getLinearSystem();
-         if (!m_assembled)
-            this->assemble();
-         solver.solve(axb);
-         this->getTrialFunction().getSolution().setData(axb.getSolution());
+        auto& axb = this->getLinearSystem();
+        if (!m_assembled)
+          this->assemble();
+        solver.solve(axb);
+        this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
       /**
@@ -713,47 +678,60 @@ namespace Rodin::Variational
   template <class U, class V>
   Problem(U& u, V& v)
     -> Problem<
-          Math::LinearSystem<
-            Math::SparseMatrix<
-              typename FormLanguage::Mult<
-                typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>::ScalarType,
-                typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>::Type>,
-            Math::Vector<
-              typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
-          U, V>;
+      Math::LinearSystem<Math::SparseMatrix<typename FormLanguage::Mult<
+                           typename FormLanguage::Traits<
+                             typename FormLanguage::Traits<U>::FESType>::ScalarType,
+                           typename FormLanguage::Traits<typename FormLanguage::Traits<
+                             V>::FESType>::ScalarType>::Type>,
+        Math::Vector<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
+      U, V>;
 
-  /// @brief Base for mixed variational problems with three or more functions.
-  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
+  /**
+   * @brief Base for mixed variational problems with three or more functions.
+   *
+   * # Architecture
+   *
+   * Trial/test identities and cumulative DOF offsets are passed directly to
+   * the problem assembly selected by @ref Rodin::Assembly::Default. That single
+   * assembler owns block insertion and completion. No auxiliary sequential
+   * tuple assembler is constructed: its availability must not restrict the
+   * scalar or storage types supported by the selected problem assembler.
+   * The formulation and assembled system are owned; trial/test functions are
+   * borrowed. Assignment replaces these values and bindings while retaining
+   * the destination identity. Cumulative offsets are established at construction
+   * and refreshed at assembly: @f$\sigma_j^U=\sum_{i<j}\dim U_i@f$ and
+   * @f$\sigma_j^V=\sum_{i<j}\dim V_i@f$ for the ordered trial/test spaces.
+   * Unused per-block forms are not materialized.
+   */
+  template <class LinearSystem, class U1, class U2, class U3, class... Us>
   class ProblemUsBase : public ProblemBase<LinearSystem>
   {
     template <class T>
     struct IsTrialOrTestFunction
     {
-      static constexpr Boolean Value = IsTrialFunction<T>::Value || IsTestFunction<T>::Value;
+      static constexpr Boolean Value =
+        IsTrialFunction<T>::Value || IsTestFunction<T>::Value;
     };
 
-    static_assert(
-        Utility::ParameterPack<U1, U2, U3, Us...>::template All<IsTrialOrTestFunction>::Value);
+    static_assert(Utility::ParameterPack<U1, U2, U3,
+      Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
       /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       /// @brief Problem body type.
-      using ProblemBodyType =
-        ProblemBody<OperatorType, VectorType, ScalarType>;
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Parent class type.
       using Parent = ProblemBase<LinearSystemType>;
@@ -764,49 +742,40 @@ namespace Rodin::Variational
 
       /// @brief First function finite element space type.
       using U1FESType = typename FormLanguage::Traits<U1>::FESType;
+
       /// @brief Second function finite element space type.
       using U2FESType = typename FormLanguage::Traits<U2>::FESType;
+
       /// @brief Third function finite element space type.
       using U3FESType = typename FormLanguage::Traits<U3>::FESType;
 
       /// @brief First function mesh type.
       using U1FESMeshType = typename FormLanguage::Traits<U1FESType>::MeshType;
+
       /// @brief Second function mesh type.
       using U2FESMeshType = typename FormLanguage::Traits<U2FESType>::MeshType;
+
       /// @brief Third function mesh type.
       using U3FESMeshType = typename FormLanguage::Traits<U3FESType>::MeshType;
 
       /// @brief First function mesh context type.
-      using U1FESMeshContextType = typename FormLanguage::Traits<U1FESMeshType>::ContextType;
+      using U1FESMeshContextType =
+        typename FormLanguage::Traits<U1FESMeshType>::ContextType;
+
       /// @brief Second function mesh context type.
-      using U2FESMeshContextType = typename FormLanguage::Traits<U2FESMeshType>::ContextType;
+      using U2FESMeshContextType =
+        typename FormLanguage::Traits<U2FESMeshType>::ContextType;
+
       /// @brief Third function mesh context type.
-      using U3FESMeshContextType = typename FormLanguage::Traits<U3FESMeshType>::ContextType;
+      using U3FESMeshContextType =
+        typename FormLanguage::Traits<U3FESMeshType>::ContextType;
 
       /// @brief Assembly strategy type.
-      using AssemblyType =
-        typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
-          ::template Type<LinearSystemType, Problem<LinearSystemType, U1, U2, U3, Us...>>;
+      using AssemblyType = typename Assembly::Default<U1FESMeshContextType,
+        U2FESMeshContextType>::template Type<LinearSystemType,
+        Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
     private:
-      template <class T>
-      struct GetFES;
-
-      template <class T>
-      struct GetFES<std::reference_wrapper<T>>
-      {
-        using Type = typename FormLanguage::Traits<T>::FESType;
-      };
-
-      template <class T>
-      struct GetSolution;
-
-      template <class T>
-      struct GetSolution<std::reference_wrapper<T>>
-      {
-        using Type = typename FormLanguage::Traits<T>::SolutionType;
-      };
-
       template <class T>
       struct IsTrialFunctionReferenceWrapper
       {
@@ -833,57 +802,15 @@ namespace Rodin::Variational
 
       using TrialFunctionTuple =
         decltype(std::declval<
-          Tuple<
-            std::reference_wrapper<U1>,
-            std::reference_wrapper<U2>,
-            std::reference_wrapper<U3>,
-            std::reference_wrapper<Us>...>>()
-            .template filter<IsTrialFunctionReferenceWrapper>());
+                 Tuple<std::reference_wrapper<U1>, std::reference_wrapper<U2>,
+                   std::reference_wrapper<U3>, std::reference_wrapper<Us>...>>()
+                   .template filter<IsTrialFunctionReferenceWrapper>());
 
       using TestFunctionTuple =
         decltype(std::declval<
-          Tuple<
-            std::reference_wrapper<U1>,
-            std::reference_wrapper<U2>,
-            std::reference_wrapper<U3>,
-            std::reference_wrapper<Us>...>>()
-            .template filter<IsTestFunctionReferenceWrapper>());
-
-      using SolutionTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetSolution>;
-
-      using TrialFESTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetFES>;
-
-      using TestFESTuple = typename Utility::Extract<TestFunctionTuple>::template Type<GetFES>;
-
-      template<class U, class V>
-      using BilinearFormType =
-        BilinearForm<
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
-          >::SolutionType,
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
-          >::FESType,
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<V>::Type>
-          >::FESType,
-          OperatorType
-        >;
-
-      template <class TestFES>
-      using LinearFormType = LinearForm<TestFES, VectorType>;
-
-      using BilinearFormTuple =
-        typename Utility::Product<TrialFunctionTuple, TestFunctionTuple>::template Type<BilinearFormType>;
-
-      using LinearFormTuple =
-        typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
-
-      using BilinearFormTupleSequentialAssembly =
-        Assembly::Sequential<OperatorType, BilinearFormTuple>;
-
-      using LinearFormTupleSequentialAssembly =
-        Assembly::Sequential<VectorType, LinearFormTuple>;
+                 Tuple<std::reference_wrapper<U1>, std::reference_wrapper<U2>,
+                   std::reference_wrapper<U3>, std::reference_wrapper<Us>...>>()
+                   .template filter<IsTestFunctionReferenceWrapper>());
 
     public:
       /**
@@ -895,31 +822,25 @@ namespace Rodin::Variational
        */
       ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
-          m_us(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-            .template filter<IsTrialFunctionReferenceWrapper>()),
-          m_vs(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-            .template filter<IsTestFunctionReferenceWrapper>()),
-          m_lft(m_vs.map(
-                [](const auto& v)
-                { return LinearFormType<
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FESType>(v.get());
-                })),
-          m_bft(m_us.product([](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
-                    .map([](const auto& uv)
-                         { return BilinearFormType<
-                             decltype(uv.first()), decltype(uv.second())>(
-                                 uv.first().get(), uv.second().get());
-                         }))
+          m_us(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+                 .template filter<IsTrialFunctionReferenceWrapper>()),
+          m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+                 .template filter<IsTestFunctionReferenceWrapper>()),
+          m_trialOffsets{},
+          m_testOffsets{},
+          m_assembly(std::make_unique<AssemblyType>())
       {
-        m_bfa.reset(new BilinearFormTupleSequentialAssembly);
-        m_lfa.reset(new LinearFormTupleSequentialAssembly);
-        m_us.iapply([&](size_t i, const auto& u)
-            { m_trialUUIDMap.right.insert({ i, u.get().getUUID() }); });
-        m_vs.iapply([&](size_t i, const auto& v)
-            { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
+        size_t trialSize = 0, testSize = 0;
+        m_us.iapply([&](size_t i, const auto& u) {
+          m_trialOffsets[i] = trialSize;
+          trialSize += u.get().getFiniteElementSpace().getSize();
+          m_trialUUIDMap.right.insert({i, u.get().getUUID()});
+        });
+        m_vs.iapply([&](size_t i, const auto& v) {
+          m_testOffsets[i] = testSize;
+          testSize += v.get().getFiniteElementSpace().getSize();
+          m_testUUIDMap.right.insert({i, v.get().getUUID()});
+        });
       }
 
       /**
@@ -931,15 +852,12 @@ namespace Rodin::Variational
           m_assembled(other.m_assembled),
           m_us(other.m_us),
           m_vs(other.m_vs),
-          m_lft(other.m_lft),
-          m_bft(other.m_bft),
+          m_pb(other.m_pb),
           m_trialOffsets(other.m_trialOffsets),
           m_testOffsets(other.m_testOffsets),
           m_trialUUIDMap(other.m_trialUUIDMap),
           m_testUUIDMap(other.m_testUUIDMap),
-          m_bfa(other.m_bfa->copy()),
-          m_lfa(other.m_lfa->copy()),
-          m_assembly(other.m_assembly)
+          m_assembly(other.m_assembly->copy())
       {}
 
       /**
@@ -951,14 +869,11 @@ namespace Rodin::Variational
           m_assembled(std::exchange(other.m_assembled, false)),
           m_us(std::move(other.m_us)),
           m_vs(std::move(other.m_vs)),
-          m_lft(std::move(other.m_lft)),
-          m_bft(std::move(other.m_bft)),
+          m_pb(std::move(other.m_pb)),
           m_trialOffsets(std::move(other.m_trialOffsets)),
           m_testOffsets(std::move(other.m_testOffsets)),
           m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
           m_testUUIDMap(std::move(other.m_testUUIDMap)),
-          m_bfa(std::move(other.m_bfa)),
-          m_lfa(std::move(other.m_lfa)),
           m_assembly(std::move(other.m_assembly))
       {}
 
@@ -974,15 +889,12 @@ namespace Rodin::Variational
           m_assembled = other.m_assembled;
           m_us = other.m_us;
           m_vs = other.m_vs;
-          m_lft = other.m_lft;
-          m_bft = other.m_bft;
+          m_pb = other.m_pb;
           m_trialOffsets = other.m_trialOffsets;
           m_testOffsets = other.m_testOffsets;
           m_trialUUIDMap = other.m_trialUUIDMap;
           m_testUUIDMap = other.m_testUUIDMap;
-          m_bfa.reset(other.m_bfa->copy());
-          m_lfa.reset(other.m_lfa->copy());
-          m_assembly = other.m_assembly;
+          m_assembly.reset(other.m_assembly->copy());
         }
         return *this;
       }
@@ -999,14 +911,11 @@ namespace Rodin::Variational
           m_assembled = std::exchange(other.m_assembled, false);
           m_us = std::move(other.m_us);
           m_vs = std::move(other.m_vs);
-          m_lft = std::move(other.m_lft);
-          m_bft = std::move(other.m_bft);
+          m_pb = std::move(other.m_pb);
           m_trialOffsets = std::move(other.m_trialOffsets);
           m_testOffsets = std::move(other.m_testOffsets);
           m_trialUUIDMap = std::move(other.m_trialUUIDMap);
           m_testUUIDMap = std::move(other.m_testUUIDMap);
-          m_bfa.reset(std::move(other.m_bfa));
-          m_lfa.reset(std::move(other.m_lfa));
           m_assembly = std::move(other.m_assembly);
         }
         return *this;
@@ -1023,10 +932,9 @@ namespace Rodin::Variational
         // Compute trial offsets
         {
           std::array<size_t, TrialFunctionTuple::Size> sz;
-          m_us.map(
-                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
-              .iapply(
-                [&](const Index i, size_t s) { sz[i] = s; });
+          m_us
+            .map([](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+            .iapply([&](const Index i, size_t s) { sz[i] = s; });
           m_trialOffsets[0] = 0;
           for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
             m_trialOffsets[i + 1] = sz[i] + m_trialOffsets[i];
@@ -1035,10 +943,9 @@ namespace Rodin::Variational
         // Compute test offsets
         {
           std::array<size_t, TestFunctionTuple::Size> sz;
-          m_vs.map(
-                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
-              .iapply(
-                [&](const Index i, size_t s) { sz[i] = s; });
+          m_vs
+            .map([](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+            .iapply([&](const Index i, size_t s) { sz[i] = s; });
           m_testOffsets[0] = 0;
           for (size_t i = 0; i < TestFunctionTuple::Size - 1; i++)
             m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
@@ -1046,24 +953,21 @@ namespace Rodin::Variational
 
         size_t rows =
           m_vs
-            .map([](const auto& v)
-            {
+            .map([](const auto& v) {
               return static_cast<size_t>(v.get().getFiniteElementSpace().getSize());
             })
             .reduce([](size_t a, size_t b) { return a + b; });
 
         size_t cols =
           m_us
-            .map([](const auto& u)
-            {
+            .map([](const auto& u) {
               return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
             })
             .reduce([](size_t a, size_t b) { return a + b; });
 
-        AssemblyInput input(
-            m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
-            m_trialUUIDMap, m_testUUIDMap, cols, rows);
-        m_assembly.execute(axb, input);
+        AssemblyInput input(m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
+          m_trialUUIDMap, m_testUUIDMap, cols, rows);
+        m_assembly->execute(axb, input);
 
         // Establish the initial guess: gather the trial function data into
         // the solution vector at the trial offsets.
@@ -1126,7 +1030,7 @@ namespace Rodin::Variational
 
         AssemblyInput input(m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
           m_trialUUIDMap, m_testUUIDMap, cols, rows);
-        m_assembly.execute(axb, input, target);
+        m_assembly->execute(axb, input, target);
 
         m_assembled = true;
 
@@ -1146,13 +1050,11 @@ namespace Rodin::Variational
       {
         auto& axb = getLinearSystem();
         if (!m_assembled)
-           this->assemble();
+          this->assemble();
         solver.solve(axb);
-        m_us.iapply(
-            [&](size_t i, auto& u)
-            {
-              u.get().getSolution().setData(axb.getSolution(), m_trialOffsets[i]);
-            });
+        m_us.iapply([&](size_t i, auto& u) {
+          u.get().getSolution().setData(axb.getSolution(), m_trialOffsets[i]);
+        });
       }
 
       /**
@@ -1199,27 +1101,23 @@ namespace Rodin::Variational
     private:
       Boolean m_assembled;
 
-      TrialFunctionTuple  m_us;
-      TestFunctionTuple   m_vs;
-
-      LinearFormTuple     m_lft;
-      BilinearFormTuple   m_bft;
+      TrialFunctionTuple m_us;
+      TestFunctionTuple m_vs;
 
       ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
 
-      std::array<size_t, TrialFunctionTuple::Size>  m_trialOffsets;
-      std::array<size_t, TestFunctionTuple::Size>   m_testOffsets;
+      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets;
+      std::array<size_t, TestFunctionTuple::Size> m_testOffsets;
 
       boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
       boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
 
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
-      AssemblyType m_assembly;
+      /// @brief Owned backend, reconstructed when assigning a nonassignable assembler.
+      std::unique_ptr<AssemblyType> m_assembly;
   };
 
-  /// @brief Variational problem in three or more unknown fields.
-  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
+  /// @brief Variational problem with three or more trial/test functions.
+  template <class LinearSystem, class U1, class U2, class U3, class... Us>
   class Problem<LinearSystem, U1, U2, U3, Us...>
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>
   {
@@ -1228,20 +1126,16 @@ namespace Rodin::Variational
       using LinearSystemType = LinearSystem;
 
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       /// @brief Problem body type.
-      using ProblemBodyType =
-        ProblemBody<OperatorType, VectorType, ScalarType>;
+      using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Parent class type.
       using Parent = ProblemUsBase<LinearSystem, U1, U2, U3, Us...>;
@@ -1337,17 +1231,17 @@ namespace Rodin::Variational
    * @param u3 Trial shape functions defining the unknowns.
    * @param us Trial shape functions defining the unknowns.
    */
-  template <class U1, class U2, class U3, class ... Us>
+  template <class U1, class U2, class U3, class... Us>
   Problem(U1& u1, U2& u2, U3& u3, Us&... us)
     -> Problem<
-        Math::LinearSystem<
-          Math::SparseMatrix<
-            typename FormLanguage::Mult<
-              typename FormLanguage::Traits<typename FormLanguage::Traits<U1>::FESType>::ScalarType,
-              typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>::Type>,
-          Math::Vector<
-            typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>>,
-        U1, U2, U3, Us...>;
+      Math::LinearSystem<Math::SparseMatrix<typename FormLanguage::Mult<
+                           typename FormLanguage::Traits<
+                             typename FormLanguage::Traits<U1>::FESType>::ScalarType,
+                           typename FormLanguage::Traits<typename FormLanguage::Traits<
+                             U2>::FESType>::ScalarType>::Type>,
+        Math::Vector<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<U2>::FESType>::ScalarType>>,
+      U1, U2, U3, Us...>;
 }
 
 #endif

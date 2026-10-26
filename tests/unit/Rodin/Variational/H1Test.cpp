@@ -5502,3 +5502,22 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+/// @brief Copy assignment refreshes closure visitation storage across mesh dimensions.
+TEST(H1Assignment, DifferentMeshDimensions)
+{
+  auto planar = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  auto spatial = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  planar.getConnectivity().compute(2, 1);
+  planar.getConnectivity().compute(1, 0);
+  spatial.getConnectivity().compute(3, 2);
+  spatial.getConnectivity().compute(2, 1);
+  spatial.getConnectivity().compute(1, 0);
+  H1 destination(std::integral_constant<size_t, 2>{}, planar);
+  H1 source(std::integral_constant<size_t, 2>{}, spatial);
+  destination = source;
+  EXPECT_EQ(destination.getSize(), source.getSize());
+  destination.getClosure(3, 0);
+  source.getClosure(3, 0);
+  EXPECT_TRUE((destination.getDOFs(3, 0) == source.getDOFs(3, 0)).all());
+}

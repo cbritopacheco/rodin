@@ -11,7 +11,7 @@
 #include <mutex>
 #include <vector>
 
-#include "QualityLattice.h"
+#include "WitnessLattice.h"
 
 namespace Rodin::Adaptation::SWIFT
 {
@@ -41,19 +41,16 @@ namespace Rodin::Adaptation::SWIFT
        * @param subdivisions Positive number of subdivisions per reference edge.
        * @returns The immutable cached covering.
        */
-      static const QualityCovering& get(
+      static const QF::QuadratureFormula& get(
         Geometry::Polytope::Type geometry, size_t subdivisions)
       {
-        assert(subdivisions > 0);
-        using Key = std::pair<Geometry::Polytope::Type, size_t>;
-        static std::mutex mutex;
-        static FlatMap<Key, std::unique_ptr<QualityCovering>> cache;
-        const std::lock_guard lock(mutex);
-        const Key key{geometry, subdivisions};
-        auto& formula = cache[key];
-        if (!formula)
-          formula.reset(new QualityCovering(geometry, subdivisions));
-        return *formula;
+        return QF::QuadratureFormula::get<QualityCovering>(geometry, subdivisions);
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, &m_weight, 0};
       }
 
       /**
@@ -95,15 +92,14 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Copies the witness set with a fresh cache identity.
+       * @brief Copies the owned witness samples.
        * @returns An owning pointer to the copy.
        */
-      QualityCovering* copy() const noexcept override
+      QualityCovering* copy() const noexcept
       {
         return new QualityCovering(*this);
       }
 
-    private:
       /**
        * @brief Constructs the shifted and contracted generating lattice.
        * @param geometry Reference-cell geometry.
@@ -111,6 +107,7 @@ namespace Rodin::Adaptation::SWIFT
        */
       QualityCovering(Geometry::Polytope::Type geometry, size_t m)
       {
+        assert(m > 0);
         using G = Geometry::Polytope::Type;
         const size_t dimension = Geometry::Polytope::Traits(geometry).getDimension();
         const bool tetrahedron = geometry == G::Tetrahedron;
@@ -120,7 +117,7 @@ namespace Rodin::Adaptation::SWIFT
         const Real scale = tetrahedron ? m + 3 * shift : m + Real(1);
         m_radius = tetrahedron && m == 1 ? Real(1) / std::sqrt(Real(6))
                                          : std::sqrt(Real(dimension)) / (2 * scale);
-        const auto& lattice = QualityLattice::get(geometry, m);
+        const auto& lattice = WitnessLattice::get(geometry, m);
         m_points.reserve(lattice.getSize());
         for (size_t q = 0; q < lattice.getSize(); ++q)
         {
@@ -132,6 +129,7 @@ namespace Rodin::Adaptation::SWIFT
         m_weight = lattice.getWeight(0);
       }
 
+    private:
       std::vector<Math::SpatialVector<Real>> m_points;
       Real m_weight;
       Real m_radius;

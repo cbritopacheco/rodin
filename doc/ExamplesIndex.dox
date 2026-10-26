@@ -75,7 +75,7 @@
 
   The @ref Rodin::Solid "Solid" module provides hyperelastic constitutive
   laws and nonlinear integrators for large-deformation solid mechanics. The
-  @ref Rodin::Elasticity "LinearElasticityIntegral" covers the small-deformation
+  @ref Rodin::Variational::LinearElasticityIntegral "LinearElasticityIntegral" covers the small-deformation
   (linearized) case, while the Solid module handles finite-strain problems with
   constitutive laws such as NeoHookean, Saint-Venant-Kirchhoff, and
   Mooney-Rivlin:

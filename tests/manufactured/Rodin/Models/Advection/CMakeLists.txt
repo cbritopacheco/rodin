@@ -7,7 +7,7 @@ target_link_libraries(RodinManufacturedAdvectionLagrangian2DTest
   Rodin::Variational
   Rodin::Advection
 )
-gtest_discover_tests(RodinManufacturedAdvectionLagrangian2DTest
+rodin_discover_tests(RodinManufacturedAdvectionLagrangian2DTest
   PROPERTIES
     LABELS manufactured
 )
@@ -24,13 +24,13 @@ target_link_libraries(RodinManufacturedAdvectionLagrangian3DTest
 set(RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS
   "*ManufacturedAdvection3DTest_10.ConstantVelocity_OneStep_L2Interior*")
 list(JOIN RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS ":" RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS)
-gtest_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
+rodin_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
   TEST_FILTER
     "-${RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS}"
   PROPERTIES
     LABELS manufactured
 )
-gtest_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
+rodin_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
   TEST_FILTER
     "${RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS}"
   PROPERTIES

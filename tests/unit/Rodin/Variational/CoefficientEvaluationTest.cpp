@@ -4,7 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Per-point coefficient evaluation and reassembly regressions. */
+/**
+ * @file
+ * @brief Per-point coefficient evaluation and reassembly regressions.
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
 #ifdef RODIN_USE_OPENMP
@@ -99,6 +102,11 @@ namespace
       {
         return m_expr.getIntegrationPoint();
       }
+      CountingShape& setPolytope(const Polytope& cell)
+      {
+        m_expr.setPolytope(cell);
+        return *this;
+      }
       CountingShape& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_expr.setIntegrationPoint(ip);
@@ -132,7 +140,8 @@ namespace
   template <class Expr>
   void checkExpression(Expr expr, const Polytope& cell, size_t& calls)
   {
-    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    expr.setPolytope(cell);
+    const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
     const auto& q = cell.getQuadrature(qf);
     const auto count = expr.getDOFs(cell);
     calls = 0;
@@ -194,7 +203,7 @@ TEST(CoefficientEvaluation, RebindingCopiesAndDirectEvaluation)
   });
   auto expr = f * v;
   const auto cell = *mesh.getCell();
-  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
   const Point p(cell, qf.getPoint(0));
   const IntegrationPoint ip(p, &qf, 0);
   expr.setIntegrationPoint(ip);
@@ -222,7 +231,7 @@ TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   const auto cell = *mesh.getCell();
-  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
   const Point point(cell, qf.getPoint(0));
   const IntegrationPoint ip(point, &qf, 0);
   Real scale = 2;
@@ -274,7 +283,7 @@ TEST(CoefficientEvaluation, ExpressionCopiesBindTheirOwnFunction)
   TestFunction v(fes);
   OwnedScalarFunction f;
   const auto cell = *mesh.getCell();
-  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
   const Point point(cell, qf.getPoint(0));
   const IntegrationPoint ip(point, &qf, 0);
   const auto check = [&](auto expr) {
@@ -312,7 +321,7 @@ TEST(CoefficientEvaluation, LazyFunctionValuesRetainDirectEvaluation)
   LazyVectorFunction f(calls, scale);
   static_assert(!LazyVectorFunction::Cache::Enabled);
   const auto cell = *mesh.getCell();
-  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
   const Point point(cell, qf.getPoint(0));
   const IntegrationPoint ip(point, &qf, 0);
   auto expr = Dot(f, v);
@@ -379,7 +388,7 @@ namespace
     static_assert(!decltype(rule)::Specialized);
     rule.setOrder(4);
     const auto cell = *mesh.getCell();
-    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
     const auto n = fes.getFiniteElement(cell.getDimension(), cell.getIndex()).getCount();
     const auto nte =
       testFes.getFiniteElement(cell.getDimension(), cell.getIndex()).getCount();
@@ -456,7 +465,7 @@ namespace
       return Math::SpatialMatrix<Real>::Identity(2, 2);
     });
     const auto cell = *scalar.getMesh().getCell();
-    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
     const auto check = [&](auto rule, size_t coefficients = 1) {
       rule.setOrder(4);
       calls = 0;

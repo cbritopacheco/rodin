@@ -105,5 +105,8 @@ workload. Curved geometry and PETSc/MPI hp solves have separate
 are not implied by this native study. Arbitrary higher degrees remain
 outside these finite-workload tests.
 
-Geometry entries are labeled `convergence;slow` with a 600-second limit.
+Each case/geometry pair has its own CTest entry, labeled `convergence;slow`,
+with a 600-second limit. The combined path, quartic patch, incorrect-viscosity
+control, and quadrature-sensitivity check run separately, so the long pyramid
+path does not consume the other checks' time budgets.
 Run `ctest --test-dir build/tests -R RodinConvergenceHPStokes --output-on-failure`.

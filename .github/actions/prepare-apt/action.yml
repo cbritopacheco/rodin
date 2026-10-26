@@ -1,0 +1,9 @@
+name: Prepare hosted Ubuntu APT sources
+description: Isolate unused Microsoft repositories before compiler and dependency installation.
+runs:
+  using: composite
+  steps:
+    - name: Prepare signed APT sources
+      if: runner.os == 'Linux'
+      shell: bash
+      run: python3 dev/ci_environment.py setup

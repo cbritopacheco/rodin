@@ -14,6 +14,7 @@
 namespace Rodin::QF
 {
   class QuadratureFormulaBase;
+  class QuadratureFormula;
 }
 
 #endif
