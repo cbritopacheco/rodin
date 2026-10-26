@@ -206,9 +206,11 @@ class BenchmarkCampaignTest(unittest.TestCase):
         entry = dict(target='DistributedFixture', executable='fixture', args='', format='googlecpp')
         with patch.object(ci, 'command', return_value=['fixture']), patch.object(ci.subprocess, 'check_output') as output:
             names = ['Kernel/3', 'Kernel/30']
-            for listing in ['\n'.join(names), '\n'.join(names * 4)]:
-                output.return_value = listing
-                self.assertEqual(ci.discover(entry, 4), names)
+            output.return_value = '\n'.join(names)
+            self.assertEqual(ci.discover(entry, 4), names)
+            output.return_value = '\n'.join(names * 4)
+            with self.assertRaisesRegex(ValueError, "DistributedFixture ranks=4.*'Kernel/3': 4"):
+                ci.discover(entry, 4)
             output.return_value = 'Kernel/3Kernel/30\nKernel/3\nKernel/3\n'
             with self.assertRaisesRegex(ValueError, "DistributedFixture ranks=4.*'Kernel/3': 2"):
                 ci.discover(entry, 4)

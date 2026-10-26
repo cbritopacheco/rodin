@@ -165,7 +165,7 @@ def discover(entry, ranks):
         output = subprocess.check_output(argv + ['--benchmark_list_tests=true'], text=True)
         names = [line.strip() for line in output.splitlines() if line.strip()]
         counts = Counter(names)
-        inconsistent = {name: count for name, count in counts.items() if count not in (1, ranks)}
+        inconsistent = {name: count for name, count in counts.items() if count != 1}
         if inconsistent:
             sample = dict(list(inconsistent.items())[:8])
             raise ValueError('Ambiguous or inconsistent distributed benchmark discovery: '
