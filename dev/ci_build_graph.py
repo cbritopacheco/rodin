@@ -20,6 +20,7 @@ import ci_tests as tests
 
 ROOT = tests.ROOT
 DIRECTORY_BANDS = 2
+VARIATIONAL_BUILD_PART_SIZE = 24
 BACKEND_NAMES = {'optional': 'Optional', 'default': 'Default', 'baseline': 'Baseline',
                  'native': 'Native', 'mpi': 'MPI', 'petsc': 'PETSc', 'complex': 'PETSc Complex',
                  'ranges_real': 'PETSc Real', 'ranges_complex': 'PETSc Complex'}
@@ -168,7 +169,8 @@ def directory_plan(entry, records):
     for group, targets in sorted(groups.items()):
         oversized = split_variational_build(entry['definition'], group)
         names = sorted(targets)
-        chunks = [names[i:i + 24] for i in range(0, len(names), 24)] if oversized else [names]
+        chunks = ([names[i:i + VARIATIONAL_BUILD_PART_SIZE]
+                   for i in range(0, len(names), VARIATIONAL_BUILD_PART_SIZE)] if oversized else [names])
         for i, chunk in enumerate(chunks):
             name = group + f' / {i + 1}' if len(chunks) > 1 else group
             spec = {**entry['definition'], 'stage': 'directory', 'common': entry['id'],
@@ -276,7 +278,7 @@ def index_graph(folder, mode=None, common_id=None):
         if (spec['directory'] != build_group(spec['directory']) or
                 ('part' in spec and (not split_variational_build(spec, spec['directory']) or
                                      not isinstance(spec['part'], int) or spec['part'] < 1 or
-                                     len(spec['targets']) > 24)) or
+                                     len(spec['targets']) > VARIATIONAL_BUILD_PART_SIZE)) or
                 producer in producer_groups or not spec['targets']):
             raise ValueError('Build producer does not stop at the agreed hierarchy level')
         producer_groups.add(producer)

@@ -247,6 +247,9 @@ class BuildGraphExecutionTest(unittest.TestCase):
                        patch.object(graph, 'stamp_sources', side_effect=stamp),
                        patch.object(graph, 'download', side_effect=download),
                        patch.object(graph, 'DIRECTORY_BANDS', 2),
+                       patch.object(graph, 'VARIATIONAL_BUILD_PART_SIZE', 1),
+                       patch.object(graph, 'split_variational_build',
+                                    side_effect=lambda spec, group: group == 'unit/Rodin/Geometry'),
                        patch.object(graph, 'specification', side_effect=specification)]
             for p in patches:
                 p.start()
@@ -257,11 +260,13 @@ class BuildGraphExecutionTest(unittest.TestCase):
             (root / 'ci-common-plan.json').write_text(json.dumps(common))
             graph.compile_common(common[0], build, root / 'ci-common-records' / common[0]['id'])
             index, bands = graph.index_graph(root / 'ci-common-records')
-            self.assertEqual(len(index['builds']), 2)
-            self.assertEqual(next(r['definition']['targets'] for r in index['builds'].values()
-                                  if r['definition']['directory'] == 'unit/Rodin/Geometry'), ['First', 'Third'])
-            self.assertEqual(index['requests'][graph.request_key('Ordinary', first)]['builds'],
-                             index['requests'][graph.request_key('Ordinary', slow)]['builds'])
+            self.assertEqual(len(index['builds']), 3)
+            geometry_parts = [r['definition'] for r in index['builds'].values()
+                              if r['definition']['directory'] == 'unit/Rodin/Geometry']
+            self.assertEqual(sorted(t for part in geometry_parts for t in part['targets']), ['First', 'Third'])
+            self.assertEqual({part['part'] for part in geometry_parts}, {1, 2})
+            self.assertLessEqual(set(index['requests'][graph.request_key('Ordinary', slow)]['builds']),
+                                 set(index['requests'][graph.request_key('Ordinary', first)]['builds']))
             original_objects = {p.relative_to(build): archive.digest(p) for p in build.rglob('*.o')}
             self.assertTrue(original_objects)
             build.rename(root / 'common-producer-build')
