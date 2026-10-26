@@ -117,6 +117,8 @@ namespace Rodin::Tests::Benchmarks
         const IntegrationPoint& first = m_samples.front();
         m_field.interpolate(value, first);
         Real total = 0;
+        // Consume the interpolated value before the barrier so GCC retains
+        // the newly evaluated scalar in the checksum.
         for (auto _ : state)
         {
           total = 0;
@@ -128,8 +130,8 @@ namespace Rodin::Tests::Benchmarks
                 m_field.interpolate(value, m_samples.front().getPoint());
               else
                 m_field.interpolate(value, first);
-              benchmark::DoNotOptimize(value);
               total += reduce(value);
+              benchmark::DoNotOptimize(value);
             }
           }
           else
@@ -144,8 +146,8 @@ namespace Rodin::Tests::Benchmarks
                   m_field.interpolate(value, point);
                 else
                   m_field.interpolate(value, ip);
-                benchmark::DoNotOptimize(value);
                 total += reduce(value);
+                benchmark::DoNotOptimize(value);
               }
             }
           }
