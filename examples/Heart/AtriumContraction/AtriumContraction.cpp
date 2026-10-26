@@ -5,8 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @brief Quasistatic atrial wall contraction driven by a prescribed plane wave.
+ * @brief Transient atrial wall contraction driven by a prescribed plane wave.
  *
+ * Newmark average acceleration advances inertial wall dynamics.
  * A NeoHookean wall is augmented by ActiveContraction's static fiber branch.
  * The prescribed active extension follows a plane moving inward from basal label 6.
  * This is a demonstration with prescribed activation and target fiber strain;
@@ -64,6 +65,7 @@ namespace
     Real young = 50;
     Real poisson = 0.3;
     Real activeStiffness = 20;
+    Real density = 1060; // Reference mass density in kg/m^3.
   };
 
   Options options(int argc, char** argv)
@@ -77,6 +79,7 @@ namespace
         std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
                      "  [--contraction .03] [--speed 200] [--width 6]\n"
                      "  [--young 50] [--poisson .3] [--active-stiffness 20]\n"
+                     "  [--density 1060 (kg/m^3)]\n"
                      "  [--stop-after n] [--base-label 6] [--apex x y z]\n"
                      "  [--apex-radius 3] [--fibers-only]\n";
         std::exit(0);
@@ -123,6 +126,8 @@ namespace
         out.young = std::stod(value);
       else if (key == "--poisson")
         out.poisson = std::stod(value);
+      else if (key == "--density")
+        out.density = std::stod(value);
       else if (key == "--active-stiffness")
         out.activeStiffness = std::stod(value);
       else
@@ -136,7 +141,8 @@ namespace
       out.young <= 0 || !std::isfinite(out.poisson) || out.poisson <= -1 ||
       out.poisson >= 0.5 || !std::isfinite(out.activeStiffness) ||
       out.activeStiffness <= 0 || !out.appendageApex.allFinite() ||
-      !std::isfinite(out.apexRadius) || out.apexRadius <= 0)
+      !std::isfinite(out.apexRadius) || out.apexRadius <= 0 ||
+      !std::isfinite(out.density) || out.density <= 0)
     {
       Alert::Exception() << "Invalid material, wave, or time discretization parameters"
                          << Alert::Raise;
@@ -291,10 +297,18 @@ int main(int argc, char** argv)
       return result;
     });
     GridFunction displacement(vectorSpace);
+    GridFunction velocity(vectorSpace), acceleration(vectorSpace);
+    GridFunction predictedDisplacement(vectorSpace), predictedVelocity(vectorSpace);
     GridFunction activation(scalarSpace);
     GridFunction extension(scalarSpace);
     displacement = zero;
     displacement.setName("Displacement");
+    velocity = zero;
+    acceleration = zero;
+    predictedDisplacement = zero;
+    predictedVelocity = zero;
+    velocity.setName("Velocity");
+    acceleration.setName("Acceleration");
     activation.setName("Activation");
     extension.setName("ActiveExtension");
     // One harmonic base-to-appendage coordinate supplies a simple anatomical
@@ -444,6 +458,14 @@ int main(int argc, char** argv)
     constexpr Real PulsePadding = 3;
     const Real endTime = (maximumProjection + PulsePadding * cfg.width) / cfg.speed;
     const Real dt = endTime / cfg.steps;
+    // Newmark average acceleration, as in the coronary solid dynamics example.
+    constexpr Real NewmarkBeta = 0.25;
+    constexpr Real NewmarkGamma = 0.5;
+    // 1 kPa s^2/mm^2 = 10^9 kg/m^3.
+    constexpr Real DensityConversion = 1e-9;
+    const Real density = cfg.density * DensityConversion;
+    const Real accelerationCoefficient = 1 / (NewmarkBeta * dt * dt);
+    const Real massCoefficient = density * accelerationCoefficient;
     Real time = 0;
     const auto activate = [&](const Point& point) {
       const Real argument = (waveCoordinateAt(point) - cfg.speed * time) / cfg.width;
@@ -467,7 +489,11 @@ int main(int argc, char** argv)
              << ",\n  \"minimum_wave_coordinate_mm\": " << minimumProjection
              << ",\n  \"maximum_wave_coordinate_mm\": " << maximumProjection
              << ",\n  \"speed_mm_per_s\": " << cfg.speed
-             << ",\n  \"width_mm\": " << cfg.width << "\n}\n";
+             << ",\n  \"width_mm\": " << cfg.width
+             << ",\n  \"reference_density_kg_per_m3\": " << cfg.density
+             << ",\n  \"density_kPa_s2_per_mm2\": " << density
+             << ",\n  \"time_step_s\": " << dt << ",\n  \"newmark_beta\": " << NewmarkBeta
+             << ",\n  \"newmark_gamma\": " << NewmarkGamma << "\n}\n";
     metadata.close();
     std::cout << "Base label " << cfg.baseLabel << ": origin=" << baseOrigin.transpose()
               << "; inward normal=" << waveDirection.transpose()
@@ -496,7 +522,9 @@ int main(int argc, char** argv)
     constexpr size_t QuadratureOrder = 4;
     work.setQuadratureOrder(QuadratureOrder);
     Problem mechanics(increment, test);
-    mechanics = work(increment, test) +
+    mechanics = work(increment, test) + massCoefficient * Integral(increment, test) +
+      massCoefficient * Integral(displacement, test) -
+      massCoefficient * Integral(predictedDisplacement, test) +
       DirichletBC(increment, zero)
         .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
     Solver::SparseLU linearSolver(mechanics);
@@ -510,6 +538,8 @@ int main(int argc, char** argv)
     auto grid = output.grid();
     grid.setMesh(mesh);
     grid.add(displacement);
+    grid.add(velocity);
+    grid.add(acceleration);
     grid.add(activation);
     grid.add(extension);
     grid.add(fiberField, IO::XDMF::Center::Cell, IO::XDMF::AttributePolicy::Static);
@@ -523,12 +553,31 @@ int main(int argc, char** argv)
     if (cfg.fibersOnly)
     {
       output.write(0).close();
-      std::cout << "Fiber inspection only: no mechanical equilibrium solve" << std::endl;
+      std::cout << "Fiber inspection only: no mechanical time integration" << std::endl;
       return 0;
+    }
+    // Initial rest with a consistent acceleration: M a_0 = -f_int(u_0, t_0).
+    TrialFunction initialAcceleration(vectorSpace);
+    Problem initial(initialAcceleration, test);
+    initial = density * Integral(initialAcceleration, test) + work.Residual(test) +
+      DirichletBC(initialAcceleration, zero)
+        .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
+    Solver::SparseLU initialSolver(initial);
+    initialSolver.solve();
+    acceleration = initialAcceleration.getSolution();
+    const auto& initialSystem = initial.getLinearSystem();
+    const Real initialResidual =
+      (initialSystem.getOperator() * initialSystem.getSolution() -
+        initialSystem.getVector())
+        .norm();
+    if (!std::isfinite(initialResidual) ||
+      initialResidual > 1e-8 * std::max<Real>(1, initialSystem.getVector().norm()))
+    {
+      Alert::Exception() << "Initial acceleration solve failed" << Alert::Raise;
     }
     std::ofstream log(cfg.output + ".csv");
     log << "time_s,max_displacement_mm,activation_max,newton_iterations,residual,min_"
-           "scaled_jacobian_mm\n";
+           "scaled_jacobian_mm,max_velocity_mm_per_s,max_acceleration_mm_per_s2\n";
     log.flush();
     const size_t count = cfg.stopAfter ? std::min(cfg.steps, cfg.stopAfter) : cfg.steps;
     std::cout << std::setprecision(9) << "Wall: " << mesh.getCellCount() << " wedges, "
@@ -541,19 +590,36 @@ int main(int argc, char** argv)
       updateActivation();
       std::cout << "Step " << step << '/' << cfg.steps << " time=" << time
                 << " front_distance_from_base=" << cfg.speed * time << std::endl;
-      newton.solve(displacement);
-      if (!newton.getReport().converged)
+      if (step > 0)
       {
-        Alert::Exception() << "Contraction Newton solve did not converge" << Alert::Raise;
+        predictedDisplacement =
+          displacement + dt * velocity + (dt * dt * (0.5 - NewmarkBeta)) * acceleration;
+        predictedVelocity = velocity + (dt * (1 - NewmarkGamma)) * acceleration;
+        // Keep the last valid displacement as Newton's initial iterate. The
+        // kinematic predictor may fold cells under a coarsely sampled pulse.
+        newton.solve(displacement);
+        if (!newton.getReport().converged)
+        {
+          Alert::Exception() << "Transient contraction Newton solve did not converge"
+                             << Alert::Raise;
+        }
+        acceleration = accelerationCoefficient * (displacement - predictedDisplacement);
+        velocity = predictedVelocity + (NewmarkGamma * dt) * acceleration;
       }
-      Real maximum = 0;
+      Real maximum = 0, maximumVelocity = 0, maximumAcceleration = 0;
       for (auto vertex = mesh.getVertex(); vertex; ++vertex)
       {
         const auto& dofs = vectorSpace.getDOFs(0, vertex->getIndex());
-        Vec u;
+        Vec u, v, a;
         for (size_t j = 0; j < 3; ++j)
+        {
           u(j) = displacement.getData()(dofs(j));
+          v(j) = velocity.getData()(dofs(j));
+          a(j) = acceleration.getData()(dofs(j));
+        }
         maximum = std::max(maximum, u.norm());
+        maximumVelocity = std::max(maximumVelocity, v.norm());
+        maximumAcceleration = std::max(maximumAcceleration, a.norm());
       }
       Real minimumCurrentJacobian = std::numeric_limits<Real>::infinity();
       for (auto cell = mesh.getCell(); cell; ++cell)
@@ -577,9 +643,11 @@ int main(int argc, char** argv)
       }
       output.write(time).flush();
       log << std::setprecision(17) << time << ',' << maximum << ','
-          << activation.getData().maxCoeff() << ',' << newton.getReport().iterations
-          << ',' << newton.getReport().finalResidual << ',' << minimumCurrentJacobian
-          << '\n';
+          << activation.getData().maxCoeff() << ','
+          << (step == 0 ? 0 : newton.getReport().iterations) << ','
+          << (step == 0 ? initialResidual : newton.getReport().finalResidual) << ','
+          << minimumCurrentJacobian << ',' << maximumVelocity << ','
+          << maximumAcceleration << '\n';
       log.flush();
       std::cout << "  max displacement=" << maximum << " mm" << std::endl;
     }

@@ -6,7 +6,7 @@ arterial fluid–structure interaction, coagulation, and active wall contraction
 | Example | Model | Build requirements |
 |---|---|---|
 | [Atrium](Atrium/README.md) | Atrial flow and coagulation with a lumped ventricular outlet. | PETSc + MPI |
-| [AtriumContraction](AtriumContraction/README.md) | Prescribed activation and fiber contraction in a wedge wall. | Local |
+| [AtriumContraction](AtriumContraction/README.md) | Transient wedge-wall contraction driven by prescribed activation. | Local |
 | [CCMLC2014_0D](CCMLC2014_0D/README.md) | Lumped left-ventricle and Windkessel dynamics. | Local |
 | [CoronaryArtery](CoronaryArtery/README.md) | Coronary flow coupled to ventricular and intramyocardial models. | PETSc + MPI |
 | [CoronaryArterySolid_PETSc_MPI](CoronaryArterySolid_PETSc_MPI/README.md) | Distributed coronary wall dynamics. | PETSc + MPI |

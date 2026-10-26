@@ -97,8 +97,18 @@ requests or artifact history, or add reassurances such as “target names are
 unchanged.” Avoid generic descriptions of folder layouts or generated binary
 locations. Include concrete paths where they are needed in commands or to
 identify an input or output. Keep change summaries and compatibility notes in
-pull request descriptions; retain scientific provenance and numerical evidence
-when they explain the documented model or data.
+pull request descriptions. READMEs focus on architecture, organization, and
+the mathematical model, with the inputs and instructions needed to use it.
+Keep run findings, measured errors, timings, mesh-quality statistics, and
+validation logs in reports or pull request descriptions rather than READMEs.
+Describe model assumptions and geometry construction without narrating the
+investigation that produced them.
+
+For Markdown READMEs, use GitHub-compatible `$...$` inline mathematics and
+`$$` display blocks with the delimiters on their own lines. Do not use
+`\(...\)` or `\[...\]` in these files: Markdown escaping can leave the
+expressions unrendered. Check the equations with a math renderer, including
+units and table cells. Doxygen retains its own mathematical delimiters.
 
 ## Editing checklist
 
