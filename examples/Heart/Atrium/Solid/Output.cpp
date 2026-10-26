@@ -52,6 +52,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
              << ",\n  \"maximum_wave_coordinate_mm\": " << m_data.maximumProjection
              << ",\n  \"speed_mm_per_s\": " << m_cfg.speed
              << ",\n  \"width_mm\": " << m_cfg.width
+             << ",\n  \"rayleigh_alpha_per_s\": " << m_cfg.rayleighAlpha
+             << ",\n  \"rayleigh_beta_s\": " << m_cfg.rayleighBeta
              << ",\n  \"reference_density_kg_per_m3\": " << m_cfg.density
              << ",\n  \"density_kPa_s2_per_mm2\": " << density
              << ",\n  \"time_step_s\": " << timeStep << ",\n  \"newmark_beta\": " << beta

@@ -8,10 +8,15 @@
 #define RODIN_ATRIUM_SOLID_SOLID_H
 
 #include <memory>
+#include <Rodin/Solid.h>
+#include <Rodin/Solver/NewtonSolver.h>
+#include <Rodin/Solver/SparseLU.h>
 #include "ProblemData.h"
 
 namespace Rodin::Examples::Heart::AtriumContraction
 {
+  class Output;
+
   /**
    * @brief Transient active atrial wall on a local wedge mesh.
    *
@@ -80,8 +85,48 @@ namespace Rodin::Examples::Heart::AtriumContraction
       const VectorField& getAcceleration() const noexcept;
 
     private:
-      struct Impl;
-      std::unique_ptr<Impl> m_impl;
+      using Material = Rodin::Solid::ActiveContraction<Rodin::Solid::NeoHookean,
+        Rodin::Solid::ActiveFiberLaw>;
+      using Trial = Variational::TrialFunction<VectorField, VectorSpace>;
+      using Test = Variational::TestFunction<VectorSpace>;
+      using LinearSystem =
+        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+      using MechanicsProblem = Variational::Problem<LinearSystem, Trial, Test>;
+      using LinearSolver = Solver::SparseLU<LinearSystem>;
+      using Newton = Solver::NewtonSolver<LinearSolver>;
+      using InternalWork = Rodin::Solid::InternalVirtualWork<Material, VectorField>;
+
+      static constexpr Real NewmarkBeta = 0.25;
+      static constexpr Real NewmarkGamma = 0.5;
+      // 1 kPa s²/mm² = 10⁹ kg/m³.
+      static constexpr Real DensityConversion = 1e-9;
+      static constexpr size_t QuadratureOrder = 4;
+
+      /**
+       * @brief Constructs the passive law and prescribed active fiber branch.
+       * @param cfg Solid material parameters.
+       * @returns Configured constitutive law.
+       */
+      static Material makeMaterial(const Parameters& cfg);
+
+      Parameters m_parameters;
+      Geometry::LocalMesh m_mesh;
+      ProblemData m_data;
+      VectorSpace m_space;
+      VectorField m_displacement, m_velocity, m_acceleration;
+      VectorField m_predictedDisplacement, m_predictedVelocity;
+      Real m_timeStep, m_density, m_accelerationCoefficient, m_massCoefficient;
+      Real m_time = 0;
+      size_t m_step = 0;
+      Material m_law;
+      Trial m_increment;
+      Test m_test;
+      InternalWork m_work;
+      MechanicsProblem m_mechanics;
+      LinearSolver m_linearSolver;
+      Newton m_newton;
+      std::unique_ptr<Output> m_output;
+      bool m_initialized = false, m_finished = false, m_failed = false;
   };
 }
 

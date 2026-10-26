@@ -27,7 +27,7 @@ $$
 
 Here $\lambda$ and $\mu$ are the Lamé parameters, $k_f$ is the active fiber
 stiffness, and $c=-c_{\max}a(X,t)$ is a prescribed target strain. The
-restriction $0<c_{\max}<1/2$ keeps $1+2c$ positive. At fixed $c$, the active
+restriction $0\leq c_{\max}<1/2$ keeps $1+2c$ positive. At fixed $c$, the active
 first Piola stress is
 
 $$
@@ -44,23 +44,25 @@ and active internal-variable kinetics are outside this model.
 
 ## Transient mechanics
 
-On the reference wall $\Omega_0$, the displacement $u$ satisfies
+With damping disabled, displacement $u$ on the reference wall $\Omega_0$ satisfies
 
 $$
 \rho_0\ddot u-\mathrm{Div}_X P(F,a)=0,
 \qquad F=I+\nabla_X u.
 $$
 
-The weak residual is
+With optional Rayleigh damping, the weak residual is
 
 $$
 R(u;w)=\int_{\Omega_0}\rho_0\ddot u\cdot w\,dX
-       +\int_{\Omega_0}P(F,a):\nabla_Xw\,dX.
+       +\int_{\Omega_0}P(F,a):\nabla_Xw\,dX
+       +\alpha_R\int_{\Omega_0}\rho_0\dot u\cdot w\,dX
+       +\beta_R a_0(\dot u,w).
 $$
 
 All rim faces with labels 1, 2, 3, 5, and 6 have fixed displacement; the inner
-and outer wall faces, labeled 4 and 7, are traction-free. Chamber pressure,
-fluid coupling, and physical damping are absent.
+and outer wall faces, labeled 4 and 7, are traction-free. Chamber pressure
+and fluid coupling are absent. Optional Rayleigh damping acts on velocity.
 
 ### Time integration and initial conditions
 
@@ -81,10 +83,37 @@ $$
 v_{n+1}=v^*+\gamma_N\Delta t\,\ddot u_{n+1}.
 $$
 
-The tangent contains the elastic tangent and the consistent mass matrix
-scaled by $1/(\beta_N\Delta t^2)$. The last accepted displacement is the
+The tangent contains the elastic tangent, the consistent mass matrix
+scaled by $1/(\beta_N\Delta t^2)$, and the damping matrix scaled by
+$\gamma_N/(\beta_N\Delta t)$. The last accepted displacement is the
 initial Newton iterate; the kinematic predictor enters the inertial residual.
-No physical damping or algorithmic damping is added.
+Rayleigh damping uses
+
+$$
+C_R=\alpha_R M+\beta_R K_0,\qquad
+ a_0(v,w)=\int_{\Omega_0}
+ \lambda\,\mathrm{div}_Xv\,\mathrm{div}_Xw
+ +2\mu\,\varepsilon_X(v):\varepsilon_X(w)\,dX,
+$$
+
+where $\varepsilon_X(v)=(\nabla_Xv+(\nabla_Xv)^T)/2$ and $K_0$ is the passive
+stiffness at the undeformed reference state. For nonnegative coefficients,
+$\dot u^T C_R\dot u\geq0$. The current nonlinear active tangent is not used
+as the damping matrix. This damping model is linear in reference strains and requires assessment
+when wall rotations are large. Newmark parameters retain average acceleration;
+physical dissipation is controlled by `--rayleigh-alpha` in $\mathrm{s^{-1}}$
+and `--rayleigh-beta` in seconds. Both default to zero.
+
+For a passive reference mode of angular frequency $\omega$, the damping ratio is
+
+$$
+\zeta(\omega)=\frac{\alpha_R}{2\omega}+\frac{\beta_R\omega}{2}.
+$$
+
+The coefficients are demonstration parameters and require calibration. A moving
+prescribed activation supplies mechanical work, so the total mechanical energy
+need not decrease while the wave is active. Time-step refinement is needed to
+distinguish resolved motion from temporal discretization effects.
 
 The initial state has $u_0=v_0=0$. Because the activation pulse is already
 present at the base, its consistent acceleration is computed from
@@ -98,7 +127,8 @@ vanish at every fixed rim. The first XDMF state records these initial data;
 each subsequent state follows one nonlinear time step.
 
 The pulse traverses the wall over
-$T=(\max_X s(X)+3w)/v$. `--steps N` advances $N$ time intervals and writes $N+1$ states including the
+$T=(\max_X s(X)+3w)/v$. `--steps N` advances $N$ time intervals and writes
+$N+1$ states including the
 initial data. By default $\Delta t=T/N$; `--dt` sets the time step directly in
 seconds. Time-step refinement is required for quantitative dynamics. The
 linear Newmark scheme does not guarantee nonlinear convergence or temporal
@@ -123,6 +153,8 @@ $$
 | Active fiber stiffness | $20\,\mathrm{kPa}$ |
 | Peak target Green–Lagrange strain magnitude | $0.03$ |
 | Reference mass density | $1060\,\mathrm{kg/m^3}$ |
+| Mass-proportional Rayleigh coefficient | $0\,\mathrm{s^{-1}}$ |
+| Stiffness-proportional Rayleigh coefficient | $0\,\mathrm{s}$ |
 | Wave speed | $200\,\mathrm{mm/s}$ |
 | Gaussian width | $6\,\mathrm{mm}$ |
 | Basal boundary label | 6 |
@@ -261,10 +293,12 @@ build/examples/Heart/Atrium/Solid/AtriumContraction \
   --output output/atrium-transient/Contraction \
   --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \
   --apex-radius 3 --steps 24 --contraction 0.06 --density 1060 \
-  --speed 200 --width 6
+  --speed 200 --width 6 --rayleigh-alpha 20 --rayleigh-beta 0.001
 ```
 
 `--young`, `--poisson`, and `--active-stiffness` configure the material.
+`--contraction 0` disables the prescribed contraction target for a resting-state
+check.
 `--stop-after` limits the number of positive-time steps while retaining the
 initial state and the time step set by `--steps`. `--fibers-only` exports the
 geometry and fiber fields without solving mechanics; its zero displacement,
@@ -291,4 +325,4 @@ target strain. `Velocity` and `Acceleration` are nodal fields in
 $\mathrm{mm/s}$ and $\mathrm{mm/s^2}$. The CSV records their maximum magnitudes,
 time, maximum displacement, activation maximum, Newton iterations, final
 residual, and minimum scaled Jacobian. Geometry metadata also records density,
-time step, and Newmark parameters.
+time step, Newmark parameters, and Rayleigh damping coefficients.

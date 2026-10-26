@@ -77,8 +77,14 @@ namespace Rodin::Examples::Heart
 #endif
 
     private:
-      struct Impl;
-      std::unique_ptr<Impl> m_impl;
+      std::unique_ptr<Solid> m_solid;
+#ifdef RODIN_ATRIUM_HAS_FLUID
+      std::unique_ptr<Fluid> m_fluid;
+#endif
+      size_t m_steps = 0;
+      bool m_initialized = false;
+      bool m_finished = false;
+      bool m_failed = false;
   };
 }
 

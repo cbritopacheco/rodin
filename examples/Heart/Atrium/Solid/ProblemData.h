@@ -46,6 +46,8 @@ namespace Rodin::Examples::Heart::AtriumContraction
     Real young = 50;
     Real poisson = 0.3;
     Real activeStiffness = 20;
+    Real rayleighAlpha = 0; // Mass-proportional damping, in 1/s.
+    Real rayleighBeta = 0; // Reference-stiffness-proportional damping, in s.
     Real density = 1060; // Reference mass density in kg/m^3.
   };
 

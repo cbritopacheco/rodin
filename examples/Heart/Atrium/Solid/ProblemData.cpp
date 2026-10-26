@@ -32,6 +32,7 @@ namespace Rodin::Examples::Heart::AtriumContraction
         std::cout << "AtriumContraction [--mesh path] [--output stem] [--steps 24]\n"
                      "  [--contraction .03] [--speed 200] [--width 6]\n"
                      "  [--young 50] [--poisson .3] [--active-stiffness 20]\n"
+                     "  [--rayleigh-alpha 0 (1/s)] [--rayleigh-beta 0 (s)]\n"
                      "  [--density 1060 (kg/m^3)]\n"
                      "  [--stop-after n] [--dt seconds] [--base-label 6] [--apex x y z]\n"
                      "  [--apex-radius 3] [--fibers-only]\n";
@@ -81,6 +82,10 @@ namespace Rodin::Examples::Heart::AtriumContraction
         out.young = std::stod(value);
       else if (key == "--poisson")
         out.poisson = std::stod(value);
+      else if (key == "--rayleigh-alpha")
+        out.rayleighAlpha = std::stod(value);
+      else if (key == "--rayleigh-beta")
+        out.rayleighBeta = std::stod(value);
       else if (key == "--density")
         out.density = std::stod(value);
       else if (key == "--active-stiffness")
@@ -95,8 +100,10 @@ namespace Rodin::Examples::Heart::AtriumContraction
 
   Options validateOptions(const Options& cfg)
   {
-    if (cfg.steps == 0 || !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
-      !std::isfinite(cfg.contraction) || cfg.contraction <= 0 || cfg.contraction >= 0.5 ||
+    if (!std::isfinite(cfg.rayleighAlpha) || cfg.rayleighAlpha < 0 ||
+      !std::isfinite(cfg.rayleighBeta) || cfg.rayleighBeta < 0 || cfg.steps == 0 ||
+      !std::isfinite(cfg.timeStep) || cfg.timeStep < 0 ||
+      !std::isfinite(cfg.contraction) || cfg.contraction < 0 || cfg.contraction >= 0.5 ||
       !std::isfinite(cfg.speed) || cfg.speed <= 0 || !std::isfinite(cfg.width) ||
       cfg.width <= 0 || !std::isfinite(cfg.young) || cfg.young <= 0 ||
       !std::isfinite(cfg.poisson) || cfg.poisson <= -1 || cfg.poisson >= 0.5 ||
