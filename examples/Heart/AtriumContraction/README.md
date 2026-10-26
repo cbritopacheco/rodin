@@ -126,7 +126,7 @@ With a recent develop checkout containing the XDMF interpolation-order fix:
 
 ```sh
 cmake --build build --target AtriumContraction -j4
-build/examples/Heart/AtriumContraction \
+build/examples/Heart/AtriumContraction/AtriumContraction \
   --mesh resources/examples/Heart/Atrium/AtriumWall_Repaired_Wedges_1mm.mesh \
   --output output/atrium-base6-plane/Contraction \
   --base-label 6 --apex 46.39638367 187.44307667 -205.03317767 \

@@ -9,7 +9,7 @@
  * @brief Driver for the 3D atrium flow and coagulation-kinetics example.
  *
  * Run:
- *   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
+ *   mpirun -n 8 ./examples/Heart/Atrium/Atrium -atrium_mesh <path> -atrium_dt 1e-3
  *
  * Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
  *          -atrium_species_cycles, -atrium_pin.

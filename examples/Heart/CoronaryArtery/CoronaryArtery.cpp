@@ -99,7 +99,7 @@
 
 #include <Rodin/MPI.h>
 
-#include "CoronaryArtery/CoupledLV0DCoronary3D.h"
+#include "CoupledLV0DCoronary3D.h"
 
 int main(int argc, char** argv)
 {
