@@ -12,15 +12,21 @@
 #     O   Owens (2006) aggregating blood (run_3d.sh; LAMBDA_H, ETA_PLASMA, A0_O,
 #         ACRIT_O, EPS_O, N0_O, NIN_O): lambda = n lambda_H in rouleaux of size n(x, t),
 #         lambda_H at high shear; add it with FLUIDS3D="O R CY N"
-#     R   gsPTT: sPTT polymer (lambda 0.1 s, eta_p 0.0070 Pa s, eps 0.2) plus the
+#     R   gsPTT calibrated to blood: sPTT polymer lambda 0.114 s (the rouleaux
+#         relaxation time, Horner et al. 2019), eta_p 0.0068 Pa s (eta''(2 Hz) =
+#         3.2e-3 Pa s, Thurston, Hct 45 %), eps 0.5, plus the
 #         solvent eta_CY - eta_p/f. Its shear stress must INCREASE with gd
 #         (eta_p <= 7.2e-3 at lambda 0.1 s; the driver checks it): with eta_p
 #         0.0104 eta_s fell to 1.6e-5 Pa s and its stress decreased for 1.75 <
 #         gd < 16 1/s, an ill-posed momentum equation (runs 9, 12, 13). The
 #         pair (lambda, eta_p) is the one with the largest 2 Hz loss viscosity
 #         eta'' under that constraint (eta'' 0.0034 Pa s, G = eta_p/lambda 0.07
-#         Pa, De = lambda/T 0.12 at 72 bpm; Thurston's blood: eta'' ~ 0.01,
-#         G ~ 0.1 Pa, lambda 0.01-0.1 s). lambda 4.83 s (De 5.8, lambda gd ~ 5e4
+#         Pa, De = lambda/T 0.12 at 72 bpm). Blood: eta'' ~ 3.2e-3 Pa s at 2 Hz,
+#         strain 0.2, Hct 45 % (Thurston's adult reference equations, Vilastic,
+#         22 C); rouleaux relaxation time 0.11 s [0-0.3] (Horner et al. 2019).
+#         The largest eta'' with eta = CY and a well-posed solvent is 4.4e-3
+#         (lambda 0.138, eta_p 0.0101, eps 0.5; used: eta_p 0.0095, 4.1e-3).
+#         lambda 4.83 s (De 5.8, lambda gd ~ 5e4
 #         at the throat) was abandoned: not blood, and beyond the method.
 #
 #  Arteries (D, mean velocity; period T = 0.83 s, 72 bpm; Re = rho U D/eta_inf,
@@ -48,8 +54,11 @@
 #  Environment (defaults):
 #     CORES=200  NP3D=32  NPWO=64  NPAXI=5  PHASES=0  GEOS="S75 A200"
 #     ARTERIES="carotid coronary aorta femoral small"  FLUIDS3D="R CY N"
-#     SOLVER3D=lulag  BUILD=build-gcc12  OUT=$HOME/Results/arteries
-#     LAMBDA_R=0.1  ETAP_R=0.0070  SKIP_3D=0  SKIP_AXI=1
+#     SOLVER3D=lulag  BUILD=build-gcc12  OUT=$HOME/Results/arteries_v2
+#     LAMBDA_R=0.114  ETAP_R=0.0068  EPS_R=0.5  SKIP_3D=0  SKIP_AXI=1
+#     DUMP=500  (XDMF dumps when max|sigma| > DUMP Pa, for locate_blowup.py)
+#  The driver applies the no-slip kinematics in the psi equation by default
+#  (-al_wall_kinematics; runs 13-15) and refuses an ill-posed gsPTT solvent.
 #  Results: $OUT/3D/<artery>/Re<Re>_Wo<Wo>[_waveform_cca]/<geo>/<fluid>/
 # =============================================================================
 set -u
@@ -67,9 +76,13 @@ export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 export OMPI_MCA_hwloc_base_binding_policy=none
 
 BUILD="${BUILD:-build-gcc12}"
-export OUT="${OUT:-$HOME/Results/arteries}"
-export LAMBDA_R="${LAMBDA_R:-0.1}"
-export ETAP_R="${ETAP_R:-0.0070}"
+# v2: the campaign with the wall kinematics and the calibrated R; a new folder,
+# since run_3d.sh skips any case that has DONE (old fluids, old code).
+export OUT="${OUT:-$HOME/Results/arteries_v2}"
+export LAMBDA_R="${LAMBDA_R:-0.114}"
+export ETAP_R="${ETAP_R:-0.0068}"
+export EPS_R="${EPS_R:-0.5}"
+DUMP="${DUMP:-500}"
 export LAMBDA_H="${LAMBDA_H:-0.005}" ETA_PLASMA="${ETA_PLASMA:-1.2e-3}"
 export A0_O="${A0_O:-1}" ACRIT_O="${ACRIT_O:--1}" EPS_O="${EPS_O:-0}" N0_O="${N0_O:--1}" NIN_O="${NIN_O:--1}"
 NPWO="${NPWO:-64}"
@@ -130,7 +143,7 @@ if [[ "${SKIP_3D:-0}" != 1 ]]; then
       for G in $GEOS; do
         add "$NP" 2 "3D_${A}_${G}_${F}" "$(q env FLUIDS="$F" NP="$NP" TIME_ORDER=2 MESH_LEVEL="$ML" WO="$WO" \
           OUTPUT_EVERY=$(( ST / 20 )) STEPS="$ST" CYCLES=4 CYCLES_R=4 SOLVER="$SOLVER3D" HARMONICS=10 \
-          WAVEFORM="$WAVE" PETSC_EXTRA="-al_diameter $D" \
+          WAVEFORM="$WAVE" PETSC_EXTRA="-al_diameter $D -al_dump_stress $DUMP" \
           EXE3D="$EXE3D" OUT3D="$OUT/3D/$A" bash "$S3" "$RE" "$G")" \
           "Re $RE  Wo $WO  D $D m  U $U m/s  $ST steps/cycle  $ML"
       done
@@ -290,6 +303,7 @@ for x in "$EXE" "$EXE3D"; do
   [[ -x "$x" ]] || { echo "missing executable $x"; exit 1; }
 done
 grep -aq -- "psi_rb" "$EXE3D" || { echo "$EXE3D has no psi_rb formulation: wrong sources?"; exit 1; }
+grep -aq -- "-al_wall_kinematics" "$EXE3D" || { echo "$EXE3D has no wall kinematics: git pull and rebuild"; exit 1; }
 if ! grep -qiE '^RODIN_USE_SCOTCH:BOOL=(ON|YES|TRUE|Y|1)$' "$REPO/$BUILD/CMakeCache.txt" 2> /dev/null; then
   echo "$BUILD is configured without Scotch (RODIN_USE_SCOTCH is not ON): the drivers would use the"
   echo "internal partitioner, much slower. Reconfigure and rebuild:"
