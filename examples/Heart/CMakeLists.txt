@@ -1,3 +1,7 @@
+add_executable(AtriumContraction AtriumContraction.cpp)
+target_link_libraries(AtriumContraction
+  PRIVATE Rodin::Solid Rodin::Variational Rodin::IO Rodin::Solver)
+
 add_executable(CCMLC2014_0D CCMLC2014_0D.cpp)
 target_link_libraries(CCMLC2014_0D
   PUBLIC
