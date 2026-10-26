@@ -268,7 +268,7 @@ namespace Rodin::Tests::Benchmarks
               return;
           }
         }
-        const auto& qf = QF::PolytopeQuadratureFormula::get(order, geometry);
+        const auto& qf = QF::QuadratureFormula::get(order, geometry);
         state.counters["degree"] = K;
         state.counters["dimension"] = dimension;
         state.counters["ambient_dimension"] = mesh.getSpaceDimension();

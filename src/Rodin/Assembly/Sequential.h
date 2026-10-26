@@ -179,7 +179,7 @@ namespace Rodin::Assembly
    *
    * @tparam FES Finite element space type
    *
-   * ## Assembly Algorithm
+   * # Assembly Algorithm
    * For each element @f$ K @f$ in the mesh:
    * 1. Retrieve element quadrature rule and basis functions
    * 2. Compute local element vector @f$ b_K @f$
@@ -234,6 +234,20 @@ namespace Rodin::Assembly
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
+
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(const Sequential& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(Sequential&& other) = default;
 
       /**
        * @brief Executes the assembly and returns the vector associated to the
@@ -348,6 +362,20 @@ namespace Rodin::Assembly
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
+
+      /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(const Sequential& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(Sequential&& other) = default;
 
       /**
        * @brief Executes the assembly and returns the linear operator
@@ -506,6 +534,20 @@ namespace Rodin::Assembly
       {}
 
       /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(const Sequential& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(Sequential&& other) = default;
+
+      /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        * @param input Input data.
@@ -600,6 +642,20 @@ namespace Rodin::Assembly
       {}
 
       /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(const Sequential& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      Sequential& operator=(Sequential&& other) = default;
+
+      /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        * @param input Input data.
@@ -609,8 +665,11 @@ namespace Rodin::Assembly
       {
         const auto& mesh = input.getTrialFES().getMesh();
         res.clear();
-        res.reserve(
-          input.getTestFES().getSize() * std::log(input.getTrialFES().getSize()));
+        const size_t trialSize = input.getTrialFES().getSize();
+        const size_t testSize = input.getTestFES().getSize();
+        res.reserve(trialSize == 0 || testSize == 0
+            ? size_t(0)
+            : size_t(testSize * std::log(trialSize)));
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();

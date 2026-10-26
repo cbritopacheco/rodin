@@ -75,3 +75,21 @@ TEST(QuadratureLifetime, Centroid)
 {
   retain<QF::Centroid>(Geometry::Polytope::Type::Triangle);
 }
+
+/// @brief Borrowed tensor-product weights remain readable during shutdown.
+TEST(QuadratureLifetime, WitherdenVincentQuadrilateral)
+{
+  retain<QF::WitherdenVincent>(size_t(1), Geometry::Polytope::Type::Quadrilateral);
+}
+
+/// @brief Borrowed wedge weights remain readable during shutdown.
+TEST(QuadratureLifetime, WitherdenVincentWedge)
+{
+  retain<QF::WitherdenVincent>(size_t(1), Geometry::Polytope::Type::Wedge);
+}
+
+/// @brief Borrowed hexahedron weights remain readable during shutdown.
+TEST(QuadratureLifetime, WitherdenVincentHexahedron)
+{
+  retain<QF::WitherdenVincent>(size_t(1), Geometry::Polytope::Type::Hexahedron);
+}

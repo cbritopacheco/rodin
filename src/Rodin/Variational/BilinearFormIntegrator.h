@@ -43,13 +43,13 @@ namespace Rodin::Variational
    * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test
    * basis functions on element @f$ K @f$.
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During finite element assembly:
    * 1. The integrator is called for each element in the mesh
    * 2. Local element matrices are computed using quadrature
    * 3. Local matrices are assembled into the global system matrix
    *
-   * ## Common Bilinear Forms
+   * # Common Bilinear Forms
    * - **Mass matrix**: @f$ \int_K u \cdot v \, dx @f$
    * - **Stiffness matrix**: @f$ \int_K \nabla u \cdot \nabla v \, dx @f$
    * - **Advection**: @f$ \int_K (\beta \cdot \nabla u) v \, dx @f$

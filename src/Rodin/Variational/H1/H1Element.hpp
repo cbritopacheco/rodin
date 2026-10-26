@@ -29,6 +29,7 @@
 
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ReferenceTabulationCache.h"
+#include "Rodin/Variational/P1/P1Element.h"
 
 #include "H1Element.h"
 
@@ -1287,7 +1288,29 @@ namespace Rodin::Variational
     }
     else
     {
-      // Higher-order derivatives not implemented
+      if constexpr (K == 1)
+      {
+        size_t local = m_local;
+        if (m_g == Geometry::Polytope::Type::Pyramid)
+        {
+          // H1 uses tensor-product base vertices; P1 uses cyclic vertices.
+          constexpr std::array<size_t, 5> vertices{0, 1, 3, 2, 4};
+          local = vertices[m_local];
+        }
+        return P1Element<Scalar>(m_g).getBasis(local).template getDerivative<Order>(m_i)(
+          r);
+      }
+      if (m_g == Geometry::Polytope::Type::Point)
+        return Scalar(0);
+      if constexpr (Order > K)
+      {
+        // Collapsed pyramid coordinates retain a rational dependence on z.
+        if (m_g != Geometry::Polytope::Type::Pyramid || m_i != 2)
+          return Scalar(0);
+      }
+      Alert::MemberFunctionException(*this, __func__)
+        << "Reference basis derivatives of order " << Order
+        << " are not implemented for H1 elements." << Alert::Raise;
       return Scalar(0);
     }
   }

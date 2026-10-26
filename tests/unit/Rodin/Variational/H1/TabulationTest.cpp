@@ -15,7 +15,7 @@
 #include <vector>
 #include "Rodin/Variational/H1/H1Element.h"
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Tests::Unit
 {
@@ -40,7 +40,7 @@ namespace Rodin::Tests::Unit
           m_points.push_back(traits.getCentroid());
           for (size_t a = 0; a < traits.getVertexCount(); ++a)
             m_points.push_back(traits.getVertex(a));
-          const auto& interior = QF::PolytopeQuadratureFormula::get(8, geometry);
+          const auto& interior = QF::QuadratureFormula::get(8, geometry);
           for (size_t q = 0; q < interior.getSize(); ++q)
             m_points.push_back(interior.getPoint(q));
         }
@@ -204,8 +204,7 @@ namespace Rodin::Tests::Unit
         coefficients[a] = element.getLinearForm(a)(polynomial);
       for (const size_t order : {2u, 4u, 8u})
       {
-        const auto& formula =
-          QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(order, geometry);
+        const auto& formula = QF::QuadratureFormula::get(order, geometry);
         const auto& table = element.getTabulation(formula);
         for (size_t qp = 0; qp < formula.getSize(); ++qp)
         {

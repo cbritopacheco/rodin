@@ -10,6 +10,7 @@
  */
 #include <chrono>
 #include <iostream>
+#include <sstream>
 #include <boost/mpi.hpp>
 #include "Rodin/PETSc.h"
 #include "Rodin/MPI/Variational.h"
@@ -239,7 +240,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["components"] = Vector ? dim : 1;
         state.counters["quadrature_order"] = 8;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(8, geometry).getSize();
+          QF::QuadratureFormula::get(8, geometry).getSize();
       }
 
       static void registerCases(const Context::MPI& context)
@@ -346,7 +347,10 @@ int main(int argc, char** argv)
           std::to_string(PETSC_VERSION_MAJOR) + "." +
             std::to_string(PETSC_VERSION_MINOR) + "." +
             std::to_string(PETSC_VERSION_SUBMINOR));
+        // Listing writes directly to the reporter stream, bypassing ReportRuns.
+        std::ostringstream listing;
         MassSilentReporter silent;
+        silent.SetOutputStream(&listing);
         const auto cases = world.rank() == 0 ? benchmark::RunSpecifiedBenchmarks()
                                              : benchmark::RunSpecifiedBenchmarks(&silent);
         result = !cases || petscMassCheckFailed ? 1 : 0;

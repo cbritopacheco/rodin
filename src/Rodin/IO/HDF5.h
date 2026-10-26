@@ -24,7 +24,7 @@
  *   by ParaView/XDMF, and are completely separate from the canonical
  *   persistence path.
  *
- * ## HDF5 Mesh Layout
+ * # HDF5 Mesh Layout
  *
  * ```
  * /Mesh
@@ -55,7 +55,7 @@
  *     /{entity}/Points                [control_nodes x sdim] (F64, nondefault charts)
  * ```
  *
- * ## XDMF Visualization Datasets (written by IO::XDMF via writeXDMFMesh)
+ * # XDMF Visualization Datasets (written by IO::XDMF via writeXDMFMesh)
  *
  * ```
  * /Mesh                               (visualization-only file, no canonical persistence)
@@ -67,7 +67,7 @@
  *   /Attributes/{d}                     [n_d] (U64)
  * ```
  *
- * ## HDF5 GridFunction Layout (standalone field file)
+ * # HDF5 GridFunction Layout (standalone field file)
  *
  * ```
  * /GridFunction
@@ -291,7 +291,7 @@ namespace Rodin::IO
      * Use the factory functions File(), Group(), DataSet(), and Space()
      * to construct handles with the correct close function.
      *
-     * ## Usage Example
+     * # Usage Example
      * ```cpp
      * auto file = HDF5::File(H5Fcreate("out.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
      * if (!file)
@@ -833,7 +833,7 @@ namespace Rodin::IO
      * visualization independent of Rodin's internal finite-element node layout
      * while intentionally approximating higher-order geometry by quadratic XDMF.
      * @param t Type of polytope to construct.
-     * @param order Polynomial order.
+     * @param order Geometry interpolation order in each reference factor.
      * @returns The x d m f reference nodes.
      */
     inline std::vector<Math::SpatialPoint> getXDMFReferenceNodes(
@@ -939,13 +939,18 @@ namespace Rodin::IO
     /**
      * @brief Tests whether the mesh needs curved XDMF visualization geometry.
      * @param[in] mesh Mesh to inspect.
-     * @returns True when at least one exported cell has order greater than one.
+     * @returns True when at least one exported cell has factor order greater than one.
+     *
+     * Topology follows interpolation order, rather than total polynomial degree:
+     * first-order product cells already have total degree greater than one.
+     * The transformation's factor-order contract retains a conservative bound
+     * when a custom transformation cannot provide a sharper interpolation order.
      */
     inline bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
     {
       for (auto it = mesh.getCell(); !it.end(); ++it)
       {
-        const size_t order = it->getTransformation().getOrder();
+        const size_t order = it->getTransformation().getFactorOrder();
         if (order > 1)
           return true;
       }
@@ -1035,7 +1040,7 @@ namespace Rodin::IO
       {
         if (!isXDMFOwnedCell(shard, D, it->getIndex()))
           continue;
-        const size_t order = it->getTransformation().getOrder();
+        const size_t order = it->getTransformation().getFactorOrder();
         count += getXDMFReferenceNodes(it->getGeometry(), order).size();
       }
       return count;
@@ -1060,10 +1065,11 @@ namespace Rodin::IO
         {
           if (!isXDMFOwnedCell(shard, D, it->getIndex()))
             continue;
-          const size_t order = it->getTransformation().getOrder();
+          const size_t order = it->getTransformation().getFactorOrder();
           const auto nodes = getXDMFReferenceNodes(it->getGeometry(), order);
           size += 1 + nodes.size();
-          if (it->getGeometry() == Geometry::Polytope::Type::Segment && order <= 1)
+          if (it->getGeometry() == Geometry::Polytope::Type::Point ||
+            (it->getGeometry() == Geometry::Polytope::Type::Segment && order <= 1))
             size += 1;
         }
         return size;
@@ -1077,7 +1083,8 @@ namespace Rodin::IO
         const auto geometry = it->getGeometry();
         const size_t nv = it->getVertices().size();
         size += 1 + nv;
-        if (geometry == Geometry::Polytope::Type::Segment)
+        if (geometry == Geometry::Polytope::Type::Point ||
+          geometry == Geometry::Polytope::Type::Segment)
           size += 1;
       }
       return size;
@@ -1116,7 +1123,7 @@ namespace Rodin::IO
 
         const auto geometry = connectivity.getGeometry(D, i);
         const auto& trans = localMesh.getPolytopeTransformation(D, i);
-        const size_t order = trans.getOrder();
+        const size_t order = trans.getFactorOrder();
 
         // Uniform high-order XDMF is used only when every cell is exported
         // through the same quadratic topology. Mixed remains the robust
@@ -1441,13 +1448,14 @@ namespace Rodin::IO
 
           const auto geometry = connectivity.getGeometry(D, i);
           const auto& trans = mesh.getPolytopeTransformation(D, i);
-          const size_t order = trans.getOrder();
+          const size_t order = trans.getFactorOrder();
           const auto nodes = getXDMFReferenceNodes(geometry, order);
 
           topology.push_back(order > 1 ? getXDMFQuadraticMixedTopologyId(geometry)
                                        : getXDMFMixedTopologyId(geometry));
 
-          if (geometry == Geometry::Polytope::Type::Segment && order <= 1)
+          if (geometry == Geometry::Polytope::Type::Point ||
+            (geometry == Geometry::Polytope::Type::Segment && order <= 1))
             topology.push_back(static_cast<U64>(nodes.size()));
 
           for (size_t k = 0; k < nodes.size(); ++k)
@@ -1470,7 +1478,8 @@ namespace Rodin::IO
 
         topology.push_back(getXDMFMixedTopologyId(geometry));
 
-        if (geometry == Geometry::Polytope::Type::Segment)
+        if (geometry == Geometry::Polytope::Type::Point ||
+          geometry == Geometry::Polytope::Type::Segment)
           topology.push_back(static_cast<U64>(key.size()));
 
         for (size_t k = 0; k < key.size(); ++k)
@@ -1549,7 +1558,7 @@ namespace Rodin::IO
 
           const auto geometry = connectivity.getGeometry(D, i);
           const auto& trans = localMesh.getPolytopeTransformation(D, i);
-          const auto nodes = getXDMFReferenceNodes(geometry, trans.getOrder());
+          const auto nodes = getXDMFReferenceNodes(geometry, trans.getFactorOrder());
 
           for (const auto& rc : nodes)
           {
@@ -1912,7 +1921,7 @@ namespace Rodin::IO
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
             const auto nodes = getXDMFReferenceNodes(
-              visCell->getGeometry(), visCell->getTransformation().getOrder());
+              visCell->getGeometry(), visCell->getTransformation().getFactorOrder());
             for (const auto& rc : nodes)
             {
               Math::SpatialPoint pc;
@@ -1941,7 +1950,7 @@ namespace Rodin::IO
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
             const auto nodes = getXDMFReferenceNodes(
-              visCell->getGeometry(), visCell->getTransformation().getOrder());
+              visCell->getGeometry(), visCell->getTransformation().getFactorOrder());
             for (const auto& rc : nodes)
             {
               Math::SpatialPoint pc;
@@ -2189,7 +2198,7 @@ namespace Rodin::IO
    *
    * Stream-based loading is not supported; only file-path loading is available.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * Geometry::Mesh<Context::Local> mesh;
    * IO::MeshLoader<IO::FileFormat::HDF5, Context::Local> loader(mesh);
@@ -2561,7 +2570,7 @@ namespace Rodin::IO
    *
    * Stream-based printing is not supported; only file-path printing is available.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * const Geometry::Mesh<Context::Local>& mesh = ...;
    * IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(mesh)
@@ -3040,7 +3049,7 @@ namespace Rodin::IO
    * @tparam FES     Finite element space type.
    * @tparam Scalar  Scalar element type of the data vector.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);
    * GridFunction u(Vh);
@@ -3191,7 +3200,7 @@ namespace Rodin::IO
    * @tparam FES     Finite element space type.
    * @tparam Scalar  Scalar element type of the data vector.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * const GridFunction& u = ...;
    * IO::GridFunctionPrinter<IO::FileFormat::HDF5, P1, Math::Vector<Real>>(u)

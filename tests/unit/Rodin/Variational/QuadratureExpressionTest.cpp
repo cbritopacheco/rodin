@@ -70,7 +70,7 @@ namespace Rodin::Tests::Unit
       integral.setPolytope(cell);
       EXPECT_EQ(mesh.requests, requests)
         << "Local assembly must not retain mapped points for every mesh cell";
-      const auto& formula = QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
+      const auto& formula = QF::QuadratureFormula::get(order, cell.getGeometry());
       for (const auto* ip : {&integral.getIntegrand().getLHS().getIntegrationPoint(),
              &integral.getIntegrand().getRHS().getIntegrationPoint()})
       {
@@ -172,8 +172,7 @@ namespace Rodin::Tests::Unit
           linear.setOrder(3);
           linear.setPolytope(*cell);
           const auto* bound = &linear.getIntegrand().getIntegrationPoint();
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(3, cell->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(3, cell->getGeometry());
           EXPECT_EQ(bound->getQuadratureFormula(), &formula);
           EXPECT_EQ(bound->getIndex(), formula.getSize() - 1);
           EXPECT_EQ(bound->getPoint().getPolytope().getDimension(), cell->getDimension());
@@ -240,7 +239,7 @@ namespace Rodin::Tests::Unit
         {
           TestFunction u(space);
           const auto cell = *space.getMesh().getCell();
-          const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
           const PolytopeQuadrature points(cell, formula);
           const auto exercise = [&](auto& reused, auto makeFresh) {
             using Value = std::remove_cvref_t<decltype(reused.getBasis(size_t(0)))>;
@@ -342,7 +341,7 @@ namespace Rodin::Tests::Unit
         {
           TestFunction u(space);
           const auto cell = *mesh.getCell();
-          const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
           const auto exercise = [&](auto& cached, auto makeFresh) {
             using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
             using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
@@ -642,7 +641,7 @@ namespace Rodin::Tests::Unit
       using Scalar = typename Rule::ScalarType;
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const auto& qf = QF::PolytopeQuadratureFormula::get(1, cell->getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(1, cell->getGeometry());
         const auto& borrowed = cell->getQuadrature(qf);
         Scalar expected = 0;
         for (size_t qp = 0; qp < borrowed.getSize(); ++qp)
@@ -688,7 +687,7 @@ namespace Rodin::Tests::Unit
       QuadratureReference<decltype(integral)> baseline(integral);
       for (size_t order : {size_t(6), size_t(8), size_t(6)})
       {
-        const auto& qf = QF::PolytopeQuadratureFormula::get(order, GetParam());
+        const auto& qf = QF::QuadratureFormula::get(order, GetParam());
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           const auto& borrowed = cell->getQuadrature(qf);
@@ -780,8 +779,7 @@ namespace Rodin::Tests::Unit
           retained = bound;
           const auto verify = [&](const auto& rule, size_t order) {
             const auto& ip = rule.getIntegrand().getIntegrationPoint();
-            const auto& formula =
-              QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+            const auto& formula = QF::QuadratureFormula::get(order, cell->getGeometry());
             EXPECT_EQ(ip.getQuadratureFormula(), &formula);
             EXPECT_EQ(ip.getIndex(), formula.getSize() - 1);
             EXPECT_EQ(ip.getPoint().getPolytope().getDimension(), cell->getDimension());
@@ -860,8 +858,7 @@ namespace Rodin::Tests::Unit
         {
           calls = 0;
           integral.setPolytope(*cell);
-          const size_t nq =
-            QF::PolytopeQuadratureFormula::get(6, cell->getGeometry()).getSize();
+          const size_t nq = QF::QuadratureFormula::get(6, cell->getGeometry()).getSize();
           // The function cache binds once per quadrature point, independently
           // of both trial and test counts. Rebinding still refreshes its value.
           EXPECT_EQ(calls, nq);

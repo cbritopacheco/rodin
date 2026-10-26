@@ -32,7 +32,8 @@ tests/benchmarks/
 │   ├── IO/                    Mesh input
 │   ├── MPI/                   Distributed module specializations
 │   └── PETSc/                 PETSc module specializations
-└── convergence/               Verification-support profiling
+└── Stokes/
+    └── InfSupStability/        Finite-mesh pressure-spectrum profiling
 ```
 
 Placement follows the operation being measured, not the physical context of
@@ -43,16 +44,270 @@ not a second assembly policy. Qualified `Rodin/...` includes resolve to
 production headers before mirrored benchmark fixtures.
 
 Module and component executables are opt-in (`EXCLUDE_FROM_ALL`) and are not
-registered with CTest. The compatibility executable `RodinBenchmarks` retains
-the historical publication registration set. New standalone profilers are not
-added to that publication workflow. Executables normally reside in
-`build/tests/benchmarks/`; an explicitly configured runtime output directory
-takes precedence.
+registered with CTest. Every enabled executable must have an explicit benchmark
+registration; configuration fails for an omitted registration. The old
+`RodinBenchmarks` aggregate and its historical dashboard are retired. Its source
+cases remain in their owning component executables. Benchmark sources and
+measurements do not enter the production-coverage denominator or test lanes.
 
-The pressure-spectrum profiler under `convergence/` measures verification
+The pressure-spectrum profiler under `Stokes/InfSupStability/` measures verification
 support, not a production Stokes solver. A root-owned spectral calculation and
 its result communication must not be interpreted as distributed assembly
 imbalance. Such measurements do not count as production solver coverage.
+
+## Registration and display
+
+An executable is declared in its owning `CMakeLists.txt`. The adjacent
+`registrations.benchmarks.cmake` records its public path, authored description,
+report format, timing policy, execution profile, ranks and case-batch limit:
+
+```cmake
+rodin_register_benchmark(RodinMathSpatialMatrixBenchmarks
+  PATH Rodin/Math/SpatialMatrix
+  DESCRIPTION "${CMAKE_CURRENT_LIST_DIR}/SpatialMatrix.html"
+  FORMAT googlecpp PROFILE slow METRIC cpu_time RANKS 1
+  CASE_BATCH 256)
+```
+
+`PATH` follows the owning module/class or physical context. `DESCRIPTION` is an
+HTML fragment explaining the operation, mathematics, algorithm, correctness
+checks and timing boundary. Inline mathematics uses `\(...\)`; descriptions
+become more specific down the hierarchy. Parent descriptions can be supplied in
+`tests/benchmarks/<publication path>/index.html`. Do not commit generated timing
+reports, investigation files or performance rankings.
+
+`PROFILE` is `regular` or `slow`. Slow is a scheduling variant under the same
+owner, not a separate module. `METRIC cpu_time` and `METRIC real_time` select a
+Google Benchmark field explicitly; `auto` follows the driver's `UseRealTime` or
+`UseManualTime` declaration, otherwise CPU time. Manually supplied values remain
+labeled `manual_time`: their scientific meaning comes from the driver and is
+not assumed to be wall time. `RANKS` preserves the required launcher counts.
+`ARGS` applies to every invocation; `MPI_ARGS` additionally applies above one
+rank.
+
+Non-root display reporters must redirect their output stream as well as suppress
+measurement callbacks: Google Benchmark writes `--benchmark_list_tests` output
+directly to that stream. Only the root catalogue should reach launcher stdout;
+every rank still participates in measurement and its numerical checks.
+
+`CASE_BATCH` is the maximum number of discovered cases per execution lane,
+not a sample reduction. The single-argument selector-size budget may split a
+batch further. Expensive spectral cases use one case per Slow lane.
+
+The configured `RodinBenchmarkTargets-Release.tsv` contains executable and
+library targets. Documentation-only configuration reads the same registrations
+into `doc/RodinBenchmarkDescriptions.tsv` without building executables. The
+rendered `rodin-module-catalogue.json` supplies the exact API module prose,
+representative formulas/code and module groups; no separate catalogue is
+maintained. Lists are alphabetical. Physical contexts are siblings of `Rodin/`;
+the public label for that source tree is **Modules**. There is no convergence
+benchmark category: the pressure spectrum is a finite-mesh stability diagnostic.
+
+Navigation places each measured operation directly under its owning module or
+class. There is no Pipeline category. For example:
+
+```text
+Modules / Assembly / Mass
+Modules / Math / SpatialMatrix / MatrixProduct
+Modules / MPI / Variational / Construction
+Modules / PETSc / Assembly / Mass
+Modules / Solver / Stokes
+Stokes / InfSupStability
+```
+
+Class-level children remain where they distinguish operations, such as matrix
+products and contractions. Complete assembly and solve workloads sit directly
+under Assembly and Solver. InfSupStability contains its spectral algorithms as
+sections on one benchmark page.
+
+## Shared builds, execution and pooling
+
+The main-branch `Benchmarks` workflow runs this graph. A manual dispatch can
+validate a branch. Numerical tests, sanitizer and production-coverage workflows
+remain separate.
+
+```text
+Benchmarks
+├── Infrastructure checks
+├── Documentation ── Doxygen XML + m.css + benchmark descriptions
+│   └── Publish documentation immediately
+│       └── Retain the latest complete benchmark histories
+├── Local / Release / GCC 14
+│   └── Shared libraries (Rodin + Google Benchmark, compiled once)
+│       ├── Modules / Assembly ── shared component build ── Regular/Slow lanes
+│       ├── Modules / Geometry ── shared component build ── Regular/Slow lanes
+│       ├── Modules / IO       ── shared component build ── Regular/Slow lanes
+│       ├── Modules / Location ── shared component build ── Regular/Slow lanes
+│       ├── Modules / Math     ── shared component build ── Regular/Slow lanes
+│       ├── Modules / QF       ── shared component build ── Regular/Slow lanes
+│       ├── Modules / Solid    ── shared component build ── Regular/Slow lanes
+│       ├── Modules / Solver   ── shared component build ── Regular/Slow lanes
+│       ├── Modules / Variational ─ shared component build ─ Regular/Slow lanes
+│       └── Stokes ── shared component build ── InfSupStability / Slow
+└── MPI and PETSc / Release / GCC 14
+    └── Shared libraries (compiled once for this backend configuration)
+        ├── Modules / MPI / Variational ── shared build ── NP2, NP4 lanes
+        ├── Modules / MPI / Location ── shared build ── NP2, NP4 lanes
+        └── Modules / PETSc / Assembly ─ shared build ── NP1, NP2, NP4 lanes
+                           │
+                           ▼
+                 Validate complete campaign
+              exact discovery + every raw report
+                           │
+                           ▼
+                 Publish complete benchmark histories
+                  (after documentation publication)
+```
+
+Documentation deploys as soon as its own build and navigation checks pass;
+benchmark failures cannot block that deployment. Fresh pages reconnect to the
+last published complete histories, retaining their measured commit and date.
+Once every benchmark contribution is validated, a second deployment updates
+the histories without replacing the documentation. Both publishers and Static
+Analysis use the same Pages publication lock and verify their deployed commit.
+
+CMake's configured dependency graph selects only libraries needed by that
+configuration's benchmark targets, including linked third-party libraries.
+Unrelated configured libraries are not built. Each group starts after its
+configuration's common build. Its execution lanes
+start immediately after **that group's** component build; there is no barrier
+waiting for sibling groups. The same compiled binary serves all its case
+partitions and rank counts. Runtime jobs restore an immutable archive and do no
+compilation. Archives validate commit, full configuration, compiler version,
+architecture, checksums and runtime dependencies. Stable source mtimes prevent a
+fresh checkout from rebuilding the restored library objects.
+
+The two Release configurations distinguish native and MPI/PETSc compilation.
+OpenMP and numerical-library thread counts are one in this campaign. These are
+not replacements for the test workflow's configuration matrix. Within a lane,
+executables run sequentially. Separate hosted runners can execute independent
+lanes concurrently. Google Benchmark's existing iteration/repetition policies
+and all discovered cases are retained; the runner requests JSON output. The
+AABB workload retains its CSV driver and exposes its exact configuration list
+with `--list`.
+
+Every lane uploads its raw report and a checksummed receipt. Pooling requires
+both configuration plans, every build group and every discovered case at every
+registered rank. Missing, duplicate, skipped, failed, stale or altered
+contributions fail the campaign. Raw Google Benchmark repetitions, counters, context and metrics remain
+available; chart values use the median of iteration records, excluding aggregate
+statistics such as the coefficient of variation. The CSV driver already emits
+its paired-block medians; its internal per-block samples are not exported. Different configurations,
+metrics and ranks are never averaged together. The final complete package also
+checksums every component result file.
+
+## Serving the pages
+
+Doxygen/m.css generates the benchmark section with the same themes and sidebar
+as the API documentation. `RodinDoxygen` requires no numerical build for these
+pages. For example:
+
+```sh
+cmake -S . -B build-doc -DRODIN_BUILD_SRC=OFF -DRODIN_BUILD_DOC=ON \
+  -DRODIN_USE_MCSS=ON -DRODIN_INSTALL_RESOURCES=OFF
+cmake --build build-doc --target RodinDoxygen
+```
+
+The publisher waits for both documentation and the complete benchmark package,
+then makes one GitHub Pages commit. For `develop`, navigation is served at
+`docs/refs/heads/develop/benchmarks/index.html`; a leaf is, for example,
+`docs/refs/heads/develop/benchmarks/Rodin/Math/SpatialMatrix/index.html`.
+Per-component, per-configuration histories live separately under
+`benchmark-data/refs/heads/develop/`, so regenerating documentation cannot erase
+them. A rerun replaces the same commit's sample rather than duplicating it.
+The generated legacy `benchmarks/` dashboard is removed only during successful
+publication of the complete replacement. Earlier aggregate history is not
+imported into the new component series.
+
+A leaf offers configuration and case selectors, then a Chart.js timing history.
+It loads only the selected case’s series and retains the latest 20 commits per
+case. This bounded window limits Pages storage; complete campaign reports remain
+CI artifacts. Histories are sharded by case to avoid monolithic class-sized JSON
+files, and configurations have separate indexes.
+Tooltips identify date, run and sample count; points link to source commits.
+Unmeasured pages say so explicitly. A local documentation build contains the
+navigation and scientific descriptions without fabricated timings.
+
+## Adding a benchmark or lane
+
+1. Add the driver under its owning module. Keep independent class benchmarks
+   separate from whole-pipeline workloads. Retain numerical guards outside the
+   timed region and describe all included work.
+2. Add an opt-in executable and link its actual dependencies. Include the
+   adjacent `registrations.benchmarks.cmake` from that directory's CMake file.
+3. Register a unique path and description, format, metric, profile, ranks and
+   batch size. Optional MPI/PETSc executables stay in their backend CMake guards;
+   their descriptions remain visible in documentation-only builds.
+4. Configure and build the target, list its cases, then run a bounded selection.
+   Run one numerical benchmark process at a time. Test all required MPI ranks
+   sequentially.
+5. Run the infrastructure checks below and build documentation. A new target
+   automatically joins its owning group's shared build and discovered execution
+   lanes. To split a slow suite further, reduce `CASE_BATCH`; no workflow matrix
+   duplication is required. MPI rank changes require an explicit registration
+   change, not a workflow-only selector.
+
+To create a new top-level module or context, register its path and add parent
+prose. `group_path()` in `dev/benchmark_ci.py` controls the common hierarchy cutoff:
+`Rodin/<Module>`, `Rodin/MPI/<Module>`, `Rodin/PETSc/<Module>`, or a physical context.
+Only split this cutoff when a group exceeds the hosted matrix limit; do not
+repeat common compilation to create execution parallelism.
+
+The workflow implementation is in `BenchmarkConfiguration.yml` and
+`BenchmarkGroup.yml`; pooling, publication and site generation are in
+`dev/benchmark_ci.py`, `dev/benchmark_publish.py` and `dev/benchmark_site.py`.
+
+Intermediate benchmark pages present their children as compact linked blocks,
+with two columns when the content area is wide and one on narrow screens.
+Each block reuses the opening paragraph of its child's authored description;
+keep that paragraph a concise explanation of the measured operation. The full
+mathematics and timing contract remain on the destination page.
+
+Benchmark pages use the same content grid, heading sizes and sidebar placement
+as the API documentation. Its top bar reuses the rendered documentation navigation,
+including dropdowns, responsive controls and theme selection. Only search changes
+to a combined benchmark-and-search icon control. Both search icons
+open the same search overlay and share hover and keyboard focus behavior. The sidebar supplies
+section links and scroll-following highlights. Its controls retain the chosen
+side across pages without shifting the content column. Visibility follows the
+same viewport rules as the API sidebar. Clicking a subsection scrolls to that
+heading. Navigation updates do not steal focus.
+
+Benchmark search reuses the pinned m.css engine and overlay. Its generated index
+contains module, collection and benchmark names, paths, CMake target names and
+authored descriptions. Exact names rank first; description queries may contain
+several words, and slash or C++-style scope paths are accepted. Each result shows
+its owning path and opening description, with no separately maintained catalogue.
+The index works in a local file preview as well as on Pages.
+
+The search icon, Tab or T opens the overlay; arrow keys select a result, Enter
+opens it and Escape closes it. A visible close button supports touch screens.
+On published measurement pages, **Filter cases** narrows the case selector by
+operation, geometry, degree or other case-name fields. The selected configuration,
+case and active filter are reflected in the URL and restored when reopened.
+
+Initialize the search dependency before running site-generation checks:
+
+```sh
+git submodule update --init third-party/m.css
+```
+
+Run infrastructure checks sequentially:
+
+```sh
+python3 -m unittest discover -s dev -p 'test_benchmark_*.py' -v
+node --check dev/benchmarks/charts.js
+node dev/test_benchmark_navigation.cjs build-doc/doc/html/benchmarks
+node dev/test_benchmark_charts.cjs build-doc/doc/html/benchmarks
+node dev/test_benchmark_search.cjs build-doc/doc/html/benchmarks
+```
+
+The browser check requires the `playwright` Node package and a Chromium install.
+`RODIN_BROWSER_EXECUTABLE` can select an installed Chromium-compatible browser.
+It checks destination icons, sidebar positioning, direct subsection links,
+manual-scroll highlights, theme selection and narrow-screen layout. Run one
+numerical benchmark at a time, retaining the registered MPI ranks for a
+distributed benchmark.
 
 ## Spatial vector and matrix arithmetic
 
@@ -60,7 +315,7 @@ imbalance. Such measurements do not count as production solver coverage.
 public spatial APIs (including `Math::sum`, `Math::minus`, `Math::mult`,
 `Math::division`, `Math::conj` and `Math::dot`) with bounded-capacity Eigen values, dynamic Eigen vector/matrix representations, and selected compile-time fixed Eigen values.
 `SpatialArithmetic.h` owns the common input, execution and numerical guards.
-These opt-in executables are separate from the historical publication suite.
+Each opt-in executable has its own component page and case histories.
 
 The vector suite covers zero construction, copying, arithmetic and compound
 assignments, scalar multiplication in both orders, division, conjugation,

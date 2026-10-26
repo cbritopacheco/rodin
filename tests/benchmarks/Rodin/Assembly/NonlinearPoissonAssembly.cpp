@@ -168,7 +168,7 @@ namespace Rodin::Tests::Benchmarks
         timing.counters["geometry_degree"] = curved ? 2 : 1;
         timing.counters["quadrature_order"] = order;
         timing.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
+          QF::QuadratureFormula::get(order, geometry).getSize();
       }
 
       /**
@@ -214,7 +214,7 @@ namespace Rodin::Tests::Benchmarks
         load = integral;
 
         Math::Vector<Real> reference = Math::Vector<Real>::Zero(space.getSize());
-        const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+        const auto& formula = QF::QuadratureFormula::get(order, geometry);
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           const auto& element = space.getFiniteElement(dimension, cell->getIndex());

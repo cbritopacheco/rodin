@@ -1,11 +1,8 @@
 name: Documentation
 permissions:
-  contents: write
+  contents: read
 on:
-  push:
-    branches:
-      - master
-      - develop
+  workflow_call:
   pull_request:
     branches:
       - master
@@ -40,9 +37,9 @@ jobs:
         # Use the same parser as the Style warning check.
         run: |
           curl -fsSL -o doxygen.tar.gz \
-            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+            https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.linux.bin.tar.gz
           tar -xzf doxygen.tar.gz
-          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
+          echo "$PWD/doxygen-1.15.0/bin" >> "$GITHUB_PATH"
       - name: Configure CMake
         run: >
           cmake
@@ -53,12 +50,14 @@ jobs:
           -DRODIN_USE_MCSS=ON
           -DRODIN_BUILD_SRC=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
+      - name: Test documentation navigation checks
+        run: python3 -m unittest discover -s dev -p 'test_documentation_*.py' -v
       - name: Build
         run: cmake --build ${{github.workspace}}/build --target RodinDoxygen
-      - name: Deploy
-        if: github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Verify rendered module and template navigation
+        run: python3 dev/check_documentation_navigation.py
+      - uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{github.workspace}}/build/doc/html
-          destination_dir: docs/${{ github.ref }}
+          name: documentation
+          path: ${{ github.workspace }}/build/doc/html
+          if-no-files-found: error

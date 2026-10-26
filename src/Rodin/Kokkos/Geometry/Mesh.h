@@ -19,7 +19,7 @@
 #include "Rodin/Geometry/IdentityTransformation.h"
 #include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational/P1/P1Element.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Connectivity.h"
 
 namespace Rodin::Geometry
@@ -1212,7 +1212,7 @@ namespace Rodin::Geometry
             order = 0;
           else if (dimension == m_sdim && geometry != Polytope::Type::Pyramid)
             order = dimension * element.getFactorOrder() - 1;
-          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
           std::vector<Real> points, weights;
           for (size_t q = 0; q < formula.getSize(); ++q)
           {

@@ -66,7 +66,7 @@ namespace Rodin::Solver
    * | @ref CG "CG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Iterative conjugate gradient solver for dense SPD systems. |
    * | @ref CG "CG<PETSc::Math::LinearSystem>" | PETSc KSP-backed conjugate gradient solver. |
    *
-   * @see CGSpecializations for available template specializations.
+   * @see @ref CGSpecializations "CG Template Specializations"
    */
   template <class LinearSystem>
   class CG;
@@ -82,7 +82,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref SimplicialLLT "SimplicialLLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse LLT factorization for SPD sparse systems. |
    *
-   * @see SimplicialLLTSpecializations for available template specializations.
+   * @see @ref SimplicialLLTSpecializations "SimplicialLLT Template Specializations"
    */
   template <class LinearSystem>
   class SimplicialLLT;
@@ -98,7 +98,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref SimplicialLDLT "SimplicialLDLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse LDLT factorization for SPD sparse systems. |
    *
-   * @see SimplicialLDLTSpecializations for available template specializations.
+   * @see @ref SimplicialLDLTSpecializations "SimplicialLDLT Template Specializations"
    */
   template <class LinearSystem>
   class SimplicialLDLT;
@@ -113,7 +113,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref LDLT "LDLT<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Eigen dense LDLT factorization with pivoting. |
    *
-   * @see LDLTSpecializations for available template specializations.
+   * @see @ref LDLTSpecializations "LDLT Template Specializations"
    */
   template <class LinearSystem>
   class LDLT;
@@ -143,7 +143,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref HouseholderQR "HouseholderQR<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Eigen dense Householder QR factorization. |
    *
-   * @see HouseholderQRSpecializations for available template specializations.
+   * @see @ref HouseholderQRSpecializations "HouseholderQR Template Specializations"
    */
   template <class LinearSystem>
   class HouseholderQR;
@@ -158,7 +158,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref SparseLU "SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse LU factorization for general sparse systems. |
    *
-   * @see SparseLUSpecializations for available template specializations.
+   * @see @ref SparseLUSpecializations "SparseLU Template Specializations"
    */
   template <class LinearSystem>
   class SparseLU;
@@ -173,7 +173,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref SparseQR "SparseQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse QR factorization with column pivoting. |
    *
-   * @see SparseQRSpecializations for available template specializations.
+   * @see @ref SparseQRSpecializations "SparseQR Template Specializations"
    */
   template <class LinearSystem>
   class SparseQR;
@@ -189,7 +189,7 @@ namespace Rodin::Solver
    * | @ref LeastSquaresCG "LeastSquaresCG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Least-squares conjugate gradient solver for sparse systems. |
    * | @ref LeastSquaresCG "LeastSquaresCG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Least-squares conjugate gradient solver for dense systems. |
    *
-   * @see LeastSquaresCGSpecializations for available template specializations.
+   * @see @ref LeastSquaresCGSpecializations "LeastSquaresCG Template Specializations"
    */
   template <class LinearSystem>
   class LeastSquaresCG;
@@ -204,7 +204,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref BiCGSTAB "BiCGSTAB<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized bi-conjugate gradient solver for sparse non-symmetric systems. |
    *
-   * @see BiCGSTABSpecializations for available template specializations.
+   * @see @ref BiCGSTABSpecializations "BiCGSTAB Template Specializations"
    */
   template <class LinearSystem>
   class BiCGSTAB;
@@ -220,6 +220,8 @@ namespace Rodin::Solver
    * | @ref GMRES "GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Restarted GMRES solver for sparse non-symmetric systems. |
    * | @ref GMRES "GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Restarted GMRES solver for dense non-symmetric systems. |
    * | @ref GMRES "GMRES<PETSc::Math::LinearSystem>" | PETSc KSP-backed GMRES solver. |
+   *
+   * @see @ref GMRESSpecializations "GMRES Template Specializations"
    */
   template <class LinearSystem>
   class GMRES;
@@ -234,6 +236,8 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref DGMRES "DGMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Deflated GMRES solver for sparse non-symmetric systems. |
    * | @ref DGMRES "DGMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Deflated GMRES solver for dense non-symmetric systems. |
+   *
+   * @see @ref DGMRESSpecializations "DGMRES Template Specializations"
    */
   template <class LinearSystem>
   class DGMRES;
@@ -246,6 +250,8 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref IDRS "IDRS<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | IDR(s) solver for sparse non-symmetric systems. |
    * | @ref IDRS "IDRS<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | IDR(s) solver for dense non-symmetric systems. |
+   *
+   * @see @ref IDRSSpecializations "IDRS Template Specializations"
    */
   template <class LinearSystem>
   class IDRS;
@@ -258,6 +264,8 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref MINRES "MINRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | MINRES solver for sparse symmetric indefinite systems. |
    * | @ref MINRES "MINRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | MINRES solver for dense symmetric indefinite systems. |
+   *
+   * @see @ref MINRESSpecializations "MINRES Template Specializations"
    */
   template <class LinearSystem>
   class MINRES;
@@ -272,6 +280,8 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref IDRSTABL "IDRSTABL<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized IDR(s) solver for sparse non-symmetric systems. |
    * | @ref IDRSTABL "IDRSTABL<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized IDR(s) solver for dense non-symmetric systems. |
+   *
+   * @see @ref IDRSTABLSpecializations "IDRSTABL Template Specializations"
    */
   template <class LinearSystem>
   class IDRSTABL;
@@ -287,7 +297,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref SPQR "SPQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | SuiteSparseQR factorization for sparse systems. |
    *
-   * @see SPQRSpecializations for available template specializations.
+   * @see @ref SPQRSpecializations "SPQR Template Specializations"
    */
   template <class LinearSystem>
   class SPQR;
@@ -304,7 +314,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref UMFPack "UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | UMFPACK multifrontal sparse LU factorization. |
    *
-   * @see UMFPackSpecializations for available template specializations.
+   * @see @ref UMFPackSpecializations "UMFPack Template Specializations"
    */
   template <class LinearSystem>
   class UMFPack;
@@ -319,7 +329,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref ParU "ParU<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | ParU factorization for real sparse systems. |
    *
-   * @see ParUSpecializations for available template specializations.
+   * @see @ref ParUSpecializations "ParU Template Specializations"
    */
   template <class LinearSystem>
   class ParU;
@@ -334,7 +344,7 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref MUMPS "MUMPS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | MUMPS factorization for real sparse systems. |
    *
-   * @see MUMPSSpecializations for available template specializations.
+   * @see @ref MUMPSSpecializations "MUMPS Template Specializations"
    */
   template <class LinearSystem>
   class MUMPS;

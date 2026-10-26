@@ -14,7 +14,7 @@
  * in Discontinuous Galerkin (DG) methods where numerical fluxes, jumps, and
  * averages depend on a consistent face orientation.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  *
  * Let @f$ F @f$ be a codimension-one polytope of the mesh. A face normal is a
  * vector field @f$ \mathbf{n}_F @f$ such that
@@ -37,7 +37,7 @@
  * For a boundary face, there is a unique adjacent cell @f$ K @f$, and the
  * normal is oriented automatically outward from that cell.
  *
- * ## Orientation Convention
+ * # Orientation Convention
  *
  * The orientation is chosen as follows:
  *
@@ -51,7 +51,7 @@
  * Consequently, on interior faces the normal is trace-dependent, while on
  * boundary faces it is determined geometrically from the unique incident cell.
  *
- * ## Trace Semantics
+ * # Trace Semantics
  *
  * The FaceNormal object supports both boundary and interior codimension-one
  * entities, but the meaning differs slightly:
@@ -67,7 +67,7 @@
  * This behavior makes FaceNormal suitable for DG interface terms where one
  * needs a normal consistent with a chosen side of the interface.
  *
- * ## Applications in DG Methods
+ * # Applications in DG Methods
  *
  * Typical uses include:
  *
@@ -80,7 +80,7 @@
  * - **Penalty terms**:
  *   @f$ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] @f$
  *
- * ## Difference from BoundaryNormal
+ * # Difference from BoundaryNormal
  *
  * - **FaceNormal**:
  *   defined on all codimension-one mesh entities; on interior faces its
@@ -89,7 +89,7 @@
  * - **BoundaryNormal**:
  *   defined only on the boundary of the domain and always oriented outward.
  *
- * ## Manifold Assumption
+ * # Manifold Assumption
  *
  * This implementation assumes that a codimension-one mesh entity is incident
  * to either:
@@ -99,7 +99,7 @@
  *
  * Non-manifold situations with more than two incident cells are not supported.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * FaceNormal n(mesh);
  *

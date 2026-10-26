@@ -13,7 +13,7 @@
  * used in advection problems, level set methods, and semi-Lagrangian time
  * integration schemes.
  *
- * ## Mathematical foundation
+ * # Mathematical foundation
  * Given a velocity field @f$ \mathbf{v}(x,t) @f$, the flow map @f$ \Phi_t @f$
  * satisfies:
  * @f[
@@ -23,7 +23,7 @@
  * The flow operator computes @f$ u(\Phi(x,t)) @f$, which represents the value
  * of function @f$ u @f$ advected along the flow.
  *
- * ## Applications
+ * # Applications
  * - **Advection-diffusion**:
  *   @f$ \partial_t u + \mathbf{v}\cdot\nabla u = f @f$
  * - **Semi-Lagrangian methods**: characteristic tracking for transport
@@ -59,7 +59,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 

@@ -26,7 +26,7 @@
 #include <vector>
 #include <Rodin/Variational.h>
 #include <Rodin/Geometry.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -122,8 +122,7 @@ namespace
       auto verify = [action, density, order](auto& integrator, const Polytope& cell) {
         EXPECT_EQ(&integrator.getPolytope(), &cell);
         EXPECT_EQ(integrator.getOrder(cell), order);
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(order, cell.getGeometry());
         Scalar expected = 0;
         for (size_t sample = 0; sample < formula.getSize(); ++sample)
         {

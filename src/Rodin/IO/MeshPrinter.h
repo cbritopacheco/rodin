@@ -28,7 +28,7 @@ namespace Rodin::IO
    * Specialized printers for specific file formats should derive from this class
    * and implement the print(std::ostream&) method to generate their respective formats.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * const Mesh<Context::Local>& mesh = getMesh();
    * MeshPrinter<FileFormat::MEDIT, Context::Local> printer(mesh);

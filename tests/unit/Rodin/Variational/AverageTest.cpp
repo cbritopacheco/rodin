@@ -163,8 +163,7 @@ TEST(Rodin_Variational_Average, DiscontinuousIntegrationPointTracesAllGeometries
         ASSERT_EQ(averageBasis.getDOFIndices()->size(), 2);
         ASSERT_EQ(jumpBasis.getDOFIndices()->size(), 2);
         const IndexArray indices = *averageBasis.getDOFIndices();
-        const auto& quadrature =
-          QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+        const auto& quadrature = QF::QuadratureFormula::get(2, face->getGeometry());
         const auto& points = face->getQuadrature(quadrature);
         for (size_t q = 0; q < points.getSize(); ++q)
         {

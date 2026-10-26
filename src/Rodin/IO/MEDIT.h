@@ -681,40 +681,70 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override;
 
-      /// @brief Reads one logical line while tracking line numbers.
+      /**
+       * @brief Reads one logical line while tracking line numbers.
+       * @param is Input stream containing the MEDIT mesh data.
+       * @param line Output buffer receiving the next input line.
+       * @returns Input stream after reading the next logical line.
+       */
       std::istream& getline(std::istream& is, std::string& line);
 
-      /// @brief Skips blank lines and returns the next non-empty line.
+      /**
+       * @brief Skips blank lines and returns the next non-empty line.
+       * @param is Input stream containing the MEDIT mesh data.
+       * @returns Next non-empty input line.
+       */
       std::string skipEmptyLines(std::istream& is);
 
-      /// @brief Reads and validates the MEDIT version section.
+      /**
+       * @brief Reads and validates the MEDIT version section.
+       * @param is Input stream containing the MEDIT mesh data.
+       */
       void readVersion(std::istream& is);
 
-      /// @brief Reads and validates the MEDIT dimension section.
+      /**
+       * @brief Reads and validates the MEDIT dimension section.
+       * @param is Input stream containing the MEDIT mesh data.
+       */
       void readDimension(std::istream& is);
 
-      /// @brief Reads vertex and element entities from the MEDIT stream.
+      /**
+       * @brief Reads vertex and element entities from the MEDIT stream.
+       * @param is Input stream containing the MEDIT mesh data.
+       */
       void readEntities(std::istream& is);
 
-      /// @brief Returns mutable counts collected for each MEDIT keyword.
+      /**
+       * @brief Returns mutable counts collected for each MEDIT keyword.
+       * @returns Map from MEDIT keywords to parsed entity counts.
+       */
       std::unordered_map<MEDIT::Keyword, size_t>& getCountMap()
       {
         return m_count;
       }
 
-      /// @brief Returns counts collected for each MEDIT keyword.
+      /**
+       * @brief Returns counts collected for each MEDIT keyword.
+       * @returns Map from MEDIT keywords to parsed entity counts.
+       */
       const std::unordered_map<MEDIT::Keyword, size_t>& getCountMap() const
       {
         return m_count;
       }
 
-      /// @brief Returns mutable stream positions for parsed MEDIT sections.
+      /**
+       * @brief Returns mutable stream positions for parsed MEDIT sections.
+       * @returns Map from MEDIT keywords to their input-stream positions.
+       */
       std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap()
       {
         return m_pos;
       }
 
-      /// @brief Returns stream positions for parsed MEDIT sections.
+      /**
+       * @brief Returns stream positions for parsed MEDIT sections.
+       * @returns Map from MEDIT keywords to their input-stream positions.
+       */
       const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>&
       getPositionMap() const
       {

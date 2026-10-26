@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <fstream>
+#include <memory>
 #include <array>
 #include <cstdint>
 #include <sstream>
@@ -47,6 +48,234 @@ namespace Rodin::Tests::Unit
 
       boost::filesystem::path m_directory; ///< Per-test output directory.
   };
+
+  /// @brief Cell geometry and the independently specified XDMF node counts.
+  struct XDMFGeometryCase
+  {
+    Polytope::Type geometry;
+    HDF5::U64 linearId;
+    HDF5::U64 quadraticId;
+    size_t quadraticNodes;
+  };
+
+  /// @brief Compares XML metadata, heavy data and evaluated fields across geometry orders.
+  class XDMFGeometryOrderTest : public XDMFTest,
+                                public ::testing::WithParamInterface<XDMFGeometryCase>
+  {
+    protected:
+      /**
+       * @brief Reads a visualization dataset after verifying its exact shape.
+       * @param filename HDF5 file to inspect.
+       * @param dataset Dataset path within the file.
+       * @param shape Expected dimensions.
+       * @returns Flattened values, or an empty vector after a failed shape check.
+       */
+      std::vector<HDF5::F64> readValues(const boost::filesystem::path& filename,
+        const std::string& dataset, const std::vector<hsize_t>& shape)
+      {
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        EXPECT_TRUE(file);
+        if (!file)
+          return {};
+        const auto actual = HDF5::readDatasetShape(file.get(), dataset);
+        EXPECT_EQ(actual, shape);
+        if (actual != shape)
+          return {};
+        size_t count = 1;
+        for (const auto extent : shape)
+          count *= extent;
+        std::vector<HDF5::F64> values(count);
+        const auto data =
+          HDF5::DataSet(H5Dopen2(file.get(), dataset.c_str(), H5P_DEFAULT));
+        EXPECT_TRUE(data);
+        if (!data)
+          return {};
+        EXPECT_GE(H5Dread(data.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                    values.data()),
+          0);
+        return values;
+      }
+  };
+
+  /// @brief Linear product cells share vertices; mixed curved cells keep topology and field sampling synchronized.
+  TEST_P(XDMFGeometryOrderTest, TopologyCoordinatesAndFieldsUseInterpolationOrder)
+  {
+    const auto parameter = GetParam();
+    const Polytope::Traits traits(parameter.geometry);
+    const size_t dimension = traits.getDimension();
+
+    /// @brief Small quadratic displacement that vanishes at reference vertices.
+    constexpr Real WarpAmplitude = 0.05;
+
+    /// @brief Roundoff allowance for quadratic-basis interpolation of coordinate fields.
+    constexpr Real SamplingTolerance = 1e-11;
+    for (const bool curved : {false, true})
+    {
+      SCOPED_TRACE(curved);
+      auto mesh =
+        LocalMesh::UniformGrid(parameter.geometry, Array<size_t>::Constant(dimension, 3));
+      if (parameter.geometry == Polytope::Type::Wedge)
+      {
+        const auto path = m_directory / "wedges.mesh";
+        mesh.save(path, FileFormat::MEDIT);
+        mesh.load(path, FileFormat::MEDIT);
+      }
+      for (size_t d = dimension; d > 0; --d)
+        mesh.getConnectivity().compute(d, d - 1);
+      const auto first = *mesh.getCell();
+      std::unique_ptr<PolytopeTransformation> original(first.getTransformation().copy());
+      // Retain the reference fields while changing only the geometric mapping.
+      H1<2, Real> scalarSpace(std::integral_constant<size_t, 2>{}, mesh);
+      H1<2, Math::SpatialVector<Real>> vectorSpace(
+        std::integral_constant<size_t, 2>{}, mesh, 2);
+      GridFunction scalar(scalarSpace);
+      GridFunction vector(vectorSpace);
+      scalar = [](const Point& point) { return 1 + point.x(); };
+      vector = [](const Point& point) {
+        return Math::SpatialVector<Real>{1 + point.x(), 5 + 2 * point.x()};
+      };
+      if (curved)
+      {
+        RealH1Element<2> element(parameter.geometry);
+        PointCloud controls(dimension, element.getCount());
+        for (size_t node = 0; node < element.getCount(); ++node)
+        {
+          const auto& reference = element.getNode(node);
+          Math::SpatialPoint physical;
+          original->transform(physical, reference);
+          physical[0] += WarpAmplitude * reference[0] * (1 - reference[0]);
+          for (size_t component = 0; component < dimension; ++component)
+            controls(component, node) = physical[component];
+        }
+        mesh.setPolytopeTransformation({dimension, first.getIndex()},
+          new ParametricTransformation<RealH1Element<2>>(std::move(controls), element));
+      }
+      EXPECT_EQ(HDF5::hasCurvedXDMFGeometry(mesh), curved);
+      const size_t points = curved
+        ? parameter.quadraticNodes + (mesh.getCellCount() - 1) * traits.getVertexCount()
+        : mesh.getVertexCount();
+      EXPECT_EQ(HDF5::getXDMFVisualizationVertexCount(mesh), points);
+      const auto layout = HDF5::getXDMFTopologyLayout(mesh);
+      ASSERT_FALSE(layout.isUniform);
+      EXPECT_EQ(layout.topologyType, "Mixed");
+
+      std::vector<HDF5::U64> topology;
+      std::vector<Math::SpatialPoint> coordinates;
+      std::vector<Real> referenceValues;
+      if (!curved)
+      {
+        for (Index vertex = 0; vertex < static_cast<Index>(mesh.getVertexCount());
+             ++vertex)
+        {
+          coordinates.push_back(mesh.getVertexCoordinates(vertex));
+          referenceValues.push_back(1 + coordinates.back()[0]);
+        }
+      }
+      size_t next = 0;
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const bool quadratic = curved && cell->getIndex() == first.getIndex();
+        topology.push_back(quadratic ? parameter.quadraticId : parameter.linearId);
+        if (!quadratic && parameter.geometry == Polytope::Type::Segment)
+          topology.push_back(2);
+        if (curved)
+        {
+          const auto nodes =
+            HDF5::getXDMFReferenceNodes(parameter.geometry, quadratic ? 2 : 1);
+          for (const auto& reference : nodes)
+          {
+            topology.push_back(next++);
+            Math::SpatialPoint physical;
+            if (quadratic)
+            {
+              original->transform(physical, reference);
+              referenceValues.push_back(1 + physical[0]);
+              physical[0] += WarpAmplitude * reference[0] * (1 - reference[0]);
+            }
+            else
+            {
+              cell->getTransformation().transform(physical, reference);
+              referenceValues.push_back(1 + physical[0]);
+            }
+            coordinates.push_back(physical);
+          }
+        }
+        else
+        {
+          for (const Index vertex : cell->getVertices())
+            topology.push_back(vertex);
+        }
+      }
+      ASSERT_EQ(coordinates.size(), points);
+      ASSERT_EQ(referenceValues.size(), points);
+      EXPECT_EQ(layout.entryCount, topology.size());
+      EXPECT_EQ(HDF5::getXDMFMixedTopologySize(mesh), topology.size());
+
+      const std::string name = curved ? "curved" : "linear";
+      XDMF writer(m_directory / name);
+      writer.setMesh(mesh)
+        .add("scalar", scalar, XDMF::Center::Node, XDMF::AttributePolicy::Static)
+        .add("vector", vector, XDMF::Center::Node, XDMF::AttributePolicy::Static);
+      writer.write(0).close();
+      std::ifstream input((m_directory / (name + ".xdmf")).string());
+      ASSERT_TRUE(input.good());
+      const std::string xml((std::istreambuf_iterator<char>(input)), {});
+      EXPECT_NE(xml.find("TopologyType=\"Mixed\""), std::string::npos);
+      EXPECT_NE(
+        xml.find("NumberOfElements=\"" + std::to_string(mesh.getCellCount()) + "\""),
+        std::string::npos);
+      EXPECT_NE(xml.find("Dimensions=\"" + std::to_string(points) + " " +
+                  std::to_string(dimension) + "\""),
+        std::string::npos);
+      EXPECT_NE(
+        xml.find("Dimensions=\"" + std::to_string(points) + "\""), std::string::npos);
+      EXPECT_NE(
+        xml.find("Dimensions=\"" + std::to_string(points) + " 2\""), std::string::npos);
+      const auto meshPath = m_directory / (name + ".mesh.h5");
+      const auto file =
+        HDF5::File(H5Fopen(meshPath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      ASSERT_TRUE(file);
+      EXPECT_EQ(
+        HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology),
+        topology);
+      const auto geometry = readValues(meshPath, HDF5::Path::MeshGeometryVertices,
+        {static_cast<hsize_t>(points), static_cast<hsize_t>(dimension)});
+      const auto scalars = readValues(m_directory / (name + ".scalar.h5"),
+        HDF5::Path::GridFunctionValuesData, {static_cast<hsize_t>(points)});
+      const auto vectors = readValues(m_directory / (name + ".vector.h5"),
+        HDF5::Path::GridFunctionValuesData, {static_cast<hsize_t>(points), 2});
+      ASSERT_EQ(geometry.size(), points * dimension);
+      ASSERT_EQ(scalars.size(), points);
+      ASSERT_EQ(vectors.size(), 2 * points);
+      for (size_t point = 0; point < points; ++point)
+      {
+        for (size_t component = 0; component < dimension; ++component)
+        {
+          EXPECT_NEAR(geometry[point * dimension + component],
+            coordinates[point][component], SamplingTolerance);
+        }
+        EXPECT_NEAR(scalars[point], referenceValues[point], SamplingTolerance);
+        EXPECT_NEAR(vectors[2 * point], referenceValues[point], SamplingTolerance);
+        EXPECT_NEAR(
+          vectors[2 * point + 1], 3 + 2 * referenceValues[point], SamplingTolerance);
+      }
+    }
+  }
+
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, XDMFGeometryOrderTest,
+    ::testing::Values(XDMFGeometryCase{Polytope::Type::Segment, 2, 34, 3},
+      XDMFGeometryCase{Polytope::Type::Triangle, 4, 36, 6},
+      XDMFGeometryCase{Polytope::Type::Quadrilateral, 5, 35, 9},
+      XDMFGeometryCase{Polytope::Type::Tetrahedron, 6, 38, 10},
+      XDMFGeometryCase{Polytope::Type::Pyramid, 7, 39, 13},
+      XDMFGeometryCase{Polytope::Type::Wedge, 8, 41, 18},
+      XDMFGeometryCase{Polytope::Type::Hexahedron, 9, 50, 27}),
+    [](const ::testing::TestParamInfo<XDMFGeometryCase>& info) {
+      std::ostringstream label;
+      label << info.param.geometry;
+      return label.str();
+    });
 
   /// @brief Failed publication preserves open state and history for flush/close recovery.
   TEST_F(XDMFTest, OutputOpenFailurePreservesHistoryForRecovery)
@@ -516,5 +745,41 @@ namespace Rodin::Tests::Unit
       writer.write(1).close();
       EXPECT_EQ(writer.getSnapshotCount(), 2u);
     }
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Names are escaped in XML while generated filesystem paths retain their literal names.
+  TEST_F(XDMFTest, EscapedNamesAndPaths)
+  {
+    const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+    P1 fes(mesh);
+    GridFunction field(fes);
+    field = Real(2);
+    XDMF writer(m_directory / "series&data");
+    writer.grid("mesh&<\"'>").setMesh(mesh).add("value&<\"'>", field);
+    writer.write().close();
+    std::ifstream input((m_directory / "series&data.xdmf").string());
+    ASSERT_TRUE(input.good());
+    const std::string xml((std::istreambuf_iterator<char>(input)), {});
+    EXPECT_NE(xml.find("mesh&amp;&lt;&quot;&apos;&gt;"), std::string::npos);
+    EXPECT_NE(xml.find("value&amp;&lt;&quot;&apos;&gt;"), std::string::npos);
+    EXPECT_NE(xml.find("series&amp;data"), std::string::npos);
+    EXPECT_EQ(xml.find("Name=\"mesh&<"), std::string::npos);
+    size_t files = 0;
+    for (const auto& entry : boost::filesystem::directory_iterator(m_directory))
+    {
+      if (entry.path().extension() == ".h5")
+      {
+        ++files;
+        EXPECT_NE(
+          entry.path().filename().string().find("series&data"), std::string::npos);
+        auto file =
+          HDF5::File(H5Fopen(entry.path().c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        EXPECT_TRUE(file);
+      }
+    }
+    EXPECT_EQ(files, 2u);
   }
 }

@@ -189,7 +189,8 @@ namespace Rodin::Tests::Convergence
         return measure();
 #else
         ADD_FAILURE() << "Pure Neumann certification requires PETSc MUMPS";
-        return {};
+        return ErrorNorms(
+          std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::infinity());
 #endif
       }
 

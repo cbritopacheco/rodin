@@ -12,7 +12,7 @@
  * (matrix of all first-order partial derivatives) of vector-valued functions
  * in variational formulations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a vector-valued function @f$ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n @f$,
  * the Jacobian matrix is defined as:
  * @f[
@@ -20,18 +20,18 @@
  * @f]
  * resulting in an @f$ n \times d @f$ matrix.
  *
- * ## Special Cases
+ * # Special Cases
  * - When @f$ n = d @f$, the determinant @f$ \det(J) @f$ appears in change of variables
  * - For @f$ d = n = 2,3 @f$, related to deformation gradient in mechanics
  * - Transpose @f$ J^T @f$ gives the gradient of components
  *
- * ## Applications
+ * # Applications
  * - Nonlinear elasticity: deformation gradient tensor
  * - Fluid dynamics: velocity gradient tensor
  * - Differential geometry: metric tensor computations
  * - Coordinate transformations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Displacement gradient for elasticity
  * P1 Vh(mesh, mesh.getSpaceDimension());

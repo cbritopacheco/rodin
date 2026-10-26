@@ -36,7 +36,14 @@ jobs:
       with:
         lfs: false
     - name: Install CI planning dependency
-      run: python3 -m pip install PyYAML==6.0.2
+      run: python3 dev/ci_environment.py python
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - name: Verify pinned artifact client handles interrupted streams
+      run: |
+        npm ci --prefix .github/actions/download-artifacts --ignore-scripts --no-audit --no-fund
+        node --test --test-concurrency=1 dev/test_ci_artifact_stream.js
     - name: Verify dependency graph and publish graph navigation
       run: python3 dev/ci_schedule.py --summary
     - name: Verify scoped discovery and incremental coverage guards
@@ -235,6 +242,7 @@ jobs:
       with:
         submodules: recursive
         lfs: false
+    - uses: ./.github/actions/prepare-apt
     - name: Setup Cpp (C++ / C)
       uses: aminya/setup-cpp@v1
       with:
@@ -351,35 +359,24 @@ jobs:
     - uses: actions/checkout@v4
       with:
         lfs: false
-    - name: Download producer records
-      uses: actions/download-artifact@v4
-      with:
-        pattern: ci-result-*
-        path: ci-artifacts
-    - name: Download targeted coverage
-      uses: actions/download-artifact@v4
-      with:
-        pattern: ci-target-*
-        path: ci-artifacts
     - name: Download expected plan
       uses: actions/download-artifact@v4
       with:
         name: ci-test-plan
         path: .
-    - name: Download shared-build index
-      uses: actions/download-artifact@v4
+    - name: Plan exact shared-build indices
+      run: python3 dev/ci_artifacts.py indices --output ci-index-inputs.json
+    - name: Download every shared-build index
+      uses: ./.github/actions/download-artifacts
       with:
-        pattern: ci-build-index-*
+        names-file: ci-index-inputs.json
         path: ci-build-indices
-    - name: Download directory build receipts
-      uses: actions/download-artifact@v4
+    - name: Plan every required receipt, coverage report and publication
+      run: python3 dev/ci_artifacts.py final --output ci-final-inputs.json
+    - name: Download all mandatory finalization evidence
+      uses: ./.github/actions/download-artifacts
       with:
-        pattern: ci-built-*
-        path: ci-artifacts
-    - name: Download successful coverage publications
-      uses: actions/download-artifact@v4
-      with:
-        pattern: ci-publication-*
+        names-file: ci-final-inputs.json
         path: ci-artifacts
     - name: Verify complete coverage and unchanged compilation inventory
       env:

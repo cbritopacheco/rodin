@@ -62,8 +62,10 @@ Loader/Printer class-template pattern: `MeshLoader`/`MeshPrinter`,
 - **MFEM** (`.mesh`/`.gf`) — meshes and grid functions.
 - **XDMF + HDF5** — visualization/time series: `IO::XDMF` writes a domain
   with `xdmf.grid().setMesh(mesh).add("name", gf)` per step; heavy data in
-  HDF5 side files; auto-detects curved (order>1) transformations and
-  samples them. This is the standard example output (open in ParaView).
+  HDF5 side files; detects higher-order geometry through `getFactorOrder()`
+  and samples it. Total polynomial degree must not classify visualization
+  topology: first-order product cells retain their native shared vertices.
+  This is the standard example output (open in ParaView).
 - **HDF5.h** — direct mesh/grid-function persistence.
 
 Examples write outputs into the CWD — run from scratch directories.

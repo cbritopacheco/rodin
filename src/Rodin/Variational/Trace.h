@@ -11,26 +11,26 @@
  * This file defines the Trace class, which computes the trace (sum of diagonal
  * elements) of matrix-valued functions in variational formulations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a square matrix @f$ A \in \mathbb{R}^{n \times n} @f$, the trace is:
  * @f[
  *   \text{tr}(A) = \sum_{i=1}^n A_{ii}
  * @f]
  *
- * ## Properties
+ * # Properties
  * The trace operator satisfies:
  * - **Linearity**: @f$ \text{tr}(A + B) = \text{tr}(A) + \text{tr}(B) @f$
  * - **Scalar multiplication**: @f$ \text{tr}(\alpha A) = \alpha \text{tr}(A) @f$
  * - **Cyclic property**: @f$ \text{tr}(ABC) = \text{tr}(CAB) = \text{tr}(BCA) @f$
  * - **Transpose invariance**: @f$ \text{tr}(A^T) = \text{tr}(A) @f$
  *
- * ## Applications
+ * # Applications
  * - Linear elasticity: @f$ \text{tr}(\boldsymbol{\varepsilon}) @f$ (volumetric strain)
  * - Continuum mechanics: invariants of stress/strain tensors
  * - Fluid dynamics: divergence from velocity gradient
  * - General tensor operations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Volumetric strain in linear elasticity
  * auto strain = 0.5 * (Jacobian(u) + Transpose(Jacobian(u)));

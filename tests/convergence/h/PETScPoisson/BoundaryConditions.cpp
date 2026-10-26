@@ -69,8 +69,7 @@ namespace Rodin::Tests::Convergence::PETScPoissonBoundaryTests
         if (dim == 1)
           return std::expm1(length) / length;
         const auto integrate = [](size_t order) {
-          const auto& rule =
-            QF::PolytopeQuadratureFormula::get(order, Polytope::Type::Segment);
+          const auto& rule = QF::QuadratureFormula::get(order, Polytope::Type::Segment);
           Real integral = 0;
           for (size_t i = 0; i < rule.getSize(); ++i)
           {

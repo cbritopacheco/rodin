@@ -89,7 +89,7 @@ namespace Rodin::Adaptation::SWIFT
       }
       const auto& fe = fes.getFiniteElement(cell->getDimension(), index);
       // This is a polynomial FE field, not the composed level-set residual.
-      const auto& qf = QF::PolytopeQuadratureFormula::get(validationOrder > 0
+      const auto& qf = QF::QuadratureFormula::get(validationOrder > 0
           ? validationOrder
           : std::max<size_t>(6, 2 * fe.getOrder() + 4),
         cell->getGeometry());
@@ -1771,7 +1771,7 @@ namespace Rodin::Adaptation::SWIFT
               fe.getOrder(), polytope.getTransformation().getOrder(), simplex)
           : m_parameters.quadrature.getVolumeOrder(
               fe.getOrder(), polytope.getTransformation().getOrder(), simplex);
-        return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+        return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
       /**
@@ -1789,7 +1789,7 @@ namespace Rodin::Adaptation::SWIFT
         const std::size_t order = m_parameters.quadrature.validation > 0
           ? m_parameters.quadrature.validation
           : Parameters::Quadrature::getValidationOrder(fe.getOrder());
-        return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+        return QF::QuadratureFormula::get(order, polytope.getGeometry());
       }
 
       /**

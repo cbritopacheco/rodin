@@ -645,22 +645,45 @@ namespace Rodin::Math
   constexpr auto dot(
     const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    assert(lhs.rows() == rhs.rows());
-    assert(lhs.cols() == rhs.cols());
     using LeftScalar = typename LHSDerived::Scalar;
     using RightScalar = typename RHSDerived::Scalar;
-    if constexpr (requires {
-                    typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
-                      Eigen::internal::scalar_product_op<LeftScalar,
-                        RightScalar>>::ReturnType;
-                  })
-      return (lhs.array() * rhs.conjugate().array()).sum();
+    if constexpr (LHSDerived::IsVectorAtCompileTime && RHSDerived::IsVectorAtCompileTime)
+    {
+      assert(lhs.size() == rhs.size());
+      using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+      // Contract Eigen expressions directly: Rodin owners route member dot()
+      // back here. Align row/column vectors before the coefficientwise product.
+      if constexpr ((LHSDerived::RowsAtCompileTime == 1) !=
+        (RHSDerived::RowsAtCompileTime == 1))
+      {
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().transpose().array())
+          .sum();
+      }
+      else
+      {
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().array())
+          .sum();
+      }
+    }
     else
     {
-      using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
-      return (lhs.template cast<Scalar>().array() *
-        rhs.template cast<Scalar>().conjugate().array())
-        .sum();
+      assert(lhs.rows() == rhs.rows());
+      assert(lhs.cols() == rhs.cols());
+      if constexpr (requires {
+                      typename Eigen::ScalarBinaryOpTraits<LeftScalar, RightScalar,
+                        Eigen::internal::scalar_product_op<LeftScalar,
+                          RightScalar>>::ReturnType;
+                    })
+        return (lhs.array() * rhs.conjugate().array()).sum();
+      else
+      {
+        using Scalar = decltype(dot(LeftScalar{}, RightScalar{}));
+        return (lhs.template cast<Scalar>().array() *
+          rhs.template cast<Scalar>().conjugate().array())
+          .sum();
+      }
     }
   }
 

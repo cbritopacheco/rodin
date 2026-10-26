@@ -11,7 +11,7 @@
  * @file
  * @brief H1 quadrature rules with point-local reference-table borrowing.
  *
- * ## Coefficient evaluation and reference data
+ * # Coefficient evaluation and reference data
  *
  * A coefficient callback may query unrelated reference formulas and evict a
  * bounded reference-table slot. Coefficient-bearing rules evaluate owned
@@ -21,7 +21,7 @@
  * coordinate comparisons or distributed communication.
  */
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Math/Common.h"
@@ -44,8 +44,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ v @f$ is an H1 shape function of order @f$K@f$.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -178,7 +177,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -281,8 +280,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ v @f$ is an H1 shape function of order @f$K@f$.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -430,7 +428,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -555,7 +553,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u @f$ and @f$ v @f$ are H1 shape functions.
    *
-   * ## Component addressing
+   * # Component addressing
    *
    * For @f$m@f$ components and @f$N_r@f$ scalar trial basis functions,
    * let @f$n_r=mN_r@f$ be the local trial DOF count. A matching-component
@@ -570,15 +568,14 @@ namespace Rodin::Variational
    * accumulation remain unchanged. Mixed degrees retain the trial count as
    * their row stride; no coordinate matching or distributed operation is used.
    *
-   * ## Empty component ranges
+   * # Empty component ranges
    *
    * With zero components, the local matrix has shape @f$0\times0@f$.
    * Binding retains the mapped-quadrature lifecycle but returns before
    * tabulating or contracting scalar bases. Equal empty DOF counts do not
    * establish equality of the trial and test scalar polynomial degrees.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -731,7 +728,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -897,7 +894,7 @@ namespace Rodin::Variational
    * rule. Nested products, traces and transformed shapes retain generic
    * integration. This metadata neither rewrites nor owns an expression.
    *
-   * ## Specializations
+   * # Specializations
    *
    * In the table, @f$C@f$ denotes a coefficient expression and @f$U@f$ a
    * direct H1 trial leaf. Eligibility retains operand order; it does not
@@ -997,14 +994,14 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$A@f$ is a coefficient function.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Mapped quadrature samples and the completed local matrix are owned by the
    * rule. Reference tables are borrowed only during binding, after the current
    * coefficient value has been materialized. Public entry access retains test
    * rows and trial columns independently of the private storage order.
    *
-   * ### Scalar coefficients
+   * ## Scalar coefficients
    *
    * A scalar coefficient gives @f$M_{bm+e,am+c}=\delta_{ec}S_{ba}@f$.
    * For left scaling, row-major addresses of successive matching components
@@ -1044,7 +1041,7 @@ namespace Rodin::Variational
    * @tparam Scalar Finite-element field range.
    * @tparam Mesh Mesh type.
    *
-   * ## Judgement
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -1218,7 +1215,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1478,8 +1475,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$A@f$ is a coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -1659,7 +1655,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1904,8 +1900,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$c@f$ is a scalar coefficient function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -2071,7 +2066,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2183,8 +2178,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ is an H1 trial shape function and @f$q@f$ is an H1 test shape function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -2344,7 +2338,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2521,8 +2515,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$p@f$ is an H1 trial shape function and @f$v@f$ is an H1 test shape function.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -2683,7 +2676,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2860,7 +2853,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are vector-valued H1 shape functions and @f$A@f$ is a coefficient function.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Reference gradients have @f$d@f$ entries and are mapped through the
    * @f$d\times s@f$ geometric inverse into all @f$s@f$ ambient components.
@@ -2884,8 +2877,7 @@ namespace Rodin::Variational
    * for every point and polytope; no table pointer or physical derivative is
    * cached across binds.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -3063,7 +3055,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -3393,7 +3385,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int \nabla u \cdot \nabla v \ dx@f$ with H1 trial and test shape functions.
    *
-   * ## Physical-gradient preparation
+   * # Physical-gradient preparation
    *
    * At each quadrature point, reference gradients are transformed by the
    * current inverse Jacobian. If both operands borrow the same reference
@@ -3410,8 +3402,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are H1 shape functions.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -3577,7 +3568,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -3863,7 +3854,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are vector-valued H1 shape functions.
    *
-   * ## Physical-gradient preparation
+   * # Physical-gradient preparation
    *
    * The scalar basis gradients are mapped at the current physical sample by
    * @f$G_{aj}=\sum_{r=0}^{d-1}\partial_r\widehat\phi_a\,(J_K^{\dagger})_{rj}@f$.
@@ -3875,7 +3866,7 @@ namespace Rodin::Variational
    * gradients. Mapping expressions and local-entry summation order remain
    * unchanged.
    *
-   * ## Component-block contraction
+   * # Component-block contraction
    *
    * Let @f$\phi_a@f$ and @f$\psi_b@f$ denote physical trial and test scalar
    * bases, and let @f$m@f$ count scalar components of the value range. The
@@ -3901,8 +3892,7 @@ namespace Rodin::Variational
    * On a point, the physical derivative is zero and no scalar gradient
    * contraction is performed, independently of the ambient dimension.
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -4049,7 +4039,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -4398,7 +4388,7 @@ namespace Rodin::Variational
           m_set = true;
           m_order = order;
           m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -4541,8 +4531,7 @@ namespace Rodin::Variational
    * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$f@f$ is a
    * coefficient function (typically a vector-valued GridFunction).
    *
-   * Judgement
-   * ---------
+   * # Judgement
    *
    * The following judgement specifies that the expression is a well formed type
    * of QuadratureRule.
@@ -4564,7 +4553,7 @@ namespace Rodin::Variational
    * inverse Jacobians on embedded cells. Point cells and empty component
    * ranges return the zero operator before evaluating the coefficient.
    *
-   * ## Working storage
+   * # Working storage
    *
    * Each sample stores @f$d_a=b^T\nabla\phi_a@f$ once per trial scalar basis,
    * rather than retaining a full gradient and contracting it again for each
@@ -4728,7 +4717,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);

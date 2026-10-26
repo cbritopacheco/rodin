@@ -18,10 +18,10 @@
  * DGMRES accelerates restarted GMRES by deflating (approximations of) invariant
  * subspaces associated with slow-to-converge eigencomponents.
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported DGMRES.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Solver::DGMRES solver(problem);
  * solver.setTolerance(1e-10).setMaxIterations(1000).setRestart(50).solve();

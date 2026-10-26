@@ -2020,7 +2020,8 @@ namespace Rodin::QF::Data::WitherdenVincent
   };
 
   /// @brief Tabulated quadrilateral rules indexed by degree.
-  inline const std::vector<std::vector<Real>> quadrilateral = {
+  inline const std::vector<std::vector<Real>>& quadrilateral =
+    *new std::vector<std::vector<Real>>{
     // degree 1: 1 points
     {
       0.5,
@@ -5255,7 +5256,8 @@ namespace Rodin::QF::Data::WitherdenVincent
   };
 
   /// @brief Tabulated wedge rules indexed by degree.
-  inline const std::vector<std::vector<Real>> wedge = {
+  inline const std::vector<std::vector<Real>>& wedge =
+    *new std::vector<std::vector<Real>>{
     // degree 1: 1 points
     {
       0.33333333333333337,
@@ -7640,7 +7642,8 @@ namespace Rodin::QF::Data::WitherdenVincent
   };
 
   /// @brief Tabulated hexahedron rules indexed by degree.
-  inline const std::vector<std::vector<Real>> hexahedron = {
+  inline const std::vector<std::vector<Real>>& hexahedron =
+    *new std::vector<std::vector<Real>>{
     // degree 1: 1 points
     {
       0.5,

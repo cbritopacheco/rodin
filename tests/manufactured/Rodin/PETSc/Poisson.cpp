@@ -128,8 +128,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
         const auto& mesh = field.getFiniteElementSpace().getMesh();
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(order, cell->getGeometry());
           for (size_t sample = 0; sample < formula.getSize(); ++sample)
           {
             const Point point(*cell, formula.getPoint(sample));

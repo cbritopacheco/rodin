@@ -49,8 +49,8 @@ jobs:
       - name: Download this configuration's common objects
         uses: actions/download-artifact@v4
         with:
-          pattern: ci-common-${{ inputs.common }}
-          path: ci-runtime-inputs
+          name: ci-common-${{ inputs.common }}
+          path: ci-runtime-inputs/ci-common-${{ inputs.common }}
       - name: Compile directory executables using common objects
         env:
           BUILD_ID: ${{ inputs.id }}

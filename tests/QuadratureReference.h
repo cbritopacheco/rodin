@@ -66,7 +66,7 @@ namespace Rodin::Tests
         {
           m_order = order;
           m_geometry = cell.getGeometry();
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, m_geometry);
+          m_qf = &QF::QuadratureFormula::get(order, m_geometry);
         }
         m_quadrature.emplace(cell, *m_qf);
         const auto& quadrature = *m_quadrature;

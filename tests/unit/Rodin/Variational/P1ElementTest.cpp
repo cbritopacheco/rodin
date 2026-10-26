@@ -11,7 +11,7 @@
 #include <complex>
 #include <type_traits>
 #include "Rodin/Variational/P1.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -204,7 +204,7 @@ namespace Rodin::Tests::Unit
         for (const size_t order : {size_t(8), size_t(16)})
         {
           SCOPED_TRACE(order);
-          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
           const auto& table = element.getTabulation(formula);
           ASSERT_EQ(&element.getTabulation(formula), &table);
           ASSERT_EQ(table.getSize(), formula.getSize());

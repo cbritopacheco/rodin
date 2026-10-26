@@ -15,7 +15,7 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational/H1/H1Element.h"
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "../QF/RepeatedFormula.h"
 
 namespace Rodin::Tests::Benchmarks
@@ -108,7 +108,7 @@ namespace Rodin::Tests::Benchmarks
        * @param warm Whether point caches remain valid between sweeps.
        * @param curved Whether the analytic map has quadratic curvature.
        */
-      template <class Formula = QF::PolytopeQuadratureFormula>
+      template <class Formula = QF::QuadratureFormula>
       static void run(benchmark::State& state, Geometry::Polytope::Type geometry,
         PointOperation operation, bool warm, bool curved)
       {
@@ -150,7 +150,7 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (std::is_same_v<Formula, QF::GaussLegendre>)
             return QF::QuadratureFormula::get<Formula>(geometry, size_t(state.range(1)));
           else
-            return QF::QuadratureFormula::get<Formula>(size_t(state.range(1)), geometry);
+            return QF::QuadratureFormula::get(size_t(state.range(1)), geometry);
         }();
         const bool referenceMiss =
           operation == PointOperation::ConstructionAndMetricsReferenceMiss;

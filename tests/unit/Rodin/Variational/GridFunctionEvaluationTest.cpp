@@ -173,7 +173,7 @@ namespace Rodin::Tests::Unit
         Variational::GridFunction field(space);
         field.getData() << 2, -3, 5;
         const auto cell = *mesh.getCell();
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
         for (size_t mutation = 0; mutation < 2; ++mutation)
         {
           const Geometry::PolytopeQuadrature quadrature(cell, formula);
@@ -215,7 +215,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_GridFunction, ReferenceExpansionSurvivesCoefficientCacheEviction)
   {
     const auto geometry = Geometry::Polytope::Type::Segment;
-    const auto& formula = QF::PolytopeQuadratureFormula::get(3, geometry);
+    const auto& formula = QF::QuadratureFormula::get(3, geometry);
     const Variational::H1Element<2, Real> scalar(geometry);
     const auto check = [&](const auto& element) {
       using Range = typename std::decay_t<decltype(element)>::RangeType;
@@ -226,8 +226,8 @@ namespace Rodin::Tests::Unit
         actual,
         [&](size_t local) {
           // Nine distinct formulas exceed the bounded reference cache capacity.
-          for (size_t order = 10; order < 19; ++order)
-            scalar.getTabulation(QF::PolytopeQuadratureFormula::get(order, geometry));
+          for (size_t order = 10; order < 28; order += 2)
+            scalar.getTabulation(QF::QuadratureFormula::get(order, geometry));
           return coefficient(local);
         },
         formula, 0);
@@ -252,7 +252,7 @@ namespace Rodin::Tests::Unit
       {
         SCOPED_TRACE(static_cast<int>(geometry));
         SCOPED_TRACE(Degree);
-        const auto& formula = QF::PolytopeQuadratureFormula::get(2, geometry);
+        const auto& formula = QF::QuadratureFormula::get(2, geometry);
         const auto coefficient = [](size_t local) {
           if constexpr (std::is_same_v<Scalar, Complex>)
             return Scalar(Real(1 + local) / 7, -Real(2 + local) / 11);

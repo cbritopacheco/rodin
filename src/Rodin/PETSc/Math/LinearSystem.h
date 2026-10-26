@@ -17,7 +17,7 @@
  * the @c FieldSplits inner
  * class for block-preconditioner support.
  *
- * ## Usage
+ * # Usage
  *
  * This class is normally not instantiated directly; instead it is created
  * internally by @ref Rodin::Variational::Problem specializations.  Solvers
@@ -50,7 +50,7 @@ namespace Rodin::Math
    * the common @ref Rodin::Math::LinearSystemBase interface used by Rodin
    * variational problems and solvers.
    *
-   * ## Implementation Details
+   * # Implementation Details
    *
    * The linear system @f$ A\mathbf{x} = \mathbf{b} @f$ is stored as
    * three PETSc handles that are allocated in the constructor and
@@ -58,7 +58,7 @@ namespace Rodin::Math
    * enforces Dirichlet boundary conditions by zeroing rows of @f$ A @f$
    * and adjusting @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
    *
-   * ## Field-Split Support
+   * # Field-Split Support
    *
    * The inner @ref FieldSplits class stores named PETSc index sets
    * (`IS`) that can be passed to `PCFIELDSPLIT` for block

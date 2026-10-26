@@ -22,7 +22,7 @@
 #include "Rodin/Variational/P0g/P0gElement.h"
 #include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/Variational/H1/H1Element.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "../QF/RepeatedFormula.h"
 
 namespace Rodin::Tests::Benchmarks
@@ -91,8 +91,7 @@ namespace Rodin::Tests::Benchmarks
     const size_t ndof = element.getCount();
     const size_t dim = Geometry::Polytope::Traits(geometry).getDimension();
     std::vector<const QF::QuadratureFormula*> formulas;
-    const auto& source =
-      QF::PolytopeQuadratureFormula::get(size_t(state.range(0)), geometry);
+    const auto& source = QF::QuadratureFormula::get(size_t(state.range(0)), geometry);
     formulas.reserve(FormulaCount);
     for (size_t i = 0; i < FormulaCount; ++i)
       formulas.push_back(&QF::QuadratureFormula::get<RepeatedFormula>(source, i));

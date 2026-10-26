@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <vector>
 #include "Rodin/Geometry.h"
+#include "../QF/RepeatedFormula.h"
 #include "Rodin/Variational.h"
 
 namespace Rodin::Tests::Unit
@@ -81,11 +82,13 @@ namespace Rodin::Tests::Unit
             ReferenceTabulationCache<H1Element<TrialDegree, Scalar>, Scalar>;
           using TestTables =
             ReferenceTabulationCache<H1Element<TestDegree, Scalar>, Scalar>;
-          const auto& bound = QF::PolytopeQuadratureFormula::get(0, geometry);
+          const auto& bound = QF::QuadratureFormula::get(0, geometry);
           std::vector<const QF::QuadratureFormula*> eviction;
           for (size_t i = 0; i < EvictionRules; ++i)
           {
-            eviction.emplace_back(&QF::PolytopeQuadratureFormula::get(i + 1, geometry));
+            eviction.emplace_back(
+              &QF::QuadratureFormula::get<Tests::RepeatedQuadratureFormula>(
+                bound, i + 1));
             trialElement.getTabulation(*eviction.back());
             testElement.getTabulation(*eviction.back());
           }

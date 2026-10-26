@@ -33,15 +33,15 @@ namespace Rodin::Distance
    * where @f$ u @f$ is the input level set function and @f$ d @f$ is the
    * normalized approximate signed distance.
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - Preserves the zero level set: @f$ d(x) = 0 \iff u(x) = 0 @f$
    * - Preserves the sign: @f$ \text{sign}(d) = \text{sign}(u) @f$
    * - Gradient magnitude approaches 1 near the interface
    *
-   * ## References
+   * # References
    * @cite rvachev1974methods @cite rvachev2001transfinite
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * GridFunction u(fes);  // Some level set function
    * Rvachev rvachev;

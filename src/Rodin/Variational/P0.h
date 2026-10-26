@@ -11,20 +11,20 @@
  * This header aggregates all functionality related to the P0 finite element
  * space, which consists of piecewise constant functions over mesh elements.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * The P0 space is defined as:
  * @f[
  *   P_0(\mathcal{T}_h) = \{u \in L^2(\Omega) : u|_K \in \mathbb{P}_0(K) \, \forall K \in \mathcal{T}_h\}
  * @f]
  * where @f$ \mathbb{P}_0(K) @f$ denotes constant functions on element @f$ K @f$.
  *
- * ## Features
+ * # Features
  * - One degree of freedom per element (at element center)
  * - Discontinuous across element boundaries
  * - Suitable for DG methods and element-wise constant approximations
  * - Gradient of P0 functions is zero within each element
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * P0 Vh(mesh);           // Define P0 space
  * GridFunction<P0> u(Vh); // P0 grid function

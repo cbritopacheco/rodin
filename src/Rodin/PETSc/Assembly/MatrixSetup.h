@@ -17,7 +17,7 @@ namespace Rodin::PETSc::Assembly
    * @brief Sets up a PETSc matrix for assembly while reusing compatible
    *        existing structure.
    *
-   * ## Contract
+   * # Contract
    *
    * The caller guarantees that, between successive assemblies of the *same*
    * matrix object, the sparsity pattern is unchanged. Concretely this means the
@@ -33,7 +33,7 @@ namespace Rodin::PETSc::Assembly
    * precondition is checked by a debug assertion. A change of finite element
    * space or mesh requires a new @c LinearSystem.
    *
-   * ## Why this matters
+   * # Why this matters
    *
    * The structural calls @c MatSetSizes / @c MatSetType / @c MatSetFromOptions /
    * @c MatSetUp re-establish the matrix internals and bump PETSc's nonzero-state

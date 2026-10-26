@@ -115,7 +115,7 @@ you claim a change is finished:
 python3 dev/check_format.py --base origin/develop   # then: git clang-format origin/develop
 python3 dev/style_lint.py                           # guards, license, @file, PETSc containment
 python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
-python3 dev/check_doxygen_warnings.py               # needs doxygen 1.14.0 exactly
+python3 dev/check_doxygen_warnings.py               # needs doxygen 1.15.0 exactly
 ```
 
 For documentation changes, also preserve the rendered Doxygen/m.css contract:

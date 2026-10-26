@@ -85,7 +85,7 @@ namespace Rodin::Tests::Convergence
         Real scalarSquared = 0, vectorSquared = 0, derivativeSquared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& qf = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& qf = QF::QuadratureFormula::get(order, geometry);
           const auto& q = cell->getQuadrature(qf);
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
@@ -174,7 +174,7 @@ namespace Rodin::Tests::Convergence
           Real expectedSquared = 0;
           for (auto cell = reference.getCell(); cell; ++cell)
           {
-            const auto& qf = QF::PolytopeQuadratureFormula::get(order, geometry);
+            const auto& qf = QF::QuadratureFormula::get(order, geometry);
             const auto& quadrature = cell->getQuadrature(qf);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {

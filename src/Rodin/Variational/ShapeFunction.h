@@ -332,7 +332,7 @@ namespace Rodin::Variational
    * basis functions (shape functions) in both trial and test spaces. Shape 
    * functions are the building blocks of finite element approximations.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * In the finite element method, functions are approximated using a linear
    * combination of basis functions (shape functions):
    * @f[
@@ -348,7 +348,7 @@ namespace Rodin::Variational
    * - **Partition of unity**: @f$ \sum_{i=1}^N \phi_i(x) = 1 @f$ for all @f$ x @f$
    * - **Nodal property**: For Lagrange elements, @f$ \phi_i(x_j) = \delta_{ij} @f$
    *
-   * ## Usage
+   * # Usage
    * ShapeFunctionBase is a CRTP base class. Derived classes include:
    * - TrialFunction: Represents @f$ u @f$ in the trial space
    * - TestFunction: Represents @f$ v @f$ in the test space

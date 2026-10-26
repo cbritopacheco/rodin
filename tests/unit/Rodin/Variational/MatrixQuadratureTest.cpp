@@ -51,8 +51,7 @@ namespace
     const std::vector<size_t> tests = {0, nte / 3, nte / 2, nte - 1};
     using Scalar = typename FormLanguage::Traits<Integrand>::ScalarType;
     Math::Matrix<Scalar> expected = Math::Matrix<Scalar>::Zero(4, 4);
-    const auto& formula =
-      QF::PolytopeQuadratureFormula::get(quadratureOrder, cell.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(quadratureOrder, cell.getGeometry());
     const auto& quadrature = cell.getQuadrature(formula);
     // Evaluate the expression directly, independently of specialized tabulation
     // and local-matrix assembly. Rectangular shapes expose component permutations.

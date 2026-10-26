@@ -108,8 +108,7 @@ namespace Rodin::Tests::Benchmarks
           state.SkipWithError("Cell closure and element basis counts differ");
           return;
         }
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
+        const auto& formula = QF::QuadratureFormula::get(state.range(0), geometry);
         const size_t nqp = formula.getSize();
         using Gradient = Math::SpatialVector<Scalar>;
         std::vector<Gradient> gradients;

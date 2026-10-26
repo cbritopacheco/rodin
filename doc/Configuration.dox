@@ -1,0 +1,72 @@
+/**
+  @page configuration Configuration
+  @brief Selecting build features and using Rodin's generated configuration.
+
+  Rodin's build selects execution backends, optional dependencies, tests and
+  documentation through CMake options. CMake generates @c Rodin/Configure.h
+  from @ref Rodin/Configure.h.in "Configure.h.in"; exported CMake targets also carry
+  the include paths, compile definitions and dependencies needed by consumers.
+
+  # Configure a build
+
+  @code{.bash}
+  cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DRODIN_USE_MPI=ON \
+    -DRODIN_MULTITHREADED=ON \
+    -DRODIN_USE_PETSC=OFF
+  cmake --build build
+  @endcode
+
+  These switches select different capabilities:
+
+  | CMake option | Purpose |
+  |--------------|---------|
+  | @c RODIN_USE_MPI | Distributed-memory support; see @ref Rodin::MPI "MPI". |
+  | @c RODIN_MULTITHREADED | Shared-memory execution policies used by @ref Rodin::Assembly "Assembly". |
+  | @c RODIN_USE_OPENMP | OpenMP dependency support. |
+  | @c RODIN_USE_PETSC | PETSc-backed linear algebra and variational operations; see @ref Rodin::PETSc "PETSc". |
+  | @c RODIN_USE_SCOTCH | Graph-based mesh partitioning through @ref Rodin::Scotch "Scotch". |
+  | @c RODIN_BUILD_UNIT_TESTS | Unit-test executables. |
+  | @c RODIN_BUILD_MANUFACTURED_TESTS | Manufactured-solution tests. |
+  | @c RODIN_BUILD_CONVERGENCE_TESTS | Convergence studies. |
+  | @c RODIN_BUILD_BENCHMARKS | Benchmark executables. |
+  | @c RODIN_BUILD_DOC | API and guide documentation. |
+  | @c RODIN_USE_MCSS | The styled documentation renderer. |
+
+  Dependency availability and the requested options determine the configured
+  build. Inspect @c build/CMakeCache.txt for its selected CMake values. Optional
+  backends have their own dependency requirements; enabling an option does not
+  install the corresponding system library.
+
+  # Inspect configuration in C++
+
+  @code{.cpp}
+  #include <Rodin/Configure.h>
+
+  #if defined(RODIN_USE_MPI)
+  // Implementation requiring Rodin's MPI configuration.
+  #endif
+  @endcode
+
+  Feature macros in the generated header are generally defined when enabled
+  and absent otherwise. The @ref Rodin/Configure.h.in "Configure.h reference"
+  documents individual version, feature and capacity macros. Some backend
+  definitions are supplied by exported CMake targets; link the relevant Rodin
+  targets to retain their compile definitions and dependencies.
+
+  @c Configure.h.in is the source template, and @c Configure.h is the generated
+  include. Regenerate the build after changing CMake selections rather than
+  editing the generated header or manually enabling a backend in consumer code.
+
+  # Module-specific controls
+
+  A small number of capacity and precondition macros are declared by their
+  owning headers. Their references remain attached to those files:
+
+  - @ref RODIN_GEOMETRY_REQUIRE_INCIDENCE checks a required mesh incidence relation.
+  - @ref RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER bounds the configured Grundmann–Möller order.
+  - @ref RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION bounds H1 vector capacity.
+
+  @see @ref Rodin/Configure.h.in "Configure.h macro reference"
+ */

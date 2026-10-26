@@ -12,22 +12,22 @@
  * operation between functions. This operator tests whether two function values
  * differ at each point in the domain.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the inequality operator:
  * @f[
  *   (f \neq g)(x) = \begin{cases} 1 & \text{if } f(x) \neq g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]
  *
- * ## Numerical Considerations
+ * # Numerical Considerations
  * For floating-point comparisons, consider using approximate equality tests
  * rather than strict inequality, due to numerical precision limitations.
  *
- * ## Applications
+ * # Applications
  * - Complement of indicator functions
  * - Non-zero region detection
  * - Logical complement of equality conditions
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * auto is_nonzero = (u != 0.0);  // Boolean function, true where u is non-zero
  * ```

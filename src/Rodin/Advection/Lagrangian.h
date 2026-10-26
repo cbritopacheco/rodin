@@ -426,7 +426,7 @@ namespace Rodin::Advection
    * where @f$ u @f$ is the scalar field and @f$ \mathbf{v} @f$ is the velocity
    * field.
    *
-   * ## Semi-Lagrangian Method
+   * # Semi-Lagrangian Method
    * At each time step, the method:
    * 1. Traces characteristics backwards: @f$ \mathbf{X}(t) = \mathbf{x} - \int_0^{\Delta t} \mathbf{v} \, ds @f$
    * 2. Interpolates the solution at departure points
@@ -437,7 +437,7 @@ namespace Rodin::Advection
    *   \int_\Omega u^{n+1} v \, dx = \int_\Omega u^n(\mathbf{X}) v \, dx
    * @f]
    *
-   * ## Advantages
+   * # Advantages
    * - Unconditionally stable for large CFL numbers
    * - Naturally handles complex geometries
    * - Mass-conservative in variational form

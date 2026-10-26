@@ -14,7 +14,7 @@
  * This file provides an optimized implementation of the linear elasticity
  * integrator for P1 vector finite element spaces.
  *
- * ## Bilinear Form
+ * # Bilinear Form
  * The integrator assembles the elasticity bilinear form:
  * @f[
  *   a(\mathbf{u}, \mathbf{v}) = \int_\Omega 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) + \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx
@@ -23,7 +23,7 @@
  * For P1 elements, this uses centroid quadrature (exact for the bilinear form)
  * and exploits the constant gradient property of P1 basis functions.
  *
- * ## Usage
+ * # Usage
  * @code{.cpp}
  * P1 Vh(mesh, spaceDim);  // Vector P1 space
  * TrialFunction u(Vh);
@@ -54,7 +54,7 @@ namespace Rodin::Variational
    * elements. Uses centroid quadrature which is exact for the constant
    * Jacobians of P1 basis functions.
    *
-   * ## Local Stiffness Matrix
+   * # Local Stiffness Matrix
    * For element @f$ K @f$, computes the local matrix entries:
    * @f[
    *   A^K_{ij} = |K| \left[ 2\mu \, \boldsymbol{\varepsilon}(\phi_j) : \boldsymbol{\varepsilon}(\phi_i) + \lambda (\nabla \cdot \phi_j)(\nabla \cdot \phi_i) \right]
@@ -204,7 +204,7 @@ namespace Rodin::Variational
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
 
-        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+        m_qf = &QF::QuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));

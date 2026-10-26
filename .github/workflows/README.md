@@ -38,6 +38,12 @@ dedicated execution lanes, installation, Build, Documentation and Linux style
 dependency steps use this installer. Test commands, configurations, MPI ranks
 and coverage producers are independent of the cache.
 
+Before compiler installation, [`prepare-apt`](../actions/prepare-apt/action.yml)
+excludes the unused Microsoft Ubuntu feeds on GitHub-hosted Linux runners.
+An unavailable feed must not prevent installation of Rodin's Ubuntu packages.
+The original definitions are backed up; other sources and signing rules remain
+intact. Local machines and self-hosted runners are not changed.
+
 The installer refreshes signed APT indexes, resolves and pins requested packages
 and their installation dependencies, then restores `.deb` downloads. Keys include
 Ubuntu release, architecture, runner image, requested package set and resolved
@@ -49,6 +55,14 @@ under `runner.temp/rodin-apt-archives`, outside the system cache removed by
 `apt-get clean`. Locks and partial downloads are not cached. A missing cache
 changes performance only, never the tests or their acceptance conditions.
 
+Shared Linux test and benchmark environments obtain their requested GCC/G++
+packages through the same signed APT plan and cached archives. They select the
+explicit compiler pair through `CC` and `CXX`, verify matching full versions and
+log the runner-provided CMake version. They do not download `setup-cpp` merely
+to select tools already present on the hosted image. This avoids an additional
+action-archive transfer at every shared producer and consumer while preserving
+the configured compiler major version and all numerical test selections.
+
 Index attempts have a 90-second budget and complete package-download attempts a
 300-second budget. GNU `timeout` terminates the privileged APT process group
 before fallback. After the runner's original sources, fallback uses the official
@@ -57,8 +71,8 @@ signing keys and exact resolved versions. Ubuntu `mirror+file:` source indirecti
 is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
-Third-party source definitions remain
-unchanged. Final installation is offline, allows no package removals and has a
+Mirror fallback leaves the remaining third-party source definitions unchanged.
+Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
 
@@ -226,16 +240,36 @@ library/MPI-launcher fingerprints. A selection spanning several directories
 restores their compatible artifacts. CMake regeneration is suppressed;
 execution lanes do not rebuild test targets.
 
-Execution lanes pre-download only their indexed archives. Restoration accepts
-that download only when both `manifest.json` and `build.tar.gz` exist. An
-incomplete download triggers `gh run download` for that exact archive with the
-workflow's read-only Actions token: at most three fresh attempts, each bounded
-to two minutes. A downloader success alone is insufficient. Source/configuration
-and SHA256 validation remain mandatory; failed recovery fails the lane instead
-of skipping its tests.
+Execution lanes download only the exact archive names in their build index.
+Single-artifact steps use the named download action; multi-artifact steps use
+[the exact-name downloader](../actions/download-artifacts/action.yml). It uses
+GitHub's official artifact client with the current-run runtime credentials,
+resolves each name once, then downloads that artifact ID. It never lists every
+artifact in the workflow or falls back to `gh run download`. Thus a run with more
+than 1,000 artifacts does not silently lose matches or repeatedly consume the
+installation REST API quota.
+
+Interrupted or empty transfers retry the same resolved ID up to three times,
+with fresh staging on each attempt. A missing name fails immediately. Each
+artifact gets its own subdirectory. Restoration still requires `manifest.json`
+and `build.tar.gz`; source/configuration, runtime compatibility and archive
+SHA256 validation remain mandatory. Incomplete restoration fails the lane.
+The downloader's official client dependency is pinned in a lockfile and installed
+once per runner in `RUNNER_TEMP`; its JavaScript action uses Node 24.
+Client 4.0.0 rejects interrupted streams that could leave 2.3.2 with an unresolved
+promise and a successful process exit. The planning job tests both a complete ZIP
+transfer and an interrupted transfer against the real pinned client on localhost.
+The latter must reject before process exit; mock-client tests also protect exact
+name resolution, retry cleanup and mandatory-artifact handling.
+
+Planning and execution bootstrap PyYAML through
+`python3 dev/ci_environment.py python`. This reuses the exact importable pinned
+version when present. Otherwise it retries bounded pip invocations without the
+HTTP cache, including package-index JSON failures, and verifies the installed
+version in a fresh Python process. Exhausted retries fail the job.
 
 Regular and Slow variants share executables. MPI ranks, geometries and study
-partitions remain execution coordinates with their original timeouts and
+partitions remain execution coordinates with their CMake-defined timeouts and
 numerical criteria. A failed producer blocks dependent execution rather than
 masquerading as a numerical failure. Artifacts expire after seven days.
 
@@ -245,6 +279,20 @@ Coverage is the union of production-source lines hit by the eligible execution
 lanes, not an average of their percentages. Tests and benchmarks may exercise
 production code but their own source lines are excluded from the denominator.
 Coverage describes compiled code and its instantiated templates.
+
+Coverage counters retain atomic updates for threaded execution. Instrumented
+processes can require a different watchdog from ordinary builds: the local
+curved cubic-pyramid Stokes rate test uses the existing one-hour high-order
+pyramid budget when coverage is enabled. Its refinement hierarchy, numerical
+criteria and distributed counterparts are unchanged.
+
+`dev/ci_artifacts.py` derives exact producer artifact names from the same plans
+used to schedule execution. A publisher downloads every required contribution
+for its family and common configuration, without glob discovery. Finalization
+first downloads every planned build index, then every ordinary/targeted receipt,
+build receipt and eligible publication. Missing artifacts remain errors; this
+download change does not relax receipt/hash checks, compilation inventories,
+zero-hit records, the baseline or the final 95% production-line threshold.
 
 - Unsanitized grouped unit/manufactured/slow and dedicated convergence/restriction
   lanes save independent LCOV contributions and receipts. Sanitizer and installation checks
@@ -347,6 +395,47 @@ run's archive or a historical Codecov report cannot substitute for them.
 An upload receipt proves submission, not completion of Codecov processing.
 When confirming coverage, check the complete local union and the final
 current-commit Codecov report after all family uploads have been processed.
+
+## Benchmark builds and publication
+
+`Benchmarks.yml` is independent of the numerical-test/coverage graph. It runs on
+main-branch pushes and manual dispatch. The local and MPI/PETSc configurations
+each compile shared Rodin and Google Benchmark libraries once, then build
+hierarchical module groups. `BenchmarkConfiguration.yml` owns the common stage;
+`BenchmarkGroup.yml` owns a group build and its independent Regular/Slow case
+lanes. A lane waits only for its own group, restores its binary and never builds.
+MPI and PETSc ranks remain explicit benchmark registrations.
+
+Every enabled benchmark executable must be registered. Discovery determines all
+case partitions, and the pooling gate requires every raw report, checksum and
+current-commit receipt. Documentation generation runs in parallel using the
+same descriptions. Documentation publishes immediately after its own validated
+build, reconnecting the new pages to the latest complete benchmark histories.
+It does not wait for benchmark builds, execution or pooling. After documentation
+publication and successful pooling, a separate publisher updates only complete
+benchmark histories; it cannot replace newer documentation. Missing or failed
+benchmark contributions leave the previous complete results intact. Both
+publishers and Static Analysis hold the same `rodin-gh-pages-publication` lock
+while writing and deploying. A push made with `GITHUB_TOKEN` does not trigger legacy Pages builds:
+`dev/deploy_pages.py` explicitly requests a build using `pages: write`, then waits
+for a successful build of the exact published `gh-pages` commit. A stale success,
+failed build or timeout fails publication. No personal access token is needed;
+repository Pages must remain configured to publish `gh-pages` from `/`.
+
+Component histories live
+under `benchmark-data/<ref>/`; documentation and its benchmark navigation live
+under `docs/<ref>/`. The former aggregate benchmark publisher is retired; its
+source cases remain in owning module targets. Benchmark execution is not a
+substitute for production coverage or test configurations.
+
+The [benchmark guide](../../tests/benchmarks/README.md) contains the full graph,
+paths, measurement definitions and steps for adding a target or execution lane.
+
+Before merging a release, require the stable CI finalization checks in branch
+protection, including `Coverage / Finalize`, and inspect the complete current-head
+coverage report. A successful partial upload or a previous commit cannot satisfy
+that gate. Branch protection is a repository setting, not configured by this
+workflow.
 
 ## Related documentation
 

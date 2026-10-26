@@ -190,7 +190,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["nnz"] = system.getOperator().nonZeros();
         state.counters["quadrature_order"] = QuadratureOrder;
         state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(QuadratureOrder, geometry).getSize();
+          QF::QuadratureFormula::get(QuadratureOrder, geometry).getSize();
         state.counters["relative_patch_residual"] = patchResidual;
         state.counters["relative_missing_pressure_residual"] = omittedResidual;
         if constexpr (Solve)

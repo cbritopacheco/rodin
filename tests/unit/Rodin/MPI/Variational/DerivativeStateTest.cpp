@@ -42,7 +42,7 @@ namespace
       return;
     const auto cell = *iterator;
     TestFunction u(space);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
     const auto exercise = [&](auto& cached, auto makeFresh) {
       using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
       using Scalar = typename FormLanguage::Traits<FES>::ScalarType;

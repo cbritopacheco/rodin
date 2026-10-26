@@ -20,7 +20,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/Shard.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/IO/ForwardDecls.h>
 #include <Rodin/IO.h>
 #include <Rodin/MPI/IO.h>
@@ -1545,8 +1545,7 @@ namespace Rodin::Tests::Unit
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     const size_t D = mpiMesh.getDimension();
-    const auto& qf =
-      QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get(1, Polytope::Type::Triangle);
 
     const auto& pq = mpiMesh.getQuadrature(D, 0, qf);
 

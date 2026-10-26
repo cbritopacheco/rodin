@@ -16,7 +16,7 @@
  * files.  This enables checkpoint/restart workflows and post-processing
  * with external HDF5-compatible tools.
  *
- * ## HDF5 File Layout
+ * # HDF5 File Layout
  *
  * ```
  * /GridFunction/
@@ -107,7 +107,7 @@ namespace Rodin::IO
    * Reads per-rank DOF values from an HDF5 file into the local portion
    * of a distributed PETSc vector.
    *
-   * ## HDF5 Layout
+   * # HDF5 Layout
    *
    * The expected file structure is:
    * - `/GridFunction/Values/Data` — 1-D array of DOF values

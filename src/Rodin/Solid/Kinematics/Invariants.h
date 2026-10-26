@@ -42,7 +42,7 @@ namespace Rodin::Solid
    * - @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$
    * - @f$ I_3 = \det(\mathbf{C}) = J^2 @f$
    *
-   * ## Usage
+   * # Usage
    * @code
    * IsotropicInvariants inv;
    * inv.setState(state);
@@ -103,7 +103,7 @@ namespace Rodin::Solid
    * - @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$
    * - @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$
    *
-   * ## Usage
+   * # Usage
    * @code
    * Math::SpatialVector<Real> fiberDir(2);
    * fiberDir << 1.0, 0.0;

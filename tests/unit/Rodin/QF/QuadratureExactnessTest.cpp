@@ -11,7 +11,8 @@
 #include <limits>
 
 #include "Rodin/Alert/Exception.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
+#include "QuadratureSelection.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GrundmannMoller.h"
 #include "Rodin/QF/GaussLegendre.h"
@@ -88,7 +89,7 @@ TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
   {
     for (size_t order = 1; order <= 20; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       const auto report = exactnessSweep(qf, g, order);
       EXPECT_LT(report.worstRelativeError, kExactTol)
         << name(g) << " order " << order << ": worst monomial x^"
@@ -111,8 +112,8 @@ TEST(QuadratureExactnessTest, PointRulesHaveUnitMassAndEmptyCoordinates)
   for (const size_t order : {0u, 1u, 15u, 16u, 17u, 51u})
   {
     SCOPED_TRACE(order);
-    const auto owned = PolytopeQuadratureFormula::build(order, Polytope::Type::Point);
-    const auto& canonical = PolytopeQuadratureFormula::get(order, Polytope::Type::Point);
+    const auto owned = makeQuadratureFormula(order, Polytope::Type::Point);
+    const auto& canonical = QuadratureFormula::get(order, Polytope::Type::Point);
     for (const auto* rule :
       std::array<const QuadratureFormulaBase*, 2>{owned.get(), &canonical})
     {
@@ -129,7 +130,7 @@ TEST(QuadratureExactnessTest, PyramidIsExactAtEvenOrders)
 {
   for (size_t order = 12; order <= 20; order += 2)
   {
-    const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Pyramid);
+    const auto& qf = QuadratureFormula::get(order, Polytope::Type::Pyramid);
     const auto report = exactnessSweep(qf, Polytope::Type::Pyramid, order);
     EXPECT_LT(report.worstRelativeError, kExactTol)
       << "Pyramid order " << order << ": worst at z^" << report.worstExponents[2];
@@ -141,7 +142,7 @@ TEST(QuadratureExactnessTest, WedgeIsExactAtOddOrders)
 {
   for (size_t order = 1; order <= 19; order += 2)
   {
-    const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Wedge);
+    const auto& qf = QuadratureFormula::get(order, Polytope::Type::Wedge);
     const auto report = exactnessSweep(qf, Polytope::Type::Wedge, order);
     EXPECT_LT(report.worstRelativeError, kExactTol)
       << "Wedge order " << order << ": worst at x^" << report.worstExponents[0] << " y^"
@@ -154,46 +155,39 @@ TEST(QuadratureExactnessTest, DispatchesDocumentedFamiliesAndFallbacks)
 {
   using Type = Polytope::Type;
 
-  EXPECT_NE(
-    dynamic_cast<const Centroid*>(PolytopeQuadratureFormula::build(1, Type::Point).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(5, Type::Segment).get()),
-    nullptr);
-
-  EXPECT_NE(dynamic_cast<const XiaoGimbutas*>(
-              PolytopeQuadratureFormula::build(50, Type::Triangle).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(51, Type::Triangle).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(
-              PolytopeQuadratureFormula::build(20, Type::Quadrilateral).get()),
-    nullptr);
-
-  EXPECT_NE(dynamic_cast<const XiaoGimbutas*>(
-              PolytopeQuadratureFormula::build(15, Type::Tetrahedron).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(16, Type::Tetrahedron).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(
-              PolytopeQuadratureFormula::build(20, Type::Hexahedron).get()),
-    nullptr);
-
-  const auto wedge50 = PolytopeQuadratureFormula::build(50, Type::Wedge);
-  const auto wedge51 = PolytopeQuadratureFormula::build(51, Type::Wedge);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(wedge50.get()), nullptr);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(wedge51.get()), nullptr);
-  EXPECT_EQ(wedge50->getSize(), XiaoGimbutas(50, Type::Triangle).getSize() * 26);
-  EXPECT_EQ(wedge51->getSize(), 26u * 26u * 26u);
-
-  EXPECT_NE(dynamic_cast<const WitherdenVincent*>(
-              PolytopeQuadratureFormula::build(10, Type::Pyramid).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(11, Type::Pyramid).get()),
-    nullptr);
+  const auto& line = QuadratureFormula::get<GaussLegendre>(Type::Segment, size_t{11});
+  EXPECT_EQ(&QuadratureFormula::get(1, Type::Point),
+    &QuadratureFormula::get<Centroid>(Type::Point));
+  EXPECT_EQ(&QuadratureFormula::get(5, Type::Segment),
+    &QuadratureFormula::get<GaussLegendre>(Type::Segment, size_t{3}));
+  EXPECT_EQ(&QuadratureFormula::get(50, Type::Triangle),
+    &QuadratureFormula::get<XiaoGimbutas>(size_t{50}, Type::Triangle));
+  EXPECT_EQ(&QuadratureFormula::get(51, Type::Triangle),
+    &QuadratureFormula::get<GaussLegendre>(Type::Triangle, size_t{26}, size_t{26}));
+  EXPECT_EQ(&QuadratureFormula::get(20, Type::Quadrilateral),
+    &QuadratureFormula::get<TensorProduct>(Type::Quadrilateral, line, line));
+  EXPECT_EQ(&QuadratureFormula::get(15, Type::Tetrahedron),
+    &QuadratureFormula::get<XiaoGimbutas>(size_t{15}, Type::Tetrahedron));
+  EXPECT_EQ(&QuadratureFormula::get(16, Type::Tetrahedron),
+    &QuadratureFormula::get<GaussLegendre>(
+      Type::Tetrahedron, size_t{9}, size_t{9}, size_t{9}));
+  EXPECT_EQ(&QuadratureFormula::get(20, Type::Hexahedron),
+    &QuadratureFormula::get<TensorProduct>(Type::Hexahedron, line, line, line));
+  const auto& wedgeLine =
+    QuadratureFormula::get<GaussLegendre>(Type::Segment, size_t{26});
+  const auto& triangle50 =
+    QuadratureFormula::get<XiaoGimbutas>(size_t{50}, Type::Triangle);
+  const auto& triangle51 =
+    QuadratureFormula::get<GaussLegendre>(Type::Triangle, size_t{26}, size_t{26});
+  EXPECT_EQ(&QuadratureFormula::get(50, Type::Wedge),
+    &QuadratureFormula::get<TensorProduct>(Type::Wedge, triangle50, wedgeLine));
+  EXPECT_EQ(&QuadratureFormula::get(51, Type::Wedge),
+    &QuadratureFormula::get<TensorProduct>(Type::Wedge, triangle51, wedgeLine));
+  EXPECT_EQ(&QuadratureFormula::get(10, Type::Pyramid),
+    &QuadratureFormula::get<WitherdenVincent>(size_t{10}, Type::Pyramid));
+  EXPECT_EQ(&QuadratureFormula::get(11, Type::Pyramid),
+    &QuadratureFormula::get<GaussLegendre>(
+      Type::Pyramid, size_t{6}, size_t{6}, size_t{6}));
 }
 
 /**
@@ -210,7 +204,7 @@ TEST(QuadratureExactnessTest, ConicalProductFallbacksAreExact)
          std::pair{Polytope::Type::Triangle, size_t{51}},
          std::pair{Polytope::Type::Tetrahedron, size_t{16}}})
   {
-    const auto qf = PolytopeQuadratureFormula::build(order, g);
+    const auto* qf = &QuadratureFormula::get(order, g);
     const auto report = exactnessSweep(*qf, g, order);
     EXPECT_LT(report.worstRelativeError, 1e-11)
       << name(g) << " order " << order << ": worst monomial x^"
@@ -237,7 +231,7 @@ TEST(QuadratureExactnessTest, WeightsSumToReferenceMeasure)
   {
     for (size_t order = 1; order <= 8; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       EXPECT_NEAR(weightSum(qf), referenceMeasure(g), kExactTol)
         << name(g) << " order " << order;
     }
@@ -256,7 +250,7 @@ TEST(QuadratureExactnessTest, PointsLieInsideReferenceElement)
   {
     for (size_t order = 1; order <= 8; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       EXPECT_TRUE(allPointsInside(qf, g)) << name(g) << " order " << order;
     }
   }
@@ -283,7 +277,7 @@ namespace
  * @brief Determinism: two constructions of the same rule agree bitwise.
  *
  * The constructors are exercised directly rather than through
- * @ref Rodin::QF::PolytopeQuadratureFormula::get, which pools its rules and
+ * @ref Rodin::QF::QuadratureFormula::get, which pools its rules and
  * would hand back the very same object twice -- comparing that with itself
  * would pass however the tables were read.
  */
@@ -338,7 +332,7 @@ TEST(QuadratureExactnessTest, MomentOracleMatchesRodinReferenceElements)
     EXPECT_TRUE(isInside(g, traits.getCentroid(), 1e-13))
       << name(g) << ": centroid outside its own element";
 
-    const auto& qf = PolytopeQuadratureFormula::get(8, g);
+    const auto& qf = QuadratureFormula::get(8, g);
     EXPECT_NEAR(weightSum(qf), referenceMeasure(g), kExactTol)
       << name(g) << ": measure from the moment oracle disagrees with the rule";
   }
@@ -388,7 +382,7 @@ TEST(QuadratureExactnessTest, TensorAndCollapsedRulesHaveStrictlyPositiveWeights
   {
     for (size_t order = 1; order <= 8; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " order " << order;
       EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14)
         << name(g) << " order " << order;
@@ -401,7 +395,7 @@ TEST(QuadratureExactnessTest, DispatchedRulesHavePositiveWeights)
 {
   for (const auto g : allGeometries())
   {
-    const auto& qf = PolytopeQuadratureFormula::get(4, g);
+    const auto& qf = QuadratureFormula::get(4, g);
     EXPECT_TRUE(allWeightsPositive(qf)) << name(g);
     EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14) << name(g);
   }
@@ -480,7 +474,7 @@ TEST(QuadratureExactnessTest, ExactnessSweepRejectsAPerturbedWeight)
   for (const auto g : allGeometries())
   {
     constexpr size_t order = 4;
-    const auto& qf = PolytopeQuadratureFormula::get(order, g);
+    const auto& qf = QuadratureFormula::get(order, g);
     ASSERT_LT(exactnessSweep(qf, g, order).worstRelativeError, kExactTol)
       << name(g) << ": baseline must pass before the mutation means anything";
 
@@ -543,7 +537,10 @@ TEST(QuadratureOwnership, DelegatedAllGeometries)
   for (const auto geometry : Polytope::Types)
   {
     SCOPED_TRACE(static_cast<int>(geometry));
-    checkQuadratureOwnership(PolytopeQuadratureFormula(5, geometry), geometry, 5);
+    const auto source = makeQuadratureFormula(5, geometry);
+    const auto copy = copyQuadratureFormula(*source);
+    EXPECT_LT(exactnessSweep(*copy, geometry, 5).worstRelativeError, kExactTol);
+    EXPECT_EQ(copy->getSize(), QuadratureFormula::get(5, geometry).getSize());
   }
 }
 
@@ -652,7 +649,7 @@ TEST(QuadratureExactnessTest, ExactnessSweepRejectsInvalidSamples)
   {
     SCOPED_TRACE(name(g));
     const Polytope::Traits traits(g);
-    const auto& qf = PolytopeQuadratureFormula::get(order, g);
+    const auto& qf = QuadratureFormula::get(order, g);
     ASSERT_LT(exactnessSweep(qf, g, order).worstRelativeError, kExactTol);
     for (const Real invalid : {std::numeric_limits<Real>::quiet_NaN(),
            std::numeric_limits<Real>::infinity(), -std::numeric_limits<Real>::infinity()})

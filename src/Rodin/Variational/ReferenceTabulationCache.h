@@ -32,7 +32,7 @@ namespace Rodin::Variational
    * @f$\partial_i\phi_a(\widehat x_q)@f$ in quadrature-major order.
    * No basis conversion, physical coordinates or mapped derivatives are stored.
    *
-   * ## Architecture
+   * # Architecture
    *
    * The bounded thread-local store is distinct for each element/scalar type.
    * Persistent formula address and reference geometry identify an entry.

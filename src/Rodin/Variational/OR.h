@@ -12,18 +12,18 @@
  * between boolean-valued functions. This operator is used for combining
  * logical conditions in variational formulations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For boolean functions @f$ p, q : \Omega \to \{0,1\} @f$, the OR operator:
  * @f[
  *   (p \lor q)(x) = \begin{cases} 1 & \text{if } p(x) = 1 \text{ or } q(x) = 1 \\ 0 & \text{otherwise} \end{cases}
  * @f]
  *
- * ## Applications
+ * # Applications
  * - Combining region indicators
  * - Logical conditions for adaptive methods
  * - Piecewise function definitions based on multiple criteria
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * auto p = (x > 0.0);      // Boolean condition
  * auto q = (y < 1.0);      // Another condition

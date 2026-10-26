@@ -16,8 +16,10 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
+from urllib.parse import urlsplit
 
 
 GIB = 1024 ** 3
@@ -34,6 +36,54 @@ INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
 UBUNTU_URI = re.compile(r'https?://(?:azure\.archive|archive|security)\.ubuntu\.com/ubuntu/?')
+YAML_VERSION = '6.0.2'
+# A wheel install normally takes seconds. Bound network stalls to three minutes
+# per attempt and retry whole pip invocations, including malformed index JSON.
+PYTHON_INSTALL_TIMEOUT = 180
+PYTHON_INSTALL_ATTEMPTS = 3
+PYTHON_RETRY_DELAY = 2
+
+
+def install_python():
+    """Reuse the exact working PyYAML version or install it with bounded retries."""
+    probe = [sys.executable, '-c',
+             f'import yaml; raise SystemExit(yaml.__version__ != {YAML_VERSION!r})']
+    if subprocess.run(probe, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                      timeout=30).returncode == 0:
+        return
+    command = [sys.executable, '-m', 'pip', 'install', '--disable-pip-version-check',
+               '--no-cache-dir', '--retries', '3', '--timeout', '30', 'PyYAML==' + YAML_VERSION]
+    last_error = None
+    for attempt in range(1, PYTHON_INSTALL_ATTEMPTS + 1):
+        try:
+            subprocess.run(command, check=True, timeout=PYTHON_INSTALL_TIMEOUT)
+            subprocess.run(probe, check=True, timeout=30)
+            return
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            last_error = error
+            print(f'Pinned PyYAML installation attempt {attempt} failed.', flush=True)
+            if attempt < PYTHON_INSTALL_ATTEMPTS:
+                time.sleep(PYTHON_RETRY_DELAY * attempt)
+    raise RuntimeError('Could not install and import PyYAML==' + YAML_VERSION) from last_error
+
+
+def select_compiler(compiler):
+    """Verify a matched GCC toolchain and export it for subsequent CMake steps."""
+    match = re.fullmatch(r'gcc-([0-9]+)', compiler)
+    if not match:
+        raise ValueError('Expected an explicit GCC major version')
+    cxx = compiler.replace('gcc-', 'g++-', 1)
+    versions = [subprocess.check_output([tool, '-dumpfullversion', '-dumpversion'],
+                                      text=True, timeout=30).strip() for tool in [compiler, cxx]]
+    if any(version.split('.')[0] != match[1] for version in versions) or versions[0] != versions[1]:
+        raise RuntimeError('Requested GCC and G++ versions do not match: ' + repr(versions))
+    subprocess.run(['cmake', '--version'], check=True, timeout=30)
+    output = os.environ.get('GITHUB_ENV')
+    if not output:
+        raise RuntimeError('Compiler selection requires GITHUB_ENV')
+    with Path(output).open('a') as stream:
+        stream.write(f'CC={compiler}\nCXX={cxx}\n')
+    print(f'Selected {compiler} / {cxx}: {versions[0]}', flush=True)
 
 
 def disk_space(path, minimum_gib=MIN_FREE_GIB):
@@ -61,6 +111,57 @@ def packages(value):
     if not result or any(not re.fullmatch(r'[a-z0-9][a-z0-9+.:\-]*(?:=[A-Za-z0-9.+:~\-]+)?', p) for p in result):
         raise ValueError('Expected a nonempty list of Debian package names or exact versions')
     return result
+
+
+def without_microsoft_ubuntu(text, deb822=False):
+    """Exclude only Microsoft's unused Ubuntu feeds, preserving other trust rules."""
+    def unrelated(uri):
+        parsed = urlsplit(uri)
+        return parsed.hostname == 'packages.microsoft.com' and parsed.path.startswith('/ubuntu/')
+    if not deb822:
+        return ''.join(line for line in text.splitlines(keepends=True)
+                       if not (re.match(r'^\s*deb(?:-src)?\s', line) and
+                               any(unrelated(uri) for uri in re.findall(r'https?://[^\s]+', line))))
+    result = []
+    changed = False
+    for paragraph in re.split(r'\n[ \t]*\n', text):
+        field = re.search(r'^URIs:[ \t]*([^\n]*(?:\n[ \t]+[^\n]*)*)', paragraph, re.M)
+        if field:
+            uris = field[1].split()
+            retained = [uri for uri in uris if not unrelated(uri)]
+            if len(retained) != len(uris):
+                changed = True
+                if not retained:
+                    continue
+                paragraph = paragraph[:field.start()] + 'URIs: ' + ' '.join(retained) + paragraph[field.end():]
+        result.append(paragraph)
+    return '\n\n'.join(result) if changed else text
+
+
+def setup_sources(system=Path('/etc/apt')):
+    """Prepare disposable hosted-runner feeds before setup-cpp runs apt-get."""
+    if (os.environ.get('GITHUB_ACTIONS') != 'true' or
+            os.environ.get('RUNNER_ENVIRONMENT') != 'github-hosted'):
+        print('APT source preparation is restricted to GitHub-hosted runners', flush=True)
+        return
+    entries = [system / 'sources.list']
+    entries += sorted((system / 'sources.list.d').glob('*.list'))
+    entries += sorted((system / 'sources.list.d').glob('*.sources'))
+    for source in entries:
+        if not source.is_file():
+            continue
+        original = source.read_text()
+        prepared = without_microsoft_ubuntu(original, source.suffix == '.sources')
+        if prepared == original:
+            continue
+        backup = source.with_name(source.name + '.rodin-backup')
+        if not backup.exists():
+            subprocess.run(['sudo', 'cp', '--', str(source), str(backup)], check=True)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.apt') as temporary:
+            temporary.write(prepared)
+            temporary.flush()
+            subprocess.run(['sudo', 'install', '-m', '644', temporary.name, str(source)], check=True)
+        print('Excluded unused Microsoft Ubuntu feed from ' + str(source), flush=True)
 
 
 def sources(directory, mirror, system=Path('/etc/apt')):
@@ -194,15 +295,22 @@ def install(archives, state):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=['disk', 'prepare', 'install'])
+    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install', 'python', 'compiler'])
     parser.add_argument('--packages', default='')
+    parser.add_argument('--compiler', default='')
     parser.add_argument('--minimum-gib', type=float, default=MIN_FREE_GIB)
     args = parser.parse_args()
     if args.minimum_gib <= 0:
         parser.error('Disk headroom must be positive')
     root = Path(os.environ.get('RUNNER_TEMP', tempfile.gettempdir()))
-    if args.operation == 'disk':
+    if args.operation == 'setup':
+        setup_sources()
+    elif args.operation == 'disk':
         disk_space(Path.cwd(), args.minimum_gib)
+    elif args.operation == 'python':
+        install_python()
+    elif args.operation == 'compiler':
+        select_compiler(args.compiler)
     elif args.operation == 'prepare':
         prepare(packages(args.packages), root / 'rodin-apt-archives', root / 'rodin-apt-state')
     else:

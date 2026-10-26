@@ -73,8 +73,7 @@ namespace Rodin::Tests::Unit
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto unrelated = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-    const auto& quadrature =
-      QF::PolytopeQuadratureFormula::get(1, Polytope::Type::Triangle);
+    const auto& quadrature = QF::QuadratureFormula::get(1, Polytope::Type::Triangle);
     const Point local(*mesh.getCell(0), quadrature.getPoint(0));
     const Point foreign(*unrelated.getCell(0), quadrature.getPoint(0));
     const IntegrationPoint foreignIntegrationPoint(foreign, &quadrature, 0);
@@ -728,7 +727,7 @@ namespace Rodin::Tests::Unit
         RealFunction([](const Point& p) { return p.x() + 10 * p.y() + 100 * p.z(); }));
 
       const Polytope cell(mesh.getDimension(), 0, mesh);
-      const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+      const auto& qf = QF::QuadratureFormula::get(2, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
       {
@@ -769,7 +768,7 @@ namespace Rodin::Tests::Unit
     Math::SpatialPoint previousCoordinates;
     for (size_t order : {1, 2, 1})
     {
-      qf = &QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
+      qf = &QF::QuadratureFormula::get(order, cell.getGeometry());
       const PolytopeQuadrature quadrature(cell, *qf);
       const Point& point = quadrature.getPoint(0);
       if (previousFormula)
@@ -795,7 +794,7 @@ namespace Rodin::Tests::Unit
     Optional<LocalMesh> mesh;
     Optional<P1<Real>> fes;
     Optional<GridFunction<P1<Real>, Math::Vector<Real>>> gf;
-    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get(2, Polytope::Type::Triangle);
     const GridFunction<P1<Real>, Math::Vector<Real>>* previousFunction = nullptr;
     const P1<Real>* previousSpace = nullptr;
     const P1Element<Real>* previousElement = nullptr;
@@ -867,7 +866,7 @@ namespace Rodin::Tests::Unit
     P1 p1(mesh);
     H1 p2(std::integral_constant<size_t, 2>{}, mesh);
     const Polytope cell(mesh.getDimension(), 0, mesh);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
     const PolytopeQuadrature quadrature(cell, qf);
     const Point& point = quadrature.getPoint(0);
     const IntegrationPoint ip(quadrature, 0);
@@ -899,7 +898,7 @@ namespace Rodin::Tests::Unit
     GridFunction source(sourceSpace);
     GridFunction target(targetSpace);
     const Polytope cell(mesh.getDimension(), 0, mesh);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
     const PolytopeQuadrature quadrature(cell, qf);
     const Point& point = quadrature.getPoint(0);
     const IntegrationPoint ip(quadrature, 0);
@@ -924,7 +923,7 @@ namespace Rodin::Tests::Unit
     const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
     gf.project(fn);
     const Polytope cell(mesh.getDimension(), 0, mesh);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(2, cell.getGeometry());
     ASSERT_GT(qf.getSize(), 1);
     const Point arbitrary(cell, Math::SpatialPoint{0.2, 0.3});
     for (size_t sample : {0, 1, 0, 1})
@@ -946,7 +945,7 @@ namespace Rodin::Tests::Unit
     P1 p1(mesh, 2);
     H1 p2(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
     const Polytope cell(mesh.getDimension(), 0, mesh);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(4, cell.getGeometry());
     const PolytopeQuadrature quadrature(cell, qf);
     const Point& point = quadrature.getPoint(0);
     const IntegrationPoint ip(quadrature, 0);
@@ -979,7 +978,7 @@ namespace Rodin::Tests::Unit
     const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
     target.project(fn);
     source.project(fn);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get(2, Polytope::Type::Triangle);
     const PolytopeQuadrature firstQuadrature(Polytope(2, 0, firstMesh), qf);
     const Point& firstPoint = firstQuadrature.getPoint(0);
     const PolytopeQuadrature secondQuadrature(Polytope(2, 0, secondMesh), qf);
@@ -1007,7 +1006,7 @@ namespace Rodin::Tests::Unit
     const auto initial = VectorFunction{
       [](const Point& p) { return 1 + p.x(); }, [](const Point& p) { return 2 + p.y(); }};
     gf.project(initial);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get(2, Polytope::Type::Triangle);
     const PolytopeQuadrature quadrature(Polytope(2, 0, mesh), qf);
     const Point& point = quadrature.getPoint(0);
     const IntegrationPoint ip(quadrature, 0);
@@ -1036,7 +1035,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
     const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
     gf.project(fn);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const auto& qf = QF::QuadratureFormula::get(2, Polytope::Type::Triangle);
     const PolytopeQuadrature firstQuadrature(Polytope(2, 0, firstMesh), qf);
     const Point& firstPoint = firstQuadrature.getPoint(0);
     const PolytopeQuadrature secondQuadrature(Polytope(2, 0, secondMesh), qf);
@@ -1064,7 +1063,7 @@ namespace Rodin::Tests::Unit
       for (size_t d = dimension; d > 0; --d)
         mesh.getConnectivity().compute(d, d - 1);
       const Polytope cell(dimension, 0, mesh);
-      const auto& qf = QF::PolytopeQuadratureFormula::get(
+      const auto& qf = QF::QuadratureFormula::get(
         1, dimension == 2 ? Polytope::Type::Segment : Polytope::Type::Triangle);
       auto check = [&](const auto& fes) {
         GridFunction gf(fes);
@@ -1107,7 +1106,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
     gf.getData().setOnes();
     const Polytope cell(2, 0, mesh);
-    const auto& qf = QF::PolytopeQuadratureFormula::get(1, Polytope::Type::Segment);
+    const auto& qf = QF::QuadratureFormula::get(1, Polytope::Type::Segment);
     for (Real x : {0.2, std::nextafter(Real(0.2), Real(1)), Real(0), -Real(0)})
     {
       const Point point(cell, Math::SpatialPoint{x, 0.3});
@@ -1128,7 +1127,7 @@ namespace Rodin::Tests::Unit
     GridFunction field(fes);
     field.getData().setOnes();
     const auto cell = *mesh.getCell();
-    const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
     const PolytopeQuadrature before(cell, formula);
     const IntegrationPoint first(before, 0);
     const auto original = field.getValue(first);

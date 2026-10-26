@@ -12,7 +12,7 @@
  * on a finite element mesh by their degrees of freedom. Grid functions are the
  * discrete representation of solutions in finite element analysis.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * A grid function represents a function @f$ u_h \in V_h @f$ by its coefficients:
  * @f[
  *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
@@ -22,14 +22,14 @@
  * - @f$ \phi_i @f$ are the basis functions from the finite element space
  * - @f$ N @f$ is the number of DOFs
  *
- * ## Features
+ * # Features
  * - **Storage**: Manages coefficient vector for FEM solutions
  * - **Evaluation**: Point-wise evaluation using basis function interpolation
  * - **I/O**: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)
  * - **Operations**: Arithmetic operations, norms, projections
  * - **Assignment**: Can be set from functions or expressions
  *
- * ## Usage Examples
+ * # Usage Examples
  * ```cpp
  * P1 Vh(mesh);
  * GridFunction<P1> u(Vh);  // Create grid function
@@ -124,7 +124,7 @@ namespace Rodin::Variational
    * spaces, where the function is represented as a linear combination of basis
    * functions with scalar coefficients stored in a data vector.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * A grid function represents a discrete finite element approximation:
    * @f[
    *   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
@@ -135,7 +135,7 @@ namespace Rodin::Variational
    * - @f$ \phi_i @f$ are the finite element basis functions
    * - @f$ N @f$ is the number of degrees of freedom
    *
-   * ## Key Features
+   * # Key Features
    * - **DOF Management**: Automatic handling of degrees of freedom storage
    * - **Function Evaluation**: Point-wise evaluation via finite element interpolation
    * - **I/O Support**: Export to various visualization formats (MEDIT, MFEM)
@@ -926,7 +926,7 @@ namespace Rodin::Variational
       Derived& project(const std::pair<size_t, Index>& p, const RangeType& v)
       {
         return static_cast<Derived&>(*this).project(
-          p, [&](RangeType& out, const Geometry::Point&) { out = v; });
+          p, [&](const Geometry::Point&) { return v; });
       }
 
       /**
@@ -1018,7 +1018,8 @@ namespace Rodin::Variational
       {
         return static_cast<Derived&>(*this).project(
           region, fn, [&](const Geometry::Polytope& polytope) {
-            return attrs.size() == 0 || attrs.count(polytope.getAttribute());
+            const auto attribute = polytope.getAttribute();
+            return attrs.empty() || (attribute && attrs.count(*attribute));
           });
       }
 
@@ -1035,6 +1036,7 @@ namespace Rodin::Variational
        * @param pred Predicate selecting the entities on which to project.
        */
       template <class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
       Derived& project(
         const Geometry::Region& region, const RangeType& fn, const Pred& pred)
       {
@@ -1287,13 +1289,15 @@ namespace Rodin::Variational
        * in the same storage, as happens to any local in a loop or in
        * consecutive scopes, would find the previous one's entry and read
        * DOFs of a different mesh. It is keyed instead on an identity no two
-       * grid functions ever share.
+       * grid functions ever share. Explicit topology revisions also invalidate
+       * retained DOFs when a mesh is edited or replaced at the same address.
        */
       struct EvaluationCache
       {
         EvaluationCache()
           : owner(nullptr),
             ownerIdentity(0),
+            revision(0),
             fes(nullptr),
             mesh(nullptr),
             element(nullptr),
@@ -1303,6 +1307,7 @@ namespace Rodin::Variational
 
         const GridFunctionBase* owner;
         size_t ownerIdentity;
+        size_t revision;
         const FES* fes;
         const Geometry::MeshBase* mesh;
         // Space assignments can change the element even with fixed connectivity.
@@ -1336,13 +1341,15 @@ namespace Rodin::Variational
         const auto* fes = &this->getFiniteElementSpace();
         const auto* mesh = &fes->getMesh();
         const auto* element = &fes->getFiniteElement(d, i);
+        const auto revision = mesh->getConnectivity().getRevision();
         if (cache.owner != this || cache.ownerIdentity != m_identity ||
-          cache.fes != fes || cache.mesh != mesh || cache.element != element ||
-          cache.d != d || cache.i != i)
+          cache.revision != revision || cache.fes != fes || cache.mesh != mesh ||
+          cache.element != element || cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
           cache.ownerIdentity = m_identity;
+          cache.revision = revision;
           cache.fes = fes;
           cache.mesh = mesh;
           cache.element = element;

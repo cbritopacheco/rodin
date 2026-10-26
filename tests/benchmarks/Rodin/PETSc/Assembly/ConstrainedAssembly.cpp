@@ -10,6 +10,7 @@
  */
 #include <chrono>
 #include <iostream>
+#include <sstream>
 #include <boost/mpi.hpp>
 #include "Rodin/PETSc.h"
 #include "Rodin/MPI/Variational/H1/H1.h"
@@ -282,7 +283,10 @@ int main(int argc, char** argv)
         benchmark::AddCustomContext(
           "openmp_max_threads", std::to_string(omp_get_max_threads()));
 #endif
+        // Listing writes directly to the reporter stream, bypassing ReportRuns.
+        std::ostringstream listing;
         SilentReporter silent;
+        silent.SetOutputStream(&listing);
         const size_t cases = world.rank() == 0
           ? benchmark::RunSpecifiedBenchmarks()
           : benchmark::RunSpecifiedBenchmarks(&silent);

@@ -54,7 +54,6 @@
 #include "PolytopeTransformationIndex.h"
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ to be computed.
  *
  * Throws an exception if the specified connectivity relation has not been
@@ -75,7 +74,6 @@
   }
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ (for use in member functions).
  *
  * Throws an exception if the specified connectivity relation has not been
@@ -94,7 +92,6 @@
   }
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires mesh to be a SubMesh.
  *
  * Throws an exception if the mesh is not a SubMesh instance, preventing
@@ -1210,7 +1207,10 @@ namespace Rodin::Geometry
           PolytopeQuadratureIndex m_quadratures;
       };
 
-      /// @brief Generates a Builder instance to build a Mesh object.
+      /**
+       * @brief Generates a Builder instance to build a Mesh object.
+       * @returns Builder for constructing a local mesh.
+       */
       static Builder Build()
       {
         return Builder();
@@ -1224,6 +1224,7 @@ namespace Rodin::Geometry
        * @param[in] l Number of nodes in each coordinate direction
        * @throws Alert::MemberFunctionException If the shape dimension does
        * not match the geometry or an axis contains fewer than two grid points.
+       * @returns Uniform-grid mesh generated from the requested geometry and subdivisions.
        */
       static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1246,6 +1247,7 @@ namespace Rodin::Geometry
        * box boundary)
        * @param[in] l Number of nodes in each coordinate direction
        * (must have @f$ d+1 @f$ entries)
+       * @returns Mesh of the requested box.
        */
       static Mesh Box(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1262,6 +1264,7 @@ namespace Rodin::Geometry
        * @param[in] shape Number of nodes in each coordinate direction
        * @throws Alert::MemberFunctionException If the shape dimension does
        * not match the geometry or an axis contains fewer than two grid points.
+       * @returns Uniform-grid mesh generated from the requested geometry and subdivisions.
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
@@ -1276,6 +1279,7 @@ namespace Rodin::Geometry
        *
        * @param[in] g Face geometry type
        * @param[in] shape Number of nodes in each coordinate direction
+       * @returns Mesh of the requested box.
        */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);
 
@@ -1294,18 +1298,32 @@ namespace Rodin::Geometry
         load(filename, fmt);
       }
 
-      /// @brief Performs a copy of another mesh.
+      /**
+       * @brief Performs a copy of another mesh.
+       * @param other Source object to copy or move from.
+       */
       Mesh(const Mesh& other);
 
-      /// @brief Move constructs the mesh from another mesh.
+      /**
+       * @brief Move constructs the mesh from another mesh.
+       * @param other Source object to copy or move from.
+       */
       Mesh(Mesh&& other);
 
       virtual ~Mesh() = default;
 
+      /**
+       * @brief Copy assignment is disabled.
+       * @param other Source object to copy or move from.
+       */
       Mesh& operator=(const Mesh& other) = delete;
 
-      /// @brief Move assigns the mesh from another mesh.
-      Mesh& operator=(Mesh&&);
+      /**
+       * @brief Move assigns the mesh from another mesh.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      Mesh& operator=([[maybe_unused]] Mesh&& other);
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -1763,13 +1781,19 @@ namespace Rodin::Geometry
       virtual Optional<Attribute> getAttribute(
         size_t dimension, Index index) const override;
 
-      /// @brief Returns the mesh connectivity (incidence relations).
+      /**
+       * @brief Returns the mesh connectivity (incidence relations).
+       * @returns Topological connectivity of this mesh.
+       */
       virtual Connectivity<Context>& getConnectivity() override
       {
         return m_connectivity;
       }
 
-      /// @brief Returns the mesh connectivity (incidence relations).
+      /**
+       * @brief Returns the mesh connectivity (incidence relations).
+       * @returns Topological connectivity of this mesh.
+       */
       virtual const Connectivity<Context>& getConnectivity() const override
       {
         return m_connectivity;
@@ -1807,9 +1831,13 @@ namespace Rodin::Geometry
       virtual const PolytopeQuadrature& getQuadrature(
         size_t dimension, Index idx, const QF::QuadratureFormula& qf) const override;
 
-      /// @brief Serializes the mesh (for boost::serialization).
+      /**
+       * @brief Serializes the mesh (for boost::serialization).
+       * @param ar Serialization archive used to store or restore the object.
+       * @param version Serialization format version; unused by this implementation.
+       */
       template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar& boost::serialization::base_object<MeshBase>(*this);
         ar & m_sdim;

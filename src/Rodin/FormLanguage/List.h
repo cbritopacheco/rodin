@@ -13,12 +13,12 @@
  * ownership of its elements through unique pointers and supports standard
  * container operations.
  *
- * ## Design
+ * # Design
  * The List class is designed to work with types derived from FormLanguage::Base,
  * leveraging the copy() method for proper polymorphic copying. Elements are
  * stored as unique_ptr instances, ensuring automatic memory management.
  *
- * ## Usage Example
+ * # Usage Example
  * @code{.cpp}
  * List<BoundaryCondition> bcList;
  * bcList.add(DirichletBC(...));
@@ -50,18 +50,18 @@ namespace Rodin::FormLanguage
    * objects with value semantics. The container manages object lifetimes
    * through unique pointers and provides deep copying capabilities.
    *
-   * ## Features
+   * # Features
    * - **Polymorphic Storage**: Stores derived types through base class pointers
    * - **Value Semantics**: Copy constructor and assignment perform deep copies
    * - **Iterator Support**: Provides standard forward iterators
    * - **Type Safety**: Elements are accessed through their stored type T
    *
-   * ## Memory Management
+   * # Memory Management
    * - Elements are stored as std::unique_ptr<T>
    * - Copy operations use the polymorphic copy() method
    * - Automatic cleanup on destruction
    *
-   * ## Complexity
+   * # Complexity
    * - Access: @f$ O(1) @f$ for at()
    * - Insertion: @f$ O(1) @f$ amortized for add()
    * - Copy: @f$ O(n) @f$ where @f$ n @f$ is the number of elements

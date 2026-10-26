@@ -57,6 +57,27 @@ namespace Rodin::Assembly
        */
       AssemblyBase(AssemblyBase&& other) = default;
 
+
+      /**
+       * @brief Assigns execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Moves execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
+
       /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
 
@@ -200,6 +221,27 @@ namespace Rodin::Assembly
        * @param other Object to move from.
        */
       AssemblyBase(AssemblyBase&& other) = default;
+
+
+      /**
+       * @brief Assigns execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Moves execution state while retaining this expression's identity.
+       * @param other Source assembler; this base has no execution state.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
 
       /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;

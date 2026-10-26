@@ -44,7 +44,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Types.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -82,7 +82,7 @@ namespace Rodin::Solid
    *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
    * @f]
    *
-   * ## Architecture
+   * # Architecture
    *
    * Cell binding selects a two- or three-dimensional instantiation of the same
    * quadrature algorithm. Two-dimensional contractions have fixed bounds;
@@ -307,7 +307,7 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -581,7 +581,7 @@ namespace Rodin::Solid
             std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder(),
               pressFE.getOrder()});
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -882,7 +882,7 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -1131,7 +1131,7 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
         const auto& qf =
-          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 

@@ -17,7 +17,8 @@
 #include "Rodin/QF/GrundmannMoller.h"
 #include "Rodin/Adaptation/SWIFT/QualityCovering.h"
 #include "Rodin/QF/GaussLobatto.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
+#include "QuadratureSelection.h"
 #include "Rodin/QF/TensorProduct.h"
 #include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Variational/P1/P1Element.h"
@@ -193,8 +194,8 @@ TEST(QuadratureFormula, ReusesNormalizedArguments)
   EXPECT_EQ(&first, &second);
   EXPECT_EQ(&QF::GaussLobatto::get(geometry, count),
     &QF::QuadratureFormula::get<QF::GaussLobatto>(geometry, count));
-  EXPECT_EQ(&QF::PolytopeQuadratureFormula::get(count, geometry),
-    &QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(count, geometry));
+  EXPECT_EQ(&QF::QuadratureFormula::get(count, geometry),
+    &QF::QuadratureFormula::get(count, geometry));
 }
 
 /// @brief Distinct families and parameter values never alias published objects.
@@ -325,21 +326,21 @@ TEST(QuadratureFormula, RetriesFailedPublication)
   EXPECT_EQ(formula.getPoint(0)(0), Real(tag) / 1024);
 }
 
-/// @brief Dispatcher copies retain exact immutable samples after their source dies.
-TEST(QuadratureFormula, DispatcherCopiesRetainExistingSamples)
+/// @brief Concrete family copies retain exact immutable samples after their source dies.
+TEST(QuadratureFormula, ConcreteCopiesRetainExistingSamples)
 {
-  std::unique_ptr<QF::PolytopeQuadratureFormula> copy;
+  std::unique_ptr<const QF::QuadratureFormulaBase> copy;
   std::vector<Math::SpatialPoint> points;
   std::vector<Real> weights;
   {
-    const QF::PolytopeQuadratureFormula source(8, G::Triangle);
-    copy.reset(source.copy());
-    ASSERT_EQ(copy->getSize(), source.getSize());
-    EXPECT_EQ(&copy->getPoint(0), &source.getPoint(0));
-    for (size_t q = 0; q < source.getSize(); ++q)
+    const auto source = Tests::QF::makeQuadratureFormula(8, G::Triangle);
+    copy = Tests::QF::copyQuadratureFormula(*source);
+    ASSERT_EQ(copy->getSize(), source->getSize());
+    EXPECT_EQ((copy->getPoint(0) - source->getPoint(0)).norm(), 0);
+    for (size_t q = 0; q < source->getSize(); ++q)
     {
-      points.push_back(source.getPoint(q));
-      weights.push_back(source.getWeight(q));
+      points.push_back(source->getPoint(q));
+      weights.push_back(source->getWeight(q));
     }
   }
   ASSERT_EQ(copy->getSize(), points.size());
@@ -350,10 +351,10 @@ TEST(QuadratureFormula, DispatcherCopiesRetainExistingSamples)
   }
 }
 
-/// @brief Unique and shared construction retain identical rules across dispatch boundaries.
+/// @brief Concrete owned and persistent construction retain identical rules across dispatch boundaries.
 TEST(QuadratureFormula, OwnedAndPublishedDispatchAgree)
 {
-  const auto build = &QF::PolytopeQuadratureFormula::build;
+  const auto build = &Tests::QF::makeQuadratureFormula;
   for (const auto geometry : Geometry::Polytope::Types)
   {
     for (const size_t order : {0u, 1u, 2u, 10u, 11u, 15u, 16u, 50u, 51u})
@@ -361,13 +362,13 @@ TEST(QuadratureFormula, OwnedAndPublishedDispatchAgree)
       SCOPED_TRACE(static_cast<size_t>(geometry));
       SCOPED_TRACE(order);
       const auto owned = build(order, geometry);
-      std::unique_ptr<QF::PolytopeQuadratureFormula> copy;
+      std::unique_ptr<const QF::QuadratureFormulaBase> copy;
       {
-        const QF::PolytopeQuadratureFormula source(order, geometry);
-        copy.reset(source.copy());
-        EXPECT_EQ(&copy->getPoint(0), &source.getPoint(0));
+        const auto source = Tests::QF::makeQuadratureFormula(order, geometry);
+        copy = Tests::QF::copyQuadratureFormula(*source);
+        EXPECT_EQ((copy->getPoint(0) - source->getPoint(0)).norm(), 0);
       }
-      const auto& published = QF::PolytopeQuadratureFormula::get(order, geometry);
+      const auto& published = QF::QuadratureFormula::get(order, geometry);
       ASSERT_EQ(owned->getSize(), published.getSize());
       ASSERT_EQ(copy->getSize(), published.getSize());
       for (size_t q = 0; q < published.getSize(); ++q)
@@ -432,8 +433,8 @@ TEST(QuadratureFormula, SampleViewsPreserveConcreteFamilies)
   {
     const QF::Centroid centroid(geometry);
     verify(centroid, QF::QuadratureFormula::get<QF::Centroid>(geometry));
-    const QF::PolytopeQuadratureFormula dispatcher(4, geometry);
-    verify(dispatcher, QF::PolytopeQuadratureFormula::get(4, geometry));
+    const auto dispatcher = Tests::QF::makeQuadratureFormula(4, geometry);
+    verify(*dispatcher, QF::QuadratureFormula::get(4, geometry));
     const QF::GaussLobatto lobatto(geometry, 3);
     verify(lobatto, QF::GaussLobatto::get(geometry, 3));
     const Adaptation::SWIFT::WitnessLattice lattice(geometry, 2);
@@ -446,4 +447,38 @@ TEST(QuadratureFormula, SampleViewsPreserveConcreteFamilies)
     const QF::GrundmannMoller formula(2, geometry);
     verify(formula, QF::QuadratureFormula::get<QF::GrundmannMoller>(size_t{2}, geometry));
   }
+}
+
+/// @brief Default requests publish the same immutable formula across producer threads.
+TEST(QuadratureFormula, DefaultDispatchSurvivesThreadsAndLookupEviction)
+{
+  constexpr size_t ThreadCount = 4;
+  std::array<const QF::QuadratureFormula*, ThreadCount> formulas{};
+  std::array<std::thread, ThreadCount> threads;
+  std::barrier gate(static_cast<std::ptrdiff_t>(ThreadCount));
+  for (size_t i = 0; i < ThreadCount; ++i)
+  {
+    threads[i] = std::thread([&, i] {
+      gate.arrive_and_wait();
+      formulas[i] = &QF::QuadratureFormula::get(18, G::Wedge);
+      for (size_t order = 1; order <= 12; ++order)
+        QF::QuadratureFormula::get(order, G::Triangle);
+    });
+  }
+  for (auto& thread : threads)
+    thread.join();
+  const auto& expected = QF::QuadratureFormula::get(18, G::Wedge);
+  for (const auto* formula : formulas)
+  {
+    ASSERT_EQ(formula, &expected);
+    EXPECT_EQ(formula->getWeight(0), expected.getWeight(0));
+    EXPECT_EQ(&formula->getPoint(0), &expected.getPoint(0));
+  }
+}
+
+/// @brief Unsupported geometries fail before publishing a default lookup entry.
+TEST(QuadratureFormula, DefaultDispatchRejectsInvalidGeometry)
+{
+  EXPECT_THROW(QF::QuadratureFormula::get(2, static_cast<G>(255)), Alert::Exception);
+  EXPECT_GT(QF::QuadratureFormula::get(2, G::Triangle).getSize(), 0u);
 }

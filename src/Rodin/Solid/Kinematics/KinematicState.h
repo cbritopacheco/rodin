@@ -40,7 +40,7 @@ namespace Rodin::Solid
    * | Left Cauchy-Green | @f$ \mathbf{b} @f$ | @f$ \mathbf{F} \mathbf{F}^T @f$ |
    * | Jacobian | @f$ J @f$ | @f$ \det(\mathbf{F}) @f$ |
    *
-   * ## Usage
+   * # Usage
    * @code
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);

@@ -69,7 +69,7 @@ TEST(EmbeddedJacobian, AmbientColumnsAndTangentAffineFields)
       };
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(4, cell->getGeometry());
         const PolytopeQuadrature quadrature(*cell, formula);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
@@ -115,7 +115,7 @@ TEST(EmbeddedJacobian, AmbientColumnsAndTangentAffineFields)
       auto shapeGradient = Grad(scalarTrial);
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(4, cell->getGeometry());
         const PolytopeQuadrature quadrature(*cell, formula);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
@@ -204,8 +204,7 @@ TEST(EmbeddedJacobian, P1BasisContractionAllRangesAndGeometries)
           SCOPED_TRACE(static_cast<int>(cell->getGeometry()));
           const auto& element =
             space.getFiniteElement(cell->getDimension(), cell->getIndex());
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(4, cell->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(4, cell->getGeometry());
           const PolytopeQuadrature points(*cell, formula);
           for (size_t qp = 0; qp < formula.getSize(); ++qp)
           {

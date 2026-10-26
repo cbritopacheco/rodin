@@ -76,7 +76,7 @@ namespace Rodin::Variational
    * @tparam Scalar The scalar component type (typically Real or Complex)
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Component Access
+   * # Component Access
    * Vector components can be accessed via:
    * - Index notation: `f(i)` for the i-th component
    * - Coordinate accessors: `f.x()`, `f.y()`, `f.z()` for first three components

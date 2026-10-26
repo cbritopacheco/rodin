@@ -33,7 +33,7 @@ jobs:
       with:
         definition: ${{ inputs.definition }}
     - name: Install pinned lane planning dependency
-      run: python3 -m pip install PyYAML==6.0.2
+      run: python3 dev/ci_environment.py python
     - uses: actions/download-artifact@v4
       with:
         name: ci-test-plan

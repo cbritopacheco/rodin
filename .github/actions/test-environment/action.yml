@@ -7,19 +7,18 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: aminya/setup-cpp@v1
-      with:
-        compiler: ${{ fromJSON(inputs.definition).compiler }}
-        cmake: true
+    - uses: ./.github/actions/prepare-apt
     - name: Select compatible dependencies
       id: packages
       shell: bash
       env:
         MODE: ${{ fromJSON(inputs.definition).mode }}
+        COMPILER: ${{ fromJSON(inputs.definition).compiler }}
       run: |
         boost=libboost1.74-all-dev
         if [ "$MODE" = mpi ]; then boost=libboost-all-dev; fi
-        packages=(lcov "$boost" libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev)
+        [[ "$COMPILER" =~ ^gcc-[0-9]+$ ]] || exit 1
+        packages=("$COMPILER" "${COMPILER/gcc-/g++-}" lcov "$boost" libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev)
         case "$MODE" in
           native) ;;
           mpi) packages+=(mpi-default-bin mpi-default-dev) ;;
@@ -35,6 +34,11 @@ runs:
       uses: ./.github/actions/apt-dependencies
       with:
         packages: ${{ steps.packages.outputs.packages }}
+    - name: Select and verify compatible compiler
+      shell: bash
+      env:
+        COMPILER: ${{ fromJSON(inputs.definition).compiler }}
+      run: python3 dev/ci_environment.py compiler --compiler "$COMPILER"
     - name: Restore SuiteSparse
       id: suitesparse
       if: fromJSON(inputs.definition).mode == 'optional'

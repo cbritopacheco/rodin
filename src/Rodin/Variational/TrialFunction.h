@@ -264,7 +264,7 @@ namespace Rodin::Variational
    * @f$ U_h @f$, the trial function @f$ u \in U_h @f$ is the function to be 
    * determined by solving the variational problem.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * The weak formulation seeks @f$ u \in U_h @f$ such that:
    * @f[
    *   a(u, v) = l(v) \quad \forall v \in V_h
@@ -279,7 +279,7 @@ namespace Rodin::Variational
    * The TrialFunction internally manages a GridFunction that stores the degrees
    * of freedom of the solution after the problem is solved.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Uh(mesh);                    // Define finite element space
    * TrialFunction u(Uh);             // Define trial function

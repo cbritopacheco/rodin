@@ -110,8 +110,7 @@ namespace Rodin::Tests::Benchmarks
         gradient.setPolytope(cell);
         using Value = std::remove_cvref_t<decltype(gradient.getBasis(size_t(0)))>;
         const auto& fe = space.getFiniteElement(d, cell.getIndex());
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
+        const auto& formula = QF::QuadratureFormula::get(state.range(0), geometry);
         const Geometry::PolytopeQuadrature quadrature(cell, formula);
         const Scalar multiplier = []() {
           if constexpr (std::is_same_v<Scalar, Complex>)

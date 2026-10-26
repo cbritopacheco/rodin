@@ -11,7 +11,7 @@
  * This header provides the SimplicialLDLT solver class, which implements Cholesky
  * decomposition without square root for symmetric positive definite sparse matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   A = LDL^T
@@ -19,13 +19,13 @@
  * where @f$ L @f$ is unit lower triangular and @f$ D @f$ is diagonal. This variant
  * avoids square root operations, improving numerical stability.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite sparse matrices
  * - When numerical stability is a concern
  * - Problems requiring higher precision
  * - Systems where LLT might encounter numerical issues
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

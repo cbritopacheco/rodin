@@ -242,3 +242,22 @@ namespace Rodin::Tests::Unit
     checkScalar.operator()<Complex>();
   }
 }
+
+/// @brief Copy/move assignment transfers the source integrators for subsequent assembly.
+TEST(LinearFormAssignment, IntegratorsSurviveReassembly)
+{
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  P1 fes(mesh);
+  TestFunction v(fes);
+  LinearForm source(v), destination(v), moved(v);
+  source = Integral(Real(3) * v);
+  destination = Integral(Real(7) * v);
+  source.assemble();
+  const auto expected = source.getVector();
+  destination = source;
+  destination.assemble();
+  EXPECT_LE((destination.getVector() - expected).norm(), 1e-13);
+  moved = std::move(destination);
+  moved.assemble();
+  EXPECT_LE((moved.getVector() - expected).norm(), 1e-13);
+}

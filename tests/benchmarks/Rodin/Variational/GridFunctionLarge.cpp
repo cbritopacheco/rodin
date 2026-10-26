@@ -8,6 +8,7 @@
 #include <array>
 #include <cmath>
 #include <memory>
+#include <limits>
 #include <string>
 
 #include "Rodin/Geometry.h"
@@ -26,11 +27,11 @@ namespace Rodin::Tests::Benchmarks
    *
    * Mesh, space, field and mapped quadrature points are constructed once per
    * field/dimension. Points and expected sums are prepared outside timing.
-   * Traversal workloads visit every cell, so the slow path refreshes DOF and basis
-   * caches. Consecutive repetitions of each sample produce controlled hit ratios.
-   * PureHit repeats one prewarmed sample of the large field without traversal.
+   * Traversal workloads visit every cell and refresh entity DOFs while reusing
+   * the complete reference table. Consecutive samples have controlled repeat ratios.
+   * RepeatOne repeats one prewarmed sample of the large field without traversal.
    * The pointwise alternative uses the space's expansion evaluator and retains
-   * the DOF cache, but bypasses the quadrature basis cache entirely.
+   * the DOF cache and evaluates basis functions directly at reference coordinates.
    */
   template <size_t Order, bool Vector>
   class LargeInterpolationData
@@ -45,7 +46,7 @@ namespace Rodin::Tests::Benchmarks
           m_mesh(makeMesh(dimension)),
           m_space(makeSpace()),
           m_field(m_space),
-          m_qf(QF::PolytopeQuadratureFormula::get(2 * Order,
+          m_qf(QF::QuadratureFormula::get(2 * Order,
             dimension == 2 ? Polytope::Type::Triangle : Polytope::Type::Tetrahedron))
       {
         const auto fn = [&] {
@@ -62,24 +63,28 @@ namespace Rodin::Tests::Benchmarks
           }
         }();
         m_field.project(fn);
-        m_points.reserve(m_mesh.getCellCount() * m_qf.getSize());
+        m_quadratures.reserve(m_mesh.getCellCount());
+        m_samples.reserve(m_mesh.getCellCount() * m_qf.getSize());
         for (Index cell = 0; cell < m_mesh.getCellCount(); ++cell)
         {
           const Polytope polytope(dimension, cell, m_mesh);
+          const auto& quadrature = m_quadratures.emplace_back(polytope, m_qf);
           for (size_t sample = 0; sample < m_qf.getSize(); ++sample)
           {
-            m_points.emplace_back(polytope, m_qf.getPoint(sample));
+            m_samples.emplace_back(quadrature, sample);
             // Populate lazy physical coordinates and the numerical oracle once.
-            m_expectedSum += reducedExpected(m_points.back());
+            m_expectedSum += reducedExpected(m_samples.back().getPoint());
           }
         }
-        m_firstExpected = reducedExpected(m_points.front());
+        m_firstExpected = reducedExpected(m_samples.front().getPoint());
         // Verify every sample and every vector component outside timing. A
         // checksum alone could hide compensating errors on a uniform mesh.
-        for (size_t sample = 0; sample < m_points.size(); ++sample)
+        for (size_t sample = 0; sample < m_samples.size(); ++sample)
         {
-          const Point& p = m_points[sample];
-          const IntegrationPoint ip(p, &m_qf, sample % m_qf.getSize());
+          const IntegrationPoint& ip = m_samples[sample];
+          const Point& p = ip.getPoint();
+          if (ip.getReferenceQuadratureFormula() != &m_qf)
+            m_setupError = std::numeric_limits<Real>::infinity();
           for (const auto& value :
             {m_field.getValue(ip), m_field.getValue(ip), m_field.getValue(p)})
           {
@@ -99,16 +104,16 @@ namespace Rodin::Tests::Benchmarks
 
       void run(benchmark::State& state)
       {
-        // 0: all misses, 1: 75% hits, 2: 31/32 hits, 3: pure hits.
+        // Sweep once, repeat each sample four/thirty-two times, or repeat one sample.
         const size_t workload = state.range(1);
         const bool pointwise = state.range(2) != 0;
         const size_t repeats = workload == 0 ? 1 : workload == 1 ? 4 : 32;
-        const size_t evaluations = m_points.size() * repeats;
+        const size_t evaluations = m_samples.size() * repeats;
         const Real expected =
           workload == 3 ? evaluations * m_firstExpected : repeats * m_expectedSum;
         Range value{};
-        // Ensures pure-hit timing starts with its single sample already cached.
-        const IntegrationPoint first(m_points.front(), &m_qf, 0);
+        // Prepare the first mapped sample outside timing.
+        const IntegrationPoint& first = m_samples.front();
         m_field.interpolate(value, first);
         Real total = 0;
         for (auto _ : state)
@@ -119,7 +124,7 @@ namespace Rodin::Tests::Benchmarks
             for (size_t evaluation = 0; evaluation < evaluations; ++evaluation)
             {
               if (pointwise)
-                m_field.interpolate(value, m_points.front());
+                m_field.interpolate(value, m_samples.front().getPoint());
               else
                 m_field.interpolate(value, first);
               benchmark::DoNotOptimize(value);
@@ -128,10 +133,10 @@ namespace Rodin::Tests::Benchmarks
           }
           else
           {
-            for (size_t sample = 0; sample < m_points.size(); ++sample)
+            for (size_t sample = 0; sample < m_samples.size(); ++sample)
             {
-              const Point& point = m_points[sample];
-              const IntegrationPoint ip(point, &m_qf, sample % m_qf.getSize());
+              const IntegrationPoint& ip = m_samples[sample];
+              const Point& point = ip.getPoint();
               for (size_t repeat = 0; repeat < repeats; ++repeat)
               {
                 if (pointwise)
@@ -150,11 +155,10 @@ namespace Rodin::Tests::Benchmarks
         state.counters["relative_error"] = relativeError;
         state.counters["cells"] = m_mesh.getCellCount();
         state.counters["dofs"] = m_space.getSize();
-        state.counters["samples"] = m_points.size();
+        state.counters["samples"] = m_samples.size();
         state.counters["evaluations_per_sweep"] = evaluations;
-        state.counters["basis_hit_fraction"] = pointwise ? 0
-          : workload == 3                                ? 1
-                                                         : Real(repeats - 1) / repeats;
+        state.counters["sample_repeat_fraction"] =
+          workload == 3 ? Real(1) : Real(repeats - 1) / repeats;
         if (!std::isfinite(relativeError) || relativeError > 1e-9 || m_setupError > 1e-10)
           state.SkipWithError("Large interpolation sweep disagrees with analytic field");
         state.SetItemsProcessed(state.iterations() * evaluations);
@@ -217,7 +221,8 @@ namespace Rodin::Tests::Benchmarks
       Space m_space;
       Field m_field;
       const QF::QuadratureFormula& m_qf;
-      std::vector<Point> m_points;
+      std::vector<PolytopeQuadrature> m_quadratures;
+      std::vector<IntegrationPoint> m_samples;
       Real m_expectedSum = 0;
       Real m_firstExpected = 0;
       Real m_setupError = 0;
@@ -238,7 +243,7 @@ namespace Rodin::Tests::Benchmarks
   }
 
   const bool registeredLargeInterpolation = [] {
-    const char* workloads[] = {"SlowSweep", "Mixed75", "FastBlocks", "PureHit"};
+    const char* workloads[] = {"Sweep", "Repeat4", "Repeat32", "RepeatOne"};
     for (size_t workload = 0; workload < 4; ++workload)
     {
       for (size_t alternative = 0; alternative < 2; ++alternative)

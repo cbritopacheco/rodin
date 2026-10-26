@@ -96,7 +96,7 @@ namespace Rodin::QF
    * @brief Persistent immutable reference quadrature points and weights.
    * @ingroup RodinQuadrature
    *
-   * ## Architecture
+   * # Architecture
    *
    * Each formula family and constructor-key type has a shared owning pool.
    * Integer and enum arguments are copied into a tuple; published formula
@@ -256,6 +256,19 @@ namespace Rodin::QF
       }
 
       /**
+       * @brief Selects a persistent quadrature formula for a reference geometry.
+       * @param order Required polynomial degree of exactness.
+       * @param geometry Reference polytope geometry.
+       * @returns Immutable formula retained until process termination.
+       *
+       * Uses positive interior published tables where available and Gaussian
+       * product rules beyond their supported degrees. Tensor factors are
+       * persistent formulas from the same thread-safe factory.
+       */
+      static const QuadratureFormula& get(
+        size_t order, Geometry::Polytope::Type geometry);
+
+      /**
        * @brief Constructs or retrieves a persistent formula of a concrete family.
        * @tparam Formula Concrete generator implementing QuadratureFormulaBase.
        * @tparam Args Integer, enum, or persistent-formula constructor arguments.
@@ -326,6 +339,18 @@ namespace Rodin::QF
       }
 
     private:
+      /**
+       * @brief Resolves a default request through the concrete-family factory.
+       * @param order Required polynomial degree of exactness.
+       * @param geometry Reference geometry.
+       * @returns Permanent concrete-family formula, including persistent factors.
+       */
+#if __has_cpp_attribute(gnu::noinline)
+      [[gnu::noinline]]
+#endif
+      static const QuadratureFormula& select(
+        size_t order, Geometry::Polytope::Type geometry);
+
       /**
        * @brief Publishes the concrete rule owned by the same pool entry.
        * @param formula Immutable concrete rule retained with this interface.

@@ -40,19 +40,19 @@ namespace Rodin::Variational
    * where @f$ \psi_i @f$ are test basis functions on element @f$ K @f$ and
    * @f$ l(\cdot) @f$ is a linear functional.
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During finite element assembly:
    * 1. The integrator is called for each element (or boundary face) in the mesh
    * 2. Local element vectors are computed using quadrature
    * 3. Local vectors are assembled into the global right-hand side vector
    *
-   * ## Common Linear Forms
+   * # Common Linear Forms
    * - **Volume load**: @f$ \int_K f \cdot v \, dx @f$
    * - **Neumann BC**: @f$ \int_{\partial K} g \cdot v \, ds @f$
    * - **Point source**: @f$ f_i v(x_i) @f$
    * - **Initial conditions**: @f$ \int_K u_0 \cdot v \, dx @f$
    *
-   * ## Domain Specification
+   * # Domain Specification
    * Linear form integrators support the `over()` method to restrict integration
    * to specific mesh regions identified by attributes:
    * ```cpp

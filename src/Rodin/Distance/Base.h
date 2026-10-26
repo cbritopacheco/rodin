@@ -28,7 +28,7 @@ namespace Rodin::Distance
    *
    * @tparam Derived The derived class type (CRTP pattern)
    *
-   * ## Usage
+   * # Usage
    * Derived classes should inherit from this base class to automatically
    * gain methods for setting and retrieving interior and interface regions:
    * ```cpp

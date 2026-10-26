@@ -13,7 +13,7 @@
 #include "Rodin/Adaptation.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Geometry.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Solver/CG.h"
 #include "Rodin/Variational.h"
 
@@ -184,8 +184,7 @@ namespace Rodin::Tests::Unit
     TEST(Rodin_Adaptation_SWIFTSolver, SurfaceQuadratureSupportsHigherAccuracyOverride)
     {
       const auto integrate = [](size_t order) {
-        const auto& rule =
-          QF::PolytopeQuadratureFormula::get(order, Polytope::Type::Segment);
+        const auto& rule = QF::QuadratureFormula::get(order, Polytope::Type::Segment);
         const SWIFT::Loss loss(Real(0.31927236562898026));
         Math::Vector<Real> integral = Math::Vector<Real>::Zero(3);
         for (size_t q = 0; q < rule.getSize(); ++q)
@@ -376,7 +375,7 @@ namespace Rodin::Tests::Unit
         };
         for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
           measure(Point(*cell, traits.getVertex(vertex)));
-        const auto& qf = QF::PolytopeQuadratureFormula::get(
+        const auto& qf = QF::QuadratureFormula::get(
           SWIFT::Parameters::Quadrature::getValidationOrder(Order), cell->getGeometry());
         const auto& quadrature = cell->getQuadrature(qf);
         for (std::size_t q = 0; q < quadrature.getSize(); ++q)
@@ -558,7 +557,7 @@ namespace Rodin::Tests::Unit
       current.getData().setZero();
       const Location::AABB<LocalMesh> locator(mesh);
       auto cell = mesh.getCell();
-      const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
+      const auto& qf = QF::QuadratureFormula::get(2, cell->getGeometry());
       const auto& point = cell->getQuadrature(qf).getPoint(0);
       const IntegrationPoint ip(point, &qf, 0);
       SWIFT::Parameters p;
@@ -1323,7 +1322,7 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
     GridFunction field(fes);
     const auto cell = mesh.getCell();
-    const auto& qf = QF::PolytopeQuadratureFormula::get(8, cell->getGeometry());
+    const auto& qf = QF::QuadratureFormula::get(8, cell->getGeometry());
     const Real peak = cell->getQuadrature(qf).getPoint(0).x();
     field = VectorFunction(std::size_t(2), [peak](const Point& point) {
       const Real x = point.x() - peak;

@@ -36,7 +36,7 @@ namespace Rodin
    * @tparam From Source type to cast from
    * @tparam To Target type to cast to
    *
-   * ## Usage
+   * # Usage
    * ```cpp
    * // Example casting operation
    * Cast<SourceType, TargetType> converter;

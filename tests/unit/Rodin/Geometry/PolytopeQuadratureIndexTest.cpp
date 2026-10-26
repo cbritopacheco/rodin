@@ -19,7 +19,7 @@
 #include <Rodin/Geometry/PolytopeQuadrature.h>
 #include <Rodin/QF/Centroid.h>
 #include <Rodin/QF/GaussLegendre.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include "../../../convergence/Convergence.h"
 
 using namespace Rodin;
@@ -207,7 +207,7 @@ namespace Rodin::Tests::Unit
     const auto polytope = *mesh.getPolytope(2, 0);
 
     const auto& qf1 = QF::QuadratureFormula::get<QF::Centroid>(Polytope::Type::Triangle);
-    const auto& qf2 = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const auto& qf2 = QF::QuadratureFormula::get(2, Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());

@@ -121,8 +121,7 @@ namespace Rodin::Tests::Unit
       {
         for (auto entity = mesh.getPolytope(dimension); !entity.end(); ++entity)
         {
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(2, entity->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(2, entity->getGeometry());
           const PolytopeQuadrature quadrature(*entity, formula);
           for (size_t q = 0; q < quadrature.getSize(); ++q)
           {

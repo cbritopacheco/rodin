@@ -354,7 +354,8 @@ int main(int argc, char** argv)
 {
   try
   {
-    const double seconds = argc > 1 ? std::stod(argv[1]) : BlockSeconds;
+    const bool list = argc == 2 && std::string(argv[1]) == "--list";
+    const double seconds = argc > 1 && !list ? std::stod(argv[1]) : BlockSeconds;
     const std::string filter = argc > 2 ? argv[2] : "";
     const std::string scenario = argc > 3 ? argv[3] : "";
     // Optional power holds the physical map fixed while changing FE order.
@@ -362,14 +363,23 @@ int main(int argc, char** argv)
     if (!std::isfinite(seconds) || !(seconds > 0))
       throw std::runtime_error("Timing block duration must be positive");
     std::cout << std::setprecision(12);
+    if (list)
+      std::cout << "geometry,degree,resolution,distortion,warp_degree\n";
 #ifdef RODIN_AABB_WORKLOAD_DIAGNOSTICS
-    std::cout
-      << "geometry,degree,resolution,cells,distortion,warp_degree,query,pruning,sample,"
-         "candidates,transforms,jacobians,iterations,retries,box_candidates,"
-         "projection_rejected,index_bytes\n";
+    if (!list)
+    {
+      std::cout
+        << "geometry,degree,resolution,cells,distortion,warp_degree,query,pruning,sample,"
+           "candidates,transforms,jacobians,iterations,retries,box_candidates,"
+           "projection_rejected,index_bytes\n";
+    }
 #else
-    std::cout << "geometry,degree,resolution,cells,distortion,warp_degree,query,pruning,"
-                 "samples,ns\n";
+    if (!list)
+    {
+      std::cout
+        << "geometry,degree,resolution,cells,distortion,warp_degree,query,pruning,"
+           "samples,ns\n";
+    }
 #endif
     for (const auto& [type, name] :
       {std::pair{G::Point, "Point"}, std::pair{G::Segment, "Segment"},
@@ -381,7 +391,10 @@ int main(int argc, char** argv)
         continue;
       if (type == G::Point)
       {
-        run(type, name, 1, 1, 0, seconds, 1);
+        if (list)
+          std::cout << name << ",1,1,0,1\n";
+        else
+          run(type, name, 1, 1, 0, seconds, 1);
         continue;
       }
       const size_t dim = Polytope::Traits(type).getDimension();
@@ -399,8 +412,16 @@ int main(int argc, char** argv)
               std::to_string(static_cast<int>(distortion)) + "/" + std::to_string(size);
             if (scenario.empty() || scenario == key)
             {
-              run(type, name, size, degree, distortion, seconds,
-                warpDegree == 0 ? degree : warpDegree);
+              if (list)
+              {
+                std::cout << name << ',' << degree << ',' << size << ',' << distortion
+                          << ',' << (warpDegree == 0 ? degree : warpDegree) << '\n';
+              }
+              else
+              {
+                run(type, name, size, degree, distortion, seconds,
+                  warpDegree == 0 ? degree : warpDegree);
+              }
             }
           }
         }

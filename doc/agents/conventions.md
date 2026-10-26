@@ -109,7 +109,7 @@ whatever the reader already believes.
 The cost of skipping this is that the anomaly is usually about the
 *instrument*, not the subject. A quadrature benchmark once appeared to show
 that access on tetrahedra and pyramids cost four to six times that on
-triangles and wedges at equal order. It did not. `PolytopeQuadratureFormula`'s
+triangles and wedges at equal order. It did not. `QuadratureFormula`'s concrete-family
 thread-local hot cache holds eight entries, inserts round-robin and scans
 linearly from slot zero, so lookup cost is proportional to the slot a key
 landed in --- that is, to the order in which distinct keys were first

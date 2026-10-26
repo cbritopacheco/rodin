@@ -40,12 +40,12 @@ namespace Rodin::Distance
    * where @f$ f @f$ changes sign based on the region, and @f$ \Gamma @f$ is
    * the interface.
    *
-   * ## Variants
+   * # Variants
    * Two mathematical variants are available:
    * 1. Negative interior approximation (full domain)
    * 2. Signed distance (with specified interior/interface regions)
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 fes(mesh);
    * SignedPoisson signedDist;

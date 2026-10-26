@@ -24,7 +24,7 @@ namespace Rodin::Variational
    * does not certify that the point still has that formula's reference
    * coordinates: mapping a face sample into a cell changes the chart.
    *
-   * ## Reference association
+   * # Reference association
    *
    * Construction from @ref Geometry::PolytopeQuadrature and a logical index
    * establishes reference association through owned samples, without coordinate

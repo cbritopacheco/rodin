@@ -14,7 +14,7 @@
 #include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/GaussLobatto.h"
 #include "Rodin/QF/GrundmannMoller.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 using namespace Rodin;
 using Type = Geometry::Polytope::Type;
@@ -105,8 +105,7 @@ TEST(QuadratureConstruction, RejectsInvalidCountsAndOrders)
     EXPECT_THROW((QF::GaussLobatto(geometry, huge)), Alert::Exception);
     if (geometry != Type::Point)
     {
-      EXPECT_THROW(
-        QF::PolytopeQuadratureFormula::build(huge, geometry), Alert::Exception);
+      EXPECT_THROW(QF::QuadratureFormula::get(huge, geometry), Alert::Exception);
     }
   }
   EXPECT_THROW((QF::GrundmannMoller(huge, Type::Triangle)), Alert::Exception);

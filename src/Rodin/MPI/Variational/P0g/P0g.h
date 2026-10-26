@@ -108,21 +108,31 @@ namespace Rodin::Variational
           m_fes(mesh.getShard())
       {}
 
-      /// @brief Copy-constructs the distributed scalar P0g space.
+      /**
+       * @brief Copy-constructs the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       */
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh),
           m_fes(other.m_fes)
       {}
 
-      /// @brief Move-constructs the distributed scalar P0g space.
+      /**
+       * @brief Move-constructs the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       */
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(other.m_mesh),
           m_fes(std::move(other.m_fes))
       {}
 
-      /// @brief Copy-assigns the distributed scalar P0g space.
+      /**
+       * @brief Copy-assigns the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -134,7 +144,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move-assigns the distributed scalar P0g space.
+      /**
+       * @brief Move-assigns the distributed scalar P0g space.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
       P0g& operator=(P0g&& other)
       {
         if (this != &other)
@@ -148,7 +162,10 @@ namespace Rodin::Variational
 
       ~P0g() override = default;
 
-      /// @brief Returns the underlying local shard P0g space.
+      /**
+       * @brief Returns the underlying local shard P0g space.
+       * @returns Finite element space on the local mesh shard.
+       */
       const FESType& getShard() const
       {
         return m_fes;
@@ -178,25 +195,39 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the global number of degrees of freedom (always 1).
+      /**
+       * @brief Returns the global number of degrees of freedom (always 1).
+       * @returns Total number of degrees of freedom in the space.
+       */
       size_t getSize() const override
       {
         return 1;
       }
 
-      /// @brief Returns the vector dimension (always 1 for scalar P0g).
+      /**
+       * @brief Returns the vector dimension (always 1 for scalar P0g).
+       * @returns Number of scalar components in the value range.
+       */
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
-      /// @brief Returns the distributed mesh on which the space is defined.
+      /**
+       * @brief Returns the distributed mesh on which the space is defined.
+       * @returns Mesh underlying the finite element space.
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      /// @brief Returns the finite element attached to local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns the finite element attached to local polytope @f$(d, i)@f$.
+       * @param d Entity dimension.
+       * @param i Local index of the polytope in its dimension.
+       * @returns Finite element associated with the specified polytope.
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return m_fes.getFiniteElement(d, i);
@@ -206,6 +237,9 @@ namespace Rodin::Variational
        * @brief Returns the global DOF array for local polytope @f$(d, i)@f$.
        *
        * For scalar P0g every polytope maps to the single global DOF 0.
+       * @param d Entity dimension.
+       * @param i Local polytope index.
+       * @returns Global degree-of-freedom indices associated with the specified local polytope.
        */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
@@ -219,8 +253,9 @@ namespace Rodin::Variational
        * returns 0 regardless of the local shard DOF index.
        *
        * @return Global distributed DOF index (always 0).
+       * @param localIdx Local shard degree-of-freedom index.
        */
-      Index getGlobalIndex(Index) const
+      Index getGlobalIndex([[maybe_unused]] Index localIdx) const
       {
         return Index(0);
       }
@@ -230,6 +265,9 @@ namespace Rodin::Variational
        * on polytope @f$(d, i)@f$.
        *
        * For scalar P0g this always returns 0.
+       * @param p Dimension and local index identifying the polytope.
+       * @param localDof Local basis-function index on the specified polytope.
+       * @returns Global distributed degree-of-freedom index.
        */
       Index getGlobalIndex(
         const std::pair<size_t, Index>& p, Index localDof) const override
@@ -237,7 +275,12 @@ namespace Rodin::Variational
         return m_fes.getGlobalIndex(p, localDof);
       }
 
-      /// @brief Returns a pullback wrapper on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns a pullback wrapper on local polytope @f$(d, i)@f$.
+       * @param p Dimension and local index identifying the polytope.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pullback operation for the specified polytope.
+       */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
@@ -249,7 +292,12 @@ namespace Rodin::Variational
           *getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
-      /// @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+       * @param p Dimension and local index identifying the polytope.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pushforward operation for the specified polytope.
+       */
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& p, Callable&& v) const
       {

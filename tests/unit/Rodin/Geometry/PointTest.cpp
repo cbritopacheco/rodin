@@ -14,7 +14,8 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
+#include "../QF/RepeatedFormula.h"
 #include "Rodin/Variational/H1.h"
 
 using namespace Rodin;
@@ -146,8 +147,7 @@ TEST(Geometry_Point, LazyPhysicalMapMatchesEveryDirectSample)
         for (const size_t order : {8u, 16u, 18u})
         {
           SCOPED_TRACE(order);
-          const auto& formula =
-            QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(order, geometry);
+          const auto& formula = QF::QuadratureFormula::get(order, geometry);
           const PolytopeQuadrature quadrature(cell, formula);
           ASSERT_TRUE(element.findTabulation(formula));
           for (size_t qp = 0; qp < formula.getSize(); ++qp)
@@ -209,8 +209,8 @@ TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
       Optional<Point> retained;
       const QF::QuadratureFormula* formulaPointer = nullptr;
       {
-        const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-          size_t{8}, Polytope::Type::Point);
+        const auto& formula =
+          QF::QuadratureFormula::get(size_t{8}, Polytope::Type::Point);
         formulaPointer = &formula;
         const PolytopeQuadrature quadrature(vertex, formula);
         ASSERT_EQ(quadrature.getSize(), 1);
@@ -227,8 +227,8 @@ TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
       for (size_t i = 0; i < 9; ++i)
       {
         const auto& replacement =
-          QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-            i + 20, Polytope::Type::Point);
+          QF::QuadratureFormula::get<Tests::RepeatedQuadratureFormula>(
+            *formulaPointer, i + 20);
         static_cast<void>(element.getTabulation(replacement));
       }
       ASSERT_FALSE(element.findTabulation(*formulaPointer));
@@ -266,10 +266,9 @@ TEST(Geometry_Point, ReferenceTableLookupUsesIdentityAndGeometry)
     const auto otherGeometry =
       geometry == Polytope::Type::Point ? Polytope::Type::Segment : Polytope::Type::Point;
     Variational::H1Element<K, Scalar> other(otherGeometry);
-    const auto& formula =
-      QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(size_t{0}, geometry);
+    const auto& formula = QF::QuadratureFormula::get(size_t{0}, geometry);
     const auto& absent =
-      QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(size_t{101}, geometry);
+      QF::QuadratureFormula::get<Tests::RepeatedQuadratureFormula>(formula, size_t{101});
     const auto& expected = element.getTabulation(formula);
     const auto found = element.findTabulation(formula);
     ASSERT_TRUE(found);
@@ -1360,4 +1359,15 @@ TEST(Geometry_Point, PhysicalOrderingIsStrictAcrossEmbeddingDimensions)
     }
     EXPECT_EQ(distinct.size(), count);
   }
+}
+
+/// @brief Empty physical coordinates compare equal without indexing absent entries.
+TEST(Geometry_Point, ZeroDimensionOrdering)
+{
+  auto mesh = LocalMesh::Builder().initialize(0).nodes(1).vertex({}).finalize();
+  const Vertex vertex(0, mesh);
+  const Point point(vertex, Math::SpatialPoint{}, Math::SpatialPoint{});
+  const Point copy(point);
+  EXPECT_FALSE(point < copy);
+  EXPECT_FALSE(copy < point);
 }

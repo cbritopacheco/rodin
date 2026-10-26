@@ -255,6 +255,7 @@ namespace Rodin::Geometry
           Parent::operator=(std::move(other));
           m_parent = std::move(other.m_parent);
           m_s2ps = std::move(other.m_s2ps);
+          m_ancestors = std::move(other.m_ancestors);
         }
         return *this;
       }

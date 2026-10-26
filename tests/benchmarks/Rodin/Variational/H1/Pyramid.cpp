@@ -14,7 +14,7 @@
 #include <limits>
 #include <vector>
 #include "Rodin/Variational/H1/H1Element.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -84,7 +84,7 @@ namespace Rodin::Tests::Benchmarks
         const QF::QuadratureFormula* formula = nullptr;
         if (!metadata)
         {
-          formula = &QF::PolytopeQuadratureFormula::get(
+          formula = &QF::QuadratureFormula::get(
             state.range(0), Geometry::Polytope::Type::Pyramid);
         }
         const size_t nqp = formula ? formula->getSize() : 0;

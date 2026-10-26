@@ -24,7 +24,7 @@
  * transient output, the master XDMF uses a Temporal collection of Spatial
  * collections.
  *
- * ## Typical Workflow
+ * # Typical Workflow
  *
  * ```cpp
  * IO::XDMF xdmf("output/simulation");
@@ -442,7 +442,7 @@ namespace Rodin::IO
        *                  determines where files are written; the filename
        *                  component is used as `{stem}` in file patterns.
        *
-       * ## Example
+       * # Example
        * ```cpp
        * IO::XDMF xdmf("output/simulation");
        * // produces: output/simulation.xdmf, output/simulation.*.h5, ...
@@ -468,7 +468,7 @@ namespace Rodin::IO
        * @param[in] stem      Base path for output files.
        * @param[in] rootRank  Rank that writes the master XDMF XML (default 0).
        *
-       * ## Example
+       * # Example
        * ```cpp
        * IO::XDMF xdmf(MPI_COMM_WORLD, "output/Poisson");
        * xdmf.setMesh(mpiMesh);

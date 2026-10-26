@@ -441,3 +441,31 @@ TEST(MFEMFieldValidation, HeaderAndPayload)
   check(linear, "H1_1D_P1");
   check(quadratic, "H1_1D_P2");
 }
+
+/// @brief Loading high-order coefficients does not depend on previous destination values.
+TEST(MFEMH1Coefficients, DestinationStateDoesNotAffectReconstruction)
+{
+  for (const auto geometry :
+    {Polytope::Type::Triangle, Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
+  {
+    const auto dimension = Polytope::Traits(geometry).getDimension();
+    auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+    for (size_t d = dimension; d > 0; --d)
+      mesh.getConnectivity().compute(d, d - 1);
+    H1<3, Real> fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction clean(fes), dirty(fes);
+    clean.getData().setZero();
+    dirty.getData().setConstant(1e20);
+    std::ostringstream payload;
+    payload << "FiniteElementSpace\nFiniteElementCollection: H1_" << dimension
+            << "D_P3\nVDim: 1\nOrdering: 0\n";
+    for (size_t i = 0; i < fes.getSize(); ++i)
+      payload << Real(i + 1) / 8 << '\n';
+    std::istringstream first(payload.str()), second(payload.str());
+    GridFunctionLoader<FileFormat::MFEM, decltype(fes), Math::Vector<Real>>(clean).load(
+      first);
+    GridFunctionLoader<FileFormat::MFEM, decltype(fes), Math::Vector<Real>>(dirty).load(
+      second);
+    EXPECT_LE((clean.getData() - dirty.getData()).norm(), 1e-12);
+  }
+}

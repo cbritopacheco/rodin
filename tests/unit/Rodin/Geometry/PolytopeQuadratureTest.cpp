@@ -10,7 +10,7 @@
 #include <vector>
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/P1.h"
 
 namespace Rodin::Tests::Unit
@@ -20,9 +20,9 @@ namespace Rodin::Tests::Unit
    *
    * ## Architecture
    *
-   * An owned dispatcher supplies immutable coordinates and weights. An optional
+   * A persistent formula supplies immutable coordinates and weights. An optional
    * empty view supplies no samples. Observations change neither payload nor
-   * logical identity. Copy construction owns independent formula contents and
+   * logical identity. Copy construction borrows the same immutable samples and
    * resets observations; no borrowed fixture or address is used as an identity key.
    */
   class ConstructionFormula final : public QF::QuadratureFormulaBase
@@ -35,7 +35,7 @@ namespace Rodin::Tests::Unit
        * @param empty Whether the observed formula has no samples.
        */
       ConstructionFormula(Geometry::Polytope::Type geometry, size_t order, bool empty)
-        : m_formula(order, geometry),
+        : m_formula(QF::QuadratureFormula::get(order, geometry)),
           m_empty(empty),
           m_sizeQueries(0),
           m_weightQueries(0),
@@ -109,9 +109,9 @@ namespace Rodin::Tests::Unit
 
       /**
        * @brief Borrows the unobserved payload used for exact input comparisons.
-       * @returns The owned dispatcher; the empty flag is handled by the fixture.
+       * @returns The persistent formula; the empty flag is handled by the fixture.
        */
-      const QF::PolytopeQuadratureFormula& getPayload() const
+      const QF::QuadratureFormula& getPayload() const
       {
         return m_formula;
       }
@@ -153,7 +153,7 @@ namespace Rodin::Tests::Unit
       }
 
     private:
-      QF::PolytopeQuadratureFormula m_formula;
+      const QF::QuadratureFormula& m_formula;
       bool m_empty;
       mutable size_t m_sizeQueries;
       mutable size_t m_weightQueries;

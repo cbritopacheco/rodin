@@ -25,11 +25,11 @@ namespace Rodin::Math
    * Template Pattern (CRTP) to enable derived classes to return their own
    * type from operations.
    *
-   * ## Type Safety
+   * # Type Safety
    * Units provide compile-time type safety, preventing accidental mixing of
    * incompatible units (e.g., adding radians to meters).
    *
-   * ## Arithmetic Operations
+   * # Arithmetic Operations
    * All standard arithmetic operations are supported:
    * - Addition/subtraction: @f$ u_1 \pm u_2 @f$
    * - Multiplication/division: @f$ u_1 \times u_2 @f$, @f$ u_1 / u_2 @f$
@@ -39,7 +39,7 @@ namespace Rodin::Math
    *
    * Comparisons follow the stored scalar type, including unordered floating-point NaN values.
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * // Creating a derived unit class
    * class Meter : public Unit<Meter, Real>

@@ -21,7 +21,7 @@ GEOMETRIES = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", 
 
 
 class BackendRegistrationTest(unittest.TestCase):
-    def configure(self, directory, petsc=True, complex=False):
+    def configure(self, directory, petsc=True, complex=False, coverage=False):
         temporary = tempfile.TemporaryDirectory(prefix="rodin-ci-registration-")
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
@@ -36,7 +36,9 @@ class BackendRegistrationTest(unittest.TestCase):
             + 'function(rodin_suppress_external_mpi_lsan_for_test name)\nendfunction()\n'
             + f'set(RODIN_USE_PETSC {"ON" if petsc else "OFF"})\nset(RODIN_USE_MPI ON)\n'
             + f'set(RODIN_CONVERGENCE_PETSC_COMPLEX {"ON" if complex else "OFF"})\n'
+            + f'set(RODIN_CODE_COVERAGE {"ON" if coverage else "OFF"})\n'
             + 'set(MPIEXEC_EXECUTABLE /usr/bin/true)\nset(MPIEXEC_NUMPROC_FLAG -n)\n'
+            + f'include("{ROOT / "tests/convergence/PETScRefinement.cmake"}")\n'
             + ''.join(f'add_subdirectory("{ROOT / entry}" {folder})\n' for entry, folder in zip(directories, folders)))
         build = source / "build"
         subprocess.run(["cmake", "-S", str(source), "-B", str(build)],
@@ -295,6 +297,35 @@ class BackendRegistrationTest(unittest.TestCase):
             self.assertEqual(len(filters), 1, name)
             self.assertIn("/" + name.rsplit("_", 1)[-1], filters[0])
         self.assertGreater(checked, 200)
+
+    def test_curved_stokes_coverage_watchdog_preserves_every_case_and_rank(self):
+        configurations = [self.configure("tests/convergence/isoparametric/Stokes", coverage=value)
+                          for value in [False, True]]
+        commands = [{name: [arg.replace(str(build.parent), "<FIXTURE>") for arg in args]
+                     for name, args in tests.items()} for tests, build in configurations]
+        self.assertEqual(commands[0], commands[1])
+        properties = []
+        for _, build in configurations:
+            rows = {}
+            for path in build.rglob("CTestTestfile.cmake"):
+                for command, args, *_ in ci.commands(path.read_text()):
+                    if command != "set_tests_properties":
+                        continue
+                    boundary = args.index("PROPERTIES")
+                    values = {key: value.replace(str(build.parent), "<FIXTURE>")
+                              for key, value in zip(args[boundary + 1::2], args[boundary + 2::2])}
+                    for name in args[:boundary]:
+                        rows.setdefault(name, {}).update(values)
+            properties.append(rows)
+        selected = "RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Pyramid"
+        self.assertEqual(properties[0][selected]["TIMEOUT"], "1800")
+        self.assertEqual(properties[1][selected]["TIMEOUT"], "3600")
+        properties[1][selected]["TIMEOUT"] = "1800"
+        self.assertEqual(properties[0], properties[1])
+        for rank in range(1, 5):
+            name = f"RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_Pyramid"
+            self.assertIn(str(rank), configurations[1][0][name])
+            self.assertEqual(properties[1][name]["PROCESSORS"], str(rank))
 
     def test_expanded_jobs_fit_github_matrix_limit(self):
         jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]

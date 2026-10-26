@@ -26,6 +26,47 @@ class EnvironmentTest(unittest.TestCase):
         self.release.start()
         self.addCleanup(self.release.stop)
 
+    def test_python_dependency_reuses_exact_importable_version(self):
+        with patch.object(environment.subprocess, 'run', return_value=SimpleNamespace(returncode=0)) as run:
+            environment.install_python()
+        run.assert_called_once()
+        self.assertIn(environment.YAML_VERSION, run.call_args.args[0][-1])
+
+    def test_python_install_retries_metadata_errors_and_timeouts_without_cached_responses(self):
+        for error in [subprocess.CalledProcessError(2, 'pip'), subprocess.TimeoutExpired('pip', 180)]:
+            with self.subTest(error=type(error).__name__), \
+                    patch.object(environment.subprocess, 'run', side_effect=[
+                        SimpleNamespace(returncode=1), error, SimpleNamespace(returncode=0),
+                        SimpleNamespace(returncode=0)]) as run, \
+                    patch.object(environment.time, 'sleep') as sleep:
+                environment.install_python()
+                first, second = run.call_args_list[1:3]
+                self.assertEqual(first.args, second.args)
+                self.assertIn('--no-cache-dir', first.args[0])
+                self.assertIn('PyYAML==' + environment.YAML_VERSION, first.args[0])
+                self.assertTrue(first.kwargs['check'])
+                self.assertEqual(first.kwargs['timeout'], environment.PYTHON_INSTALL_TIMEOUT)
+                sleep.assert_called_once_with(environment.PYTHON_RETRY_DELAY)
+
+    def test_python_install_permanent_failure_is_not_accepted(self):
+        with patch.object(environment.subprocess, 'run', side_effect=[
+                SimpleNamespace(returncode=1), *[
+                    subprocess.CalledProcessError(2, 'pip')
+                    for _ in range(environment.PYTHON_INSTALL_ATTEMPTS)]]) as run, \
+                patch.object(environment.time, 'sleep'):
+            with self.assertRaisesRegex(RuntimeError, 'Could not install and import PyYAML'):
+                environment.install_python()
+        self.assertEqual(run.call_count, 1 + environment.PYTHON_INSTALL_ATTEMPTS)
+
+    def test_python_install_verifies_import_after_pip_succeeds(self):
+        outcomes = [SimpleNamespace(returncode=1)]
+        for _ in range(environment.PYTHON_INSTALL_ATTEMPTS):
+            outcomes.extend([SimpleNamespace(returncode=0), subprocess.CalledProcessError(1, 'import yaml')])
+        with patch.object(environment.subprocess, 'run', side_effect=outcomes), \
+                patch.object(environment.time, 'sleep'):
+            with self.assertRaisesRegex(RuntimeError, 'Could not install and import PyYAML'):
+                environment.install_python()
+
     def test_package_input_is_canonical_and_rejects_shell_or_apt_options(self):
         self.assertEqual(environment.packages('libx-dev lcov libx-dev'), ['lcov', 'libx-dev'])
         self.assertEqual(environment.packages('libx:amd64=1:2.3-4~ubuntu1'),
@@ -33,6 +74,55 @@ class EnvironmentTest(unittest.TestCase):
         for value in ['', '-y lcov', 'lcov; true', '$(id)', 'foo==1', 'foo >= 1']:
             with self.subTest(value=value), self.assertRaises(ValueError):
                 environment.packages(value)
+
+    def test_matching_compilers_are_selected_explicitly_after_verification(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                patch.object(environment.subprocess, 'check_output', side_effect=['14.2.0\n', '14.2.0\n']) as probe, \
+                patch.object(environment.subprocess, 'run') as cmake:
+            environment.select_compiler('gcc-14')
+            self.assertEqual(Path(os.environ['GITHUB_ENV']).read_text(), 'CC=gcc-14\nCXX=g++-14\n')
+            self.assertEqual([call.args[0][0] for call in probe.call_args_list], ['gcc-14', 'g++-14'])
+            cmake.assert_called_once_with(['cmake', '--version'], check=True, timeout=30)
+
+    def test_mismatched_or_missing_compilers_cannot_export_a_fallback(self):
+        for versions in [['13.3.0', '13.3.0'], ['14.2.0', '14.3.0'], FileNotFoundError('g++-14')]:
+            with self.subTest(versions=versions), tempfile.TemporaryDirectory() as folder, \
+                    patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                    patch.object(environment.subprocess, 'check_output', side_effect=versions), \
+                    patch.object(environment.subprocess, 'run'):
+                with self.assertRaises((RuntimeError, FileNotFoundError)):
+                    environment.select_compiler('gcc-14')
+                self.assertFalse(Path(os.environ['GITHUB_ENV']).exists())
+
+    def test_compiler_arguments_cannot_inject_environment_variables(self):
+        with patch.object(environment.subprocess, 'check_output') as probe:
+            for compiler in ['gcc', 'gcc-14\nCXX=clang', 'clang-19', 'gcc-14; true']:
+                with self.subTest(compiler=compiler), self.assertRaises(ValueError):
+                    environment.select_compiler(compiler)
+            probe.assert_not_called()
+
+    def test_each_shared_backend_requests_the_explicit_compiler_pair(self):
+        document = yaml.safe_load((ROOT / '.github/actions/test-environment/action.yml').read_text())
+        command = next(step['run'] for step in document['runs']['steps'] if step.get('id') == 'packages')
+        for mode in ['native', 'mpi', 'petsc', 'complex', 'ranges_real', 'ranges_complex', 'optional', 'default', 'baseline']:
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as folder:
+                output = Path(folder) / 'output'
+                subprocess.run(['bash', '-e', '-c', command], check=True,
+                               env=dict(os.environ, MODE=mode, COMPILER='gcc-14', GITHUB_OUTPUT=str(output)))
+                requested = environment.packages(output.read_text().strip().split('=', 1)[1])
+                self.assertIn('gcc-14', requested)
+                self.assertIn('g++-14', requested)
+                self.assertIn('lcov', requested)
+
+    def test_shared_linux_environments_do_not_download_another_compiler_action(self):
+        for name in ['test-environment', 'benchmark-environment']:
+            text = (ROOT / '.github/actions' / name / 'action.yml').read_text()
+            self.assertNotIn('aminya/setup-cpp', text)
+            document = yaml.safe_load(text)
+            steps = document['runs']['steps']
+            install = next(i for i, step in enumerate(steps) if step.get('uses') == './.github/actions/apt-dependencies')
+            select = next(i for i, step in enumerate(steps) if 'ci_environment.py compiler' in step.get('run', ''))
+            self.assertLess(install, select)
 
     def test_ample_space_never_removes_tools_or_requires_hosted_runner(self):
         with patch.object(environment.shutil, 'disk_usage', return_value=SimpleNamespace(free=20 * environment.GIB)), \
@@ -220,6 +310,63 @@ class EnvironmentTest(unittest.TestCase):
             self.assertNotIn('sudo rm -rf', text)
             self.assertNotIn('apt-get clean', text)
             self.assertIn('python3 dev/ci_environment.py disk', text)
+
+    def test_every_compiler_setup_is_preceded_by_the_source_guard(self):
+        count = 0
+        paths = list((ROOT / '.github/workflows').glob('*.yml'))
+        paths += list((ROOT / '.github/actions').glob('*/action.yml'))
+        for path in paths:
+            document = yaml.safe_load(path.read_text())
+            groups = [job.get('steps', []) for job in document.get('jobs', {}).values()]
+            groups.append(document.get('runs', {}).get('steps', []))
+            for steps in groups:
+                for i, step in enumerate(steps):
+                    if step.get('uses', '').startswith('aminya/setup-cpp@'):
+                        count += 1
+                        self.assertGreater(i, 0, str(path))
+                        self.assertEqual(steps[i - 1].get('uses'), './.github/actions/prepare-apt', str(path))
+        self.assertGreater(count, 0)
+
+    def test_unused_microsoft_feed_is_removed_without_changing_ubuntu_or_comments(self):
+        ubuntu = 'deb [signed-by=/keys/ubuntu.gpg] https://archive.ubuntu.com/ubuntu noble main\n'
+        microsoft = 'deb [signed-by=/keys/microsoft.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main\n'
+        comment = '# https://packages.microsoft.com/ubuntu/24.04/prod\n'
+        self.assertEqual(environment.without_microsoft_ubuntu(ubuntu + microsoft + comment), ubuntu + comment)
+        self.assertEqual(environment.without_microsoft_ubuntu(ubuntu), ubuntu)
+        self.assertEqual(environment.without_microsoft_ubuntu(comment), comment)
+
+    def test_deb822_filters_only_microsoft_uris_and_preserves_signature_fields(self):
+        vendor = 'Types: deb\nURIs: https://packages.microsoft.com/ubuntu/24.04/prod\nSuites: noble\nSigned-By: /keys/vendor.gpg\n'
+        ubuntu = 'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\nSuites: noble\nSigned-By: /keys/ubuntu.gpg\n'
+        self.assertEqual(environment.without_microsoft_ubuntu(vendor + '\n' + ubuntu, True), ubuntu)
+        mixed = ubuntu.replace('URIs: ', 'URIs: https://packages.microsoft.com/ubuntu/24.04/prod ')
+        self.assertEqual(environment.without_microsoft_ubuntu(mixed, True), ubuntu)
+        self.assertEqual(environment.without_microsoft_ubuntu(ubuntu + '\n\n', True), ubuntu + '\n\n')
+        self.assertEqual(environment.without_microsoft_ubuntu(vendor, True), '')
+
+    def test_source_setup_leaves_local_and_self_hosted_systems_untouched(self):
+        with patch.dict(os.environ, GITHUB_ACTIONS='true', RUNNER_ENVIRONMENT='self-hosted'), \
+                patch.object(environment.subprocess, 'run') as run:
+            environment.setup_sources()
+            run.assert_not_called()
+
+    def test_hosted_source_setup_backs_up_then_installs_only_filtered_definition(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'sources.list.d').mkdir()
+            source = root / 'sources.list.d/microsoft-prod.list'
+            source.write_text('deb https://packages.microsoft.com/ubuntu/24.04/prod noble main\n')
+            commands = []
+            def execute(command, **kwargs):
+                commands.append(command)
+                if command[1] == 'install':
+                    self.assertEqual(Path(command[-2]).read_text(), '')
+            with patch.dict(os.environ, GITHUB_ACTIONS='true', RUNNER_ENVIRONMENT='github-hosted'), \
+                    patch.object(environment.subprocess, 'run', side_effect=execute):
+                environment.setup_sources(root)
+            self.assertEqual(commands[0], ['sudo', 'cp', '--', str(source), str(source) + '.rodin-backup'])
+            self.assertEqual(commands[1][:4], ['sudo', 'install', '-m', '644'])
+
 
 
 if __name__ == '__main__':

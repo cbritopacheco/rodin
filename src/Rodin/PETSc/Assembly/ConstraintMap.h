@@ -24,7 +24,7 @@ namespace Rodin::PETSc::Assembly
   /**
    * @brief Affine constraint map with collective dependency closure.
    *
-   * ## Architecture
+   * # Architecture
    *
    * Identification rows specify @f$x_s=\sum_m C_{sm}x_m+d_s@f$.
    * A master can itself be constrained on another rank. Every rank therefore
@@ -32,7 +32,7 @@ namespace Rodin::PETSc::Assembly
    * matrix entry. Only prescribed values and identification rows are exchanged;
    * matrix entries and unconstrained rows are not communicated here.
    *
-   * ## Implementation
+   * # Implementation
    *
    * Two collective gathers publish fixed rows and affine identification rows.
    * Replicated boundary rows must agree, independently of master ordering.

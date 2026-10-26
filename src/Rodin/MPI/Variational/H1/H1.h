@@ -248,43 +248,69 @@ namespace Rodin::Variational
        * Ghost/shared DOFs are populated by communicating from the owning rank.
        *
        * @param[in] mesh Distributed mesh on which the space is defined.
+       * @param degree Compile-time polynomial degree tag.
        */
-      H1(std::integral_constant<size_t, K>, const MeshType& mesh)
+      H1([[maybe_unused]] std::integral_constant<size_t, K> degree, const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(std::integral_constant<size_t, K>{}, mesh.getShard())
       {
         build(mesh);
       }
 
-      /// @brief Copy constructor.
-      H1(const H1&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Source object to copy or move from.
+       */
+      H1([[maybe_unused]] const H1& other) = default;
 
-      /// @brief Move constructor.
-      H1(H1&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
+      H1([[maybe_unused]] H1&& other) = default;
 
-      /// @brief Move assignment operator.
-      H1& operator=(H1&&) = default;
+      /**
+       * @brief Move assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      H1& operator=([[maybe_unused]] H1&& other) = default;
 
-      /// @brief Returns the local shard finite element space.
+      /**
+       * @brief Returns the local shard finite element space.
+       * @returns Finite element space on the local mesh shard.
+       */
       const FESType& getShard() const
       {
         return m_fes;
       }
 
-      /// @brief Returns the global ownership range [begin, end).
+      /**
+       * @brief Returns the global ownership range [begin, end).
+       * @param begin Output receiving the first globally owned degree-of-freedom index.
+       * @param end Output receiving the end of the globally owned index range.
+       */
       void getOwnershipRange(Index& begin, Index& end) const
       {
         begin = m_offset;
         end = m_offset + m_owned;
       }
 
-      /// @brief Returns the global DOF index for a local shard DOF.
+      /**
+       * @brief Returns the global DOF index for a local shard DOF.
+       * @param localIdx Local shard degree-of-freedom index.
+       * @returns Global distributed degree-of-freedom index.
+       */
       Index getGlobalIndex(Index localIdx) const
       {
         return m_localToGlobal.left.at(localIdx);
       }
 
-      /// @brief Returns the local DOF index for a global DOF, or nullopt if not present.
+      /**
+       * @brief Returns the local DOF index for a global DOF, or nullopt if not present.
+       * @param globalIdx Global distributed degree-of-freedom index.
+       * @returns Local shard index, or no value when the global index is not present.
+       */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
         auto it = m_localToGlobal.right.find(globalIdx);
@@ -293,31 +319,50 @@ namespace Rodin::Variational
         return it->second;
       }
 
-      /// @brief Returns the finite element on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns the finite element on local polytope @f$(d, i)@f$.
+       * @param d Entity dimension.
+       * @param i Local index of the polytope in its dimension.
+       * @returns Finite element associated with the specified polytope.
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return m_fes.getFiniteElement(d, i);
       }
 
-      /// @brief Returns the global number of DOFs of the distributed space.
+      /**
+       * @brief Returns the global number of DOFs of the distributed space.
+       * @returns Total number of degrees of freedom in the space.
+       */
       size_t getSize() const override
       {
         return m_globalSize;
       }
 
-      /// @brief Returns the vector dimension (1 for scalar spaces).
+      /**
+       * @brief Returns the vector dimension (1 for scalar spaces).
+       * @returns Number of scalar components in the value range.
+       */
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
-      /// @brief Returns the distributed mesh.
+      /**
+       * @brief Returns the distributed mesh.
+       * @returns Mesh underlying the finite element space.
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      /// @brief Returns global DOF indices for local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns global DOF indices for local polytope @f$(d, i)@f$.
+       * @param d Entity dimension.
+       * @param i Local polytope index.
+       * @returns Global degree-of-freedom indices associated with the specified local polytope.
+       */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         static thread_local IndexArray s_dofs;
@@ -327,7 +372,12 @@ namespace Rodin::Variational
         return s_dofs;
       }
 
-      /// @brief Returns the global DOF index for a local basis function.
+      /**
+       * @brief Returns the global DOF index for a local basis function.
+       * @param p Dimension and local index identifying the polytope.
+       * @param localDof Local basis-function index on the specified polytope.
+       * @returns Global distributed degree-of-freedom index.
+       */
       Index getGlobalIndex(
         const std::pair<size_t, Index>& p, Index localDof) const override
       {
@@ -336,7 +386,12 @@ namespace Rodin::Variational
         return getGlobalIndex(local);
       }
 
-      /// @brief Returns a pullback wrapper for a callable (or FunctionBase) on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns a pullback wrapper for a callable (or FunctionBase) on local polytope @f$(d, i)@f$.
+       * @param p Dimension and local index identifying the polytope.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pullback operation for the specified polytope.
+       */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
@@ -345,16 +400,28 @@ namespace Rodin::Variational
         return Pullback<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
-      /// @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+      /**
+       * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+       * @param geometry Polytope used to construct the coordinate mapping.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pushforward operation for the specified polytope.
+       */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& geometry, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
-      /// @brief Returns a pushforward wrapper for an explicit polytope object.
+      /**
+       * @brief Returns a pushforward wrapper for an explicit polytope object.
+       * @param geometry Polytope used to construct the coordinate mapping.
+       * @param v Field callable composed with the coordinate mapping.
+       * @returns Pushforward operation for the specified polytope.
+       */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const Geometry::Polytope& geometry, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -517,11 +584,23 @@ namespace Rodin::Variational
         return res;
       }
 
+      /**
+       * @brief Flattens a position in the triangular degree-of-freedom lattice.
+       * @param i First triangular lattice coordinate.
+       * @param j Second triangular lattice coordinate.
+       * @returns Flattened ordinal of the triangular lattice position.
+       */
       static size_t triangleIndex(size_t i, size_t j)
       {
         return j * (K + 1) - j * (j - 1) / 2 + i;
       }
 
+      /**
+       * @brief Finds the ordinal of a position in an entity ordering.
+       * @param positions Ordered positions of the degrees of freedom on the entity.
+       * @param position Position whose ordinal is requested.
+       * @returns Ordinal of the requested position, or no value if it is absent.
+       */
       static Optional<size_t> findOrdinal(
         const std::vector<size_t>& positions, size_t position)
       {
@@ -533,6 +612,12 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
+      /**
+       * @brief Matches local entity vertices to the owning rank ordering.
+       * @param localVertexIDs Global vertex identifiers in the local entity ordering.
+       * @param ownerVertexIDs Global vertex identifiers in the owning rank ordering.
+       * @returns Permutation from local to owner vertex order, or no value if the vertex sets differ.
+       */
       static Optional<std::vector<size_t>> vertexPermutation(
         const std::vector<Index>& localVertexIDs,
         const std::vector<Index>& ownerVertexIDs)
@@ -559,6 +644,15 @@ namespace Rodin::Variational
         return localToOwner;
       }
 
+      /**
+       * @brief Converts a local entity degree-of-freedom ordinal to owner orientation.
+       * @param g Reference geometry of the shared entity.
+       * @param positions Ordered positions of the degrees of freedom on the entity.
+       * @param localOrdinal Ordinal of the degree of freedom in the local entity ordering.
+       * @param localVertexIDs Global vertex identifiers in the local entity ordering.
+       * @param ownerVertexIDs Global vertex identifiers in the owning rank ordering.
+       * @returns Degree-of-freedom ordinal in owner orientation, or no value when no compatible mapping exists.
+       */
       static Optional<size_t> orientedOwnerOrdinal(Geometry::Polytope::Type g,
         const std::vector<size_t>& positions, size_t localOrdinal,
         const std::vector<Index>& localVertexIDs,

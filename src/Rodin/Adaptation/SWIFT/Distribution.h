@@ -74,7 +74,7 @@ namespace Rodin::Adaptation::SWIFT
         const auto& testFES = m_test.get().getFiniteElementSpace();
         const auto nTrial = trialFES.getFiniteElement(d, cell.getIndex()).getCount();
         const auto nTest = testFES.getFiniteElement(d, cell.getIndex()).getCount();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(m_order, cell.getGeometry());
+        const auto& qf = QF::QuadratureFormula::get(m_order, cell.getGeometry());
         const auto& quadrature = cell.getQuadrature(qf);
         m_matrix = Math::Matrix<Real>::Zero(nTest, nTrial);
         m_trialStrains.resize(nTrial);
@@ -172,8 +172,7 @@ namespace Rodin::Adaptation::SWIFT
             if (!mesh.getShard().isOwned(dimension, cell->getIndex()))
               continue;
           }
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(m_order, cell->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(m_order, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(formula);
           for (size_t sample = 0; sample < quadrature.getSize(); ++sample)
           {

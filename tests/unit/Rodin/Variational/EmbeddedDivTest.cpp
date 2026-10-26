@@ -52,7 +52,7 @@ namespace
     TestFunction v(vectors);
     TestFunction q(scalars);
     const auto cell = mesh.getCell();
-    const auto& formula = QF::PolytopeQuadratureFormula::get(5, cell->getGeometry());
+    const auto& formula = QF::QuadratureFormula::get(5, cell->getGeometry());
     const auto& quadrature = cell->getQuadrature(formula);
     auto derivative = Div(field);
     auto basis = Div(u);

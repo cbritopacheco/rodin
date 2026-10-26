@@ -9,7 +9,7 @@
  * @brief Affine scalar derivative and order-dispatch oracles.
  */
 #include <gtest/gtest.h>
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Variational/H1.h"
 #include "../../../convergence/Convergence.h"
@@ -187,8 +187,7 @@ namespace
         auto gradient = Grad(scalarField);
         auto jacobian = Jacobian(vectorField);
         auto divergence = Div(vectorField);
-        const auto& formula =
-          QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(size_t{4}, geometry);
+        const auto& formula = QF::QuadratureFormula::get(size_t{4}, geometry);
         size_t checked = 0;
         for (auto cell = retained.getCell(); cell; ++cell)
         {
@@ -305,8 +304,7 @@ namespace Rodin::Tests::Unit
         }
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& formula =
-            QF::PolytopeQuadratureFormula::get(4, cell->getGeometry());
+          const auto& formula = QF::QuadratureFormula::get(4, cell->getGeometry());
           const PolytopeQuadrature quadrature(*cell, formula);
           for (size_t q = 0; q < quadrature.getSize(); ++q)
             checkPoint(IntegrationPoint(quadrature, q));
@@ -321,7 +319,7 @@ namespace Rodin::Tests::Unit
       bool boundary = false, interior = false;
       for (auto face = mesh.getFace(); face; ++face)
       {
-        const auto& formula = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(2, face->getGeometry());
         const PolytopeQuadrature quadrature(*face, formula);
         const IntegrationPoint point(quadrature, 0);
         if (face->isBoundary())

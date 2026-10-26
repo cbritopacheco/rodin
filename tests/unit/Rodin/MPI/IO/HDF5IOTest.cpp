@@ -836,3 +836,46 @@ int main(int argc, char** argv)
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+/// @brief Default distributed static filenames keep each rank's values in a separate file.
+TEST(MPIDistributedXDMFSeries, DefaultStaticAttributesAreRankLocal)
+{
+  const int rank = worldRank();
+  int ranks = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &ranks);
+  std::array<char, 256> directory{};
+  if (rank == 0)
+  {
+    const auto path = (boost::filesystem::temp_directory_path() /
+      boost::filesystem::unique_path("rodin-mpi-static-%%%%-%%%%"))
+                        .string();
+    std::copy(path.begin(), path.end(), directory.begin());
+    boost::filesystem::create_directory(path);
+  }
+  MPI_Bcast(directory.data(), directory.size(), MPI_CHAR, 0, MPI_COMM_WORLD);
+  const boost::filesystem::path testDir(directory.data());
+  const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1 space(mesh);
+  GridFunction field(space);
+  field = Real(rank + 1);
+  XDMF output(MPI_COMM_WORLD, testDir / "series");
+  output.setMesh(mesh).add(
+    "value", field, XDMF::Center::Node, XDMF::AttributePolicy::Static);
+  output.write().close();
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (rank == 0)
+  {
+    for (int r = 0; r < ranks; ++r)
+    {
+      const auto path = testDir / ("series.value.r" + std::to_string(r) + ".h5");
+      ASSERT_TRUE(boost::filesystem::exists(path));
+      auto file = HDF5::File(H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      const auto values = HDF5::readVectorDataset<HDF5::F64>(
+        file.get(), HDF5::Path::GridFunctionValuesData);
+      ASSERT_FALSE(values.empty());
+      for (const auto value : values)
+        EXPECT_EQ(value, Real(r + 1));
+    }
+    boost::filesystem::remove_all(testDir);
+  }
+}

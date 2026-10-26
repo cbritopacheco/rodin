@@ -12,13 +12,13 @@
  * for all finite element types. A finite element is characterized by the triple
  * @f$ (K, P, \Sigma) @f$ defining its geometry, polynomial space, and DOFs.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * A finite element is defined by:
  * - @f$ K @f$: Reference element geometry (interval, triangle, tetrahedron, etc.)
  * - @f$ P @f$: Polynomial space (e.g., @f$ \mathbb{P}_k @f$, @f$ \mathbb{Q}_k @f$)
  * - @f$ \Sigma @f$: Degrees of freedom (nodal values, moments, etc.)
  *
- * ## Element Types
+ * # Element Types
  * Common finite element families:
  * - **Lagrange**: @f$ C^0 @f$ continuous, nodal DOFs at vertices/edges/faces
  * - **Hermite**: @f$ C^1 @f$ continuous, includes derivative DOFs
@@ -26,12 +26,12 @@
  * - **Nédélec**: @f$ H(\text{curl}) @f$ conforming
  * - **Discontinuous**: @f$ L^2 @f$ elements for DG methods
  *
- * ## Polynomial Spaces
+ * # Polynomial Spaces
  * - @f$ \mathbb{P}_k @f$: Complete polynomials of degree @f$ \leq k @f$
  * - @f$ \mathbb{Q}_k @f$: Tensor product polynomials of degree @f$ \leq k @f$ per direction
  * - Serendipity: Subset of @f$ \mathbb{Q}_k @f$ with reduced DOFs
  *
- * ## Reference Elements
+ * # Reference Elements
  * Standard geometries:
  * - 1D: Interval [0,1]
  * - 2D: Triangle (vertices at (0,0), (1,0), (0,1)) or quadrilateral [0,1]²

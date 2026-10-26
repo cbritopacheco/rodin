@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <fstream>
+#include <vector>
 #include "Rodin/Geometry/IdentityTransformation.h"
 
 #include "Rodin/Geometry.h"
@@ -156,4 +157,18 @@ TEST_F(HDF5Geometry, UnsupportedChartPreservesExistingFile)
   std::ifstream input(file.string());
   const std::string contents((std::istreambuf_iterator<char>(input)), {});
   EXPECT_EQ(contents, "retained checkpoint");
+}
+
+/// @brief XDMF mixed topology encodes the node count required by Polyvertex cells.
+TEST_F(HDF5Geometry, XDMFPointTopology)
+{
+  const auto mesh =
+    LocalMesh::Build().initialize(1).nodes(2).vertex({0}).vertex({1}).finalize();
+  const auto path = directory / "points.h5";
+  HDF5::writeXDMFMesh(path.string(), mesh);
+  auto file = HDF5::File(H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+  const auto topology =
+    HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology);
+  const std::vector<HDF5::U64> expected{1, 1, 0, 1, 1, 1};
+  EXPECT_EQ(topology, expected);
 }

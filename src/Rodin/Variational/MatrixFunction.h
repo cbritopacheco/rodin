@@ -68,7 +68,7 @@ namespace Rodin::Variational
    * @tparam Scalar The scalar entry type (typically Real or Complex)
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Component Access
+   * # Component Access
    * Matrix entries can be accessed via:
    * - `A(i, j)` for the entry at row i, column j
    * - `A(i)` for the i-th row (returning a vector function)
@@ -152,7 +152,8 @@ namespace Rodin::Variational
       template <class... Args>
       constexpr Derived& traceOf(const Args&... args)
       {
-        return static_cast<Derived&>(*this).traceOf(args...);
+        Parent::traceOf(args...);
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -415,6 +416,8 @@ namespace Rodin::Variational
   /**
    * @ingroup MatrixFunctionSpecializations
    * @brief Callable matrix coefficient with explicit row and column extents.
+   *
+   * @see @ref MatrixFunctionSpecializations "MatrixFunction Template Specializations"
    */
   template <class F>
   class MatrixFunction final

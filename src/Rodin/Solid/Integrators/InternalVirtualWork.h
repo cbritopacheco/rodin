@@ -210,7 +210,7 @@ namespace Rodin::Solid
           const size_t effectiveOrder =
             (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
           const auto& qf =
-            QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+            QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
           const auto& quadrature = polytope.getQuadrature(qf);
           const size_t nqp = quadrature.getSize();
 

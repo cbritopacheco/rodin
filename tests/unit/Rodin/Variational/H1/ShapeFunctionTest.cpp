@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <utility>
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/H1.h"
 #include "../../../../convergence/Convergence.h"
 
@@ -71,8 +71,8 @@ namespace Rodin::Tests::Unit
           mesh.getConnectivity().compute(d, lower);
       }
       const auto cell = *mesh.getCell();
-      const auto& first = QF::PolytopeQuadratureFormula::get(2, geometry);
-      const auto& second = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const auto& first = QF::QuadratureFormula::get(2, geometry);
+      const auto& second = QF::QuadratureFormula::get(4, geometry);
       const PolytopeQuadrature firstSamples(cell, first), secondSamples(cell, second);
       // The single borrowed cursor outlives every expression created below.
       IntegrationPoint cursor(firstSamples, 0);

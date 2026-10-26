@@ -728,15 +728,16 @@ TEST(FMMSubsets, ObtuseTriangle)
   {
     auto mesh = [&] {
       if (embedded)
-      {}
-      return LocalMesh::Builder()
-        .initialize(3)
-        .nodes(3)
-        .vertex({0, 0, 0})
-        .vertex({1, 0, 0})
-        .vertex({2, 1, 1})
-        .polytope(Polytope::Type::Triangle, {0, 1, 2})
-        .finalize();
+      {
+        return LocalMesh::Builder()
+          .initialize(3)
+          .nodes(3)
+          .vertex({0, 0, 0})
+          .vertex({1, 0, 0})
+          .vertex({2, 1, 1})
+          .polytope(Polytope::Type::Triangle, {0, 1, 2})
+          .finalize();
+      }
       return LocalMesh::Builder()
         .initialize(2)
         .nodes(3)
@@ -746,6 +747,7 @@ TEST(FMMSubsets, ObtuseTriangle)
         .polytope(Polytope::Type::Triangle, {0, 1, 2})
         .finalize();
     }();
+    ASSERT_EQ(mesh.getSpaceDimension(), embedded ? 3u : 2u);
     mesh.getConnectivity().compute(0, 0);
     P1<Real> space(mesh);
     GridFunction arrival(space);

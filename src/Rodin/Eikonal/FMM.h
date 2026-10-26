@@ -202,7 +202,7 @@ namespace Rodin::Eikonal
        * repeatedly accepting the vertex with the smallest arrival time from
        * the priority queue and updating its neighbors.
        *
-       * ## Algorithm
+       * # Algorithm
        * 1. Initialize: seed points have time 0, all others have time ∞
        * 2. Extract vertex with minimum arrival time from priority queue
        * 3. Mark it as Accepted

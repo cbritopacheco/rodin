@@ -23,6 +23,42 @@
 namespace Rodin::IO
 {
   /**
+   * @brief Escapes XML text and attribute values without changing filesystem names.
+   * @param value Unescaped UTF-8 name or HDF5 filename.
+   * @returns XML representation preserving the original decoded string.
+   */
+  static std::string escapeXML(const std::string& value)
+  {
+    std::string result;
+    result.reserve(value.size());
+    for (const char character : value)
+    {
+      switch (character)
+      {
+        case '&':
+          result += "&amp;";
+          break;
+        case '<':
+          result += "&lt;";
+          break;
+        case '>':
+          result += "&gt;";
+          break;
+        case '"':
+          result += "&quot;";
+          break;
+        case '\'':
+          result += "&apos;";
+          break;
+        default:
+          result += character;
+          break;
+      }
+    }
+    return result;
+  }
+
+  /**
    * @brief Formats an index with leading zeros.
    * @param index Degree-of-freedom index.
    * @param width Minimum number of decimal digits.
@@ -256,6 +292,7 @@ namespace Rodin::IO
     m_patterns.staticMesh = "{stem}.{grid}{rank_suffix}.mesh.h5";
     m_patterns.transientMesh = "{stem}.{grid}{rank_suffix}.mesh.{index}.h5";
     m_patterns.attribute = "{stem}.{grid}.{name}{rank_suffix}.{index}.h5";
+    m_patterns.staticAttribute = "{stem}.{grid}.{name}{rank_suffix}.h5";
   }
 #endif
 
@@ -447,7 +484,8 @@ namespace Rodin::IO
   {
     const auto meshH5 = snap.meshFile.string();
 
-    os << indent(bi) << "<Grid Name=\"" << gridName << "\" GridType=\"Uniform\">\n";
+    os << indent(bi) << "<Grid Name=\"" << escapeXML(gridName)
+       << "\" GridType=\"Uniform\">\n";
     os << indent(bi + 1) << "<Time Value=\"" << snap.time << "\" />\n";
 
     os << indent(bi + 1) << "<Topology TopologyType=\"" << snap.topologyType
@@ -461,15 +499,16 @@ namespace Rodin::IO
       os << snap.topologyRows << " " << snap.topologyColumns;
     else
       os << snap.topologySize;
-    os << "\">" << meshH5 << ":" << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
+    os << "\">" << escapeXML(meshH5) << ":" << HDF5::Path::MeshXDMFTopology
+       << "</DataItem>\n";
     os << indent(bi + 1) << "</Topology>\n";
 
     os << indent(bi + 1) << "<Geometry GeometryType=\""
        << getGeometryType(snap.spaceDimension) << "\">\n";
     os << indent(bi + 2)
        << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-       << snap.vertexCount << " " << snap.spaceDimension << "\">" << meshH5 << ":"
-       << HDF5::Path::MeshGeometryVertices << "</DataItem>\n";
+       << snap.vertexCount << " " << snap.spaceDimension << "\">" << escapeXML(meshH5)
+       << ":" << HDF5::Path::MeshGeometryVertices << "</DataItem>\n";
     os << indent(bi + 1) << "</Geometry>\n";
 
     for (const auto& attr : snap.meshAttributes)
@@ -478,12 +517,12 @@ namespace Rodin::IO
       std::ostringstream dimStr;
       dimStr << ((attr.center == Center::Node) ? snap.vertexCount : snap.cellCount);
 
-      os << indent(bi + 1) << "<Attribute Name=\"" << attr.name
+      os << indent(bi + 1) << "<Attribute Name=\"" << escapeXML(attr.name)
          << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
       // Same reason as topology: the mesh attribute is stored as U64 in HDF5.
       os << indent(bi + 2)
          << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
-         << dimStr.str() << "\">" << meshH5 << ":"
+         << dimStr.str() << "\">" << escapeXML(meshH5) << ":"
          << HDF5::attributePath(attr.topologicalDimension) << "</DataItem>\n";
       os << indent(bi + 1) << "</Attribute>\n";
     }
@@ -506,12 +545,12 @@ namespace Rodin::IO
       else
         dimStr << count << " " << attr.dimension;
 
-      os << indent(bi + 1) << "<Attribute Name=\"" << attr.name << "\" AttributeType=\""
-         << attrType << "\" Center=\"" << centerStr << "\">\n";
+      os << indent(bi + 1) << "<Attribute Name=\"" << escapeXML(attr.name)
+         << "\" AttributeType=\"" << attrType << "\" Center=\"" << centerStr << "\">\n";
       os << indent(bi + 2)
          << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-         << dimStr.str() << "\">" << attrH5 << ":" << HDF5::Path::GridFunctionValuesData
-         << "</DataItem>\n";
+         << dimStr.str() << "\">" << escapeXML(attrH5) << ":"
+         << HDF5::Path::GridFunctionValuesData << "</DataItem>\n";
       os << indent(bi + 1) << "</Attribute>\n";
     }
 
@@ -557,7 +596,7 @@ namespace Rodin::IO
       {
         const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
 
-        os << indent(2) << "<Grid Name=\"" << gridName
+        os << indent(2) << "<Grid Name=\"" << escapeXML(gridName)
            << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
         for (const auto& snap : gr.snapshots)
@@ -573,7 +612,7 @@ namespace Rodin::IO
         const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
         const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
 
-        os << indent(2) << "<Grid Name=\"" << gridName
+        os << indent(2) << "<Grid Name=\"" << escapeXML(gridName)
            << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
         for (size_t s = 0; s < gr.snapshots.size(); ++s)
@@ -596,7 +635,8 @@ namespace Rodin::IO
 
             const auto& meta = snap.pieces[r];
 
-            os << indent(5) << "<Grid Name=\"" << makeGridPieceName(gridName, r)
+            os << indent(5) << "<Grid Name=\""
+               << escapeXML(makeGridPieceName(gridName, r))
                << "\" GridType=\"Uniform\">\n";
 
             os << indent(6) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
@@ -604,7 +644,7 @@ namespace Rodin::IO
             os << indent(7)
                << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
                   "Dimensions=\""
-               << meta.topologySize << "\">" << meshH5 << ":"
+               << meta.topologySize << "\">" << escapeXML(meshH5) << ":"
                << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
             os << indent(6) << "</Topology>\n";
 
@@ -613,8 +653,9 @@ namespace Rodin::IO
             os << indent(7)
                << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
                   "Dimensions=\""
-               << meta.vertexCount << " " << meta.spaceDimension << "\">" << meshH5 << ":"
-               << HDF5::Path::MeshGeometryVertices << "</DataItem>\n";
+               << meta.vertexCount << " " << meta.spaceDimension << "\">"
+               << escapeXML(meshH5) << ":" << HDF5::Path::MeshGeometryVertices
+               << "</DataItem>\n";
             os << indent(6) << "</Geometry>\n";
 
             for (const auto& attr : snap.meshAttributes)
@@ -624,12 +665,12 @@ namespace Rodin::IO
               dimStr << ((attr.center == Center::Node) ? meta.vertexCount
                                                        : meta.cellCount);
 
-              os << indent(6) << "<Attribute Name=\"" << attr.name
+              os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
                  << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
               os << indent(7)
                  << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
                     "Dimensions=\""
-                 << dimStr.str() << "\">" << meshH5 << ":"
+                 << dimStr.str() << "\">" << escapeXML(meshH5) << ":"
                  << HDF5::attributePath(attr.topologicalDimension) << "</DataItem>\n";
               os << indent(6) << "</Attribute>\n";
             }
@@ -657,13 +698,13 @@ namespace Rodin::IO
               else
                 dimStr << count << " " << attr.dimension;
 
-              os << indent(6) << "<Attribute Name=\"" << attr.name
+              os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
                  << "\" AttributeType=\"" << attrType << "\" Center=\"" << centerStr
                  << "\">\n";
               os << indent(7)
                  << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
                     "Dimensions=\""
-                 << dimStr.str() << "\">" << attrH5 << ":"
+                 << dimStr.str() << "\">" << escapeXML(attrH5) << ":"
                  << HDF5::Path::GridFunctionValuesData << "</DataItem>\n";
               os << indent(6) << "</Attribute>\n";
             }

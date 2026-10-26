@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 #include "Rodin/Geometry.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/P1.h"
 
 using namespace Rodin;
@@ -75,8 +75,7 @@ namespace
             for (size_t j = 0; j < embedding; ++j)
               controls(j, local) = physical[j];
           }
-          const auto& formula = QF::QuadratureFormula::get<QF::PolytopeQuadratureFormula>(
-            size_t{4}, geometry);
+          const auto& formula = QF::QuadratureFormula::get(size_t{4}, geometry);
           constexpr Real CoordinateTolerance = 1e-11;
           auto inspect = [&](const PolytopeTransformation& chart) {
             EXPECT_EQ(chart.getOrder(), element.getOrder());

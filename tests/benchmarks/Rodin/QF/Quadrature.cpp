@@ -18,7 +18,7 @@
 
 #include <benchmark/benchmark.h>
 
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/QuadratureFormula.h>
 #include <Rodin/Geometry/Polytope.h>
 #include <Rodin/Math.h>
 
@@ -47,31 +47,22 @@ namespace Rodin::Tests::Benchmarks
 
   /// @brief Cost of obtaining a rule.
   ///
-  /// This measures the pooled lookup, not construction. Read it with care: it
-  /// is not a per-element-type cost. PolytopeQuadratureFormula holds a
-  /// thread-local cache of eight entries, inserted round-robin and scanned
-  /// linearly from slot zero, so the cost of a hit is proportional to the slot
-  /// the key landed in, hence to the order in which distinct keys were first
-  /// requested in the process. Running this family in full gives 3.5 ns for
-  /// the first case and 32 ns for the eighth, resetting every eight; running
-  /// any single case alone gives 3.5 ns whatever the element. The ramp is the
-  /// cache, not the geometry.
-  ///
-  /// It is kept because the envelope is the useful quantity: 3.5 to 32 ns
-  /// against a 375 ns degree-4 wedge sweep bounds the lookup at under 9% of an
-  /// integrator's time in the worst slot, so no plausible change of quadrature
-  /// family is limited by it.
+  /// This measures default family selection followed by persistent lookup,
+  /// not construction. Cache positions depend on prior requests in each
+  /// concrete-family/key-type pool. Tensor-product dispatch also looks up its
+  /// factors. Compare both individual warm requests and the full sequence;
+  /// the sequence's insertion history is part of its measured workload.
   static void BM_QuadratureAccess(benchmark::State& state)
   {
     const auto g = geometryOf(state.range(0));
     const auto order = static_cast<size_t>(state.range(1));
     for (auto _ : state)
     {
-      const auto& qf = QF::PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QF::QuadratureFormula::get(order, g);
       benchmark::DoNotOptimize(qf.getSize());
     }
     state.counters["points"] =
-      static_cast<double>(QF::PolytopeQuadratureFormula::get(order, g).getSize());
+      static_cast<double>(QF::QuadratureFormula::get(order, g).getSize());
   }
 
   /// @brief Cost of one sweep over the rule doing per-point work of the kind
@@ -82,7 +73,7 @@ namespace Rodin::Tests::Benchmarks
   {
     const auto g = geometryOf(state.range(0));
     const auto order = static_cast<size_t>(state.range(1));
-    const auto& qf = QF::PolytopeQuadratureFormula::get(order, g);
+    const auto& qf = QF::QuadratureFormula::get(order, g);
     const size_t d = Polytope::Traits(g).getDimension();
 
     for (auto _ : state)

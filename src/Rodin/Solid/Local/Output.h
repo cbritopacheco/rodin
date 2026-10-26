@@ -21,7 +21,7 @@
  * @c Tags::QuadraturePointIndex, so an Output and an Input driven by the
  * same pass address the same quadrature point.
  *
- * ## Usage with CRTP
+ * # Usage with CRTP
  *
  * @code
  * struct MyOutput : Solid::Output<MyOutput>
@@ -44,7 +44,7 @@
  * });
  * @endcode
  *
- * ## Usage with lambda / std::function
+ * # Usage with lambda / std::function
  *
  * @code
  * ivw.setOutput([&](const Solid::ConstitutivePoint& cp, const auto& law) {

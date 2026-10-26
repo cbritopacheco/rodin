@@ -14,7 +14,7 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational/P1.h"
 #include "Rodin/QF/GaussLegendre.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -72,7 +72,7 @@ namespace Rodin::Tests::Benchmarks
        * @param geometry Reference-cell family.
        * @param perturbed Whether control coefficients depart from the affine map.
        */
-      template <class Formula = QF::PolytopeQuadratureFormula>
+      template <class Formula = QF::QuadratureFormula>
       static void run(
         benchmark::State& state, Geometry::Polytope::Type geometry, bool perturbed)
       {
@@ -127,7 +127,7 @@ namespace Rodin::Tests::Benchmarks
           if constexpr (std::is_same_v<Formula, QF::GaussLegendre>)
             return QF::QuadratureFormula::get<Formula>(geometry, size_t(state.range(1)));
           else
-            return QF::QuadratureFormula::get<Formula>(size_t(state.range(1)), geometry);
+            return QF::QuadratureFormula::get(size_t(state.range(1)), geometry);
         }();
         std::vector<Math::SpatialMatrix<Real>> reference(formula.getSize()), result;
         for (size_t qp = 0; qp < formula.getSize(); ++qp)

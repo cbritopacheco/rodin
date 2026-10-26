@@ -50,10 +50,7 @@
 
 #include "ForwardDecls.h"
 
-/**
- * @ingroup RodinDirectives
- * @brief Indicates the maximum vector dimension a H1Element can support.
- */
+/// @brief Indicates the maximum vector dimension a H1Element can support.
 #define RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION 16
 
 namespace Rodin::FormLanguage
@@ -95,7 +92,7 @@ namespace Rodin::Variational
    * The H1Element provides a k-th order finite element with Lagrange basis functions.
    * This is a high-order-stable H1-conforming element family.
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - **DOF count**: Depends on geometry and polynomial degree K
    *   - Segment: K+1
    *   - Triangle: (K+1)(K+2)/2
@@ -108,17 +105,17 @@ namespace Rodin::Variational
    * - **Partition of unity**: @f$ \sum_{i=1}^{n} \phi_i(x) = 1 @f$ for all @f$ x @f$
    * - **Continuity**: Global C⁰ continuity across element interfaces (H¹-conforming)
    *
-   * ## Convergence Rates
+   * # Convergence Rates
    * For smooth solutions, H1 elements of degree k provide k-th order convergence:
    * - **L² norm**: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
    * - **H¹ norm (energy)**: @f$ \|u - u_h\|_{H^1} = O(h^k) @f$
    *
-   * ## Basis Function Construction
+   * # Basis Function Construction
    * - **1D (Segment)**: Classical Lagrange interpolation @f$ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} @f$
    * - **2D/3D Simplices**: Barycentric Lagrange polynomials @f$ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} @f$
    * - **Tensor Products**: For quadrilaterals and wedges, tensor product of lower-dimensional bases
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // H1 element of degree 3 on triangle - 10 DOFs
    * RealH1Element<3> h1_tri(Polytope::Type::Triangle);
@@ -139,6 +136,8 @@ namespace Rodin::Variational
    * @see H1Element<K, Math::SpatialVector<Scalar>> for vector-valued version
    * @see P0Element for piecewise constant elements
    * @see P1Element for piecewise linear elements
+   *
+   * @see @ref H1ElementSpecializations "H1Element Template Specializations"
    */
   template <size_t K, class Scalar>
   class H1Element final : public FiniteElementBase<H1Element<K, Scalar>>
@@ -212,12 +211,12 @@ namespace Rodin::Variational
        *
        * The basis functions form a partition of unity: @f$ \sum_i \phi_i(x) = 1 @f$.
        *
-       * ## Evaluation Methods
+       * # Evaluation Methods
        * - `operator()(point)`: Evaluates the basis function at a spatial point
        * - `getDerivative<Order>(i)`: Gets the partial derivative of order `Order` w.r.t. coordinate i
        * - `getGradient()`: Gets the gradient function (vector of first-order partial derivatives)
        *
-       * ## Implementation
+       * # Implementation
        * The basis functions are constructed using:
        * - **Segments**: Classical Lagrange interpolation
        * - **Triangles/Tetrahedra**: Barycentric Lagrange polynomials
@@ -234,7 +233,9 @@ namespace Rodin::Variational
            * Computes @f$ \frac{\partial^{Order} \phi}{\partial x_i^{Order}} @f$ where
            * φ is the basis function and x_i is a spatial coordinate.
            *
-           * @tparam Order Order of differentiation (1 for first derivative, 2 for second, etc.)
+           * @tparam Order Order of differentiation.
+           * @note Higher derivatives use the degree-one formulas or return a known
+           * zero. Other higher derivatives raise Alert::Exception on evaluation.
            */
           template <size_t Order>
           class DerivativeFunction
@@ -344,7 +345,9 @@ namespace Rodin::Variational
 
           /**
            * @brief Gets the derivative function of specified order.
-           * @tparam Order Order of differentiation
+           * @tparam Order Order of differentiation.
+           * @note Higher derivatives use the degree-one formulas or return a known
+           * zero. Other higher derivatives raise Alert::Exception on evaluation.
            * @param i Coordinate index (0=x, 1=y, 2=z)
            * @return Derivative function object
            */
@@ -927,7 +930,7 @@ namespace Rodin::Variational
    *
    * Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - **DOF count**: @f$ d \times n_s @f$ where:
    *   - @f$ d @f$ is the vector dimension (vdim)
    *   - @f$ n_s @f$ is the number of scalar DOFs for the underlying H1 element
@@ -937,18 +940,18 @@ namespace Rodin::Variational
    * - **Jacobian**: @f$ J_{ij} = \frac{\partial u_i}{\partial x_j} @f$ where @f$ \mathbf{u} @f$ is the vector field
    * - **Continuity**: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)
    *
-   * ## Component Structure
+   * # Component Structure
    * Each vector basis function is non-zero in only one component:
    * - Basis function `i*vdim + c` has value @f$ \phi_i(x) @f$ in component c, zero elsewhere
    * - This allows efficient assembly and clear physical interpretation
    *
-   * ## Applications
+   * # Applications
    * - **Linear elasticity**: Displacement field @f$ \mathbf{u}(x) @f$
    * - **Fluid mechanics**: Velocity field @f$ \mathbf{v}(x) @f$
    * - **Electromagnetics**: Electric field @f$ \mathbf{E}(x) @f$
    * - **General vector PDEs**: Any vector-valued unknown
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs
    * VectorH1Element<2> vec_h1(2, Polytope::Type::Triangle);
@@ -1053,8 +1056,8 @@ namespace Rodin::Variational
 
           /**
            * @brief Represents a derivative function of a Pk vector element.
-           * @tparam Order Order of the derivative (0 for function, 1 for first
-           * derivative, etc.)
+           * @tparam Order Order of the derivative.
+           * @note Higher derivatives follow the scalar basis contract.
            */
           template <size_t Order>
           class DerivativeFunction
@@ -1112,22 +1115,18 @@ namespace Rodin::Variational
                     return 0;
                   }
                 }
-                else if constexpr (Order == 1)
+                else
                 {
                   if (m_i == m_local % m_vdim)
                   {
                     return H1Element<K, ScalarType>(m_g)
                       .getBasis(m_local / m_vdim)
-                      .template getDerivative<1>(m_j)(rc);
+                      .template getDerivative<Order>(m_j)(rc);
                   }
                   else
                   {
                     return 0;
                   }
-                }
-                else
-                {
-                  return 0;
                 }
               }
 
@@ -1336,10 +1335,8 @@ namespace Rodin::Variational
        */
       constexpr H1Element& operator=(const H1Element& other)
       {
-        Parent::operator=(other);
-        m_vdim = other.m_vdim;
-        m_lfs = other.m_lfs;
-        m_bs = other.m_bs;
+        if (this != &other)
+          *this = H1Element(other);
         return *this;
       }
 
@@ -1522,6 +1519,8 @@ namespace Rodin::Variational
       {
         ar& boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;
+        if constexpr (Archive::is_loading::value)
+          *this = H1Element(this->getGeometry(), m_vdim);
       }
 
     private:
@@ -1560,12 +1559,22 @@ namespace Rodin::Variational
       /// @brief Nodal functional type of the underlying scalar element.
       using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
 
-      /// @brief Replicates a scalar reference element for a rectangular matrix range.
+      /**
+       * @brief Replicates a scalar reference element for a rectangular matrix range.
+       * @param geometry Reference polytope geometry.
+       * @param rows Number of rows in the matrix-valued range.
+       * @param cols Number of columns in the matrix-valued range.
+       */
       H1Element(Geometry::Polytope::Type geometry, size_t rows, size_t cols)
         : H1Element(ScalarElement(geometry), rows, cols)
       {}
 
-      /// @brief Replicates a scalar reference element for a rectangular matrix range.
+      /**
+       * @brief Replicates a scalar reference element for a rectangular matrix range.
+       * @param scalar Scalar finite element used for the componentwise construction.
+       * @param rows Number of rows in the matrix-valued range.
+       * @param cols Number of columns in the matrix-valued range.
+       */
       H1Element(const ScalarElement& scalar, size_t rows, size_t cols)
         : Parent(scalar.getGeometry()),
           m_scalar(scalar),
@@ -1580,17 +1589,31 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Copies the element and its component extents.
-      H1Element(const H1Element&) = default;
+      /**
+       * @brief Copies the element and its component extents.
+       * @param other Source object to copy or move from.
+       */
+      H1Element([[maybe_unused]] const H1Element& other) = default;
 
-      /// @brief Moves the element and its component extents.
-      H1Element(H1Element&&) = default;
+      /**
+       * @brief Moves the element and its component extents.
+       * @param other Source object to copy or move from.
+       */
+      H1Element([[maybe_unused]] H1Element&& other) = default;
 
-      /// @brief Copies the element and its component extents.
-      H1Element& operator=(const H1Element&) = default;
+      /**
+       * @brief Copies the element and its component extents.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      H1Element& operator=([[maybe_unused]] const H1Element& other) = default;
 
-      /// @brief Moves the element and its component extents.
-      H1Element& operator=(H1Element&&) = default;
+      /**
+       * @brief Moves the element and its component extents.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      H1Element& operator=([[maybe_unused]] H1Element&& other) = default;
 
       /// @brief Matrix basis with one nonzero entry.
       class BasisFunction
@@ -1711,7 +1734,12 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Contracts each matrix entry with the scalar reference element.
+      /**
+       * @brief Contracts each matrix entry with the scalar reference element.
+       * @param out Output value receiving the basis-coefficient contraction.
+       * @param coefficient Callable returning the coefficient associated with a local basis index.
+       * @param point Reference coordinates of the evaluation point.
+       */
       template <class Coefficient>
       void evaluate(
         RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& point) const
@@ -1726,44 +1754,67 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the number of local matrix basis functions.
+      /**
+       * @brief Returns the number of local matrix basis functions.
+       * @returns Number of degrees of freedom for the requested entity or element.
+       */
       size_t getCount() const
       {
         return m_scalar.getCount() * m_rows * m_cols;
       }
 
-      /// @brief Returns the polynomial order when it is known.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       */
       size_t getOrder() const
       {
         return m_scalar.getOrder();
       }
 
-      /// @brief Returns the number of matrix rows.
+      /**
+       * @brief Returns the number of matrix rows.
+       * @returns Number of rows in the matrix-valued range.
+       */
       size_t getRows() const
       {
         return m_rows;
       }
 
-      /// @brief Returns the number of matrix columns.
+      /**
+       * @brief Returns the number of matrix columns.
+       * @returns Number of columns in the matrix-valued range.
+       */
       size_t getColumns() const
       {
         return m_cols;
       }
 
-      /// @brief Returns the scalar element whose basis is replicated for matrix entries.
+      /**
+       * @brief Returns the scalar element whose basis is replicated for matrix entries.
+       * @returns Underlying scalar finite element.
+       */
       const ScalarElement& getScalarElement() const
       {
         return m_scalar;
       }
 
-      /// @brief Returns the scalar reference node for the selected component DOF.
+      /**
+       * @brief Returns the scalar reference node for the selected component DOF.
+       * @param local Local degree-of-freedom index.
+       * @returns Reference node associated with the local degree of freedom.
+       */
       decltype(auto) getNode(size_t local) const
       {
         assert(local < getCount());
         return m_scalar.getNode(local / (m_rows * m_cols));
       }
 
-      /// @brief Returns a basis value at the bound integration point.
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Local degree-of-freedom index.
+       * @returns Basis function associated with the local degree of freedom.
+       */
       BasisFunction getBasis(size_t local) const
       {
         assert(local < getCount());
@@ -1771,7 +1822,11 @@ namespace Rodin::Variational
           local % (m_rows * m_cols)};
       }
 
-      /// @brief Returns the scalar nodal functional applied to the selected matrix entry.
+      /**
+       * @brief Returns the scalar nodal functional applied to the selected matrix entry.
+       * @param local Local degree-of-freedom index.
+       * @returns Degree-of-freedom functional associated with the local index.
+       */
       LinearForm getLinearForm(size_t local) const
       {
         assert(local < getCount());

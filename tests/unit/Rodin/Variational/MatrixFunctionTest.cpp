@@ -242,3 +242,23 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Dot(temporary, rhs).getValue(point), Complex(2) * expected);
   }
 }
+
+/// @brief Integer and set trace arguments bind the base trace domain without recursion.
+TEST(MatrixFunctionTrace, LiteralAndSetDomains)
+{
+  Math::SpatialMatrix<Real> value(2, 2);
+  value.setIdentity();
+  MatrixFunction function(value);
+  EXPECT_EQ(&function.traceOf(1), &function);
+  EXPECT_EQ(function.getTraceDomain(), (FlatSet<Attribute>{1}));
+  function.traceOf(2, 3);
+  EXPECT_EQ(function.getTraceDomain(), (FlatSet<Attribute>{2, 3}));
+  function.traceOf(FlatSet<Attribute>{4});
+  EXPECT_EQ(function.getTraceDomain(), (FlatSet<Attribute>{4}));
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<Math::SpatialVector<Real>> space(mesh, 2);
+  GridFunction field(space);
+  auto jacobian = Jacobian(field);
+  jacobian.traceOf(1);
+  EXPECT_EQ(jacobian.getTraceDomain(), (FlatSet<Attribute>{1}));
+}

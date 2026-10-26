@@ -15,20 +15,20 @@
  * @f]
  * where @f$ A @f$ is symmetric (and may be indefinite).
  *
- * ## Algorithm
+ * # Algorithm
  * MINRES is a Lanczos-based Krylov method that minimizes the residual norm
  * over the generated Krylov subspace, while preserving short recurrences for
  * symmetric operators.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite (works, but CG is usually preferable)
  * - Symmetric indefinite systems (e.g., some mixed formulations, saddle-point after
  *   suitable transformations, Helmholtz-type operators, etc.)
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported MINRES.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

@@ -41,7 +41,7 @@ namespace Rodin::Geometry
    *
    * The same class covers affine P1 geometry and curved Pk geometry.
    *
-   * ## Quadrature evaluation
+   * # Quadrature evaluation
    *
    * A bulk Jacobian evaluation borrows the element's existing reference
    * tabulation for the duration of the call, then contracts it with this

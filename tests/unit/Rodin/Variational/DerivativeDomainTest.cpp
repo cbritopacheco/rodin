@@ -74,8 +74,7 @@ namespace
       for (size_t cell = 0; cell < mesh->getCellCount(); ++cell)
       {
         const auto entity = mesh->getCell(cell);
-        const auto& formula =
-          QF::PolytopeQuadratureFormula::get(3, entity->getGeometry());
+        const auto& formula = QF::QuadratureFormula::get(3, entity->getGeometry());
         const auto& quadrature = entity->getQuadrature(formula);
         const Point& point = quadrature.getPoint(0);
         const bool included = mesh == &parent && cell == 0;

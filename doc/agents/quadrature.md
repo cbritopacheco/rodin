@@ -12,7 +12,7 @@ cross-module numerical contract, not only a `QF` implementation detail.
 
 ## Contract
 
-For a requested order $p$, `PolytopeQuadratureFormula` returns a rule that is
+For a requested order $p$, `QuadratureFormula` returns a rule that is
 exact for every polynomial of total degree at most $p$ on the selected Rodin
 reference polytope. Rules used by the default dispatcher have strictly
 positive weights and points inside the reference polytope.
@@ -107,17 +107,18 @@ points than optimized tables.
 - `TensorProduct` composes two or three formulas and multiplies their weights.
 - `GrundmannMoller` remains an explicitly selectable simplex family. It is not
   a default because its weights are signed above degree one.
-- `PolytopeQuadratureFormula::build` constructs an owned formula.
-- Dispatcher construction uses the same family-selection implementation with
-  `make_shared`, combining the concrete generator and its ownership control block.
-  The public `build` operation retains unique ownership. With available FlatMap
-  capacity, publishing a one-point rule needs two allocations: the permanent
-  record and the shared generator. Other rules may also allocate sample arrays.
-  Cold dispatcher construction stays out of line where supported to avoid
-  adding register saves to the thread-local factory lookup.
-- `PolytopeQuadratureFormula::get` returns a canonical formula from a
-  process-wide pool. An eight-entry thread-local cache serves repeated hot-path
-  lookups without locking; cache misses enter the locked canonical pool.
+- `QuadratureFormula::get(order, geometry)` selects a concrete family out of
+  line and obtains it from the persistent factory. Tensor products receive
+  persistent component formulas. No dispatcher forwarding object or shared
+  ownership is retained. Default and explicit-family requests with identical
+  normalized constructor arguments return the same object; different requested
+  orders may share a formula when they select the same Gaussian point counts.
+- Default requests first use an eight-entry non-owning thread-local lookup of
+  order and geometry, preserving the fast path before family selection. Each
+  concrete-family/key-type pool also has an eight-entry thread-local cache.
+  Misses enter its locked canonical FlatMap. A published one-point rule needs
+  one storage allocation when map capacity is available. Other rules may also
+  allocate sample arrays; tensor products can publish missing component rules.
 
 Reference-formula reuse and mapped-point ownership are separate lifetimes.
 Variational quadrature rules own a `Geometry::PolytopeQuadrature` for their

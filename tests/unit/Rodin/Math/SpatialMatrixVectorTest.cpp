@@ -184,3 +184,30 @@ TEST(SpatialArithmetic, ComplexPseudoInverse)
     }
   }
 }
+
+/// @brief Compound updates evaluate aliased Eigen expressions before writing components.
+TEST(SpatialArithmetic, AliasedEigenCompoundUpdates)
+{
+  using namespace Rodin;
+  for (const size_t dimension : {size_t(0), size_t(1), size_t(2), size_t(3)})
+  {
+    Math::SpatialVector<Real> original(dimension);
+    for (size_t i = 0; i < dimension; ++i)
+      original[i] = Real(i + 1);
+    auto plus = original;
+    plus += plus.getData().head(dimension).reverse();
+    auto minus = original;
+    minus -= minus.getData().head(dimension).reverse();
+    for (size_t i = 0; i < dimension; ++i)
+    {
+      EXPECT_EQ(plus[i], original[i] + original[dimension - 1 - i]);
+      EXPECT_EQ(minus[i], original[i] - original[dimension - 1 - i]);
+    }
+  }
+  Math::SpatialVector<Real> product{1, 2, 3};
+  const Eigen::Matrix3d matrix = Eigen::Matrix3d::Ones();
+  product += matrix * product.getData();
+  EXPECT_EQ(product[0], 7);
+  EXPECT_EQ(product[1], 8);
+  EXPECT_EQ(product[2], 9);
+}

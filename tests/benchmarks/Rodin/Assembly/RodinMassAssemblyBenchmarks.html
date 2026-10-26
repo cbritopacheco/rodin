@@ -1,0 +1,7 @@
+<p>Full Eigen mass/reaction operator and projection-load assembly.</p>
+<h2>Measured operation</h2>
+<p>Times one public operator or load assembly, with independent oracles.</p>
+<h3>Architecture</h3>
+<p>Setup, independent geometry, original-loop assembly, constant-field energy and projection identities are untimed. Repeated assembly must replace output. A doubled reaction coefficient is checked after timing to detect stale expression values. No projection solve or constraint elimination is timed. The workload parameter supplies the form without duplicating assembly or qualification. Its default retains the original right-weighted reaction.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

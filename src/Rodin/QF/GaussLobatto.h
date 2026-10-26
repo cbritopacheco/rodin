@@ -38,7 +38,7 @@ namespace Rodin::QF
    * include both @f$ 0 @f$ and @f$ 1 @f$, with interior points being the
    * zeros of the derivative of the Legendre polynomial @f$ P'_{n-1}(x) @f$.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    *
    * The 1D Gauss-Lobatto rule with @f$ n @f$ points is exact for polynomials
    * of degree up to @f$ 2n-3 @f$. The weights @f$ w_i @f$ and points
@@ -47,7 +47,7 @@ namespace Rodin::QF
    *   \int_0^1 f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
    * @f]
    *
-   * ## Higher Dimensions
+   * # Higher Dimensions
    *
    * For tensor-product geometries (quadrilaterals, wedges), the rule is
    * constructed via tensor products of 1D Gauss-Lobatto rules. For simplicial
@@ -64,7 +64,7 @@ namespace Rodin::QF
    * documented trace; rational finite-element derivatives need not have a
    * direction-independent limit there.
    *
-   * ## Supported Geometries
+   * # Supported Geometries
    * - Point
    * - Segment
    * - Triangle
@@ -77,7 +77,7 @@ namespace Rodin::QF
    * @note Requires at least @f$ n \geq 2 @f$ points per direction for proper
    * Lobatto quadrature (to include both endpoints).
    *
-   * ## Architecture
+   * # Architecture
    *
    * Constructors own their nodes and weights. @ref get returns immutable
    * published formulas keyed by geometry and point count. Their permanent

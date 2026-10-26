@@ -51,7 +51,7 @@ namespace Rodin::Variational
    * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from the two sides
    * of the interface.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * In DG methods, functions are allowed to be discontinuous across element
    * interfaces. The average operator is used to define consistent numerical
    * fluxes and penalization terms:
@@ -60,7 +60,7 @@ namespace Rodin::Variational
    *
    * where @f$ \Gamma_h @f$ denotes the set of interior faces.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // DG interior penalty term
    * auto penalty = InterfaceIntegral(Average(Grad(u)), Jump(v));
@@ -231,7 +231,7 @@ namespace Rodin::Variational
    * interfaces in finite element formulations. This is used in DG bilinear
    * and linear form assembly.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // DG consistency term
    * auto consistency = InterfaceIntegral(Average(Grad(u)), Jump(v));

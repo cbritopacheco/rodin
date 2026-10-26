@@ -1,0 +1,9 @@
+<p>Cell-local named elasticity kernels with explicit quadrature accounting.</p>
+<h2>Measured operation</h2>
+<p>Measures one local stiffness matrix without scatter or global setup.</p>
+<h3>Measurement contract</h3>
+<p>Warm retains the kernel, output capacity, reference derivatives and mapped geometry. FirstKernel constructs, evaluates and destroys a kernel and its output on every iteration, with mapped geometry already warm. Neither scope represents process-first quadrature lookup or cold geometry. Exactly one selected cell is evaluated per iteration; mesh and space construction, oracle evaluation and guards remain outside timing.</p>
+<p>Native and prescribed quadratic geometry use the same unit-box mesh and full-dimensional vector space. Constant real Lamé parameters are fixed at \(\lambda=2\) and \(\mu=3\). The public integral supplies an independent implementation of the same requested quadrature rule, not a claim of exact integration on curved or rational cells. The dimensionless comparison is \(\|A_K-A_K^{\mathrm{integral}}\|_F/ \max(1,\|A_K^{\mathrm{integral}}\|_F)\le10^{-11}\). A perturbed matrix must be rejected before timing starts.</p>
+<p>Counters distinguish factor degree, reported element order, requested quadrature order and actual point count. The pair-component work proxy is \(n_q n_{\mathrm{local}}^2 s^2\); it is not an instruction count and excludes reference preparation and geometry costs. No source optimization, quadrature reduction, new cache, collective or CTest timing gate is added.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

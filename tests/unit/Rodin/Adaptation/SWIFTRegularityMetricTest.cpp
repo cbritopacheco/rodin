@@ -134,7 +134,7 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
       firstDev.setZero();
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const auto& rule = QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+        const auto& rule = QF::QuadratureFormula::get(order, cell->getGeometry());
         const auto& quadrature = cell->getQuadrature(rule);
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {

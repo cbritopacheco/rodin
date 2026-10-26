@@ -13,7 +13,6 @@
  */
 
 /**
- * @ingroup RodinDirectives
  * @brief Maximum value permitted for the @f$ s \geq 0 @f$ parameter in
  * Grundmann-Moller quadrature.
  * @see <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html">Rodin::QF::GrundmannMoller</a>
@@ -22,7 +21,6 @@
 #define RODIN_QF_GRUNDMANNMOLLER_MAX_S 16
 
 /**
- * @ingroup RodinDirectives
  * @brief Maximum degree permitted for Grundmann-Moller quadrature.
  *
  * The degree is given by @f$ d = 2s + 1 @f$ where @f$ s \geq 0 @f$.
@@ -47,7 +45,7 @@ namespace Rodin::QF
    * provide exact integration for polynomials of odd degree @f$ d = 2s + 1 @f$
    * where @f$ s \geq 0 @f$ is a parameter.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    *
    * For a simplex @f$ K @f$ of dimension @f$ n @f$, the Grundmann-Möller
    * rule approximates:
@@ -57,7 +55,7 @@ namespace Rodin::QF
    * where the points @f$ x_i @f$ and weights @f$ w_i @f$ are determined by
    * the parameter @f$ s @f$ and the simplex dimension @f$ n @f$.
    *
-   * ## Degree of Exactness
+   * # Degree of Exactness
    *
    * The quadrature rule is exact for all polynomials of degree up to
    * @f$ d = 2s + 1 @f$. For example:
@@ -65,7 +63,7 @@ namespace Rodin::QF
    * - @f$ s = 1 @f$: degree 3 (cubic exactness)
    * - @f$ s = 2 @f$: degree 5 (quintic exactness)
    *
-   * ## Supported Geometries
+   * # Supported Geometries
    *
    * - Point (0D simplex, one empty coordinate tuple with unit weight)
    * - Segment (1D simplex)

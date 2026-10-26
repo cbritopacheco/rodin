@@ -938,7 +938,7 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
       auto stiffness = Integral(Grad(trial), Grad(test));
       stiffness.setOrder(6);
       stiffness.setPolytope(*cell);
-      const auto& formula = QF::PolytopeQuadratureFormula::get(6, G::Triangle);
+      const auto& formula = QF::QuadratureFormula::get(6, G::Triangle);
       const auto& quadrature = cell->getQuadrature(formula);
       Real integratedGradient = 0, scalarGradientEnergy = 0;
       for (size_t q = 0; q < quadrature.getSize(); ++q)

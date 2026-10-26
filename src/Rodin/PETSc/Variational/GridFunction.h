@@ -20,7 +20,7 @@
  * degrees of freedom inside PETSc distributed vectors, supporting both
  * purely local (sequential) and MPI-parallel computations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  *
  * A grid function represents a discrete finite element approximation
  * @f$ u_h \in V_h @f$ defined by its expansion in the finite element
@@ -39,7 +39,7 @@
  * ghost layer so that every rank can read DOFs shared with adjacent mesh
  * partitions without explicit point-to-point communication.
  *
- * ## Ghost-Vector Management
+ * # Ghost-Vector Management
  *
  * In MPI mode the PETSc vector is created with `VecMPISetGhost()`.
  * The ghost indices are computed from the shard's local DOFs that map to
@@ -54,7 +54,7 @@
  * The `acquire()` / `flush()` / `sync()` / `release()` methods encapsulate
  * these patterns.
  *
- * ## Key Features
+ * # Key Features
  *
  * - **Dual context support**: Compiles for both `Context::Local`
  *   (sequential `PETSC_COMM_SELF`) and `Context::MPI` (distributed) meshes.
@@ -81,7 +81,7 @@
  * - **Projection**: `project()` assigns DOF values by evaluating a
  *   user-supplied function over a filtered mesh region.
  *
- * ## Usage Example
+ * # Usage Example
  *
  * ```cpp
  * // Sequential usage
@@ -142,7 +142,7 @@ namespace Rodin::Variational
    * supports both sequential (`Context::Local`) and distributed
    * (`Context::MPI`) finite element spaces.
    *
-   * ## Ownership and Ghost Model (MPI)
+   * # Ownership and Ghost Model (MPI)
    *
    * When the mesh context is `Context::MPI`, the constructor partitions the
    * global DOF vector across MPI ranks.  Each rank *owns* a contiguous
@@ -152,7 +152,7 @@ namespace Rodin::Variational
    * a `GhostBimap` so that `operator[]` can transparently translate a
    * global DOF index to the correct local position in the ghosted vector.
    *
-   * ## Array Access Protocol
+   * # Array Access Protocol
    *
    * PETSc requires explicit lock/unlock of the underlying raw array via
    * `VecGetArray*` / `VecRestoreArray*`.  This class manages the lock
@@ -290,12 +290,12 @@ namespace Rodin::Variational
        * Allocates a PETSc vector whose size matches the number of DOFs in
        * @p fes and sets all entries to zero.
        *
-       * ### Local mode (`Context::Local`)
+       * # Local mode (`Context::Local`)
        * Creates a sequential vector on `PETSC_COMM_SELF` with
        * `VecCreate` → `VecSetSizes` → `VecSetFromOptions` → `VecSetUp` →
        * `VecZeroEntries`.
        *
-       * ### MPI mode (`Context::MPI`)
+       * # MPI mode (`Context::MPI`)
        * 1. Queries the ownership range from the finite element space via
        *    `fes.getOwnershipRange(m_begin, m_end)`.
        * 2. Iterates over local shard DOFs to identify ghost indices —
@@ -567,7 +567,11 @@ namespace Rodin::Variational
         this->release();
       }
 
-      /// @brief Sets every entry of the PETSc vector to a scalar value.
+      /**
+       * @brief Sets every entry of the PETSc vector to a scalar value.
+       * @param value Field callable composed with the coordinate mapping.
+       * @returns Reference to this object after assignment.
+       */
       GridFunction& operator=(const ScalarType& value)
       {
         static_cast<const GridFunction&>(*this).flush();
@@ -1105,6 +1109,23 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Projects a constant over the selected entities of a region.
+       * @tparam Pred Unary predicate selecting entities.
+       * @param region Region over which to interpolate.
+       * @param value Constant value to interpolate.
+       * @param pred Predicate selecting the entities to update.
+       * @returns Reference to this grid function.
+       */
+      template <class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
+      GridFunction& project(
+        const Geometry::Region& region, const RangeType& value, const Pred& pred)
+      {
+        return this->project(
+          region, [&](const auto&) -> RangeType { return value; }, pred);
+      }
+
+      /**
        * @brief Projects a user-supplied function onto the grid function
        *        over a filtered mesh region.
        *
@@ -1112,12 +1133,12 @@ namespace Rodin::Variational
        * @p pred to each polytope, and for those that pass, sets the
        * corresponding DOF values by evaluating the function @p v.
        *
-       * In local mode the method acquires and flushes array access around
-       * the entity loop. In MPI mode interpolation is collective: the
+       * In local mode functional values are staged before acquiring write
+       * access. In MPI mode interpolation is collective: the
        * backend-independent @ref Interpolation selects and evaluates
        * functionals, then each owner commits its coefficients and refreshes
        * ghost copies. Unselected coefficients retain their previous values.
-       * In MPI mode source values are evaluated before any destination
+       * Source values are evaluated before any destination
        * coefficient is replaced, including when the source references this
        * grid function.
        *
@@ -1171,6 +1192,7 @@ namespace Rodin::Variational
         }
 #endif
 
+        // Preserve the source type and its evaluation overloads for the pullback.
         Geometry::PolytopeIterator it;
         switch (region)
         {
@@ -1188,16 +1210,36 @@ namespace Rodin::Variational
             break;
         }
 
-        this->acquire();
-
+        // Source expressions may read this field. Evaluate every functional
+        // before acquiring write access, including across shared entities.
+        this->sync();
+        std::vector<std::pair<Index, ScalarType>> coefficients;
+        coefficients.reserve(fes.getSize());
         while (it)
         {
           const auto& polytope = *it;
           if (pred(polytope))
-            this->project({polytope.getDimension(), polytope.getIndex()}, v);
+          {
+            const auto d = polytope.getDimension();
+            const auto i = polytope.getIndex();
+            const auto& element = fes.getFiniteElement(d, i);
+            const auto mapping = fes.getPullback({d, i}, v);
+            for (Index local = 0; local < element.getCount(); ++local)
+            {
+              coefficients.emplace_back(
+                fes.getGlobalIndex({d, i}, local), element.getLinearForm(local)(mapping));
+            }
+          }
           ++it;
         }
 
+        static_cast<const GridFunction&>(*this).flush();
+        this->acquire();
+        for (const auto& [index, value] : coefficients)
+        {
+          assert(index < fes.getSize());
+          m_write.raw[index] = value;
+        }
         this->flush();
 
         return *this;
@@ -1210,10 +1252,10 @@ namespace Rodin::Variational
        * array has not already been acquired (`m_write.acquired == false`),
        * the method:
        *
-       * ### Local mode
+       * # Local mode
        * - Calls `VecGetArrayWrite(m_data, &raw)`.
        *
-       * ### MPI mode
+       * # MPI mode
        * 1. Obtains the local (ghosted) form via `VecGhostGetLocalForm`.
        * 2. Locks the local form with `VecGetArrayWrite`.
        *
@@ -1319,10 +1361,10 @@ namespace Rodin::Variational
        * @brief Releases mutable (write) access and scatters locally-modified
        *        ghost values back to their owners.
        *
-       * ### Local mode
+       * # Local mode
        * - Calls `VecRestoreArrayWrite(m_data, &raw)`.
        *
-       * ### MPI mode
+       * # MPI mode
        * 1. Restores the array with `VecRestoreArrayWrite(ghost, &raw)`.
        * 2. Returns the local form via `VecGhostRestoreLocalForm`.
        * 3. Performs a **reverse** ghost update
@@ -1509,6 +1551,7 @@ namespace Rodin::Variational
        * expose, such as block-vector manipulation.
        *
        * @see sync(), flush(), release(), axpy(), setData()
+       * @returns Underlying PETSc vector.
        */
       auto& getData()
       {
@@ -1522,6 +1565,7 @@ namespace Rodin::Variational
        * the flushing requirements before passing the handle to PETSc.
        *
        * @see sync(), flush(), release()
+       * @returns Underlying PETSc vector.
        */
       const DataType& getData() const
       {
@@ -1531,6 +1575,7 @@ namespace Rodin::Variational
       /**
        * @brief Returns the current read-access state, including the
        *        acquired flag and the raw pointer (may be null if not acquired).
+       * @returns Read-access guard for the vector storage.
        */
       const ArrayRead& getArrayRead() const
       {
@@ -1540,6 +1585,7 @@ namespace Rodin::Variational
       /**
        * @brief Returns the current write-access state, including the
        *        acquired flag and the raw pointer (may be null if not acquired).
+       * @returns Write-access guard for the vector storage.
        */
       const ArrayWrite& getArrayWrite() const
       {
@@ -1549,6 +1595,8 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of the finite element space on
        *        the given polytope.
+       * @param polytope Polytope used to construct the coordinate mapping.
+       * @returns Polynomial order on the requested polytope, or no value when unavailable.
        */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
@@ -1675,15 +1723,15 @@ namespace Rodin::PETSc::Variational
     public:
       /// @brief Parent specialization type.
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
-      using Parent::Parent; ///< Inherit all constructors.
-      using Parent::operator[]; ///< Inherit element-access operators.
-      using Parent::operator(); ///< Inherit point-evaluation operator.
-      using Parent::getValue; ///< Inherit getValue.
-      using Parent::operator=; ///< Inherit assignment operators.
-      using Parent::operator+=; ///< Inherit addition operators.
-      using Parent::operator-=; ///< Inherit subtraction operators.
-      using Parent::operator*=; ///< Inherit multiplication operators.
-      using Parent::operator/=; ///< Inherit division operators.
+      using Parent::Parent; // Inherit all constructors.
+      using Parent::operator[]; // Inherit element-access operators.
+      using Parent::operator(); // Inherit point-evaluation operator.
+      using Parent::getValue; // Inherit getValue.
+      using Parent::operator=; // Inherit assignment operators.
+      using Parent::operator+=; // Inherit addition operators.
+      using Parent::operator-=; // Inherit subtraction operators.
+      using Parent::operator*=; // Inherit multiplication operators.
+      using Parent::operator/=; // Inherit division operators.
   };
 
   /**

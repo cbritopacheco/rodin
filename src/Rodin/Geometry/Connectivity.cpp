@@ -23,6 +23,7 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>& Connectivity<Context::Local>::initialize(
     size_t maximalDimension)
   {
+    ++m_revision;
     m_maximalDimension = maximalDimension;
     m_dimension = 0;
 
@@ -60,6 +61,7 @@ namespace Rodin::Geometry
 
   Connectivity<Context::Local>& Connectivity<Context::Local>::nodes(size_t count)
   {
+    ++m_revision;
     m_count[0] = count;
     m_index[0].left.reserve(count);
     m_index[0].right.reserve(count);
@@ -91,6 +93,7 @@ namespace Rodin::Geometry
     index = it->second;
     if (inserted)
     {
+      ++m_revision;
       m_index[d].left.push_back(&it->first);
       auto& v = m_connectivity[d][0].emplace_back();
       for (const Index& j : it->first)
@@ -122,6 +125,7 @@ namespace Rodin::Geometry
     index = it->second;
     if (inserted)
     {
+      ++m_revision;
       m_index[d].left.push_back(&it->first);
       auto& v = m_connectivity[d][0].emplace_back();
       for (const Index& j : it->first)
@@ -205,6 +209,7 @@ namespace Rodin::Geometry
     const auto& [d, dp] = p;
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
+    ++m_revision;
     m_connectivity[d][dp] = std::move(inc);
     // This incidence relation is now explicitly provided (e.g. from serialized IO),
     // so it must not be considered stale and recomputed on next access.

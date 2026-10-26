@@ -654,7 +654,7 @@ namespace Rodin::Geometry
    * @brief Less-than comparison for polytopes.
    * @param[in] lhs Left-hand side polytope
    * @param[in] rhs Right-hand side polytope
-   * @returns True if lhs < rhs (lexicographic order by dimension then index)
+   * @returns Lexicographic ordering by dimension, index, then mesh address
    */
   bool operator<(const Polytope& lhs, const Polytope& rhs);
 

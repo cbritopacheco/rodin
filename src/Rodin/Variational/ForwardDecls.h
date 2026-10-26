@@ -13,7 +13,7 @@
  * Forward declarations allow for efficient compilation by avoiding circular
  * dependencies and reducing header inclusion overhead.
  *
- * ## Key Declarations
+ * # Key Declarations
  * - **Shape Functions**: TrialFunction, TestFunction, ShapeFunction
  * - **Spaces**: FiniteElementSpace, FiniteElement
  * - **Forms**: BilinearForm, LinearForm
@@ -22,7 +22,7 @@
  * - **Operators**: Grad, Div, Jacobian, etc.
  * - **Boundary Conditions**: DirichletBC, PeriodicBC
  *
- * ## ShapeFunctionSpaceType Enum
+ * # ShapeFunctionSpaceType Enum
  * Distinguishes between trial and test functions in variational formulations.
  */
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
@@ -91,7 +91,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * ShapeFunction class, please see @ref ShapeFunctionSpecializations.
    *
-   * @see ShapeFunctionSpecializations
+   * @see @ref ShapeFunctionSpecializations "ShapeFunction Template Specializations"
    */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
   class ShapeFunction;
@@ -131,7 +131,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * BooleanFunction class, please see @ref BooleanFunctionSpecializations.
    *
-   * @see BooleanFunctionSpecializations
+   * @see @ref BooleanFunctionSpecializations "BooleanFunction Template Specializations"
    */
   template <class T>
   class BooleanFunction;
@@ -161,7 +161,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * RealFunction class, please see @ref RealFunctionSpecializations.
    *
-   * @see RealFunctionSpecializations
+   * @see @ref RealFunctionSpecializations "RealFunction Template Specializations"
    */
   template <class... Values>
   class RealFunction;
@@ -174,7 +174,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * ComplexFunction class, please see @ref ComplexFunctionSpecializations.
    *
-   * @see ComplexFunctionSpecializations
+   * @see @ref ComplexFunctionSpecializations "ComplexFunction Template Specializations"
    */
   template <class... Values>
   class ComplexFunction;
@@ -192,7 +192,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * VectorFunction class, please see `Vec`torFunctionSpecializations.
    *
-   * @see VectorFunctionSpecializations
+   * @see @ref VectorFunctionSpecializations "VectorFunction Template Specializations"
    */
   template <class... Values>
   class VectorFunction;
@@ -205,7 +205,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * MatrixFunction class, please see `Mat`rixFunctionSpecializations.
    *
-   * @see MatrixFunctionSpecializations
+   * @see @ref MatrixFunctionSpecializations "MatrixFunction Template Specializations"
    */
   template <class T>
   class MatrixFunction;
@@ -238,7 +238,7 @@ namespace Rodin::Variational
    * GridFunction class, please see @ref GridFunctionSpecializations.
    *
    * @see GridFunctionBase
-   * @see GridFunctionSpecializations
+   * @see @ref GridFunctionSpecializations "GridFunction Template Specializations"
    */
   template <class FES, class Data>
   class GridFunction;
@@ -299,7 +299,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ U @f$ and @f$ V @f$ are finite element spaces.
    *
-   * @see BilinearFormSpecializations
+   * @see @ref BilinearFormSpecializations "BilinearForm Template Specializations"
    */
   template <class Solution, class TrialFES, class TestFES, class OperatorType>
   class BilinearForm;
@@ -360,6 +360,7 @@ namespace Rodin::Variational
   template <class StrictType>
   class FunctionBaseCopy;
 
+  /// @see @ref ZeroSpecializations "Zero Template Specializations"
   template <class... Args>
   class Zero;
 
@@ -378,9 +379,11 @@ namespace Rodin::Variational
   template <bool Enabled>
   class DOFMapping;
 
+  /// @see @ref JumpSpecializations "Jump Template Specializations"
   template <class Operand>
   class Jump;
 
+  /// @see @ref AverageSpecializations "Average Template Specializations"
   template <class Operand>
   class Average;
 
@@ -400,11 +403,12 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Pow class, please see @ref PowSpecializations.
    *
-   * @see PowSpecializations
+   * @see @ref PowSpecializations "Pow Template Specializations"
    */
   template <class Base, class Exponent>
   class Pow;
 
+  /// @see @ref SqrtSpecializations "Sqrt Template Specializations"
   template <class Operand>
   class Sqrt;
 
@@ -430,11 +434,12 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Transpose class, please see @ref TransposeSpecializations.
    *
-   * @see TransposeSpecializations
+   * @see @ref TransposeSpecializations "Transpose Template Specializations"
    */
   template <class Operand>
   class Transpose;
 
+  /// @see @ref DerivativeSpecializations "Derivative Template Specializations"
   template <class Operand>
   class Derivative;
 
@@ -462,7 +467,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Grad class, please see @ref GradSpecializations.
    *
-   * @see GradSpecializations
+   * @see @ref GradSpecializations "Grad Template Specializations"
    */
   template <class Operand>
   class Grad;
@@ -474,7 +479,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Div class, please see @ref DivSpecializations.
    *
-   * @see DivSpecializations
+   * @see @ref DivSpecializations "Div Template Specializations"
    */
   template <class Operand>
   class Div;
@@ -502,7 +507,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the Jacobian
    * class, please see @ref JacobianSpecializations.
    *
-   * @see JacobianSpecializations
+   * @see @ref JacobianSpecializations "Jacobian Template Specializations"
    */
   template <class Operand>
   class Jacobian;
@@ -512,6 +517,7 @@ namespace Rodin::Variational
   template <class Operand>
   class Restriction;
 
+  /// @see @ref ConjugateSpecializations "Conjugate Template Specializations"
   template <class Operand>
   class Conjugate;
 
@@ -527,8 +533,7 @@ namespace Rodin::Variational
    *   - \text{Operand}
    * @f]
    *
-   * Range Deduction Rules
-   * ---------------------
+   * # Range Deduction Rules
    *  The rule for deducing the range of a UnaryMinus object, denoted @f$
    *  \texttt{Range}[-\text{Operand}] @f$, is the following:
    *  @f[
@@ -537,7 +542,7 @@ namespace Rodin::Variational
    *      {\vdash \texttt{Range}[- \text{Operand}] : \texttt{R}}
    *  @f]
    *
-   * @see UnaryMinusSpecializations
+   * @see @ref UnaryMinusSpecializations "UnaryMinus Template Specializations"
    */
   template <class Operand>
   class UnaryMinus;
@@ -556,8 +561,7 @@ namespace Rodin::Variational
    * @f]
    * which represents the usual arithmetic addition of two operands.
    *
-   * Range Deduction Rules
-   * ---------------------
+   * # Range Deduction Rules
    *  The rule for deducing the range of a Sum object, denoted @f$
    *  \texttt{Range}[\text{LHS} + \text{RHS}]@f$, is the following:
    *  @f[
@@ -566,7 +570,7 @@ namespace Rodin::Variational
    *      {\vdash \texttt{Range}[\text{LHS} + \text{RHS}] : \texttt{R}}
    *  @f]
    *
-   * @see SumSpecializations
+   * @see @ref SumSpecializations "Sum Template Specializations"
    */
   template <class LHS, class RHS>
   class Sum;
@@ -584,8 +588,7 @@ namespace Rodin::Variational
    * \text{LHS} * \text{RHS}
    * @f]
    *
-   * Range Deduction Rules
-   * ---------------------
+   * # Range Deduction Rules
    *  The rules for deducing the range of a Mult object, denoted @f$
    *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are the following:
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Real} @f$
@@ -637,7 +640,7 @@ namespace Rodin::Variational
    *          {\vdash \texttt{Range}[\text{LHS} * \text{RHS}] : \texttt{Matrix}}
    *        @f]
    *
-   * @see MultSpecializations
+   * @see @ref MultSpecializations "Mult Template Specializations"
    */
   template <class LHS, class RHS>
   class Mult;
@@ -655,7 +658,7 @@ namespace Rodin::Variational
    * \text{LHS} \div \text{RHS}
    * @f]
    *
-   * @see DivisionSpecializations
+   * @see @ref DivisionSpecializations "Division Template Specializations"
    */
   template <class LHS, class RHS>
   class Division;
@@ -676,7 +679,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the Dot
    * class, please see @ref DotSpecializations.
    *
-   * @see DotSpecializations
+   * @see @ref DotSpecializations "Dot Template Specializations"
    */
   template <class LHS, class RHS>
   class Dot;
@@ -694,11 +697,12 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Abs class, please see @ref AbsSpecializations.
    *
-   * @see AbsSpecializations
+   * @see @ref AbsSpecializations "Abs Template Specializations"
    */
   template <class Operand>
   class Abs;
 
+  /// @see @ref ExpSpecializations "Exp Template Specializations"
   template <class Operand>
   class Exp;
 
@@ -719,7 +723,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Frobenius class, please see @ref FrobeniusSpecializations.
    *
-   * @see FrobeniusSpecializations
+   * @see @ref FrobeniusSpecializations "Frobenius Template Specializations"
    */
   template <class Operand>
   class Frobenius;
@@ -733,16 +737,21 @@ namespace Rodin::Variational
    *   \cos{\text{Operand}}
    * @f]
    * where Operand represents a scalar.
+   *
+   * @see @ref CosSpecializations "Cos Template Specializations"
    */
   template <class Operand>
   class Cos;
 
+  /// @see @ref SinSpecializations "Sin Template Specializations"
   template <class Operand>
   class Sin;
 
+  /// @see @ref CoshSpecializations "Cosh Template Specializations"
   template <class Operand>
   class Cosh;
 
+  /// @see @ref SinhSpecializations "Sinh Template Specializations"
   template <class Operand>
   class Sinh;
 
@@ -755,6 +764,8 @@ namespace Rodin::Variational
    *   \tan{\text{Operand}} = \dfrac{\sin{\text{Operand}}}{\cos{\text{Operand}}}
    * @f]
    * where Operand represents a scalar.
+   *
+   * @see @ref TanSpecializations "Tan Template Specializations"
    */
   template <class Operand>
   class Tan;
@@ -777,7 +788,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the Dot
    * class, please see @ref TraceSpecializations.
    *
-   * @see TraceSpecializations
+   * @see @ref TraceSpecializations "Trace Template Specializations"
    */
   template <class Operand>
   class Trace;
@@ -803,15 +814,19 @@ namespace Rodin::Variational
   template <class LHS, class RHS>
   class Composition;
 
+  /// @see @ref TraceOperatorSpecializations "TraceOperator Template Specializations"
   template <class Operand>
   class TraceOperator;
 
+  /// @see @ref PotentialSpecializations "Potential Template Specializations"
   template <class Kernel, class Operand>
   class Potential;
 
+  /// @see @ref MaxSpecializations "Max Template Specializations"
   template <class... Args>
   class Max;
 
+  /// @see @ref MinSpecializations "Min Template Specializations"
   template <class... Args>
   class Min;
 
@@ -827,7 +842,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * LT class, please see @ref LTSpecializations.
    *
-   * @see LTSpecializations
+   * @see @ref LTSpecializations "LT Template Specializations"
    */
   template <class LHS, class RHS>
   class LT;
@@ -844,7 +859,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * GT class, please see @ref GTSpecializations.
    *
-   * @see GTSpecializations
+   * @see @ref GTSpecializations "GT Template Specializations"
    */
   template <class LHS, class RHS>
   class GT;
@@ -861,7 +876,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * EQ class, please see @ref EQSpecializations.
    *
-   * @see EQSpecializations
+   * @see @ref EQSpecializations "EQ Template Specializations"
    */
   template <class LHS, class RHS>
   class EQ;
@@ -878,7 +893,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * LEQ class, please see @ref LEQSpecializations.
    *
-   * @see LEQSpecializations
+   * @see @ref LEQSpecializations "LEQ Template Specializations"
    */
   template <class LHS, class RHS>
   class LEQ;
@@ -895,7 +910,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * GEQ class, please see @ref GEQSpecializations.
    *
-   * @see GEQSpecializations
+   * @see @ref GEQSpecializations "GEQ Template Specializations"
    */
   template <class LHS, class RHS>
   class GEQ;
@@ -911,6 +926,8 @@ namespace Rodin::Variational
    *
    * @note For an overview of all the possible specializations of the
    * NEQ class, please see the NEQ specializations.
+   *
+   * @see @ref NEQSpecializations "NEQ Template Specializations"
    */
   template <class LHS, class RHS>
   class NEQ;
@@ -928,7 +945,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the AND class,
    * please see @ref ANDSpecializations.
    *
-   * @see ANDSpecializations
+   * @see @ref ANDSpecializations "AND Template Specializations"
    */
   template <class LHS, class RHS>
   class AND;
@@ -945,7 +962,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * OR class, please see @ref ORSpecializations.
    *
-   * @see ORSpecializations
+   * @see @ref ORSpecializations "OR Template Specializations"
    */
   template <class LHS, class RHS>
   class OR;
@@ -959,7 +976,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ \mathcal{R}_h @f$ is some region of the mesh @f$ \mathcal{T}_h
    * @f$.
-   * @see QuadratureRuleSpecializations
+   * @see @ref QuadratureRuleSpecializations "QuadratureRule Template Specializations"
    * @see RodinQuadrature
    */
   template <class Integrand>
@@ -987,7 +1004,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the Integral
    * class, please see @ref IntegralSpecializations.
    *
-   * @see IntegralSpecializations
+   * @see @ref IntegralSpecializations "Integral Template Specializations"
    */
   template <class Integrand>
   class Integral;
@@ -1013,7 +1030,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * FaceIntegral class, please see @ref FaceIntegralSpecializations.
    *
-   * @see FaceIntegralSpecializations
+   * @see @ref FaceIntegralSpecializations "FaceIntegral Template Specializations"
    */
   template <class Integrand>
   class FaceIntegral;
@@ -1045,7 +1062,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * BoundaryIntegral class, please see @ref BoundaryIntegralSpecializations.
    *
-   * @see BoundaryIntegralSpecializations
+   * @see @ref BoundaryIntegralSpecializations "BoundaryIntegral Template Specializations"
    */
   template <class Integrand>
   class BoundaryIntegral;
@@ -1080,7 +1097,7 @@ namespace Rodin::Variational
    * InterfaceIntegral class, please see @ref
    * InterfaceIntegralSpecializations.
    *
-   * @see InterfaceIntegralSpecializations
+   * @see @ref InterfaceIntegralSpecializations "InterfaceIntegral Template Specializations"
    */
   template <class Integrand>
   class InterfaceIntegral;
@@ -1098,11 +1115,12 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * DirichletBC class, please see @ref DirichletBCSpecializations.
    *
-   * @see DirichletBCSpecializations
+   * @see @ref DirichletBCSpecializations "DirichletBC Template Specializations"
    */
   template <class Operand, class Value>
   class DirichletBC;
 
+  /// @see @ref PeridodicBCSpecializations "PeriodicBC Template Specializations"
   template <class Operand, class... Parameters>
   class PeriodicBC;
 
@@ -1123,7 +1141,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the Problem
    * class, please see @ref ProblemSpecializations.
    *
-   * @see ProblemSpecializations
+   * @see @ref ProblemSpecializations "Problem Template Specializations"
    */
   template <class... Parameters>
   class Problem;

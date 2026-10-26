@@ -218,3 +218,23 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+/// @brief Component extraction preserves both cells' explicit interface support.
+TEST(Rodin_Variational_Component, AverageInterfaceSupport)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  mesh.getConnectivity().compute(1, 2);
+  P1<Math::SpatialVector<Real>> space(mesh, 2);
+  TrialFunction trial(space);
+  auto average = Average(trial);
+  auto component = Component(average, 0);
+  for (auto face = mesh.getInterface(); face; ++face)
+  {
+    average.setPolytope(*face);
+    component.setPolytope(*face);
+    EXPECT_EQ(component.getDOFs(*face), average.getDOFs(*face));
+    ASSERT_TRUE(average.getDOFIndices());
+    ASSERT_TRUE(component.getDOFIndices());
+    EXPECT_TRUE((*component.getDOFIndices() == *average.getDOFIndices()).all());
+  }
+}

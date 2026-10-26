@@ -52,7 +52,7 @@ namespace Rodin::Variational
    * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from the two sides
    * of the interface (with a chosen orientation).
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * In Discontinuous Galerkin (DG) methods, functions are allowed to be
    * discontinuous across element interfaces. The jump operator captures this
    * discontinuity and is used in:
@@ -62,7 +62,7 @@ namespace Rodin::Variational
    *
    * where @f$ \Gamma_h @f$ denotes the set of interior faces.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // Evaluate jump of a function on an interface
    * auto jump_u = Jump(u);
@@ -233,7 +233,7 @@ namespace Rodin::Variational
    * interfaces in finite element formulations. This is used in DG bilinear
    * and linear form assembly.
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // DG interior penalty term
    * auto penalty = InterfaceIntegral(Jump(u), Jump(v));

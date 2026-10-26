@@ -11,7 +11,7 @@
 #include <benchmark/benchmark.h>
 #include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational/P1/P1Element.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -45,7 +45,7 @@ namespace Rodin::Tests::Benchmarks
         controls(j, a) = Real((a + 1) * (j + 1)) / element.getCount();
     }
     ParametricTransformation transformation(controls, element);
-    const auto& formula = QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
+    const auto& formula = QF::QuadratureFormula::get(state.range(0), geometry);
     std::vector<Math::SpatialMatrix<Real>> expected, measured;
     transformation.PolytopeTransformation::jacobian(expected, formula);
     const auto evaluate = [&]() {

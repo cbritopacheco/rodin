@@ -35,6 +35,7 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - uses: ./.github/actions/prepare-apt
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:

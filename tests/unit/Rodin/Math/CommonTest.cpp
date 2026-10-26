@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "Rodin/Math/Common.h"
+#include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Types.h"
@@ -461,6 +462,68 @@ TEST_F(CommonTest, DotProductEigen)
   Math::Vector<Complex> z2(2);
   z2 << Complex(2, -1), Complex(-1, 4);
   EXPECT_EQ(dot(z1, z2), z1(0) * std::conj(z2(0)) + z1(1) * std::conj(z2(1)));
+}
+
+/**
+ * @brief Vector contractions ignore orientation and conjugate the right operand.
+ *
+ * Uses matrix-row views, vector segments and mixed scalar precision, including
+ * empty vectors. The componentwise oracle is independent of Eigen's dot product.
+ */
+TEST_F(CommonTest, DotProductVectorOrientation)
+{
+  const auto check = []<class Scalar>() {
+    Math::Vector<Scalar> column(3);
+    column << Scalar(1), Scalar(2), Scalar(-3);
+    Math::Matrix<Complex> matrix(2, 3);
+    matrix << Complex(3, 1), Complex(4, -2), Complex(-1, 3), Complex(-2, 1),
+      Complex(5, 2), Complex(7, -1);
+    for (Eigen::Index row = 0; row < matrix.rows(); ++row)
+    {
+      Complex expected = 0;
+      for (Eigen::Index i = 0; i < column.size(); ++i)
+        expected += Complex(column[i]) * std::conj(matrix(row, i));
+      EXPECT_EQ(Math::dot(column, matrix.row(row)), expected);
+      EXPECT_EQ(Math::dot(matrix.row(row), column), std::conj(expected));
+      EXPECT_EQ(column.dot(matrix.row(row)), expected);
+      EXPECT_EQ(Math::dot(column.head(2), matrix.row(row).head(2)),
+        Complex(column[0]) * std::conj(matrix(row, 0)) +
+          Complex(column[1]) * std::conj(matrix(row, 1)));
+    }
+    EXPECT_EQ(Math::dot(column.head(0), matrix.row(0).head(0)), Complex(0));
+  };
+  check.template operator()<Real>();
+  check.template operator()<Complex>();
+  check.template operator()<float>();
+}
+
+/// @brief Vector-shaped Rodin matrix owners contract without member dispatch or orientation restrictions.
+TEST_F(CommonTest, DotProductFixedMatrixVectors)
+{
+  FixedSizeMatrix<Complex, 3, 1> column;
+  FixedSizeMatrix<Complex, 1, 3> row;
+  column << Complex(1, 2), Complex(3, -1), Complex(-2, 4);
+  row << Complex(2, -1), Complex(-1, 3), Complex(4, 2);
+  Complex expected = 0;
+  for (Index i = 0; i < 3; ++i)
+    expected += column[i] * std::conj(row[i]);
+  EXPECT_EQ(Math::dot(column, row), expected);
+  EXPECT_EQ(column.dot(row), expected);
+  EXPECT_EQ(Math::dot(row, column), std::conj(expected));
+  EXPECT_EQ(row.dot(column), std::conj(expected));
+  EXPECT_EQ(Math::dot(column + column, row), Complex(2) * expected);
+
+  FixedSizeMatrix<float, 3, 1> real;
+  real << 1, 2, 3;
+  Complex mixed = 0;
+  for (Index i = 0; i < 3; ++i)
+    mixed += static_cast<Real>(real[i]) * std::conj(row[i]);
+  EXPECT_EQ(Math::dot(real, row), mixed);
+  EXPECT_EQ(real.dot(row), mixed);
+
+  FixedSizeMatrix<Complex, 0, 1> emptyColumn;
+  FixedSizeMatrix<Complex, 1, 0> emptyRow;
+  EXPECT_EQ(Math::dot(emptyColumn, emptyRow), Complex(0));
 }
 
 /// @brief Verifies min function for common test by checking tolerance-based numerical results, exact expected values.

@@ -5,3 +5,5 @@ target_link_libraries(RodinQFBenchmarks PRIVATE
 add_executable(RodinReferenceQuadratureBenchmarks EXCLUDE_FROM_ALL ReferenceQuadrature.cpp)
 target_link_libraries(RodinReferenceQuadratureBenchmarks PRIVATE
   Rodin::QF benchmark::benchmark)
+
+include(registrations.benchmarks.cmake)

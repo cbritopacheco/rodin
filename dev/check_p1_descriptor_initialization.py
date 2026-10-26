@@ -23,7 +23,7 @@ def main():
         [args.nm, "-C", str(args.binary)], text=True).splitlines()
     descriptors = [line for line in symbols
                    if "P1Element<" in line and "::getBasis(" in line
-                   and "::s_basis" in line]
+                   and "::basis" in line]
     guards = [line for line in descriptors if "guard variable for " in line]
     objects = [line for line in descriptors if "guard variable for " not in line]
     # Eight geometries have 1+2+3+4+4+8+5+6 vertices, for each scalar field.

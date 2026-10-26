@@ -25,7 +25,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/Traits.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/BilinearForm.h"
 #include "Rodin/Variational/NamedFormStorage.h"
 #include "Rodin/Variational/Function.h"
@@ -137,7 +137,7 @@ namespace Rodin::Variational
        * owns copies of the Lamé parameters, so that each thread assembling
        * with its own copy of the kernel evaluates its own copies.
        *
-       * ## Trial-side weighting
+       * # Trial-side weighting
        *
        * At each quadrature point, trial divergences are multiplied by the
        * first Lamé parameter and trial symmetric gradients by the shear
@@ -146,7 +146,7 @@ namespace Rodin::Variational
        * order or the local entry accumulation sequence. No additional buffer
        * or cross-point physical cache is introduced.
        *
-       * ## Spatial contraction
+       * # Spatial contraction
        *
        * At spatial dimension @f$s=3@f$, const Eigen views expose the known
        * column extent while retaining dynamic rows. Other dimensions retain
@@ -242,7 +242,7 @@ namespace Rodin::Variational
               std::max(m_lambda->getOrder(polytope).value_or(size_t(0)),
                 m_mu->getOrder(polytope).value_or(size_t(0))) +
               trialFE.getOrder() + testFE.getOrder();
-            const auto& qf = QF::PolytopeQuadratureFormula::get(order, geometry);
+            const auto& qf = QF::QuadratureFormula::get(order, geometry);
             const auto& quadrature = polytope.getQuadrature(qf);
 
             const bool rebuild = !m_cached || m_geometry != geometry ||

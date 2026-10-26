@@ -138,8 +138,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
               if (!m_mesh.getShard().isOwned(dim, cell->getIndex()))
                 continue;
             }
-            const auto& qf =
-              QF::PolytopeQuadratureFormula::get(OracleOrder, cell->getGeometry());
+            const auto& qf = QF::QuadratureFormula::get(OracleOrder, cell->getGeometry());
             const Geometry::PolytopeQuadrature quadrature(*cell, qf);
             auto moment = exact(quadrature.getPoint(0));
             moment *= 0;

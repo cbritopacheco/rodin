@@ -170,9 +170,9 @@ namespace Rodin::Tests::Benchmarks
         state.counters["base_order"] = orders[0];
         state.counters["alternate_order"] = orders[1];
         state.counters["base_samples"] =
-          QF::PolytopeQuadratureFormula::get(orders[0], geometry).getSize();
+          QF::QuadratureFormula::get(orders[0], geometry).getSize();
         state.counters["alternate_samples"] =
-          QF::PolytopeQuadratureFormula::get(orders[1], geometry).getSize();
+          QF::QuadratureFormula::get(orders[1], geometry).getSize();
         state.counters["reference_error"] = error;
       }
 
