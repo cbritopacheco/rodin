@@ -46,6 +46,34 @@ class BenchmarkSiteTest(unittest.TestCase):
             self.assertEqual(module['representative'], '<code>Ax</code>')
             self.assertNotIn(folder, json.dumps(catalogue))
 
+    def test_documentation_group_retains_module_path_without_physical_context(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            docs, manifest, _ = self.fixture(root)
+            catalogue = json.loads((docs / 'rodin-module-catalogue.json').read_text())
+            module = catalogue['groups'][0]['modules'][0]
+            overview = {key: module[key] for key in ('brief', 'representative', 'description')}
+            export_module_catalogue(
+                [('Infrastructure', [('Serialization', 'group_serialization')])],
+                {'Infrastructure': 'Shared services.'}, {'group_serialization': overview},
+                {'group_serialization': 'RodinSerialization'}, ['theme.css'], docs,
+                {'group_serialization': 'Rodin/Serialization'})
+            out = root / 'site'
+            build_site(manifest, docs, out, 'Release', '../')
+            index = (out / 'index.html').read_text()
+            self.assertIn('href="Rodin/Serialization/index.html"', index)
+            contexts = index.split('data-category="Physical contexts"', 1)[1]
+            self.assertNotIn('Serialization', contexts)
+            self.assertFalse((out / 'RodinSerialization').exists())
+
+    def test_documentation_group_requires_explicit_component_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaisesRegex(ValueError, 'Rodin component path'):
+                export_module_catalogue(
+                    [('Infrastructure', [('Serialization', 'group_serialization')])],
+                    {'Infrastructure': 'Shared services.'}, {'group_serialization': {}},
+                    {'group_serialization': 'RodinSerialization'}, [], Path(folder))
+
     def test_site_has_complete_ancestors_relative_assets_and_correct_metadata(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

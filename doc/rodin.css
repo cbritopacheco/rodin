@@ -677,7 +677,8 @@ main article :is(h2, h3, h4) {
 }
 main article .m-frame > :is(h2, h3, h4):first-child,
 main article .m-block > :is(h2, h3, h4):first-child,
-main article .m-note > :is(h2, h3, h4):first-child {
+main article .m-note > :is(h2, h3, h4):first-child,
+main article .m-block.m-badge > :is(h2, h3, h4) {
   margin-top: 0;
 }
 main article :is(pre, code, .m-code) {
@@ -736,4 +737,10 @@ nav[aria-label*="table of contents"] summary,
 }
 .rodin-toc-branch > [hidden] {
   display: none !important;
+}
+
+/* Preserve the official Boost logo silhouette inside the license badge. */
+main article .m-block.m-badge.rodin-license-badge > img {
+  border-radius: 0;
+  object-fit: contain;
 }

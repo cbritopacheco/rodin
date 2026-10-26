@@ -20,7 +20,7 @@ import xml.etree.ElementTree as ET
 from documentation_hierarchy import prepare_hierarchy, prepare_member_definitions, symbol_index
 from documentation_links import publish_enum_anchors, unlink_unpublished_references
 from documentation_highlighting import cpp_symbols
-from documentation_reference import prepare_reference_headers, render_references, render_warning_notes
+from documentation_reference import prepare_reference_headers, render_references, render_admonition_notes
 from documentation_search import assemble_search, prepare_class_search
 
 
@@ -157,7 +157,7 @@ def clear_generated_pages(xml, html):
             page.unlink()
 
 
-def export_module_catalogue(groups, categories, overviews, namespaces, stylesheets, output):
+def export_module_catalogue(groups, categories, overviews, namespaces, stylesheets, output, paths=None):
     """Expose the same rendered module descriptions to the benchmark site."""
     from urllib.parse import urlparse
     catalogue = {'schema': 1, 'groups': [], 'stylesheets': []}
@@ -166,8 +166,10 @@ def export_module_catalogue(groups, categories, overviews, namespaces, styleshee
     for category, modules in groups:
         entries = []
         for title, target in modules:
-            entries.append({'title': title, 'path': namespaces[target].replace('::', '/'),
-                            **overviews[target]})
+            path = (paths or {}).get(target, namespaces[target].replace('::', '/'))
+            if not path.startswith('Rodin/'):
+                raise ValueError('Module needs a Rodin component path: ' + target)
+            entries.append({'title': title, 'path': path, **overviews[target]})
         catalogue['groups'].append({'name': category, 'description': categories[category],
                                     'modules': entries})
     (output / 'rodin-module-catalogue.json').write_text(json.dumps(catalogue, indent=2) + '\n')
@@ -240,7 +242,7 @@ def build(configuration, renderer, templates):
                   for target in data}
     export_module_catalogue(config['RODIN_MODULES'], config['RODIN_MODULE_CATEGORIES'], data,
                             namespaces, state.config['STYLESHEETS'],
-                            output / state.doxyfile['HTML_OUTPUT'])
+                            output / state.doxyfile['HTML_OUTPUT'], config.get('RODIN_MODULE_PATHS'))
     if config.get('RODIN_BENCHMARK_MANIFEST'):
         from benchmark_site import build_site
         html_output = output / state.doxyfile['HTML_OUTPUT']
@@ -248,7 +250,7 @@ def build(configuration, renderer, templates):
                            html_output / 'benchmarks', 'Published configurations',
                            config.get('RODIN_BENCHMARK_DOCUMENTATION_URL', '../'))
         print('Rendered benchmark documentation pages:', count)
-    print('Rendered m.css warning notes:', render_warning_notes(output / state.doxyfile['HTML_OUTPUT']))
+    print('Rendered m.css admonition notes:', render_admonition_notes(output / state.doxyfile['HTML_OUTPUT']))
     print('Published enum-value anchors:', publish_enum_anchors(xml, output / state.doxyfile['HTML_OUTPUT']))
     print('Unlinked unpublished scopes:', unlink_unpublished_references(xml, output / state.doxyfile['HTML_OUTPUT']))
     print('Rendered concise overview for', len(data), 'modules.')

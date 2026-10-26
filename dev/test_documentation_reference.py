@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from documentation_reference import (ReferenceLayout, Markup, parameters,
-                                     prepare_reference_headers, render_references, render_warning_notes, scope_name,
+                                     prepare_reference_headers, render_references, render_admonition_notes, scope_name,
                                      split_arguments, text)
 import xml.etree.ElementTree as ET
 
@@ -26,10 +26,21 @@ class ReferenceTest(unittest.TestCase):
         page = self.site / 'page.html'
         page.write_text('<aside class="m-note m-danger"><h4>Warning</h4><p>Read this.</p></aside>'
                         '<aside class="m-note m-danger"><h4>Danger</h4><p>Stop.</p></aside>')
-        self.assertEqual(render_warning_notes(self.site), 1)
+        self.assertEqual(render_admonition_notes(self.site), 1)
         self.assertIn('class="m-note m-warning"><h4>Warning</h4>', page.read_text())
         self.assertIn('class="m-note m-danger"><h4>Danger</h4>', page.read_text())
-        self.assertEqual(render_warning_notes(self.site), 0)
+        self.assertEqual(render_admonition_notes(self.site), 0)
+
+    def test_precondition_uses_info_component_without_changing_other_success_notes(self):
+        page = self.site / 'page.html'
+        page.write_text('<aside id="contract" class="m-note m-success custom"><h4>Precondition</h4>'
+                        '<p>Keep <a href="#input">input</a> finite.</p></aside>'
+                        '<aside class="m-note m-success"><h4>Success</h4><p>Done.</p></aside>')
+        self.assertEqual(render_admonition_notes(self.site), 1)
+        self.assertIn('id="contract" class="m-note m-info custom"', page.read_text())
+        self.assertIn('<p>Keep <a href="#input">input</a> finite.</p>', page.read_text())
+        self.assertIn('class="m-note m-success"><h4>Success</h4>', page.read_text())
+        self.assertEqual(render_admonition_notes(self.site), 0)
 
     def write(self, identity, name, params='', kind='class'):
         source = ('<doxygen><compounddef id="' + identity + '" kind="' + kind + '"><compoundname>' + name + '</compoundname>' +

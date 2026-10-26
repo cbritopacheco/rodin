@@ -231,7 +231,10 @@ to code throughout the site and uses normal font weight for every token.
 The documentation build also exports `rodin-module-catalogue.json` with the same
 rendered module overviews, category descriptions, ownership paths and stylesheet
 order. The benchmark navigation consumes this catalogue rather than duplicating
-namespace prose. See [benchmark registration and display](../tests/benchmarks/README.md#registration-and-display).
+namespace prose. Namespace-backed entries derive their `Rodin/…` ownership path
+from the C++ namespace. Documentation groups specify that path in
+`RODIN_MODULE_PATHS` in `conf.py.in`; their Doxygen group identifiers are not
+source directories or physical contexts. See [benchmark registration and display](../tests/benchmarks/README.md#registration-and-display).
 
 ## Benchmark documentation and publication
 

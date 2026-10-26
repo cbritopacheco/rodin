@@ -33,7 +33,7 @@
 
   @section poisson-example-mainpage A simple example
 
-  Rodin provides a compositional form language that lets
+  The library provides a compositional form language that lets
   you express variational problems in C++ code that closely mirrors the
   mathematical notation. For example, the Poisson problem with homogeneous Dirichlet boundary
   conditions, in strong form, for a domain @f$\Omega@f$ with boundary
@@ -150,7 +150,7 @@
 
   @section rodin-philosophy Philosophy behind Rodin
 
-  Rodin follows [mosra](https://mosra.cz/)'s
+  The architecture follows [mosra](https://mosra.cz/)'s
   ["batteries included, but screws not glued in"](https://magnum.graphics/)
   philosophy from the Magnum Engine project. For Rodin it means meshes, finite
   element spaces, forms, assembly, and solvers work together, while their
@@ -184,11 +184,14 @@
   The aim is to make Rodin useful for research and general-purpose finite
   element applications with as few restrictions as possible.
 
-  @m_class{m-block m-success}
+  @m_class{m-block m-success m-badge rodin-license-badge}
 
   @parblock
+  <img src="Images/Boost.svg" alt="Boost logo" />
+
   <strong>Software that uses or links against Rodin can retain its own license,
-  including a proprietary one.</strong> The Boost Software License is not copyleft:
+  including a proprietary one.</strong> The
+  [Boost Software License](https://www.boost.org/doc/user-guide/bsl.html) is not copyleft:
   it does not require the source code of that software to be released or its
   license to be changed. When redistributing Rodin source code or modified
   portions of it, retain the original copyright notices and the complete

@@ -81,6 +81,9 @@ RODIN_MODULES = [
     ]),
 ]
 
+# Documentation groups have no C++ namespace from which to derive their source path.
+RODIN_MODULE_PATHS = {'group___rodin_serialization': 'Rodin/Serialization'}
+
 RODIN_MODULE_CATEGORIES = {
     'Core': 'Geometry, finite element spaces, variational expressions, assembly and linear algebra form the path from a weak formulation to an algebraic system.',
     'Models': 'Transport, distance construction, regularization, solid mechanics and cardiac models are expressed using the core numerical interfaces.',
