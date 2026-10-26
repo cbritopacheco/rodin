@@ -88,6 +88,7 @@ class BuildGraphPlanTest(unittest.TestCase):
             self.assertEqual(len(parts), 6)
             self.assertEqual([p['part'] for p in parts], list(range(1, 7)))
             self.assertTrue(all(p['common'] == 'common' and len(p['targets']) <= 24 for p in parts))
+            self.assertTrue(all(graph.directory_common_specification(p) == entry['definition'] for p in parts))
             self.assertEqual([t for part in parts for t in part['targets']],
                              sorted(t['target'] for t in targets))
             self.assertEqual(set(document['requests'][graph.request_key(**request)]['builds']),
@@ -265,6 +266,13 @@ class BuildGraphExecutionTest(unittest.TestCase):
             self.assertTrue(original_objects)
             build.rename(root / 'common-producer-build')
             (root / 'artifacts').mkdir()
+            # A numbered directory part must still restore the unchanged common archive.
+            part = dict(next(iter(index['builds'].values()))['definition'], part=1)
+            graph.compile_directory(part, build)
+            self.assertTrue(all(archive.digest(build / p) == digest for p, digest in original_objects.items()))
+            shutil.rmtree(root / 'ci-build-artifact')
+            shutil.rmtree(root / 'ci-built-record')
+            shutil.rmtree(build)
             for key, row in index['builds'].items():
                 graph.compile_directory(row['definition'], build)
                 self.assertTrue(all(archive.digest(build / p) == digest for p, digest in original_objects.items()))

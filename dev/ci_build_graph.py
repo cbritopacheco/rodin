@@ -322,12 +322,18 @@ def download(name, destination):
     return source
 
 
+def directory_common_specification(spec):
+    """Recover the exact shared-library identity from a directory part."""
+    common = {k: v for k, v in spec.items() if k not in ['common', 'directory', 'part']}
+    common.update(stage='common', targets=[])
+    return common
+
+
 def compile_directory(spec, build):
     stamp_sources()
     artifact = ROOT / 'ci-common-input'
     artifact = download('ci-common-' + spec['common'], artifact) or artifact
-    common = {k: v for k, v in spec.items() if k not in ['common', 'directory']}
-    common.update(stage='common', targets=[])
+    common = directory_common_specification(spec)
     archive.restore(common, build, artifact)
     objects = {p: (archive.digest(p), p.stat().st_mtime_ns) for p in build.rglob('*.o')}
     # Keep the existing single-compiler safeguards for memory-heavy MPI and
