@@ -1,6 +1,6 @@
 # CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq
 
-Sequential staggered coronary ALE fluid–structure interaction using equal-order linear velocity and pressure, with a separate results directory for comparison with the quadratic-velocity variant.
+Sequential staggered coronary ALE fluid–structure interaction using equal-order linear velocity and pressure.
 
 Requires `RODIN_USE_PETSC=ON`; MPI is not required.
 
@@ -21,6 +21,3 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default meshes are `resources/examples/Heart/CoronaryArtery/Stenosis80.mesh` and `Prismatic80.mesh` in the same directory.
-
-The driver source [`CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq.cpp`](CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq.cpp) contains the model parameters,
-solver settings, and output configuration.

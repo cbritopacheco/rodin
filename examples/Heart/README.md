@@ -1,23 +1,18 @@
 # Heart examples
 
-Each example has its own source folder, CMake target, and README with build
-and run instructions. Executables are generated under
-`build/examples/Heart/<example>/<example>`. Target names are unchanged.
+These examples cover lumped ventricular dynamics, coronary and atrial flow,
+arterial fluid–structure interaction, coagulation, and active wall contraction.
 
-| Example | Build requirements |
-|---|---|
-| [Atrium](Atrium/README.md) | PETSc + MPI |
-| [AtriumContraction](AtriumContraction/README.md) | Local |
-| [CCMLC2014_0D](CCMLC2014_0D/README.md) | Local |
-| [CoronaryArtery](CoronaryArtery/README.md) | PETSc + MPI |
-| [CoronaryArterySolid_PETSc_MPI](CoronaryArterySolid_PETSc_MPI/README.md) | PETSc + MPI |
-| [CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq](CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq/README.md) | PETSc |
-| [CoronaryArtery_FSI_Explicit_PETSc_MPI](CoronaryArtery_FSI_Explicit_PETSc_MPI/README.md) | PETSc + MPI |
-| [CoronaryArtery_FSI_Explicit_PETSc_Seq](CoronaryArtery_FSI_Explicit_PETSc_Seq/README.md) | PETSc |
-| [CoronaryArtery_FSI_PETSc_MPI](CoronaryArtery_FSI_PETSc_MPI/README.md) | PETSc + MPI |
-| [CoronarySolid](CoronarySolid/README.md) | Local |
-| [ProteinTest](ProteinTest/README.md) | PETSc |
-
-Shared coronary helpers remain in `CoronaryArtery/`; the atrium, protein,
-and sequential FSI examples include them through their private include path.
-Meshes remain under `resources/examples/Heart/` and are stored in Git LFS.
+| Example | Model | Build requirements |
+|---|---|---|
+| [Atrium](Atrium/README.md) | Atrial flow and coagulation with a lumped ventricular outlet. | PETSc + MPI |
+| [AtriumContraction](AtriumContraction/README.md) | Prescribed activation and fiber contraction in a wedge wall. | Local |
+| [CCMLC2014_0D](CCMLC2014_0D/README.md) | Lumped left-ventricle and Windkessel dynamics. | Local |
+| [CoronaryArtery](CoronaryArtery/README.md) | Coronary flow coupled to ventricular and intramyocardial models. | PETSc + MPI |
+| [CoronaryArterySolid_PETSc_MPI](CoronaryArterySolid_PETSc_MPI/README.md) | Distributed coronary wall dynamics. | PETSc + MPI |
+| [CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq](CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq/README.md) | Sequential staggered FSI with linear velocity and pressure. | PETSc |
+| [CoronaryArtery_FSI_Explicit_PETSc_MPI](CoronaryArtery_FSI_Explicit_PETSc_MPI/README.md) | Staggered ALE FSI with a single-rank interface map. | PETSc + MPI |
+| [CoronaryArtery_FSI_Explicit_PETSc_Seq](CoronaryArtery_FSI_Explicit_PETSc_Seq/README.md) | Sequential staggered FSI with quadratic velocity and linear pressure. | PETSc |
+| [CoronaryArtery_FSI_PETSc_MPI](CoronaryArtery_FSI_PETSc_MPI/README.md) | Monolithic coronary ALE FSI prototype. | PETSc + MPI |
+| [CoronarySolid](CoronarySolid/README.md) | Coronary wall dynamics and a residual/tangent diagnostic. | Local |
+| [ProteinTest](ProteinTest/README.md) | Coagulation and washout in an ectatic tube. | PETSc |

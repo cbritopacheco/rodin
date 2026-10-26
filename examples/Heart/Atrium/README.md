@@ -21,6 +21,3 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default mesh is `resources/examples/Heart/Atrium/Coarse.mesh`. Override it with `-atrium_mesh`; `-atrium_dt`, `-atrium_flow_cycles`, and `-atrium_species_cycles` control the run.
-
-The driver source [`Atrium.cpp`](Atrium.cpp) contains the model parameters,
-solver settings, and output configuration.

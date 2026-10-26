@@ -21,6 +21,3 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default conforming mesh is `resources/examples/Heart/CoronaryArtery/MergedFSI.mesh`. Use `-coronary_fsi_mesh` to override it. Cell labels distinguish fluid and solid.
-
-The driver source [`CoronaryArtery_FSI_PETSc_MPI.cpp`](CoronaryArtery_FSI_PETSc_MPI.cpp) contains the model parameters,
-solver settings, and output configuration.

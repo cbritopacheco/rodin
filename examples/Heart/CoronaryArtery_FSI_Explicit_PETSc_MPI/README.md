@@ -21,6 +21,3 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default meshes are `resources/examples/Heart/CoronaryArtery/FSIFluid.mesh` and `FSISolid.mesh` in the same directory.
-
-The driver source [`CoronaryArtery_FSI_Explicit_PETSc_MPI.cpp`](CoronaryArtery_FSI_Explicit_PETSc_MPI.cpp) contains the model parameters,
-solver settings, and output configuration.

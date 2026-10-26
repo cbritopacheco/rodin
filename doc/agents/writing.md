@@ -86,6 +86,20 @@ Retain Doxygen mathematical delimiters for rendered expressions and explicit
 links to public concepts. A layout change must not discard assumptions,
 contracts, mathematical content, or existing cross-references.
 
+## README content
+
+READMEs describe the example or component for a reader without the development
+conversation. Explain its purpose, model, assumptions, inputs, configuration,
+outputs, limitations, and the commands needed to use it.
+
+Do not narrate reorganizations or editing work, carry over chat-specific
+requests or artifact history, or add reassurances such as “target names are
+unchanged.” Avoid generic descriptions of folder layouts or generated binary
+locations. Include concrete paths where they are needed in commands or to
+identify an input or output. Keep change summaries and compatibility notes in
+pull request descriptions; retain scientific provenance and numerical evidence
+when they explain the documented model or data.
+
 ## Editing checklist
 
 Before completion, verify that the main question and construction are visible,

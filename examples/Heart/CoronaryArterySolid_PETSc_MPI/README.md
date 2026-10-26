@@ -21,6 +21,3 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default mesh is `resources/examples/Heart/CoronaryArtery/Solid.mesh`.
-
-The driver source [`CoronaryArterySolid_PETSc_MPI.cpp`](CoronaryArterySolid_PETSc_MPI.cpp) contains the model parameters,
-solver settings, and output configuration.

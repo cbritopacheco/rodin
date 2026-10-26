@@ -11,7 +11,7 @@ Hill–Maxwell internal state is solved.
 In the original `Coarse.mesh` volume, label 6 identifies the basal cap. The
 original tetrahedra have volume material 1. In the wedge-only wall, the cap
 is absent and its boundary label is preserved on the adjoining rim faces.
-The wave uses this rim, rather than a Cartesian coordinate axis.
+The wave direction is determined by the basal rim.
 
 The inner vertices of rim 6 define a least-squares plane through their mean
 position \(b\). Its unit normal \(d\) is oriented toward the wall centroid.
@@ -25,8 +25,8 @@ s(X)=d\cdot(X-b),\qquad
 
 The wave crest starts on the fitted basal plane at \(t=0\) and moves in the
 positive \(d\)-direction. The first stored state is an equilibrium solve with
-that basal activation; it is not an unactivated initial snapshot. The last
-crest position is three widths past the maximum wall projection.
+that basal activation. The last crest position is three widths past the
+maximum wall projection.
 
 This is a strict planar pulse. A portion of the appendage lies behind the
 basal plane and therefore receives only the initial Gaussian tail. The
@@ -40,8 +40,7 @@ static nodal XDMF field for checking the plane orientation.
 
 ## Simple landmark-based fibers
 
-The supplied appendage-apex landmark is the centroid of the three picked
-points:
+The default left-appendage apex landmark is
 
 \[
 X_{\mathrm{LAA}}=(46.39638367,187.44307667,-205.03317767)\ \mathrm{mm}.
@@ -88,7 +87,7 @@ Critical points are handled explicitly. If the harmonic tangent vanishes,
 the projected direction toward the apex is used; at a remaining pole, a
 Cartesian tangent is chosen. `FiberFallback` flags these cells: 0 means the
 harmonic construction, 1 the geometric-apex fallback, and 2 the pole fallback.
-The supplied mesh has one fallback cell, inside the constant-potential apex
+The example mesh has one fallback cell, inside the constant-potential apex
 patch. `FiberCoordinate`, `LongitudinalDirection`, `WallNormal`, and
 `FiberDirection` are exported for inspection.
 
@@ -122,7 +121,7 @@ requires spatial, quadrature, and time refinement and material calibration.
 
 ## Build and run
 
-With a recent develop checkout containing the XDMF interpolation-order fix:
+From the repository root, using a configured build tree:
 
 ```sh
 cmake --build build --target AtriumContraction -j4
@@ -148,13 +147,12 @@ to each converged deformed cell before saving a mechanics snapshot.
 
 ## Mesh repair used for the demonstration
 
-The original label-4 surface had a small topological handle near
-\((45.15,191.5,-193.5)\ \mathrm{mm}\). The normal extrusion crossed inside
-that handle. MMG remeshing reduced the number of folded wedges substantially
-but retained the handle.
+The source label-4 surface contains a small topological handle near
+\((45.15,191.5,-193.5)\ \mathrm{mm}\). A direct normal extrusion folds inside
+that handle, which persists after MMGS remeshing.
 
-The separately saved repair candidate replaces the local handle patch with
-a disk, then uses Rodin's MMGS adaptation and normal extrusion:
+The example wall is constructed by replacing the local handle patch with
+a disk, followed by Rodin's MMGS adaptation and normal extrusion:
 
 1. Remesh the label-4 surface with tagged inlet/outlet boundary edges.
 2. Replace the handle patch selected within an 8 mm radius by a disk.
@@ -176,7 +174,7 @@ repaired-surface distances have mean 0.221 mm and maximum 4.692 mm; sampled
 repaired-vertex to original-surface distances have mean 0.024 mm and maximum
 2.027 mm. These are vertex-to-triangle samples, not certified Hausdorff
 bounds. Inspect the repaired patch before using the mesh for anatomical
-conclusions. Earlier source and combined meshes remain separate artifacts.
+conclusions.
 
 ## Reference run
 

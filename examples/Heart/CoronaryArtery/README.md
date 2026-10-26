@@ -1,6 +1,6 @@
 # CoronaryArtery
 
-Coronary flow coupled to the lumped left-ventricle model and intramyocardial outlet beds. The driver supports Oseen and Newton flow solves. Shared coronary model headers and postprocessing scripts also live in this folder.
+Coronary flow coupled to the lumped left-ventricle model and intramyocardial outlet beds. The driver supports Oseen and Newton flow solves.
 
 Requires `RODIN_USE_PETSC=ON` and `RODIN_USE_MPI=ON`.
 
@@ -21,6 +21,3 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default mesh is `resources/examples/Heart/CoronaryArtery/Output3D.mesh`. See `CoronaryArtery.cpp` for the PETSc options, including `-coronary_dt`, `-coronary_nsteps`, and `-coronary_output_prefix`.
-
-The driver source [`CoronaryArtery.cpp`](CoronaryArtery.cpp) contains the model parameters,
-solver settings, and output configuration.

@@ -19,6 +19,3 @@ Output files are written relative to the working directory.
 ## Input and configuration
 
 No input mesh is required.
-
-The driver source [`CCMLC2014_0D.cpp`](CCMLC2014_0D.cpp) contains the model parameters,
-solver settings, and output configuration.

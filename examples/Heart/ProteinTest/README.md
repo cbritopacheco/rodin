@@ -1,6 +1,6 @@
 # ProteinTest
 
-Sequential coagulation and washout testbed in a coronary-like tube with an ectatic segment. The outlet is traction-free. The mesh generators are included in this folder.
+Sequential coagulation and washout testbed in a coronary-like tube with an ectatic segment. The outlet is traction-free.
 
 Requires `RODIN_USE_PETSC=ON`; MPI is not required.
 
@@ -25,6 +25,3 @@ The default mesh is `resources/examples/Heart/ProteinTest.mesh`. Generate it fro
 ```sh
 python3 examples/Heart/ProteinTest/make_test_mesh.py resources/examples/Heart/ProteinTest.mesh
 ```
-
-The driver source [`ProteinTest.cpp`](ProteinTest.cpp) contains the model parameters,
-solver settings, and output configuration.
