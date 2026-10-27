@@ -101,6 +101,37 @@ class BackendRegistrationTest(unittest.TestCase):
                             "-I" + str(ROOT / "src"), str(source / "main.cpp"),
                             "-o", str(source / "header")], check=True, capture_output=True, text=True)
 
+    def test_curved_elasticity_boundary_enables_curved_workload(self):
+        _, build = self.configure("tests/convergence/isoparametric/LinearElasticity")
+        target = "RodinConvergenceIsoparametricPETScLinearElasticityBoundary"
+        flags = (build / f"cases/CMakeFiles/{target}.dir/flags.make").read_text()
+        self.assertIn("-DRODIN_ELASTICITY_BOUNDARY_CURVED", flags)
+
+    def test_curved_traction_budgets_preserve_studies_and_ranks(self):
+        tests, build = self.configure("tests/convergence/isoparametric/LinearElasticity")
+        prefix = "RodinConvergenceIsoparametricPETScLinearElasticityBoundary"
+        properties = {}
+        for command, args, *_ in ci.commands((build / "cases/CTestTestfile.cmake").read_text()):
+            if command == "set_tests_properties":
+                boundary = args.index("PROPERTIES")
+                values = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties.setdefault(name, {}).update(values)
+        for rank, degree, geometry in itertools.product(range(5), range(1, 4), GEOMETRIES):
+            suffix = f"_MPI_np{rank}" if rank else ""
+            name = f"{prefix}{suffix}_MixedTractionP{degree}Rates_{geometry}"
+            command = tests[name]
+            self.assertIn("--gtest_fail_if_no_test_selected", command)
+            suite = "MPITest" if rank else "LocalTest"
+            self.assertIn(f"--gtest_filter=AllGeometries/{suite}.MixedTractionP{degree}Rates/{geometry}", command)
+            expected = 14400 if degree == 1 else 7200
+            self.assertEqual(properties[name]["TIMEOUT"], str(expected if geometry == "Tetrahedron" else 1800))
+            if rank:
+                self.assertIn(str(rank), command)
+                self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+        job = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]["PETScCurvedBoundaryConvergence"]
+        self.assertIn("(matrix.physics == 'LinearElasticity' && matrix.geometry == 'tetrahedron') && 360", job["timeout-minutes"])
+
     def test_curved_elasticity_studies_have_exactly_one_process_each(self):
         tests, _ = self.configure("tests/convergence/isoparametric/LinearElasticity")
         text = (ROOT / "tests/convergence/isoparametric/LinearElasticity/LinearElasticity.cpp").read_text()

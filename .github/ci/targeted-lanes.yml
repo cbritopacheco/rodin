@@ -4386,7 +4386,7 @@ jobs:
       }}, Selection=${{ matrix.selection }}, Physics=${{ matrix.physics }}, Partition=${{ matrix.partition }})
   PETScCurvedBoundaryConvergence:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ matrix.physics == 'NonlinearPoisson' && 360 || matrix.physics == 'ReactionDiffusion' && 360 || 240 }}
+    timeout-minutes: ${{ matrix.physics == 'NonlinearPoisson' && 360 || matrix.physics == 'ReactionDiffusion' && 360 || (matrix.physics == 'LinearElasticity' && matrix.geometry == 'tetrahedron') && 360 || 240 }}
     strategy:
       fail-fast: false
       matrix:

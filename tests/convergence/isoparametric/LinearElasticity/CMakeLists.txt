@@ -76,18 +76,25 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
   rodin_add_petsc_refinement(RodinConvergenceIsoparametricPETScLinearElasticityBoundary
     ../../h/PETScLinearElasticity/Traction.cpp
     RATE_CASES MixedTractionP1Rates MixedTractionP2Rates MixedTractionP3Rates)
-  # The complete curved tetrahedral traction group took 1952 seconds locally.
-  # Preserve the numerical histories and isolate each degree under its own
-  # two-hour scheduling allowance; this is not a proven runtime bound.
+  target_compile_definitions(RodinConvergenceIsoparametricPETScLinearElasticityBoundary
+    PRIVATE RODIN_ELASTICITY_BOUNDARY_CURVED)
+  # The P1 tetrahedral history exceeded two hours in coverage CI: the
+  # first levels took 121 and 917 seconds, before the eightfold final
+  # refinement. Retain that history with a four-hour scheduling allowance;
+  # the other degrees retain two hours. These are not proven runtime bounds.
   foreach(degree 1 2 3)
+    set(_traction_timeout 7200)
+    if(degree EQUAL 1)
+      set(_traction_timeout 14400)
+    endif()
     set_tests_properties(
       RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP${degree}Rates_Tetrahedron
-      PROPERTIES TIMEOUT 7200)
+      PROPERTIES TIMEOUT ${_traction_timeout})
     if (RODIN_USE_MPI)
       foreach(np 1 2 3 4)
         set_tests_properties(
           RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MPI_np${np}_MixedTractionP${degree}Rates_Tetrahedron
-          PROPERTIES TIMEOUT 7200)
+          PROPERTIES TIMEOUT ${_traction_timeout})
       endforeach()
     endif()
   endforeach()
