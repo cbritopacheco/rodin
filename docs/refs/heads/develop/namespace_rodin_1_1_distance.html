@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md572">Available Methods</a></li>
-            <li><a href="#autotoc_md573">Eikonal Distance (FMM)</a></li>
-            <li><a href="#autotoc_md574">Poisson Distance Approximation</a></li>
-            <li><a href="#autotoc_md575">Level-Set Normalization</a></li>
+            <li><a href="#autotoc_md573">Available Methods</a></li>
+            <li><a href="#autotoc_md574">Eikonal Distance (FMM)</a></li>
+            <li><a href="#autotoc_md575">Poisson Distance Approximation</a></li>
+            <li><a href="#autotoc_md576">Level-Set Normalization</a></li>
             <li>
               Reference
               <ul>
@@ -134,7 +134,7 @@
 <use x='241.546144' y='-10.184024' xlink:href='#eq1-g3-107'/>
 <use x='247.523751' y='-10.184024' xlink:href='#eq1-g4-58'/>
 </g>
-</svg></div><p><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> constructs distance fields through fast marching, while <a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> and <a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a> provide PDE-based alternatives. These models convert boundary or level-set information into distance approximations for shape optimization, interface processing, and mesh adaptation.</p><section id="autotoc_md572"><h2><a href="#autotoc_md572">Available Methods</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Class</th><th>Equation</th><th>Properties</th></tr></thead><tbody><tr><td><strong>Eikonal</strong></td><td><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Distance::<wbr />Eikonal</a></td><td><svg class="m-math" style="width: 5.167em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.599878 11.955168">
+</svg></div><p><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> constructs distance fields through fast marching, while <a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> and <a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a> provide PDE-based alternatives. These models convert boundary or level-set information into distance approximations for shape optimization, interface processing, and mesh adaptation.</p><section id="autotoc_md573"><h2><a href="#autotoc_md573">Available Methods</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Class</th><th>Equation</th><th>Properties</th></tr></thead><tbody><tr><td><strong>Eikonal</strong></td><td><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Distance::<wbr />Eikonal</a></td><td><svg class="m-math" style="width: 5.167em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.599878 11.955168">
 <title>
 $ \lVert\nabla d\rVert = 1 $
 </title>
@@ -288,14 +288,14 @@ $ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\
 <use x='97.754366' y='6.711982' xlink:href='#eq6-g2-117'/>
 <use x='102.657336' y='6.711982' xlink:href='#eq6-g0-106'/>
 </g>
-</svg></td><td>Better gradient normalization than Rvachev; more accurate near the interface</td></tr></tbody></table><p>All methods except <a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> and <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> inherit from a common CRTP <code>Base&lt;Derived&gt;</code> that provides <code>setInterior()</code> and <code>setInterface()</code> methods for specifying the signed-distance regions (mesh boundary attributes).</p></section><section id="autotoc_md573"><h2><a href="#autotoc_md573">Eikonal Distance (FMM)</a></h2><p>The <a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> class wraps the FMM solver and provides the most accurate distance computation. Seeds are automatically identified from the interface attributes. Calling <code>sign()</code> after <code>solve()</code> negates interior values to produce a signed distance field.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></td><td>Better gradient normalization than Rvachev; more accurate near the interface</td></tr></tbody></table><p>All methods except <a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> and <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> inherit from a common CRTP <code>Base&lt;Derived&gt;</code> that provides <code>setInterior()</code> and <code>setInterface()</code> methods for specifying the signed-distance regions (mesh boundary attributes).</p></section><section id="autotoc_md574"><h2><a href="#autotoc_md574">Eikonal Distance (FMM)</a></h2><p>The <a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> class wraps the FMM solver and provides the most accurate distance computation. Seeds are automatically identified from the interface attributes. Calling <code>sign()</code> after <code>solve()</code> negates interior values to produce a signed distance field.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">GridFunction</span><span class="w"> </span><span class="nf">d</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="n">Distance</span><span class="o">::</span><span class="nc">Eikonal</span><span class="w"> </span><span class="nf">eikonal</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">eikonal</span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">)</span>
 <span class="w">       </span><span class="p">.</span><span class="n">setInterior</span><span class="p">(</span><span class="n">interiorAttr</span><span class="p">)</span>
 <span class="w">       </span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
-<span class="w">       </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span></pre></section><section id="autotoc_md574"><h2><a href="#autotoc_md574">Poisson Distance Approximation</a></h2><p><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> solves <svg class="m-math" style="width: 4.929em; height: 0.955em; vertical-align: -0.104em;" viewBox="0 -8.169366 47.315221 9.165637">
+<span class="w">       </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span></pre></section><section id="autotoc_md575"><h2><a href="#autotoc_md575">Poisson Distance Approximation</a></h2><p><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> solves <svg class="m-math" style="width: 4.929em; height: 0.955em; vertical-align: -0.104em;" viewBox="0 -8.169366 47.315221 9.165637">
 <title>
 $ -\Delta u = 1 $
 </title>
@@ -396,7 +396,7 @@ $ u = 0 $
 
 <span class="c1">// Signed Poisson distance with interface/region attributes</span>
 <span class="n">Distance</span><span class="o">::</span><span class="nc">SignedPoisson</span><span class="w"> </span><span class="n">signedPoisson</span><span class="p">;</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">d2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signedPoisson</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">regionAttr</span><span class="p">,</span><span class="w"> </span><span class="n">Vh</span><span class="p">);</span></pre></section><section id="autotoc_md575"><h2><a href="#autotoc_md575">Level-Set Normalization</a></h2><p><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> and <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> are post-processing operators that normalize an existing level-set field into an approximate distance function without solving any PDE:</p><pre class="m-code"><span class="n">Distance</span><span class="o">::</span><span class="nc">Rvachev</span><span class="w"> </span><span class="n">rvachev</span><span class="p">;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">d2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signedPoisson</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">regionAttr</span><span class="p">,</span><span class="w"> </span><span class="n">Vh</span><span class="p">);</span></pre></section><section id="autotoc_md576"><h2><a href="#autotoc_md576">Level-Set Normalization</a></h2><p><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> and <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> are post-processing operators that normalize an existing level-set field into an approximate distance function without solving any PDE:</p><pre class="m-code"><span class="n">Distance</span><span class="o">::</span><span class="nc">Rvachev</span><span class="w"> </span><span class="n">rvachev</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">dR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rvachev</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span>
 
 <span class="n">Distance</span><span class="o">::</span><span class="nc">SpaldingTucker</span><span class="w"> </span><span class="n">st</span><span class="p">;</span>
@@ -470,7 +470,7 @@ $ u = 0 $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

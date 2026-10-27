@@ -76,10 +76,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md221">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md222">Higher Dimensions</a></li>
-            <li><a href="#autotoc_md223">Supported Geometries</a></li>
-            <li><a href="#autotoc_md224">Architecture</a></li>
+            <li><a href="#autotoc_md222">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md223">Higher Dimensions</a></li>
+            <li><a href="#autotoc_md224">Supported Geometries</a></li>
+            <li><a href="#autotoc_md225">Architecture</a></li>
             <li>
               Reference
               <ul>
@@ -154,7 +154,7 @@ $ P&#x27;_{n-1}(x) $
 <use x='28.554618' y='0' xlink:href='#eq4-g2-120'/>
 <use x='35.206705' y='0' xlink:href='#eq4-g4-41'/>
 </g>
-</svg>.</p><section id="autotoc_md221"><h2><a href="#autotoc_md221">Mathematical Foundation</a></h2><p>The 1D Gauss-Lobatto rule with <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+</svg>.</p><section id="autotoc_md222"><h2><a href="#autotoc_md222">Mathematical Foundation</a></h2><p>The 1D Gauss-Lobatto rule with <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
 <title>
 $ n $
 </title>
@@ -249,7 +249,7 @@ $ x_i $
 <use x='251.010538' y='-13.239141' xlink:href='#eq9-g2-105'/>
 <use x='254.39181' y='-15.032404' xlink:href='#eq9-g5-41'/>
 </g>
-</svg></div></section><section id="autotoc_md222"><h2><a href="#autotoc_md222">Higher Dimensions</a></h2><p>For tensor-product geometries (quadrilaterals, wedges), the rule is constructed via tensor products of 1D Gauss-Lobatto rules. For simplicial geometries (triangles, tetrahedra), the Duffy transformation is applied:</p><ul><li>Triangle: <svg class="m-math" style="width: 10.822em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 103.890642 11.955168">
+</svg></div></section><section id="autotoc_md223"><h2><a href="#autotoc_md223">Higher Dimensions</a></h2><p>For tensor-product geometries (quadrilaterals, wedges), the rule is constructed via tensor products of 1D Gauss-Lobatto rules. For simplicial geometries (triangles, tetrahedra), the Duffy transformation is applied:</p><ul><li>Triangle: <svg class="m-math" style="width: 10.822em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 103.890642 11.955168">
 <title>
 $ (r,s) = (u, (1-u)v) $
 </title>
@@ -403,7 +403,7 @@ $ 2n-3 $
 <use x='15.497259' y='0' xlink:href='#eq15-g0-0'/>
 <use x='27.45242' y='0' xlink:href='#eq15-g2-51'/>
 </g>
-</svg>. Conical products are not fully symmetric under vertex permutations. A pyramid integrand evaluated at the apex must have a defined value or documented trace; rational finite-element derivatives need not have a direction-independent limit there.</li></ul></section><section id="autotoc_md223"><h2><a href="#autotoc_md223">Supported Geometries</a></h2><ul><li>Point</li><li>Segment</li><li>Triangle</li><li>Quadrilateral</li><li>Tetrahedron</li><li>Wedge</li><li>Pyramid</li><li>Hexahedron</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Requires at least <svg class="m-math" style="width: 2.998em; height: 0.972em; vertical-align: -0.170em;" viewBox="0 -7.704442 28.780752 9.329999">
+</svg>. Conical products are not fully symmetric under vertex permutations. A pyramid integrand evaluated at the apex must have a defined value or documented trace; rational finite-element derivatives need not have a direction-independent limit there.</li></ul></section><section id="autotoc_md224"><h2><a href="#autotoc_md224">Supported Geometries</a></h2><ul><li>Point</li><li>Segment</li><li>Triangle</li><li>Quadrilateral</li><li>Tetrahedron</li><li>Wedge</li><li>Pyramid</li><li>Hexahedron</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Requires at least <svg class="m-math" style="width: 2.998em; height: 0.972em; vertical-align: -0.170em;" viewBox="0 -7.704442 28.780752 9.329999">
 <title>
 $ n \geq 2 $
 </title>
@@ -417,7 +417,7 @@ $ n \geq 2 $
 <use x='10.308435' y='0' xlink:href='#eq16-g0-21'/>
 <use x='22.927761' y='0' xlink:href='#eq16-g2-50'/>
 </g>
-</svg> points per direction for proper Lobatto quadrature (to include both endpoints).</p></aside></section><section id="autotoc_md224"><h2><a href="#autotoc_md224">Architecture</a></h2><p>Constructors own their nodes and weights. <a href="#a7e3f3043fc9dcd86e0e890cc01c06a60" class="m-doc">get</a> returns immutable published formulas keyed by geometry and point count. Their permanent addresses select mapped quadrature caches. A thread-local hot cache avoids repeated locking; a process-wide pool owns the rules until program termination.</p></section>
+</svg> points per direction for proper Lobatto quadrature (to include both endpoints).</p></aside></section><section id="autotoc_md225"><h2><a href="#autotoc_md225">Architecture</a></h2><p>Constructors own their nodes and weights. <a href="#a7e3f3043fc9dcd86e0e890cc01c06a60" class="m-doc">get</a> returns immutable published formulas keyed by geometry and point count. Their permanent addresses select mapped quadrature caches. A thread-local hot cache avoids repeated locking; a process-wide pool owns the rules until program termination.</p></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" title="QuadratureFormulaBase">QuadratureFormulaBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GaussLobatto</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html"><code>QuadratureFormulaBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html"><span class="nc">QuadratureFormulaBase</span></a>
 </pre></details></td><td>Read-only access to reference quadrature points and weights.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html#a3eae8327ca1fb513e25290e9d367039f"><code>getSamples()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#ac9de85c2457236f7e87494d48158e743">QuadratureFormulaBase::getSamples</a></td></tr><tr><td><a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html#a23e73ba10e16901b2326d8212936b72b"><code>getSize()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a319cde5b2ea76e92e922845ecfa5c615">QuadratureFormulaBase::getSize</a></td></tr><tr><td><a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html#a3d9ae6d6960698e83f7b4f81ad9c40e3"><code>getPoint()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a498c8f41a2a0208b3c64510e52fa04f6">QuadratureFormulaBase::getPoint</a></td></tr><tr><td><a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html#a56b74ff92cb5876bea3ef654457be465"><code>getWeight()</code></a></td><td><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html#a37791e12d1a664c6d31f69c0b2e2b69f">QuadratureFormulaBase::getWeight</a></td></tr></tbody></table></section>
         <section id="pub-types">
@@ -871,7 +871,7 @@ $ w_i $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

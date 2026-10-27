@@ -78,12 +78,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md300">Algorithm</a></li>
-            <li><a href="#autotoc_md301">Applicability</a></li>
-            <li><a href="#autotoc_md302">Usage Example</a></li>
+            <li><a href="#autotoc_md301">Algorithm</a></li>
+            <li><a href="#autotoc_md302">Applicability</a></li>
+            <li><a href="#autotoc_md303">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header provides a wrapper for the UMFPACK solver from SuiteSparse, a high-performance direct solver for general sparse matrices using multifrontal LU factorization.</p><section id="autotoc_md300"><h2><a href="#autotoc_md300">Algorithm</a></h2><p>UMFPACK computes:</p><div class="m-math"><svg style="width: 6.263em; height: 1.093em;" viewBox="164.207723 -10.493961 60.127564 10.493973">
+<p>This header provides a wrapper for the UMFPACK solver from SuiteSparse, a high-performance direct solver for general sparse matrices using multifrontal LU factorization.</p><section id="autotoc_md301"><h2><a href="#autotoc_md301">Algorithm</a></h2><p>UMFPACK computes:</p><div class="m-math"><svg style="width: 6.263em; height: 1.093em;" viewBox="164.207723 -10.493961 60.127564 10.493973">
 <title>
 \[     PAQ = LU
 \]
@@ -144,7 +144,7 @@ $ U $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-85'/>
 </g>
-</svg> is upper triangular. The multifrontal method processes the matrix using an assembly tree for efficiency.</p></section><section id="autotoc_md301"><h2><a href="#autotoc_md301">Applicability</a></h2><ul><li>General sparse matrices (non-symmetric, non-positive definite)</li><li>Large-scale problems</li><li>Circuit simulation</li><li>Structural analysis</li><li>Computational fluid dynamics</li></ul></section><section id="autotoc_md302"><h2><a href="#autotoc_md302">Usage Example</a></h2><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is upper triangular. The multifrontal method processes the matrix using an assembly tree for efficiency.</p></section><section id="autotoc_md302"><h2><a href="#autotoc_md302">Applicability</a></h2><ul><li>General sparse matrices (non-symmetric, non-positive definite)</li><li>Large-scale problems</li><li>Circuit simulation</li><li>Structural analysis</li><li>Computational fluid dynamics</li></ul></section><section id="autotoc_md303"><h2><a href="#autotoc_md303">Usage Example</a></h2><pre class="m-code"><span class="nc">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">UMFPack</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
@@ -187,7 +187,7 @@ $ U $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

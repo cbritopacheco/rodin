@@ -568,7 +568,7 @@
                 </tr>
               </tbody>
             </table>
-<h4 id="autotoc_md162">Example</h4><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"output/simulation"</span><span class="p">);</span>
+<h4 id="autotoc_md163">Example</h4><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"output/simulation"</span><span class="p">);</span>
 <span class="c1">// produces: output/simulation.xdmf, output/simulation.*.h5, ...</span></pre>
           </div></section>
           <section class="m-doc-details" id="ac2713ab30ef446503bc9bba304abacac"><div>
@@ -597,7 +597,7 @@
                 </tr>
               </tbody>
             </table>
-<p>In distributed mode:</p><ul><li>Each rank writes its own rank-specific HDF5 visualization files (using <code>{rank}</code> in the file patterns).</li><li>Only the root rank writes the master <code>.xdmf</code> XML file that references all per-rank piece files as a Spatial collection.</li><li>For transient output, the master XDMF contains a Temporal collection of Spatial collections.</li><li>write(), flush(), and close() are collective operations that must be called by all ranks.</li></ul><h4 id="autotoc_md163">Example</h4><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span><span class="w"> </span><span class="s">"output/Poisson"</span><span class="p">);</span>
+<p>In distributed mode:</p><ul><li>Each rank writes its own rank-specific HDF5 visualization files (using <code>{rank}</code> in the file patterns).</li><li>Only the root rank writes the master <code>.xdmf</code> XML file that references all per-rank piece files as a Spatial collection.</li><li>For transient output, the master XDMF contains a Temporal collection of Spatial collections.</li><li>write(), flush(), and close() are collective operations that must be called by all ranks.</li></ul><h4 id="autotoc_md164">Example</h4><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span><span class="w"> </span><span class="s">"output/Poisson"</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">"u"</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="nc">XDMF</span><span class="o">::</span><span class="nc">Center</span><span class="o">::</span><span class="no">Node</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
@@ -1145,7 +1145,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

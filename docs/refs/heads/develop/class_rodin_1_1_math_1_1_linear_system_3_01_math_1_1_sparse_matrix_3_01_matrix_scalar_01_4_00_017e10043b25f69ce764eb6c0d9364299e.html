@@ -433,7 +433,7 @@ $ x $
                 </tr>
               </tbody>
             </table>
-<h4 id="autotoc_md165">Architecture</h4><p>Let <svg class="m-math" style="width: 0.962em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.233623 8.169366">
+<h4 id="autotoc_md166">Architecture</h4><p>Let <svg class="m-math" style="width: 0.962em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.233623 8.169366">
 <title>
 $C$
 </title>
@@ -588,7 +588,7 @@ $x_C=g_C$
 <use x='29.495197' y='0' xlink:href='#eq11-g1-103'/>
 <use x='35.100505' y='1.793263' xlink:href='#eq11-g0-67'/>
 </g>
-</svg>. Neither symmetry of values nor transpose storage is required. In particular, no conjugation enters the lifting for complex systems. The solution vector is preserved for warm starts.</p><h4 id="autotoc_md166">Implementation</h4><p>All constrained columns contribute to the load before any coefficient is cleared. Their diagonal positions are recorded after each column&#x27;s traversal. Absent diagonals are inserted together by one backwards merge of the compressed arrays, preserving sorted row indices and all existing stored entries, including explicit zeros.</p><p>A byte per row identifies constraints. Adjacent constrained columns are cleared as contiguous storage ranges. Between these ranges, blocks of sixteen row indices form a bit mask: empty masks require no coefficient stores, while nonempty masks visit only their set bits. Sixteen is a kernel granularity, not a numerical threshold. The tail uses bit masking for Real and conditional zero assignment for other scalars; multiplication by zero would not clear nonfinite values. Finally the diagonals and prescribed load entries are restored.</p><p>For a single contiguous constraint interval, a bounded sample may select exact row-range pruning. This heuristic requires at least eight entries per column on average and at least half of sixteen storage- quantile samples to reject the interval. These measured policy choices select a kernel only: each skipped column is independently certified by its actual row bounds. Partial columns use binary searches. Fragmented constraints always use the block kernel.</p><p>With <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+</svg>. Neither symmetry of values nor transpose storage is required. In particular, no conjugation enters the lifting for complex systems. The solution vector is preserved for warm starts.</p><h4 id="autotoc_md167">Implementation</h4><p>All constrained columns contribute to the load before any coefficient is cleared. Their diagonal positions are recorded after each column&#x27;s traversal. Absent diagonals are inserted together by one backwards merge of the compressed arrays, preserving sorted row indices and all existing stored entries, including explicit zeros.</p><p>A byte per row identifies constraints. Adjacent constrained columns are cleared as contiguous storage ranges. Between these ranges, blocks of sixteen row indices form a bit mask: empty masks require no coefficient stores, while nonempty masks visit only their set bits. Sixteen is a kernel granularity, not a numerical threshold. The tail uses bit masking for Real and conditional zero assignment for other scalars; multiplication by zero would not clear nonfinite values. Finally the diagonals and prescribed load entries are restored.</p><p>For a single contiguous constraint interval, a bounded sample may select exact row-range pruning. This heuristic requires at least eight entries per column on average and at least half of sixteen storage- quantile samples to reject the interval. These measured policy choices select a kernel only: each skipped column is independently certified by its actual row bounds. Partial columns use binary searches. Fragmented constraints always use the block kernel.</p><p>With <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
 <title>
 $n$
 </title>
@@ -1001,7 +1001,7 @@ $ x $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

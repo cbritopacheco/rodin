@@ -77,7 +77,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md625">Representative use</a></li>
+            <li><a href="#autotoc_md626">Representative use</a></li>
             <li>
               Reference
               <ul>
@@ -87,7 +87,7 @@
             </li>
           </ul>
         </nav>
-<pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><p><a href="#ad5c6ff77549565037bd0b324918edf80" class="m-doc">CCMLC2014T</a> advances a reduced ventricular model through a cardiac cycle. <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">HolzapfelReducedLaw</a> and <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_passive_law.html" class="m-doc">CCMLC2014PassiveLaw</a> supply its reduced passive energy and stress response. The module supports cardiac-cycle studies and constitutive parameter calibration before larger three-dimensional simulations.</p><p>0D models integrate ordinary differential equations over a heartbeat and are orders of magnitude cheaper than 3D simulations; parameters should round-trip between the 0D cycle and the corresponding 3D laws before debugging full simulations.</p><section id="autotoc_md625"><h2><a href="#autotoc_md625">Representative use</a></h2><p>The reduced ventricular model advances a configured state with a nonlinear time step:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Heart</span><span class="o">::</span><span class="nc">CCMLC2014T</span><span class="o">&lt;&gt;</span><span class="p">;</span>
+<pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><p><a href="#ad5c6ff77549565037bd0b324918edf80" class="m-doc">CCMLC2014T</a> advances a reduced ventricular model through a cardiac cycle. <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">HolzapfelReducedLaw</a> and <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_passive_law.html" class="m-doc">CCMLC2014PassiveLaw</a> supply its reduced passive energy and stress response. The module supports cardiac-cycle studies and constitutive parameter calibration before larger three-dimensional simulations.</p><p>0D models integrate ordinary differential equations over a heartbeat and are orders of magnitude cheaper than 3D simulations; parameters should round-trip between the 0D cycle and the corresponding 3D laws before debugging full simulations.</p><section id="autotoc_md626"><h2><a href="#autotoc_md626">Representative use</a></h2><p>The reduced ventricular model advances a configured state with a nonlinear time step:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">Model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Heart</span><span class="o">::</span><span class="nc">CCMLC2014T</span><span class="o">&lt;&gt;</span><span class="p">;</span>
 <span class="nc">Model</span><span class="o">::</span><span class="nc">Input</span><span class="w"> </span><span class="n">input</span><span class="p">;</span>
 <span class="nc">Model</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">report</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><p>Material, loading and initialization parameters in <code>input</code> must be chosen for the intended experiment before advancing the model.</p></section>
@@ -203,7 +203,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

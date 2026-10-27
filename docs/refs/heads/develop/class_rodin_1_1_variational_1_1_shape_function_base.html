@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md530">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md531">Usage</a></li>
+            <li><a href="#autotoc_md531">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md532">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for shape functions in finite element spaces.</p><p>ShapeFunctionBase provides the foundation for representing finite element basis functions (shape functions) in both trial and test spaces. Shape functions are the building blocks of finite element approximations.</p><section id="autotoc_md530"><h2><a href="#autotoc_md530">Mathematical Foundation</a></h2><p>In the finite element method, functions are approximated using a linear combination of basis functions (shape functions):</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+<p>Base class for shape functions in finite element spaces.</p><p>ShapeFunctionBase provides the foundation for representing finite element basis functions (shape functions) in both trial and test spaces. Shape functions are the building blocks of finite element approximations.</p><section id="autotoc_md531"><h2><a href="#autotoc_md531">Mathematical Foundation</a></h2><p>In the finite element method, functions are approximated using a linear combination of basis functions (shape functions):</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
 \[  u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
 \]
@@ -262,7 +262,7 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='51.379235' y='1.793263' xlink:href='#eq9-g0-105'/>
 <use x='54.262375' y='1.793263' xlink:href='#eq9-g0-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md531"><h2><a href="#autotoc_md531">Usage</a></h2><p>ShapeFunctionBase is a CRTP base class. Derived classes include:</p><ul><li>TrialFunction: Represents <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg></li></ul></section><section id="autotoc_md532"><h2><a href="#autotoc_md532">Usage</a></h2><p>ShapeFunctionBase is a CRTP base class. Derived classes include:</p><ul><li>TrialFunction: Represents <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -402,7 +402,7 @@ $ v $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</dd>
+            <dd>Recommends an integration order for the shape expression.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1428ee337cebecb42cce3db0724526bb" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a0abc221d3661e40c6eeeaefabaa145aa" class="m-doc">ShapeFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -787,7 +787,7 @@ $ v $
               
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</p>
+            <p>Recommends an integration order for the shape expression.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -795,17 +795,17 @@ $ v $
               <tbody>
                 <tr>
                   <td style="width: 1%">poly</td>
-                  <td>Polytope on which the order is queried.</td>
+                  <td>Entity supplying reference geometry and coordinate mapping.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Polynomial order bound, or std::nullopt if not polynomial.</td>
+                  <td>An automatic integration recommendation, or no established estimate.</td>
                 </tr>
               </tfoot>
             </table>
-<p>The returned value is a <strong>safe upper bound</strong> on the total polynomial degree of the expression in reference coordinates, ignoring the geometry map.</p><ul><li>Used for quadrature selection and composition rules.</li><li>May depend on the reference geometry (simplex, tensor-product, wedge).</li><li>Returns std::nullopt for non-polynomial expressions.</li><li>The value is not guaranteed to be sharp.</li></ul>
+<p>The recommendation uses the operation, reference family and geometry. A nonpolynomial accuracy estimate does not assert exactness. Zero certifies an elementwise constant expression; an empty result means no estimate is established. Explicit integrator orders remain authoritative.</p>
           </div></section>
           <section class="m-doc-details" id="a1428ee337cebecb42cce3db0724526bb"><div>
             <h3>
@@ -861,7 +861,7 @@ $ v $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

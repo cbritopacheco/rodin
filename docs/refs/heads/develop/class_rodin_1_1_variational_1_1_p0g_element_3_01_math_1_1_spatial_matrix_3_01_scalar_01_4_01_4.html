@@ -181,6 +181,14 @@
             </dt>
             <dd>Returns the polynomial order when it is known.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1a4b254bdf003c3544ffbaf49a5d086" class="m-doc">getDegree</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the total polynomial degree of the reference basis.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af737a5b8ced763ee2a01bd7cea1cb9ea" class="m-doc">getDegree</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;size_t&gt; directions) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            </dt>
+            <dd>Returns a degree bound in selected reference coordinates.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the number of matrix rows.</dd>
@@ -409,6 +417,45 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ab1a4b254bdf003c3544ffbaf49a5d086"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1a4b254bdf003c3544ffbaf49a5d086" class="m-doc-self">getDegree</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the total polynomial degree of the reference basis.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Zero for the constant reference basis.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af737a5b8ced763ee2a01bd7cea1cb9ea"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af737a5b8ced763ee2a01bd7cea1cb9ea" class="m-doc-self">getDegree</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;size_t&gt; directions) const</span></span>
+            </h3>
+            <p>Returns a degree bound in selected reference coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">directions</td>
+                  <td>Reference-coordinate indices; duplicates are ignored.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The bound, or no value for invalid or unsupported selections.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0af0bdf821ec4bd24b0e14e7722f5f37"><div>
             <h3>
               
@@ -565,7 +612,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

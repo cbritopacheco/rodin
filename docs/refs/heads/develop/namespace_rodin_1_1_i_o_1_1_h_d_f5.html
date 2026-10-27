@@ -1305,11 +1305,11 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>True when at least one exported cell has factor order greater than one.</td>
+                  <td>True when an exported cell is not certified as native first-order geometry.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Topology follows interpolation order, rather than total polynomial degree: first-order product cells already have total degree greater than one. The transformation&#x27;s factor-order contract retains a conservative bound when a custom transformation cannot provide a sharper interpolation order.</p>
+<p>Topology follows interpolation order, rather than total polynomial degree: first-order product cells already have total degree greater than one. Unknown transformations conservatively use quadratic visualization sampling.</p>
           </div></section>
           <section class="m-doc-details" id="a6a52c76ceb79aec44c3331d38ace5bf3"><div>
             <h3>
@@ -2087,7 +2087,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

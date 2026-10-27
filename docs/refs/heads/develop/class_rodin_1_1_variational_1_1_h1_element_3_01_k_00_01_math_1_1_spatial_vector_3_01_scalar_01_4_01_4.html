@@ -81,10 +81,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md401">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md402">Component Structure</a></li>
-            <li><a href="#autotoc_md403">Applications</a></li>
-            <li><a href="#autotoc_md404">Usage Example</a></li>
+            <li><a href="#autotoc_md402">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md403">Component Structure</a></li>
+            <li><a href="#autotoc_md404">Applications</a></li>
+            <li><a href="#autotoc_md405">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).</p><section id="autotoc_md401"><h2><a href="#autotoc_md401">Mathematical Properties</a></h2><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 3.291em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 31.598041 10.095454">
+<p>Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).</p><section id="autotoc_md402"><h2><a href="#autotoc_md402">Mathematical Properties</a></h2><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 3.291em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 31.598041 10.095454">
 <title>
 $ d \times n_s $
 </title>
@@ -236,7 +236,7 @@ $ \mathbf{u} $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-117'/>
 </g>
-</svg> is the vector field</li><li><strong>Continuity</strong>: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)</li></ul></section><section id="autotoc_md402"><h2><a href="#autotoc_md402">Component Structure</a></h2><p>Each vector basis function is non-zero in only one component:</p><ul><li>Basis function <code>i*vdim + c</code> has value <svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
+</svg> is the vector field</li><li><strong>Continuity</strong>: C⁰ continuous vector field (each component is C⁰ continuous, H¹-conforming)</li></ul></section><section id="autotoc_md403"><h2><a href="#autotoc_md403">Component Structure</a></h2><p>Each vector basis function is non-zero in only one component:</p><ul><li>Basis function <code>i*vdim + c</code> has value <svg class="m-math" style="width: 2.715em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.066112 11.955168">
 <title>
 $ \phi_i(x) $
 </title>
@@ -254,7 +254,7 @@ $ \phi_i(x) $
 <use x='14.8617' y='0' xlink:href='#eq9-g1-120'/>
 <use x='21.513787' y='0' xlink:href='#eq9-g2-41'/>
 </g>
-</svg> in component c, zero elsewhere</li><li>This allows efficient assembly and clear physical interpretation</li></ul></section><section id="autotoc_md403"><h2><a href="#autotoc_md403">Applications</a></h2><ul><li><strong>Linear elasticity</strong>: Displacement field <svg class="m-math" style="width: 2.420em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.228719 11.955168">
+</svg> in component c, zero elsewhere</li><li>This allows efficient assembly and clear physical interpretation</li></ul></section><section id="autotoc_md404"><h2><a href="#autotoc_md404">Applications</a></h2><ul><li><strong>Linear elasticity</strong>: Displacement field <svg class="m-math" style="width: 2.420em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.228719 11.955168">
 <title>
 $ \mathbf{u}(x) $
 </title>
@@ -302,7 +302,7 @@ $ \mathbf{E}(x) $
 <use x='13.380335' y='0' xlink:href='#eq12-g1-120'/>
 <use x='20.032422' y='0' xlink:href='#eq12-g2-41'/>
 </g>
-</svg></li><li><strong>General vector PDEs</strong>: Any vector-valued unknown</li></ul></section><section id="autotoc_md404"><h2><a href="#autotoc_md404">Usage Example</a></h2><pre class="m-code"><span class="c1">// 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs</span>
+</svg></li><li><strong>General vector PDEs</strong>: Any vector-valued unknown</li></ul></section><section id="autotoc_md405"><h2><a href="#autotoc_md405">Usage Example</a></h2><pre class="m-code"><span class="c1">// 2D vector H1 element of degree 2 on triangle - 6 nodes × 2 components = 12 DOFs</span>
 <span class="nc">VectorH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 12</span>
 
@@ -312,9 +312,9 @@ $ \mathbf{E}(x) $
 
 <span class="c1">// Get Jacobian matrix</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">jac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">getJacobian</span><span class="p">()(</span><span class="n">pt</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns 2×2 matrix</span></pre><aside class="m-note m-default"><h4>See also</h4><p>H1Element&lt;K, Scalar&gt; for scalar-valued version</p></aside></section>
-        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" title="FiniteElementBase&lt; H1Element&lt; K, Scalar &gt; &gt;; FiniteElementBase&lt; H1Element&lt; K, Math::SpatialVector&lt; Scalar &gt; &gt; &gt;">FiniteElementBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">H1Element</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_base.html"><code>FiniteElementBase&lt;H1Element&lt;K, Scalar&gt;&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a53c40b18e8f77c35307ebd37bf12b8a6"><span class="nc">FiniteElementBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
-</pre></details></td><td>Base class for finite elements.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_base.html"><code>FiniteElementBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a53c40b18e8f77c35307ebd37bf12b8a6"><span class="nc">FiniteElementBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
-</pre></details></td><td>Base class for finite elements.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element</code></a></td><td><details><summary>9 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a9380058543a0871ca31f78aafac33adb"><code>evaluate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#ad5cc945ca3d303969295f4372d87030c"><code>findTabulation()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a0d503758db9ab2f10ee0acdb137b422d"><code>getNodeIndex()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a423ce505bd641d876992fd87242c6870"><code>getNodes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a4e80a5a425b7c9f842e4182cc68abbe7"><code>getTabulation()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a24cf32f8d9c9045844486a731247b8fc"><code>Gradients</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a169db9f10ee718c00f30decb8e8ee819"><code>tabulate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a9338b663a25b32cd50c52d3ad9b5fb53"><code>Tabulation</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#aedd7f98d41d6cb78cf591e81142bab76"><code>Values</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_base.html"><code>FiniteElementBase</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a31877fd761e82217b0cafe1757d2dab0"><code>getGeometry()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a4341aa8c71a1769aa8e88ec085c0078c"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#ab703e9eec08b5fa84a539aedad7dd52f"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html" title="LagrangeFiniteElementBase&lt; H1Element&lt; K, Scalar &gt; &gt;; LagrangeFiniteElementBase&lt; H1Element&lt; K, Math::SpatialVector&lt; Scalar &gt; &gt; &gt;">LagrangeFiniteElementBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">H1Element</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html"><code>LagrangeFiniteElementBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html"><span class="nc">LagrangeFiniteElementBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Common reference-space properties of Lagrange element families.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html"><code>LagrangeFiniteElementBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html"><span class="nc">LagrangeFiniteElementBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">H1Element</span><span class="o">&lt;</span><span class="w"> </span><span class="n">K</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_spatial_vector.html"><span class="nc">SpatialVector</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Scalar</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Common reference-space properties of Lagrange element families.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_finite_element_base.html"><code>FiniteElementBase</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#aca686e68d6d96e0f0813fac17af8ee23"><code>evaluate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a31877fd761e82217b0cafe1757d2dab0"><code>getGeometry()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a4341aa8c71a1769aa8e88ec085c0078c"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_finite_element_base.html#ab703e9eec08b5fa84a539aedad7dd52f"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_h1_element.html"><code>H1Element</code></a></td><td><details><summary>8 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#ad5cc945ca3d303969295f4372d87030c"><code>findTabulation()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a0d503758db9ab2f10ee0acdb137b422d"><code>getNodeIndex()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a423ce505bd641d876992fd87242c6870"><code>getNodes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a4e80a5a425b7c9f842e4182cc68abbe7"><code>getTabulation()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a24cf32f8d9c9045844486a731247b8fc"><code>Gradients</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a169db9f10ee718c00f30decb8e8ee819"><code>tabulate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#a9338b663a25b32cd50c52d3ad9b5fb53"><code>Tabulation</code></a></li><li><a href="class_rodin_1_1_variational_1_1_h1_element.html#aedd7f98d41d6cb78cf591e81142bab76"><code>Values</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html"><code>LagrangeFiniteElementBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html#a8361787754b76385a32304e8a33edf84"><code>getLagrangeDegree()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -326,8 +326,8 @@ $ \mathbf{E}(x) $
               class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>
             </dt>
             <dd>Basis function of the vector-valued H1 element.</dd>
-            <dt id="a1b837615d7707ae06d044ff618d6b262">
-              using <a href="#a1b837615d7707ae06d044ff618d6b262" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>&lt;H1Element&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;&gt;
+            <dt id="ac0be870b96295185f6f97baf895af20a">
+              using <a href="#ac0be870b96295185f6f97baf895af20a" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_lagrange_finite_element_base.html" class="m-doc">LagrangeFiniteElementBase</a>&lt;H1Element&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
             <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
@@ -420,13 +420,17 @@ $ \mathbf{E}(x) $
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </div></details></dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1a4b254bdf003c3544ffbaf49a5d086" class="m-doc">getDegree</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a total polynomial degree bound for the reference basis.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af737a5b8ced763ee2a01bd7cea1cb9ea" class="m-doc">getDegree</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;size_t&gt; directions) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            </dt>
+            <dd>Returns a degree bound in selected reference coordinates.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the polynomial order.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8d3bbc3418fbf88579c4354ec32c6839" class="m-doc">getFactorOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Degree of each simplex, tensor, or collapsed-coordinate factor.</dd>
+            <dd>Returns the finite-element family index.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
@@ -437,12 +441,6 @@ $ \mathbf{E}(x) $
               <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_h1_element.html#a169db9f10ee718c00f30decb8e8ee819" class="m-doc">tabulate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; point) const -&gt; Evaluation&lt;ReferenceGeometry&gt;</span>
             </dt>
             <dd>Prepares shared modal derivatives for nodal gradient evaluation.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="class_rodin_1_1_variational_1_1_h1_element.html#a9380058543a0871ca31f78aafac33adb" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">Range&amp; out,
-              Coefficient&amp;&amp; coefficient,
-              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const</span>
-            </dt>
-            <dd>Evaluates a local finite element expansion on the reference element.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_h1_element.html#a4e80a5a425b7c9f842e4182cc68abbe7" class="m-doc">getTabulation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; qf) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element.html#a9338b663a25b32cd50c52d3ad9b5fb53" class="m-doc">Tabulation</a>&amp;</span>
             </dt>
@@ -720,32 +718,56 @@ $ \mathbf{E}(x) $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ab1a4b254bdf003c3544ffbaf49a5d086"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1a4b254bdf003c3544ffbaf49a5d086" class="m-doc-self">getDegree</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns a total polynomial degree bound for the reference basis.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A total degree bound, or no polynomial bound for rational pyramids.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af737a5b8ced763ee2a01bd7cea1cb9ea"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af737a5b8ced763ee2a01bd7cea1cb9ea" class="m-doc-self">getDegree</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;size_t&gt; directions) const</span></span>
+            </h3>
+            <p>Returns a degree bound in selected reference coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">directions</td>
+                  <td>Reference-coordinate indices; duplicates are ignored.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The bound, or no value for invalid or unsupported selections.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a15b23d5374f96033b06313f150a05b96"><div>
             <h3>
               
               <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Returns the polynomial order.</p>
+            <p>Returns the finite-element family index.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Polynomial order of the finite element.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a8d3bbc3418fbf88579c4354ec32c6839"><div>
-            <h3>
-              
-              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d3bbc3418fbf88579c4354ec32c6839" class="m-doc-self">getFactorOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Degree of each simplex, tensor, or collapsed-coordinate factor.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>The factor order.</td>
+                  <td>The family index, independently of the reference geometry.</td>
                 </tr>
               </tfoot>
             </table>
@@ -849,7 +871,7 @@ $ \mathbf{E}(x) $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -89,19 +89,20 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md147">Usage Example</a></li>
+            <li><a href="#autotoc_md148">Usage Example</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pro-methods">Protected functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Abstract base class template for loading objects from streams or files.</p><p>The Loader class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li><a href="#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> - Load object from an input stream</li><li><a href="#aa4f907de0650109219ed913846b7d85f" class="m-doc">getObject()</a> - Access the object being loaded</li></ul><section id="autotoc_md147"><h2><a href="#autotoc_md147">Usage Example</a></h2><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="nc">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
+<p>Abstract base class template for loading objects from streams or files.</p><p>The Loader class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li><a href="#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> - Load object from an input stream</li><li><a href="#aa4f907de0650109219ed913846b7d85f" class="m-doc">getObject()</a> - Access the object being loaded</li></ul><section id="autotoc_md148"><h2><a href="#autotoc_md148">Usage Example</a></h2><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="nc">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">is</span><span class="p">)</span><span class="w"> </span><span class="k">override</span>
@@ -140,6 +141,15 @@
               using <a href="#a45a85369a36957866b0a38d9800a1282" class="m-doc-self">ObjectType</a> = T
             </dt>
             <dd>Type of object being loaded.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a17511e29698bdc7b518647e2f8b9d759">
+              <span class="m-doc-wrap-bumper"><a href="#a17511e29698bdc7b518647e2f8b9d759" class="m-doc-self">~Loader</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Destroys the loader through its polymorphic interface.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -259,7 +269,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

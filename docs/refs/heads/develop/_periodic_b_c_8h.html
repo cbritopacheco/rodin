@@ -78,10 +78,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md510">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md511">Applications</a></li>
-            <li><a href="#autotoc_md512">Implementation</a></li>
-            <li><a href="#autotoc_md513">Usage Example</a></li>
+            <li><a href="#autotoc_md511">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md512">Applications</a></li>
+            <li><a href="#autotoc_md513">Implementation</a></li>
+            <li><a href="#autotoc_md514">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md510"><h2><a href="#autotoc_md510">Mathematical Foundation</a></h2><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
+<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md511"><h2><a href="#autotoc_md511">Mathematical Foundation</a></h2><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
 <title>
 \[     u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
 \]
@@ -165,7 +165,7 @@ $ L $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-76'/>
 </g>
-</svg>.</p></section><section id="autotoc_md511"><h2><a href="#autotoc_md511">Applications</a></h2><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md512"><h2><a href="#autotoc_md512">Implementation</a></h2><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md513"><h2><a href="#autotoc_md513">Usage Example</a></h2><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
+</svg>.</p></section><section id="autotoc_md512"><h2><a href="#autotoc_md512">Applications</a></h2><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md513"><h2><a href="#autotoc_md513">Implementation</a></h2><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md514"><h2><a href="#autotoc_md514">Usage Example</a></h2><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">pbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">from</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
@@ -229,7 +229,7 @@ $ L $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

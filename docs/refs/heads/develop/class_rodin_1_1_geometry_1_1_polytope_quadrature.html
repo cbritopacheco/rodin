@@ -76,7 +76,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md117">Architecture</a></li>
+            <li><a href="#autotoc_md118">Architecture</a></li>
             <li>
               Reference
               <ul>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p>A PolytopeQuadrature stores the mapped quadrature points corresponding to a single quadrature formula on a single concrete polytope. It is:</p><ul><li>not a reference quadrature formula,</li><li>not a variational quadrature rule,</li><li>not a container of weights.</li></ul><p>Its purpose is to cache the geometric realization of a quadrature formula on a polytope so that repeated integration passes can reuse mapped <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> objects.</p><section id="autotoc_md117"><h2><a href="#autotoc_md117">Architecture</a></h2><p>Construction evaluates the transformation&#x27;s quadrature Jacobians in one bulk call and places each matrix in its point&#x27;s existing owned cache. Parametric transformations can therefore reuse reference derivatives without retaining mapped geometry for previously traversed cells. Physical coordinates and derived inverse, determinant and distortion remain lazy. No point borrows a formula or element table. Temporary Jacobian storage and retained points are both bounded by the current formula&#x27;s size.</p></section>
+<p>A PolytopeQuadrature stores the mapped quadrature points corresponding to a single quadrature formula on a single concrete polytope. It is:</p><ul><li>not a reference quadrature formula,</li><li>not a variational quadrature rule,</li><li>not a container of weights.</li></ul><p>Its purpose is to cache the geometric realization of a quadrature formula on a polytope so that repeated integration passes can reuse mapped <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> objects.</p><section id="autotoc_md118"><h2><a href="#autotoc_md118">Architecture</a></h2><p>Construction evaluates the transformation&#x27;s quadrature Jacobians in one bulk call and places each matrix in its point&#x27;s existing owned cache. Parametric transformations can therefore reuse reference derivatives without retaining mapped geometry for previously traversed cells. Physical coordinates and derived inverse, determinant and distortion remain lazy. No point borrows a formula or element table. Temporary Jacobian storage and retained points are both bounded by the current formula&#x27;s size.</p></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -238,7 +238,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

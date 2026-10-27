@@ -79,9 +79,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md183">Type Safety</a></li>
-            <li><a href="#autotoc_md184">Arithmetic Operations</a></li>
-            <li><a href="#autotoc_md185">Example Usage</a></li>
+            <li><a href="#autotoc_md184">Type Safety</a></li>
+            <li><a href="#autotoc_md185">Arithmetic Operations</a></li>
+            <li><a href="#autotoc_md186">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md183"><h2><a href="#autotoc_md183">Type Safety</a></h2><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md184"><h2><a href="#autotoc_md184">Arithmetic Operations</a></h2><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
+<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md184"><h2><a href="#autotoc_md184">Type Safety</a></h2><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md185"><h2><a href="#autotoc_md185">Arithmetic Operations</a></h2><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
 <title>
 $ u_1 \pm u_2 $
 </title>
@@ -168,7 +168,7 @@ $ -u $
 <use x='0' y='0' xlink:href='#eq5-g0-0'/>
 <use x='9.298497' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul><p>Comparisons follow the stored scalar type, including unordered floating-point NaN values.</p></section><section id="autotoc_md185"><h2><a href="#autotoc_md185">Example Usage</a></h2><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
+</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul><p>Comparisons follow the stored scalar type, including unordered floating-point NaN values.</p></section><section id="autotoc_md186"><h2><a href="#autotoc_md186">Example Usage</a></h2><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Meter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="nc">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="nc">Real</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">public</span><span class="o">:</span>
@@ -874,7 +874,7 @@ $ 0 $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

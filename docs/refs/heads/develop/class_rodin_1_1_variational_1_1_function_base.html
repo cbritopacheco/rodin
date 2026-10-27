@@ -89,8 +89,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md370">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md371">Key Features</a></li>
+            <li><a href="#autotoc_md371">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md372">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for functions defined on finite element meshes.</p><p>Instances of FunctionBase will always have the getValue() method defined, which enables the evaluation of any function on some mesh element.</p><p>FunctionBase provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md370"><h2><a href="#autotoc_md370">Mathematical Foundation</a></h2><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
+<p>Base class for functions defined on finite element meshes.</p><p>Instances of FunctionBase will always have the getValue() method defined, which enables the evaluation of any function on some mesh element.</p><p>FunctionBase provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md371"><h2><a href="#autotoc_md371">Mathematical Foundation</a></h2><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
 <title>
 $ f : \Omega \to \mathbb{R}^n $
 </title>
@@ -180,7 +180,7 @@ $ \phi_i $
 <use x='0' y='0' xlink:href='#eq5-g1-30'/>
 <use x='6.928102' y='1.793263' xlink:href='#eq5-g0-105'/>
 </g>
-</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md371"><h2><a href="#autotoc_md371">Key Features</a></h2><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong>Trace operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
+</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md372"><h2><a href="#autotoc_md372">Key Features</a></h2><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong>Trace operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_form_language_1_1_base.html" title="FormLanguage::Base">FormLanguage::Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">FunctionBase</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" title="BooleanFunctionBase&lt; LHSDerived &gt;; BooleanFunctionBase&lt; RHSDerived &gt;; BooleanFunctionBase&lt; AND&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; BooleanFunction&lt; Boolean &gt; &gt;; BooleanFunctionBase&lt; EQ&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; GEQ&lt; FunctionBase&lt; LHSDerived &gt;, FunctionBase&lt; RHSDerived &gt; &gt; &gt;; BooleanFunctionBase&lt; GT&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; LEQ&lt; FunctionBase&lt; LHSDerived &gt;, FunctionBase&lt; RHSDerived &gt; &gt; &gt;; BooleanFunctionBase&lt; LT&lt; FunctionBase&lt; LHSDerived &gt;, FunctionBase&lt; RHSDerived &gt; &gt; &gt;; BooleanFunctionBase&lt; NEQ&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; OR&lt; LHSType, RHSType &gt; &gt;">BooleanFunctionBase</a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" title="MatrixFunctionBase&lt; ScalarType, FittingTensor&lt; GradDerived, Displacement, LocatorType &gt; &gt;; MatrixFunctionBase&lt; ScalarType, IdentityMatrix &gt;; MatrixFunctionBase&lt; Scalar, MatrixFunction&lt; MatrixType &gt; &gt;; MatrixFunctionBase&lt; ScalarType, MatrixFunction &gt;">MatrixFunctionBase</a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" title="ScalarFunctionBase&lt; typename FormLanguage::Traits&lt; FunctionBase&lt; OperandDerived &gt; &gt;::ScalarType, Component&lt; FunctionBase&lt; OperandDerived &gt;, size_t, size_t &gt; &gt;; ScalarFunctionBase&lt; ScalarType, Component &gt;; ScalarFunctionBase&lt; Scalar, Zero&lt; Scalar &gt; &gt;">ScalarFunctionBase</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+25 more</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_base.html"><span class="nc">Base</span></a>
 </pre></details></td><td>Base class for all objects in Rodin&#x27;s FormLanguage system.</td></tr></tbody></table></section>
         <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_boolean_function_base.html"><code>BooleanFunctionBase&lt;LHSDerived&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">BooleanFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="w"> </span><span class="o">&gt;</span>
@@ -319,7 +319,7 @@ $ \phi_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</dd>
+            <dd>Recommends an automatic integration order on a mesh entity.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2a1cd57f8a8a7447519f64bb30d04950" class="m-doc">getDerived</a>(</span><span class="m-doc-wrap">) -&gt; Derived&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -753,7 +753,7 @@ $ A^T(x) $
               
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</p>
+            <p>Recommends an automatic integration order on a mesh entity.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -761,17 +761,17 @@ $ A^T(x) $
               <tbody>
                 <tr>
                   <td style="width: 1%">geom</td>
-                  <td>Reference geometry type.</td>
+                  <td>Entity supplying reference geometry and coordinate mapping.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Polynomial order bound, or std::nullopt if not polynomial.</td>
+                  <td>An integration recommendation, or no established estimate.</td>
                 </tr>
               </tfoot>
             </table>
-<p>The returned value is a <strong>safe upper bound</strong> on the total polynomial degree of the expression in reference coordinates, ignoring the geometry map.</p><ul><li>Used for quadrature selection and composition rules.</li><li>May depend on the reference geometry (simplex, tensor-product, wedge).</li><li>Returns std::nullopt for non-polynomial expressions.</li><li>The value is not guaranteed to be sharp.</li></ul>
+<p>Known polynomial structure supplies a degree-based recommendation. Rational expressions may use a documented accuracy estimate instead; no polynomial exactness is implied in that case. An empty result means that no recommendation is established. A result of zero must certify an elementwise constant expression, since constant-value optimizations also consume this information. Integrators retain explicit overrides and account for the geometric measure in their selection policies.</p>
           </div></section>
           <section class="m-doc-details" id="a2a1cd57f8a8a7447519f64bb30d04950"><div>
             <h3>
@@ -857,7 +857,7 @@ $ A^T(x) $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -78,13 +78,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md346">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md347">Orientation Convention</a></li>
-            <li><a href="#autotoc_md348">Trace Semantics</a></li>
-            <li><a href="#autotoc_md349">Applications in DG Methods</a></li>
-            <li><a href="#autotoc_md350">Difference from BoundaryNormal</a></li>
-            <li><a href="#autotoc_md351">Manifold Assumption</a></li>
-            <li><a href="#autotoc_md352">Usage Example</a></li>
+            <li><a href="#autotoc_md347">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md348">Orientation Convention</a></li>
+            <li><a href="#autotoc_md349">Trace Semantics</a></li>
+            <li><a href="#autotoc_md350">Applications in DG Methods</a></li>
+            <li><a href="#autotoc_md351">Difference from BoundaryNormal</a></li>
+            <li><a href="#autotoc_md352">Manifold Assumption</a></li>
+            <li><a href="#autotoc_md353">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the FaceNormal class, which represents a unit normal vector on codimension-one mesh entities (faces in 3D, edges in 2D). Face normals are fundamental in face-based finite element formulations, notably in Discontinuous Galerkin (DG) methods where numerical fluxes, jumps, and averages depend on a consistent face orientation.</p><section id="autotoc_md346"><h2><a href="#autotoc_md346">Mathematical Foundation</a></h2><p>Let <svg class="m-math" style="width: 0.959em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.203615 8.169366">
+<p>This file defines the FaceNormal class, which represents a unit normal vector on codimension-one mesh entities (faces in 3D, edges in 2D). Face normals are fundamental in face-based finite element formulations, notably in Discontinuous Galerkin (DG) methods where numerical fluxes, jumps, and averages depend on a consistent face orientation.</p><section id="autotoc_md347"><h2><a href="#autotoc_md347">Mathematical Foundation</a></h2><p>Let <svg class="m-math" style="width: 0.959em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.203615 8.169366">
 <title>
 $ F $
 </title>
@@ -223,7 +223,7 @@ $ K $
 <g id='eq9-page1'>
 <use x='0' y='0' xlink:href='#eq9-g0-75'/>
 </g>
-</svg>, and the normal is oriented automatically outward from that cell.</p></section><section id="autotoc_md347"><h2><a href="#autotoc_md347">Orientation Convention</a></h2><p>The orientation is chosen as follows:</p><ul><li><strong>Boundary face (one adjacent cell)</strong>: the normal is oriented automatically outward from the unique incident cell.</li><li><strong>Interior face (two adjacent cells)</strong>: the normal is oriented outward from the unique adjacent cell whose attribute belongs to the trace domain.</li></ul><p>Consequently, on interior faces the normal is trace-dependent, while on boundary faces it is determined geometrically from the unique incident cell.</p></section><section id="autotoc_md348"><h2><a href="#autotoc_md348">Trace Semantics</a></h2><p>The FaceNormal object supports both boundary and interior codimension-one entities, but the meaning differs slightly:</p><ul><li>On a <strong>boundary face</strong>, no trace domain is required, since there is only one adjacent cell and the outward direction is unambiguous.</li><li>On an <strong>interior face</strong>, a trace domain is required to select which side of the interface defines the outward direction. If no trace domain is provided, or if none of the adjacent cells matches it, the normal is considered undefined and an exception is raised.</li></ul><p>This behavior makes FaceNormal suitable for DG interface terms where one needs a normal consistent with a chosen side of the interface.</p></section><section id="autotoc_md349"><h2><a href="#autotoc_md349">Applications in DG Methods</a></h2><p>Typical uses include:</p><ul><li><strong>Numerical fluxes</strong>: <svg class="m-math" style="width: 6.417em; height: 1.505em; vertical-align: -0.312em;" viewBox="0 -11.457002 61.605542 14.445794">
+</svg>, and the normal is oriented automatically outward from that cell.</p></section><section id="autotoc_md348"><h2><a href="#autotoc_md348">Orientation Convention</a></h2><p>The orientation is chosen as follows:</p><ul><li><strong>Boundary face (one adjacent cell)</strong>: the normal is oriented automatically outward from the unique incident cell.</li><li><strong>Interior face (two adjacent cells)</strong>: the normal is oriented outward from the unique adjacent cell whose attribute belongs to the trace domain.</li></ul><p>Consequently, on interior faces the normal is trace-dependent, while on boundary faces it is determined geometrically from the unique incident cell.</p></section><section id="autotoc_md349"><h2><a href="#autotoc_md349">Trace Semantics</a></h2><p>The FaceNormal object supports both boundary and interior codimension-one entities, but the meaning differs slightly:</p><ul><li>On a <strong>boundary face</strong>, no trace domain is required, since there is only one adjacent cell and the outward direction is unambiguous.</li><li>On an <strong>interior face</strong>, a trace domain is required to select which side of the interface defines the outward direction. If no trace domain is provided, or if none of the adjacent cells matches it, the normal is considered undefined and an exception is raised.</li></ul><p>This behavior makes FaceNormal suitable for DG interface terms where one needs a normal consistent with a chosen side of the interface.</p></section><section id="autotoc_md350"><h2><a href="#autotoc_md350">Applications in DG Methods</a></h2><p>Typical uses include:</p><ul><li><strong>Numerical fluxes</strong>: <svg class="m-math" style="width: 6.417em; height: 1.505em; vertical-align: -0.312em;" viewBox="0 -11.457002 61.605542 14.445794">
 <title>
 $ \hat{f}(u^+, u^-, \mathbf{n}) $
 </title>
@@ -333,7 +333,7 @@ $ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] $
 <use x='42.433674' y='0' xlink:href='#eq13-g3-93'/>
 <use x='43.692837' y='0' xlink:href='#eq13-g3-93'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md350"><h2><a href="#autotoc_md350">Difference from BoundaryNormal</a></h2><ul><li><strong>FaceNormal</strong>: defined on all codimension-one mesh entities; on interior faces its orientation may depend on the trace domain.</li><li><strong>BoundaryNormal</strong>: defined only on the boundary of the domain and always oriented outward.</li></ul></section><section id="autotoc_md351"><h2><a href="#autotoc_md351">Manifold Assumption</a></h2><p>This implementation assumes that a codimension-one mesh entity is incident to either:</p><ul><li>exactly one cell (boundary face), or</li><li>exactly two cells (interior face).</li></ul><p>Non-manifold situations with more than two incident cells are not supported.</p></section><section id="autotoc_md352"><h2><a href="#autotoc_md352">Usage Example</a></h2><pre class="m-code"><span class="nc">FaceNormal</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li></ul></section><section id="autotoc_md351"><h2><a href="#autotoc_md351">Difference from BoundaryNormal</a></h2><ul><li><strong>FaceNormal</strong>: defined on all codimension-one mesh entities; on interior faces its orientation may depend on the trace domain.</li><li><strong>BoundaryNormal</strong>: defined only on the boundary of the domain and always oriented outward.</li></ul></section><section id="autotoc_md352"><h2><a href="#autotoc_md352">Manifold Assumption</a></h2><p>This implementation assumes that a codimension-one mesh entity is incident to either:</p><ul><li>exactly one cell (boundary face), or</li><li>exactly two cells (interior face).</li></ul><p>Non-manifold situations with more than two incident cells are not supported.</p></section><section id="autotoc_md353"><h2><a href="#autotoc_md353">Usage Example</a></h2><pre class="m-code"><span class="nc">FaceNormal</span><span class="w"> </span><span class="nf">n</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 
 <span class="c1">// DG numerical flux on interfaces</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">flux</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="nc">Average</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nc">Dot</span><span class="p">(</span><span class="n">n</span><span class="p">.</span><span class="n">traceOf</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">)));</span>
@@ -396,7 +396,7 @@ $ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] $
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

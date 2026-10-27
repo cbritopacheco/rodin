@@ -192,7 +192,7 @@
     "ranks": "1",
     "args": "",
     "mpi_args": "",
-    "case_batch": "256"
+    "case_batch": "1"
   },
   {
     "target": "RodinBulkP1JacobianBenchmarks",
@@ -732,7 +732,7 @@
     "ranks": "1",
     "args": "",
     "mpi_args": "",
-    "case_batch": "256"
+    "case_batch": "1"
   },
   {
     "target": "RodinH1ConvectionBenchmarks",

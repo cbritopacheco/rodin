@@ -76,8 +76,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md188">Architecture</a></li>
-            <li><a href="#autotoc_md189">Implementation</a></li>
+            <li><a href="#autotoc_md189">Architecture</a></li>
+            <li><a href="#autotoc_md190">Implementation</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md188"><h2><a href="#autotoc_md188">Architecture</a></h2><p>Identification rows specify <svg class="m-math" style="width: 11.328em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 108.749941 12.453452">
+<section id="autotoc_md189"><h2><a href="#autotoc_md189">Architecture</a></h2><p>Identification rows specify <svg class="m-math" style="width: 11.328em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 108.749941 12.453452">
 <title>
 $x_s=\sum_m C_{sm}x_m+d_s$
 </title>
@@ -118,7 +118,7 @@ $x_s=\sum_m C_{sm}x_m+d_s$
 <use x='98.751329' y='0' xlink:href='#eq1-g2-100'/>
 <use x='104.834022' y='1.793263' xlink:href='#eq1-g1-115'/>
 </g>
-</svg>. A master can itself be constrained on another rank. Every rank therefore needs the complete constraint dependency graph before expanding a local matrix entry. Only prescribed values and identification rows are exchanged; matrix entries and unconstrained rows are not communicated here.</p></section><section id="autotoc_md189"><h2><a href="#autotoc_md189">Implementation</a></h2><p>Two collective gathers publish fixed rows and affine identification rows. Replicated boundary rows must agree, independently of master ordering. The native <a href="class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> then resolves transitive dependencies, propagates affine offsets and rejects cycles. Every rank receives the same graph, including ranks with no locally constrained DOFs. Assemblers invoke this collective only for identification conditions; ordinary value-prescribing boundaries retain their existing communication.</p></section>
+</svg>. A master can itself be constrained on another rank. Every rank therefore needs the complete constraint dependency graph before expanding a local matrix entry. Only prescribed values and identification rows are exchanged; matrix entries and unconstrained rows are not communicated here.</p></section><section id="autotoc_md190"><h2><a href="#autotoc_md190">Implementation</a></h2><p>Two collective gathers publish fixed rows and affine identification rows. Replicated boundary rows must agree, independently of master ordering. The native <a href="class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> then resolves transitive dependencies, propagates affine offsets and rejects cycles. Every rank receives the same graph, including ranks with no locally constrained DOFs. Assemblers invoke this collective only for identification conditions; ordinary value-prescribing boundaries retain their existing communication.</p></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html" title="Assembly::ConstraintMap&lt; PetscScalar &gt;">Assembly::ConstraintMap</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ConstraintMap</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><code>Assembly::ConstraintMap&lt;PetscScalar&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Assembly</span><span class="o">::</span><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><span class="nc">ConstraintMap</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">PetscScalar</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Read-only expansion map for value and identification constraints.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_constraint_map.html"><code>Assembly::ConstraintMap</code></a></td><td><details><summary>13 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a6a3ae7c7a8395b8c5c21d366bb4879e9"><code>expand()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a97abd18d186558cb081a24805c6e1999"><code>Expansion</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a32d626626eee0bc4ade146973f6abb1c"><code>finalize()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a723a57487b35cc237235ac730f513d8b"><code>getFixedValue()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a017148f14956e2ca25cf8c8c1db01915"><code>getIdentificationValue()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a00b6033eb9b7439b5776d57cffc67dc2"><code>getIdentifiedRows()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#aea2183b3b451c9cb9fcfb3a92bfc104a"><code>isFixed()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a06cc207eceb5bcf6d362bfa3e296a840"><code>isIdentified()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a0092e1dd2034bb02ff0507cc39a4a1e0"><code>reset()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#ad9aa7714ca73ce034d1f9f3178955f19"><code>setFixed()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a899c105eb4926ccf24420de66568fbac"><code>setIdentification()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a0b0705fd5294fe8e8a06d37e3e966f5a"><code>setIdentification()</code></a></li><li><a href="class_rodin_1_1_assembly_1_1_constraint_map.html#a259cb5a711406a8c3e5d937eb9350cca"><code>size()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
@@ -233,7 +233,7 @@ $x_s=\sum_m C_{sm}x_m+d_s$
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

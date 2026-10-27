@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md627">Representative use</a></li>
+            <li><a href="#autotoc_md628">Representative use</a></li>
           </ul>
         </nav>
-<pre class="m-code"><span class="n">archive</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">values</span><span class="p">;</span></pre><p>Boost.Serialization adapters store arrays, Eigen-compatible dense matrices, flat containers, and optional values. The export registrations cover selected <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a> instantiations used in MPI shard transfer. Including the relevant adapter headers enables binary archives of supported numerical data and container structures.</p><section id="autotoc_md627"><h2><a href="#autotoc_md627">Representative use</a></h2><p>Include the adapter for a stored type before using it with a Boost archive. For example, a Rodin array can be written to a binary archive over a stream:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Serialization/Array.h&gt;</span>
+<pre class="m-code"><span class="n">archive</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">values</span><span class="p">;</span></pre><p>Boost.Serialization adapters store arrays, Eigen-compatible dense matrices, flat containers, and optional values. The export registrations cover selected <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a> instantiations used in MPI shard transfer. Including the relevant adapter headers enables binary archives of supported numerical data and container structures.</p><section id="autotoc_md628"><h2><a href="#autotoc_md628">Representative use</a></h2><p>Include the adapter for a stored type before using it with a Boost archive. For example, a Rodin array can be written to a binary archive over a stream:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Serialization/Array.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/archive/binary_oarchive.hpp&gt;</span>
 
 <span class="nc">Array</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">values</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
@@ -125,7 +125,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -78,10 +78,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md78">Overview</a></li>
-            <li><a href="#autotoc_md79">Mapping Between SubMesh and Parent Mesh</a></li>
-            <li><a href="#autotoc_md80">Downcasting</a></li>
-            <li><a href="#autotoc_md81">Use Cases</a></li>
+            <li><a href="#autotoc_md79">Overview</a></li>
+            <li><a href="#autotoc_md80">Mapping Between SubMesh and Parent Mesh</a></li>
+            <li><a href="#autotoc_md81">Downcasting</a></li>
+            <li><a href="#autotoc_md82">Use Cases</a></li>
             <li>
               Reference
               <ul>
@@ -89,12 +89,12 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md78"><h2><a href="#autotoc_md78">Overview</a></h2><p>A SubMesh is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md79"><h2><a href="#autotoc_md79">Mapping Between SubMesh and Parent Mesh</a></h2><p>A SubMesh object holds a reference to its parent Mesh and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the SubMesh to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md80"><h2><a href="#autotoc_md80">Downcasting</a></h2><p>A Mesh that is also a SubMesh can be downcasted to access SubMesh functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<section id="autotoc_md79"><h2><a href="#autotoc_md79">Overview</a></h2><p>A SubMesh is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md80"><h2><a href="#autotoc_md80">Mapping Between SubMesh and Parent Mesh</a></h2><p>A SubMesh object holds a reference to its parent Mesh and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the SubMesh to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md81"><h2><a href="#autotoc_md81">Downcasting</a></h2><p>A Mesh that is also a SubMesh can be downcasted to access SubMesh functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// The cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="nc">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
-<span class="p">}</span></pre></section><section id="autotoc_md81"><h2><a href="#autotoc_md81">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html"><code>Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<span class="p">}</span></pre></section><section id="autotoc_md82"><h2><a href="#autotoc_md82">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html"><code>Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SubMesh</span><span class="o">&lt;</span>
 <span class="w">  </span><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html#a5d11968e3ae899be574a41d47a17a36f"><span class="nc">Context</span></a><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
 </pre></details></td><td>SubMesh representing a subregion of a parent mesh.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
@@ -139,7 +139,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-8a8941761f97.js"></script>
+<script src="search-v2-8869a4936c9f.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
