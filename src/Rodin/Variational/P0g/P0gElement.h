@@ -325,7 +325,14 @@ namespace Rodin::Variational
        */
       Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getLagrangeDegree(0, directions);
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
+        return 0;
       }
   };
 
@@ -658,7 +665,14 @@ namespace Rodin::Variational
        */
       Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getLagrangeDegree(0, directions);
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
+        return 0;
       }
 
     private:
@@ -901,7 +915,14 @@ namespace Rodin::Variational
        */
       Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getLagrangeDegree(0, directions);
+        const size_t dimension =
+          Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        for (const size_t direction : directions)
+        {
+          if (direction >= dimension)
+            return std::nullopt;
+        }
+        return 0;
       }
 
       /**

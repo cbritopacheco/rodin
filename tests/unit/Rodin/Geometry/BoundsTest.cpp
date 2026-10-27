@@ -6,6 +6,8 @@
  */
 #include <cmath>
 #include <functional>
+#include <limits>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #include <gtest/gtest.h>
@@ -23,6 +25,22 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  template <class Element>
+  concept HasLagrangeDegree =
+    requires(const Element& element) { element.getLagrangeDegree(size_t(1), {0}); };
+
+  static_assert(HasLagrangeDegree<H1Element<2, Real>>);
+  static_assert(HasLagrangeDegree<P1Element<Real>>);
+  static_assert(!HasLagrangeDegree<FiniteElementBase<H1Element<2, Real>>>);
+  static_assert(!HasLagrangeDegree<P0Element<Real>>);
+  static_assert(!HasLagrangeDegree<P0gElement<Real>>);
+  static_assert(
+    std::is_base_of_v<LagrangeFiniteElementBase<H1Element<2, Real>>, H1Element<2, Real>>);
+  static_assert(
+    std::is_base_of_v<LagrangeFiniteElementBase<P1Element<Real>>, P1Element<Real>>);
+  static_assert(
+    !std::is_base_of_v<LagrangeFiniteElementBase<P0Element<Real>>, P0Element<Real>>);
+
   /**
    * @brief Exercises support enclosures on arbitrary basis coefficients.
    * @tparam K H1 family index.
@@ -137,6 +155,9 @@ TEST(Rodin_Variational_Degree, FamilyIndexAndPolynomialContainment)
         const Optional<size_t> expected =
           geometry == Polytope::Type::Pyramid && direction == 2 ? Optional<size_t>{}
                                                                 : Optional<size_t>{K};
+        EXPECT_EQ(scalar.getLagrangeDegree(K, {direction}), expected);
+        EXPECT_EQ(vector.getLagrangeDegree(K, {direction}), expected);
+        EXPECT_EQ(matrix.getLagrangeDegree(K, {direction}), expected);
         EXPECT_EQ(scalar.getDegree({direction}), expected);
         EXPECT_EQ(vector.getDegree({direction}), expected);
         EXPECT_EQ(matrix.getDegree({direction}), expected);
@@ -171,14 +192,38 @@ TEST(Rodin_Variational_Degree, FamilyIndexAndPolynomialContainment)
     }
     EXPECT_FALSE(discontinuous.getDegree({3}));
     EXPECT_FALSE(globalConstant.getDegree({3}));
+    const P0Element<Math::SpatialVector<Real>> vectorConstant(geometry, 2);
+    const P0gElement<Math::SpatialVector<Real>> vectorGlobal(geometry, 2);
+    const P0Element<Math::SpatialMatrix<Real>> matrixConstant(geometry, 2, 3);
+    const P0gElement<Math::SpatialMatrix<Real>> matrixGlobal(geometry, 2, 3);
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    const auto checkConstant = [&](const auto& element) {
+      EXPECT_EQ(element.getDegree({}), 0);
+      EXPECT_FALSE(element.getDegree({dimension}));
+      if (dimension > 0)
+        EXPECT_EQ(element.getDegree({0, 0}), 0);
+    };
+    checkConstant(vectorConstant);
+    checkConstant(vectorGlobal);
+    checkConstant(matrixConstant);
+    checkConstant(matrixGlobal);
     const P1Element<Real> linear(geometry);
+    const P1Element<Math::SpatialVector<Real>> linearVector(geometry, 2);
+    const P1Element<Math::SpatialMatrix<Real>> linearMatrix(geometry, 2, 3);
     EXPECT_EQ(linear.getOrder(), 1);
+    EXPECT_EQ(linear.getLagrangeDegree(1, {}), 0);
+    EXPECT_FALSE(linear.getLagrangeDegree(1, {3}));
     EXPECT_EQ(linear.getDegree(), (H1Element<1, Real>(geometry).getDegree()));
     for (size_t direction = 0; direction < Polytope::Traits(geometry).getDimension();
          ++direction)
     {
       EXPECT_EQ(linear.getDegree({direction}),
         (H1Element<1, Real>(geometry).getDegree({direction})));
+      EXPECT_EQ(linear.getLagrangeDegree(1, {direction}), linear.getDegree({direction}));
+      EXPECT_EQ(
+        linearVector.getLagrangeDegree(1, {direction}), linear.getDegree({direction}));
+      EXPECT_EQ(
+        linearMatrix.getLagrangeDegree(1, {direction}), linear.getDegree({direction}));
     }
   }
 }
@@ -248,6 +293,22 @@ namespace
       ParametricTransformation<H1Element<K, Real>> m_map;
       std::reference_wrapper<size_t> m_samples;
   };
+}
+
+TEST(Rodin_Variational_Degree, PublicLagrangeBoundRejectsOverflow)
+{
+  const size_t maximum = std::numeric_limits<size_t>::max();
+  const H1Element<1, Real> triangle(Polytope::Type::Triangle);
+  const H1Element<1, Real> quadrilateral(Polytope::Type::Quadrilateral);
+  const H1Element<1, Real> wedge(Polytope::Type::Wedge);
+  const H1Element<1, Real> pyramid(Polytope::Type::Pyramid);
+
+  EXPECT_EQ(triangle.getLagrangeDegree(maximum, {0, 1}), maximum);
+  EXPECT_EQ(quadrilateral.getLagrangeDegree(maximum, {0}), maximum);
+  EXPECT_FALSE(quadrilateral.getLagrangeDegree(maximum, {0, 1}));
+  EXPECT_EQ(quadrilateral.getLagrangeDegree(maximum / 2, {0, 1}), maximum - 1);
+  EXPECT_FALSE(wedge.getLagrangeDegree(maximum, {0, 2}));
+  EXPECT_FALSE(pyramid.getLagrangeDegree(maximum, {0, 1}));
 }
 
 TEST(Rodin_Geometry_Degree, DirectionalMeasureSelectsTightProductRules)

@@ -16,6 +16,7 @@
 
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
+#include "Variational/LagrangeFiniteElement.h"
 #include "Variational/Interpolation.h"
 
 #include "Variational/ShapeFunction.h"

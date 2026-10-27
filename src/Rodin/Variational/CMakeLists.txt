@@ -7,6 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinVariational_HEADERS
   FiniteElement.h
+  LagrangeFiniteElement.h
   ReferenceTabulation.h
   ReferenceTabulationCache.h
   BilinearForm.h

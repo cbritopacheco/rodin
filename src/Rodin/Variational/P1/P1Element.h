@@ -33,7 +33,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/Variational/LagrangeFiniteElement.h"
 #include "Rodin/Variational/ReferenceTabulationCache.h"
 
 #include "ForwardDecls.h"
@@ -89,7 +89,7 @@ namespace Rodin::Variational
    * @see @ref P1ElementSpecializations "P1Element Template Specializations"
    */
   template <class Scalar>
-  class P1Element final : public FiniteElementBase<P1Element<Scalar>>
+  class P1Element final : public LagrangeFiniteElementBase<P1Element<Scalar>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -97,7 +97,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Scalar>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Scalar>>;
 
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -1031,7 +1031,7 @@ namespace Rodin::Variational
       template <class Archive>
       void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
-        ar& boost::serialization::base_object<Parent>(*this);
+        ar& boost::serialization::base_object<typename Parent::Parent>(*this);
       }
   };
 
@@ -1053,7 +1053,7 @@ namespace Rodin::Variational
    */
   template <class Scalar>
   class P1Element<Math::SpatialVector<Scalar>> final
-    : public FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>
+    : public LagrangeFiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -1061,7 +1061,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
 
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -1554,7 +1554,7 @@ namespace Rodin::Variational
       template <class Archive>
       void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
-        ar& boost::serialization::base_object<Parent>(*this);
+        ar& boost::serialization::base_object<typename Parent::Parent>(*this);
         ar & m_vdim;
         if constexpr (Archive::is_loading::value)
           *this = P1Element(this->getGeometry(), m_vdim);
@@ -1575,7 +1575,7 @@ namespace Rodin::Variational
   /// @brief Matrix-valued reference element built from scalar nodal functionals.
   template <class Scalar>
   class P1Element<Math::SpatialMatrix<Scalar>> final
-    : public FiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>
+    : public LagrangeFiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>
   {
     public:
       /// @brief Scalar reference element for this family.
@@ -1588,7 +1588,7 @@ namespace Rodin::Variational
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief CRTP or finite element base class.
-      using Parent = FiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>;
 
       /// @brief Basis type of the underlying scalar element.
       using ScalarBasis = decltype(std::declval<ScalarElement>().getBasis(0));

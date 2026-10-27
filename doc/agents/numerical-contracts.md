@@ -188,6 +188,10 @@ bound. Invalid directions and unknown bounds return an empty optional;
 repeated directions are ignored. Rational pyramid bases have a family order
 but no established total polynomial degree bound; their horizontal coordinates
 have known bounds when the vertical coordinate is treated as a coefficient.
+The shared directional Lagrange-space calculation belongs to
+`LagrangeFiniteElementBase`, which does not impose nodal data or a particular
+basis representation. P0 and P0g validate directions and report their constant
+degree directly; unrelated finite element families do not inherit this policy.
 
 Expressions retain `getOrder(polytope)` as an integration recommendation,
 including documented nonpolynomial estimates. Zero additionally certifies an
