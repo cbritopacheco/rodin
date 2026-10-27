@@ -287,6 +287,27 @@ class BackendRegistrationTest(unittest.TestCase):
                     counts.update(selected)
                 self.assertEqual(counts, Counter({n: 1 for n in names}))
 
+    def test_nonlinear_tetrahedron_budget_preserves_every_study_and_rank(self):
+        tests, build = self.configure('tests/convergence/h/PETScNonlinearPoisson')
+        properties = {}
+        for command, args, *_ in ci.commands((build / 'cases/CTestTestfile.cmake').read_text()):
+            if command == 'set_tests_properties':
+                boundary = args.index('PROPERTIES')
+                values = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties.setdefault(name, {}).update(values)
+        prefix = 'RodinConvergenceHPETScNonlinearPoissonBoundary'
+        for rank, kind, degree, geometry in itertools.product(
+                range(5), ['MixedNeumann', 'Robin', 'PureNeumann'], range(1, 4), GEOMETRIES):
+            context = f'_MPI_np{rank}' if rank else ''
+            name = f'{prefix}{context}_{kind}P{degree}Rates_{geometry}'
+            self.assertIn(name, tests)
+            timeout = 18000 if (geometry, kind, degree) == ('Tetrahedron', 'PureNeumann', 1) else (
+                10800 if geometry in ['Tetrahedron', 'Pyramid'] else 1800)
+            self.assertEqual(properties[name]['TIMEOUT'], str(timeout))
+            if rank:
+                self.assertEqual(properties[name]['PROCESSORS'], str(rank))
+
     def test_petsc_timeout_overrides_preserve_commands_ranks_and_other_budgets(self):
         modules = ["p/PETScNonlinearPoisson", "hp/PETScNonlinearPoisson",
                    "h/PETScNonlinearPoisson", "h/PETScStokes",

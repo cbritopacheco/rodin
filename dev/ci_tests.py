@@ -330,8 +330,12 @@ def scoped_tree(build, group, configured, profile=""):
 
 def discover(stage, build):
     environment = dict(os.environ, GCOV_PREFIX=str(build.parent / (build.name + "-coverage-discovery-excluded")))
-    result = subprocess.run(["ctest", "--test-dir", str(stage), "--show-only=json-v1"],
-                            check=True, capture_output=True, text=True, env=environment)
+    try:
+        result = subprocess.run(["ctest", "--test-dir", str(stage), "--show-only=json-v1"],
+                                check=True, capture_output=True, text=True, env=environment)
+    except subprocess.CalledProcessError as error:
+        details = "\n".join(part.strip() for part in [error.stderr, error.stdout] if part and part.strip())
+        raise RuntimeError(f"CTest discovery failed (exit {error.returncode}):\n{details}") from error
     report = json.loads(result.stdout)
     missing = [test["name"] for test in report["tests"] if "NOT_BUILT" in test["name"]]
     if missing:
