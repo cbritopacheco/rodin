@@ -45,6 +45,7 @@
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
 #include <initializer_list>
+#include <type_traits>
 
 #include <boost/serialization/access.hpp>
 
@@ -331,14 +332,9 @@ namespace Rodin::Variational
         }
         if (directions.size() == 0)
           return 0;
-        using Method = Optional<size_t> (Derived::*)(std::initializer_list<size_t>) const;
-        if constexpr (requires { static_cast<Method>(&Derived::getDegree); })
-        {
-          constexpr auto selected = static_cast<Method>(&Derived::getDegree);
-          constexpr auto inherited = static_cast<Method>(&FiniteElementBase::getDegree);
-          if constexpr (selected != inherited)
-            return static_cast<const Derived&>(*this).getDegree(directions);
-        }
+        using MethodOwner = decltype(getMethodOwner(&Derived::getDegree));
+        if constexpr (std::is_same_v<typename MethodOwner::type, Derived>)
+          return static_cast<const Derived&>(*this).getDegree(directions);
         return getDegree();
       }
 
@@ -361,6 +357,18 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Identifies the class that declares a member function.
+       * @tparam ReturnType Member function return type.
+       * @tparam ClassType Class declaring the member function.
+       * @tparam ArgumentType Member function argument type.
+       * @param[in] method Member function whose declaring class is queried.
+       * @returns A type identity for the declaring class.
+       */
+      template <class ReturnType, class ClassType, class ArgumentType>
+      static std::type_identity<ClassType> getMethodOwner(
+        ReturnType (ClassType::*method)(ArgumentType) const);
+
       /**
        * @brief Reference geometry of the finite element.
        *

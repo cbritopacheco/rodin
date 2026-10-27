@@ -68,7 +68,9 @@ namespace
       EXPECT_EQ(base.getDegree({direction}), element.getDegree({direction}));
     EXPECT_FALSE(base.getDegree({3}));
     if (geometry == Polytope::Type::Pyramid)
+    {
       EXPECT_FALSE(transformation.getDegree());
+    }
     const auto& formula = QF::QuadratureFormula::get(12, geometry);
     for (const auto& direction : {Math::SpatialVector<Real>{1, 0, 0},
            Math::SpatialVector<Real>{-1, 0, 0}, Math::SpatialVector<Real>{0, 1, 0},
@@ -174,7 +176,9 @@ TEST(Rodin_Variational_Degree, FamilyIndexAndPolynomialContainment)
       }
       else if (geometry == Polytope::Type::Triangle ||
         geometry == Polytope::Type::Tetrahedron)
+      {
         EXPECT_EQ(base.getDegree({0, 1}), K);
+      }
     };
     check.template operator()<1>();
     check.template operator()<2>();
@@ -201,7 +205,9 @@ TEST(Rodin_Variational_Degree, FamilyIndexAndPolynomialContainment)
       EXPECT_EQ(element.getDegree({}), 0);
       EXPECT_FALSE(element.getDegree({dimension}));
       if (dimension > 0)
+      {
         EXPECT_EQ(element.getDegree({0, 0}), 0);
+      }
     };
     checkConstant(vectorConstant);
     checkConstant(vectorGlobal);
@@ -340,7 +346,9 @@ TEST(Rodin_Geometry_Degree, DirectionalMeasureSelectsTightProductRules)
       geometry == Polytope::Type::Pyramid ? 10 : dimension * 2 - 1;
     EXPECT_EQ(samples, QF::QuadratureFormula::get(expectedOrder, geometry).getSize());
     if (geometry == Polytope::Type::Hexahedron)
+    {
       EXPECT_EQ(samples, 27);
+    }
     EXPECT_NEAR(measure, cell.getMeasure(20), 1e-12);
   }
 }
