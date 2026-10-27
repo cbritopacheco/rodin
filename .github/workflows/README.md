@@ -18,9 +18,9 @@ can share compilation without sharing runtime state.
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
 | [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
-| [Documentation.yml](Documentation.yml) | Builds and checks the generated documentation and handles documentation publication. |
+| [Documentation.yml](Documentation.yml) | Reusable documentation build and checks; also runs on pull requests. |
+| [PublishDocumentation.yml](PublishDocumentation.yml) | Manual documentation build and publication without the benchmark campaign. |
 | [Benchmarks.yml](Benchmarks.yml) | Runs and publishes performance benchmarks on pushes to the main development branches. |
-| [StaticAnalysis.yml](StaticAnalysis.yml) | Generates and publishes the include-dependency graph on pushes to the main development branches. |
 | [Labeler.yml](Labeler.yml) | Maintains pull-request labels. |
 | [copilot-setup-steps.yml](copilot-setup-steps.yml) | Provisions the GitHub coding-agent environment; it is separate from numerical test scheduling. |
 
@@ -418,7 +418,7 @@ It does not wait for benchmark builds, execution or pooling. After documentation
 publication and successful pooling, a separate publisher updates only complete
 benchmark histories; it cannot replace newer documentation. Missing or failed
 benchmark contributions leave the previous complete results intact. Both
-publishers and Static Analysis hold the same `rodin-gh-pages-publication` lock
+automatic publishers and the manual documentation publisher hold the same `rodin-gh-pages-publication` lock
 while writing and deploying. Each publisher uploads the locked `gh-pages`
 checkout as its own Pages artifact and uses `actions/deploy-pages` in that
 same job. This avoids a second hosted-runner queue for a legacy Pages build;
@@ -438,9 +438,9 @@ Repository setup for these publishers:
   and require `pages: write` and `id-token: write`.
 
 The local workflow repair does not change these repository settings. A legacy
-Pages source fails preparation with an actionable diagnostic. All three Pages
-writers—documentation, complete benchmarks, and the include-dependency graph—
-use the same artifact deployment path.
+Pages source fails preparation with an actionable diagnostic. The automatic documentation and complete-benchmark publishers, together with
+the manual documentation publisher, use the same artifact deployment path.
+The unused include-dependency-graph workflow has been removed.
 
 Component histories live
 under `benchmark-data/<ref>/`; documentation and its benchmark navigation live

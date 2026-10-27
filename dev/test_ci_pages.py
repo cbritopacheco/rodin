@@ -72,7 +72,7 @@ class PagesTest(unittest.TestCase):
     def test_every_pages_writer_deploys_its_artifact_under_same_lock(self):
         for filename, job in [('Benchmarks.yml', 'PublishDocumentation'),
                               ('Benchmarks.yml', 'Publish'),
-                              ('StaticAnalysis.yml', 'IncludeDependencyGraph')]:
+                              ('PublishDocumentation.yml', 'PublishDocumentation')]:
             workflow = yaml.safe_load((ROOT / '.github/workflows' / filename).read_text())
             definition = workflow['jobs'][job]
             self.assertEqual(definition['concurrency']['group'], 'rodin-gh-pages-publication')
