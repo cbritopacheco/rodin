@@ -14,7 +14,8 @@ runs:
       env:
         CONFIGURATION: ${{ inputs.configuration }}
       run: |
-        packages='gcc-14 g++-14 libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev'
+        # Resolve zlib explicitly on both build producers and execution consumers.
+        packages='zlib1g gcc-14 g++-14 libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev'
         case "$CONFIGURATION" in
           local) ;;
           distributed) packages="$packages petsc-dev mpi-default-bin mpi-default-dev" ;;

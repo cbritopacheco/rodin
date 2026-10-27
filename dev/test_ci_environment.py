@@ -114,6 +114,21 @@ class EnvironmentTest(unittest.TestCase):
                 self.assertIn('g++-14', requested)
                 self.assertIn('lcov', requested)
 
+    def test_shared_environments_resolve_zlib_instead_of_reusing_image_version(self):
+        for action, cases in [
+                ('test-environment', [dict(MODE=mode, COMPILER='gcc-14') for mode in
+                 ['native', 'mpi', 'petsc', 'complex', 'ranges_real', 'ranges_complex', 'optional', 'default', 'baseline']]),
+                ('benchmark-environment', [dict(CONFIGURATION=mode) for mode in ['local', 'distributed']])]:
+            document = yaml.safe_load((ROOT / '.github/actions' / action / 'action.yml').read_text())
+            command = next(step['run'] for step in document['runs']['steps'] if step.get('id') == 'packages')
+            for case in cases:
+                with self.subTest(action=action, case=case), tempfile.TemporaryDirectory() as folder:
+                    output = Path(folder) / 'output'
+                    subprocess.run(['bash', '-e', '-c', command], check=True,
+                                   env=dict(os.environ, **case, GITHUB_OUTPUT=str(output)))
+                    requested = environment.packages(output.read_text().strip().split('=', 1)[1])
+                    self.assertIn('zlib1g', requested)
+
     def test_shared_linux_environments_do_not_download_another_compiler_action(self):
         for name in ['test-environment', 'benchmark-environment']:
             text = (ROOT / '.github/actions' / name / 'action.yml').read_text()
