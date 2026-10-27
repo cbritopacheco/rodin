@@ -107,7 +107,7 @@ namespace Rodin::Variational
        * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
        */
 
-      static constexpr std::array<Real, K + 1> compute()
+      static std::array<Real, K + 1> compute()
       {
         std::array<Real, K + 1> nodes{};
 
@@ -158,6 +158,8 @@ namespace Rodin::Variational
         return nodes;
       }
 
+      // Keep initialization consistent across translation units and avoid
+      // imposing a constant-evaluation limit on higher orders.
       inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 
@@ -210,7 +212,7 @@ namespace Rodin::Variational
        * @brief Constructs the reference interpolation nodes.
        * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
        */
-      static constexpr std::array<Real, K + 1> compute()
+      static std::array<Real, K + 1> compute()
       {
         std::array<Real, K + 1> nodes{};
 
@@ -225,6 +227,7 @@ namespace Rodin::Variational
         return nodes;
       }
 
+      // GLL<K> is initialized at runtime, so map its nodes at runtime too.
       inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 }

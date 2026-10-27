@@ -540,4 +540,15 @@ namespace Rodin::Tests::Unit
       EXPECT_LT(nodes[i], nodes[i + 1]);
     }
   }
+
+  /// @brief High orders do not depend on a compiler's constant-evaluation limit.
+  TEST(GLL01, HighOrderInitialization)
+  {
+    const auto& nodes = GLL01<256>::getNodes();
+    ASSERT_EQ(nodes.size(), 257);
+    EXPECT_EQ(nodes.front(), 0);
+    EXPECT_EQ(nodes.back(), 1);
+    for (const Real node : nodes)
+      EXPECT_TRUE(std::isfinite(node));
+  }
 }
