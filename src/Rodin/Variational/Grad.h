@@ -15,17 +15,22 @@
 #ifndef RODIN_VARIATIONAL_GRAD_H
 #define RODIN_VARIATIONAL_GRAD_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialTensor.h"
 
 #include "VectorFunction.h"
 #include "IntegrationPoint.h"
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
-  /// space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Grad over a grid function: exposes the finite element
+   * space, the operand type and the range type.
+   */
   template <class FES, class Data>
   struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
   {
@@ -40,8 +45,10 @@ namespace Rodin::FormLanguage
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 
-  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
-  /// space, the shape function space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Grad over a shape function: exposes the finite element
+   * space, the shape function space, the operand type and the range type.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
@@ -69,6 +76,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref Grad "Grad<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
+   * | @ref Grad "Grad<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
    * | @ref GradBase "GradBase<GridFunction<FES, Data>, Derived>" | Generic gradient base for scalar grid functions. |
    * | @ref Grad "Grad<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Gradient of an H1 grid function. |
    * | @ref Grad "Grad<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Gradient of an H1 shape-function expression. |
@@ -100,7 +109,7 @@ namespace Rodin::Variational
    * @f]
    * where @f$ u @f$ is a scalar function and @f$ d @f$ is the spatial dimension.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * For a scalar function @f$ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} @f$,
    * the gradient is a vector field:
    * @f[
@@ -112,7 +121,7 @@ namespace Rodin::Variational
    *   \nabla u_h = \sum_i u_i \nabla \phi_i
    * @f]
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * // In a variational formulation
    * auto stiffness = Integral(Grad(u), Grad(v));  // Laplacian term
@@ -160,6 +169,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       GradBase(const GradBase& other)
         : Parent(other),
@@ -168,6 +178,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       GradBase(GradBase&& other)
         : Parent(std::move(other)),
@@ -194,6 +205,8 @@ namespace Rodin::Variational
        * Resolves mesh ownership and dispatches to the derived class's
        * @c interpolate. Falls back to inclusion / submesh restriction
        * when the polytope's mesh is not the FES mesh.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       SpatialVectorType getValue(const Geometry::Point& p) const
       {
@@ -213,11 +226,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -228,6 +249,8 @@ namespace Rodin::Variational
        * If the polytope is owned by the FES mesh, dispatches to
        * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
        * restriction.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       SpatialVectorType getValue(const IntegrationPoint& ip) const
       {
@@ -251,11 +274,19 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Evaluation point is not represented in the field's submesh."
+              << Alert::Raise;
+          }
           this->interpolate(value, *restriction);
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Evaluation point does not belong to the field's mesh or its ancestry."
+            << Alert::Raise;
         }
         return value;
       }
@@ -274,7 +305,11 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       constexpr
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
@@ -294,7 +329,11 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -303,6 +342,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy function to be overriden in Derived type.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
       GradBase* copy() const noexcept override
       {
@@ -316,16 +356,18 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a GridFunction
+   * @param operand Operand determining the expression type.
    */
   template <class FES, class Data>
-  Grad(const GridFunction<FES, Data>&) -> Grad<GridFunction<FES, Data>>;
+  Grad(const GridFunction<FES, Data>& operand) -> Grad<GridFunction<FES, Data>>;
 
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a ShapeFunction
+   * @param operand Operand determining the expression type.
    */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Grad(const ShapeFunction<NestedDerived, FES, Space>&)
+  Grad(const ShapeFunction<NestedDerived, FES, Space>& operand)
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 

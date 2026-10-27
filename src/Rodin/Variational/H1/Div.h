@@ -29,37 +29,47 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Div over a grid function: exposes the finite element
-  /// space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a grid function: exposes the finite element
+   * space, the scalar type and the operand type.
+   */
   template <size_t K, class Scalar, class Data, class Mesh>
-  struct Traits<Variational::Div<Variational::GridFunction<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
+  struct Traits<Variational::Div<Variational::GridFunction<
+    Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>;
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Operand type.
-      using OperandType =
-        Variational::GridFunction<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>,
-          Data>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>;
+
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Operand type.
+    using OperandType =
+      Variational::GridFunction<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>,
+        Data>;
   };
 
-  /// @brief Type traits for @c Div over a shape function: exposes the finite element
-  /// space, the shape function space, the scalar type and the operand type.
-  template <size_t K, class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>>
+  /**
+   * @brief Type traits for @c Div over a shape function: exposes the finite element
+   * space, the shape function space, the scalar type and the operand type.
+   */
+  template <size_t K, class NestedDerived, class Scalar, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Div<Variational::ShapeFunction<NestedDerived,
+    Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-      /// @brief Scalar value type.
-      using ScalarType = Scalar;
-      /// @brief Operand type.
-      using OperandType = Variational::ShapeFunction<NestedDerived,
-        Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>;
+    /// @brief Finite element space type.
+    using FESType = Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    /// @brief Scalar value type.
+    using ScalarType = Scalar;
+
+    /// @brief Operand type.
+    using OperandType = Variational::ShapeFunction<NestedDerived,
+      Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>;
   };
 }
 
@@ -83,13 +93,13 @@ namespace Rodin::Variational
    */
   template <size_t K, class Scalar, class Data, class Mesh>
   class Div<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>> final
-    : public DivBase<
-        GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
+    : public DivBase<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
         Div<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -98,32 +108,63 @@ namespace Rodin::Variational
 
       /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
+
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
-      Div(const OperandType& u) : Parent(u) {}
-      /// @brief Copy constructor.
-      Div(const Div& other) : Parent(other) {}
-      /// @brief Move constructor.
-      Div(Div&& other) : Parent(std::move(other)) {}
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
+      Div(const OperandType& u)
+        : Parent(u)
+      {}
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      Div(const Div& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      Div(Div&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
+        if (!ip.getQuadratureFormula())
+        {
+          this->interpolate(out, p);
+          return;
+        }
         const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
         const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
+        const Index i = polytope.getIndex();
 
-        const auto& gf  = this->getOperand();
+        const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
         const H1Element<K, ScalarType> feS(polytope.getGeometry());
         const size_t nscalar = feS.getCount();
-        const auto* qf = ip.getQuadratureFormula();
-        assert(qf);
         const auto& tab = feS.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
@@ -139,16 +180,21 @@ namespace Rodin::Variational
 
           phys = JinvT * ref;
 
-          for (size_t comp = 0; comp < vdim && comp < d; ++comp)
+          for (size_t comp = 0; comp < vdim && comp < static_cast<size_t>(phys.size());
+               ++comp)
           {
             const size_t local = alpha * vdim + comp;
-            out += gf[fes.getGlobalIndex({d, i}, local)]
-                 * phys(static_cast<std::uint8_t>(comp));
+            out += gf[fes.getGlobalIndex({d, i}, local)] *
+              phys(static_cast<std::uint8_t>(comp));
           }
         }
       }
 
-      /// @brief Interpolates at a geometric point.
+      /**
+       * @brief Interpolates at a geometric point.
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
+       */
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -160,7 +206,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
 
@@ -200,7 +246,7 @@ namespace Rodin::Variational
           }
 
           UndeterminedTraceDomainException(
-              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+            *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
             << Alert::Raise;
           return;
         }
@@ -208,10 +254,10 @@ namespace Rodin::Variational
         {
           assert(d == mesh.getDimension());
 
-          const auto& gf  = this->getOperand();
+          const auto& gf = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
-          const auto& fe  = fes.getFiniteElement(d, i);
-          const auto& rc  = p.getReferenceCoordinates();
+          const auto& fe = fes.getFiniteElement(d, i);
+          const auto& rc = p.getReferenceCoordinates();
 
           // div(u) = trace( Jinv^T * sum_a u_a * grad_ref(phi_a) )
           // Here u_a is vector-valued (vdim = d in typical use), but we do not
@@ -245,9 +291,8 @@ namespace Rodin::Variational
 
             gradPhys = JinvT * ref;
 
-            // divergence contribution is u_comp * dphi/dx_comp if comp < d
-            // (only makes sense when vdim == d; if vdim != d, we only sum over min(vdim,d))
-            if (comp < d)
+            // The trace uses physical gradient components, including on embedded cells.
+            if (comp < static_cast<size_t>(gradPhys.size()))
             {
               const auto& uA = gf[fes.getGlobalIndex({d, i}, a)];
               // u_a is vector coefficient for basis "component", but in your layout
@@ -259,15 +304,30 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          H1Element<K, ScalarType>(geom.getGeometry()).getDegree().value_or(2 * K);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -277,9 +337,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Div of an H1 GridFunction
+   * @param u Operand expression.
    */
   template <size_t K, class Scalar, class Data, class Mesh>
-  Div(const GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>&)
+  Div(const GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>& u)
     -> Div<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
   /**
@@ -293,88 +354,53 @@ namespace Rodin::Variational
    * @f]
    * for pressure-velocity coupling in Stokes/Navier-Stokes equations.
    */
-  template <size_t K, class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  class Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>>
+  template <size_t K, class NestedDerived, class Number, class Mesh,
+    ShapeFunctionSpaceType Space>
+  class Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>
+    final
+    : public ShapeFunctionBase<Div<
+        ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>>
   {
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Number>, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
+
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
+
       /// @brief Scalar value type.
       using ScalarType = Number;
 
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      /// @brief Per-cell tabulation cache.
+      /// @brief Physical derivatives prepared by the current integration-point bind.
       struct Cache
       {
-          /// @brief Key identifying a cached tabulation.
-          struct Key
-          {
-              /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-              /// @brief Spatial dimension.
-              size_t dim = 0;
-              /// @brief Cached cell tabulation.
-              Index cell = 0;
-
-              /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf = nullptr;
-              /// @brief Index of the quadrature point.
-              size_t qp = 0;
-
-              /// @brief Whether the key holds a cached entry.
-              bool valid = false;
-
-              /// @brief Tests whether the key holds a cached entry.
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
-
-              /// @brief Equality comparison.
-              bool operator==(const Key& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return geom == o.geom && dim == o.dim && cell == o.cell && qf == o.qf &&
-                  qp == o.qp;
-              }
-
-              /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
-              {
-                valid = false;
-                geom = Geometry::Polytope::Type::Point;
-                dim = 0;
-                cell = 0;
-                qf = nullptr;
-                qp = 0;
-              }
-        };
-
-        /// @brief Cached physical divergences per vector DOF (size = ndof).
+        /// @brief Prepared physical derivatives in local basis order.
         std::vector<ScalarType> divPhys;
-        /// @brief Key identifying the cached entry.
-        Key key;
       };
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u),
@@ -382,7 +408,10 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -390,60 +419,77 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the operand function.
-      constexpr
-      const OperandType& getOperand() const
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
+      constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return getOperand().getDOFs(polytope);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Div& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Every explicit bind prepares physical derivatives from the supplied
+       * point. Cell and formula identities do not identify geometry state:
+       * deformation may preserve both while changing the inverse Jacobian.
+       * Only reference tabulation and working storage are reused across binds.
+       *
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
 
-        const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto& p = ip.getPoint();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
-        const size_t d   = poly.getDimension();
-        const Index  cell = poly.getIndex();
+        const size_t d = poly.getDimension();
         const auto geom = poly.getGeometry();
-
-        typename Cache::Key key;
-        key.geom  = geom;
-        key.dim   = d;
-        key.cell  = cell;
-        key.qf = qf;
-        key.qp    = qp;
-        key.valid = true;
-
-        if (qf && m_cache.key == key)
-          return *this;
-
-        m_cache.key = key;
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
@@ -469,43 +515,62 @@ namespace Rodin::Variational
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
           for (size_t j = 0; j < d; ++j)
+          {
             ref(j) = qf ? tab->getGradient(qp, alpha)[j]
                         : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
+          }
 
           phys = JinvT * ref;
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-            m_cache.divPhys[local] = (comp < d) ? phys(comp) : ScalarType(0);
+            m_cache.divPhys[local] =
+              (comp < static_cast<size_t>(phys.size())) ? phys(comp) : ScalarType(0);
           }
         }
 
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       ScalarType getBasis(size_t local) const
       {
-        assert(m_cache.key);
         assert(local < m_cache.divPhys.size());
         return m_cache.divPhys[local];
       }
 
-      /// @brief Gets the finite element space.
-      constexpr
-      const auto& getFiniteElementSpace() const
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
+      constexpr const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())
           return std::nullopt;
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (*k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (*k == 0) ? 0 : (*k - 1);
       }
 
@@ -521,9 +586,14 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Div.
-  template <size_t K, class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Div(const ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
+  /**
+   * @brief Deduction guide for @c Div.
+   * @param u Operand expression.
+   */
+  template <size_t K, class NestedDerived, class Number, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Div(const ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&
+      u)
     -> Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 

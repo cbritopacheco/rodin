@@ -506,13 +506,16 @@ TEST(PublishedRuleTest, OurRulesAgreeWithThePublishedOnes)
     const TableRule pub{data, 2, {}};
     const XiaoGimbutas ours(degree, Polytope::Type::Triangle);
     for (size_t a = 0; a <= degree; ++a)
+    {
       for (size_t b = 0; a + b <= degree; ++b)
       {
         const auto integrate = [&](const auto& r) {
           Real s = 0;
           for (size_t q = 0; q < r.getSize(); ++q)
+          {
             s += r.getWeight(q) * std::pow(r.getPoint(q)[0], (Real)a) *
               std::pow(r.getPoint(q)[1], (Real)b);
+          }
           return s;
         };
         const Real p = integrate(pub), o = integrate(ours);
@@ -520,5 +523,6 @@ TEST(PublishedRuleTest, OurRulesAgreeWithThePublishedOnes)
           << "triangle degree " << degree << " monomial x^" << a << " y^" << b
           << " (ours " << ours.getSize() << " pts, published " << pub.getSize() << ")";
       }
+    }
   }
 }

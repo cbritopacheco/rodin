@@ -3,33 +3,38 @@
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
- *
+ */
+/**
  * @file MPIP0P0gTest.cpp
  * @brief Distributed PETSc tests for P0 and P0g spaces on MPI meshes.
  *
- * These tests distribute a mesh across MPI ranks and exercise:
- *   - GridFunction projection onto distributed P0 and P0g.
- *   - Linear form assembly (\int f\cdot v d\Omega) with distributed P0 and P0g.
- *   - Bilinear form assembly (\int u\cdot v d\Omega) with distributed P0 and P0g.
- *   - Solving the L2 projection problem with distributed P0 via PETSc GMRES.
- *   - Solving the L2 projection problem with distributed P0g via PETSc GMRES.
+ * Mesh distribution, interpolation, assembly and mass-projection solves use
+ * the configured PETSc scalar field @f$\mathbb F\in\{\mathbb R,\mathbb C\}@f$.
+ * Legacy projection data remain real-valued, including when embedded in complex
+ * storage. Error integrands use @f$|u_h-c|^2=(u_h-c)\overline{(u_h-c)}@f$;
+ * scalar comparisons retain both real and imaginary components.
  *
- * ### P0 tests
+ * ## Piecewise constants
  *
- * For the P0 space (piecewise constant), the natural PDE is the L2 projection:
- * find u_h ∈ P0 such that \int u_h v d\Omega = \int f v d\Omega for all v ∈ P0.
- * The resulting system is diagonal with M_ii = |K_i| (cell area/volume),
- * so u_h = f_K (average of f over each cell K).
+ * Mass projection onto @f$P_0@f$ is defined by
+ * @f[
+ * \int_\Omega u_h\overline v\,dx=\int_\Omega f\overline v\,dx
+ * \quad\text{for every }v\in P_0.
+ * @f]
+ * The diagonal mass matrix has @f$M_{ii}=|K_i|@f$, so each coefficient is the
+ * cell average @f$u_h|_{K_i}=|K_i|^{-1}\int_{K_i}f\,dx@f$.
  *
- * ### P0g tests
+ * ## Global constants
  *
- * For the P0g space (global constant), the L2 projection gives:
- * |\Omega| \cdot c = \int f d\Omega, so c = (1/|\Omega|) \int f d\Omega.
- * For a constant f this reduces to c = f.
+ * Projection onto @f$P_{0g}@f$ yields the domain average
+ * @f$c=|\Omega|^{-1}\int_\Omega f\,dx@f$. Constants are reproduced exactly
+ * up to the stated algebraic tolerance. Interpolation through a DOF functional
+ * is tested separately and is not asserted to compute an average.
  */
 
 #include <cmath>
 #include <string>
+#include <type_traits>
 
 #include <gtest/gtest.h>
 
@@ -62,6 +67,47 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
+  /// @brief Scalar data with the configured PETSc coefficient field.
+  using PETScScalarFunction = std::conditional_t<std::is_same_v<PetscScalar, Complex>,
+    ComplexFunction<PetscScalar>, RealFunction<PetscScalar>>;
+
+  /// @brief Leaves rank zero empty while retaining the existing P0g DOF owner.
+  class EmptyRootPartitioner final : public Partitioner
+  {
+    public:
+      EmptyRootPartitioner(const Mesh<Context::Local>& mesh, size_t count)
+        : m_partitioner(mesh),
+          m_count(count)
+      {
+        m_partitioner.partition(count > 1 ? count - 1 : count);
+      }
+
+      const Mesh<Context::Local>& getMesh() const override
+      {
+        return m_partitioner.getMesh();
+      }
+
+      void partition(size_t count, size_t dimension) override
+      {
+        m_count = count;
+        m_partitioner.partition(count > 1 ? count - 1 : count, dimension);
+      }
+
+      size_t getCount() const override
+      {
+        return m_count;
+      }
+
+      size_t getPartition(Index index) const override
+      {
+        return m_partitioner.getPartition(index) + (m_count > 1);
+      }
+
+    private:
+      BalancedCompactPartitioner m_partitioner;
+      size_t m_count;
+  };
+
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
@@ -111,6 +157,61 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // Alias to resolve the enclosing 'PETSc' namespace scope to Rodin::PETSc.
   namespace PETSc = ::Rodin::PETSc;
 
+  /**
+   * @brief Interpolation reaches the unique global-constant DOF owner even
+   *        when that owner has no entities on which to evaluate the function.
+   *
+   * The two-cell segment is assigned only to nonzero ranks. With four ranks,
+   * both the owner and one ghost holder have empty shards; the untouched ghost
+   * must not replace the interpolated coefficient. Scalar and vector constants
+   * are checked exactly on every copy. A subsequent empty selection must leave
+   * both fields unchanged.
+   */
+  TEST(PETSc_MPI_P0g, InterpolationWithEmptyOwner)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    Sharder<Context::MPI> sharder(ctx);
+    if (world.rank() == 0)
+    {
+      auto local = makeShardableMesh(Polytope::Type::Segment, {3});
+      EmptyRootPartitioner partitioner(local, static_cast<size_t>(world.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    auto mesh = sharder.gather(0);
+    if (world.size() > 1 && world.rank() == 0)
+    {
+      EXPECT_EQ(mesh.getShard().getVertexCount(), 0);
+    }
+
+    P0g<PetscScalar, decltype(mesh)> scalarSpace(mesh);
+    P0g<Math::SpatialVector<PetscScalar>, decltype(mesh)> vectorSpace(mesh, size_t(2));
+    PETSc::Variational::GridFunction scalar(scalarSpace);
+    PETSc::Variational::GridFunction vector(vectorSpace);
+    scalar = PetscScalar(-7);
+    vector = PetscScalar(-7);
+    scalar = RealFunction(3);
+    vector = VectorFunction(RealFunction(3), RealFunction(5));
+
+    const auto& scalarRead = scalar;
+    const auto& vectorRead = vector;
+    EXPECT_EQ(scalarRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[1], PetscScalar(5));
+    scalarRead.flush();
+    vectorRead.flush();
+
+    scalar.project(Region::Cells, RealFunction(11), [](const auto&) { return false; });
+    vector.project(Region::Cells, VectorFunction(RealFunction(11), RealFunction(13)),
+      [](const auto&) { return false; });
+    EXPECT_EQ(scalarRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[1], PetscScalar(5));
+    scalarRead.flush();
+    vectorRead.flush();
+  }
+
   // =========================================================================
   // P0 — GridFunction projection
   // =========================================================================
@@ -133,7 +234,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 });
 
-    P0<Real, Mesh<Context::MPI>> fes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     GridFunction<decltype(fes), ::Vec> u(fes);
     u = RealFunction(c);
 
@@ -145,7 +246,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     for (Index i = begin; i < end; ++i)
     {
       const PetscScalar v = u[i];
-      EXPECT_NEAR(PetscRealPart(v), c, 1e-10);
+      EXPECT_NEAR(std::abs(v - PetscScalar(c)), 0, 1e-10);
     }
     u.flush();
   }
@@ -169,15 +270,15 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    P0<Real, Mesh<Context::MPI>> fes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     GridFunction<decltype(fes), ::Vec> u(fes);
     u = RealFunction(c);
 
     // Integral of the grid function over the domain
-    const Real total = Integral(u).compute();
+    const auto total = Integral(u).compute();
 
     // Expected: c * |\Omega| = c * 1 = c
-    EXPECT_NEAR(total, c, 1e-9);
+    EXPECT_NEAR(std::abs(total - PetscScalar(c)), 0., 1e-9);
   }
 
   // =========================================================================
@@ -200,11 +301,11 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 });
 
-    P0<Real, Mesh<Context::MPI>> fes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TestFunction v(fes);
 
     LinearForm lf(v);
-    lf = Integral(RealFunction(1.0), v);
+    lf = Integral(PETScScalarFunction(1.0), v);
     lf.assemble();
 
     ::Vec b = lf.getVector();
@@ -233,18 +334,18 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    P0<Real, Mesh<Context::MPI>> fes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TestFunction v(fes);
 
     LinearForm lf(v);
-    lf = Integral(RealFunction(1.0), v);
+    lf = Integral(PETScScalarFunction(1.0), v);
     lf.assemble();
 
     ::Vec b = lf.getVector();
-    PetscReal sum = 0.0;
+    PetscScalar sum = 0.0;
     VecSum(b, &sum);
 
-    EXPECT_NEAR(static_cast<Real>(sum), 1.0, 1e-10);
+    EXPECT_NEAR(std::abs(sum - PetscScalar(1)), 0.0, 1e-10);
   }
 
   // =========================================================================
@@ -265,7 +366,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 });
 
-    P0<Real, Mesh<Context::MPI>> fes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
@@ -307,25 +408,26 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    using FES = P0<Real, Mesh<Context::MPI>>;
+    using FES = P0<PetscScalar, Mesh<Context::MPI>>;
     FES fes(mesh);
 
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
     Problem projection(u, v);
-    projection = Integral(u, v) - Integral(RealFunction(c), v);
+    projection = Integral(u, v) - Integral(PETScScalarFunction(c), v);
 
     PETSc::Solver::GMRES solver(projection);
     solver.solve();
 
-    // Compute \int (u_h - c)^2 d\Omega
+    // The Hermitian square remains nonnegative for complex coefficient storage.
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
-    diff = Pow(u.getSolution() - RealFunction(c), 2);
+    diff = Dot(
+      u.getSolution() - PETScScalarFunction(c), u.getSolution() - PETScScalarFunction(c));
 
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-10);
+    const auto error = Integral(diff).compute();
+    EXPECT_NEAR(std::abs(error), 0.0, 1e-10);
   }
 
   /**
@@ -344,24 +446,25 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, { 6, 6 },
                                    Real(1) / Real(5));
 
-    using FES = P0<Real, Mesh<Context::MPI>>;
+    using FES = P0<PetscScalar, Mesh<Context::MPI>>;
     FES fes(mesh);
 
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
     Problem projection(u, v);
-    projection = Integral(u, v) - Integral(RealFunction(c), v);
+    projection = Integral(u, v) - Integral(PETScScalarFunction(c), v);
 
     PETSc::Solver::GMRES solver(projection);
     solver.solve();
 
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
-    diff = Pow(u.getSolution() - RealFunction(c), 2);
+    diff = Dot(
+      u.getSolution() - PETScScalarFunction(c), u.getSolution() - PETScScalarFunction(c));
 
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-10);
+    const auto error = Integral(diff).compute();
+    EXPECT_NEAR(std::abs(error), 0.0, 1e-10);
   }
 
   /**
@@ -379,24 +482,25 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    using FES = P0<Real, Mesh<Context::MPI>>;
+    using FES = P0<PetscScalar, Mesh<Context::MPI>>;
     FES fes(mesh);
 
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
     Problem projection(u, v);
-    projection = Integral(u, v) - Integral(RealFunction(c), v);
+    projection = Integral(u, v) - Integral(PETScScalarFunction(c), v);
 
     PETSc::Solver::GMRES solver(projection);
     solver.solve();
 
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
-    diff = Pow(u.getSolution() - RealFunction(c), 2);
+    diff = Dot(
+      u.getSolution() - PETScScalarFunction(c), u.getSolution() - PETScScalarFunction(c));
 
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-10);
+    const auto error = Integral(diff).compute();
+    EXPECT_NEAR(std::abs(error), 0.0, 1e-10);
   }
 
   // =========================================================================
@@ -422,13 +526,13 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    P0g<Real, Mesh<Context::MPI>> fes(mesh);
+    P0g<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     GridFunction<decltype(fes), ::Vec> u(fes);
     u = RealFunction(c);
 
     // Verify projection via collective integral: \int u_h d\Omega = c * 1 = c
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, c, 1e-10);
+    const auto total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(c)), 0., 1e-10);
   }
 
   // =========================================================================
@@ -447,11 +551,11 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 });
 
-    P0g<Real, Mesh<Context::MPI>> fes(mesh);
+    P0g<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TestFunction v(fes);
 
     LinearForm lf(v);
-    lf = Integral(RealFunction(1.0), v);
+    lf = Integral(PETScScalarFunction(1.0), v);
     lf.assemble();
 
     ::Vec b = lf.getVector();
@@ -478,18 +582,18 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    P0g<Real, Mesh<Context::MPI>> fes(mesh);
+    P0g<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TestFunction v(fes);
 
     LinearForm lf(v);
-    lf = Integral(RealFunction(1.0), v);
+    lf = Integral(PETScScalarFunction(1.0), v);
     lf.assemble();
 
     ::Vec b = lf.getVector();
-    PetscReal domainArea = 0.0;
+    PetscScalar domainArea = 0.0;
     VecSum(b, &domainArea);
 
-    EXPECT_NEAR(static_cast<Real>(domainArea), 1.0, 1e-10);
+    EXPECT_NEAR(std::abs(domainArea - PetscScalar(1)), 0.0, 1e-10);
   }
 
   // =========================================================================
@@ -510,7 +614,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 });
 
-    P0g<Real, Mesh<Context::MPI>> fes(mesh);
+    P0g<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
@@ -541,7 +645,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    P0g<Real, Mesh<Context::MPI>> fes(mesh);
+    P0g<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
@@ -558,7 +662,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       PetscInt    col = 0;
       PetscScalar val = 0.0;
       MatGetValues(A, 1, &row, 1, &col, &val);
-      EXPECT_NEAR(PetscRealPart(val), 1.0, 1e-10);
+      EXPECT_NEAR(std::abs(val - PetscScalar(1)), 0, 1e-10);
     }
     world.barrier();
   }
@@ -586,25 +690,26 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
-    using FES = P0g<Real, Mesh<Context::MPI>>;
+    using FES = P0g<PetscScalar, Mesh<Context::MPI>>;
     FES fes(mesh);
 
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
     Problem projection(u, v);
-    projection = Integral(u, v) - Integral(RealFunction(c), v);
+    projection = Integral(u, v) - Integral(PETScScalarFunction(c), v);
 
     PETSc::Solver::GMRES solver(projection);
     solver.solve();
 
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
-    diff = Pow(u.getSolution() - RealFunction(c), 2);
+    diff = Dot(
+      u.getSolution() - PETScScalarFunction(c), u.getSolution() - PETScScalarFunction(c));
 
-    // Integral(diff) = \int (c_h - c)^2 d\Omega.  For a constant rhs this must be 0.
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-10);
+    // A represented constant has zero squared L2 error.
+    const auto error = Integral(diff).compute();
+    EXPECT_NEAR(std::abs(error), 0.0, 1e-10);
   }
 
   /**
@@ -622,24 +727,25 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, { 6, 6 },
                                    Real(1) / Real(5));
 
-    using FES = P0g<Real, Mesh<Context::MPI>>;
+    using FES = P0g<PetscScalar, Mesh<Context::MPI>>;
     FES fes(mesh);
 
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
 
     Problem projection(u, v);
-    projection = Integral(u, v) - Integral(RealFunction(c), v);
+    projection = Integral(u, v) - Integral(PETScScalarFunction(c), v);
 
     PETSc::Solver::GMRES solver(projection);
     solver.solve();
 
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
-    diff = Pow(u.getSolution() - RealFunction(c), 2);
+    diff = Dot(
+      u.getSolution() - PETScScalarFunction(c), u.getSolution() - PETScScalarFunction(c));
 
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-10);
+    const auto error = Integral(diff).compute();
+    EXPECT_NEAR(std::abs(error), 0.0, 1e-10);
   }
 
   /**
@@ -659,10 +765,10 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 12, 12 },
                                    Real(1) / Real(11));
 
-    using FES = P0g<Real, Mesh<Context::MPI>>;
+    using FES = P0g<PetscScalar, Mesh<Context::MPI>>;
     FES fes(mesh);
 
-    auto f = F::x + F::y;
+    auto f = PETScScalarFunction(1) * (F::x + F::y);
 
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction  v(fes);
@@ -677,11 +783,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     // The solution is stored as a P0g GridFunction; DOF 0 = global average.
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
-    diff = Pow(u.getSolution() - RealFunction(1.0), 2);
+    diff = Dot(u.getSolution() - PETScScalarFunction(1.0),
+      u.getSolution() - PETScScalarFunction(1.0));
 
-    // \int (c_h - 1)^2 d\Omega should be 0 (c_h = 1 = average of f over [0,1]^2)
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-6);
+    // The exact domain average of the manufactured source is one.
+    const auto error = Integral(diff).compute();
+    EXPECT_NEAR(std::abs(error), 0.0, 1e-6);
   }
 
 } // namespace Rodin::Tests::Unit::PETSc::MPI

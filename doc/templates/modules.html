@@ -1,0 +1,38 @@
+{% set navbar_current = 'modules' %}
+{% extends 'base-index.html' %}
+
+{% block main %}
+        <h1>Modules</h1>
+        <nav class="m-block m-default" aria-label="Module table of contents">
+          <h2>Contents</h2>
+          <ul>
+{% for category, modules in RODIN_MODULES %}
+            <li><a href="#modules-{{ loop.index }}">{{ category }}</a>
+              <ul>
+{% for label, target in modules %}
+                <li><a href="#{{ target }}">{{ label }}</a></li>
+{% endfor %}
+              </ul>
+            </li>
+{% endfor %}
+          </ul>
+        </nav>
+{% for category, modules in RODIN_MODULES %}
+        <section id="modules-{{ loop.index }}" data-category="{{ category }}">
+          <h2>{{ category }}</h2>
+          <p data-role="category-description" data-category="{{ category }}">{{ RODIN_MODULE_CATEGORIES[category] }}</p>
+{% for label, target in modules %}
+{% set module = RODIN_MODULE_OVERVIEWS[target] %}
+          <section class="m-frame" id="{{ target }}" data-module="{{ target }}">
+            <h3><a href="{{ target }}.html" class="m-doc">{{ label }}</a></h3>
+            <p class="m-text m-dim" data-role="brief"><em>{{ module.brief }}</em></p>
+            <div data-role="representative">{{ module.representative }}</div>
+            <div class="m-block m-flat" data-role="description">{{ module.description }}</div>
+          </section>
+{% endfor %}
+        </section>
+{% endfor %}
+        <p>Build flags and module-specific macro controls are documented in
+          <a href="configuration.html" class="m-doc">Configuration</a>.</p>
+{{ super() -}}
+{% endblock %}

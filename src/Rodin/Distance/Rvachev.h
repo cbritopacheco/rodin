@@ -33,15 +33,15 @@ namespace Rodin::Distance
    * where @f$ u @f$ is the input level set function and @f$ d @f$ is the
    * normalized approximate signed distance.
    *
-   * ## Mathematical Properties
+   * # Mathematical Properties
    * - Preserves the zero level set: @f$ d(x) = 0 \iff u(x) = 0 @f$
    * - Preserves the sign: @f$ \text{sign}(d) = \text{sign}(u) @f$
    * - Gradient magnitude approaches 1 near the interface
    *
-   * ## References
+   * # References
    * @cite rvachev1974methods @cite rvachev2001transfinite
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * GridFunction u(fes);  // Some level set function
    * Rvachev rvachev;
@@ -63,20 +63,15 @@ namespace Rodin::Distance
       auto operator()(const Variational::GridFunction<FES, Data>& gf)
       {
         Variational::GridFunction dist(gf.getFiniteElementSpace());
-        Math::SpatialVector<Real> gu;
-        dist =
-          [&](const Geometry::Point& p)
-          {
-            const Real u = gf(p);
-            Variational::Grad grad(gf);
-            grad.getValue(gu, p);
-            return u / Math::sqrt(u * u + gu.squaredNorm());
-          };
+        dist = [&](const Geometry::Point& p) {
+          const Real u = gf(p);
+          Variational::Grad grad(gf);
+          const auto gu = grad.getValue(p);
+          return u / Math::sqrt(u * u + gu.squaredNorm());
+        };
         return dist;
       }
   };
 }
 
 #endif
-
-

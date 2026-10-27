@@ -29,6 +29,7 @@ namespace
 TEST(GaussJacobiTest, IsExactAgainstTheWeight)
 {
   for (size_t alpha = 0; alpha <= 3; ++alpha)
+  {
     for (size_t n = 1; n <= 12; ++n)
     {
       std::vector<Real> x, w;
@@ -44,12 +45,14 @@ TEST(GaussJacobiTest, IsExactAgainstTheWeight)
           << "alpha " << alpha << " n " << n << " k " << k;
       }
     }
+  }
 }
 
 /// @brief Weights are positive and nodes lie strictly inside (0,1).
 TEST(GaussJacobiTest, WeightsPositiveAndNodesInterior)
 {
   for (size_t alpha = 0; alpha <= 3; ++alpha)
+  {
     for (size_t n = 1; n <= 12; ++n)
     {
       std::vector<Real> x, w;
@@ -61,6 +64,7 @@ TEST(GaussJacobiTest, WeightsPositiveAndNodesInterior)
         EXPECT_LT(x[i], 1);
       }
     }
+  }
 }
 
 /// @brief With alpha = 0 the rule must reduce to Gauss-Legendre on [0,1],

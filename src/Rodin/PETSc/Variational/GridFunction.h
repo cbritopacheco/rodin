@@ -20,7 +20,7 @@
  * degrees of freedom inside PETSc distributed vectors, supporting both
  * purely local (sequential) and MPI-parallel computations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  *
  * A grid function represents a discrete finite element approximation
  * @f$ u_h \in V_h @f$ defined by its expansion in the finite element
@@ -39,7 +39,7 @@
  * ghost layer so that every rank can read DOFs shared with adjacent mesh
  * partitions without explicit point-to-point communication.
  *
- * ## Ghost-Vector Management
+ * # Ghost-Vector Management
  *
  * In MPI mode the PETSc vector is created with `VecMPISetGhost()`.
  * The ghost indices are computed from the shard's local DOFs that map to
@@ -54,7 +54,7 @@
  * The `acquire()` / `flush()` / `sync()` / `release()` methods encapsulate
  * these patterns.
  *
- * ## Key Features
+ * # Key Features
  *
  * - **Dual context support**: Compiles for both `Context::Local`
  *   (sequential `PETSC_COMM_SELF`) and `Context::MPI` (distributed) meshes.
@@ -81,7 +81,7 @@
  * - **Projection**: `project()` assigns DOF values by evaluating a
  *   user-supplied function over a filtered mesh region.
  *
- * ## Usage Example
+ * # Usage Example
  *
  * ```cpp
  * // Sequential usage
@@ -115,6 +115,8 @@
 #include <utility>
 
 #include "Rodin/Types.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Context/Local.h"
 #include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -124,6 +126,7 @@
 
 #ifdef RODIN_USE_MPI
 #include "Rodin/MPI/Context.h"
+#include "Rodin/MPI/Variational/Interpolation.h"
 #endif
 
 namespace Rodin::Variational
@@ -139,7 +142,7 @@ namespace Rodin::Variational
    * supports both sequential (`Context::Local`) and distributed
    * (`Context::MPI`) finite element spaces.
    *
-   * ## Ownership and Ghost Model (MPI)
+   * # Ownership and Ghost Model (MPI)
    *
    * When the mesh context is `Context::MPI`, the constructor partitions the
    * global DOF vector across MPI ranks.  Each rank *owns* a contiguous
@@ -149,7 +152,7 @@ namespace Rodin::Variational
    * a `GhostBimap` so that `operator[]` can transparently translate a
    * global DOF index to the correct local position in the ghosted vector.
    *
-   * ## Array Access Protocol
+   * # Array Access Protocol
    *
    * PETSc requires explicit lock/unlock of the underlying raw array via
    * `VecGetArray*` / `VecRestoreArray*`.  This class manages the lock
@@ -172,8 +175,7 @@ namespace Rodin::Variational
    * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a> convenience wrapper
    */
   template <class FES>
-  class GridFunction<FES, ::Vec>
-    : public GridFunctionBase<GridFunction<FES, ::Vec>>
+  class GridFunction<FES, ::Vec> : public GridFunctionBase<GridFunction<FES, ::Vec>>
   {
     public:
       /**
@@ -209,9 +211,9 @@ namespace Rodin::Variational
        */
       struct ArrayWrite
       {
-        Boolean acquired = false;            ///< `true` while the array is locked for writing.
-        ::Vec ghost = PETSC_NULLPTR;         ///< Local form of the ghosted vector (MPI only).
-        PetscScalar* raw = PETSC_NULLPTR;    ///< Raw pointer to the mutable DOF array.
+        Boolean acquired = false; ///< `true` while the array is locked for writing.
+        ::Vec ghost = PETSC_NULLPTR; ///< Local form of the ghosted vector (MPI only).
+        PetscScalar* raw = PETSC_NULLPTR; ///< Raw pointer to the mutable DOF array.
       };
 
       /**
@@ -223,46 +225,52 @@ namespace Rodin::Variational
        */
       struct ArrayRead
       {
-        Boolean acquired = false;              ///< `true` while the array is locked for reading.
-        ::Vec ghost = PETSC_NULLPTR;           ///< Local form of the ghosted vector (MPI only).
-        const PetscScalar* raw = PETSC_NULLPTR; ///< Raw pointer to the read-only DOF array.
+        Boolean acquired = false; ///< `true` while the array is locked for reading.
+        ::Vec ghost = PETSC_NULLPTR; ///< Local form of the ghosted vector (MPI only).
+        const PetscScalar* raw =
+          PETSC_NULLPTR; ///< Raw pointer to the read-only DOF array.
       };
 
       /// @brief Finite element space type, e.g. @ref Rodin::Variational::P1.
-      using FESType =
-        FES;
+      using FESType = FES;
 
-      /// @brief Underlying PETSc vector data type (@c Vec), used to store the
-      ///        DOF coefficient vector @f$ \mathbf{u} @f$.
-      using DataType =
-        ::Vec;
+      /**
+       * @brief Underlying PETSc vector data type (@c Vec), used to store the
+       *        DOF coefficient vector @f$ \mathbf{u} @f$.
+       */
+      using DataType = ::Vec;
 
-      /// @brief Scalar type of each DOF coefficient (`PetscScalar`); determines
-      ///        the arithmetic precision of all vector operations.
-      using ScalarType =
-        PetscScalar;
+      /**
+       * @brief Scalar type of each DOF coefficient (`PetscScalar`); determines
+       *        the arithmetic precision of all vector operations.
+       */
+      using ScalarType = PetscScalar;
 
-      /// @brief Range type of the finite element space (e.g. `PetscScalar`
-      ///        for scalar FE spaces, or `Math::Vector<PetscScalar>` for
-      ///        vector-valued spaces).
-      using RangeType =
-        typename FormLanguage::Traits<FESType>::RangeType;
+      /**
+       * @brief Range type of the finite element space (e.g. `PetscScalar`
+       *        for scalar FE spaces, or `Math::Vector<PetscScalar>` for
+       *        vector-valued spaces).
+       */
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      /// @brief Mesh type associated with the finite element space (e.g.
-      ///        `Geometry::Mesh<Context::Local>` or `Geometry::Mesh<Context::MPI>`).
-      using FESMeshType =
-        typename FormLanguage::Traits<FESType>::MeshType;
+      /**
+       * @brief Mesh type associated with the finite element space (e.g.
+       *        `Geometry::Mesh<Context::Local>` or `Geometry::Mesh<Context::MPI>`).
+       */
+      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
-      /// @brief Context type of the finite element space mesh; either
-      ///        @ref Rodin::Context::Local for sequential problems or
-      ///        @ref Rodin::Context::MPI for distributed problems.
-      using FESMeshContextType =
-        typename FormLanguage::Traits<FESMeshType>::ContextType;
+      /**
+       * @brief Context type of the finite element space mesh; either
+       *        @ref Rodin::Context::Local for sequential problems or
+       *        @ref Rodin::Context::MPI for distributed problems.
+       */
+      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
-      /// @brief Parent CRTP base class providing the generic
-      ///        GridFunctionBase interface (projection, interpolation, I/O).
-      using Parent =
-        GridFunctionBase<GridFunction<FESType, DataType>>;
+      /**
+       * @brief Parent CRTP base class providing the generic
+       *        GridFunctionBase interface (projection, interpolation, I/O).
+       */
+      using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;
 
@@ -272,9 +280,8 @@ namespace Rodin::Variational
 
       using Parent::max;
 
-      static_assert(
-          std::is_same_v<FESMeshContextType, Context::Local> ||
-          std::is_same_v<FESMeshContextType, Context::MPI>);
+      static_assert(std::is_same_v<FESMeshContextType, Context::Local> ||
+        std::is_same_v<FESMeshContextType, Context::MPI>);
 
       /**
        * @brief Constructs a zero-initialised grid function on the given
@@ -283,12 +290,12 @@ namespace Rodin::Variational
        * Allocates a PETSc vector whose size matches the number of DOFs in
        * @p fes and sets all entries to zero.
        *
-       * ### Local mode (`Context::Local`)
+       * # Local mode (`Context::Local`)
        * Creates a sequential vector on `PETSC_COMM_SELF` with
        * `VecCreate` → `VecSetSizes` → `VecSetFromOptions` → `VecSetUp` →
        * `VecZeroEntries`.
        *
-       * ### MPI mode (`Context::MPI`)
+       * # MPI mode (`Context::MPI`)
        * 1. Queries the ownership range from the finite element space via
        *    `fes.getOwnershipRange(m_begin, m_end)`.
        * 2. Iterates over local shard DOFs to identify ghost indices —
@@ -380,7 +387,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
       }
 
       /**
@@ -390,7 +397,8 @@ namespace Rodin::Variational
        * `VecCopy` so that this instance owns an independent copy of the
        * DOF data.  Ghost mappings and ownership ranges are also copied.
        * Any acquired array state in @p other is **not** propagated; the
-       * new object starts with no arrays acquired.
+       * new object starts with no arrays acquired. The source must have completed
+       * writes through its mutable owner; a prepared read borrow is retained.
        *
        * @param[in] other Grid function to copy from.
        */
@@ -402,6 +410,11 @@ namespace Rodin::Variational
           m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
           m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
       {
+        if (other.m_write.acquired)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Complete source coefficient writes before copying." << Alert::Raise;
+        }
         PetscErrorCode ierr = VecDuplicate(other.m_data, &m_data);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecCopy(other.m_data, m_data);
@@ -413,7 +426,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
       }
 
       /**
@@ -421,7 +434,9 @@ namespace Rodin::Variational
        *
        * Transfers ownership of the PETSc vector handle from @p other using
        * `std::exchange`, leaving @p other in a valid but empty state (null
-       * vector, no array access).  No PETSc API calls are made.
+       * vector, no array access). Outstanding array borrows transfer with the
+       * vector. Moving requires exclusive access to both objects; it neither
+       * restores arrays nor performs a ghost update. No PETSc API calls are made.
        *
        * @param[in] other Grid function to move from.
        */
@@ -431,11 +446,17 @@ namespace Rodin::Variational
           m_begin(std::exchange(other.m_begin, 0)),
           m_end(std::exchange(other.m_end, 0)),
           m_ghosts(std::move(other.m_ghosts)),
-          m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
-          m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
+          m_read(),
+          m_write()
       {
-        other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        if (other.m_read.acquired)
+        {
+          m_read = std::exchange(other.m_read, ArrayRead{});
+          m_readAcquired.store(true, std::memory_order_relaxed);
+          other.m_readAcquired.store(false, std::memory_order_relaxed);
+        }
+        if (other.m_write.acquired)
+          m_write = std::exchange(other.m_write, ArrayWrite{});
       }
 
       /**
@@ -454,8 +475,8 @@ namespace Rodin::Variational
        * is created with `VecDuplicate` only when this instance holds none,
        * which is the case for a moved-from object.
        *
-       * Any array acquired through `operator[]` on either operand is
-       * flushed first, so the copy sees the current values.
+       * The destination completes its own pending writes. The source must
+       * have completed writes through its mutable owner before this const borrow.
        *
        * @pre Both grid functions must reference the same finite element space.
        *
@@ -471,7 +492,7 @@ namespace Rodin::Variational
 
         static_cast<const GridFunction&>(*this).flush();
         this->flush();
-        other.flush();
+        other.sync();
 
         m_begin = other.m_begin;
         m_end = other.m_end;
@@ -494,7 +515,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -502,7 +523,9 @@ namespace Rodin::Variational
        * @brief Move assignment operator.
        *
        * Releases any existing PETSc handles via `release()`, then transfers
-       * ownership from @p other.
+       * ownership and outstanding array borrows from @p other. Moving requires
+       * exclusive access to both objects. Pending source writes remain pending
+       * until the new owner explicitly synchronizes them.
        *
        * @pre Both grid functions must reference the same finite element space.
        *
@@ -523,23 +546,32 @@ namespace Rodin::Variational
         m_end = std::exchange(other.m_end, 0);
         m_ghosts = std::move(other.m_ghosts);
 
-        m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-
-        other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        if (other.m_read.acquired)
+        {
+          m_read = std::exchange(other.m_read, ArrayRead{});
+          m_readAcquired.store(true, std::memory_order_relaxed);
+          other.m_readAcquired.store(false, std::memory_order_relaxed);
+        }
+        if (other.m_write.acquired)
+          m_write = std::exchange(other.m_write, ArrayWrite{});
 
         return *this;
       }
 
-      /// @brief Destructor; calls `release()` to restore any acquired arrays
-      ///        and destroy the underlying PETSc vector.
+      /**
+       * @brief Destructor; calls `release()` to restore any acquired arrays
+       *        and destroy the underlying PETSc vector.
+       */
       virtual ~GridFunction()
       {
         this->release();
       }
 
-      /// @brief Sets every entry of the PETSc vector to a scalar value.
+      /**
+       * @brief Sets every entry of the PETSc vector to a scalar value.
+       * @param value Field callable composed with the coordinate mapping.
+       * @returns Reference to this object after assignment.
+       */
       GridFunction& operator=(const ScalarType& value)
       {
         static_cast<const GridFunction&>(*this).flush();
@@ -553,8 +585,20 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
+      }
+
+      /**
+       * @brief Completes pending writes and computes the coefficient min.
+       * In MPI mode this operation is collective.
+       * @param idx Global index of the selected coefficient.
+       * @returns The requested coefficient min.
+       */
+      ScalarType min(Index& idx)
+      {
+        sync();
+        return static_cast<const GridFunction&>(*this).min(idx);
       }
 
       /**
@@ -567,8 +611,7 @@ namespace Rodin::Variational
        * @param[out] idx On return, the global index of the minimum value.
        * @returns The minimum scalar value @f$ \min_i u_i @f$.
        */
-      constexpr
-      ScalarType min(Index& idx) const
+      constexpr ScalarType min(Index& idx) const
       {
         this->sync();
         PetscErrorCode ierr;
@@ -577,9 +620,21 @@ namespace Rodin::Variational
         PetscReal res;
         ierr = VecMin(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
         idx = static_cast<Index>(pidx);
         return static_cast<ScalarType>(res);
+      }
+
+      /**
+       * @brief Completes pending writes and computes the coefficient max.
+       * In MPI mode this operation is collective.
+       * @param idx Global index of the selected coefficient.
+       * @returns The requested coefficient max.
+       */
+      ScalarType max(Index& idx)
+      {
+        sync();
+        return static_cast<const GridFunction&>(*this).max(idx);
       }
 
       /**
@@ -592,8 +647,7 @@ namespace Rodin::Variational
        * @param[out] idx On return, the global index of the maximum value.
        * @returns The maximum scalar value @f$ \max_i u_i @f$.
        */
-      constexpr
-      ScalarType max(Index& idx) const
+      constexpr ScalarType max(Index& idx) const
       {
         this->sync();
         PetscErrorCode ierr;
@@ -602,9 +656,21 @@ namespace Rodin::Variational
         PetscReal res;
         ierr = VecMax(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
         idx = static_cast<Index>(pidx);
         return static_cast<ScalarType>(res);
+      }
+
+      /**
+       * @brief Completes pending writes and computes the coefficient norm.
+       * In MPI mode this operation is collective.
+       * @param type PETSc norm type.
+       * @returns The requested coefficient norm.
+       */
+      Real norm(NormType type = NORM_2)
+      {
+        sync();
+        return static_cast<const GridFunction&>(*this).norm(type);
       }
 
       /**
@@ -724,7 +790,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -752,7 +818,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -779,7 +845,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -806,7 +872,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return static_cast<GridFunction&>(*this);
       }
 
@@ -824,6 +890,7 @@ namespace Rodin::Variational
        * (@f$ \mathbf{u} \leftarrow \mathbf{u} + \Delta t\, \mathbf{v} @f$).
        *
        * @pre `&this->getFiniteElementSpace() == &other.getFiniteElementSpace()`
+       * @pre Pending source writes have been completed through the mutable owner.
        *
        * @param[in] a     Scalar coefficient @f$ a @f$.
        * @param[in] other Grid function @f$ v @f$ to accumulate.
@@ -834,7 +901,7 @@ namespace Rodin::Variational
         assert(&this->getFiniteElementSpace() == &other.getFiniteElementSpace());
         static_cast<const GridFunction&>(*this).flush();
         this->flush();
-        other.flush();
+        other.sync();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecAXPY(data, a, other.getData());
@@ -846,7 +913,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -907,7 +974,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -936,7 +1003,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -964,8 +1031,10 @@ namespace Rodin::Variational
 
         // Global size checks
         PetscInt nDst = 0, nSrc = 0;
-        ierr = VecGetSize(m_data, &nDst); assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetSize(data,   &nSrc); assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetSize(m_data, &nDst);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetSize(data, &nSrc);
+        assert(ierr == PETSC_SUCCESS);
 
         const PetscInt off = static_cast<PetscInt>(offset);
         assert(off >= 0);
@@ -1008,7 +1077,7 @@ namespace Rodin::Variational
 
           // Important: IS local size must be nLocal, not nDst (global)
           MPI_Comm comm;
-          PetscObjectGetComm((PetscObject) m_data, &comm);
+          PetscObjectGetComm((PetscObject)m_data, &comm);
 
           IS is = nullptr;
           ierr = ISCreateStride(comm, nLocal, start, 1, &is);
@@ -1040,6 +1109,23 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Projects a constant over the selected entities of a region.
+       * @tparam Pred Unary predicate selecting entities.
+       * @param region Region over which to interpolate.
+       * @param value Constant value to interpolate.
+       * @param pred Predicate selecting the entities to update.
+       * @returns Reference to this grid function.
+       */
+      template <class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
+      GridFunction& project(
+        const Geometry::Region& region, const RangeType& value, const Pred& pred)
+      {
+        return this->project(
+          region, [&](const auto&) -> RangeType { return value; }, pred);
+      }
+
+      /**
        * @brief Projects a user-supplied function onto the grid function
        *        over a filtered mesh region.
        *
@@ -1047,8 +1133,18 @@ namespace Rodin::Variational
        * @p pred to each polytope, and for those that pass, sets the
        * corresponding DOF values by evaluating the function @p v.
        *
-       * The method calls `acquire()` before the loop and `flush()` after
-       * it, so the caller does not need to manage array access manually.
+       * In local mode functional values are staged before acquiring write
+       * access. In MPI mode interpolation is collective: the
+       * backend-independent @ref Interpolation selects and evaluates
+       * functionals, then each owner commits its coefficients and refreshes
+       * ghost copies. Unselected coefficients retain their previous values.
+       * Source values are evaluated before any destination
+       * coefficient is replaced, including when the source references this
+       * grid function.
+       *
+       * @pre In MPI mode the predicate and source function must agree on
+       * replicas of the same entity. Pending direct writes must obey the
+       * existing collective @ref sync() contract.
        *
        * @tparam Function Callable type compatible with the finite element
        *                  space's projection interface.
@@ -1061,11 +1157,42 @@ namespace Rodin::Variational
        * @returns Reference to `*this`.
        */
       template <class Function, class Pred>
-      GridFunction& project(const Geometry::Region& region, const Function& v, const Pred& pred)
+      GridFunction& project(
+        const Geometry::Region& region, const Function& v, const Pred& pred)
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
 
+#ifdef RODIN_USE_MPI
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          this->sync();
+          Interpolation interpolation(fes, region, pred);
+          IndexMap<typename FESType::ScalarType> values;
+          interpolation.assemble(values, v);
+          // Evaluation can acquire a read array through a reference to this
+          // destination. Release it before committing the staged coefficients.
+          static_cast<const GridFunction&>(*this).flush();
+          PetscScalar* owned = nullptr;
+          PetscErrorCode ierr = VecGetArray(m_data, &owned);
+          assert(ierr == PETSC_SUCCESS);
+          for (const auto& [global, value] : values)
+          {
+            assert(m_begin <= global && global < m_end);
+            owned[global - m_begin] = value;
+          }
+          ierr = VecRestoreArray(m_data, &owned);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+          return *this;
+        }
+#endif
+
+        // Preserve the source type and its evaluation overloads for the pullback.
         Geometry::PolytopeIterator it;
         switch (region)
         {
@@ -1083,16 +1210,36 @@ namespace Rodin::Variational
             break;
         }
 
-        this->acquire();
-
+        // Source expressions may read this field. Evaluate every functional
+        // before acquiring write access, including across shared entities.
+        this->sync();
+        std::vector<std::pair<Index, ScalarType>> coefficients;
+        coefficients.reserve(fes.getSize());
         while (it)
         {
           const auto& polytope = *it;
           if (pred(polytope))
-            this->project({ polytope.getDimension(), polytope.getIndex() }, v);
+          {
+            const auto d = polytope.getDimension();
+            const auto i = polytope.getIndex();
+            const auto& element = fes.getFiniteElement(d, i);
+            const auto mapping = fes.getPullback({d, i}, v);
+            for (Index local = 0; local < element.getCount(); ++local)
+            {
+              coefficients.emplace_back(
+                fes.getGlobalIndex({d, i}, local), element.getLinearForm(local)(mapping));
+            }
+          }
           ++it;
         }
 
+        static_cast<const GridFunction&>(*this).flush();
+        this->acquire();
+        for (const auto& [index, value] : coefficients)
+        {
+          assert(index < fes.getSize());
+          m_write.raw[index] = value;
+        }
         this->flush();
 
         return *this;
@@ -1105,10 +1252,10 @@ namespace Rodin::Variational
        * array has not already been acquired (`m_write.acquired == false`),
        * the method:
        *
-       * ### Local mode
+       * # Local mode
        * - Calls `VecGetArrayWrite(m_data, &raw)`.
        *
-       * ### MPI mode
+       * # MPI mode
        * 1. Obtains the local (ghosted) form via `VecGhostGetLocalForm`.
        * 2. Locks the local form with `VecGetArrayWrite`.
        *
@@ -1121,6 +1268,8 @@ namespace Rodin::Variational
        */
       GridFunction& acquire()
       {
+        if (!m_write.acquired)
+          static_cast<const GridFunction&>(*this).flush();
         PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -1149,7 +1298,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1160,11 +1309,17 @@ namespace Rodin::Variational
        * instead, permitting concurrent read access from multiple threads
        * or call sites.  In MPI mode this only locks the ghosted local form;
        * ghost synchronization is done by collective data-update paths.
+       * Pending writes must have been completed through the mutable owner.
        *
        * @returns Const reference to `*this`.
        */
       const GridFunction& acquire() const
       {
+        if (m_write.acquired)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Complete pending coefficient writes before const access." << Alert::Raise;
+        }
         if (m_readAcquired.load(std::memory_order_acquire))
           return *this;
 
@@ -1198,7 +1353,7 @@ namespace Rodin::Variational
           assert(false);
         }
         m_readAcquired.store(true, std::memory_order_release);
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1206,10 +1361,10 @@ namespace Rodin::Variational
        * @brief Releases mutable (write) access and scatters locally-modified
        *        ghost values back to their owners.
        *
-       * ### Local mode
+       * # Local mode
        * - Calls `VecRestoreArrayWrite(m_data, &raw)`.
        *
-       * ### MPI mode
+       * # MPI mode
        * 1. Restores the array with `VecRestoreArrayWrite(ghost, &raw)`.
        * 2. Returns the local form via `VecGhostRestoreLocalForm`.
        * 3. Performs a **reverse** ghost update
@@ -1274,7 +1429,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1321,7 +1476,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 
@@ -1352,17 +1507,21 @@ namespace Rodin::Variational
       /**
        * @brief Const overload of @ref sync().
        *
-       * Synchronization changes PETSc access state, not the mathematical grid
-       * function.  The write state is mutable so const reductions can ensure
-       * they see DOFs written through a non-const alias before the object was
-       * observed as const.
+       * Releases read access only. Pending coefficient writes must first be
+       * completed by calling the non-const overload on the writer. This read
+       * operation never commits coefficients or performs a ghost scatter.
        *
        * @returns Const reference to `*this`.
        */
       const GridFunction& sync() const
       {
+        if (m_write.acquired)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Pending writes require sync() on the mutable grid function."
+            << Alert::Raise;
+        }
         this->flush();
-        const_cast<GridFunction&>(*this).flush();
         return *this;
       }
 
@@ -1392,6 +1551,7 @@ namespace Rodin::Variational
        * expose, such as block-vector manipulation.
        *
        * @see sync(), flush(), release(), axpy(), setData()
+       * @returns Underlying PETSc vector.
        */
       auto& getData()
       {
@@ -1405,33 +1565,31 @@ namespace Rodin::Variational
        * the flushing requirements before passing the handle to PETSc.
        *
        * @see sync(), flush(), release()
+       * @returns Underlying PETSc vector.
        */
       const DataType& getData() const
       {
         return m_data;
       }
 
-      /// @brief Returns the current read-access state, including the
-      ///        acquired flag and the raw pointer (may be null if not acquired).
+      /**
+       * @brief Returns the current read-access state, including the
+       *        acquired flag and the raw pointer (may be null if not acquired).
+       * @returns Read-access guard for the vector storage.
+       */
       const ArrayRead& getArrayRead() const
       {
         return m_read;
       }
 
-      /// @brief Returns the current write-access state, including the
-      ///        acquired flag and the raw pointer (may be null if not acquired).
+      /**
+       * @brief Returns the current write-access state, including the
+       *        acquired flag and the raw pointer (may be null if not acquired).
+       * @returns Write-access guard for the vector storage.
+       */
       const ArrayWrite& getArrayWrite() const
       {
         return m_write;
-      }
-
-      /// @brief Returns the polynomial order of the finite element space on
-      ///        the given polytope.
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
-          .getOrder();
       }
 
       /**
@@ -1506,17 +1664,20 @@ namespace Rodin::Variational
           m_data = PETSC_NULLPTR;
         }
 
-        (void) ierr;
+        (void)ierr;
       }
 
     private:
       DataType
         m_data; ///< Underlying PETSc @c Vec storing the DOF coefficient vector @f$ \mathbf{u} @f$.
-      size_t m_begin, m_end;    ///< Owned DOF range @f$[\texttt{m\_begin}, \texttt{m\_end})@f$ (MPI mode); unused in Local mode.
-      GhostBimap m_ghosts;      ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
+      size_t m_begin,
+        m_end; ///< Owned DOF range @f$[\texttt{m\_begin}, \texttt{m\_end})@f$ (MPI mode); unused in Local mode.
+      GhostBimap
+        m_ghosts; ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
 
-      mutable ArrayRead m_read;   ///< Read-access state (mutable to allow const `acquire`/`flush`).
-      mutable ArrayWrite m_write; ///< Write-access state (mutable to allow const `acquire`/`flush`).
+      mutable ArrayRead
+        m_read; ///< Read-access state (mutable to allow const `acquire`/`flush`).
+      ArrayWrite m_write; ///< Write-access state owned by the mutable writer.
       mutable std::atomic_bool m_readAcquired{false};
       mutable std::mutex m_readMutex;
   };
@@ -1544,29 +1705,29 @@ namespace Rodin::PETSc::Variational
    * @see <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::Variational::GridFunction<FES, ::Vec></a>
    */
   template <class FES>
-  class GridFunction
-    : public Rodin::Variational::GridFunction<FES, ::Vec>
+  class GridFunction : public Rodin::Variational::GridFunction<FES, ::Vec>
   {
     public:
       /// @brief Parent specialization type.
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
-      using Parent::Parent;       ///< Inherit all constructors.
-      using Parent::operator[];   ///< Inherit element-access operators.
-      using Parent::operator();   ///< Inherit point-evaluation operator.
-      using Parent::getValue;     ///< Inherit getValue.
-      using Parent::operator=;    ///< Inherit assignment operators.
-      using Parent::operator+=;   ///< Inherit addition operators.
-      using Parent::operator-=;   ///< Inherit subtraction operators.
-      using Parent::operator*=;   ///< Inherit multiplication operators.
-      using Parent::operator/=;   ///< Inherit division operators.
+      using Parent::Parent; // Inherit all constructors.
+      using Parent::operator[]; // Inherit element-access operators.
+      using Parent::operator(); // Inherit point-evaluation operator.
+      using Parent::getValue; // Inherit getValue.
+      using Parent::operator=; // Inherit assignment operators.
+      using Parent::operator+=; // Inherit addition operators.
+      using Parent::operator-=; // Inherit subtraction operators.
+      using Parent::operator*=; // Inherit multiplication operators.
+      using Parent::operator/=; // Inherit division operators.
   };
 
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc::Variational::GridFunction.
+   * @param fes Finite element space.
    */
   template <class FES>
-  GridFunction(const FES&) -> GridFunction<FES>;
+  GridFunction(const FES& fes) -> GridFunction<FES>;
 }
 
 namespace Rodin::FormLanguage
@@ -1585,6 +1746,7 @@ namespace Rodin::FormLanguage
   {
     /// @brief Finite element space type associated with this grid function.
     using FESType = FES;
+
     /// @brief Data storage type (PETSc vector @c Vec).
     using DataType = ::Vec;
   };

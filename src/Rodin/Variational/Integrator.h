@@ -32,14 +32,14 @@ namespace Rodin::Variational
    * (element-level) contributions that are then assembled into global matrices
    * and vectors.
    *
-   * ## Integrator Types
+   * # Integrator Types
    * There are two main types of integrators:
    * - **Linear Integrators**: Compute contributions to the load vector (RHS)
    *   - Example: @f$ b_i = \int_K f \psi_i \, dx @f$
    * - **Bilinear Integrators**: Compute contributions to the system matrix
    *   - Example: @f$ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx @f$
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During the assembly process:
    * 1. Integrators are iterated over mesh elements
    * 2. Local contributions are computed using numerical quadrature
@@ -55,9 +55,7 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FormLanguage::Base;
 
-      /**
-       * @brief Enumeration of integrator types.
-       */
+      /// @brief Enumeration of integrator types.
       enum class Type
       {
         Linear,   ///< Linear form integrator (load vector)
@@ -111,8 +109,10 @@ namespace Rodin::Variational
        *
        * State the order with @ref setOrder(size_t) whenever the degree the
        * integrand actually has is not the degree inference can see.
+       * @returns Reference to this object after the operation.
+       * @param automatic Tag selecting automatic quadrature-order inference.
        */
-      Integrator& setOrder(std::nullopt_t)
+      Integrator& setOrder([[maybe_unused]] std::nullopt_t automatic)
       {
         m_order = nullptr;
         return *this;
@@ -132,6 +132,7 @@ namespace Rodin::Variational
        * share one degree; prefer @ref setOrder(OrderType) otherwise.
        *
        * @param[in] order Integration order to use on every polytope
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(size_t order)
       {
@@ -151,6 +152,7 @@ namespace Rodin::Variational
        * meaningless and typically too low in both cases.
        *
        * @param[in] order Rule invoked with the polytope being integrated
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(OrderType order)
       {
@@ -169,6 +171,17 @@ namespace Rodin::Variational
         if (m_order)
           return m_order(polytope);
         return std::nullopt;
+      }
+
+      /** @brief Gets the configured order rule for delegation to another integrator.
+       * An empty callable preserves inference; a nonempty callable preserves
+       * constant or per-polytope order selection without resolving it early.
+       * @returns Reference to the configured order rule; an empty rule selects
+       * integrand-based inference.
+       */
+      const OrderType& getOrder() const noexcept
+      {
+        return m_order;
       }
 
       virtual ~Integrator() = default;

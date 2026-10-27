@@ -93,166 +93,185 @@ namespace
 
   struct BoundaryFluid
   {
-      static constexpr Attribute FSI = 2;
-      static constexpr Attribute Inlet = 4;
-      static constexpr std::array<Attribute, 6> Outlets{{7, 8, 9, 10, 14, 15}};
-  // One-element-wide band of FSI faces touching the inlet/outlet caps. Promoted
-  // at startup from FSI so the fluid velocity can be strongly pinned to zero on
-  // the cap rings while the bulk FSI keeps its Robin transmission.
-      static constexpr Attribute FSIRing = 99;
+    static constexpr Attribute FSI = 2;
+    static constexpr Attribute Inlet = 4;
+    static constexpr std::array<Attribute, 6> Outlets{{7, 8, 9, 10, 14, 15}};
+    // One-element-wide band of FSI faces touching the inlet/outlet caps. Promoted
+    // at startup from FSI so the fluid velocity can be strongly pinned to zero on
+    // the cap rings while the bulk FSI keeps its Robin transmission.
+    static constexpr Attribute FSIRing = 99;
   };
 
   struct BoundarySolid
   {
-      static constexpr Attribute FSI = 2;
-      static constexpr Attribute Inlet = 17;
-      static constexpr std::array<Attribute, 6> Outlets{{18, 19, 20, 21, 22, 31}};
-      static constexpr Attribute FSIRing = 99;
+    static constexpr Attribute FSI = 2;
+    static constexpr Attribute Inlet = 17;
+    static constexpr std::array<Attribute, 6> Outlets{{18, 19, 20, 21, 22, 31}};
+    static constexpr Attribute FSIRing = 99;
   };
 
   struct RCR
   {
-  // RCR windkessel parameters matched to the WORKING CoupledLV0DCoronary3D
-  // setup (Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000).
-  // The previous (C = 1e-12, Rd = 5e10) gave a windkessel with ~no capacitive
-  // damping (cap = C/dt ~ 0, so pc jumps instantly with every flux ripple)
-  // and a 50x too-large distal resistance: that combination is what makes the
-  // explicit 0D-3D outlet coupling oscillate and blow up.
-      Real Rp = 5.0e8;
-      Real C = 5.0e-11;
-      Real Rd = 1.0e9;
-      Real pd = 400.0;
-      Real pc = 10500.0;
-      Real pout = 11000.0;
-      Real qd = 0.0;
+    // RCR windkessel parameters matched to the WORKING CoupledLV0DCoronary3D
+    // setup (Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000).
+    // The previous (C = 1e-12, Rd = 5e10) gave a windkessel with ~no capacitive
+    // damping (cap = C/dt ~ 0, so pc jumps instantly with every flux ripple)
+    // and a 50x too-large distal resistance: that combination is what makes the
+    // explicit 0D-3D outlet coupling oscillate and blow up.
+    Real Rp = 5.0e8;
+    Real C = 5.0e-11;
+    Real Rd = 1.0e9;
+    Real pd = 400.0;
+    Real pc = 10500.0;
+    Real pout = 11000.0;
+    Real qd = 0.0;
   };
 
   struct CarreauYasuda
   {
-      Real mu0 = 0.0186058;
-      Real muInf = 0.0042963;
-      Real lambda = 0.2435;
-      Real n = 0.2079;
-      Real yasuda = 1.5410;
-      Real gammaRegularization = 1.0e-3;
+    Real mu0 = 0.0186058;
+    Real muInf = 0.0042963;
+    Real lambda = 0.2435;
+    Real n = 0.2079;
+    Real yasuda = 1.5410;
+    Real gammaRegularization = 1.0e-3;
   };
 
   struct GeoArtery
   {
-      Real Rp;
-      Real Lp;
-      Real Rd;
-      Real Ld;
+    Real Rp;
+    Real Lp;
+    Real Rd;
+    Real Ld;
   };
 
   struct OutletFlowLaw
   {
-      /// @brief Proximal surrogate vessel radius.
-      Real proximalRadius = 6.e-4;
-      /// @brief Proximal surrogate vessel length.
-      Real proximalLength = 0.00075;
-      /// @brief Distal surrogate vessel radius.
-      Real distalRadius = 1e-4;
-      /// @brief Distal surrogate vessel length.
-      Real distalLength = 0.0025;
-      /// @brief Array with radius and large for each branch
-      std::unordered_map<Attribute, GeoArtery> geometricParam{
-        {7, {6.e-4, 0.0125, 3e-4, 0.0025}},
-        {8, {4.e-4, 0.01, 2e-4, 0.0025}},
-        {9, {4.e-4, 0.01, 2e-4, 0.0025}},
-        {10, {4.e-4, 0.01, 2e-4, 0.0025}},
-        {14, {6.e-4, 0.0125, 3e-4, 0.0025}},
-        {15, {6.e-4, 0.0125, 3e-4, 0.0025}},
-      };
-      /// @brief Pressure-drop threshold for the Poiseuille fallback.
-      Real pressureDropTolerance = 1.0e-12;
-      /// @brief Minimum shear-rate bracket.
-      Real minShearRate = 1.0e-8;
-      /// @brief Number of RK4 substeps for the WRMS flow integral.
-      int integralSteps = 100;
-      /// @brief Maximum bracketing expansions for outlet scalar solves.
-      int maxBracketIterations = 100;
-      /// @brief Wall shear root solver absolute tolerance.
-      Real shearAbsoluteTolerance = 1.0e-12;
-      /// @brief Wall shear root solver relative tolerance.
-      Real shearRelativeTolerance = 1.0e-10;
-      /// @brief Wall shear root solver step tolerance.
-      Real shearStepTolerance = 1.0e-12;
-      /// @brief Wall shear root solver maximum iterations.
-      int shearMaxIterations = 50;
-      /// @brief Flow inversion root solver absolute tolerance.
-      Real flowAbsoluteTolerance = 1.0e-10;
-      /// @brief Flow inversion root solver relative tolerance.
-      Real flowRelativeTolerance = 1.0e-9;
-      /// @brief Flow inversion root solver step tolerance.
-      Real flowStepTolerance = 1.0e-12;
-      /// @brief Flow inversion root solver maximum iterations.
-      int flowMaxIterations = 50;
-      /// @brief Flow magnitude treated as zero in pressure-drop inversion.
-      Real zeroFlowTolerance = 1.0e-16;
-      /// @brief Minimum pressure-drop bracket.
-      Real pressureDropBracketMin = 1.0;
-      /// @brief Distal capacitor bracket pressure pad.
-      Real distalPressureBracketPad = 1000.0;
+    /// @brief Proximal surrogate vessel radius.
+    Real proximalRadius = 6.e-4;
+
+    /// @brief Proximal surrogate vessel length.
+    Real proximalLength = 0.00075;
+
+    /// @brief Distal surrogate vessel radius.
+    Real distalRadius = 1e-4;
+
+    /// @brief Distal surrogate vessel length.
+    Real distalLength = 0.0025;
+
+    /// @brief Array with radius and large for each branch
+    std::unordered_map<Attribute, GeoArtery> geometricParam{
+      {7, {6.e-4, 0.0125, 3e-4, 0.0025}},
+      {8, {4.e-4, 0.01, 2e-4, 0.0025}},
+      {9, {4.e-4, 0.01, 2e-4, 0.0025}},
+      {10, {4.e-4, 0.01, 2e-4, 0.0025}},
+      {14, {6.e-4, 0.0125, 3e-4, 0.0025}},
+      {15, {6.e-4, 0.0125, 3e-4, 0.0025}},
+    };
+
+    /// @brief Pressure-drop threshold for the Poiseuille fallback.
+    Real pressureDropTolerance = 1.0e-12;
+
+    /// @brief Minimum shear-rate bracket.
+    Real minShearRate = 1.0e-8;
+
+    /// @brief Number of RK4 substeps for the WRMS flow integral.
+    int integralSteps = 100;
+
+    /// @brief Maximum bracketing expansions for outlet scalar solves.
+    int maxBracketIterations = 100;
+
+    /// @brief Wall shear root solver absolute tolerance.
+    Real shearAbsoluteTolerance = 1.0e-12;
+
+    /// @brief Wall shear root solver relative tolerance.
+    Real shearRelativeTolerance = 1.0e-10;
+
+    /// @brief Wall shear root solver step tolerance.
+    Real shearStepTolerance = 1.0e-12;
+
+    /// @brief Wall shear root solver maximum iterations.
+    int shearMaxIterations = 50;
+
+    /// @brief Flow inversion root solver absolute tolerance.
+    Real flowAbsoluteTolerance = 1.0e-10;
+
+    /// @brief Flow inversion root solver relative tolerance.
+    Real flowRelativeTolerance = 1.0e-9;
+
+    /// @brief Flow inversion root solver step tolerance.
+    Real flowStepTolerance = 1.0e-12;
+
+    /// @brief Flow inversion root solver maximum iterations.
+    int flowMaxIterations = 50;
+
+    /// @brief Flow magnitude treated as zero in pressure-drop inversion.
+    Real zeroFlowTolerance = 1.0e-16;
+
+    /// @brief Minimum pressure-drop bracket.
+    Real pressureDropBracketMin = 1.0;
+
+    /// @brief Distal capacitor bracket pressure pad.
+    Real distalPressureBracketPad = 1000.0;
   };
 
   struct Config
   {
-      std::string xdmfBasename = "CoronaryArtery_FSI_Explicit";
-      std::string csvPath = "CoronaryArtery_FSI_Explicit.csv";
-      Real meshScale = 1.0e-3;
+    std::string xdmfBasename = "CoronaryArtery_FSI_Explicit";
+    std::string csvPath = "CoronaryArtery_FSI_Explicit.csv";
+    Real meshScale = 1.0e-3;
 
-      Real dt = 1.0e-3;
-      size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+    Real dt = 1.0e-3;
+    size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
-  // Scale applied to the inlet->outlet pressure drop.  The 0D model produces a
-  // transmural gradient of ~1000 Pa between the inlet (arterial) pressure and
-  // the outlet (Windkessel) pressures; this compresses each outlet toward the
-  // inlet so the driving gradient is pressureDropScale * original (0.5 -> ~500
-  // Pa).  1.0 leaves the gradient untouched.
-      Real pressureDropScale = 0.5;
+    // Scale applied to the inlet->outlet pressure drop.  The 0D model produces a
+    // transmural gradient of ~1000 Pa between the inlet (arterial) pressure and
+    // the outlet (Windkessel) pressures; this compresses each outlet toward the
+    // inlet so the driving gradient is pressureDropScale * original (0.5 -> ~500
+    // Pa).  1.0 leaves the gradient untouched.
+    Real pressureDropScale = 0.5;
 
-      Real fluidDensity = 1060.0;
-      Real pressurePenalty = 1.0e-12;
-      Real inletBackflowStabilization = 1.0;
-      Real outletBackflowStabilization = 1.0;
-      CarreauYasuda viscosity;
-  // Geometry + nonlinear-solve parameters for the non-Newtonian outlet flow
-  // law used by updateRCRNonNew (per-outlet proximal/distal surrogate vessels).
-      OutletFlowLaw outletFlowLaw;
+    Real fluidDensity = 1060.0;
+    Real pressurePenalty = 1.0e-12;
+    Real inletBackflowStabilization = 1.0;
+    Real outletBackflowStabilization = 1.0;
+    CarreauYasuda viscosity;
+    // Geometry + nonlinear-solve parameters for the non-Newtonian outlet flow
+    // law used by updateRCRNonNew (per-outlet proximal/distal surrogate vessels).
+    OutletFlowLaw outletFlowLaw;
 
-      Real inletImpedance = 1.e3;
-      Real inletTangentialDamping = 1.e3;
+    Real inletImpedance = 1.e3;
+    Real inletTangentialDamping = 1.e3;
 
-  // Static follower-pressure prestress: ramp 0 -> par(0) in this many
-  // increments (0 = disabled); the dynamic loop then starts from the
-  // pressurized equilibrium with an exactly balanced first residual.
-      size_t prestressSteps = 0;
+    // Static follower-pressure prestress: ramp 0 -> par(0) in this many
+    // increments (0 = disabled); the dynamic loop then starts from the
+    // pressurized equilibrium with an exactly balanced first residual.
+    size_t prestressSteps = 0;
 
-      Real solidDensity = 1060.0;
-      Real solidYoungModulus = 2.0e6;
-      Real solidPoissonRatio = 0.4;
-  // Dissipative Newmark (gamma > 1/2, beta = (gamma + 1/2)^2 / 4):
-  // unconditionally stable and damps the high-frequency content of the
-  // startup transient (prestress handoff mismatch absorbed in the first
-  // steps) so the acceleration spike cannot blow up the predictor.
-  // Classic non-dissipative trapezoidal pair: beta = 0.25, gamma = 0.5.
-  // Mildly dissipative Newmark (gamma = 0.6, beta = (gamma + 1/2)^2 / 4).
-  // With the level/remainder load split the handoff residual is zero by
-  // construction, so only a LIGHT touch of dissipation is kept as a safety
-  // margin for the loose coupling; (0.25, 0.5) is worth trying once a clean
-  // start is confirmed, or with >= 2 coupling iterations.
-      Real newmarkBeta = 0.3025;
-      Real newmarkGamma = 0.6;
+    Real solidDensity = 1060.0;
+    Real solidYoungModulus = 2.0e6;
+    Real solidPoissonRatio = 0.4;
+    // Dissipative Newmark (gamma > 1/2, beta = (gamma + 1/2)^2 / 4):
+    // unconditionally stable and damps the high-frequency content of the
+    // startup transient (prestress handoff mismatch absorbed in the first
+    // steps) so the acceleration spike cannot blow up the predictor.
+    // Classic non-dissipative trapezoidal pair: beta = 0.25, gamma = 0.5.
+    // Mildly dissipative Newmark (gamma = 0.6, beta = (gamma + 1/2)^2 / 4).
+    // With the level/remainder load split the handoff residual is zero by
+    // construction, so only a LIGHT touch of dissipation is kept as a safety
+    // margin for the loose coupling; (0.25, 0.5) is worth trying once a clean
+    // start is confirmed, or with >= 2 coupling iterations.
+    Real newmarkBeta = 0.3025;
+    Real newmarkGamma = 0.6;
 
-      size_t couplingIterations = 3;   // max sub-iterations (Aitken-accelerated)
-      Real couplingRelaxation = 0.5;   // INITIAL Aitken omega (adapted at runtime)
-      Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
-  // Robin transmission parameter (both sides of Gamma_FSI).  Optimal
-  // scaling alpha = gamma*sqrt(rho_s E) (Burman et al. 2025, Sec. 4.1).
-  //   robinAlpha <= 0 -> auto from robinGamma; > 0 -> explicit override.
-      Real robinAlpha = 0.0;
-      Real robinGamma = 1.0;
+    size_t couplingIterations = 3;   // max sub-iterations (Aitken-accelerated)
+    Real couplingRelaxation = 0.5;   // INITIAL Aitken omega (adapted at runtime)
+    Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
+    // Robin transmission parameter (both sides of Gamma_FSI).  Optimal
+    // scaling alpha = gamma*sqrt(rho_s E) (Burman et al. 2025, Sec. 4.1).
+    //   robinAlpha <= 0 -> auto from robinGamma; > 0 -> explicit override.
+    Real robinAlpha = 0.0;
+    Real robinGamma = 1.0;
   };
 
   static Real periodic_activation(Real t)
@@ -531,20 +550,20 @@ namespace
     mesh.flush();
   }
 
-// --------------------------------------------------------------------------
-// FSI interface map between the fluid and solid meshes.
-// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // FSI interface map between the fluid and solid meshes.
+  // --------------------------------------------------------------------------
   struct InterfaceSegment
   {
-      Index fluid;
-      Index solid;
+    Index fluid;
+    Index solid;
   };
 
   struct InterfaceMap
   {
-      std::unordered_map<Index, Index> fluidToSolid;
-      std::unordered_map<Index, Index> solidToFluid;
-      std::vector<InterfaceSegment> segments;
+    std::unordered_map<Index, Index> fluidToSolid;
+    std::unordered_map<Index, Index> solidToFluid;
+    std::vector<InterfaceSegment> segments;
   };
 
   static Math::SpatialPoint centroid(const MeshType& mesh, const Polytope& polytope)
@@ -560,16 +579,16 @@ namespace
     return c;
   }
 
-// Relabel the one-element-wide band of FSI faces that touch an inlet/outlet cap
-// to a distinct "ring" attribute.  Rodin's DirichletBC is codimension-one: it
-// constrains whole faces, never a bare edge, so to strongly pin a field to zero
-// exactly on the cap rings (the curves where the FSI surface meets the caps) we
-// promote the row of FSI faces adjacent to each cap into their own attribute.
-// The caller then clamps that attribute and keeps the Robin transmission over
-// the remaining (bulk) FSI faces.  A face is in the band iff it shares at least
-// one vertex with a cap face, i.e. it touches the ring curve.  Done identically
-// on the fluid and solid reference meshes (assumed conforming on the interface)
-// so the bulk FSI faces still pair up one-to-one in buildInterfaceMap.
+  // Relabel the one-element-wide band of FSI faces that touch an inlet/outlet cap
+  // to a distinct "ring" attribute.  Rodin's DirichletBC is codimension-one: it
+  // constrains whole faces, never a bare edge, so to strongly pin a field to zero
+  // exactly on the cap rings (the curves where the FSI surface meets the caps) we
+  // promote the row of FSI faces adjacent to each cap into their own attribute.
+  // The caller then clamps that attribute and keeps the Robin transmission over
+  // the remaining (bulk) FSI faces.  A face is in the band iff it shares at least
+  // one vertex with a cap face, i.e. it touches the ring curve.  Done identically
+  // on the fluid and solid reference meshes (assumed conforming on the interface)
+  // so the bulk FSI faces still pair up one-to-one in buildInterfaceMap.
   static std::size_t tagFSIRingBand(MeshType& mesh, Attribute fsi, Attribute ring,
     Attribute inlet, const std::array<Attribute, 6>& outlets)
   {
@@ -581,12 +600,14 @@ namespace
       if (*a == inlet)
         return true;
       for (const Attribute o : outlets)
+      {
         if (*a == o)
           return true;
+      }
       return false;
     };
 
-  // Vertices lying on any cap face; the ring curves are a subset of these.
+    // Vertices lying on any cap face; the ring curves are a subset of these.
     std::unordered_set<Index> capVertices;
     for (auto it = mesh.getBoundary(); it; ++it)
     {
@@ -596,18 +617,20 @@ namespace
         capVertices.insert(v);
     }
 
-  // Collect (don't mutate during iteration) every FSI face touching a cap vertex.
+    // Collect (don't mutate during iteration) every FSI face touching a cap vertex.
     std::vector<Index> toRelabel;
     for (auto it = mesh.getBoundary(); it; ++it)
     {
       if (it->getAttribute() != fsi)
         continue;
       for (const auto& v : it->getVertices())
+      {
         if (capVertices.count(v))
         {
           toRelabel.push_back(it->getIndex());
           break;
         }
+      }
     }
 
     for (const Index f : toRelabel)
@@ -616,16 +639,16 @@ namespace
     return toRelabel.size();
   }
 
-// Match each fluid FSI face to its geometric twin on the solid FSI surface by
-// centroid proximity.  The two meshes are assumed CONFORMING on the interface
-// (coincident faces); a tolerance absorbs floating-point / ASCII round-off.
+  // Match each fluid FSI face to its geometric twin on the solid FSI surface by
+  // centroid proximity.  The two meshes are assumed CONFORMING on the interface
+  // (coincident faces); a tolerance absorbs floating-point / ASCII round-off.
 
   static InterfaceMap buildInterfaceMap(
     const MeshType& fluidReferenceMesh, const MeshType& solidReferenceMesh)
   {
     InterfaceMap map;
 
-  // Collect local solid FSI face centroids and the interface bounding box.
+    // Collect local solid FSI face centroids and the interface bounding box.
     std::vector<std::pair<Math::SpatialPoint, Index>> solidFaces;
     Math::SpatialPoint lo, hi;
     bool haveBox = false;
@@ -651,12 +674,12 @@ namespace
       }
     }
 
-  // Matching tolerance: a small fraction of the interface bounding-box diagonal
-  // (large enough to absorb round-off, far smaller than a face).
+    // Matching tolerance: a small fraction of the interface bounding-box diagonal
+    // (large enough to absorb round-off, far smaller than a face).
     const Real diag = haveBox ? Real((hi - lo).norm()) : Real(0);
     const Real tol = std::max(Real(1e-12), Real(1e-6) * diag);
 
-  // Spatial hash of solid centroids on a grid of cell size 'tol'.
+    // Spatial hash of solid centroids on a grid of cell size 'tol'.
     auto cellOf = [&](const Math::SpatialPoint& c) {
       std::array<long long, 3> k{0, 0, 0};
       const Index n = std::min<Index>(3, static_cast<Index>(c.size()));
@@ -668,7 +691,7 @@ namespace
     for (std::size_t s = 0; s < solidFaces.size(); ++s)
       grid[cellOf(solidFaces[s].first)].push_back(s);
 
-  // Match each local fluid FSI face to the nearest solid centroid within 'tol'.
+    // Match each local fluid FSI face to the nearest solid centroid within 'tol'.
     std::size_t fluidCount = 0;
     std::size_t unmatched = 0;
     Real worst = 0.0;
@@ -685,7 +708,9 @@ namespace
       Index bestSolid = 0;
       bool found = false;
       for (long long dx = -1; dx <= 1; ++dx)
+      {
         for (long long dy = -1; dy <= 1; ++dy)
+        {
           for (long long dz = -1; dz <= 1; ++dz)
           {
             const std::array<long long, 3> key{base[0] + dx, base[1] + dy, base[2] + dz};
@@ -703,6 +728,8 @@ namespace
               }
             }
           }
+        }
+      }
 
       if (!found || best > tol)
       {
@@ -745,8 +772,8 @@ namespace
 
     auto solidFace = solidReferenceMesh.getFace(found->second);
 
-  // Geometric re-localization: matched faces need not share vertex ordering,
-  // so the source face's reference coordinate cannot be reused directly.
+    // Geometric re-localization: matched faces need not share vertex ordering,
+    // so the source face's reference coordinate cannot be reused directly.
     const Math::SpatialPoint pc = p.getPhysicalCoordinates();
     Math::SpatialPoint rc;
     solidFace->getTransformation().inverse(rc, pc);
@@ -764,7 +791,7 @@ namespace
 
     auto fluidFace = fluidMesh.getFace(found->second);
 
-  // Geometric re-localization on the twin face -- see forwardFluidPointToSolid.
+    // Geometric re-localization on the twin face -- see forwardFluidPointToSolid.
     const Math::SpatialPoint pc = p.getPhysicalCoordinates();
     Math::SpatialPoint rc;
     fluidFace->getTransformation().inverse(rc, pc);
@@ -775,8 +802,10 @@ namespace
   static bool isFiniteVec(const Math::SpatialVector<Real>& x)
   {
     for (Index i = 0; i < x.size(); ++i)
+    {
       if (!std::isfinite(x(i)))
         return false;
+    }
     return true;
   }
 
@@ -813,8 +842,10 @@ namespace
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_coupling_iterations",
       &couplingIterations, &couplingIterationsSet);
     if (couplingIterationsSet)
+    {
       cfg.couplingIterations =
         static_cast<size_t>(std::max<PetscInt>(1, couplingIterations));
+    }
 
     PetscReal couplingRelaxation = cfg.couplingRelaxation;
     PetscBool couplingRelaxationSet = PETSC_FALSE;
@@ -1129,6 +1160,7 @@ int main(int argc, char** argv)
     // value exchange, e.g. an Allgather'd centroid->value buffer) is added, run
     // this case on a SINGLE MPI rank.
     if (comm.size() > 1)
+    {
       throw std::runtime_error(
         "CoronaryArtery_FSI_Explicit: the fluid<->solid interface coupling is "
         "not yet distributed and requires a single MPI rank. Run with "
@@ -1136,6 +1168,7 @@ int main(int argc, char** argv)
         "rank). Multi-rank support needs a global interface map plus "
         "cross-rank interface value exchange -- see the notes above "
         "buildInterfaceMap.");
+    }
 
     Model::Input modelInput = makeModelInput();
     Model model(modelInput);
@@ -1162,8 +1195,10 @@ int main(int argc, char** argv)
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
       BoundarySolid::FSIRing, BoundarySolid::Inlet, BoundarySolid::Outlets);
     if (isRoot)
+    {
       std::cout << "FSI ring band: fluid=" << fluidRingFaces
                 << " face(s), solid=" << solidRingFaces << " face(s)\n";
+    }
 
     std::vector<Math::SpatialPoint> referenceVertices;
     saveReferenceVertices(meshFluid, referenceVertices);
@@ -1335,9 +1370,11 @@ int main(int argc, char** argv)
       ? cfg.robinAlpha
       : cfg.robinGamma * std::sqrt(cfg.solidDensity * cfg.solidYoungModulus);
     if (isRoot)
+    {
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
                     << "  (gamma * sqrt(rho_s E), gamma = " << cfg.robinGamma << ")"
                     << Alert::Raise;
+    }
     const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
 
     const auto& cy = cfg.viscosity;
@@ -1637,9 +1674,11 @@ int main(int argc, char** argv)
           const auto dS = dState(xs);
           const auto dP = dPred(xs);
           for (Index i = 0; i < static_cast<Index>(dim); ++i)
+          {
             value(i) = Ja *
               (robinVelocityCoeff * (dS(i) - dP(i)) + robinAlpha * vp(i) -
                 robinAlpha * uf(i));
+          }
 
           return value;
         });
@@ -1743,15 +1782,19 @@ int main(int argc, char** argv)
         if (!snesPre.converged())
         {
           if (isRoot)
+          {
             std::cerr << "Prestress SNES failed at increment " << k << " / "
                       << cfg.prestressSteps << "; continuing with the last "
                       << "converged (partial) prestress state.\n";
+          }
           break;
         }
       }
       if (isRoot)
+      {
         Alert::Info() << "Prestressed wall to " << prestressPressure << " Pa in "
                       << cfg.prestressSteps << " increment(s)" << Alert::Raise;
+      }
 
       // Commit the prestressed state as the dynamic initial condition (zero
       // velocity / acceleration are already set) and lift the fluid mesh.
@@ -1865,9 +1908,11 @@ int main(int argc, char** argv)
           if (!snes.converged())
           {
             if (isRoot)
+            {
               std::cerr << "Solid SNES failed at step " << step << " (coupling iterate "
                         << couple << ") after " << snes.getIterationNumber()
                         << " iterations.\n";
+            }
             stepFailed = true;
             break;
           }
@@ -1894,9 +1939,11 @@ int main(int argc, char** argv)
             VecDot(aitkenResPrev.getData(), rdiff.getData(), &num);
             VecDot(rdiff.getData(), rdiff.getData(), &den);
             if (den > 0.0)
+            {
               aitkenOmega = std::min(Real(1.0),
                 std::max(Real(0.05),
                   -aitkenOmega * static_cast<Real>(num) / static_cast<Real>(den)));
+            }
           }
           aitkenResPrev.setData(delta.getData());
           delta *= aitkenOmega;
@@ -1960,8 +2007,10 @@ int main(int argc, char** argv)
             const PetscScalar* arr = nullptr;
             VecGetArrayRead(mOld, &arr);
             for (PetscInt i = lo; i < hi; ++i)
+            {
               if (arr[i - lo] != PetscScalar(0))
                 VecSetValue(b, vOff + i, arr[i - lo], ADD_VALUES);
+            }
             VecRestoreArrayRead(mOld, &arr);
             VecAssemblyBegin(b);
             VecAssemblyEnd(b);

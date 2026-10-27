@@ -4,10 +4,19 @@ target_link_libraries(RodinIOMeshLoaderTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinIOMeshLoaderTest
+rodin_discover_tests(RodinIOMeshLoaderTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinIOFileFormatTest FileFormatTest.cpp)
+target_link_libraries(RodinIOFileFormatTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+rodin_discover_tests(RodinIOFileFormatTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOMEDITParserTest MEDITParserTest.cpp)
+target_link_libraries(RodinIOMEDITParserTest PRIVATE GTest::gtest_main Rodin::IO)
+rodin_discover_tests(RodinIOMEDITParserTest PROPERTIES LABELS unit)
 
 add_executable(RodinIOH1GridFunctionIOTest H1GridFunctionIOTest.cpp)
 target_link_libraries(RodinIOH1GridFunctionIOTest
@@ -17,7 +26,7 @@ target_link_libraries(RodinIOH1GridFunctionIOTest
   Rodin::Geometry
   Rodin::Variational
   Rodin::IO)
-gtest_discover_tests(RodinIOH1GridFunctionIOTest
+rodin_discover_tests(RodinIOH1GridFunctionIOTest
   PROPERTIES
     LABELS unit
 )
@@ -30,7 +39,7 @@ target_link_libraries(RodinIOP1GridFunctionIOTest
   Rodin::Geometry
   Rodin::Variational
   Rodin::IO)
-gtest_discover_tests(RodinIOP1GridFunctionIOTest
+rodin_discover_tests(RodinIOP1GridFunctionIOTest
   PROPERTIES
     LABELS unit
 )
@@ -43,7 +52,7 @@ target_link_libraries(RodinIOP0GridFunctionIOTest
   Rodin::Geometry
   Rodin::Variational
   Rodin::IO)
-gtest_discover_tests(RodinIOP0GridFunctionIOTest
+rodin_discover_tests(RodinIOP0GridFunctionIOTest
   PROPERTIES
     LABELS unit
 )
@@ -56,7 +65,47 @@ target_link_libraries(RodinIOHDF5IOTest
   Rodin::Geometry
   Rodin::Variational
   Rodin::IO)
-gtest_discover_tests(RodinIOHDF5IOTest
+rodin_discover_tests(RodinIOHDF5IOTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinIOSpatialMatrixTest SpatialMatrixTest.cpp)
+target_link_libraries(RodinIOSpatialMatrixTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::IO Rodin::Variational)
+rodin_discover_tests(RodinIOSpatialMatrixTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOPrinterTest PrinterTest.cpp)
+target_link_libraries(RodinIOPrinterTest PRIVATE GTest::gtest_main Rodin::IO)
+rodin_discover_tests(RodinIOPrinterTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOXDMFTest XDMFTest.cpp)
+target_link_libraries(RodinIOXDMFTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::IO Rodin::Variational)
+rodin_discover_tests(RodinIOXDMFTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOMEDITLoaderTest MEDITLoaderTest.cpp)
+target_link_libraries(RodinIOMEDITLoaderTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+rodin_discover_tests(RodinIOMEDITLoaderTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOMFEMCoefficientTest MFEMCoefficientTest.cpp)
+target_link_libraries(RodinIOMFEMCoefficientTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+rodin_discover_tests(RodinIOMFEMCoefficientTest PROPERTIES LABELS unit)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_executable(RodinIOHDF5FailureTest HDF5FailureTest.cpp)
+  target_link_libraries(RodinIOHDF5FailureTest PRIVATE
+    GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+  foreach(operation IN ITEMS H5Screate_simple H5Dget_space
+      H5Sget_simple_extent_ndims H5Sget_simple_extent_dims H5Dwrite H5Gcreate2)
+    target_link_options(RodinIOHDF5FailureTest PRIVATE "LINKER:--wrap=${operation}")
+  endforeach()
+  rodin_discover_tests(RodinIOHDF5FailureTest PROPERTIES LABELS unit)
+endif()
+
+add_executable(RodinHDF5GeometryTest HDF5GeometryTest.cpp)
+target_link_libraries(RodinHDF5GeometryTest
+  PRIVATE GTest::gtest_main Rodin::IO Rodin::Geometry Rodin::Variational)
+rodin_discover_tests(RodinHDF5GeometryTest PROPERTIES LABELS unit)

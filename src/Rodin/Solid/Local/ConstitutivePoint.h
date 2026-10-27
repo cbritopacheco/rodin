@@ -62,97 +62,113 @@ namespace Rodin::Solid
     /// @brief Tag for the fiber direction vector.
     struct FiberDirection
     {
-        /// @brief Stored value type for this tag.
-        using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+      using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet direction vector.
     struct SheetDirection
     {
-        /// @brief Stored value type for this tag.
-        using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+      using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet-normal direction vector.
     struct SheetNormalDirection
     {
-        /// @brief Stored value type for this tag.
-        using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+      using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the activation parameter.
     struct Activation
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
     /// @brief Tag for the active fiber extension @f$e_c^{n+1}@f$.
     struct ActiveExtension
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
+    };
+
+    /// @brief Current independent gamma field.
+    struct ActiveGamma
+    {
+      /// @brief Stored value type.
+      using Type = Real;
+    };
+
+    /// @brief Current independent beta field.
+    struct ActiveBeta
+    {
+      /// @brief Stored value type.
+      using Type = Real;
     };
 
     /// @brief Tag for the previous active fiber extension @f$e_c^n@f$.
     struct PreviousActiveExtension
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
-    /// @brief Tag for the previous fiber strain @f$e_{1D}^n@f$.
-    ///
-    /// When present, the series law is evaluated at the midpoint fiber strain
-    /// @f$e_{1D}^{n+\frac{1}{2}}@f$, as in the compatible discretization of
-    /// Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent,
-    /// the series law falls back to the current fiber strain.
+    /**
+     * @brief Tag for the previous fiber strain @f$e_{1D}^n@f$.
+     *
+     * When present, the series law is evaluated at the midpoint fiber strain
+     * @f$e_{1D}^{n+\frac{1}{2}}@f$, as in the compatible discretization of
+     * Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent,
+     * the series law falls back to the current fiber strain.
+     */
     struct PreviousFiberStrain
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
     /// @brief Tag for the active-law time step.
     struct TimeStep
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
     /// @brief Tag for the scalar electrical/chemical activation input.
     struct ElectricalActivation
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
     /// @brief Tag for previous active variable @f$\gamma^n@f$.
     struct PreviousActiveGamma
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
     /// @brief Tag for previous active variable @f$\beta^n@f$.
     struct PreviousActiveBeta
     {
-        /// @brief Stored value type for this tag.
-        using Type = Real;
+      /// @brief Stored value type for this tag.
+      using Type = Real;
     };
 
     /// @brief Tag for the index of the current cell (polytope) being assembled.
     struct CellIndex
     {
-        /// @brief Stored value type for this tag.
-        using Type = Index;
+      /// @brief Stored value type for this tag.
+      using Type = Index;
     };
 
     /// @brief Tag for the index of the current quadrature point within the cell.
     struct QuadraturePointIndex
     {
-        /// @brief Stored value type for this tag.
-        using Type = std::size_t;
+      /// @brief Stored value type for this tag.
+      using Type = std::size_t;
     };
   }
 
@@ -168,7 +184,7 @@ namespace Rodin::Solid
    * through @c getPoint(), which returns an optional reference to the
    * underlying Geometry::Point.
    *
-   * ## Usage (with geometric context, typical in integrators)
+   * # Usage (with geometric context, typical in integrators)
    *
    * @code
    * Geometry::Point pt(polytope, rc);
@@ -178,11 +194,11 @@ namespace Rodin::Solid
    * ConstitutivePoint cp(pt, state);
    * cp.set<Tags::FiberDirection>(fiberDir);
    *
-   * law.setCache(cache, cp);
-   * law.getFirstPiolaKirchhoffStress(P, cache, cp);
+   * law.setConstitutivePoint(cp);
+   * law.getFirstPiolaKirchhoffStress(P);
    * @endcode
    *
-   * ## Usage (without geometry, for unit testing)
+   * # Usage (without geometry, for unit testing)
    *
    * @code
    * KinematicState state(2);
@@ -227,7 +243,8 @@ namespace Rodin::Solid
        * @param point The geometric evaluation point
        * @param state The kinematic state at this quadrature point
        */
-      explicit ConstitutivePoint(const Geometry::Point& point, const KinematicState& state)
+      explicit ConstitutivePoint(
+        const Geometry::Point& point, const KinematicState& state)
         : m_point(std::cref(point)),
           m_state(std::cref(state))
       {
@@ -248,17 +265,40 @@ namespace Rodin::Solid
         m_aux.reserve(ReservedTags);
       }
 
-      /// @brief Copy constructor.
-      ConstitutivePoint(const ConstitutivePoint&) = default;
-      /// @brief Move constructor.
-      ConstitutivePoint(ConstitutivePoint&&) = default;
-      /// @brief Copy assignment operator.
-      ConstitutivePoint& operator=(const ConstitutivePoint&) = default;
-      /// @brief Move assignment operator.
-      ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      ConstitutivePoint(const ConstitutivePoint& other) = default;
 
-      /// @brief Gets the kinematic state.
-      const KinematicState& getKinematicState() const { return m_state.get(); }
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      ConstitutivePoint(ConstitutivePoint&& other) = default;
+
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      ConstitutivePoint& operator=(const ConstitutivePoint& other) = default;
+
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      ConstitutivePoint& operator=(ConstitutivePoint&& other) = default;
+
+      /**
+       * @brief Gets the kinematic state.
+       * @returns The kinematic state.
+       */
+      const KinematicState& getKinematicState() const
+      {
+        return m_state.get();
+      }
 
       /**
        * @brief Gets the underlying Geometry::Point, if available.

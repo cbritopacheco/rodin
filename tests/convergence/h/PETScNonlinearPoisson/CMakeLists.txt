@@ -1,0 +1,79 @@
+add_executable(RodinConvergenceHPETScNonlinearPoisson NonlinearPoisson.cpp)
+include(../../PETScRefinement.cmake)
+rodin_add_petsc_refinement(RodinConvergenceHPETScNonlinearPoissonBoundary BoundaryConditions.cpp
+  RATE_CASES MixedNeumannP1Rates MixedNeumannP2Rates MixedNeumannP3Rates
+  RobinP1Rates RobinP2Rates RobinP3Rates
+  PureNeumannP1Rates PureNeumannP2Rates PureNeumannP3Rates)
+# Individual pyramid rate histories exceeded thirty minutes in CI. The
+# resolved tetrahedron and pyramid histories retain all levels and receive a
+# three-hour scheduling allowance; other geometries keep the usual watchdog.
+foreach(geometry Tetrahedron Pyramid)
+  foreach(boundary MixedNeumann Robin PureNeumann)
+    foreach(degree 1 2 3)
+      set(_boundary_timeout 10800)
+      # CI exceeded three hours while solving the finest resolved P1 tetrahedron.
+      if(geometry STREQUAL "Tetrahedron" AND boundary STREQUAL "PureNeumann" AND degree EQUAL 1)
+        set(_boundary_timeout 18000)
+      endif()
+      set_tests_properties(
+        RodinConvergenceHPETScNonlinearPoissonBoundary_${boundary}P${degree}Rates_${geometry}
+        PROPERTIES TIMEOUT ${_boundary_timeout})
+      if(RODIN_USE_MPI)
+        foreach(np 1 2 3 4)
+          set_tests_properties(
+            RodinConvergenceHPETScNonlinearPoissonBoundary_MPI_np${np}_${boundary}P${degree}Rates_${geometry}
+            PROPERTIES TIMEOUT ${_boundary_timeout})
+        endforeach()
+      endif()
+    endforeach()
+  endforeach()
+endforeach()
+target_link_libraries(RodinConvergenceHPETScNonlinearPoisson
+  PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
+set(_RODIN_NONLINEARPOISSON_GEOMETRIES
+  Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+foreach(geometry IN LISTS _RODIN_NONLINEARPOISSON_GEOMETRIES)
+  add_test(NAME RodinConvergenceHPETScNonlinearPoisson_${geometry}
+    COMMAND $<TARGET_FILE:RodinConvergenceHPETScNonlinearPoisson>
+      "--gtest_filter=AllGeometries/PETScNonlinearPoissonLocalTest.*/${geometry}")
+  set_tests_properties(RodinConvergenceHPETScNonlinearPoisson_${geometry} PROPERTIES
+    LABELS "convergence;petsc;slow" TIMEOUT 600)
+  rodin_suppress_external_mpi_lsan_for_test(
+    RodinConvergenceHPETScNonlinearPoisson_${geometry})
+endforeach()
+
+if (RODIN_USE_MPI)
+  target_link_libraries(RodinConvergenceHPETScNonlinearPoisson PRIVATE Rodin::MPI)
+  set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
+  execute_process(COMMAND ${MPIEXEC_EXECUTABLE} --version
+    OUTPUT_VARIABLE _mpi_version_output ERROR_VARIABLE _mpi_version_output)
+  if (_mpi_version_output MATCHES "Open MPI|OpenRTE")
+    set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "--oversubscribe")
+  endif()
+  foreach(np 1 2 3 4)
+    foreach(geometry IN LISTS _RODIN_NONLINEARPOISSON_GEOMETRIES)
+      add_test(NAME RodinConvergenceHPETScMPINonlinearPoisson_np${np}_${geometry}
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+          ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+          $<TARGET_FILE:RodinConvergenceHPETScNonlinearPoisson>
+          "--gtest_filter=AllGeometries/PETScNonlinearPoissonMPITest.*/${geometry}")
+      set_tests_properties(RodinConvergenceHPETScMPINonlinearPoisson_np${np}_${geometry}
+        PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 600 PROCESSORS ${np})
+      rodin_suppress_external_mpi_lsan_for_test(
+        RodinConvergenceHPETScMPINonlinearPoisson_np${np}_${geometry})
+    endforeach()
+  endforeach()
+endif()
+
+# The local Pyramid P1 history alone takes 456 seconds in coverage CI; the
+# complete six-case group cannot fit its old ten-minute watchdog. Retain all
+# hierarchy levels and allow one hour for the complete local/rank context.
+set(_RODIN_H_NONLINEAR_PYRAMID_TIMEOUT 3600)
+set_tests_properties(RodinConvergenceHPETScNonlinearPoisson_Pyramid
+  PROPERTIES TIMEOUT ${_RODIN_H_NONLINEAR_PYRAMID_TIMEOUT})
+if (RODIN_USE_MPI)
+  foreach(np 1 2 3 4)
+    set_tests_properties(RodinConvergenceHPETScMPINonlinearPoisson_np${np}_Pyramid
+      PROPERTIES TIMEOUT ${_RODIN_H_NONLINEAR_PYRAMID_TIMEOUT})
+  endforeach()
+endif()

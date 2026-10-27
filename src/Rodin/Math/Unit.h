@@ -25,11 +25,11 @@ namespace Rodin::Math
    * Template Pattern (CRTP) to enable derived classes to return their own
    * type from operations.
    *
-   * ## Type Safety
+   * # Type Safety
    * Units provide compile-time type safety, preventing accidental mixing of
    * incompatible units (e.g., adding radians to meters).
    *
-   * ## Arithmetic Operations
+   * # Arithmetic Operations
    * All standard arithmetic operations are supported:
    * - Addition/subtraction: @f$ u_1 \pm u_2 @f$
    * - Multiplication/division: @f$ u_1 \times u_2 @f$, @f$ u_1 / u_2 @f$
@@ -37,7 +37,9 @@ namespace Rodin::Math
    * - Compound assignments: +=, -=, *=, /=
    * - Comparison: ==, !=, <, >, <=, >=
    *
-   * ## Example Usage
+   * Comparisons follow the stored scalar type, including unordered floating-point NaN values.
+   *
+   * # Example Usage
    * ```cpp
    * // Creating a derived unit class
    * class Meter : public Unit<Meter, Real>
@@ -87,33 +89,41 @@ namespace Rodin::Math
        * @brief Constructs a unit from a value.
        * @param[in] v The value to wrap in the unit
        */
-      constexpr
-      Unit(T v)
+      constexpr Unit(T v)
         : m_v(v)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Unit(const Unit&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Unit(const Unit& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      Unit(Unit&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Unit(Unit&& other) = default;
 
-      /// @brief Copy assignment operator.
-      constexpr
-      Unit& operator=(const Unit&) = default;
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr Unit& operator=(const Unit& other) = default;
 
-      /// @brief Move assignment operator.
-      constexpr
-      Unit& operator=(Unit&&) = default;
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr Unit& operator=(Unit&& other) = default;
 
       /**
        * @brief Explicit conversion to underlying type.
        * @return The underlying value
        */
-      explicit
-      operator T() const
+      explicit operator T() const
       {
         return m_v;
       }
@@ -123,8 +133,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if values are equal
        */
-      constexpr
-      bool operator==(const Unit& other) const
+      constexpr bool operator==(const Unit& other) const
       {
         return m_v == other.m_v;
       }
@@ -134,8 +143,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if values are not equal
        */
-      constexpr
-      bool operator!=(const Unit& other) const
+      constexpr bool operator!=(const Unit& other) const
       {
         return !operator==(other);
       }
@@ -145,8 +153,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is less than other
        */
-      constexpr
-      bool operator<(const Unit& other) const
+      constexpr bool operator<(const Unit& other) const
       {
         return m_v < other.m_v;
       }
@@ -156,8 +163,7 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is greater than other
        */
-      constexpr
-      bool operator>(const Unit& other) const
+      constexpr bool operator>(const Unit& other) const
       {
         return m_v > other.m_v;
       }
@@ -167,10 +173,9 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is less than or equal to other
        */
-      constexpr
-      bool operator<=(const Unit& other) const
+      constexpr bool operator<=(const Unit& other) const
       {
-        return !operator>(other);
+        return m_v <= other.m_v;
       }
 
       /**
@@ -178,10 +183,9 @@ namespace Rodin::Math
        * @param[in] other Unit to compare with
        * @return True if this value is greater than or equal to other
        */
-      constexpr
-      bool operator>=(const Unit& other) const
+      constexpr bool operator>=(const Unit& other) const
       {
-        return !operator<(other);
+        return m_v >= other.m_v;
       }
 
       /**
@@ -189,10 +193,9 @@ namespace Rodin::Math
        * @param[in] other Unit to add
        * @return Sum of the two units
        */
-      constexpr
-      auto operator+(const Unit& other) const
+      constexpr Derived operator+(const Unit& other) const
       {
-        return Unit(m_v + other.m_v);
+        return Derived(m_v + other.m_v);
       }
 
       /**
@@ -200,10 +203,9 @@ namespace Rodin::Math
        * @param[in] other Unit to subtract
        * @return Difference of the two units
        */
-      constexpr
-      auto operator-(const Unit& other) const
+      constexpr Derived operator-(const Unit& other) const
       {
-        return Unit(m_v - other.m_v);
+        return Derived(m_v - other.m_v);
       }
 
       /**
@@ -211,42 +213,37 @@ namespace Rodin::Math
        * @param[in] other Unit to multiply by
        * @return Product of the two units
        */
-      constexpr
-      auto operator*(const Unit& other) const
+      constexpr Derived operator*(const Unit& other) const
       {
-        return Unit(m_v * other.m_v);
+        return Derived(m_v * other.m_v);
       }
-
 
       /**
        * @brief Division operator.
        * @param[in] other Unit to divide by
        * @return Quotient of the two units
        */
-      constexpr
-      auto operator/(const Unit& other) const
+      constexpr Derived operator/(const Unit& other) const
       {
-        return Unit(m_v / other.m_v);
+        return Derived(m_v / other.m_v);
       }
 
       /**
        * @brief Unary plus operator.
        * @return Copy of this unit
        */
-      constexpr
-      Unit operator+() const
+      constexpr Derived operator+() const
       {
-        return *this;
+        return static_cast<const Derived&>(*this);
       }
 
       /**
        * @brief Unary minus operator.
        * @return Negated unit
        */
-      constexpr
-      Unit operator-() const
+      constexpr Derived operator-() const
       {
-        return Unit(-m_v);
+        return Derived(-m_v);
       }
 
       /**
@@ -254,11 +251,10 @@ namespace Rodin::Math
        * @param[in] other Unit to add
        * @return Reference to this unit
        */
-      constexpr
-      Unit& operator+=(const Unit& other)
+      constexpr Derived& operator+=(const Unit& other)
       {
         m_v += other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -266,11 +262,10 @@ namespace Rodin::Math
        * @param[in] other Unit to subtract
        * @return Reference to this unit
        */
-      constexpr
-      Unit& operator-=(const Unit& other)
+      constexpr Derived& operator-=(const Unit& other)
       {
         m_v -= other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -278,11 +273,10 @@ namespace Rodin::Math
        * @param[in] other Unit to multiply by
        * @return Reference to this unit
        */
-      constexpr
-      Unit& operator*=(const Unit& other)
+      constexpr Derived& operator*=(const Unit& other)
       {
         m_v *= other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -290,11 +284,10 @@ namespace Rodin::Math
        * @param[in] other Unit to divide by
        * @return Reference to this unit
        */
-      constexpr
-      Unit& operator/=(const Unit& other)
+      constexpr Derived& operator/=(const Unit& other)
       {
         m_v /= other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
     private:

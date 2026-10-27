@@ -17,7 +17,7 @@ namespace Rodin::PETSc::Assembly
    * @brief Sets up a PETSc matrix for assembly while reusing compatible
    *        existing structure.
    *
-   * ## Contract
+   * # Contract
    *
    * The caller guarantees that, between successive assemblies of the *same*
    * matrix object, the sparsity pattern is unchanged. Concretely this means the
@@ -25,16 +25,15 @@ namespace Rodin::PETSc::Assembly
    * Vertex coordinates may move (as in an ALE formulation) because that changes
    * geometry, not the connectivity graph, hence not the pattern.
    *
-   * Because a @c LinearSystem is bound to fixed finite element spaces, its
-   * global dimensions never change over its lifetime: a different mesh or space
-   * means a different @c LinearSystem. PETSc has no in-place resize for an
-   * already-assembled matrix (@c MatSetSizes is only valid before the layout is
-   * established), so @c prepare does not attempt one. If it ever observes an
-   * already-assembled matrix whose dimensions differ from the requested ones,
-   * which can only happen if a @c LinearSystem is illegally reused across
-   * different spaces, it fails the debug assertion.
+   * A @c LinearSystem is associated with fixed finite element spaces, so its
+   * global dimensions remain constant throughout its lifetime.
    *
-   * ## Why this matters
+   * @note PETSc does not support resizing an assembled matrix. Reuse requires
+   * the existing global dimensions to match the requested dimensions; this
+   * precondition is checked by a debug assertion. A change of finite element
+   * space or mesh requires a new @c LinearSystem.
+   *
+   * # Why this matters
    *
    * The structural calls @c MatSetSizes / @c MatSetType / @c MatSetFromOptions /
    * @c MatSetUp re-establish the matrix internals and bump PETSc's nonzero-state
@@ -88,9 +87,9 @@ namespace Rodin::PETSc::Assembly
       /**
        * @brief Prepares the matrix for a fresh assembly pass.
        *
-       * Virgin matrices receive their sizes, optional type, optional command
-       * line options, and @c MatSetUp. Already-assembled compatible matrices
-       * keep their structure and are zeroed for reuse.
+       * Unassembled matrices receive their initial sizes, optional type,
+       * optional command line options, and @c MatSetUp. Compatible assembled
+       * matrices retain their structure and are zeroed for reuse.
        *
        * @param[in] options Requested layout and setup policy.
        * @returns PETSc error code from the final zeroing operation.
@@ -108,10 +107,6 @@ namespace Rodin::PETSc::Assembly
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
 
-        // A virgin matrix must be set up. An already-assembled matrix whose
-        // dimensions match is reused. Different dimensions violate the
-        // constant-space contract: use a fresh LinearSystem for a different
-        // finite element space or mesh.
         assert((assembled != PETSC_TRUE ||
                  (curRows == options.globalRows && curCols == options.globalCols)) &&
           "MatrixSetup cannot resize an assembled matrix; use a fresh "

@@ -28,9 +28,10 @@ namespace Rodin::Geometry
       m_mode(Mode::None)
   {}
 
-  Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
+  Shard::Builder& Shard::Builder::initialize(
+    const Mesh<Context>& parent, size_t dimension)
   {
-    const size_t dim = parent.getDimension();
+    const size_t dim = std::max(parent.getDimension(), dimension);
     const size_t sdim = parent.getSpaceDimension();
 
     m_mode = Mode::Parent;
@@ -382,6 +383,19 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     Shard res;
     res.Parent::operator=(m_build.finalize());
+    if (m_mode == Mode::Parent)
+    {
+      const auto& transforms = m_parent->get().getPolytopeTransformationIndex();
+      for (size_t d = 0; d < m_s2ds.size(); ++d)
+      {
+        const auto& map = m_s2ds[d].left;
+        for (Index i = 0; i < map.size(); ++i)
+        {
+          if (const auto* transformation = transforms.find(d, map[i]))
+            res.setPolytopeTransformation({d, i}, transformation->copy());
+        }
+      }
+    }
     res.m_s2ds  = std::move(m_s2ds);
     res.m_state = std::move(m_state);
     res.m_owner = std::move(m_owner);
@@ -481,4 +495,3 @@ namespace Rodin::Geometry
     return m_state[d];
   }
 }
-

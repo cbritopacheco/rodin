@@ -11,26 +11,26 @@
  * This file defines the Trace class, which computes the trace (sum of diagonal
  * elements) of matrix-valued functions in variational formulations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a square matrix @f$ A \in \mathbb{R}^{n \times n} @f$, the trace is:
  * @f[
  *   \text{tr}(A) = \sum_{i=1}^n A_{ii}
  * @f]
  *
- * ## Properties
+ * # Properties
  * The trace operator satisfies:
  * - **Linearity**: @f$ \text{tr}(A + B) = \text{tr}(A) + \text{tr}(B) @f$
  * - **Scalar multiplication**: @f$ \text{tr}(\alpha A) = \alpha \text{tr}(A) @f$
  * - **Cyclic property**: @f$ \text{tr}(ABC) = \text{tr}(CAB) = \text{tr}(BCA) @f$
  * - **Transpose invariance**: @f$ \text{tr}(A^T) = \text{tr}(A) @f$
  *
- * ## Applications
+ * # Applications
  * - Linear elasticity: @f$ \text{tr}(\boldsymbol{\varepsilon}) @f$ (volumetric strain)
  * - Continuum mechanics: invariants of stress/strain tensors
  * - Fluid dynamics: divergence from velocity gradient
  * - General tensor operations
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Volumetric strain in linear elasticity
  * auto strain = 0.5 * (Jacobian(u) + Transpose(Jacobian(u)));
@@ -40,6 +40,7 @@
 #ifndef RODIN_VARIATIONAL_TRACE_H
 #define RODIN_VARIATIONAL_TRACE_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/Polytope.h"
@@ -48,15 +49,19 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Trace over a shape function: exposes the finite element
-  /// space and the shape function space.
+  /**
+   * @brief Type traits for @c Trace over a shape function: exposes the finite element
+   * space and the shape function space.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
+  struct Traits<
+    Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -90,8 +95,7 @@ namespace Rodin::Variational
        * Creates the trace operator @f$ \text{tr}(A) = \sum_{i=1}^n A_{ii} @f$
        * for a square matrix @f$ A @f$.
        */
-      constexpr
-      Trace(const OperandType& m)
+      constexpr Trace(const OperandType& m)
         : m_operand(m.copy())
       {}
 
@@ -99,8 +103,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        * @param[in] other Trace to copy
        */
-      constexpr
-      Trace(const Trace& other)
+      constexpr Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
@@ -109,8 +112,7 @@ namespace Rodin::Variational
        * @brief Move constructor.
        * @param[in] other Trace to move from
        */
-      constexpr
-      Trace(Trace&& other)
+      constexpr Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
@@ -123,8 +125,7 @@ namespace Rodin::Variational
        * Computes the sum of diagonal entries of the matrix at the given point.
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p).trace();
       }
@@ -133,8 +134,7 @@ namespace Rodin::Variational
        * @brief Gets the operand matrix function.
        * @return Reference to the matrix being traced
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
@@ -145,17 +145,19 @@ namespace Rodin::Variational
        * @param[in] args Arguments forwarded to operand's traceOf method
        * @return Reference to this trace operator
        */
-      template <class ... Args>
-      constexpr
-      Trace& traceOf(const Args& ... args)
+      template <class... Args>
+      constexpr Trace& traceOf(const Args&... args)
       {
         m_operand->traceOf(args...);
         return *this;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param p Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }
@@ -173,9 +175,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Trace.
+  /**
+   * @brief Deduction guide for @c Trace.
+   * @param operand Operand expression.
+   */
   template <class NestedDerived>
-  Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
+  Trace(const FunctionBase<NestedDerived>& operand) -> Trace<FunctionBase<NestedDerived>>;
 
   /// @brief Trace of a shape function.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
@@ -185,6 +190,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -194,77 +200,123 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
-      constexpr
-      Trace(const OperandType& operand)
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param operand Operand expression.
+       */
+      constexpr Trace(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Trace(const Trace& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      Trace(Trace&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
-      /// @brief Gets the operand function.
-      constexpr
-      const OperandType& getOperand() const
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
+      constexpr const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getOperand().getDOFIndices();
+      }
+
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Trace& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_operand->setPolytope(polytope);
+        return *this;
+      }
+
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Trace& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      constexpr
-      auto getBasis(size_t local) const
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      constexpr auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).trace();
       }
 
-      /// @brief Gets the finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       const FES& getFiniteElementSpace() const
       {
         return this->getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param p Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
       }
@@ -273,13 +325,17 @@ namespace Rodin::Variational
       {
         return new Trace(*this);
       }
+
     private:
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Trace.
+  /**
+   * @brief Deduction guide for @c Trace.
+   * @param operand Operand expression.
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Trace(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  Trace(const ShapeFunctionBase<NestedDerived, FES, Space>& operand)
     -> Trace<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 

@@ -16,6 +16,7 @@
 #ifndef RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <memory>
 #include <type_traits>
 
@@ -42,13 +43,13 @@ namespace Rodin::Variational
    * where @f$ \phi_j @f$ are trial basis functions and @f$ \psi_i @f$ are test
    * basis functions on element @f$ K @f$.
    *
-   * ## Role in Assembly
+   * # Role in Assembly
    * During finite element assembly:
    * 1. The integrator is called for each element in the mesh
    * 2. Local element matrices are computed using quadrature
    * 3. Local matrices are assembled into the global system matrix
    *
-   * ## Common Bilinear Forms
+   * # Common Bilinear Forms
    * - **Mass matrix**: @f$ \int_K u \cdot v \, dx @f$
    * - **Stiffness matrix**: @f$ \int_K \nabla u \cdot \nabla v \, dx @f$
    * - **Advection**: @f$ \int_K (\beta \cdot \nabla u) v \, dx @f$
@@ -102,7 +103,8 @@ namespace Rodin::Variational
       template <class OtherNumber, class OtherDerived>
       BilinearFormIntegratorBase(const BilinearFormIntegratorBase<OtherNumber, OtherDerived>& other)
         : Parent(other),
-          m_u(other.m_u->copy()), m_v(other.m_v->copy())
+          m_u(other.getTrialFunction().copy()),
+          m_v(other.getTestFunction().copy())
       {}
 
       /**
@@ -121,7 +123,8 @@ namespace Rodin::Variational
       template <class OtherNumber, class OtherDerived>
       BilinearFormIntegratorBase(BilinearFormIntegratorBase<OtherNumber, OtherDerived>&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u)), m_v(std::move(other.m_v))
+          m_u(other.getTrialFunction().copy()),
+          m_v(other.getTestFunction().copy())
       {}
 
       /// @brief Virtual destructor
@@ -169,8 +172,10 @@ namespace Rodin::Variational
       std::unique_ptr<FormLanguage::Base> m_v;
   };
 
-  /// @brief Base class for bilinear form integrators whose trial and test functions live
-  /// on the same polytope.
+  /**
+   * @brief Base class for bilinear form integrators whose trial and test functions live
+   * on the same polytope.
+   */
   template <class Number>
   class LocalBilinearFormIntegratorBase
     : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
@@ -185,25 +190,58 @@ namespace Rodin::Variational
       using Parent::Parent;
 
       /**
-       * @brief Copy constructor.
+       * @brief Copies the integrator without retaining a borrowed local numbering.
+       * @param other Integrator to copy.
        */
-      template <class OtherNumber>
-      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase<OtherNumber>& other)
+      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase& other)
         : Parent(other),
           m_attrs(other.m_attrs)
       {}
 
       /**
-       * @brief Move constructor.
+       * @brief Moves the integrator without retaining a borrowed local numbering.
+       * @param other Integrator to move.
        */
-      template <class OtherNumber>
-      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase<OtherNumber>&& other)
+      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase&& other)
         : Parent(std::move(other)),
           m_attrs(std::move(other.m_attrs))
       {}
 
+      /// @returns The bound trial numbering, or no override for ordinary element DOFs.
+      Utility::OptionalReference<const IndexArray> getTrialDOFIndices() const
+      {
+        return m_trialDOFs;
+      }
+
+      /// @returns The bound test numbering, or no override for ordinary element DOFs.
+      Utility::OptionalReference<const IndexArray> getTestDOFIndices() const
+      {
+        return m_testDOFs;
+      }
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      template <class OtherNumber>
+      LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase<OtherNumber>& other)
+        : Parent(other),
+          m_attrs(other.getAttributes())
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      template <class OtherNumber>
+      LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase<OtherNumber>&& other)
+        : Parent(std::move(other)),
+          m_attrs(other.getAttributes())
+      {}
+
       /**
        * @brief Gets the attributes of the elements being integrated.
+       * @returns The attributes of the elements being integrated.
        */
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
@@ -216,13 +254,20 @@ namespace Rodin::Variational
        *
        * Specifies the material reference over which the integration should
        * take place.
+       * @param attr Mesh attribute selecting the region.
        */
       LocalBilinearFormIntegratorBase& over(const Geometry::Attribute& attr)
       {
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
-      /// @brief Restricts integration to the given mesh attributes.
+      /**
+       * @brief Restricts integration to the given mesh attributes.
+       * @param attrs Mesh attributes selecting the region.
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @returns Reference to this object after the operation.
+       */
       template <class A1, class A2, class ... As>
       LocalBilinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
@@ -235,6 +280,7 @@ namespace Rodin::Variational
        *
        * Specifies the material references over which the integration should
        * take place.
+       * @param attrs Mesh attributes selecting the region.
        */
       LocalBilinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -243,27 +289,58 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns the polytope the expression is bound to.
+      /**
+       * @brief Returns the polytope the expression is bound to.
+       * @returns The polytope the expression is bound to.
+       */
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
-      /// @brief Binds the expression to a polytope.
+      /**
+       * @brief Binds the expression to a polytope.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       virtual LocalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const = 0;
 
       virtual
       LocalBilinearFormIntegratorBase* copy() const noexcept override = 0;
 
+    protected:
+      /**
+       * @brief Binds the numberings prepared by a two-sided integrand.
+       * @param trial Trial numbering, absent for ordinary element bases.
+       * @param test Test numbering, absent for ordinary element bases.
+       */
+      void setDOFIndices(Utility::OptionalReference<const IndexArray> trial,
+        Utility::OptionalReference<const IndexArray> test)
+      {
+        m_trialDOFs = trial;
+        m_testDOFs = test;
+      }
+
     private:
+      Utility::OptionalReference<const IndexArray> m_trialDOFs, m_testDOFs;
       FlatSet<Geometry::Attribute> m_attrs;
   };
 
-  /// @brief Base class for bilinear form integrators coupling a trial and a test polytope
-  /// across the mesh.
+  /**
+   * @brief Base class for bilinear form integrators coupling a trial and a test polytope
+   * across the mesh.
+   */
   template <class Number>
   class GlobalBilinearFormIntegratorBase
     : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>
@@ -277,26 +354,31 @@ namespace Rodin::Variational
 
       using Parent::Parent;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
-          m_trialAttrs(other.m_trialAttrs),
-          m_testAttrs(other.m_testAttrs)
+          m_trialAttrs(other.getTrialAttributes()),
+          m_testAttrs(other.getTestAttributes())
       {}
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(GlobalBilinearFormIntegratorBase<OtherNumber>&& other)
         : Parent(std::move(other)),
-          m_trialAttrs(std::move(other.m_trialAttrs)),
-          m_testAttrs(std::move(other.m_testAttrs))
+          m_trialAttrs(other.getTrialAttributes()),
+          m_testAttrs(other.getTestAttributes())
       {}
 
       /**
        * @brief Gets the attributes of the elements being integrated.
+       * @returns The attributes of the elements being integrated.
        */
       const FlatSet<Geometry::Attribute>& getTrialAttributes() const
       {
@@ -305,6 +387,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the attributes of the elements being integrated.
+       * @returns The attributes of the elements being integrated.
        */
       const FlatSet<Geometry::Attribute>& getTestAttributes() const
       {
@@ -317,6 +400,7 @@ namespace Rodin::Variational
        *
        * Specifies the material reference over which the integration should
        * take place.
+       * @param attrs Mesh attributes selecting the region.
        */
       GlobalBilinearFormIntegratorBase& setTrialAttributes(
           const FlatSet<Geometry::Attribute>& attrs)
@@ -331,6 +415,7 @@ namespace Rodin::Variational
        *
        * Specifies the material reference over which the integration should
        * take place.
+       * @param attrs Mesh attributes selecting the region.
        */
       GlobalBilinearFormIntegratorBase& setTestAttributes(
           const FlatSet<Geometry::Attribute>& attrs)
@@ -339,17 +424,33 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Binds the expression to a polytope.
+      /**
+       * @brief Binds the expression to a polytope.
+       * @param tau Mesh entity used by this operation.
+       * @param t Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       virtual
       GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
-      /// @brief Returns the region the trial function is integrated over.
+      /**
+       * @brief Returns the region the trial function is integrated over.
+       * @returns The region the trial function is integrated over.
+       */
       virtual Geometry::Region getTrialRegion() const = 0;
 
-      /// @brief Returns the region the test function is integrated over.
+      /**
+       * @brief Returns the region the test function is integrated over.
+       * @returns The region the test function is integrated over.
+       */
       virtual Geometry::Region getTestRegion() const = 0;
 
       virtual

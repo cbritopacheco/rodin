@@ -11,7 +11,7 @@
  * This header provides the CG (Conjugate Gradient) solver class, an iterative
  * method for solving linear systems with symmetric positive definite matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The conjugate gradient method solves:
  * @f[
  *   Ax = b
@@ -19,7 +19,7 @@
  * where @f$ A @f$ is symmetric positive definite. It minimizes the quadratic
  * form @f$ \frac{1}{2}x^TAx - b^Tx @f$ using conjugate search directions.
  *
- * ## Convergence
+ * # Convergence
  * CG converges in at most @f$ n @f$ iterations in exact arithmetic. The error
  * decreases as:
  * @f[
@@ -27,13 +27,13 @@
  * @f]
  * where @f$ \kappa @f$ is the condition number of @f$ A @f$.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite matrices
  * - Large sparse systems
  * - Elliptic PDEs (Poisson, heat equation, elasticity)
  * - Systems amenable to preconditioning
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -88,9 +88,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for CG
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  CG(Variational::ProblemBase<LinearSystem>&) -> CG<LinearSystem>;
+  CG(Variational::ProblemBase<LinearSystem>& pb) -> CG<LinearSystem>;
 
   /**
    * @ingroup CGSpecializations
@@ -157,9 +158,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~CG() = default;
 
       /**
@@ -209,13 +208,19 @@ namespace Rodin::Solver
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns the iteration count from the most recent solve.
+      /**
+       * @brief Returns the iteration count from the most recent solve.
+       * @returns The iteration count from the most recent solve.
+       */
       size_t getIterationNumber() const
       {
         return static_cast<size_t>(m_solver.iterations());
       }
 
-      /// @brief Returns the estimated relative error from the most recent solve.
+      /**
+       * @brief Returns the estimated relative error from the most recent solve.
+       * @returns The estimated relative error from the most recent solve.
+       */
       Real getError() const
       {
         return static_cast<Real>(m_solver.error());
@@ -285,9 +290,7 @@ namespace Rodin::Solver
         : Parent(other)
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~CG() = default;
 
       /**
@@ -335,13 +338,19 @@ namespace Rodin::Solver
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns the iteration count from the most recent solve.
+      /**
+       * @brief Returns the iteration count from the most recent solve.
+       * @returns The iteration count from the most recent solve.
+       */
       size_t getIterationNumber() const
       {
         return static_cast<size_t>(m_solver.iterations());
       }
 
-      /// @brief Returns the estimated relative error from the most recent solve.
+      /**
+       * @brief Returns the estimated relative error from the most recent solve.
+       * @returns The estimated relative error from the most recent solve.
+       */
       Real getError() const
       {
         return static_cast<Real>(m_solver.error());

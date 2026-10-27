@@ -1,0 +1,95 @@
+name: Benchmark group
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        type: string
+        required: true
+      group:
+        type: string
+        required: true
+permissions:
+  contents: read
+env:
+  OMPI_MCA_rmaps_base_oversubscribe: '1'
+jobs:
+  Build:
+    name: Shared component build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    outputs:
+      lanes: ${{ steps.build.outputs.lanes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - uses: ./.github/actions/benchmark-environment
+        with:
+          configuration: ${{ inputs.configuration }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: benchmark-common-${{ inputs.configuration }}
+          path: benchmark-common
+      - name: Restore shared libraries, build components and discover cases
+        id: build
+        env:
+          GROUP: ${{ inputs.group }}
+        run: python3 dev/benchmark_ci.py build --source benchmark-common --id "$GROUP" --output benchmark-group
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-group-${{ inputs.group }}
+          path: benchmark-group
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-plan-group-${{ inputs.group }}
+          path: benchmark-group/execution.json
+          if-no-files-found: error
+  Run:
+    name: ${{ matrix.lane.label }}
+    needs: Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: ${{ fromJSON(needs.Build.outputs.lanes) }}
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OMPI_MCA_rmaps_base_oversubscribe: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r doc/requirements.txt
+      - uses: ./.github/actions/benchmark-environment
+        with:
+          configuration: ${{ inputs.configuration }}
+      - name: Hydrate benchmark resources
+        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
+      - uses: actions/download-artifact@v4
+        with:
+          name: benchmark-group-${{ inputs.group }}
+          path: benchmark-group
+      - name: Run one benchmark executable at a time
+        env:
+          LANE: ${{ matrix.lane.id }}
+        run: python3 dev/benchmark_ci.py run --source benchmark-group --id "$LANE" --output benchmark-result
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-result-${{ matrix.lane.id }}
+          path: benchmark-result
+          if-no-files-found: error

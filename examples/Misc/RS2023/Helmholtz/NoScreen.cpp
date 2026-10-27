@@ -72,10 +72,16 @@ int main(int, char**)
   std::vector<Data> grid;
   grid.reserve(epsilon_r.size() * waveNumber_r.size() *  conductivity_r.size());
   for (const Real screen : screen_r)
+  {
     for (const Real epsilon : epsilon_r)
+    {
       for (const Real waveNumber : waveNumber_r)
+      {
         for (const Real g : conductivity_r)
           grid.push_back({ screen, epsilon, waveNumber, g });
+      }
+    }
+  }
 
   const size_t hwc = std::thread::hardware_concurrency();
   const size_t n = hwc - 2;

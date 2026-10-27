@@ -48,17 +48,19 @@ namespace Rodin::PETSc
       void getComm(MPI_Comm* comm) const
       {
         [[maybe_unused]] PetscErrorCode ierr =
-          PetscObjectGetComm(reinterpret_cast<PetscObject&>(this->getHandle()), comm);
+          PetscObjectGetComm(reinterpret_cast<PetscObject>(this->getHandle()), comm);
         assert(ierr == PETSC_SUCCESS);
       }
 
       /**
        * @brief Returns a read-only reference to the underlying PETSc handle.
+       * @returns A read-only reference to the underlying PETSc handle.
        */
       virtual const Handle& getHandle() const noexcept = 0;
 
       /**
        * @brief Returns a mutable reference to the underlying PETSc handle.
+       * @returns A mutable reference to the underlying PETSc handle.
        */
       virtual Handle& getHandle() noexcept = 0;
   };

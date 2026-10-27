@@ -16,6 +16,8 @@
 
 #include "Variational/GridFunction.h"
 #include "Variational/FiniteElementSpace.h"
+#include "Variational/LagrangeFiniteElement.h"
+#include "Variational/Interpolation.h"
 
 #include "Variational/ShapeFunction.h"
 #include "Variational/TrialFunction.h"
@@ -26,6 +28,9 @@
 
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
+#include "Variational/MassForm.h"
+#include "Variational/DiffusionForm.h"
+#include "Variational/HelmholtzForm.h"
 
 #include "Variational/Zero.h"
 #include "Variational/Dot.h"
@@ -88,6 +93,7 @@
 #include "Variational/RealFunction.h"
 #include "Variational/VectorFunction.h"
 #include "Variational/MatrixFunction.h"
+#include "Variational/TensorFunction.h"
 #include "Variational/BooleanFunction.h"
 
 #include "Variational/P0.h"

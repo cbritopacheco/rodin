@@ -39,11 +39,26 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsEigenObject
   {
-    /**
-     * @brief True if T is an Eigen object, false otherwise.
-     */
-    static constexpr bool Value =
-      std::is_base_of_v<Eigen::EigenBase<typename std::decay<T>::type>, typename std::decay<T>::type>;
+    private:
+      /**
+       * @brief Recognizes an Eigen base, including Rodin's derived vector types.
+       * @tparam Derived Eigen expression type.
+       * @param object Pointer used only for type deduction.
+       * @returns A compile-time true type.
+       */
+      template <class Derived>
+      static std::true_type deduce(const Eigen::EigenBase<Derived>* object);
+
+      /**
+       * @brief Rejects types without an Eigen base.
+       * @returns A compile-time false type.
+       */
+      static std::false_type deduce(...);
+
+    public:
+      /// @brief True for Eigen objects and Rodin vectors, including cv/ref types.
+      static constexpr bool Value =
+        decltype(deduce(static_cast<const std::decay_t<T>*>(nullptr)))::value;
   };
 
   /// @brief Compile-time column count of a type; -1 when unavailable.
@@ -62,9 +77,7 @@ namespace Rodin::FormLanguage
       static constexpr int Value = std::decay_t<T>::ColsAtCompileTime;
   };
 
-  /**
-   * @brief Traits specialization for Boolean type.
-   */
+  /// @brief Traits specialization for Boolean type.
   template <>
   struct Traits<Boolean>
   {
@@ -72,9 +85,7 @@ namespace Rodin::FormLanguage
       using ScalarType = Boolean;  ///< Scalar type is Boolean itself
   };
 
-  /**
-   * @brief Traits specialization for Integer type.
-   */
+  /// @brief Traits specialization for Integer type.
   template <>
   struct Traits<Integer>
   {
@@ -82,9 +93,7 @@ namespace Rodin::FormLanguage
       using ScalarType = Integer;  ///< Scalar type is Integer itself
   };
 
-  /**
-   * @brief Traits specialization for Real type.
-   */
+  /// @brief Traits specialization for Real type.
   template <>
   struct Traits<Real>
   {
@@ -92,9 +101,7 @@ namespace Rodin::FormLanguage
       using ScalarType = Real;  ///< Scalar type is Real itself
   };
 
-  /**
-   * @brief Traits specialization for Complex type.
-   */
+  /// @brief Traits specialization for Complex type.
   template <>
   struct Traits<Complex>
   {
@@ -120,6 +127,7 @@ namespace Rodin::FormLanguage
     Complex,
     Vector,
     Matrix,
+    Tensor,
     Unknown
   };
 
@@ -155,16 +163,30 @@ namespace Rodin::FormLanguage
       static constexpr bool Value = true;
   };
 
-  /// @brief Type trait: whether @c T has vector range (a spatial vector or a
-  /// single-column Eigen object).
+  /**
+   * @brief Type trait: whether @c T has vector range (a spatial vector or a
+   * single-column Eigen object).
+   */
   template <class T>
-  struct IsVectorRange
-    : std::bool_constant<
-        IsSpatialVector<std::decay_t<T>>::Value
-        || (
-          IsEigenObject<std::decay_t<T>>::Value
-          && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
-        )>
+  struct IsTensorRange : std::false_type
+  {
+      /// @brief Compile-time range classification.
+      static constexpr bool Value = false;
+  };
+
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class Scalar, size_t Rank>
+  struct IsTensorRange<Math::SpatialTensor<Scalar, Rank>> : std::true_type
+  {
+      /// @brief Compile-time range classification.
+      static constexpr bool Value = true;
+  };
+
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class T>
+  struct IsVectorRange : std::bool_constant<IsSpatialVector<std::decay_t<T>>::Value ||
+                           (IsEigenObject<std::decay_t<T>>::Value &&
+                             (ColsAtCompileTime<std::decay_t<T>>::Value == 1))>
   {
       /// @brief True if @c T has vector range.
       static constexpr bool Value = IsSpatialVector<std::decay_t<T>>::Value ||
@@ -172,8 +194,10 @@ namespace Rodin::FormLanguage
           (ColsAtCompileTime<std::decay_t<T>>::Value == 1));
   };
 
-  /// @brief Type trait: whether @c T has matrix range (a spatial matrix or a
-  /// multi-column Eigen object).
+  /**
+   * @brief Type trait: whether @c T has matrix range (a spatial matrix or a
+   * multi-column Eigen object).
+   */
   template <class T>
   struct IsMatrixRange
     : std::bool_constant<
@@ -201,6 +225,7 @@ namespace Rodin::FormLanguage
         : std::is_same_v<std::decay_t<T>, Complex> ? RangeKind::Complex
         : IsVectorRange<std::decay_t<T>>::Value    ? RangeKind::Vector
         : IsMatrixRange<std::decay_t<T>>::Value    ? RangeKind::Matrix
+        : IsTensorRange<std::decay_t<T>>::Value    ? RangeKind::Tensor
                                                    : RangeKind::Unknown;
   };
 
@@ -212,10 +237,8 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHS>
   struct Sum
   {
-    /**
-     * @brief Result type of @f$ \text{LHS} + \text{RHS} @f$
-     */
-    using Type = decltype(Math::sum(std::declval<LHS>(), std::declval<RHS>()));
+    /// @brief Result type of @f$ \text{LHS} + \text{RHS} @f$
+      using Type = decltype(Math::sum(std::declval<LHS>(), std::declval<RHS>()));
   };
 
   /**
@@ -229,10 +252,8 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHS>
   struct Minus
   {
-    /**
-     * @brief Result type of @f$ \text{LHS} - \text{RHS} @f$
-     */
-    using Type = decltype(Math::minus(std::declval<LHS>(), std::declval<RHS>()));
+    /// @brief Result type of @f$ \text{LHS} - \text{RHS} @f$
+      using Type = decltype(Math::minus(std::declval<LHS>(), std::declval<RHS>()));
   };
 
   /**
@@ -245,10 +266,8 @@ namespace Rodin::FormLanguage
   template <class Operand>
   struct UnaryMinus
   {
-    /**
-     * @brief Result type of @f$ -\text{Operand} @f$
-     */
-    using Type = decltype(Math::minus(std::declval<Operand>()));
+    /// @brief Result type of @f$ -\text{Operand} @f$
+      using Type = decltype(Math::minus(std::declval<Operand>()));
   };
 
   /**
@@ -262,10 +281,8 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHS>
   struct Mult
   {
-    /**
-     * @brief Result type of @f$ \text{LHS} \times \text{RHS} @f$
-     */
-    using Type = decltype(Math::mult(std::declval<LHS>(), std::declval<RHS>()));
+    /// @brief Result type of @f$ \text{LHS} \times \text{RHS} @f$
+      using Type = decltype(Math::mult(std::declval<LHS>(), std::declval<RHS>()));
   };
 
   /**
@@ -279,10 +296,8 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHS>
   struct Division
   {
-    /**
-     * @brief Result type of @f$ \text{LHS} / \text{RHS} @f$
-     */
-    using Type = decltype(Math::division(std::declval<LHS>(), std::declval<RHS>()));
+    /// @brief Result type of @f$ \text{LHS} / \text{RHS} @f$
+      using Type = decltype(Math::division(std::declval<LHS>(), std::declval<RHS>()));
   };
 
   /**
@@ -296,10 +311,8 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHS>
   struct Dot
   {
-    /**
-     * @brief Result type of @f$ \text{LHS} \cdot \text{RHS} @f$
-     */
-    using Type = decltype(Math::dot(std::declval<LHS>(), std::declval<RHS>()));
+    /// @brief Result type of @f$ \text{LHS} \cdot \text{RHS} @f$
+      using Type = decltype(Math::dot(std::declval<LHS>(), std::declval<RHS>()));
   };
 }
 

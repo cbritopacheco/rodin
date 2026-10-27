@@ -44,18 +44,14 @@ namespace Rodin::Heart::CCMLC2014::Model
     NumberOfVariables       ///< Total number of unknowns in the coupled system.
   };
 
-  /**
-   * @brief Implicit time-integration scheme for the 0D state equations.
-   */
+  /// @brief Implicit time-integration scheme for the 0D state equations.
   enum class TimeScheme
   {
     BackwardEuler, ///< First-order L-stable backward Euler.
     BDF2 ///< Second-order stiffly-damped BDF2 with BE startup.
   };
 
-  /**
-   * @brief Rheology used in the reduced Windkessel branch flow laws.
-   */
+  /// @brief Rheology used in the reduced Windkessel branch flow laws.
   enum class WindkesselRheology
   {
     Newtonian, ///< Linear resistance branch flows.

@@ -142,24 +142,24 @@
  *   @f]
  *   Every matrix entry @f$ A_{ij}\mathrel{+}=a @f$ is assembled as
  *   @f[
- *     A_{r,c}\mathrel{+}= \alpha_r\,a\,\alpha_c
+ *     A_{r,c}\mathrel{+}= \overline{\alpha_r}\,a\,\alpha_c
  *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i),\;
  *          (c,\alpha_c)\in\operatorname{expand}(j),
  *   @f]
  *   and every vector entry @f$ b_i\mathrel{+}=f @f$ as
  *   @f[
- *     b_r\mathrel{+}= \alpha_r f
+ *     b_r\mathrel{+}= \overline{\alpha_r} f
  *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i).
  *   @f]
  *   For homogeneous identifications this is the variational transformation
  *   @f[
- *     A \leftarrow T^T A T,\qquad b \leftarrow T^T b.
+ *     A \leftarrow T^* A T,\qquad b \leftarrow T^* b.
  *   @f]
  *   For affine identifications @f$ x = T\hat{x}+\hat{d} @f$, the known
  *   defect also shifts the RHS:
  *   @f[
- *     A \leftarrow T^T A T,\qquad
- *     b \leftarrow T^T\!\left(b - A\hat{d}\right).
+ *     A \leftarrow T^* A T,\qquad
+ *     b \leftarrow T^*\!\left(b - A\hat{d}\right).
  *   @f]
  *   If slave DOFs remain in the unknown vector, reconstruction rows are then
  *   written as
@@ -364,6 +364,7 @@ namespace Rodin::Variational
        * Consumer assemblies use this to locate @f$ v @f$'s trial block and
        * apply the correct global offset when assembling identified-DOF
        * constraints.
+       * @returns The UUID of @f$ v @f$'s leaf trial function for an identification BC, or nullopt for a value-prescribing BC.
        */
       virtual Optional<Identifiable::UUID> getValueUUID() const
       {
@@ -376,6 +377,7 @@ namespace Rodin::Variational
        * Value-prescribing BCs and homogeneous identification BCs return an
        * empty map. Affine identification BCs override this to provide the
        * known additive defect value for each slave row.
+       * @returns Optional defects for affine identification BCs.
        */
       virtual const IdentificationValues& getIdentificationValues() const
       {
@@ -388,6 +390,24 @@ namespace Rodin::Variational
        * @return Pointer to a new copy
        */
       virtual DirichletBCBase* copy() const noexcept override = 0;
+
+      /**
+       * @brief Binds the constrained operand when transferring an owned problem.
+       * @param operand New trial function of the concrete boundary condition's type.
+       * @returns This boundary condition.
+       * @throws Alert::Exception If the concrete condition cannot bind this operand.
+       *
+       * Prescribed values and independently borrowed right-hand-side dependencies
+       * retain their existing ownership. Cached boundary DOFs must be reassembled.
+       */
+      virtual DirichletBCBase& setOperand(
+        [[maybe_unused]] const FormLanguage::Base& operand)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "This boundary condition does not support rebinding its operand."
+          << Alert::Raise;
+        return *this;
+      }
   };
 
   /// Alias for a list of Dirichlet boundary conditions
@@ -440,16 +460,13 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Finite element space type.
-      using FESType =
-        FES;
+      using FESType = FES;
 
       /// Operand type
-      using OperandType =
-        TrialFunction<Solution, FESType>;
+      using OperandType = TrialFunction<Solution, FESType>;
 
       /// Scalar type
-      using ScalarType =
-        typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
@@ -461,20 +478,16 @@ namespace Rodin::Variational
       using DOFs = typename Parent::DOFs;
 
       /// Value type
-      using ValueType =
-        FunctionBase<ValueDerived>;
+      using ValueType = FunctionBase<ValueDerived>;
 
       /// @brief Mesh type of the finite element space.
-      using FESMeshType =
-        typename FormLanguage::Traits<FESType>::MeshType;
+      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
       /// @brief Range type of the finite element space.
-      using FESRangeType =
-        typename FormLanguage::Traits<FESType>::RangeType;
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Execution context of the finite element space mesh.
-      using FESMeshContextType =
-        typename FormLanguage::Traits<FESMeshType>::ContextType;
+      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
@@ -482,8 +495,7 @@ namespace Rodin::Variational
           DirichletBC>;
 
       /// @brief Assembly backend type.
-      using AssemblyType =
-        DefaultAssemblyType;
+      using AssemblyType = DefaultAssemblyType;
 
       /**
        * @brief Constructs the object given the Operand and Value.
@@ -491,11 +503,13 @@ namespace Rodin::Variational
        * @param[in] v Value object
        */
       DirichletBC(const OperandType& u, const ValueType& v)
-        : m_u(u), m_value(v.copy())
+        : m_u(u),
+          m_value(v.copy())
       {}
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       DirichletBC(const DirichletBC& other)
         : Parent(other),
@@ -508,6 +522,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
@@ -522,38 +537,41 @@ namespace Rodin::Variational
        * @brief Specifies the region of the boundary over which the condition
        * will be imposed.
        * @param[in] bdrAtr Attribute associated to the boundary region
+       * @returns Reference to this object after the operation.
        */
-      constexpr
-      DirichletBC& on(Geometry::Attribute bdrAtr)
+      constexpr DirichletBC& on(Geometry::Attribute bdrAtr)
       {
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
 
       template <class A1, class A2, class... As>
-      /// @brief Restricts the boundary condition to the given mesh attributes.
+      /**
+       * @brief Restricts the boundary condition to the given mesh attributes.
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @param as Mesh attributes selecting the region.
+       * @returns Reference to this object after the operation.
+       */
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
-        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+        return on(FlatSet<Geometry::Attribute>{a1, a2, as...});
       }
 
       /**
        * @brief Specifies the regions of the boundary over which the condition
        * will be imposed.
        * @param[in] bdrAttrs Attributes associated to the boundary regions
+       * @returns Reference to this object after the operation.
        */
-      constexpr
-      DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
+      constexpr DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
         assert(bdrAttrs.size() > 0);
         m_essBdr = bdrAttrs;
         return *this;
       }
 
-      /**
-       * @returns Attributes over which the boundary condition is imposed.
-       */
-      constexpr
-      const FlatSet<Geometry::Attribute>& getAttributes() const
+      /// @returns Attributes over which the boundary condition is imposed.
+      constexpr const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_essBdr;
       }
@@ -593,6 +611,25 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
+      /**
+       * @brief Binds a new constrained trial function and clears assembled DOFs.
+       * @param operand Trial function with the concrete operand type.
+       * @returns This boundary condition.
+       * @throws Alert::Exception If the operand has an incompatible type.
+       */
+      DirichletBC& setOperand(const FormLanguage::Base& operand) override
+      {
+        const auto* trial = dynamic_cast<const OperandType*>(&operand);
+        if (!trial)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Incompatible boundary condition operand type." << Alert::Raise;
+        }
+        m_u = std::cref(*trial);
+        std::visit([](auto& dofs) { dofs.clear(); }, m_dofs);
+        return *this;
+      }
+
       const ValueType& getValue() const override
       {
         assert(m_value);
@@ -604,11 +641,22 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
-      /// @brief Gets the assembly backend.
+      /**
+       * @brief Gets the assembly backend for execution.
+       * @returns The non-const assembly backend.
+       */
+      Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly()
+      {
+        return m_assembly;
+      }
+
+      /**
+       * @brief Gets the assembly backend for inspection.
+       * @returns The const assembly backend.
+       */
       const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
-        assert(m_assembly);
-        return *m_assembly;
+        return m_assembly;
       }
 
       DirichletBC* copy() const noexcept override
@@ -629,9 +677,12 @@ namespace Rodin::Variational
    * @brief CTAD for DirichletBC
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
+   * @param u ShapeFunction object
+   * @param v Value object
    */
   template <class Solution, class FES, class FunctionDerived>
-  DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
+  DirichletBC(
+    const TrialFunction<Solution, FES>& u, const FunctionBase<FunctionDerived>& v)
     -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
 
   /**
@@ -758,11 +809,11 @@ namespace Rodin::Variational
    * distributes every matrix and vector contribution through the expansion
    * map.  In the homogeneous case this implements
    * @f[
-   *   A \leftarrow T^T A T,\qquad b \leftarrow T^T b,
+   *   A \leftarrow T^* A T,\qquad b \leftarrow T^* b,
    * @f]
    * while an affine defect @f$ d @f$ uses
    * @f[
-   *   b \leftarrow T^T(b - A\hat{d}).
+   *   b \leftarrow T^*(b - A\hat{d}).
    * @f]
    * Equivalently, every matrix column contribution through an identified slave
    * subtracts the known value @f$ A_{:,g_s}d_{g_s} @f$ from the assembled RHS.
@@ -838,10 +889,17 @@ namespace Rodin::Variational
         public:
           virtual ~DefectBase() = default;
 
-          /// @brief Evaluates the expression at a geometric point.
+          /**
+           * @brief Evaluates the expression at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
           virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
 
-          /// @brief Creates a polymorphic copy.
+          /**
+           * @brief Creates a polymorphic copy.
+           * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+           */
           virtual DefectBase* copy() const noexcept = 0;
       };
 
@@ -853,23 +911,36 @@ namespace Rodin::Variational
           /// @brief Type of the prescribed value.
           using FunctionType = FunctionBase<DefectDerived>;
 
-          /// @brief Constructs the defect from the prescribed value.
+          /**
+           * @brief Constructs the defect from the prescribed value.
+           * @param value Function operand.
+           */
           explicit Defect(const FunctionType& value)
             : m_value(value.copy())
           {}
 
-          /// @brief Copy constructor.
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
           Defect(const Defect& other)
             : m_value(other.m_value->copy())
           {}
 
-          /// @brief Evaluates the expression at a geometric point.
+          /**
+           * @brief Evaluates the expression at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
           FESRangeType getValue(const Geometry::Point& p) const override
           {
             return (*m_value)(p);
           }
 
-          /// @brief Creates a polymorphic copy.
+          /**
+           * @brief Creates a polymorphic copy.
+           * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+           */
           Defect* copy() const noexcept override
           {
             return new Defect(*this);
@@ -913,7 +984,10 @@ namespace Rodin::Variational
           m_defect(std::make_unique<Defect<DefectDerived>>(defect))
       {}
 
-      /// Copy constructor
+      /**
+       * Copy constructor
+       * @param other Object to copy from.
+       */
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
@@ -925,7 +999,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// Move constructor
+      /**
+       * Move constructor
+       * @param other Object to move from.
+       */
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -943,6 +1020,8 @@ namespace Rodin::Variational
        * Selects tagged codimension-one facets over which the identification
        * @f$ u=A(v) @f$ is enforced. Both slave and master DOFs are read from
        * the *same* face polytopes — there is no cross-face matching.
+       * @param bdrAtr Boundary attribute selecting the region.
+       * @returns Reference to this object after the operation.
        */
       constexpr DirichletBC& on(Geometry::Attribute bdrAtr)
       {
@@ -951,6 +1030,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets @f$ \Gamma_D @f$ to the union of multiple attributes.
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @param as Mesh attributes selecting the region.
+       * @returns Reference to this object after the operation.
        */
       template <class A1, class A2, class... As>
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
@@ -960,6 +1043,8 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets @f$ \Gamma_D @f$ to a precomputed attribute set.
+       * @returns Reference to this object after the operation.
+       * @param bdrAttrs Boundary attributes selecting the region.
        */
       constexpr DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
@@ -968,9 +1053,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @returns The boundary attribute set defining @f$ \Gamma_D @f$.
-       */
+      /// @returns The boundary attribute set defining @f$ \Gamma_D @f$.
       constexpr const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_essBdr;
@@ -1001,11 +1084,12 @@ namespace Rodin::Variational
        * ShapeFunctionBase::setIntegrationPoint() with the active
        * quadrature formula and quadrature index.
        *
-       * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the linear part is the
+       * Exactly zero coefficients are omitted; the linear part is the
        * @c DirichletBCBase::IdentifiedDOFs alternative of the variant
        * returned by @ref getDOFs. If the three-argument constructor was used,
        * the same slave linear form is applied to the known defect and exposed
-       * through @ref getIdentificationValues.
+       * through @ref getIdentificationValues. On MPI meshes, both maps use
+       * the same halo-aware selection of required boundary functionals.
        */
       void assemble() override
       {
@@ -1018,34 +1102,43 @@ namespace Rodin::Variational
         {
           const auto& fes = m_u.get().getFiniteElementSpace();
           const auto& mesh = fes.getMesh();
-          const size_t faceCount = mesh.getFaceCount();
-          const size_t faceDim = mesh.getDimension() - 1;
-
-          for (Index i = 0; i < faceCount; i++)
+          const auto value = [defect = m_defect.get()](
+                               const Geometry::Point& p) { return defect->getValue(p); };
+          if constexpr (requires {
+                          m_assembly.assembleValues(m_values, fes, m_essBdr, value);
+                        })
           {
-            if (m_essBdr.empty() && !mesh.isBoundary(i))
-              continue;
-
-            if (!m_essBdr.empty())
+            m_assembly.assembleValues(m_values, fes, m_essBdr, value);
+          }
+          else
+          {
+            const size_t faceDim = mesh.getDimension() - 1;
+            auto assembleFace = [&](const Geometry::Polytope& face) {
+              const Index i = face.getIndex();
+              if (!m_essBdr.empty())
+              {
+                const auto a = face.getAttribute();
+                if (!a || !m_essBdr.count(*a))
+                  return;
+              }
+              const auto& fe = fes.getFiniteElement(faceDim, i);
+              const auto mapping = fes.getPullback({faceDim, i}, value);
+              for (Index local = 0; local < fe.getCount(); ++local)
+              {
+                const Index global = fes.getGlobalIndex({faceDim, i}, local);
+                if (!m_values.contains(global))
+                  m_values.emplace(global, fe.getLinearForm(local)(mapping));
+              }
+            };
+            if (m_essBdr.empty())
             {
-              const auto a = mesh.getAttribute(faceDim, i);
-              if (!a || !m_essBdr.count(*a))
-                continue;
+              for (auto it = mesh.getBoundary(); it; ++it)
+                assembleFace(*it);
             }
-
-            const auto& fe = fes.getFiniteElement(faceDim, i);
-            const auto mapping = fes.getPullback(
-              {faceDim, i}, [defect = m_defect.get()](const Geometry::Point& p) {
-                return defect->getValue(p);
-              });
-
-            for (Index local = 0; local < fe.getCount(); local++)
+            else
             {
-              const Index global = fes.getGlobalIndex({faceDim, i}, local);
-              auto find = m_values.find(global);
-              if (find == m_values.end())
-                m_values.insert(
-                  find, std::pair{global, fe.getLinearForm(local)(mapping)});
+              for (auto it = mesh.getFace(); it; ++it)
+                assembleFace(*it);
             }
           }
         }
@@ -1056,17 +1149,32 @@ namespace Rodin::Variational
         return false;
       }
 
-      /**
-       * @returns The slave trial function @f$ u @f$.
-       */
+      /// @returns The slave trial function @f$ u @f$.
       const OperandType& getOperand() const override
       {
         return m_u.get();
       }
 
       /**
-       * @returns The right-hand-side shape-function expression @f$ A(v) @f$.
+       * @brief Binds a new constrained trial function and clears assembled DOFs.
+       * @param operand Trial function with the concrete operand type.
+       * @returns This boundary condition.
+       * @throws Alert::Exception If the operand has an incompatible type.
        */
+      DirichletBC& setOperand(const FormLanguage::Base& operand) override
+      {
+        const auto* trial = dynamic_cast<const OperandType*>(&operand);
+        if (!trial)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Incompatible boundary condition operand type." << Alert::Raise;
+        }
+        m_u = std::cref(*trial);
+        std::visit([](auto& dofs) { dofs.clear(); }, m_dofs);
+        return *this;
+      }
+
+      /// @returns The right-hand-side shape-function expression @f$ A(v) @f$.
       const ValueType& getValue() const override
       {
         assert(m_v);
@@ -1098,7 +1206,19 @@ namespace Rodin::Variational
         return m_values;
       }
 
-      /// @brief Gets the assembly backend.
+      /**
+       * @brief Gets the assembly backend for execution.
+       * @returns The non-const assembly backend.
+       */
+      Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly()
+      {
+        return m_assembly;
+      }
+
+      /**
+       * @brief Gets the assembly backend for inspection.
+       * @returns The const assembly backend.
+       */
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {
         return m_assembly;
@@ -1122,18 +1242,26 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for the identification DirichletBC.
+   * @param u ShapeFunction object
+   * @param v Value object
    */
   template <class Solution, class FES1, class Derived2, class FES2,
     ShapeFunctionSpaceType Sp>
-  DirichletBC(
-    const TrialFunction<Solution, FES1>&, const ShapeFunctionBase<Derived2, FES2, Sp>&)
+  DirichletBC(const TrialFunction<Solution, FES1>& u,
+    const ShapeFunctionBase<Derived2, FES2, Sp>& v)
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 
-  /// @brief Deduction guide for @c DirichletBC.
+  /**
+   * @brief Deduction guide for @c DirichletBC.
+   * @param u Slave trial function
+   * @param value Boundary value supplied as a shape-function expression.
+   * @param defect Boundary-value defect function.
+   */
   template <class Solution, class FES1, class Derived2, class FES2,
     ShapeFunctionSpaceType Sp, class DefectDerived>
-  DirichletBC(const TrialFunction<Solution, FES1>&,
-    const ShapeFunctionBase<Derived2, FES2, Sp>&, const FunctionBase<DefectDerived>&)
+  DirichletBC(const TrialFunction<Solution, FES1>& u,
+    const ShapeFunctionBase<Derived2, FES2, Sp>& value,
+    const FunctionBase<DefectDerived>& defect)
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 

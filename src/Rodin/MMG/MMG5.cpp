@@ -23,15 +23,21 @@ namespace Rodin::MMG
 
   MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, Optional<size_t> spaceDim)
   {
+    const size_t embedding = spaceDim.value_or(dim);
+    if (!((dim == 2 && (embedding == 2 || embedding == 3)) ||
+          (dim == 3 && embedding == 3)))
+    {
+      MMG5Exception(__func__)
+        << "Unsupported MMG mesh dimensions: topology " << dim << ", embedding "
+        << embedding << ". Supported topology/embedding dimensions are 2/2, 2/3, and 3/3."
+        << Alert::Raise;
+    }
+
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
-      MMG5Exception(__func__) << "Failed to allocate memory for the mesh." << Alert::Raise);
-    assert(dim > 0);
-    if (!spaceDim)
-      spaceDim = dim;
-    assert(spaceDim > 0);
-    const bool isSurface = (*spaceDim - 1) == dim;
-    assert(isSurface || (dim == *spaceDim));
+      MMG5Exception(__func__) << "Failed to allocate memory for the mesh."
+                              << Alert::Raise);
+    const bool isSurface = dim == 2 && embedding == 3;
     if (isSurface)
     {
       MMGS_Set_commonFunc();
@@ -42,20 +48,15 @@ namespace Rodin::MMG
       MMG2D_Set_commonFunc();
       MMG2D_Init_parameters(res);
     }
-    else if (dim == 3)
+    else
     {
       MMG3D_Set_commonFunc();
       MMG3D_Init_parameters(res);
     }
-    else
-    {
-      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
-      return nullptr;
-    }
     res->np = 0;
     res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
     res->ver = version;
-    res->dim = *spaceDim;
+    res->dim = embedding;
     res->info.imprim = getMMGVerbosityLevel();
     return res;
   }
@@ -79,17 +80,23 @@ namespace Rodin::MMG
     assert(src);
     assert(dst);
 
+    // Copy capacities together with their storage and free-list entries.
+    // MMG insertion follows the copied free lists beyond the current entity count.
     // Copy all non-pointer fields
     *dst = *src;
 
     // Fields which have been deprecated (or seem to have anyways)
     dst->ipar = nullptr;
 
-    // int* : mesh->adja
+    // MMG5_int* : mesh->adja
     if (src->adja)
     {
-      MMG5_SAFE_CALLOC(dst->adja, 4 * src->ne + 5, int, /* No op */);
-      std::copy(src->adja, src->adja + 4 * src->ne + 5, dst->adja);
+      const size_t entriesPerCell = src->dim == 2 || isSurfaceMesh(src) ? 3 : 4;
+      const size_t cellCount = entriesPerCell == 3 ? src->ntmax : src->nemax;
+      constexpr size_t adjacencyPadding = 5;
+      const size_t adjacencySize = entriesPerCell * cellCount + adjacencyPadding;
+      MMG5_SAFE_CALLOC(dst->adja, adjacencySize, MMG5_int, /* No op */);
+      std::copy(src->adja, src->adja + adjacencySize, dst->adja);
     }
     else
       dst->adja = nullptr;
@@ -98,9 +105,7 @@ namespace Rodin::MMG
     if (src->adjt)
     {
       MMG5_SAFE_CALLOC(dst->adjt, 3 * src->nt + 4, int, /* No op */);
-      std::copy(
-        src->adjt, src->adjt + 3 * src->nt + 4,
-        dst->adjt);
+      std::copy(src->adjt, src->adjt + 3 * src->nt + 4, dst->adjt);
     }
     else
       dst->adjt = nullptr;
@@ -109,9 +114,7 @@ namespace Rodin::MMG
     if (src->adjapr)
     {
       MMG5_SAFE_CALLOC(dst->adjapr, 5 * src->nprism + 6, int, /* No op */);
-      std::copy(
-        src->adjapr, src->adjapr + 5 * src->nprism + 6,
-        dst->adjapr);
+      std::copy(src->adjapr, src->adjapr + 5 * src->nprism + 6, dst->adjapr);
     }
     else
       dst->adjapr = nullptr;
@@ -120,9 +123,7 @@ namespace Rodin::MMG
     if (src->adjq)
     {
       MMG5_SAFE_CALLOC(dst->adjq, 4 * src->nquad + 5, int, /* No op */);
-      std::copy(
-        src->adjq, src->adjq + 4 * src->nquad + 5,
-        dst->adjq);
+      std::copy(src->adjq, src->adjq + 4 * src->nquad + 5, dst->adjq);
     }
     else
       dst->adjq = nullptr;
@@ -131,12 +132,12 @@ namespace Rodin::MMG
     if (src->point)
     {
       /* Why MMG fields are 1-indexed is beyond me, but it does not pose so much
-      * difficulty. We will copy from the 0-index, if it contains garbage then
-      * it should not matter because MMG code should only access memory from the
-      * 1-index.
-      */
-      MMG5_SAFE_CALLOC(dst->point, src->np + 1, MMG5_Point, /* No op */);
-      std::copy(src->point, src->point + src->np + 1, dst->point);
+       * difficulty. We will copy from the 0-index, if it contains garbage then
+       * it should not matter because MMG code should only access memory from the
+       * 1-index.
+       */
+      MMG5_SAFE_CALLOC(dst->point, src->npmax + 1, MMG5_Point, /* No op */);
+      std::copy(src->point, src->point + src->npmax + 1, dst->point);
     }
     else
       dst->point = nullptr;
@@ -144,8 +145,10 @@ namespace Rodin::MMG
     // MMG5_pxPoint : mesh->xpoint
     if (src->xpoint)
     {
-      MMG5_SAFE_CALLOC(dst->xpoint, src->xp + 1, MMG5_xPoint, /* No op */);
-      std::copy(src->xpoint, src->xpoint + src->xp + 1, dst->xpoint);
+      MMG5_SAFE_CALLOC(
+        dst->xpoint, std::max(src->xp, src->xpmax) + 1, MMG5_xPoint, /* No op */);
+      std::copy(
+        src->xpoint, src->xpoint + std::max(src->xp, src->xpmax) + 1, dst->xpoint);
     }
     else
       dst->xpoint = nullptr;
@@ -153,8 +156,8 @@ namespace Rodin::MMG
     // MMG5_pTetra : mesh->tetra
     if (src->tetra)
     {
-      MMG5_SAFE_CALLOC(dst->tetra, src->ne + 1, MMG5_Tetra, /* No op */);
-      std::copy(src->tetra, src->tetra + src->ne + 1, dst->tetra);
+      MMG5_SAFE_CALLOC(dst->tetra, src->nemax + 1, MMG5_Tetra, /* No op */);
+      std::copy(src->tetra, src->tetra + src->nemax + 1, dst->tetra);
     }
     else
       dst->tetra = nullptr;
@@ -162,8 +165,10 @@ namespace Rodin::MMG
     // MMG5_pxTetra : mesh->xtetra
     if (src->xtetra)
     {
-      MMG5_SAFE_CALLOC(dst->xtetra, src->xt + 1, MMG5_xTetra, /* No op */);
-      std::copy(src->xtetra, src->xtetra + src->xt + 1, dst->xtetra);
+      MMG5_SAFE_CALLOC(
+        dst->xtetra, std::max(src->xt, src->xtmax) + 1, MMG5_xTetra, /* No op */);
+      std::copy(
+        src->xtetra, src->xtetra + std::max(src->xt, src->xtmax) + 1, dst->xtetra);
     }
     else
       dst->xtetra = nullptr;
@@ -189,8 +194,11 @@ namespace Rodin::MMG
     // MMG5_pTria : mesh->tria
     if (src->tria)
     {
-      MMG5_SAFE_CALLOC(dst->tria, src->nt + 1, MMG5_Tria, /* No op */);
-      std::copy(src->tria, src->tria + src->nt + 1, dst->tria);
+      // Volume boundary triangles have count-sized storage; triangle element
+      // arrays in planar and surface meshes also contain their free-list slots.
+      const auto triangleCount = src->tetra ? src->nt : src->ntmax;
+      MMG5_SAFE_CALLOC(dst->tria, triangleCount + 1, MMG5_Tria, /* No op */);
+      std::copy(src->tria, src->tria + triangleCount + 1, dst->tria);
     }
     else
       dst->tria = nullptr;
@@ -207,8 +215,8 @@ namespace Rodin::MMG
     // MMG5_pEdge : mesh->edge
     if (src->edge)
     {
-      MMG5_SAFE_CALLOC(dst->edge, src->na + 1, MMG5_Edge, /* No op */);
-      std::copy(src->edge, src->edge + src->na + 1, dst->edge);
+      MMG5_SAFE_CALLOC(dst->edge, src->namax + 1, MMG5_Edge, /* No op */);
+      std::copy(src->edge, src->edge + src->namax + 1, dst->edge);
     }
     else
       dst->edge = nullptr;
@@ -259,22 +267,29 @@ namespace Rodin::MMG
     if (src->info.invmat.lookup)
     {
       MMG5_SAFE_CALLOC(dst->info.invmat.lookup, src->info.invmat.size, int, /* No op */);
-      std::copy(
-        src->info.invmat.lookup,
-        src->info.invmat.lookup + src->info.invmat.size,
-        dst->info.invmat.lookup
-        );
+      std::copy(src->info.invmat.lookup, src->info.invmat.lookup + src->info.invmat.size,
+        dst->info.invmat.lookup);
     }
     else
       dst->info.invmat.lookup = nullptr;
 
     // char* : mesh->namein
-    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
-    std::strcpy(dst->namein, src->namein);
+    if (src->namein)
+    {
+      MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
+      std::strcpy(dst->namein, src->namein);
+    }
+    else
+      dst->namein = nullptr;
 
     // char* : mesh->nameout
-    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
-    std::strcpy(dst->nameout, src->nameout);
+    if (src->nameout)
+    {
+      MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
+      std::strcpy(dst->nameout, src->nameout);
+    }
+    else
+      dst->nameout = nullptr;
   }
 
   MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, size_t vdim)
@@ -284,15 +299,16 @@ namespace Rodin::MMG
       return nullptr;
     MMG5_pSol res = nullptr;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Sol,
-      MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol." << Alert::Raise);
-    res->ver  = mesh->ver;
+      MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol."
+                              << Alert::Raise);
+    res->ver = mesh->ver;
     res->size = vdim;
     if (vdim == 1)
       res->type = MMG5_Scalar;
     else
       res->type = MMG5_Vector;
     res->dim = mesh->dim;
-    res->np  = mesh->np;
+    res->np = mesh->np;
     res->npi = 0;
     res->npmax = mesh->npmax;
     if (res->np)
@@ -300,7 +316,8 @@ namespace Rodin::MMG
       // So (res->size + 1) * (res->np + 1) seems to work for most
       // applications
       MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), Real,
-        MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
+        MMG5Exception(__func__)
+          << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
     }
     else
     {
@@ -310,438 +327,474 @@ namespace Rodin::MMG
     return res;
   }
 
-MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
-{
-  bool isSurface = src.isSurface();
-  assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
-  const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
-
-  MMG5_pMesh res =
-    createMesh(sMeshVersionFormatted, src.getDimension(), src.getSpaceDimension());
-
-  res->npi = 0;
-  res->nai = 0;
-  res->nti = 0;
-  res->nei = 0;
-  res->xp  = 0;
-
-  // Always convert vertices
-  res->np = src.getVertexCount();
-
-  // Remaps (Rodin index -> MMG dense 1-based index; 0 => filtered out / not present)
-  std::vector<Index> edgeRemap; // for segments (surface/2D/3D)
-  std::vector<Index> triRemap;  // for 3D boundary triangles (if filtered)
-
-  if (isSurface) // Use MMGS
+  MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   {
-    // Always convert cells (triangles)
-    res->nt = src.getCellCount();
+    bool isSurface = src.isSurface();
+    assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
+    const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
 
-    // Only convert edges (segments) if they have an attribute
+    if (ptr)
     {
-      size_t na = 0;
+      const auto validate = [&](const auto& indices, Geometry::Polytope::Type type) {
+        const size_t dimension = Geometry::Polytope::Traits(type).getDimension();
+        for (const Index index : indices)
+        {
+          if (dimension > src.getConnectivity().getMaximalDimension() ||
+            index >= src.getConnectivity().getCount(dimension) ||
+            src.getPolytope(dimension, index)->getGeometry() != type)
+          {
+            Alert::Exception() << "Invalid MMG metadata entity index " << index
+                               << " for geometry " << static_cast<size_t>(type) << "."
+                               << Alert::Raise;
+          }
+        }
+      };
+      validate(ptr->getCorners(), Geometry::Polytope::Type::Point);
+      validate(ptr->getRequiredVertices(), Geometry::Polytope::Type::Point);
+      validate(ptr->getRidges(), Geometry::Polytope::Type::Segment);
+      validate(ptr->getRequiredEdges(), Geometry::Polytope::Type::Segment);
+      validate(ptr->getRequiredTriangles(), Geometry::Polytope::Type::Triangle);
+      validate(ptr->getRequiredTetrahedra(), Geometry::Polytope::Type::Tetrahedron);
+    }
+
+    MMG5_pMesh res =
+      createMesh(sMeshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+
+    res->npi = 0;
+    res->nai = 0;
+    res->nti = 0;
+    res->nei = 0;
+    res->xp = 0;
+
+    // Always convert vertices
+    res->np = src.getVertexCount();
+
+    // Remaps (Rodin index -> MMG dense 1-based index; 0 => filtered out / not present)
+    std::vector<Index> edgeRemap; // for segments (surface/2D/3D)
+    std::vector<Index> triRemap; // for 3D boundary triangles (if filtered)
+
+    if (isSurface) // Use MMGS
+    {
+      // Always convert cells (triangles)
+      res->nt = src.getCellCount();
+
+      // Only convert edges (segments) if they have an attribute
+      {
+        size_t na = 0;
+        for (auto it = src.getFace(); !it.end(); ++it)
+        {
+          if ((*it).getAttribute().has_value())
+            ++na;
+        }
+        res->na = na;
+
+        edgeRemap.assign(src.getFaceCount(), 0);
+      }
+
+      res->nti = res->nt;
+      res->npi = res->np;
+      res->nquad = 0;
+
+      MMGS_Set_commonFunc();
+      if (!MMGS_zaldy(res))
+      {
+        MMG5Exception(__func__)
+          << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+      }
+
+      // Copy points (always)
+      for (auto it = src.getVertex(); !it.end(); ++it)
+      {
+        const auto& vertex = *it;
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+        const Index i = vertex.getIndex() + 1;
+        const auto& coords = vertex.getCoordinates();
+        for (size_t d = 0; d < src.getSpaceDimension(); d++)
+          res->point[i].c[d] = coords[d];
+        res->point[i].ref = vertex.getAttribute().value_or(0);
+      }
+
+      // Copy edges (only attributed) + dense indexing
+      Index mmgEdge = 0;
       for (auto it = src.getFace(); !it.end(); ++it)
-        if ((*it).getAttribute().has_value())
-          ++na;
-      res->na = na;
+      {
+        const auto& face = *it;
+        assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
 
-      edgeRemap.assign(src.getFaceCount(), 0);
-    }
+        if (!face.getAttribute().has_value())
+          continue;
 
-    res->nti   = res->nt;
-    res->npi   = res->np;
-    res->nquad = 0;
+        const Index old = face.getIndex();
+        const Index i = ++mmgEdge; // 1..res->na
+        edgeRemap[old] = i;
 
-    MMGS_Set_commonFunc();
-    if (!MMGS_zaldy(res))
-      MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+        const auto& vertices = face.getVertices();
+        res->edge[i].a = vertices[0] + 1;
+        res->edge[i].b = vertices[1] + 1;
+        res->edge[i].ref = *face.getAttribute();
+      }
 
-    // Copy points (always)
-    for (auto it = src.getVertex(); !it.end(); ++it)
-    {
-      const auto& vertex = *it;
-      assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
-      const Index i = vertex.getIndex() + 1;
-      const auto& coords = vertex.getCoordinates();
-      for (size_t d = 0; d < src.getSpaceDimension(); d++)
-        res->point[i].c[d] = coords[d];
-      res->point[i].ref = vertex.getAttribute().value_or(0);
-    }
-
-    // Copy edges (only attributed) + dense indexing
-    Index mmgEdge = 0;
-    for (auto it = src.getFace(); !it.end(); ++it)
-    {
-      const auto& face = *it;
-      assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
-
-      if (!face.getAttribute().has_value())
-        continue;
-
-      const Index old = face.getIndex();
-      const Index i = ++mmgEdge; // 1..res->na
-      edgeRemap[old] = i;
-
-      const auto& vertices = face.getVertices();
-      res->edge[i].a = vertices[0] + 1;
-      res->edge[i].b = vertices[1] + 1;
-      res->edge[i].ref = *face.getAttribute();
-    }
-
-    // Copy triangles (cells) (always)
-    for (auto it = src.getCell(); !it.end(); ++it)
-    {
-      const auto& cell = *it;
-      const Index i = cell.getIndex() + 1;
-      assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
-      MMG5_pTria pt = &res->tria[i];
-      const auto& vertices = cell.getVertices();
-      pt->v[0] = vertices[0] + 1;
-      pt->v[1] = vertices[1] + 1;
-      pt->v[2] = vertices[2] + 1;
-      pt->ref = cell.getAttribute().value_or(0);
-    }
-  }
-  else if (src.getDimension() == 2) // Use MMG2D
-  {
-    // Always convert cells (triangles)
-    res->nt = src.getCellCount();
-
-    // Only convert edges (segments) if they have an attribute
-    {
-      size_t na = 0;
-      for (auto it = src.getFace(); !it.end(); ++it)
-        if ((*it).getAttribute().has_value())
-          ++na;
-      res->na = na;
-
-      edgeRemap.assign(src.getFaceCount(), 0);
-    }
-
-    MMG2D_Set_commonFunc();
-    if (!MMG2D_zaldy(res))
-      MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
-
-    // Copy points (always)
-    for (auto it = src.getVertex(); !it.end(); ++it)
-    {
-      const auto& vertex = *it;
-      assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
-      const Index i = vertex.getIndex() + 1;
-      const auto& coords = vertex.getCoordinates();
-      for (size_t d = 0; d < src.getSpaceDimension(); d++)
-        res->point[i].c[d] = coords[d];
-      res->point[i].ref = vertex.getAttribute().value_or(0);
-      res->point[i].tag = MG_NUL;
-    }
-
-    // Copy edges (only attributed) + dense indexing
-    Index mmgEdge = 0;
-    for (auto it = src.getFace(); !it.end(); ++it)
-    {
-      const auto& face = *it;
-      assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
-
-      if (!face.getAttribute().has_value())
-        continue;
-
-      const Index old = face.getIndex();
-      const Index i = ++mmgEdge; // 1..res->na
-      edgeRemap[old] = i;
-
-      const auto& vertices = face.getVertices();
-      res->edge[i].a = vertices[0] + 1;
-      res->edge[i].b = vertices[1] + 1;
-      res->edge[i].ref = *face.getAttribute();
-      res->edge[i].tag |= MG_REF + MG_BDY;
-    }
-
-    // Copy triangles with correct orientation (cells always)
-    if (src.getCellCount() == 0)
-    {
-      for (size_t i = 1; i <= res->np; i++)
-        res->point[i].tag &= ~MG_NUL;
-    }
-    else
-    {
+      // Copy triangles (cells) (always)
       for (auto it = src.getCell(); !it.end(); ++it)
       {
         const auto& cell = *it;
         const Index i = cell.getIndex() + 1;
         assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
-
         MMG5_pTria pt = &res->tria[i];
         const auto& vertices = cell.getVertices();
         pt->v[0] = vertices[0] + 1;
         pt->v[1] = vertices[1] + 1;
         pt->v[2] = vertices[2] + 1;
-
         pt->ref = cell.getAttribute().value_or(0);
+      }
+    }
+    else if (src.getDimension() == 2) // Use MMG2D
+    {
+      // Always convert cells (triangles)
+      res->nt = src.getCellCount();
+
+      // Only convert edges (segments) if they have an attribute
+      {
+        size_t na = 0;
+        for (auto it = src.getFace(); !it.end(); ++it)
+        {
+          if ((*it).getAttribute().has_value())
+            ++na;
+        }
+        res->na = na;
+
+        edgeRemap.assign(src.getFaceCount(), 0);
+      }
+
+      MMG2D_Set_commonFunc();
+      if (!MMG2D_zaldy(res))
+      {
+        MMG5Exception(__func__)
+          << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+      }
+
+      // Copy points (always)
+      for (auto it = src.getVertex(); !it.end(); ++it)
+      {
+        const auto& vertex = *it;
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+        const Index i = vertex.getIndex() + 1;
+        const auto& coords = vertex.getCoordinates();
+        for (size_t d = 0; d < src.getSpaceDimension(); d++)
+          res->point[i].c[d] = coords[d];
+        res->point[i].ref = vertex.getAttribute().value_or(0);
+        res->point[i].tag = MG_NUL;
+      }
+
+      // Copy edges (only attributed) + dense indexing
+      Index mmgEdge = 0;
+      for (auto it = src.getFace(); !it.end(); ++it)
+      {
+        const auto& face = *it;
+        assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
+
+        if (!face.getAttribute().has_value())
+          continue;
+
+        const Index old = face.getIndex();
+        const Index i = ++mmgEdge; // 1..res->na
+        edgeRemap[old] = i;
+
+        const auto& vertices = face.getVertices();
+        res->edge[i].a = vertices[0] + 1;
+        res->edge[i].b = vertices[1] + 1;
+        res->edge[i].ref = *face.getAttribute();
+        res->edge[i].tag |= MG_REF + MG_BDY;
+      }
+
+      // Copy triangles with correct orientation (cells always)
+      if (src.getCellCount() == 0)
+      {
+        for (size_t i = 1; i <= res->np; i++)
+          res->point[i].tag &= ~MG_NUL;
+      }
+      else
+      {
+        for (auto it = src.getCell(); !it.end(); ++it)
+        {
+          const auto& cell = *it;
+          const Index i = cell.getIndex() + 1;
+          assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
+
+          MMG5_pTria pt = &res->tria[i];
+          const auto& vertices = cell.getVertices();
+          pt->v[0] = vertices[0] + 1;
+          pt->v[1] = vertices[1] + 1;
+          pt->v[2] = vertices[2] + 1;
+
+          pt->ref = cell.getAttribute().value_or(0);
+
+          res->point[pt->v[0]].tag &= ~MG_NUL;
+          res->point[pt->v[1]].tag &= ~MG_NUL;
+          res->point[pt->v[2]].tag &= ~MG_NUL;
+
+          pt->edg[0] = 0;
+          pt->edg[1] = 0;
+          pt->edg[2] = 0;
+
+          auto orientation = MMG2D_quickarea(
+            res->point[pt->v[0]].c, res->point[pt->v[1]].c, res->point[pt->v[2]].c);
+
+          if (orientation < 0)
+          {
+            auto tmp = pt->v[2];
+            pt->v[2] = pt->v[1];
+            pt->v[1] = tmp;
+          }
+        }
+      }
+    }
+    else if (src.getDimension() == 3) // Use MMG3D
+    {
+      constexpr size_t edgeDim = 1;
+      constexpr size_t faceDim = 2;
+      constexpr size_t cellDim = 3;
+      const bool hasFaceCellIncidence =
+        src.getConnectivity().getIncidence(faceDim, cellDim).size() > 0;
+      const auto isMMG3DBoundaryTriangle = [&](Index faceIdx) {
+        return !hasFaceCellIncidence || src.isBoundary(faceIdx);
+      };
+
+      // Always convert cells (tets)
+      res->ne = src.getCellCount();
+
+      // Only convert edges (segments) if they have an attribute
+      {
+        const auto rodinEdgeCount = src.getPolytopeCount(edgeDim);
+        size_t na = 0;
+        for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
+        {
+          if ((*it).getAttribute().has_value())
+            ++na;
+        }
+        res->na = na;
+
+        edgeRemap.assign(rodinEdgeCount, 0);
+      }
+
+      // Only convert boundary triangles if they have an attribute or MMG metadata
+      {
+        size_t nt = 0;
+        for (auto it = src.getFace(); !it.end(); ++it)
+        {
+          const auto& face = *it;
+          if (!isMMG3DBoundaryTriangle(face.getIndex()))
+            continue;
+          const bool isRequired =
+            ptr && ptr->getRequiredTriangles().count(face.getIndex()) > 0;
+          if (face.getAttribute().has_value() || isRequired)
+            ++nt;
+        }
+        res->nt = nt;
+
+        triRemap.assign(src.getFaceCount(), 0);
+      }
+
+      MMG3D_Set_commonFunc();
+      if (!MMG3D_zaldy(res))
+      {
+        MMG5Exception(__func__)
+          << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+      }
+
+      // Copy points (always)
+      for (auto it = src.getVertex(); !it.end(); ++it)
+      {
+        const auto& vertex = *it;
+        assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+        const Index i = vertex.getIndex() + 1;
+        const auto& coords = vertex.getCoordinates();
+        for (size_t d = 0; d < src.getSpaceDimension(); d++)
+          res->point[i].c[d] = coords[d];
+        res->point[i].ref = vertex.getAttribute().value_or(0);
+        res->point[i].tag = MG_NUL;
+      }
+
+      // Copy edges (only attributed) + dense indexing
+      Index mmgEdge = 0;
+      for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
+      {
+        const auto& segment = *it;
+        assert(segment.getGeometry() == Geometry::Polytope::Type::Segment);
+
+        if (!segment.getAttribute().has_value())
+          continue;
+
+        const Index old = segment.getIndex();
+        const Index i = ++mmgEdge; // 1..res->na
+        if (old >= 0 && (size_t)old < edgeRemap.size())
+          edgeRemap[old] = i;
+
+        const auto& vertices = segment.getVertices();
+        res->edge[i].a = vertices[0] + 1;
+        res->edge[i].b = vertices[1] + 1;
+        res->edge[i].ref = *segment.getAttribute();
+        res->edge[i].tag |= MG_REF;
+      }
+
+      // Copy triangles (only attributed) + dense indexing
+      Index mmgTri = 0;
+      for (auto it = src.getFace(); !it.end(); ++it)
+      {
+        const auto& face = *it;
+        assert(face.getGeometry() == Geometry::Polytope::Type::Triangle);
+
+        if (!isMMG3DBoundaryTriangle(face.getIndex()))
+          continue;
+
+        const bool isRequired =
+          ptr && ptr->getRequiredTriangles().count(face.getIndex()) > 0;
+        if (!face.getAttribute().has_value() && !isRequired)
+          continue;
+
+        const Index old = face.getIndex();
+        const Index i = ++mmgTri; // 1..res->nt
+        if (old >= 0 && (size_t)old < triRemap.size())
+          triRemap[old] = i;
+
+        MMG5_pTria pt = &res->tria[i];
+        const auto& vertices = face.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+        pt->ref = face.getAttribute().value_or(0);
+      }
+
+      // Copy tetrahedra with correct orientation (cells always)
+      for (auto it = src.getCell(); !it.end(); ++it)
+      {
+        const auto& cell = *it;
+        const Index i = cell.getIndex() + 1;
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Tetrahedron);
+
+        MMG5_pTetra pt = &res->tetra[i];
+        const auto& vertices = cell.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+        pt->v[3] = vertices[3] + 1;
 
         res->point[pt->v[0]].tag &= ~MG_NUL;
         res->point[pt->v[1]].tag &= ~MG_NUL;
         res->point[pt->v[2]].tag &= ~MG_NUL;
+        res->point[pt->v[3]].tag &= ~MG_NUL;
 
-        pt->edg[0] = 0;
-        pt->edg[1] = 0;
-        pt->edg[2] = 0;
+        pt->ref = cell.getAttribute().value_or(0);
 
-        auto orientation = MMG2D_quickarea(
-            res->point[pt->v[0]].c,
-            res->point[pt->v[1]].c,
-            res->point[pt->v[2]].c);
-
-        if (orientation < 0)
+        if (MMG5_orvol(res->point, pt->v) < 0.0)
         {
           auto tmp = pt->v[2];
-          pt->v[2] = pt->v[1];
-          pt->v[1] = tmp;
+          pt->v[2] = pt->v[3];
+          pt->v[3] = tmp;
         }
       }
     }
-  }
-  else if (src.getDimension() == 3) // Use MMG3D
-  {
-    constexpr size_t edgeDim = 1;
-    constexpr size_t faceDim = 2;
-    constexpr size_t cellDim = 3;
-    const bool hasFaceCellIncidence =
-      src.getConnectivity().getIncidence(faceDim, cellDim).size() > 0;
-    const auto isMMG3DBoundaryTriangle = [&](Index faceIdx) {
-      return !hasFaceCellIncidence || src.isBoundary(faceIdx);
-    };
-
-    // Always convert cells (tets)
-    res->ne = src.getCellCount();
-
-    // Only convert edges (segments) if they have an attribute
+    else
     {
-      const auto rodinEdgeCount = src.getPolytopeCount(edgeDim);
-      size_t na = 0;
-      for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
-        if ((*it).getAttribute().has_value())
-          ++na;
-      res->na = na;
-
-      edgeRemap.assign(rodinEdgeCount, 0);
+      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
+      return nullptr;
     }
 
-    // Only convert boundary triangles if they have an attribute or MMG metadata
+    if (ptr)
     {
-      size_t nt = 0;
-      for (auto it = src.getFace(); !it.end(); ++it)
+      // Tag corners (vertices always exist)
+      for (const auto& c : ptr->getCorners())
       {
-        const auto& face = *it;
-        if (!isMMG3DBoundaryTriangle(face.getIndex()))
-          continue;
-        const bool isRequired =
-          ptr && ptr->getRequiredTriangles().count(face.getIndex()) > 0;
-        if (face.getAttribute().has_value() || isRequired)
-          ++nt;
+        assert(c >= 0);
+        assert(c <= res->np);
+        res->point[c + 1].tag |= MG_CRN;
       }
-      res->nt = nt;
 
-      triRemap.assign(src.getFaceCount(), 0);
-    }
-
-    MMG3D_Set_commonFunc();
-    if (!MMG3D_zaldy(res))
-      MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
-
-    // Copy points (always)
-    for (auto it = src.getVertex(); !it.end(); ++it)
-    {
-      const auto& vertex = *it;
-      assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
-      const Index i = vertex.getIndex() + 1;
-      const auto& coords = vertex.getCoordinates();
-      for (size_t d = 0; d < src.getSpaceDimension(); d++)
-        res->point[i].c[d] = coords[d];
-      res->point[i].ref = vertex.getAttribute().value_or(0);
-      res->point[i].tag = MG_NUL;
-    }
-
-    // Copy edges (only attributed) + dense indexing
-    Index mmgEdge = 0;
-    for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
-    {
-      const auto& segment = *it;
-      assert(segment.getGeometry() == Geometry::Polytope::Type::Segment);
-
-      if (!segment.getAttribute().has_value())
-        continue;
-
-      const Index old = segment.getIndex();
-      const Index i = ++mmgEdge; // 1..res->na
-      if (old >= 0 && (size_t)old < edgeRemap.size())
-        edgeRemap[old] = i;
-
-      const auto& vertices = segment.getVertices();
-      res->edge[i].a = vertices[0] + 1;
-      res->edge[i].b = vertices[1] + 1;
-      res->edge[i].ref = *segment.getAttribute();
-      res->edge[i].tag |= MG_REF;
-    }
-
-    // Copy triangles (only attributed) + dense indexing
-    Index mmgTri = 0;
-    for (auto it = src.getFace(); !it.end(); ++it)
-    {
-      const auto& face = *it;
-      assert(face.getGeometry() == Geometry::Polytope::Type::Triangle);
-
-      if (!isMMG3DBoundaryTriangle(face.getIndex()))
-        continue;
-
-      const bool isRequired =
-        ptr && ptr->getRequiredTriangles().count(face.getIndex()) > 0;
-      if (!face.getAttribute().has_value() && !isRequired)
-        continue;
-
-      const Index old = face.getIndex();
-      const Index i = ++mmgTri; // 1..res->nt
-      if (old >= 0 && (size_t)old < triRemap.size())
-        triRemap[old] = i;
-
-      MMG5_pTria pt = &res->tria[i];
-      const auto& vertices = face.getVertices();
-      pt->v[0] = vertices[0] + 1;
-      pt->v[1] = vertices[1] + 1;
-      pt->v[2] = vertices[2] + 1;
-      pt->ref = face.getAttribute().value_or(0);
-    }
-
-    // Copy tetrahedra with correct orientation (cells always)
-    for (auto it = src.getCell(); !it.end(); ++it)
-    {
-      const auto& cell = *it;
-      const Index i = cell.getIndex() + 1;
-      assert(cell.getGeometry() == Geometry::Polytope::Type::Tetrahedron);
-
-      MMG5_pTetra pt = &res->tetra[i];
-      const auto& vertices = cell.getVertices();
-      pt->v[0] = vertices[0] + 1;
-      pt->v[1] = vertices[1] + 1;
-      pt->v[2] = vertices[2] + 1;
-      pt->v[3] = vertices[3] + 1;
-
-      res->point[pt->v[0]].tag &= ~MG_NUL;
-      res->point[pt->v[1]].tag &= ~MG_NUL;
-      res->point[pt->v[2]].tag &= ~MG_NUL;
-      res->point[pt->v[3]].tag &= ~MG_NUL;
-
-      pt->ref = cell.getAttribute().value_or(0);
-
-      if (MMG5_orvol(res->point, pt->v) < 0.0)
+      // Tag ridges (edges may be filtered out now)
+      for (const auto& r : ptr->getRidges())
       {
-        auto tmp = pt->v[2];
-        pt->v[2] = pt->v[3];
-        pt->v[3] = tmp;
+        assert(r >= 0);
+        const Index old = r;
+
+        if (!edgeRemap.empty() && old >= 0 && (size_t)old < edgeRemap.size())
+        {
+          const Index i = edgeRemap[old];
+          if (i > 0)
+            res->edge[i].tag |= MG_GEO;
+        }
+        else
+        {
+          // Backward-compatible fallback if no remap is available (should not happen here)
+          if (old + 1 <= res->na)
+            res->edge[old + 1].tag |= MG_GEO;
+        }
       }
-    }
-  }
-  else
-  {
-    MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
-    return nullptr;
-  }
 
-  if (ptr)
-  {
-    // Tag corners (vertices always exist)
-    for (const auto& c : ptr->getCorners())
-    {
-      assert(c >= 0);
-      assert(c <= res->np);
-      res->point[c + 1].tag |= MG_CRN;
-    }
-
-    // Tag ridges (edges may be filtered out now)
-    for (const auto& r : ptr->getRidges())
-    {
-      assert(r >= 0);
-      const Index old = r;
-
-      if (!edgeRemap.empty() && old >= 0 && (size_t)old < edgeRemap.size())
+      // Tag required vertices (vertices always exist)
+      for (const auto& c : ptr->getRequiredVertices())
       {
-        const Index i = edgeRemap[old];
+        assert(c >= 0);
+        assert(c <= res->np);
+        res->point[c + 1].tag |= MG_REQ;
+        res->point[c + 1].tag &= ~MG_NUL;
+      }
+
+      // Tag required edges (edges may be filtered out now)
+      for (const auto& r : ptr->getRequiredEdges())
+      {
+        assert(r >= 0);
+        const Index old = r;
+
+        if (!edgeRemap.empty() && old >= 0 && (size_t)old < edgeRemap.size())
+        {
+          const Index i = edgeRemap[old];
+          if (i > 0)
+            res->edge[i].tag |= MG_REQ;
+        }
+        else
+        {
+          // Backward-compatible fallback if no remap is available (should not happen here)
+          if (old + 1 <= res->na)
+            res->edge[old + 1].tag |= MG_REQ;
+        }
+      }
+
+      // Tag required triangles
+      for (const auto& r : ptr->getRequiredTriangles())
+      {
+        assert(r >= 0);
+        const Index old = r;
+
+        Index i = 0;
+        if (!triRemap.empty() && old >= 0 && (size_t)old < triRemap.size())
+        {
+          i = triRemap[old];
+        }
+        else if (old + 1 <= res->nt)
+        {
+          i = old + 1;
+        }
+
         if (i > 0)
-          res->edge[i].tag |= MG_GEO;
+        {
+          res->tria[i].tag[0] |= MG_REQ;
+          res->tria[i].tag[1] |= MG_REQ;
+          res->tria[i].tag[2] |= MG_REQ;
+        }
       }
-      else
+
+      // Tag required tetrahedra (tetrahedra are always copied densely)
+      for (const auto& r : ptr->getRequiredTetrahedra())
       {
-        // Backward-compatible fallback if no remap is available (should not happen here)
-        if (old + 1 <= res->na)
-          res->edge[old + 1].tag |= MG_GEO;
+        assert(r >= 0);
+        if (r + 1 <= res->ne)
+          res->tetra[r + 1].tag |= MG_REQ;
       }
     }
 
-    // Tag required vertices (vertices always exist)
-    for (const auto& c : ptr->getRequiredVertices())
-    {
-      assert(c >= 0);
-      assert(c <= res->np);
-      res->point[c + 1].tag |= MG_REQ;
-      res->point[c + 1].tag &= ~MG_NUL;
-    }
-
-    // Tag required edges (edges may be filtered out now)
-    for (const auto& r : ptr->getRequiredEdges())
-    {
-      assert(r >= 0);
-      const Index old = r;
-
-      if (!edgeRemap.empty() && old >= 0 && (size_t)old < edgeRemap.size())
-      {
-        const Index i = edgeRemap[old];
-        if (i > 0)
-          res->edge[i].tag |= MG_REQ;
-      }
-      else
-      {
-        // Backward-compatible fallback if no remap is available (should not happen here)
-        if (old + 1 <= res->na)
-          res->edge[old + 1].tag |= MG_REQ;
-      }
-    }
-
-    // Tag required triangles
-    for (const auto& r : ptr->getRequiredTriangles())
-    {
-      assert(r >= 0);
-      const Index old = r;
-
-      Index i = 0;
-      if (!triRemap.empty() && old >= 0 && (size_t)old < triRemap.size())
-      {
-        i = triRemap[old];
-      }
-      else if (old + 1 <= res->nt)
-      {
-        i = old + 1;
-      }
-
-      if (i > 0)
-      {
-        res->tria[i].tag[0] |= MG_REQ;
-        res->tria[i].tag[1] |= MG_REQ;
-        res->tria[i].tag[2] |= MG_REQ;
-      }
-    }
-
-    // Tag required tetrahedra (tetrahedra are always copied densely)
-    for (const auto& r : ptr->getRequiredTetrahedra())
-    {
-      assert(r >= 0);
-      if (r + 1 <= res->ne)
-        res->tetra[r + 1].tag |= MG_REQ;
-    }
+    // MMG3D_saveMesh(res, "debug.mesh");
+    return res;
   }
-
-
-  // MMG3D_saveMesh(res, "debug.mesh");
-  return res;
-}
 
   MMG::Mesh MMG5::meshToRodin(const MMG5_pMesh src)
   {
@@ -756,8 +809,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       {
         for (int i = 1; i <= src->np; i++)
         {
-          build.vertex({ src->point[i].c[0] });
-          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          build.vertex({src->point[i].c[0]});
+          build.attribute({0, i - 1}, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
             build.corner(i - 1);
           if (src->point[i].tag & MG_REQ)
@@ -769,8 +822,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       {
         for (int i = 1; i <= src->np; i++)
         {
-          build.vertex({ src->point[i].c[0], src->point[i].c[1] });
-          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          build.vertex({src->point[i].c[0], src->point[i].c[1]});
+          build.attribute({0, i - 1}, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
             build.corner(i - 1);
           if (src->point[i].tag & MG_REQ)
@@ -782,8 +835,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       {
         for (int i = 1; i <= src->np; i++)
         {
-          build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
-          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          build.vertex({src->point[i].c[0], src->point[i].c[1], src->point[i].c[2]});
+          build.attribute({0, i - 1}, src->point[i].ref);
           if (src->point[i].tag & MG_CRN)
             build.corner(i - 1);
           if (src->point[i].tag & MG_REQ)
@@ -793,7 +846,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       }
       default:
       {
-        MMG5Exception(__func__) << "Space dimension greater than 3 not supported." << Alert::Raise;
+        MMG5Exception(__func__)
+          << "Space dimension greater than 3 not supported." << Alert::Raise;
         break;
       }
     }
@@ -804,9 +858,9 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       assert(src->edge[i].a >= 1);
       assert(src->edge[i].b >= 1);
       build.polytope(Geometry::Polytope::Type::Segment,
-          { static_cast<size_t>(src->edge[i].a - 1),
-            static_cast<size_t>(src->edge[i].b - 1) });
-      build.attribute({ 1, i - 1 }, src->edge[i].ref );
+        {static_cast<size_t>(src->edge[i].a - 1),
+          static_cast<size_t>(src->edge[i].b - 1)});
+      build.attribute({1, i - 1}, src->edge[i].ref);
       if (src->edge[i].tag & MG_GEO)
         build.ridge(i - 1);
       if (src->edge[i].tag & MG_REQ)
@@ -820,10 +874,10 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       assert(src->tria[i].v[1] >= 1);
       assert(src->tria[i].v[2] >= 1);
       build.polytope(Geometry::Polytope::Type::Triangle,
-          { static_cast<size_t>(src->tria[i].v[0] - 1),
-            static_cast<size_t>(src->tria[i].v[1] - 1),
-            static_cast<size_t>(src->tria[i].v[2] - 1) });
-      build.attribute({ 2, i - 1 }, src->tria[i].ref );
+        {static_cast<size_t>(src->tria[i].v[0] - 1),
+          static_cast<size_t>(src->tria[i].v[1] - 1),
+          static_cast<size_t>(src->tria[i].v[2] - 1)});
+      build.attribute({2, i - 1}, src->tria[i].ref);
       if ((src->tria[i].tag[0] & MG_REQ) && (src->tria[i].tag[1] & MG_REQ) &&
         (src->tria[i].tag[2] & MG_REQ))
         build.requiredTriangle(i - 1);
@@ -837,11 +891,11 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       assert(src->tetra[i].v[2] >= 1);
       assert(src->tetra[i].v[3] >= 1);
       build.polytope(Geometry::Polytope::Type::Tetrahedron,
-          { static_cast<size_t>(src->tetra[i].v[0] - 1),
-            static_cast<size_t>(src->tetra[i].v[1] - 1),
-            static_cast<size_t>(src->tetra[i].v[2] - 1),
-            static_cast<size_t>(src->tetra[i].v[3] - 1) });
-      build.attribute({ 3, i - 1 }, src->tetra[i].ref );
+        {static_cast<size_t>(src->tetra[i].v[0] - 1),
+          static_cast<size_t>(src->tetra[i].v[1] - 1),
+          static_cast<size_t>(src->tetra[i].v[2] - 1),
+          static_cast<size_t>(src->tetra[i].v[3] - 1)});
+      build.attribute({3, i - 1}, src->tetra[i].ref);
       if (src->tetra[i].tag & MG_REQ)
         build.requiredTetrahedron(i - 1);
     }
@@ -859,7 +913,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     if (dst->np)
     {
       MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), Real,
-        MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
+        MMG5Exception(__func__)
+          << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
       std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
     }
     else
@@ -871,7 +926,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     {
       auto nameInLength = std::strlen(src->namein);
       MMG5_SAFE_CALLOC(dst->namein, nameInLength + 1, char,
-          MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
+        MMG5Exception(__func__)
+          << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
       std::memcpy(dst->namein, src->namein, nameInLength + 1);
     }
     else
@@ -883,7 +939,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     {
       auto nameOutLength = std::strlen(src->nameout);
       MMG5_SAFE_CALLOC(dst->nameout, nameOutLength + 1, char,
-          MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
+        MMG5Exception(__func__)
+          << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
       std::memcpy(dst->nameout, src->nameout, nameOutLength + 1);
     }
     else
@@ -929,6 +986,9 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   void MMG5::destroyMesh(MMG5_pMesh mesh)
   {
     assert(mesh);
+    // The bundled MMG cleanup omits the level-set base-reference array.
+    if (mesh->info.br)
+      MMG5_DEL_MEM(mesh, mesh->info.br);
     if (isSurfaceMesh(mesh))
     {
       MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
@@ -951,33 +1011,29 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   {
     assert(mesh);
     bool isSurface = isSurfaceMesh(mesh);
-    switch(mesh->dim)
+    switch (mesh->dim)
     {
       case 2:
       {
         assert(!isSurface);
         if (m_hmin)
         {
-          MMG2D_Set_dparameter(
-            mesh, nullptr, MMG2D_DPARAM_hmin, *m_hmin);
+          MMG2D_Set_dparameter(mesh, nullptr, MMG2D_DPARAM_hmin, *m_hmin);
         }
         if (m_hmax)
         {
-          MMG2D_Set_dparameter(
-            mesh, nullptr, MMG2D_DPARAM_hmax, *m_hmax);
+          MMG2D_Set_dparameter(mesh, nullptr, MMG2D_DPARAM_hmax, *m_hmax);
         }
         if (m_hgrad)
         {
-          MMG2D_Set_dparameter(
-            mesh, nullptr, MMG2D_DPARAM_hgrad, *m_hgrad);
+          MMG2D_Set_dparameter(mesh, nullptr, MMG2D_DPARAM_hgrad, *m_hgrad);
         }
         if (m_hausd)
         {
-          MMG2D_Set_dparameter(
-            mesh, nullptr, MMG2D_DPARAM_hausd, *m_hausd);
+          MMG2D_Set_dparameter(mesh, nullptr, MMG2D_DPARAM_hausd, *m_hausd);
         }
         MMG2D_Set_iparameter(
-            mesh, nullptr, MMG2D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
+          mesh, nullptr, MMG2D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
         break;
       }
       case 3:
@@ -986,51 +1042,43 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
         {
           if (m_hmin)
           {
-            MMGS_Set_dparameter(
-              mesh, nullptr, MMGS_DPARAM_hmin, *m_hmin);
+            MMGS_Set_dparameter(mesh, nullptr, MMGS_DPARAM_hmin, *m_hmin);
           }
           if (m_hmax)
           {
-            MMGS_Set_dparameter(
-              mesh, nullptr, MMGS_DPARAM_hmax, *m_hmax);
+            MMGS_Set_dparameter(mesh, nullptr, MMGS_DPARAM_hmax, *m_hmax);
           }
           if (m_hgrad)
           {
-            MMGS_Set_dparameter(
-              mesh, nullptr, MMGS_DPARAM_hgrad, *m_hgrad);
+            MMGS_Set_dparameter(mesh, nullptr, MMGS_DPARAM_hgrad, *m_hgrad);
           }
           if (m_hausd)
           {
-            MMGS_Set_dparameter(
-              mesh, nullptr, MMGS_DPARAM_hausd, *m_hausd);
+            MMGS_Set_dparameter(mesh, nullptr, MMGS_DPARAM_hausd, *m_hausd);
           }
           MMGS_Set_iparameter(
-              mesh, nullptr, MMGS_IPARAM_angle, static_cast<int>(m_ridgeDetection));
+            mesh, nullptr, MMGS_IPARAM_angle, static_cast<int>(m_ridgeDetection));
         }
         else
         {
           if (m_hmin)
           {
-            MMG3D_Set_dparameter(
-              mesh, nullptr, MMG3D_DPARAM_hmin, *m_hmin);
+            MMG3D_Set_dparameter(mesh, nullptr, MMG3D_DPARAM_hmin, *m_hmin);
           }
           if (m_hmax)
           {
-            MMG3D_Set_dparameter(
-              mesh, nullptr, MMG3D_DPARAM_hmax, *m_hmax);
+            MMG3D_Set_dparameter(mesh, nullptr, MMG3D_DPARAM_hmax, *m_hmax);
           }
           if (m_hgrad)
           {
-            MMG3D_Set_dparameter(
-              mesh, nullptr, MMG3D_DPARAM_hgrad, *m_hgrad);
+            MMG3D_Set_dparameter(mesh, nullptr, MMG3D_DPARAM_hgrad, *m_hgrad);
           }
           if (m_hausd)
           {
-            MMG3D_Set_dparameter(
-              mesh, nullptr, MMG3D_DPARAM_hausd, *m_hausd);
+            MMG3D_Set_dparameter(mesh, nullptr, MMG3D_DPARAM_hausd, *m_hausd);
           }
           MMG3D_Set_iparameter(
-              mesh, nullptr, MMG3D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
+            mesh, nullptr, MMG3D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
         }
         break;
       }

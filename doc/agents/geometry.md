@@ -16,6 +16,11 @@ they curve) are separate layers throughout.
 - `Polytope::Type` enumerates reference geometries (Segment, Triangle,
   Quadrilateral, Tetrahedron, ...); reference nodes/centroids come from
   the type's traits.
+  Their reference-coordinate dimension is exactly the topological dimension
+  $d$, independently of physical embedding. In particular, the Point vertex
+  and centroid belong to $\mathbb{R}^0$: both are empty coordinate tuples.
+  `SpatialPoint{0}` instead constructs a one-dimensional coordinate and must
+  not represent the zero-dimensional reference point.
 
 ## Connectivity — incidence d → d′
 
@@ -47,9 +52,37 @@ compare coordinate/key sets in tests.
   reconstruct them from vertex coordinates in FES-generic code.
 - `mesh.setVertexCoordinates(...)` flushes/invalidates transformations;
   `mesh.flush()` demotes everything back to affine.
+- Transformations expose geometry, not evaluation-cache identity. Their optional
+  `getDegree()` bounds total polynomial degree; `getDegree({directions...})`
+  bounds joint degree in selected reference coordinates. `isFirstOrder()`
+  certifies native vertex geometry without confusing multilinear or rational
+  maps with affine maps. `getBounds()` returns an owned conservative convex
+  enclosure, with pyramid bounds using the certified rational reference space.
+  Unknown enclosures leave location candidates unpruned. A fresh
+  `setPolytope()` binding discards consumers' previous physical results even
+  for the same logical entity. Geometry must remain fixed during a binding;
+  changed geometry requires fresh points/quadrature and a new binding.
+  Native P1 derivatives retain constant affine-simplex results only within
+  that binding. Direct point evaluation without a matching explicit cell
+  binding prepares fresh physical data. Persistent formula addresses remain separate
+  and continue to protect reference tabulation and sample provenance.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
+  Construction evaluates the cell's quadrature Jacobians in one bulk
+  transformation call and stores them in the points' existing owned caches.
+  Parametric P1 and H1 geometry borrow their reference tables only during this
+  call; neither points nor transformations retain borrowed table storage.
+  Physical coordinates and derived metric quantities remain lazy. Mapped points
+  own their reference coordinates and retain only the persistent formula pointer
+  and sample index until physical evaluation. A parametric map may immediately
+  borrow an existing thread-local basis table by that formula; an absent or
+  evicted table uses direct evaluation at the owned reference point. Mapped-owner destruction, cache eviction and transfer to another thread do not
+  invalidate the owned sample. Rebinding clears provenance and geometric caches.
+  Variational rules own only their bound polytope's mapped points. The explicit
+  mesh cache is retained for callers requiring borrowed quadratures whose
+  lifetime extends until geometry is flushed; variational quadrature rules
+  do not populate it.
 
 ## Mesh algebra
 
@@ -71,7 +104,7 @@ compare coordinate/key sets in tests.
 ## Quadrature (QF/)
 
 Formulas are defined on reference polytopes and selected by polytope type and
-polynomial degree. `QF::PolytopeQuadratureFormula` dispatches to published
+polynomial degree. `QF::QuadratureFormula` dispatches to published
 positive-interior tables where available and positive Gaussian product rules
 otherwise. Variational integrators pick an order automatically but accept an
 override; order 4 is the house choice for validity and diagnostic sampling of
@@ -84,10 +117,37 @@ curved cells. See quadrature.md for the exact ranges and fallback formulas.
 and overlap metadata for distributed meshes (used by the MPI stack;
 Scotch provides a graph-partitioner implementation).
 
+A local mesh or shard has the maximum dimension of its actual entities,
+with dimension zero for an empty shard. A distributed mesh stores
+
+$$
+D = \max_r \dim S_r,
+$$
+
+where $S_r$ is the shard on rank $r$. Collective construction and loading
+establish $D$; `getDimension()`, copy/move, and geometry-only `flush()` do not
+communicate. Distributed submeshes use the same contract. Topology replacement
+must go through collective construction or loading. Empty ranks participate
+in reconciliation even when they have no local entities to reconcile.
+
 ## Classification and location utilities
 
-- `MinSTCut` — serial binary Potts classifier via s-t min cut (converting
-  a level set into discrete cell labels with perimeter regularization).
+- `MinSTCut<MeshType>` — mesh-aware binary Potts classifier, deduced from the
+  constructor's mesh argument. Only the local specialization is implemented;
+  the primary template is declaration-only, so MPI meshes have no serial
+  fallback. Construct with a borrowed local mesh; explicitly compute
+  face-to-cell incidence first.
+  `classify(average)` evaluates a caller-supplied cell-average function once
+  per cell and obtains volumes and interior-facet measures through
+  `Polytope::getMeasure` and adjacency through `Connectivity`. `Parameters`
+  are owned and configured with chainable `setParameters`; `fidelity` scales
+  unary costs, and `smoothing(const Polytope&)` multiplies each interior
+  facet's measure (default one, capturing lambdas supported). Results contain
+  mesh-indexed `inside`, `outside`, and `cut`; applying attributes
+  remains the caller's responsibility. The graph and Dinic solver are private.
+  Cell values are averages, not integrals: volumes multiply them once.
+  Boundary facets add no penalty; all labels are free. Nonmanifold facets
+  are unsupported.
 - `Location::AABB` — BVH point locator for point-in-mesh queries.
 
 Mesh *optimization/remeshing* on this branch is MMG-based

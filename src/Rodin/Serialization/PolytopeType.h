@@ -25,7 +25,7 @@ namespace boost::serialization
    * @tparam Archive Archive type.
    * @tparam ScalarType Unused scalar tag kept for compatibility.
    * @param ar Archive used for serialization.
-   * @param t Polytope type to serialize.
+   * @param t Type of polytope to construct.
    * @param version Serialization version.
    */
   template <class Archive, class ScalarType>

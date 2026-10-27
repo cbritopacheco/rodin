@@ -13,7 +13,7 @@
  * are essential for imposing natural (Neumann) boundary conditions and
  * boundary terms in weak formulations.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * Boundary integrals compute:
  * @f[
  *   \int_{\partial\Omega} f(x) \, ds
@@ -21,13 +21,13 @@
  * where @f$ \partial\Omega @f$ is the domain boundary and @f$ ds @f$ is the
  * surface measure.
  *
- * ## Applications
+ * # Applications
  * - **Neumann boundary conditions**: @f$ \int_{\Gamma_N} g \cdot v \, ds @f$
  * - **Robin boundary conditions**: @f$ \int_{\Gamma_R} (\alpha u - \beta) v \, ds @f$
  * - **Weak boundary terms**: Integration by parts produces boundary integrals
  * - **Flux calculations**: Computing normal fluxes across boundaries
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Neumann BC: \int_\Gamma g\cdot v ds
  * auto neumann = BoundaryIntegral(g, v).on(2);  // On boundary attribute 2
@@ -153,15 +153,26 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  BoundaryIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
-    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+  BoundaryIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>& integrand)
+    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  BoundaryIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+  BoundaryIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
   /**
    * @ingroup BoundaryIntegralSpecializations
@@ -188,25 +199,38 @@ namespace Rodin::Variational
       using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>
-      /// @brief Constructs the boundary integral of the given integrand.
+      /**
+       * @brief Constructs the boundary integral of the given integrand.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       constexpr BoundaryIntegral(const FunctionBase<LHSDerived>& lhs,
         const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : BoundaryIntegral(Dot(lhs, rhs))
       {}
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       constexpr
       BoundaryIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       BoundaryIntegral(const BoundaryIntegral& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       BoundaryIntegral(BoundaryIntegral&& other)
         : Parent(std::move(other))
@@ -223,20 +247,25 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param integrand Expression to integrate.
+   */
   template <class NestedDerived, class FES>
-  BoundaryIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
+  BoundaryIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>& integrand)
     -> BoundaryIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES>
-  BoundaryIntegral(
-      const FunctionBase<LHSDerived>&,
-      const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
-    -> BoundaryIntegral<
-        ShapeFunctionBase<Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
+  BoundaryIntegral(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+    -> BoundaryIntegral<ShapeFunctionBase<
+      Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES,
+      TestSpace>>;
 }
 
 #endif

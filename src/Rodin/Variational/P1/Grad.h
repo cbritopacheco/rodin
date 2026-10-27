@@ -11,13 +11,14 @@
  * @file
  * @brief Gradient operator specialization for P1 (piecewise linear) functions.
  *
- * For P1 functions, the gradient is constant on each element:
+ * On affine simplices, the gradient of a P1 function is constant on each element:
  * @f[
  *   \nabla u|_K = \sum_{i=1}^{n+1} u_i \nabla \phi_i
  * @f]
  * where @f$ \phi_i @f$ are the P1 basis functions and @f$ n @f$ is the spatial dimension.
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
@@ -29,20 +30,18 @@
 
 namespace Rodin::Variational
 {
-  /**
-   * @addtogroup GradSpecializations
-   */
+  /// @addtogroup GradSpecializations
 
-  /**
-   * @brief Base class for Grad classes.
-   */
+  /// @brief Base class for Grad classes.
   template <class Operand, class Derived>
   class GradBase;
 
   /// @brief Gradient of a P1 grid function.
   template <class Scalar, class Mesh, class Data>
+    requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
   class Grad<GridFunction<P1<Scalar, Mesh>, Data>> final
-    : public GradBase<GridFunction<P1<Scalar, Mesh>, Data>, Grad<GridFunction<P1<Scalar, Mesh>, Data>>>
+    : public GradBase<GridFunction<P1<Scalar, Mesh>, Data>,
+        Grad<GridFunction<P1<Scalar, Mesh>, Data>>>
   {
     public:
       /// @brief Finite element space type.
@@ -67,7 +66,7 @@ namespace Rodin::Variational
        * @brief Constructs the gradient of a P1 function @f$ u @f$.
        * @param[in] u P1 GridFunction (piecewise linear)
        *
-       * @note The gradient is constant on each element for P1 functions.
+       * @note The physical gradient is constant on affine simplices; it may vary on other maps.
        */
       Grad(const OperandType& u)
         : Parent(u)
@@ -89,10 +88,41 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
-        interpolate(out, ip.getPoint());
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+          const auto gref = fe.getTabulation(*qf).getGradient(ip.getIndex(), local);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        out = JinvT * ref;
       }
 
       /**
@@ -113,7 +143,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // Evaluating on a face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
           if (inc.size() == 1)
@@ -129,7 +159,6 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -153,7 +182,8 @@ namespace Rodin::Variational
                 return;
               }
               UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+                << Alert::Raise;
             }
             return;
           }
@@ -172,21 +202,36 @@ namespace Rodin::Variational
           {
             const auto& basis = fe.getBasis(local);
             basis.getGradient()(rc);
-            res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
+            res += basis.getGradient()(rc) * gf[fes.getGlobalIndex({d, i}, local)];
           }
           out = p.getJacobianInverse().transpose() * res;
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        const size_t k =
+          P1Element<ScalarType>(geom.getGeometry()).getDegree().value_or(2);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
@@ -197,13 +242,17 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a ShapeFunction
    */
-  template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
+  template <class NestedDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType SpaceType>
+    requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
   class Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>>>
+    : public ShapeFunctionBase<
+        Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>>>
   {
     public:
       /// @brief Finite element space type.
       using FESType = P1<Scalar, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
@@ -226,79 +275,119 @@ namespace Rodin::Variational
       struct Cache
       {
         /// @brief Key identifying the cell a tabulation was computed for.
-          struct CellKey
-          {
+        struct CellKey
+        {
           /// @brief Mesh the cached tabulation belongs to.
-              const void* mesh = nullptr;
+          const Geometry::MeshBase* mesh;
+
           /// @brief Topological dimension of the cached polytope.
-              size_t d = 0;
+          size_t dimension;
+
           /// @brief Index of the cached polytope.
-              Index i = 0;
+          Index index;
+
           /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          Geometry::Polytope::Type geometry;
+
           /// @brief Order of the geometric transformation.
-              int transOrder = 1;
+          Optional<size_t> transformationOrder;
+
           /// @brief Whether the key holds a cached entry.
-              bool valid = false;
+          bool valid;
 
-          /// @brief Tests whether the key holds a cached entry.
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
+          /// @brief Constructs an invalid cell key.
+          CellKey()
+            : mesh(nullptr),
+              dimension(0),
+              index(0),
+              geometry(Geometry::Polytope::Type::Point),
+              transformationOrder(1),
+              valid(false)
+          {}
 
-          /// @brief Equality comparison.
-              bool operator==(const CellKey& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
-                  transOrder == o.transOrder;
-              }
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
+          explicit operator bool() const noexcept
+          {
+            return valid;
+          }
+
+          /**
+           * @brief Equality comparison.
+           * @returns Whether the operands compare equal.
+           * @param o Key to compare with this key.
+           */
+          bool operator==(const CellKey& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return mesh == o.mesh && dimension == o.dimension && index == o.index &&
+              geometry == o.geometry && transformationOrder == o.transformationOrder;
+          }
 
           /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
-              {
-                valid = false;
-                mesh = nullptr;
-                d = 0;
-                i = 0;
-                geom = Geometry::Polytope::Type::Point;
-                transOrder = 1;
-              }
+          void reset() noexcept
+          {
+            valid = false;
+            mesh = nullptr;
+            dimension = 0;
+            index = 0;
+            geometry = Geometry::Polytope::Type::Point;
+            transformationOrder = 1;
+          }
         };
 
         /// @brief Key identifying the quadrature point a tabulation was computed for.
-        struct QpKey
+        struct QuadraturePointKey
         {
-            /// @brief Quadrature formula the cached tabulation belongs to.
-            const QF::QuadratureFormulaBase* qf = nullptr;
-            /// @brief Index of the quadrature point.
-            size_t qp = 0;
-            /// @brief Whether the key holds a cached entry.
-            bool valid = false;
+          /// @brief Quadrature formula the cached tabulation belongs to.
+          const QF::QuadratureFormula* formula;
 
-            /// @brief Tests whether the key holds a cached entry.
-            explicit operator bool() const noexcept
-            {
-              return valid;
-            }
+          /// @brief Index of the quadrature point.
+          size_t index;
 
-            /// @brief Equality comparison.
-            bool operator==(const QpKey& o) const noexcept
-            {
-              if (!valid || !o.valid)
-                return false;
-              return qf == o.qf && qp == o.qp;
-            }
+          /// @brief Whether the key holds a cached entry.
+          bool valid;
 
-            /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
-            {
-              valid = false;
-              qf = nullptr;
-              qp = 0;
-            }
+          /// @brief Constructs an invalid quadrature cache key.
+          QuadraturePointKey()
+            : formula(nullptr),
+
+              index(0),
+              valid(false)
+          {}
+
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
+          explicit operator bool() const noexcept
+          {
+            return valid;
+          }
+
+          /**
+           * @brief Equality comparison.
+           * @returns Whether the operands compare equal.
+           * @param o Key to compare with this key.
+           */
+          bool operator==(const QuadraturePointKey& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return formula == o.formula && index == o.index;
+          }
+
+          /// @brief Resets the key, invalidating the cached entry.
+          void reset() noexcept
+          {
+            valid = false;
+            formula = nullptr;
+
+            index = 0;
+          }
         };
 
         // Cached physical gradients \nabla_x φ_a (one per scalar basis function)
@@ -307,93 +396,146 @@ namespace Rodin::Variational
 
         /// @brief Key of the cached cell tabulation.
         CellKey cellKey;
+
         /// @brief Key of the cached quadrature-point tabulation.
-        QpKey qpKey;
+        QuadraturePointKey quadraturePointKey;
       };
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
-          m_ip(nullptr),
-          m_cache(other.m_cache)
+          m_ip(nullptr)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_ip(std::exchange(other.m_ip, nullptr)),
-          m_cache(std::move(other.m_cache))
+          m_ip(nullptr)
       {}
 
-      /// @brief Gets the operand function.
-      constexpr
-      const OperandType& getOperand() const
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         // Gradient has same number of scalar DOFs as the operand basis count.
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Starts a fresh cell binding for physical basis derivatives.
+       *
+       * Affine simplex derivatives are prepared at the first point and reused
+       * throughout this binding. Curved or varying reference derivatives are
+       * prepared at each new quadrature sample. Rebinding the same entity
+       * discards the preceding physical results while retaining storage.
+       * @param polytope Entity whose geometry remains fixed during this binding.
+       * @returns This expression with no point bound.
+       */
+      Grad& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        m_binding.reset();
+        m_cache.cellKey.reset();
+        m_cache.quadraturePointKey.reset();
+        m_binding.mesh = &polytope.getMesh();
+        m_binding.dimension = polytope.getDimension();
+        m_binding.index = polytope.getIndex();
+        m_binding.geometry = polytope.getGeometry();
+        m_binding.transformationOrder = polytope.getTransformation().getDegree();
+        m_binding.valid = true;
+        return *this;
+      }
+
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Both the inverse map and the reference basis derivative determine
+       * @f$(J_K^\dagger)^T\widehat\nabla\phi_a@f$. Rational pyramidal
+       * basis derivatives vary with the reference sample even when the
+       * geometric Jacobian is constant, so they require sample-indexed reuse.
+       *
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
 
-        const auto& pt   = ip.getPoint();
+        const auto& pt = ip.getPoint();
         const auto& poly = pt.getPolytope();
         const auto& mesh = poly.getMesh();
 
-        const size_t d    = poly.getDimension();
-        const Index  i    = poly.getIndex();
-        const auto   geom = poly.getGeometry();
+        const size_t d = poly.getDimension();
+        const Index i = poly.getIndex();
+        const auto geom = poly.getGeometry();
 
-        const int transOrder = poly.getTransformation().getOrder();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto& transformation = poly.getTransformation();
+        const auto transformationOrder = transformation.getDegree();
+        const auto* qf = ip.getReferenceQuadratureFormula();
 
         // ---- cell key: allocate/size once per cell
-        typename Cache::CellKey ckey;
-        ckey.mesh = static_cast<const void*>(&mesh);
-        ckey.d = d;
-        ckey.i = i;
-        ckey.geom = geom;
-        ckey.transOrder = transOrder;
-        ckey.valid = true;
+        typename Cache::CellKey cellKey;
+        cellKey.mesh = &mesh;
+        cellKey.dimension = d;
+        cellKey.index = i;
+        cellKey.geometry = geom;
+        cellKey.transformationOrder = transformationOrder;
+        cellKey.valid = true;
 
-        const bool cellChanged = !(m_cache.cellKey == ckey);
+        const bool cellChanged = !(m_binding == cellKey) || !(m_cache.cellKey == cellKey);
         if (cellChanged)
         {
-          m_cache.cellKey = ckey;
-          m_cache.qpKey = {}; // invalidate qp cache
+          m_cache.cellKey = cellKey;
+          m_cache.quadraturePointKey.reset(); // invalidate qp cache
 
           const size_t nv = Geometry::Polytope::Traits(geom).getVertexCount();
           m_cache.grad.resize(nv);
@@ -405,31 +547,36 @@ namespace Rodin::Variational
         }
 
         // ---- decide if gradients depend on quadrature point
-        const bool tensorRef = (geom == Geometry::Polytope::Type::Quadrilateral) ||
+        const bool variableReferenceDerivative =
+          (geom == Geometry::Polytope::Type::Quadrilateral) ||
           (geom == Geometry::Polytope::Type::Wedge) ||
+          (geom == Geometry::Polytope::Type::Pyramid) ||
           (geom == Geometry::Polytope::Type::Hexahedron);
 
-        const bool needsQp = (transOrder > 1) || tensorRef;
+        const bool needsQp = (!transformationOrder || *transformationOrder > 1) ||
+          variableReferenceDerivative;
 
-        typename Cache::QpKey qkey;
+        typename Cache::QuadraturePointKey quadraturePointKey;
         if (needsQp)
         {
-          qkey.qf = qf;
-          qkey.qp = qf ? ip.getIndex() : 0;
-          qkey.valid = true;
+          quadraturePointKey.formula = qf;
+
+          quadraturePointKey.index = qf ? ip.getIndex() : 0;
+          quadraturePointKey.valid = true;
         }
         else
         {
           // one state per cell
-          qkey.qf = nullptr;
-          qkey.qp = 0;
-          qkey.valid = true;
+          quadraturePointKey.formula = nullptr;
+          quadraturePointKey.index = 0;
+          quadraturePointKey.valid = true;
         }
 
-        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
-        if (cellChanged || qpChanged)
+        const bool quadraturePointChanged =
+          (needsQp && !qf) || !(m_cache.quadraturePointKey == quadraturePointKey);
+        if (cellChanged || quadraturePointChanged)
         {
-          m_cache.qpKey = qkey;
+          m_cache.quadraturePointKey = quadraturePointKey;
 
           const P1Element<ScalarType> fe(geom);
           const size_t nv = fe.getCount();
@@ -456,7 +603,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       constexpr const SpatialVectorType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
@@ -464,13 +615,24 @@ namespace Rodin::Variational
         return m_cache.grad[local];
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())
           return std::nullopt;
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (*k == 1)
+        {
+          const auto degree = geom.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
         return (*k == 0) ? 0 : (*k - 1);
       }
 
@@ -483,6 +645,440 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
       const IntegrationPoint* m_ip;
       Cache m_cache;
+      typename Cache::CellKey m_binding;
+  };
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Rank-three physical gradient range for the matrix P1 solution.
+  template <class Scalar, class Mesh, class Data>
+  struct Traits<Variational::Grad<
+    Variational::GridFunction<Variational::P1<Math::SpatialMatrix<Scalar>, Mesh>, Data>>>
+  {
+    /// @brief Finite element space of this family.
+    using FES = Variational::P1<Math::SpatialMatrix<Scalar>, Mesh>;
+
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Operand type.
+    using OperandType = Variational::GridFunction<FESType, Data>;
+
+    /// @brief Range (evaluation value) type.
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+    /// @brief Rank-three derivative tensor.
+    using RangeType = Math::SpatialTensor<ScalarType>;
+  };
+
+  /// @brief Rank-three physical gradient range for matrix P1 shape functions.
+  template <class Scalar, class Mesh, class Derived,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Grad<Variational::ShapeFunction<Derived,
+    Variational::P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>>>
+  {
+    /// @brief Finite element space of this family.
+    using FES = Variational::P1<Math::SpatialMatrix<Scalar>, Mesh>;
+
+    /// @brief Finite element space type.
+    using FESType = FES;
+
+    /// @brief Scalar type of matrix or tensor entries.
+    using ScalarType = typename Traits<FES>::ScalarType;
+
+    /// @brief Evaluated matrix, tensor, or scalar range type.
+    using RangeType = Math::SpatialTensor<ScalarType>;
+
+    /// @brief Cloned or referenced expression operand type.
+    using OperandType = Variational::ShapeFunction<Derived, FES, Space>;
+
+    /// @brief Trial or test shape-function space.
+    static constexpr auto SpaceType = Space;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /**
+   * @ingroup GradSpecializations
+   * @brief Physical gradient of a matrix P1 solution, with derivative axis last.
+   * Uses this family's scalar basis and component ordering.
+   */
+  template <class Scalar, class Mesh, class Data>
+  class Grad<GridFunction<P1<Math::SpatialMatrix<Scalar>, Mesh>, Data>> final
+    : public FunctionBase<Grad<GridFunction<P1<Math::SpatialMatrix<Scalar>, Mesh>, Data>>>
+  {
+    public:
+      /// @brief Finite element space of this family.
+      using FES = P1<Math::SpatialMatrix<Scalar>, Mesh>;
+
+      /// @brief CRTP or finite element base class.
+      using Parent = FunctionBase<Grad>;
+
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = GridFunction<FES, Data>;
+
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param operand Operand expression.
+       */
+      explicit Grad(const OperandType& operand)
+        : m_operand(operand)
+      {}
+
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to copy from.
+       */
+      Grad(const Grad& other)
+        : Parent(other),
+          m_operand(other.m_operand)
+      {}
+
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to move from.
+       */
+      Grad(Grad&& other)
+        : Parent(std::move(other)),
+          m_operand(other.m_operand)
+      {}
+
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
+      const OperandType& getOperand() const
+      {
+        return m_operand.get();
+      }
+
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
+      RangeType getValue(const Geometry::Point& point) const
+      {
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto p = getDerivativePoint(point);
+        const auto& poly = p.getPolytope();
+        const auto& dofs = fes.getDOFs(poly.getDimension(), poly.getIndex());
+        RangeType value(
+          fes.getRows(), fes.getColumns(), fes.getMesh().getSpaceDimension());
+        value.setZero();
+        const auto& fe = fes.getFiniteElement(poly.getDimension(), poly.getIndex());
+        const auto& inverse = p.getJacobianInverse();
+        const size_t components = fes.getRows() * fes.getColumns();
+        for (size_t a = 0; a < static_cast<size_t>(dofs.size()); ++a)
+        {
+          const auto basis = fe.getScalarElement().getBasis(a / components);
+          const size_t row = (a % components) / fes.getColumns();
+          const size_t column = a % fes.getColumns();
+          for (size_t l = 0; l < poly.getDimension(); ++l)
+          {
+            const auto derivative =
+              basis.template getDerivative<1>(l)(p.getReferenceCoordinates());
+            for (size_t k = 0; k < fes.getMesh().getSpaceDimension(); ++k)
+              value(row, column, k) += getOperand()[dofs[a]] * derivative * inverse(l, k);
+          }
+        }
+        return value;
+      }
+
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
+      RangeType getValue(const IntegrationPoint& point) const
+      {
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto& p = point.getPoint();
+        const auto& poly = p.getPolytope();
+        const auto* formula = point.getReferenceQuadratureFormula();
+        if (!formula || !fes.getMesh().isLocalPoint(p) ||
+          poly.getDimension() != fes.getMesh().getDimension())
+          return getValue(p);
+        const auto& dofs = fes.getDOFs(poly.getDimension(), poly.getIndex());
+        RangeType value(
+          fes.getRows(), fes.getColumns(), fes.getMesh().getSpaceDimension());
+        value.setZero();
+        const auto& fe = fes.getFiniteElement(poly.getDimension(), poly.getIndex());
+        const auto& inverse = p.getJacobianInverse();
+        const size_t components = fes.getRows() * fes.getColumns();
+        for (size_t a = 0; a < static_cast<size_t>(dofs.size()); ++a)
+        {
+          const auto coefficient = getOperand()[dofs[a]];
+          const auto gradient = fe.getScalarElement().getTabulation(*formula).getGradient(
+            point.getIndex(), a / components);
+          const size_t row = (a % components) / fes.getColumns();
+          const size_t column = a % fes.getColumns();
+          for (size_t l = 0; l < poly.getDimension(); ++l)
+          {
+            for (size_t k = 0; k < fes.getMesh().getSpaceDimension(); ++k)
+              value(row, column, k) += coefficient * gradient[l] * inverse(l, k);
+          }
+        }
+        return value;
+      }
+
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto order = getOperand().getOrder(poly);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (order && *order == 1)
+        {
+          const auto degree = poly.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
+        return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
+      }
+      Grad* copy() const noexcept override
+      {
+        return new Grad(*this);
+      }
+
+    private:
+      /**
+       * @brief Resolves the volume-side point for the selected trace domain.
+       * @param point Evaluation point whose volume-side trace is resolved.
+       * @returns Volume-side evaluation point selected by the trace domain.
+       */
+      Geometry::Point getDerivativePoint(const Geometry::Point& point) const
+      {
+        const auto& mesh = getOperand().getFiniteElementSpace().getMesh();
+        if (!mesh.isLocalPoint(point))
+        {
+          if (auto included = mesh.inclusion(point))
+            return getDerivativePoint(*included);
+          if (mesh.isSubMesh())
+          {
+            if (auto restricted = mesh.asSubMesh().restriction(point))
+              return getDerivativePoint(*restricted);
+          }
+          Alert::MemberFunctionException(*this, __func__)
+            << "Derivative point is outside the finite element mesh." << Alert::Raise;
+        }
+        const auto& poly = point.getPolytope();
+        const size_t dimension = mesh.getDimension();
+        if (poly.getDimension() == dimension)
+          return point;
+        const auto& adjacent = mesh.getConnectivity().getIncidence(
+          {poly.getDimension(), dimension}, poly.getIndex());
+        for (auto index : adjacent)
+        {
+          const auto cell = mesh.getPolytope(dimension, index);
+          const auto attribute = cell->getAttribute();
+          if (adjacent.size() != 1 &&
+            (!attribute || !this->getTraceDomain().contains(*attribute)))
+            continue;
+          Math::SpatialPoint reference;
+          cell->getTransformation().inverse(reference, point.getPhysicalCoordinates());
+          return Geometry::Point(*cell, reference);
+        }
+        Alert::MemberFunctionException(*this, __func__)
+          << "Matrix derivative requires a determined trace domain." << Alert::Raise;
+        return point;
+      }
+
+      std::reference_wrapper<const OperandType> m_operand;
+  };
+
+  /**
+   * @ingroup GradSpecializations
+   * @brief Physical gradients of matrix P1 trial or test bases.
+   */
+  template <class Scalar, class Mesh, class Derived, ShapeFunctionSpaceType Space>
+  class Grad<ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>> final
+    : public ShapeFunctionBase<
+        Grad<ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>>,
+        P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
+  {
+    public:
+      /// @brief Finite element space of this family.
+      using FES = P1<Math::SpatialMatrix<Scalar>, Mesh>;
+
+      /// @brief CRTP or finite element base class.
+      using Parent = ShapeFunctionBase<Grad, FES, Space>;
+
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunction<Derived, FES, Space>;
+
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param operand Operand expression.
+       */
+      explicit Grad(const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_operand(operand.copy())
+      {}
+
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to copy from.
+       */
+      Grad(const Grad& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy())
+      {}
+
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to move from.
+       */
+      Grad(Grad&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand))
+      {}
+
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
+      const OperandType& getOperand() const
+      {
+        return *m_operand;
+      }
+
+      /**
+       * @brief Returns the leaf shape function used for assembly.
+       * @returns The leaf shape function used for assembly.
+       */
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      /**
+       * @brief Returns the local basis count for the selected polytope.
+       * @param poly Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return getOperand().getDOFs(poly);
+      }
+
+      /**
+       * @brief Returns the currently bound integration point.
+       * @returns The currently bound integration point.
+       */
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        assert(m_point);
+        return *m_point;
+      }
+
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Grad& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_point = nullptr;
+        return *this;
+      }
+
+      /**
+       * @brief Binds the integration point and prepares local basis values.
+       * @param point Point at which the operation is evaluated.
+       * @returns Reference to this object after the operation.
+       */
+      Grad& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_point = &point;
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& p = point.getPoint();
+        const auto& poly = p.getPolytope();
+        const size_t count =
+          fes.getFiniteElement(poly.getDimension(), poly.getIndex()).getCount();
+        m_basis.resize(count);
+        const auto& fe = fes.getFiniteElement(poly.getDimension(), poly.getIndex());
+        const auto& inverse = p.getJacobianInverse();
+        const size_t components = fes.getRows() * fes.getColumns();
+        const auto* formula = point.getReferenceQuadratureFormula();
+        const auto* table =
+          formula ? &fe.getScalarElement().getTabulation(*formula) : nullptr;
+        for (size_t a = 0; a < count; ++a)
+        {
+          auto& gradient = m_basis[a];
+          gradient =
+            RangeType(fes.getRows(), fes.getColumns(), fes.getMesh().getSpaceDimension());
+          gradient.setZero();
+          const auto basis = fe.getScalarElement().getBasis(a / components);
+          const size_t row = (a % components) / fes.getColumns();
+          const size_t column = a % fes.getColumns();
+          for (size_t l = 0; l < poly.getDimension(); ++l)
+          {
+            const auto derivative = table
+              ? table->getGradient(point.getIndex(), a / components)[l]
+              : basis.template getDerivative<1>(l)(p.getReferenceCoordinates());
+            for (size_t k = 0; k < fes.getMesh().getSpaceDimension(); ++k)
+              gradient(row, column, k) += derivative * inverse(l, k);
+          }
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      const RangeType& getBasis(size_t local) const
+      {
+        return m_basis.at(local);
+      }
+
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto order = getOperand().getOrder(poly);
+        // A reference-linear basis can have a varying physical derivative
+        // when its coordinate map is non-affine or its degree is unknown.
+        if (order && *order == 1)
+        {
+          const auto degree = poly.getTransformation().getDegree();
+          if (!degree || *degree > 1)
+            return 1;
+        }
+        return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
+      }
+      Grad* copy() const noexcept override
+      {
+        return new Grad(*this);
+      }
+
+    private:
+      std::unique_ptr<OperandType> m_operand;
+      const IntegrationPoint* m_point = nullptr;
+      std::vector<RangeType> m_basis;
   };
 }
 

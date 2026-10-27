@@ -52,12 +52,14 @@ TEST(XiaoGimbutasTest, ShippedRulesAreExactAtEveryDegree)
 TEST(XiaoGimbutasTest, ShippedWeightsArePositive)
 {
   for (const auto g : kSimplices)
+  {
     for (size_t p = 1; p <= XiaoGimbutas::getMaxDegree(g); ++p)
     {
       const XiaoGimbutas qf(p, g);
       EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " degree " << p;
       EXPECT_NEAR(weightAmplification(qf), 1.0, 1e-14) << name(g) << " degree " << p;
     }
+  }
 }
 
 /// @brief Every shipped node lies inside its reference element, checked
@@ -65,8 +67,10 @@ TEST(XiaoGimbutasTest, ShippedWeightsArePositive)
 TEST(XiaoGimbutasTest, ShippedNodesAreInterior)
 {
   for (const auto g : kSimplices)
+  {
     for (size_t p = 1; p <= XiaoGimbutas::getMaxDegree(g); ++p)
       EXPECT_TRUE(allPointsInside(XiaoGimbutas(p, g), g)) << name(g) << " degree " << p;
+  }
 }
 
 /**
@@ -84,8 +88,10 @@ TEST(XiaoGimbutasTest, ShippedRulesAreNotFullySymmetric)
   {
     size_t asymmetric = 0;
     for (size_t p = 1; p <= XiaoGimbutas::getMaxDegree(g); ++p)
+    {
       if (!isFullySymmetric(XiaoGimbutas(p, g), g))
         ++asymmetric;
+    }
     EXPECT_GT(asymmetric, 0u)
       << name(g) << ": every shipped rule is symmetric, so nothing was gained"
       << " over the symmetric family";
@@ -96,9 +102,13 @@ TEST(XiaoGimbutasTest, ShippedRulesAreNotFullySymmetric)
 TEST(XiaoGimbutasTest, ShippedWeightsSumToTheMeasure)
 {
   for (const auto g : kSimplices)
+  {
     for (size_t p = 1; p <= XiaoGimbutas::getMaxDegree(g); ++p)
+    {
       EXPECT_NEAR(weightSum(XiaoGimbutas(p, g)), referenceMeasure(g), 1e-12)
         << name(g) << " degree " << p;
+    }
+  }
 }
 
 /// @brief Availability is reported honestly, and the tables are non-empty

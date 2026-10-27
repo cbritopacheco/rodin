@@ -16,8 +16,6 @@
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/Identifiable.h"
-#include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
 
@@ -34,20 +32,19 @@ namespace Rodin::FormLanguage
    * @warning The FormLanguage::Base class is not thread safe. Only one thread
    * should access the methods of a FormLanguage object at a time.
    *
-   * ## Key Features
+   * # Key Features
    * - **Unique Identification**: Each instance receives a unique UUID for tracking
    * - **Polymorphic Operations**: Support for copying and cloning operations
    */
   class Base : public Copyable, public Identifiable
   {
     public:
-      /**
-       * @brief Constructor.
-       */
+      /// @brief Constructor.
       Base() = default;
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Base(const Base& other)
         : Copyable(other),
@@ -56,26 +53,27 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Base(Base&& other)
         : Copyable(std::move(other)),
           Identifiable(std::move(other))
       {}
 
-      /**
-       * @brief Destructor.
-       */
+      /// @brief Destructor.
       virtual ~Base() = default;
 
       /**
        * @brief Copy assignment is not allowed.
+       * @param other Object to copy from.
        */
-      Base& operator=(const Base&) = delete;
+      Base& operator=(const Base& other) = delete;
 
       /**
        * @brief Move assignment is not allowed.
+       * @param other Object to move from.
        */
-      Base& operator=(Base&&) = delete;
+      Base& operator=(Base&& other) = delete;
 
       /**
        * @brief Gets the human-readable name of this object.
@@ -102,7 +100,6 @@ namespace Rodin::FormLanguage
        * @note This is a CRTP function to be overridden in derived classes.
        */
       virtual Base* copy() const noexcept override = 0;
-
   };
 }
 

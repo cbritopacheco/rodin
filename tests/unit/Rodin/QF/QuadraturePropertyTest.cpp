@@ -56,8 +56,10 @@ namespace
     const Eigen::Index d = verts[0].size();
     Math::Matrix<Real> B(d, d);
     for (Eigen::Index k = 0; k < d; ++k)
+    {
       for (Eigen::Index i = 0; i < d; ++i)
         B(i, k) = verts[static_cast<size_t>(k) + 1][i] - verts[0][i];
+    }
     const Real det = std::abs(B.determinant());
 
     Real s = 0;
@@ -83,8 +85,10 @@ namespace
     {
       Vertices piece{centroid};
       for (size_t i = 0; i < verts.size(); ++i)
+      {
         if (i != skip)
           piece.push_back(verts[i]);
+      }
       out.push_back(std::move(piece));
     }
     return out;
@@ -97,13 +101,17 @@ namespace
     std::uniform_real_distribution<Real> uni(-1, 1);
     std::vector<std::pair<std::vector<size_t>, Real>> terms;
     for (size_t a = 0; a <= p; ++a)
+    {
       for (size_t b = 0; a + b <= p; ++b)
+      {
         for (size_t c = 0; a + b + c <= p; ++c)
         {
           if (d == 2 && c > 0)
             continue;
           terms.push_back({{a, b, c}, uni(rng)});
         }
+      }
+    }
     return [terms, d](const Math::SpatialVector<Real>& x) {
       Real s = 0;
       for (const auto& [e, coeff] : terms)
@@ -182,8 +190,10 @@ TEST(QuadraturePropertyTest, IntegralScalesWithTheAffineDeterminant)
         do
         {
           for (Eigen::Index i = 0; i < A.rows(); ++i)
+          {
             for (Eigen::Index j = 0; j < A.cols(); ++j)
               A(i, j) = uni(rng);
+          }
         } while (std::abs(A.determinant()) < 0.2);
         Math::SpatialVector<Real> shift;
         shift.resize(static_cast<Eigen::Index>(d));
@@ -394,14 +404,18 @@ TEST(QuadraturePropertyTest, WeightedNodeMeanIsTheCentroid)
       for (size_t q = 0; q < qf.getSize(); ++q)
       {
         for (size_t k = 0; k < d; ++k)
+        {
           mean[static_cast<Eigen::Index>(k)] +=
             qf.getWeight(q) * qf.getPoint(q)[static_cast<Eigen::Index>(k)];
+        }
         total += qf.getWeight(q);
       }
       for (size_t k = 0; k < d; ++k)
+      {
         EXPECT_NEAR(mean[static_cast<Eigen::Index>(k)] / total,
           traits.getCentroid()[static_cast<Eigen::Index>(k)], 1e-12)
           << name(g) << " degree " << p << " coordinate " << k;
+      }
     }
   }
 }

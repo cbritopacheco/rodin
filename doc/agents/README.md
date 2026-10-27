@@ -1,5 +1,9 @@
 # Agent knowledge base — index
 
+Rodin is a modular C++20 finite element framework for shape and topology
+optimization, with a variational form language, meshing and remeshing, level
+sets, and PETSc/MMG integrations.
+
 Hierarchical: read top-down, stop at the depth your task needs.
 
 ## Level 1 — always
@@ -18,8 +22,9 @@ Hierarchical: read top-down, stop at the depth your task needs.
 
 - [architecture.md](architecture.md) — the module map: every directory under
   `src/Rodin/`, what it is, how the layers stack.
-- [workflows.md](workflows.md) — operational checklists for extending nodes,
-  finite element spaces, assembly, solvers, IO, and Solid terms.
+- [workflows.md](workflows.md) — build and repository procedures, plus
+  operational checklists for extending nodes, finite element spaces,
+  assembly, solvers, IO, and Solid terms.
 - [backend-support.md](backend-support.md) — what "supported" means across
   local Eigen, OpenMP, MPI, and PETSc code paths.
 - [numerical-contracts.md](numerical-contracts.md) — interpolation vs `L2`
@@ -49,6 +54,9 @@ Hierarchical: read top-down, stop at the depth your task needs.
 - [petsc.md](petsc.md) — PETSc backend: idioms, CI version skew, known traps.
 - [testing.md](testing.md) — test-suite layout, test patterns
   (FD-consistency, manufactured solutions, benchmarks), CI workflows.
+  For test registration or lane changes, also read the actionable
+  [CI extension guide](../../dev/ci-testing.md) and
+  [shared-build and coverage architecture](../../.github/workflows/README.md).
 
 ## Level 4 — foundations (theory ↔ code)
 
@@ -77,5 +85,5 @@ shaped the way it is, or when writing new formulations:
   active contraction and internal variables, 0D reduced models, frame
   conventions.
 
-Procedural how-tos (build, run examples) live in `.claude/skills/*/SKILL.md`
-— plain markdown, readable by any agent.
+Detailed procedural how-tos also live in `.claude/skills/*/SKILL.md` as plain
+markdown, readable by any agent.

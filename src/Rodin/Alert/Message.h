@@ -45,15 +45,24 @@ namespace Rodin::Alert
     template <typename T>
     class CanBeOutput
     {
-      template <
-        class U,
+      /**
+       * @brief Selects the compile-time stream-insertion detection result.
+       * @param value Pointer used only for compile-time stream-insertion detection.
+       * @returns Compile-time marker indicating whether stream insertion is supported.
+       */
+      template <class U,
         class = decltype(std::declval<std::ostream&>() << std::declval<const U&>())>
-      static std::true_type test(U*);
+      static std::true_type test(U* value);
+
+      /**
+       * @brief Selects the compile-time stream-insertion detection result.
+       * @returns Compile-time marker indicating whether stream insertion is supported.
+       */
 
       template <typename>
       static std::false_type test(...);
 
-    public:
+      public:
         /// @brief True if T can be streamed to an ostream, false otherwise.
         static constexpr bool Value = decltype(test<T>(nullptr))::value;
     };
@@ -97,6 +106,7 @@ namespace Rodin::Alert
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       MessagePrefix(const MessagePrefix& other)
         : Parent(other)
@@ -104,6 +114,7 @@ namespace Rodin::Alert
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       MessagePrefix(MessagePrefix&& other)
         : Parent(std::move(other))
@@ -158,10 +169,15 @@ namespace Rodin::Alert
       Message(const Message& other)
         : m_os(other.m_os),
           m_prefix(other.m_prefix),
+          m_text(other.m_text),
           m_newline(other.m_newline)
       {
-        m_ss << other.m_ss.rdbuf();
-        m_styled << other.m_ss.rdbuf();
+        m_ss.copyfmt(other.m_ss);
+        m_styled.copyfmt(other.m_styled);
+        m_ss.str(other.m_ss.str());
+        m_styled.str(other.m_styled.str());
+        m_ss.seekp(0, std::ios_base::end);
+        m_styled.seekp(0, std::ios_base::end);
       }
 
       /**
@@ -170,9 +186,7 @@ namespace Rodin::Alert
        */
       Message(Message&& other) = default;
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~Message() = default;
 
       /**
@@ -184,8 +198,7 @@ namespace Rodin::Alert
        */
       const char* what() const noexcept
       {
-        s_what = m_ss.str();
-        return s_what.c_str();
+        return m_text.c_str();
       }
 
       /**
@@ -199,8 +212,8 @@ namespace Rodin::Alert
        * can be output to an ostream.
        */
       template <class T>
-      std::enable_if_t<Internal::CanBeOutput<T>::Value, Message&>
-      operator<<(const T& v) noexcept
+      std::enable_if_t<Internal::CanBeOutput<T>::Value, Message&> operator<<(
+        const T& v) noexcept
       {
         if (m_newline)
         {
@@ -210,6 +223,7 @@ namespace Rodin::Alert
         }
         m_ss << v;
         m_styled << v;
+        m_text = m_ss.str();
         m_newline = false;
         return *this;
       }
@@ -220,8 +234,9 @@ namespace Rodin::Alert
        *
        * Inserts a newline character and marks the next insertion for
        * automatic indentation to align with the message prefix.
+       * @param tag Formatting or action tag selected through its type.
        */
-      Message& operator<<(const NewLineT&)
+      Message& operator<<([[maybe_unused]] const NewLineT& tag)
       {
         operator<<('\n');
         m_newline = true;
@@ -233,8 +248,9 @@ namespace Rodin::Alert
        *
        * Triggers the raise() method to output the message and perform
        * any associated actions (such as program termination for exceptions).
+       * @param tag Formatting or action tag selected through its type.
        */
-      void operator<<(const RaiseT&)
+      void operator<<([[maybe_unused]] const RaiseT& tag)
       {
         this->raise();
       }
@@ -244,11 +260,11 @@ namespace Rodin::Alert
        *
        * Default behavior outputs the formatted message to the configured
        * output stream. Derived classes may override this to add additional
-       * behavior (e.g., Exception terminates the program).
+       * behavior (e.g., Exception throws after writing the diagnostic).
        */
       virtual void raise() const
       {
-        m_os.get() << m_styled.rdbuf() << NewLine;
+        m_os.get() << m_styled.str() << NewLine;
       }
 
       /**
@@ -263,19 +279,15 @@ namespace Rodin::Alert
       }
 
     private:
-      /// @brief Thread-local storage for the what() string.
-      static thread_local std::string s_what;
-
       std::reference_wrapper<std::ostream> m_os;
       Prefix m_prefix;
       std::stringstream m_ss;
       std::stringstream m_styled;
+
+      /// @brief Owned unformatted payload; reading what() never allocates or changes it.
+      std::string m_text;
       bool m_newline;
   };
-
-  /// @brief Thread-local storage initialization for Message::s_what.
-  template <class Prefix>
-  thread_local std::string Message<Prefix>::s_what;
 
   /**
    * @brief Convenience message for custom Alert prefixes.
@@ -292,9 +304,7 @@ namespace Rodin::Alert
       /// @brief Parent class type alias.
       using Parent = Message<Prefix>;
 
-      /**
-       * @brief Constructs a message that writes to std::cout.
-       */
+      /// @brief Constructs a message that writes to std::cout.
       PrefixedMessage()
         : Parent(std::cout, Prefix())
       {}

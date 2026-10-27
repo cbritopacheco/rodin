@@ -1,0 +1,17 @@
+add_subdirectory(Math)
+add_subdirectory(QF)
+add_subdirectory(Geometry)
+add_subdirectory(Variational)
+add_subdirectory(Location)
+add_subdirectory(IO)
+add_subdirectory(Assembly)
+add_subdirectory(Solver)
+add_subdirectory(Solid)
+
+if (RODIN_USE_MPI)
+  add_subdirectory(MPI)
+endif()
+
+if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  add_subdirectory(PETSc)
+endif()

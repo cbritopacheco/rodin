@@ -5,16 +5,21 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "PolytopeQuadrature.h"
+#include "PolytopeTransformation.h"
 #include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Geometry
 {
   PolytopeQuadrature::PolytopeQuadrature(
-      const Polytope& polytope, const QF::QuadratureFormulaBase& qf)
+    const Polytope& polytope, const QF::QuadratureFormula& qf)
     : m_qf(&qf)
   {
-    m_ps.reserve(qf.getSize());
-    for (size_t qp = 0; qp < qf.getSize(); ++qp)
-      m_ps.emplace_back(polytope, qf.getPoint(qp));
+    std::vector<Math::SpatialMatrix<Real>> jacobians;
+    polytope.getTransformation().jacobian(jacobians, qf);
+    const size_t count = jacobians.size();
+    assert(count == qf.getSize());
+    m_ps.reserve(count);
+    for (size_t qp = 0; qp < count; ++qp)
+      m_ps.emplace_back(jacobians[qp], polytope, qf, qp);
   }
 }

@@ -27,13 +27,14 @@ add_library(Rodin::Alert ALIAS RodinAlert)
 set_target_properties(RodinAlert PROPERTIES EXPORT_NAME Alert)
 
 # ---- Link targets ----------------------------------------------------------
+rodin_add_termcolor()
 # Publicly depend on the umbrella Rodin target
-target_link_libraries(RodinAlert PUBLIC Rodin::Rodin)
+target_link_libraries(RodinAlert PUBLIC Rodin::Rodin
+  $<BUILD_INTERFACE:termcolor::termcolor>)
 
 # Termcolor during build + root include dir after install
 target_include_directories(RodinAlert
   PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third-party/termcolor/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
@@ -50,11 +51,4 @@ install(
 rodin_install_headers(
   DIRECTORIES .
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Alert
-)
-
-# Install termcolor so that #include <termcolor/termcolor.hpp> works
-install(
-  DIRECTORY ${PROJECT_SOURCE_DIR}/third-party/termcolor/include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )

@@ -27,11 +27,13 @@ namespace Rodin::Variational
   /// @brief Shape function expression.
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, P1<Range, Mesh>, Space>
-    : public ShapeFunctionBase<ShapeFunction<Derived, P1<Range, Mesh>, Space>, P1<Range, Mesh>, Space>
+    : public ShapeFunctionBase<ShapeFunction<Derived, P1<Range, Mesh>, Space>,
+        P1<Range, Mesh>, Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
@@ -39,88 +41,110 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Range (evaluation value) type.
-      using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Parent class type.
       using Parent =
-        ShapeFunctionBase<
-          ShapeFunction<Derived, FESType, SpaceType>,
-          FESType,
-          SpaceType>;
+        ShapeFunctionBase<ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
 
       /// @brief Per-cell tabulation cache.
       struct Cache
       {
         /// @brief Key identifying the cached element structure.
-          struct StructureKey
-          {
+        struct StructureKey
+        {
           /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+
           /// @brief Vector dimension of the finite element space.
-              size_t vdim = 1;
+          size_t vdim = 1;
+
           /// @brief Whether the key holds a cached entry.
-              bool valid = false;
+          bool valid = false;
 
-          /// @brief Tests whether the key holds a cached entry.
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
+          explicit operator bool() const noexcept
+          {
+            return valid;
+          }
 
-          /// @brief Equality comparison.
-              bool operator==(const StructureKey& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return geom == o.geom && vdim == o.vdim;
-              }
+          /**
+           * @brief Equality comparison.
+           * @returns Whether the operands compare equal.
+           * @param o Key to compare with this key.
+           */
+          bool operator==(const StructureKey& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return geom == o.geom && vdim == o.vdim;
+          }
 
           /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
-              {
-                valid = false;
-                geom = Geometry::Polytope::Type::Point;
-                vdim = 1;
-              }
+          void reset() noexcept
+          {
+            valid = false;
+            geom = Geometry::Polytope::Type::Point;
+            vdim = 1;
+          }
         };
 
         /// @brief Key identifying the cached shape function values.
         struct ValueKey
         {
           /// @brief Quadrature formula the cached tabulation belongs to.
-            const QF::QuadratureFormulaBase* qf = nullptr;
+          const QF::QuadratureFormula* qf;
+
           /// @brief Index of the quadrature point.
-            size_t qp = 0;
+          size_t qp;
+
           /// @brief Whether the key holds a cached entry.
-            bool valid = false;
+          bool valid;
 
-          /// @brief Tests whether the key holds a cached entry.
-            explicit operator bool() const noexcept
-            {
-              return valid;
-            }
+          /// @brief Constructs an invalid quadrature cache key.
+          ValueKey()
+            : qf(nullptr),
+              qp(0),
+              valid(false)
+          {}
 
-          /// @brief Equality comparison.
-            bool operator==(const ValueKey& o) const noexcept
-            {
-              if (!valid || !o.valid)
-                return false;
-              return qf == o.qf && qp == o.qp;
-            }
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
+          explicit operator bool() const noexcept
+          {
+            return valid;
+          }
+
+          /**
+           * @brief Equality comparison.
+           * @returns Whether the operands compare equal.
+           * @param o Key to compare with this key.
+           */
+          bool operator==(const ValueKey& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return qf == o.qf && qp == o.qp;
+          }
 
           /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
-            {
-              valid = false;
-              qf = nullptr;
-              qp = 0;
-            }
+          void reset() noexcept
+          {
+            valid = false;
+            qf = nullptr;
+            qp = 0;
+          }
         };
 
         // For scalar: size = nv
         // For vector: size = nv * vdim, where local = a*vdim + c
         /// @brief Cached reference basis tabulation.
-        std::vector<RangeType>  basis;
+        std::vector<RangeType> basis;
 
         // Scalar vertex basis values: size = nv
         /// @brief Cached vertex basis values.
@@ -128,38 +152,48 @@ namespace Rodin::Variational
 
         /// @brief Key of the cached element structure.
         StructureKey skey;
+
         /// @brief Key of the cached shape function values.
         ValueKey vkey;
       };
 
       ShapeFunction() = delete;
 
-      /// @brief Constructs the shape function over a finite element space.
-      constexpr
-      ShapeFunction(const FESType& fes)
+      /**
+       * @brief Constructs the shape function over a finite element space.
+       * @param fes Finite element space.
+       */
+      constexpr ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      ShapeFunction(const ShapeFunction& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_ip(nullptr),
           m_cache(other.m_cache)
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      ShapeFunction(ShapeFunction&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
           m_ip(std::exchange(other.m_ip, nullptr)),
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the global DOF indices for a polytope.
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
+      constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
@@ -168,53 +202,68 @@ namespace Rodin::Variational
         else
         {
           static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
-          return P1Element<RangeType>(polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension()).getCount();
+          return P1Element<RangeType>(
+            polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension())
+            .getCount();
         }
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
       /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      ShapeFunction& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
        * Fallback path (non-quadrature evaluations).
        * Keeps your previous behavior (pushforward of each basis at p).
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
        */
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
 
-        const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto& p = ip.getPoint();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
-        const auto geom  = poly.getGeometry();
+        const auto geom = poly.getGeometry();
 
-        const size_t vdim =
-          [] (const auto& self) -> size_t
-          {
-            if constexpr (std::is_same_v<RangeType, ScalarType>)
-              return 1;
-            else
-              return self.getFiniteElementSpace().getVectorDimension();
-          }(*this);
+        const size_t vdim = [](const auto& self) -> size_t {
+          if constexpr (std::is_same_v<RangeType, ScalarType>)
+            return 1;
+          else
+            return self.getFiniteElementSpace().getVectorDimension();
+        }(*this);
 
         // ---- structure cache: allocate/size once per (geom, vdim)
         typename Cache::StructureKey skey;
-        skey.geom  = geom;
-        skey.vdim  = vdim;
+        skey.geom = geom;
+        skey.vdim = vdim;
         skey.valid = true;
 
         const bool structureChanged = !(m_cache.skey == skey);
         if (structureChanged)
         {
           m_cache.skey = skey;
-          m_cache.vkey = {}; // invalidate value cache
+          m_cache.vkey.reset(); // invalidate value cache
 
           const size_t nv = Geometry::Polytope::Traits(geom).getVertexCount();
           m_cache.phi_vertex.resize(nv);
@@ -241,7 +290,7 @@ namespace Rodin::Variational
         // ---- value cache: update once per (qf, qp)
         typename Cache::ValueKey vkey;
         vkey.qf = qf;
-        vkey.qp    = qp;
+        vkey.qp = qp;
         vkey.valid = true;
 
         const bool valueChanged = !qf || !(m_cache.vkey == vkey);
@@ -284,27 +333,35 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      constexpr
-      const RangeType& getBasis(size_t local) const
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      constexpr const RangeType& getBasis(size_t local) const
       {
         assert(m_cache.skey);
         assert(local < m_cache.basis.size());
         return m_cache.basis[local];
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
-        return P1Element<ScalarType>(poly.getGeometry()).getOrder();
+        return P1Element<ScalarType>(poly.getGeometry()).getDegree().value_or(2);
       }
 
       virtual ShapeFunction* copy() const noexcept override
@@ -315,6 +372,187 @@ namespace Rodin::Variational
     private:
       const IntegrationPoint* m_ip;
       Cache m_cache;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued shape-function specialization with cached scalar basis tabulation.
+  template <class Derived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
+  class ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
+    : public ShapeFunctionBase<
+        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>,
+        P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using FES = P1<Math::SpatialMatrix<Scalar>, Mesh>;
+
+      /// @brief Current shape-function specialization.
+      using Shape = ShapeFunction;
+
+      /// @brief Existing shape-function interface.
+      using Parent = ShapeFunctionBase<
+        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>, FES, Space>;
+
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+
+      /**
+       * @brief Constructs matrix basis tabulation on the supplied finite element space.
+       * @param fes Finite element space.
+       */
+      explicit ShapeFunction(const FES& fes)
+        : Parent(fes),
+          m_ip(nullptr),
+          m_qf(nullptr),
+          m_qp(0),
+          m_geometry(Geometry::Polytope::Type::Point)
+      {}
+
+      /**
+       * @brief Constructs matrix basis tabulation on the supplied finite element space.
+       * @param other Object to copy from.
+       */
+      ShapeFunction(const ShapeFunction& other)
+        : Parent(other),
+          m_ip(nullptr),
+          m_qf(nullptr),
+          m_qp(0),
+          m_geometry(Geometry::Polytope::Type::Point)
+      {}
+
+      /**
+       * @brief Constructs matrix basis tabulation on the supplied finite element space.
+       * @param other Object to move from.
+       */
+      ShapeFunction(ShapeFunction&& other)
+        : Parent(std::move(other)),
+          m_ip(nullptr),
+          m_qf(nullptr),
+          m_qp(0),
+          m_geometry(Geometry::Polytope::Type::Point)
+      {}
+
+      /**
+       * @brief Returns the local basis count for the selected polytope.
+       * @param poly Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return this->getFiniteElementSpace()
+          .getFiniteElement(poly.getDimension(), poly.getIndex())
+          .getCount();
+      }
+
+      /**
+       * @brief Returns the currently bound integration point.
+       * @returns The currently bound integration point.
+       */
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        assert(m_ip);
+        return *m_ip;
+      }
+
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Shape& setPolytope([[maybe_unused]] const Geometry::Polytope& polytope)
+      {
+        m_ip = nullptr;
+        return *this;
+      }
+
+      /**
+       * @brief Binds the integration point and prepares local basis values.
+       *
+       * Both matrix dimensions and the local basis count identify the owned
+       * component layout. A space assignment can change rows and columns while
+       * preserving the formula, sample and total component count.
+       *
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
+      Shape& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_ip = &ip;
+        const auto& poly = ip.getPoint().getPolytope();
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(
+          poly.getDimension(), poly.getIndex());
+        if (!ip.getReferenceQuadratureFormula() ||
+          m_qf != ip.getReferenceQuadratureFormula() || m_qp != ip.getIndex() ||
+          m_geometry != poly.getGeometry() || m_basis.size() != fe.getCount() ||
+          m_basis.empty() || m_basis.front().rows() != fe.getRows() ||
+          m_basis.front().cols() != fe.getColumns())
+        {
+          m_basis.resize(fe.getCount());
+          const auto& scalar = fe.getScalarElement();
+          const size_t components = fe.getRows() * fe.getColumns();
+          const auto& point = ip.getPoint().getReferenceCoordinates();
+          for (size_t a = 0; a < scalar.getCount(); ++a)
+          {
+            const auto value = scalar.getBasis(a)(point);
+            for (size_t c = 0; c < components; ++c)
+            {
+              auto& basis = m_basis[a * components + c];
+              basis.resize(fe.getRows(), fe.getColumns());
+              basis.setZero();
+              basis(c / fe.getColumns(), c % fe.getColumns()) = value;
+            }
+          }
+          m_qf = ip.getReferenceQuadratureFormula();
+          m_qp = ip.getIndex();
+          m_geometry = poly.getGeometry();
+        }
+        return static_cast<Shape&>(*this);
+      }
+
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      const RangeType& getBasis(size_t local) const
+      {
+        return m_basis.at(local);
+      }
+
+      /**
+       * @brief Returns the leaf shape function used for assembly.
+       * @returns The leaf shape function used for assembly.
+       */
+      const auto& getLeaf() const
+      {
+        return static_cast<const Derived&>(*this).getLeaf();
+      }
+
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto& element = this->getFiniteElementSpace().getFiniteElement(
+          poly.getDimension(), poly.getIndex());
+        return element.getDegree().value_or(2);
+      }
+
+      ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+
+    private:
+      const IntegrationPoint* m_ip;
+      const QF::QuadratureFormula* m_qf;
+      size_t m_qp;
+      Geometry::Polytope::Type m_geometry;
+      std::vector<RangeType> m_basis;
   };
 }
 

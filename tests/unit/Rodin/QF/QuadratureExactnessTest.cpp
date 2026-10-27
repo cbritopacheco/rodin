@@ -5,13 +5,18 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
 
 #include <string>
+#include <limits>
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/Alert/Exception.h"
+#include "Rodin/QF/QuadratureFormula.h"
+#include "QuadratureSelection.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GrundmannMoller.h"
 #include "Rodin/QF/GaussLegendre.h"
+#include "Rodin/QF/GaussLobatto.h"
 #include "Rodin/QF/TensorProduct.h"
 #include "Rodin/QF/WitherdenVincent.h"
 #include "Rodin/QF/XiaoGimbutas.h"
@@ -27,16 +32,19 @@ namespace
 {
   constexpr Real kExactTol = 1e-12;
 
-  /// @brief Every type Rodin publishes, minus Point, which carries no
-  /// quadrature of its own. Taken from Polytope::Types so that a new element
-  /// type is covered by these tests the moment it is declared, rather than
-  /// when someone remembers to extend a list here.
+  /**
+   * @brief Lists every published reference geometry.
+   *
+   * Point carries the unit-mass rule on @f$\mathbb{R}^0@f$ and is included.
+   * Taking types from the library also includes future published geometries.
+   *
+   * @returns All published reference geometry types.
+   */
   std::vector<Polytope::Type> allGeometries()
   {
     std::vector<Polytope::Type> gs;
     for (const auto g : Polytope::Types)
-      if (g != Polytope::Type::Point)
-        gs.push_back(g);
+      gs.push_back(g);
     return gs;
   }
 
@@ -69,16 +77,19 @@ namespace
 // Numerical: the rule integrates what it claims to integrate.
 // ---------------------------------------------------------------------------
 
-/// @brief Every dispatched rule is exact to its requested degree, on every
-/// element type. This is the table-integrity gate: a wrong coefficient shows
-/// up here and nowhere else.
+/**
+ * @brief Checks every dispatched rule through its requested total degree.
+ *
+ * Closed-form moments provide an independent table-integrity gate on every
+ * published reference geometry, including Point.
+ */
 TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
 {
   for (const auto g : allGeometries())
   {
     for (size_t order = 1; order <= 20; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       const auto report = exactnessSweep(qf, g, order);
       EXPECT_LT(report.worstRelativeError, kExactTol)
         << name(g) << " order " << order << ": worst monomial x^"
@@ -89,12 +100,37 @@ TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
   }
 }
 
+/**
+ * @brief Point rules have unit mass and the unique empty reference coordinate.
+ *
+ * A function on @f$\mathbb{R}^0@f$ is constant, so the one-point rule satisfies
+ * @f$Q(c)=c@f$ at every requested order. Owned construction and canonical
+ * reuse must both retain zero coordinate dimension, not a one-entry zero.
+ */
+TEST(QuadratureExactnessTest, PointRulesHaveUnitMassAndEmptyCoordinates)
+{
+  for (const size_t order : {0u, 1u, 15u, 16u, 17u, 51u})
+  {
+    SCOPED_TRACE(order);
+    const auto owned = makeQuadratureFormula(order, Polytope::Type::Point);
+    const auto& canonical = QuadratureFormula::get(order, Polytope::Type::Point);
+    for (const auto* rule :
+      std::array<const QuadratureFormulaBase*, 2>{owned.get(), &canonical})
+    {
+      ASSERT_EQ(rule->getSize(), 1u);
+      EXPECT_EQ(rule->getWeight(0), Real(1));
+      EXPECT_EQ(rule->getPoint(0).size(), 0);
+      EXPECT_TRUE(allPointsInside(*rule, Polytope::Type::Point));
+    }
+  }
+}
+
 /// @brief The arbitrary-order pyramid fallback remains exact beyond the table.
 TEST(QuadratureExactnessTest, PyramidIsExactAtEvenOrders)
 {
   for (size_t order = 12; order <= 20; order += 2)
   {
-    const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Pyramid);
+    const auto& qf = QuadratureFormula::get(order, Polytope::Type::Pyramid);
     const auto report = exactnessSweep(qf, Polytope::Type::Pyramid, order);
     EXPECT_LT(report.worstRelativeError, kExactTol)
       << "Pyramid order " << order << ": worst at z^" << report.worstExponents[2];
@@ -106,7 +142,7 @@ TEST(QuadratureExactnessTest, WedgeIsExactAtOddOrders)
 {
   for (size_t order = 1; order <= 19; order += 2)
   {
-    const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Wedge);
+    const auto& qf = QuadratureFormula::get(order, Polytope::Type::Wedge);
     const auto report = exactnessSweep(qf, Polytope::Type::Wedge, order);
     EXPECT_LT(report.worstRelativeError, kExactTol)
       << "Wedge order " << order << ": worst at x^" << report.worstExponents[0] << " y^"
@@ -119,56 +155,56 @@ TEST(QuadratureExactnessTest, DispatchesDocumentedFamiliesAndFallbacks)
 {
   using Type = Polytope::Type;
 
-  EXPECT_NE(
-    dynamic_cast<const Centroid*>(PolytopeQuadratureFormula::build(1, Type::Point).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(5, Type::Segment).get()),
-    nullptr);
-
-  EXPECT_NE(dynamic_cast<const XiaoGimbutas*>(
-              PolytopeQuadratureFormula::build(50, Type::Triangle).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(51, Type::Triangle).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(
-              PolytopeQuadratureFormula::build(20, Type::Quadrilateral).get()),
-    nullptr);
-
-  EXPECT_NE(dynamic_cast<const XiaoGimbutas*>(
-              PolytopeQuadratureFormula::build(15, Type::Tetrahedron).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(16, Type::Tetrahedron).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(
-              PolytopeQuadratureFormula::build(20, Type::Hexahedron).get()),
-    nullptr);
-
-  const auto wedge50 = PolytopeQuadratureFormula::build(50, Type::Wedge);
-  const auto wedge51 = PolytopeQuadratureFormula::build(51, Type::Wedge);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(wedge50.get()), nullptr);
-  EXPECT_NE(dynamic_cast<const TensorProduct*>(wedge51.get()), nullptr);
-  EXPECT_EQ(wedge50->getSize(), XiaoGimbutas(50, Type::Triangle).getSize() * 26);
-  EXPECT_EQ(wedge51->getSize(), 26u * 26u * 26u);
-
-  EXPECT_NE(dynamic_cast<const WitherdenVincent*>(
-              PolytopeQuadratureFormula::build(10, Type::Pyramid).get()),
-    nullptr);
-  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
-              PolytopeQuadratureFormula::build(11, Type::Pyramid).get()),
-    nullptr);
+  const auto& line = QuadratureFormula::get<GaussLegendre>(Type::Segment, size_t{11});
+  EXPECT_EQ(&QuadratureFormula::get(1, Type::Point),
+    &QuadratureFormula::get<Centroid>(Type::Point));
+  EXPECT_EQ(&QuadratureFormula::get(5, Type::Segment),
+    &QuadratureFormula::get<GaussLegendre>(Type::Segment, size_t{3}));
+  EXPECT_EQ(&QuadratureFormula::get(50, Type::Triangle),
+    &QuadratureFormula::get<XiaoGimbutas>(size_t{50}, Type::Triangle));
+  EXPECT_EQ(&QuadratureFormula::get(51, Type::Triangle),
+    &QuadratureFormula::get<GaussLegendre>(Type::Triangle, size_t{26}, size_t{26}));
+  EXPECT_EQ(&QuadratureFormula::get(20, Type::Quadrilateral),
+    &QuadratureFormula::get<TensorProduct>(Type::Quadrilateral, line, line));
+  EXPECT_EQ(&QuadratureFormula::get(15, Type::Tetrahedron),
+    &QuadratureFormula::get<XiaoGimbutas>(size_t{15}, Type::Tetrahedron));
+  EXPECT_EQ(&QuadratureFormula::get(16, Type::Tetrahedron),
+    &QuadratureFormula::get<GaussLegendre>(
+      Type::Tetrahedron, size_t{9}, size_t{9}, size_t{9}));
+  EXPECT_EQ(&QuadratureFormula::get(20, Type::Hexahedron),
+    &QuadratureFormula::get<TensorProduct>(Type::Hexahedron, line, line, line));
+  const auto& wedgeLine =
+    QuadratureFormula::get<GaussLegendre>(Type::Segment, size_t{26});
+  const auto& triangle50 =
+    QuadratureFormula::get<XiaoGimbutas>(size_t{50}, Type::Triangle);
+  const auto& triangle51 =
+    QuadratureFormula::get<GaussLegendre>(Type::Triangle, size_t{26}, size_t{26});
+  EXPECT_EQ(&QuadratureFormula::get(50, Type::Wedge),
+    &QuadratureFormula::get<TensorProduct>(Type::Wedge, triangle50, wedgeLine));
+  EXPECT_EQ(&QuadratureFormula::get(51, Type::Wedge),
+    &QuadratureFormula::get<TensorProduct>(Type::Wedge, triangle51, wedgeLine));
+  EXPECT_EQ(&QuadratureFormula::get(10, Type::Pyramid),
+    &QuadratureFormula::get<WitherdenVincent>(size_t{10}, Type::Pyramid));
+  EXPECT_EQ(&QuadratureFormula::get(11, Type::Pyramid),
+    &QuadratureFormula::get<GaussLegendre>(
+      Type::Pyramid, size_t{6}, size_t{6}, size_t{6}));
 }
 
-/// @brief The positive conical-product fallbacks are exact beyond the
-/// published simplex tables.
+/**
+ * @brief Checks positive conical-product exactness beyond the simplex tables.
+ *
+ * Full-degree moments, positive weights and reference-domain membership
+ * are checked together at the first unsupported compact-table orders.
+ * The degree-fifty-one line factor is checked independently as well: its
+ * product with the certified triangle factor covers the wedge fallback.
+ */
 TEST(QuadratureExactnessTest, ConicalProductFallbacksAreExact)
 {
-  for (const auto& [g, order] : {std::pair{Polytope::Type::Triangle, size_t{51}},
+  for (const auto& [g, order] : {std::pair{Polytope::Type::Segment, size_t{51}},
+         std::pair{Polytope::Type::Triangle, size_t{51}},
          std::pair{Polytope::Type::Tetrahedron, size_t{16}}})
   {
-    const auto qf = PolytopeQuadratureFormula::build(order, g);
+    const auto* qf = &QuadratureFormula::get(order, g);
     const auto report = exactnessSweep(*qf, g, order);
     EXPECT_LT(report.worstRelativeError, 1e-11)
       << name(g) << " order " << order << ": worst monomial x^"
@@ -183,32 +219,38 @@ TEST(QuadratureExactnessTest, ConicalProductFallbacksAreExact)
 // Invariant: properties that hold for every rule, at every order.
 // ---------------------------------------------------------------------------
 
-/// @brief The weights reproduce the measure of the reference element. This is
-/// the degree-0 case of exactness, isolated because it is the one condition a
-/// rescaled or renormalised rule can satisfy while failing every other.
+/**
+ * @brief Checks that weights reproduce the reference measure.
+ *
+ * This isolates degree-zero exactness: a rescaled or renormalized rule may
+ * satisfy it while failing higher moments.
+ */
 TEST(QuadratureExactnessTest, WeightsSumToReferenceMeasure)
 {
   for (const auto g : allGeometries())
   {
     for (size_t order = 1; order <= 8; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       EXPECT_NEAR(weightSum(qf), referenceMeasure(g), kExactTol)
         << name(g) << " order " << order;
     }
   }
 }
 
-/// @brief Every quadrature point lies in its reference element. A rule with
-/// exterior points is unusable on curved cells even when it integrates
-/// polynomials correctly, because the geometric map need not be defined there.
+/**
+ * @brief Checks that quadrature samples lie in their reference domains.
+ *
+ * Exterior nodes can request a geometric map outside its reference domain,
+ * even when polynomial moments are exact.
+ */
 TEST(QuadratureExactnessTest, PointsLieInsideReferenceElement)
 {
   for (const auto g : allGeometries())
   {
     for (size_t order = 1; order <= 8; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       EXPECT_TRUE(allPointsInside(qf, g)) << name(g) << " order " << order;
     }
   }
@@ -235,7 +277,7 @@ namespace
  * @brief Determinism: two constructions of the same rule agree bitwise.
  *
  * The constructors are exercised directly rather than through
- * @ref Rodin::QF::PolytopeQuadratureFormula::get, which pools its rules and
+ * @ref Rodin::QF::QuadratureFormula::get, which pools its rules and
  * would hand back the very same object twice -- comparing that with itself
  * would pass however the tables were read.
  */
@@ -264,15 +306,13 @@ TEST(QuadratureExactnessTest, ConstructionIsDeterministic)
   EXPECT_GT(compared, 0u) << "no shipped rule was compared";
 }
 
-/// @brief The closed-form moments are moments of *Rodin's* reference elements.
-///
-/// exactMoment() is written by hand so that the exactness sweep has an oracle
-/// independent of any quadrature code. That independence is only worth having
-/// if the domain it integrates over is the one Rodin actually uses, so this
-/// test pins the two together: every reference vertex published by
-/// Polytope::Traits must satisfy the half-space system, and the measure
-/// implied by the moments must agree with the measure obtained by integrating
-/// the constant 1 with a rule of the highest order under test.
+/**
+ * @brief Checks that the moment oracle uses Rodin's reference domains.
+ *
+ * The hand-written moments are independent of the quadrature implementation.
+ * Every published reference vertex and centroid must satisfy the domain's
+ * half-space system. The constant moment must agree with the rule's mass.
+ */
 TEST(QuadratureExactnessTest, MomentOracleMatchesRodinReferenceElements)
 {
   for (const auto g : allGeometries())
@@ -292,7 +332,7 @@ TEST(QuadratureExactnessTest, MomentOracleMatchesRodinReferenceElements)
     EXPECT_TRUE(isInside(g, traits.getCentroid(), 1e-13))
       << name(g) << ": centroid outside its own element";
 
-    const auto& qf = PolytopeQuadratureFormula::get(8, g);
+    const auto& qf = QuadratureFormula::get(8, g);
     EXPECT_NEAR(weightSum(qf), referenceMeasure(g), kExactTol)
       << name(g) << ": measure from the moment oracle disagrees with the rule";
   }
@@ -302,12 +342,13 @@ TEST(QuadratureExactnessTest, MomentOracleMatchesRodinReferenceElements)
 // Characterisation: which rules are positive, and which are not.
 // ---------------------------------------------------------------------------
 
-/// @brief Grundmann-Möller has negative weights at every degree above one.
-///
-/// This is a characterisation test, not an aspiration: it documents why GM
-/// cannot be used to assemble a form that must stay positive semidefinite, and
-/// it will fail loudly if GM is ever silently swapped for a positive rule.
-/// The amplification @f$ \sum|w|/\sum w @f$ is the quantity that matters.
+/**
+ * @brief Characterizes signed Grundmann--Möller weights above degree one.
+ *
+ * Negative weights do not preserve positive-semidefinite assembly in general.
+ * The amplification @f$\sum|w|/\sum w@f$ distinguishes these rules from a
+ * positive rule, independently of their polynomial exactness.
+ */
 TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
 {
   for (const auto g : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
@@ -319,23 +360,21 @@ TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
       const GrundmannMoller qf(s, g);
       EXPECT_FALSE(allWeightsPositive(qf)) << name(g) << " s = " << s;
       EXPECT_GT(weightAmplification(qf), Real(1)) << name(g) << " s = " << s;
+      const size_t degree = 2 * s + 1;
+      EXPECT_LT(exactnessSweep(qf, g, degree).worstRelativeError, kExactTol)
+        << name(g) << " signed rule degree " << degree;
     }
   }
 }
 
-/// @brief Every tensor-product and collapsed rule has positive weights.
-///
-/// This is load-bearing rather than incidental. Negative weights are the
-/// reason Grundmann-Möller cannot assemble a form that must stay positive
-/// semidefinite, and the reason a positive simplex family is being introduced
-/// at all. That argument does not extend to the tensor-product and collapsed
-/// elements, whose weights are products of positive Gaussian weights. The
-/// collapse Jacobians are carried by positive Gauss--Jacobi weights.
-///
-/// Because that structural fact is what justifies leaving these elements on
-/// their existing rules, it is asserted here rather than assumed. The
-/// amplification @f$ \sum|w| / \sum w @f$ must be exactly one: any departure
-/// means a sign appeared somewhere in the product.
+/**
+ * @brief Checks positivity of tensor-product and collapsed rules.
+ *
+ * Their weights are products of positive Gaussian weights; collapse Jacobians
+ * are carried by positive Gauss--Jacobi weights. This preserves the positivity
+ * required by positive-semidefinite assembly. The amplification
+ * @f$\sum|w|/\sum w@f$ must equal one up to the stated roundoff budget.
+ */
 TEST(QuadratureExactnessTest, TensorAndCollapsedRulesHaveStrictlyPositiveWeights)
 {
   for (const auto g : {Polytope::Type::Segment, Polytope::Type::Quadrilateral,
@@ -343,7 +382,7 @@ TEST(QuadratureExactnessTest, TensorAndCollapsedRulesHaveStrictlyPositiveWeights
   {
     for (size_t order = 1; order <= 8; ++order)
     {
-      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto& qf = QuadratureFormula::get(order, g);
       EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " order " << order;
       EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14)
         << name(g) << " order " << order;
@@ -356,7 +395,7 @@ TEST(QuadratureExactnessTest, DispatchedRulesHavePositiveWeights)
 {
   for (const auto g : allGeometries())
   {
-    const auto& qf = PolytopeQuadratureFormula::get(4, g);
+    const auto& qf = QuadratureFormula::get(4, g);
     EXPECT_TRUE(allWeightsPositive(qf)) << name(g);
     EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14) << name(g);
   }
@@ -368,48 +407,74 @@ TEST(QuadratureExactnessTest, DispatchedRulesHavePositiveWeights)
 
 namespace
 {
-  /// @brief A rule wrapper that perturbs one weight, used to prove the
-  /// exactness sweep rejects a corrupted table.
+  /// @brief Perturbs a selected sample to check the quadrature oracle.
   class PerturbedRule
   {
     public:
-      PerturbedRule(const QuadratureFormulaBase& base, size_t which, Real delta)
+      /**
+       * @brief Borrows a rule and owns the selected sample perturbation.
+       * @param base Immutable source rule.
+       * @param which Logical index of the altered sample.
+       * @param delta Additive weight perturbation.
+       * @param point Optional replacement reference coordinates.
+       */
+      PerturbedRule(const QuadratureFormulaBase& base, size_t which, Real delta,
+        Optional<Math::SpatialVector<Real>> point = {})
         : m_base(base),
           m_which(which),
-          m_delta(delta)
+          m_delta(delta),
+          m_point(std::move(point))
       {}
 
+      /**
+       * @brief Gets the unchanged source sample count.
+       * @returns Number of source samples.
+       */
       size_t getSize() const
       {
         return m_base.getSize();
       }
 
+      /**
+       * @brief Gets a source weight with the selected perturbation.
+       * @param i Logical sample index.
+       * @returns Original or perturbed weight.
+       */
       Real getWeight(size_t i) const
       {
         return m_base.getWeight(i) + (i == m_which ? m_delta : Real(0));
       }
 
+      /**
+       * @brief Gets source or replacement reference coordinates.
+       * @param i Logical sample index.
+       * @returns Borrowed source coordinates or owned replacement coordinates.
+       */
       const Math::SpatialVector<Real>& getPoint(size_t i) const
       {
-        return m_base.getPoint(i);
+        return i == m_which && m_point ? *m_point : m_base.getPoint(i);
       }
 
     private:
       const QuadratureFormulaBase& m_base;
       size_t m_which;
       Real m_delta;
+      Optional<Math::SpatialVector<Real>> m_point;
   };
 }
 
-/// @brief A tolerance test that cannot fail proves nothing. Perturbing a single
-/// weight by one part in @f$ 10^{9} @f$ must be rejected by the sweep that the
-/// unperturbed rule passes.
+/**
+ * @brief Checks sensitivity to a finite weight perturbation.
+ *
+ * A relative perturbation of @f$10^{-9}@f$, with the stated absolute floor,
+ * must fail the moment budget that the unperturbed rule passes.
+ */
 TEST(QuadratureExactnessTest, ExactnessSweepRejectsAPerturbedWeight)
 {
   for (const auto g : allGeometries())
   {
     constexpr size_t order = 4;
-    const auto& qf = PolytopeQuadratureFormula::get(order, g);
+    const auto& qf = QuadratureFormula::get(order, g);
     ASSERT_LT(exactnessSweep(qf, g, order).worstRelativeError, kExactTol)
       << name(g) << ": baseline must pass before the mutation means anything";
 
@@ -430,4 +495,187 @@ TEST(QuadratureExactnessTest, InteriorityCheckRejectsAnExteriorPoint)
   outside[0] = 0.25;
   outside[1] = 0.25;
   EXPECT_TRUE(isInside(Polytope::Type::Triangle, outside, 1e-13));
+}
+
+namespace
+{
+  /// @brief Owned copies retain exact moments after their original rule is destroyed.
+  template <class Rule>
+  void checkQuadratureOwnership(Rule original, Polytope::Type geometry, size_t degree)
+  {
+    auto copied = original;
+    auto moved = std::move(copied);
+    std::unique_ptr<QuadratureFormulaBase> clone;
+    {
+      const Rule temporary = original;
+      clone.reset(temporary.copy());
+    }
+    auto verify = [&](const QuadratureFormulaBase& rule) {
+      ASSERT_GT(rule.getSize(), 0u);
+      EXPECT_LT(exactnessSweep(rule, geometry, degree).worstRelativeError, kExactTol);
+      for (size_t qp = 0; qp < rule.getSize(); ++qp)
+      {
+        EXPECT_TRUE(std::isfinite(rule.getWeight(qp)));
+        ASSERT_EQ(rule.getPoint(qp).size(), dimensionOf(geometry));
+        for (size_t coordinate = 0; coordinate < dimensionOf(geometry); ++coordinate)
+          EXPECT_TRUE(std::isfinite(rule.getPoint(qp)[coordinate]));
+        EXPECT_TRUE(isInside(geometry, rule.getPoint(qp), kExactTol));
+      }
+    };
+    verify(original);
+    verify(moved);
+    verify(*clone);
+    EXPECT_EQ(moved.getGeometry(), geometry);
+    EXPECT_EQ(moved.getSize(), original.getSize());
+    EXPECT_EQ(clone->getSize(), original.getSize());
+  }
+}
+
+/// @brief Delegated formulas own their rule and preserve moments across every geometry.
+TEST(QuadratureOwnership, DelegatedAllGeometries)
+{
+  for (const auto geometry : Polytope::Types)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const auto source = makeQuadratureFormula(5, geometry);
+    const auto copy = copyQuadratureFormula(*source);
+    EXPECT_LT(exactnessSweep(*copy, geometry, 5).worstRelativeError, kExactTol);
+    EXPECT_EQ(copy->getSize(), QuadratureFormula::get(5, geometry).getSize());
+  }
+}
+
+/// @brief Grundmann-Moller copied state preserves signed simplex moment sums.
+TEST(QuadratureOwnership, GrundmannMollerSimplices)
+{
+  for (const auto geometry :
+    {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+    checkQuadratureOwnership(GrundmannMoller(2, geometry), geometry, 5);
+}
+
+/// @brief Gaussian copied rules preserve exact moments and own their samples.
+TEST(QuadratureOwnership, GaussLegendreAllGeometries)
+{
+  for (const auto geometry : Polytope::Types)
+    checkQuadratureOwnership(GaussLegendre(geometry, 4), geometry, 5);
+}
+
+/// @brief Lobatto copied rules retain their endpoint and collapsed-node ownership.
+TEST(QuadratureOwnership, GaussLobattoAllGeometries)
+{
+  for (const auto geometry : Polytope::Types)
+    checkQuadratureOwnership(GaussLobatto(geometry, 5), geometry, 3);
+}
+
+/// @brief Published simplex rules retain owned coordinates through deep copying.
+TEST(QuadratureOwnership, XiaoGimbutasSimplices)
+{
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+    checkQuadratureOwnership(XiaoGimbutas(5, geometry), geometry, 5);
+}
+
+/// @brief Published tensor-product rules retain exact moments after cloning.
+TEST(QuadratureOwnership, WitherdenVincentTensorProducts)
+{
+  for (const auto geometry : {Polytope::Type::Quadrilateral, Polytope::Type::Hexahedron})
+    checkQuadratureOwnership(WitherdenVincent(5, geometry), geometry, 5);
+}
+
+/**
+ * @brief Domain membership rejects coordinate tuples of the wrong dimension.
+ *
+ * This is a logical shape condition, independent of half-space tolerances.
+ * In particular, every nonempty coordinate tuple is invalid in
+ * @f$\mathbb{R}^0@f$. Dimensions below the cell dimension must be rejected
+ * before a component is read.
+ */
+TEST(QuadratureExactnessTest, InteriorityCheckRejectsWrongCoordinateDimension)
+{
+  for (const auto g : allGeometries())
+  {
+    SCOPED_TRACE(name(g));
+    const Polytope::Traits traits(g);
+    EXPECT_TRUE(isInside(g, traits.getCentroid(), Real(0)));
+    for (size_t dimension = 0; dimension <= Math::SpatialVector<Real>::MaxSize;
+         ++dimension)
+    {
+      if (dimension == traits.getDimension())
+        continue;
+      SCOPED_TRACE(dimension);
+      Math::SpatialVector<Real> point;
+      point.resize(static_cast<Eigen::Index>(dimension));
+      point.setZero();
+      EXPECT_FALSE(isInside(g, point, Real(0)));
+    }
+  }
+}
+
+/**
+ * @brief Nonfinite coordinates do not belong to a real reference domain.
+ *
+ * Every active coordinate is checked. Point has no active coordinate;
+ * nonempty tuples there are rejected by the dimension regression.
+ */
+TEST(QuadratureExactnessTest, InteriorityCheckRejectsNonfiniteCoordinates)
+{
+  for (const auto g : allGeometries())
+  {
+    SCOPED_TRACE(name(g));
+    const Polytope::Traits traits(g);
+    for (size_t axis = 0; axis < traits.getDimension(); ++axis)
+    {
+      for (const Real invalid :
+        {std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::infinity(),
+          -std::numeric_limits<Real>::infinity()})
+      {
+        auto point = traits.getCentroid();
+        point[axis] = invalid;
+        EXPECT_FALSE(isInside(g, point, Real(0))) << "axis " << axis;
+      }
+    }
+  }
+}
+
+/**
+ * @brief Exactness validation rejects malformed or nonfinite rule samples.
+ *
+ * NaN comparisons must not leave the worst-error accumulator at zero.
+ * Finite data whose monomial evaluation overflows must also be rejected.
+ * Valid finite signed weights remain admissible to the exactness instrument.
+ */
+TEST(QuadratureExactnessTest, ExactnessSweepRejectsInvalidSamples)
+{
+  constexpr size_t order = 4;
+  for (const auto g : allGeometries())
+  {
+    SCOPED_TRACE(name(g));
+    const Polytope::Traits traits(g);
+    const auto& qf = QuadratureFormula::get(order, g);
+    ASSERT_LT(exactnessSweep(qf, g, order).worstRelativeError, kExactTol);
+    for (const Real invalid : {std::numeric_limits<Real>::quiet_NaN(),
+           std::numeric_limits<Real>::infinity(), -std::numeric_limits<Real>::infinity()})
+    {
+      EXPECT_THROW(
+        exactnessSweep(PerturbedRule(qf, 0, invalid), g, order), Alert::Exception);
+      for (size_t axis = 0; axis < traits.getDimension(); ++axis)
+      {
+        auto point = qf.getPoint(0);
+        point[axis] = invalid;
+        EXPECT_THROW(exactnessSweep(PerturbedRule(qf, 0, Real(0), point), g, order),
+          Alert::Exception);
+      }
+    }
+    Math::SpatialVector<Real> wrongDimension;
+    wrongDimension.resize(static_cast<Eigen::Index>(
+      (traits.getDimension() + 1) % (Math::SpatialVector<Real>::MaxSize + 1)));
+    wrongDimension.setZero();
+    EXPECT_THROW(exactnessSweep(PerturbedRule(qf, 0, Real(0), wrongDimension), g, order),
+      Alert::Exception);
+    if (traits.getDimension() > 0)
+    {
+      auto point = qf.getPoint(0);
+      point[0] = std::numeric_limits<Real>::max();
+      EXPECT_THROW(
+        exactnessSweep(PerturbedRule(qf, 0, Real(0), point), g, order), Alert::Exception);
+    }
+  }
 }

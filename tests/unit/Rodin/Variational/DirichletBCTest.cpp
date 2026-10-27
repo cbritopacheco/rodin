@@ -1,5 +1,7 @@
 #include <cmath>
 #include <memory>
+#include <type_traits>
+#include <utility>
 
 #include <gtest/gtest.h>
 
@@ -77,6 +79,29 @@ namespace Rodin::Tests::Unit
       }
       return res;
     }
+  }
+
+  /// @brief The public backend accessor permits execution and const inspection.
+  TEST(Rodin_Variational_DirichletBC, BackendAccessorExecution)
+  {
+    auto mesh = makeUnitSquareMesh(2);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    RealFunction value = 7;
+    DirichletBC dbc(u, value);
+    IndexMap<Real> dofs;
+    dbc.getAssembly().execute(dofs, {u, value, {}});
+    ASSERT_EQ(dofs.size(), 4u);
+    for (const auto& [index, coefficient] : dofs)
+      EXPECT_DOUBLE_EQ(coefficient, 7);
+    const auto& inspected = dbc;
+    using Backend = std::remove_reference_t<decltype(dbc.getAssembly())>;
+    std::unique_ptr<Backend> copy(inspected.getAssembly().copy());
+    dofs.clear();
+    copy->execute(dofs, {u, value, {}});
+    ASSERT_EQ(dofs.size(), 4u);
+    for (const auto& [index, coefficient] : dofs)
+      EXPECT_DOUBLE_EQ(coefficient, 7);
   }
 
   /// @brief Verifies triangular uniform grid 2 for variational real P1 sanity test by checking exact expected values, form assembly.
@@ -336,6 +361,64 @@ namespace Rodin::Tests::Unit
       const auto it = dofs.find(vertex);
       ASSERT_NE(it, dofs.end());
       EXPECT_DOUBLE_EQ(it->second, 3.0);
+    }
+  }
+
+  /// @brief Identification borrows writable evaluation state through a const input.
+  TEST(Rodin_Variational_DirichletBC, IdentificationBorrowsNonConstExpression)
+  {
+    auto mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+    Real scale = 2;
+    auto expression = RealFunction([&scale](const Point&) { return scale; }) * v;
+    DirichletBC dbc(u, expression);
+    using BC = decltype(dbc);
+    using Input = typename BC::AssemblyType::InputType;
+    using Value = typename Input::ValueType;
+    static_assert(std::is_constructible_v<Input, const decltype(u)&, Value&,
+      const FlatSet<Attribute>&>);
+    static_assert(!std::is_constructible_v<Input, const decltype(u)&, const Value&,
+                  const FlatSet<Attribute>&>);
+    static_assert(
+      std::is_same_v<decltype(std::declval<const Input&>().getShapeFunction()), Value&>);
+    const FlatSet<Attribute> attrs{LeftAttribute, TopAttribute};
+    const Input input(u, expression, attrs);
+    using Rows = DirichletBCBase<Real>::IdentifiedDOFs;
+    Assembly::Sequential<Rows, BC> sequential;
+#ifdef RODIN_USE_OPENMP
+    Assembly::OpenMP<Rows, BC> parallel;
+#endif
+    const auto expected = getBoundaryVertices(mesh, attrs);
+    for (const Real coefficient : {2., 5.})
+    {
+      scale = coefficient;
+      Rows rows;
+      sequential.execute(rows, input);
+      ASSERT_EQ(rows.size(), expected.size());
+      for (const Index vertex : expected)
+      {
+        const auto row = rows.find(vertex);
+        ASSERT_NE(row, rows.end());
+        ASSERT_EQ(row->second.first.size(), 1);
+        EXPECT_EQ(row->second.first(0), vertex);
+        EXPECT_DOUBLE_EQ(row->second.second(0), coefficient);
+      }
+#ifdef RODIN_USE_OPENMP
+      Rows parallelRows;
+      parallel.execute(parallelRows, input);
+      ASSERT_EQ(parallelRows.size(), expected.size());
+      for (const Index vertex : expected)
+      {
+        const auto row = parallelRows.find(vertex);
+        ASSERT_NE(row, parallelRows.end());
+        ASSERT_EQ(row->second.first.size(), 1);
+        EXPECT_EQ(row->second.first(0), vertex);
+        EXPECT_DOUBLE_EQ(row->second.second(0), coefficient);
+      }
+#endif
     }
   }
 

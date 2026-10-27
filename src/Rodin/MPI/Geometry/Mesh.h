@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include "Rodin/Configure.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
@@ -34,9 +35,7 @@
 
 namespace Rodin::Geometry
 {
-  /**
-   * @brief Convenience alias for the distributed mesh type.
-   */
+  /// @brief Convenience alias for the distributed mesh type.
   using MPIMesh = Mesh<Context::MPI>;
 
   /**
@@ -46,6 +45,15 @@ namespace Rodin::Geometry
    * Stores the rank-local shard of a partitioned mesh together with the MPI
    * context and global/local index mappings needed for distributed assembly.
    *
+   * @par Architecture
+   * The distributed topological dimension is
+   * @f$ D = \max_r \dim S_r @f$, where @f$ S_r @f$ is the local shard.
+   * Collective construction and loading establish this value once; queries,
+   * copying, and moving do not communicate. A shard retains its actual local
+   * dimension, with dimension zero for an empty shard. Topology replacement
+   * requires collective construction or loading of a new distributed mesh;
+   * computing incidences and changing geometry do not change @f$ D @f$.
+   *
    * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
    * @see <a href="_m_p_i_2_geometry_2_mesh_8h.html">Mesh.h</a>
    */
@@ -53,9 +61,7 @@ namespace Rodin::Geometry
   class Mesh<Context::MPI> : public MeshBase
   {
     public:
-      /**
-       * @brief Builder used to construct a distributed mesh from a shard.
-       */
+      /// @brief Builder used to construct a distributed mesh from a shard.
       class Builder
       {
         public:
@@ -80,8 +86,8 @@ namespace Rodin::Geometry
           /**
            * @brief Finalizes the builder and returns the distributed mesh.
            *
-           * The resulting mesh stores the shard previously provided to the builder and
-           * is associated with the MPI context used to construct the builder.
+           * Collective over the associated communicator. The resulting mesh
+           * stores the shard and the maximum shard dimension across ranks.
            *
            * @return Distributed mesh containing the stored shard.
            */
@@ -90,6 +96,7 @@ namespace Rodin::Geometry
         private:
           /// Rank-local shard that will be moved into the finalized mesh.
           Shard m_shard;
+
           /// MPI context bound to the mesh being constructed.
           Context::MPI m_context;
       };
@@ -102,7 +109,7 @@ namespace Rodin::Geometry
        * @return Distributed uniform grid.
        */
       static Mesh UniformGrid(
-          const Context::MPI& context, Polytope::Type g, std::initializer_list<size_t> l)
+        const Context::MPI& context, Polytope::Type g, std::initializer_list<size_t> l)
       {
         Array<size_t> shape(l.size());
         std::copy(l.begin(), l.end(), shape.begin());
@@ -117,7 +124,7 @@ namespace Rodin::Geometry
        * @return Distributed uniform grid.
        */
       static Mesh UniformGrid(
-          const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape);
+        const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape);
 
       /**
        * @brief Constructs an empty distributed mesh associated with the given MPI context.
@@ -125,7 +132,8 @@ namespace Rodin::Geometry
        * @param[in] context MPI context associated with the mesh.
        */
       Mesh(const Context::MPI& context)
-        : m_context(context)
+        : m_context(context),
+          m_dimension(0)
       {}
 
       /**
@@ -134,6 +142,7 @@ namespace Rodin::Geometry
        * The quadrature cache is intentionally rebuilt lazily because cached
        * quadrature points store references to the mesh object that created
        * them.
+       * @param other Source object to copy or move from.
        */
       Mesh(const Mesh& other);
 
@@ -142,16 +151,21 @@ namespace Rodin::Geometry
        *
        * The quadrature cache is intentionally not moved because cached
        * quadrature points store references to the source mesh object.
+       * @param other Source object to copy or move from.
        */
       Mesh(Mesh&& other);
 
       /**
        * @brief Copy assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
        */
       Mesh& operator=(const Mesh& other);
 
       /**
        * @brief Move assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
        */
       Mesh& operator=(Mesh&& other);
 
@@ -160,6 +174,8 @@ namespace Rodin::Geometry
        *
        * The shard contains the local portion of the distributed mesh, including
        * owned and ghost polytopes, local geometry, attributes, and connectivity.
+       * Topology replacement must use collective construction or loading so
+       * that the distributed dimension is established on every rank.
        *
        * @return Reference to the local mesh shard.
        */
@@ -243,14 +259,18 @@ namespace Rodin::Geometry
 
       /**
        * @brief Checks whether a point is attached to this mesh or its local shard.
+       * @param p Point whose mesh attachment is checked.
+       * @returns Whether the point belongs to this distributed mesh or its local shard.
        */
       bool isLocalPoint(const Point& p) const override;
 
       /**
        * @brief Returns the topological dimension of the distributed mesh.
        *
-       * The dimension corresponds to the dimension of the underlying mesh
-       * shard, which is identical across all MPI ranks.
+       * Returns the cached value @f$ D = \max_r \dim S_r @f$ established
+       * during collective construction or loading. This query does not
+       * communicate. An empty local shard has dimension zero independently
+       * of the distributed mesh dimension.
        *
        * @return Topological dimension of the mesh.
        */
@@ -650,7 +670,8 @@ namespace Rodin::Geometry
        * @param[in] attr Attribute to assign to the polytope.
        * @return Reference to the mesh.
        */
-      Mesh& setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override;
+      Mesh& setAttribute(
+        const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override;
 
       /**
        * @brief Sets one coordinate of a local vertex.
@@ -669,7 +690,8 @@ namespace Rodin::Geometry
        * @param[in] coords New coordinates of the vertex.
        * @return Reference to the mesh.
        */
-      Mesh& setVertexCoordinates(Index localIdx, const Math::SpatialPoint& coords) override;
+      Mesh& setVertexCoordinates(
+        Index localIdx, const Math::SpatialPoint& coords) override;
 
       /**
        * @brief Returns the transformation associated with a local polytope.
@@ -678,7 +700,8 @@ namespace Rodin::Geometry
        * @param[in] localIdx Local index of the polytope in the shard.
        * @return Transformation associated with the polytope.
        */
-      virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index localIdx) const override;
+      virtual const PolytopeTransformation& getPolytopeTransformation(
+        size_t dimension, Index localIdx) const override;
 
       /**
        * @brief Returns cached quadrature associated with a local polytope.
@@ -692,8 +715,8 @@ namespace Rodin::Geometry
        * @param[in] qf Quadrature formula.
        * @return Cached quadrature associated with the polytope and formula.
        */
-      virtual const PolytopeQuadrature&
-      getQuadrature(size_t dimension, Index localIdx, const QF::QuadratureFormulaBase& qf) const override;
+      virtual const PolytopeQuadrature& getQuadrature(
+        size_t dimension, Index localIdx, const QF::QuadratureFormula& qf) const override;
 
       /**
        * @brief Sets the transformation associated with a local polytope.
@@ -705,21 +728,23 @@ namespace Rodin::Geometry
        * @param[in] trans Transformation assigned to the polytope.
        * @return Reference to the mesh.
        */
-      virtual Mesh& setPolytopeTransformation(const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
+      virtual Mesh& setPolytopeTransformation(
+        const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
 
       /**
        * @brief Loads the local shard of the distributed mesh from a file.
        *
-       * Each MPI rank loads its own shard from the given file.
+       * Each MPI rank loads its own shard from the given file. This operation
+       * is collective and establishes the maximum shard dimension.
        *
        * @param[in] filename Path to the input file.
        * @param[in] fmt File format used to read the mesh.
        * @return Reference to the mesh.
        */
-      MPIMesh& load(
-        const boost::filesystem::path& filename, IO::FileFormat fmt) override;
+      MPIMesh& load(const boost::filesystem::path& filename, IO::FileFormat fmt) override;
 
-      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      template <class Filename,
+        typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
       /**
        * @brief Rank-dependent overload for loading distributed shard files.
        *
@@ -746,7 +771,8 @@ namespace Rodin::Geometry
        * @param[in] filename Path to the output file.
        * @param[in] fmt File format used to write the mesh.
        */
-      void save(const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
+      void save(
+        const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
 
       /**
        * @brief Rank-dependent overload for saving distributed shard files.
@@ -758,7 +784,8 @@ namespace Rodin::Geometry
        * @param[in] filename Rank-dependent path generator.
        * @param[in] fmt File format used to write the shard file.
        */
-      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      template <class Filename,
+        typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
       void save(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
@@ -776,38 +803,43 @@ namespace Rodin::Geometry
 
       /**
        * @brief Submesh downcast is unsupported for distributed meshes.
-       * @throws std::runtime_error always.
+       * @throws Alert::Exception always.
+       * @returns Never returns; the distributed mesh does not support this conversion.
        */
       SubMeshBase& asSubMesh() override
       {
-        throw std::runtime_error("asSubMesh() not implemented");
+        Alert::MemberFunctionException error(*this, __func__);
+        error << "Submesh downcast is unsupported for distributed meshes.";
+        throw error;
       }
 
       /**
        * @brief Const submesh downcast is unsupported for distributed meshes.
-       * @throws std::runtime_error always.
+       * @throws Alert::Exception always.
+       * @returns Never returns; the distributed mesh does not support this conversion.
        */
       const SubMeshBase& asSubMesh() const override
       {
-        throw std::runtime_error("asSubMesh() not implemented");
+        Alert::MemberFunctionException error(*this, __func__);
+        error << "Submesh downcast is unsupported for distributed meshes.";
+        throw error;
       }
 
       /**
        * @brief Returns mutable connectivity data of the local shard.
+       * @returns Topological connectivity of this mesh.
        */
       Connectivity<Context::Local>& getConnectivity() override;
 
       /**
        * @brief Returns const connectivity data of the local shard.
+       * @returns Topological connectivity of this mesh.
        */
       const Connectivity<Context::Local>& getConnectivity() const override;
 
-      /**
-       * @brief Options controlling iterative reconciliation rounds.
-       */
+      /// @brief Options controlling iterative reconciliation rounds.
       struct ReconcileOptions
       {
-
         /**
          * Maximum number of owner-convergence rounds.
          *
@@ -876,6 +908,9 @@ namespace Rodin::Geometry
        * entities of dimension @p d. Interior entities remain purely local.
        *
        * Only shard metadata is modified; the local mesh topology is unchanged.
+       * All ranks participate, including ranks with no entities of dimension
+       * @p d, because convergence checks and distributed numbering are
+       * collective.
        *
        * @param[in] d Topological dimension of the entities to reconcile.
        * @param[in] options Reconciliation controls. When
@@ -896,8 +931,13 @@ namespace Rodin::Geometry
     private:
       /// MPI execution context associated with this distributed mesh.
       Context::MPI m_context;
+
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
+
+      /// Maximum shard dimension established during collective construction.
+      size_t m_dimension;
+
       /// Mesh-level quadrature cache whose points are attached to this MPI mesh.
       mutable PolytopeQuadratureIndex m_quadratures;
   };

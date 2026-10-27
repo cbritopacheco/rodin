@@ -277,11 +277,13 @@ namespace Rodin::Examples::Heart
         std::size_t best = 0;
         Real bestVal = -std::numeric_limits<Real>::infinity();
         for (std::size_t i = 0; i < m_scalarSize; ++i)
+        {
           if (m_ecap[i] > bestVal)
           {
             bestVal = m_ecap[i];
             best = i;
           }
+        }
         m_ecap.flush();
         return best;
       }

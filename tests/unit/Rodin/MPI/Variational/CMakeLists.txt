@@ -22,6 +22,26 @@ target_link_libraries(RodinMPIP0gTest
   Rodin::Variational
   Rodin::MPI)
 
+add_executable(RodinMPIInterpolationTest InterpolationTest.cpp)
+target_link_libraries(RodinMPIInterpolationTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI)
+
+add_executable(RodinMPIDerivativeStateTest DerivativeStateTest.cpp)
+target_link_libraries(RodinMPIDerivativeStateTest
+  PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
+
+add_executable(RodinMPIMatrixRangeTest MatrixRangeTest.cpp)
+target_link_libraries(RodinMPIMatrixRangeTest
+  PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
+if (RODIN_USE_PETSC)
+  target_compile_definitions(RodinMPIMatrixRangeTest PRIVATE RODIN_TEST_WITH_PETSC)
+  target_link_libraries(RodinMPIMatrixRangeTest PRIVATE Rodin::PETSc)
+endif()
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -37,10 +57,42 @@ endif()
 
 foreach(np 1 2 3 4)
   add_test(
+    NAME RodinMPIMatrixRangeTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIMatrixRangeTest>)
+  set_tests_properties(RodinMPIMatrixRangeTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    PROCESSORS ${np})
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIMatrixRangeTest_np${np})
+
+  add_test(
+    NAME RodinMPIDerivativeStateTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIDerivativeStateTest>)
+  set_tests_properties(RodinMPIDerivativeStateTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 60)
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIDerivativeStateTest_np${np})
+
+  add_test(
+    NAME RodinMPIInterpolationTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIInterpolationTest>)
+  set_tests_properties(RodinMPIInterpolationTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 60
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIInterpolationTest_np${np})
+
+  add_test(
     NAME RodinMPISubMeshGridFunctionTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>)
+            $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
+            "--gtest_filter=-AllGeometriesAndOrders/MPISubMeshH1Restriction.*")
   set_tests_properties(RodinMPISubMeshGridFunctionTest_np${np} PROPERTIES
     LABELS "unit;distributed"
     TIMEOUT 30
@@ -66,4 +118,27 @@ foreach(np 1 2 3 4)
     LABELS "unit;distributed"
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIP0gTest_np${np})
+endforeach()
+
+# Each value range has its own watchdog; every entry retains full, boundary,
+# sparse and nested submeshes. Eight ranks retain empty holders.
+foreach(np 1 2 3 4 8)
+  foreach(geometry Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+    foreach(degree RANGE 1 6)
+      foreach(curvature Affine Curved)
+        foreach(range RealScalar ComplexScalar RealVector ComplexVector RealMatrix ComplexMatrix)
+          set(restriction_case "${geometry}_K${degree}_${curvature}_${range}")
+          set(restriction_test "RodinMPIH1SubMeshRestrictionTest_${restriction_case}_np${np}")
+          add_test(NAME ${restriction_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
+              "--gtest_filter=AllGeometriesAndOrders/MPISubMeshH1Restriction.PolynomialRestriction/${restriction_case}")
+          set_tests_properties(${restriction_test} PROPERTIES
+            LABELS "unit;distributed;slow" TIMEOUT 1200 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${restriction_test})
+        endforeach()
+      endforeach()
+    endforeach()
+  endforeach()
 endforeach()

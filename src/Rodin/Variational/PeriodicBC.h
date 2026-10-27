@@ -12,7 +12,7 @@
  * finite element problems. Periodic conditions enforce that the solution
  * values match across opposite boundaries of the domain.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * A periodic boundary condition specifies:
  * @f[
  *   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
@@ -20,19 +20,19 @@
  * where @f$ \Gamma_- @f$ and @f$ \Gamma_+ @f$ are matching boundary pairs
  * separated by periodicity vector @f$ L @f$.
  *
- * ## Applications
+ * # Applications
  * - Crystal lattice simulations
  * - Unit cell problems in homogenization
  * - Fluid flow in periodic geometries
  * - Wave propagation in periodic media
  *
- * ## Implementation
+ * # Implementation
  * Periodic conditions are enforced by:
  * 1. Identifying matching DOF pairs on opposite boundaries
  * 2. Constraining one DOF to equal its periodic partner
  * 3. Eliminating dependent DOFs from the system
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Periodic BC between boundaries 1 and 2
  * auto pbc = PeriodicBC(u).from(1).to(2);
@@ -147,13 +147,21 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = PeriodicBCBase<ScalarType>;
 
-      /// @brief Constructs the periodic boundary condition from an identification map.
+      /**
+       * @brief Constructs the periodic boundary condition from an identification map.
+       * @param adjacency Adjacency relation.
+       * @param u Operand expression.
+       */
       PeriodicBC(const OperandType& u, const IndexMap<IndexSet>& adjacency)
         : m_u(u),
           m_adjacency(adjacency)
       {}
 
-      /// @brief Constructs the periodic boundary condition from an identification map.
+      /**
+       * @brief Constructs the periodic boundary condition from an identification map.
+       * @param adjacency Adjacency relation.
+       * @param u Operand expression.
+       */
       PeriodicBC(const OperandType& u, IndexMap<IndexSet>&& adjacency)
         : m_u(u),
           m_adjacency(std::move(adjacency))
@@ -161,20 +169,24 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       PeriodicBC(const PeriodicBC& other)
         : Parent(other),
           m_u(other.m_u),
-          m_adjacency(other.m_adjacency)
+          m_adjacency(other.m_adjacency),
+          m_dofs(other.m_dofs)
       {}
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       PeriodicBC(PeriodicBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_adjacency(std::move(other.m_adjacency))
+          m_adjacency(std::move(other.m_adjacency)),
+          m_dofs(std::move(other.m_dofs))
       {}
 
       /**
@@ -192,12 +204,16 @@ namespace Rodin::Variational
           for (const auto& child : v)
             dofs.coeffRef(i++) = child;
           Math::Vector<ScalarType> coeffs(v.size());
+          coeffs.setOnes();
           coeffs.array() /= v.size();
-          m_dofs.emplace(k, std::pair{ std::move(dofs), std::move(coeffs) });
+          m_dofs.emplace(k, std::pair{std::move(dofs), std::move(coeffs)});
         }
       }
 
-      /// @brief Gets the degree-of-freedom identification map.
+      /**
+       * @brief Gets the degree-of-freedom identification map.
+       * @returns The degree-of-freedom identification map.
+       */
       const IndexMap<IndexSet>& getAdjacency() const
       {
         return m_adjacency;
@@ -234,9 +250,11 @@ namespace Rodin::Variational
    * @brief CTAD for PeriodicBC
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
+   * @param u Operand expression.
+   * @param adjacency Adjacency relation.
    */
   template <class Solution, class FES>
-  PeriodicBC(const TrialFunction<Solution, FES>&, const IndexMap<IndexSet>&)
+  PeriodicBC(const TrialFunction<Solution, FES>& u, const IndexMap<IndexSet>& adjacency)
     -> PeriodicBC<TrialFunction<Solution, FES>, IndexMap<IndexSet>>;
 }
 

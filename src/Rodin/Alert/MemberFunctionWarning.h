@@ -47,8 +47,9 @@ namespace Rodin::Alert
        * This constructor formats a warning message that includes the name of
        * the member function and the class where the warning was generated.
        * It uses Boost.TypeIndex to automatically extract the class name.
+       * @param instance Class instance used to deduce the class type; its value is unused.
        */
-      MemberFunctionWarning(const T&, const FuncName& funcName)
+      MemberFunctionWarning([[maybe_unused]] const T& instance, const FuncName& funcName)
       {
         const auto& className = boost::typeindex::type_id_with_cvr<T>().pretty_name();
         *this << "In member function " << Identifier::Function(funcName)

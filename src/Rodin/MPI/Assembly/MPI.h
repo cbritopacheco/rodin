@@ -12,11 +12,21 @@
  * @brief MPI assembly iterators and assembly specializations.
  */
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
+#include <boost/mpi/collectives.hpp>
+#include <boost/serialization/complex.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/serialization/vector.hpp>
+
 #include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/Assembly/AssemblyBase.h"
+#include "BoundaryDOFs.h"
 
 namespace Rodin::Assembly
 {
@@ -38,9 +48,7 @@ namespace Rodin::Assembly
   class MPIIteration
   {
     public:
-      /**
-       * @brief Distributed mesh type iterated by this helper.
-       */
+      /// @brief Distributed mesh type iterated by this helper.
       using MeshType = Geometry::Mesh<Context::MPI>;
 
       /**
@@ -97,55 +105,40 @@ namespace Rodin::Assembly
                 Variational::FunctionBase<ValueDerived>>>
   {
     public:
-      /**
-       * @brief Finite-element-space type attached to the trial function.
-       */
+      /// @brief Finite-element-space type attached to the trial function.
       using FESType =
         FES;
 
-      /**
-       * @brief Trial-function type of the assembled Dirichlet term.
-       */
+      /// @brief Trial-function type of the assembled Dirichlet term.
       using TrialFunctionType =
         Variational::TrialFunction<Solution, FES>;
 
-      /**
-       * @brief Boundary value function base type.
-       */
+      /// @brief Boundary value function base type.
       using ValueType =
         Variational::FunctionBase<ValueDerived>;
 
-      /**
-       * @brief Concrete Dirichlet boundary-condition operand type.
-       */
+      /// @brief Concrete Dirichlet boundary-condition operand type.
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
 
-      /**
-       * @brief Parent assembly base specialization.
-       */
+      /// @brief Parent assembly base specialization.
       using Parent =
         AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
 
-      /**
-       * @brief Value range type induced by the finite element space.
-       */
+      /// @brief Value range type induced by the finite element space.
       using FESRangeType =
         typename FormLanguage::Traits<FESType>::RangeType;
 
-      /**
-       * @brief Input payload type consumed by execute().
-       */
+      /// @brief Input payload type consumed by execute().
       using InputType =
         typename Parent::InputType;
 
-      /**
-       * @brief Default-constructs the MPI assembler.
-       */
+      /// @brief Default-constructs the MPI assembler.
       MPI() = default;
 
       /**
        * @brief Copy-constructs the MPI assembler.
+       * @param other Object to copy from.
        */
       MPI(const MPI& other)
         : Parent(other)
@@ -153,6 +146,7 @@ namespace Rodin::Assembly
 
       /**
        * @brief Move-constructs the MPI assembler.
+       * @param other Object to move from.
        */
       MPI(MPI&& other)
         : Parent(std::move(other))
@@ -161,60 +155,20 @@ namespace Rodin::Assembly
       /**
        * @brief Assembles distributed Dirichlet contributions into an index map.
        *
-       * Iterates over locally owned boundary entities of the MPI mesh shard,
+       * Visits selected boundary functionals in the existing MPI mesh overlap,
        * filters by essential boundary attributes, evaluates the boundary value
-       * pullback, and inserts global constrained indices into @p res.
+       * pullback, and inserts global constrained indices into @p res. P1/H1 constraints
+       * are evaluated locally, including on ghost faces. Only globally
+       * supported P0g requires communication.
        *
        * @param[out] res   Target distributed index map.
        * @param[in] input  Assembly input wrapper carrying operand and value.
        */
-      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      void execute(IndexMap<Scalar>& res, const InputType& input) override
       {
-        const auto& u = input.getOperand();
-        const auto& value = input.getValue();
-        const auto& essBdr = input.getEssentialBoundary();
-        const auto& fes = u.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-        const size_t faceDim = mesh.getDimension() - 1;
-
-        res.clear();
-
-        auto assembleFace = [&](const Geometry::Polytope& face) {
-          const Index i = face.getIndex();
-
-          if (!essBdr.empty())
-          {
-            const auto a = face.getAttribute();
-            if (!a || !essBdr.contains(*a))
-              return;
-          }
-
-          const auto& fe = fes.getFiniteElement(faceDim, i);
-          const auto mapping = fes.getPullback({ faceDim, i }, value);
-          const auto& dofs = fes.getDOFs(faceDim, i);
-
-          for (Index local = 0; local < fe.getCount(); ++local)
-          {
-            const Index global = dofs[local];
-            auto pos = res.find(global);
-            if (pos == res.end())
-            {
-              const auto s = fe.getLinearForm(local)(mapping);
-              res.emplace_hint(pos, global, s);
-            }
-          }
-        };
-
-        if (essBdr.empty())
-        {
-          for (auto it = mesh.getBoundary(); it; ++it)
-            assembleFace(*it);
-        }
-        else
-        {
-          for (auto it = mesh.getFace(); it; ++it)
-            assembleFace(*it);
-        }
+        const auto& fes = input.getOperand().getFiniteElementSpace();
+        MPIBoundaryDOFs<FES>(fes, input.getEssentialBoundary())
+          .assemble(res, input.getValue());
       }
 
       /**
@@ -230,12 +184,12 @@ namespace Rodin::Assembly
   /**
    * @brief MPI assembler for the identification Dirichlet BC `u = A(v)`.
    *
-   * Iterates the locally owned boundary entities of the MPI mesh shard,
-   * filters by essential boundary attributes, and emits, for each slave DOF
-   * on a shared face, the master-DOF/coefficient pair
-   * @c (masterDOFs[local], 1.0) — exact, tolerance-free pairing via the FES's
-   * own DOF connectivity. Generalises to non-trivial @f$ A @f$ by evaluating
-   * @c Av.getBasis(j) with a live @c IntegrationPoint built from @p p.
+   * Visits required DOFs on halo boundary entities, filters by essential boundary
+   * attributes, and evaluates the slave DOF functional on each master basis
+   * expression with a live @c IntegrationPoint. Coefficients are never
+   * thresholded or compared to identify distributed copies.
+   * The source face is selected by distributed index. No constraint exchange
+   * is required for locally supported spaces.
    */
   template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
     Variational::ShapeFunctionSpaceType Sp>
@@ -262,11 +216,17 @@ namespace Rodin::Assembly
 
       /// @brief Default constructor.
       MPI() = default;
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       MPI(const MPI& other)
         : Parent(other)
       {}
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       MPI(MPI&& other)
         : Parent(std::move(other))
       {}
@@ -276,93 +236,70 @@ namespace Rodin::Assembly
        * @param[out] res Target map from slave DOFs to master DOFs and weights.
        * @param[in] input Assembly input wrapper carrying operand and boundary data.
        */
-      void execute(OutputType& res, const InputType& input) const override
+      void execute(OutputType& res, const InputType& input) override
       {
-        const auto& u = input.getOperand();
-        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
-        const auto& essBdr = input.getEssentialBoundary();
-        const auto& fesU = u.getFiniteElementSpace();
+        const auto& fesU = input.getOperand().getFiniteElementSpace();
+        auto& Av = input.getShapeFunction();
         const auto& fesV = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh = fesU.getMesh();
-        const size_t faceDim = mesh.getDimension() - 1;
-
-        res.clear();
-
-        auto assembleFace = [&](const Geometry::Polytope& face) {
-          const Index fi = face.getIndex();
-
-          if (!essBdr.empty())
-          {
-            const auto a = face.getAttribute();
-            if (!a || !essBdr.contains(*a))
-              return;
-          }
-
-          const auto& feU = fesU.getFiniteElement(faceDim, fi);
-          const auto& feV = fesV.getFiniteElement(faceDim, fi);
-          const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
-          const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
-
-          const Index nMasters = static_cast<Index>(feV.getCount());
-
-          for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
-          {
-            const Index slave = slaveDOFs[s];
-            auto pos = res.find(slave);
-            if (pos != res.end())
-              continue;
-
-            std::vector<Index> mIdx;
-            std::vector<Scalar> mCoef;
-            mIdx.reserve(static_cast<size_t>(nMasters));
-            mCoef.reserve(static_cast<size_t>(nMasters));
-
-            for (Index j = 0; j < nMasters; j++)
-            {
-              auto basisCallable = [&Av, j](const Geometry::Point& p) {
-                const Variational::IntegrationPoint ip(p);
-                Av.setIntegrationPoint(ip);
-                return Av.getBasis(static_cast<size_t>(j));
-              };
-              const auto mapping =
-                fesU.getPullback({faceDim, fi}, std::move(basisCallable));
-              const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
-              if (c != Scalar(0))
-              {
-                mIdx.push_back(masterDOFs[j]);
-                mCoef.push_back(c);
-              }
-            }
-
-            if (mIdx.empty())
-              continue;
-
-            const Index n = static_cast<Index>(mIdx.size());
-            IndexArray masters(n);
-            Math::Vector<Scalar> coeffs(n);
-            for (Index k = 0; k < n; k++)
-            {
-              masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
-              coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];
-            }
-            res.emplace_hint(
-              pos, slave, std::pair{std::move(masters), std::move(coeffs)});
-          }
-        };
-
-        if (essBdr.empty())
+        const size_t faceDim = fesU.getMesh().getDimension() - 1;
+        const MPIBoundaryDOFs<FES1> boundary(fesU, input.getEssentialBoundary());
+        using Entries = std::vector<std::pair<Index, Scalar>>;
+        IndexMap<Entries> rows;
+        for (const auto& [slave, indices] : boundary.getDOFs())
         {
-          for (auto it = mesh.getBoundary(); it; ++it)
-            assembleFace(*it);
+          const auto [face, local] = indices;
+          const auto& feU = fesU.getFiniteElement(faceDim, face);
+          const auto& feV = fesV.getFiniteElement(faceDim, face);
+          const auto masterDOFs = fesV.getDOFs(faceDim, face);
+          Entries entries;
+          for (Index j = 0; j < static_cast<Index>(feV.getCount()); ++j)
+          {
+            auto basis = [&Av, j](const Geometry::Point& p) {
+              const Variational::IntegrationPoint ip(p);
+              Av.setIntegrationPoint(ip);
+              return Av.getBasis(j);
+            };
+            const auto mapping = fesU.getPullback({faceDim, face}, std::move(basis));
+            const Scalar coefficient = feU.getLinearForm(local)(mapping);
+            if (coefficient != Scalar(0))
+              entries.emplace_back(masterDOFs[j], coefficient);
+          }
+          rows.emplace(slave, std::move(entries));
         }
-        else
+        boundary.synchronize(rows);
+        res.clear();
+        for (const auto& [slave, entries] : rows)
         {
-          for (auto it = mesh.getFace(); it; ++it)
-            assembleFace(*it);
+          const Index n = static_cast<Index>(entries.size());
+          IndexArray masters(n);
+          Math::Vector<Scalar> coefficients(n);
+          for (Index k = 0; k < n; ++k)
+          {
+            masters[k] = entries[k].first;
+            coefficients[k] = entries[k].second;
+          }
+          res.emplace(slave, std::pair{std::move(masters), std::move(coefficients)});
         }
       }
 
-      /// @brief Creates a polymorphic copy of this assembler.
+      /**
+       * Evaluates affine data through the same halo-aware functional selection.
+       * @param values Values used by the operation.
+       * @param fes Finite element space.
+       * @param attributes Mesh attributes selecting the region.
+       * @param function Function to evaluate.
+       */
+      template <class Function>
+      void assembleValues(IndexMap<Scalar>& values, const FES1& fes,
+        const FlatSet<Geometry::Attribute>& attributes, const Function& function) const
+      {
+        MPIBoundaryDOFs<FES1>(fes, attributes).assemble(values, function);
+      }
+
+      /**
+       * @brief Creates a polymorphic copy of this assembler.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MPI* copy() const noexcept override
       {
         return new MPI(*this);

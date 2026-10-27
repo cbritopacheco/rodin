@@ -19,6 +19,10 @@ namespace Rodin::Variational
 
   template <class Solution, class FES>
   class LinearElasticityIntegral;
+
+  template <class Solution, class FES, class OperatorType, class LambdaDerived,
+    class MuDerived>
+  class LinearElasticityForm;
 }
 
 #endif

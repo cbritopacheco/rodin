@@ -16,6 +16,7 @@
  * - Matrix Frobenius inner product: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$
  */
 
+#include "Rodin/Utility/OptionalReference.h"
 #include <Eigen/Core>
 
 #include "Rodin/Geometry/Polytope.h"
@@ -33,111 +34,114 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Dot over a function expression: exposes the left-hand side
-  /// operand, the right-hand side operand, the scalar type and the range type.
+  /**
+   * @brief Type traits for @c Dot over a function expression: exposes the left-hand side
+   * operand, the right-hand side operand, the scalar type and the range type.
+   */
   template <class LHSDerived, class RHSDerived>
-  struct Traits<
-    Variational::Dot<
-      Variational::FunctionBase<LHSDerived>,
-      Variational::FunctionBase<RHSDerived>>>
+  struct Traits<Variational::Dot<Variational::FunctionBase<LHSDerived>,
+    Variational::FunctionBase<RHSDerived>>>
   {
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::FunctionBase<LHSDerived>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::FunctionBase<LHSDerived>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::FunctionBase<RHSDerived>;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::FunctionBase<RHSDerived>;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 
-  /// @brief Type traits for @c Dot over a function expression: exposes the finite element
-  /// space, the shape function space, the left-hand side operand, the right-hand side
-  /// operand, the scalar type and the range type.
-  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Dot<
-      Variational::FunctionBase<LHSDerived>,
-      Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  /**
+   * @brief Type traits for @c Dot over a function expression: exposes the finite element
+   * space, the shape function space, the left-hand side operand, the right-hand side
+   * operand, the scalar type and the range type.
+   */
+  template <class LHSDerived, class RHSDerived, class FES,
+    Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Dot<Variational::FunctionBase<LHSDerived>,
+    Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Left-hand side operand type.
-      using LHSType = Variational::FunctionBase<LHSDerived>;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-      /// @brief Right-hand side operand type.
-      using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, Space>;
+    /// @brief Left-hand side operand type.
+    using LHSType = Variational::FunctionBase<LHSDerived>;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Right-hand side operand type.
+    using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, Space>;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 
-  /// @brief Type traits for @c Dot over a shape function: exposes the left-hand side
-  /// operand, the right-hand side operand, the scalar type and the range type.
+  /**
+   * @brief Type traits for @c Dot over a shape function: exposes the left-hand side
+   * operand, the right-hand side operand, the scalar type and the range type.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  struct Traits<
-    Variational::Dot<
-      Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
-      Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
+  struct Traits<Variational::Dot<
+    Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
+    Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
   {
-      /// @brief Left-hand side operand type.
-      using LHSType =
-        Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
+    /// @brief Left-hand side operand type.
+    using LHSType =
+      Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType =
-        Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
+    /// @brief Right-hand side operand type.
+    using RHSType =
+      Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
 
-      /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+    using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-      /// @brief Range type of the right-hand side operand.
-      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the right-hand side operand.
+    using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-      /// @brief Scalar type of the left-hand side operand.
-      using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
+    /// @brief Scalar type of the left-hand side operand.
+    using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-      /// @brief Scalar type of the right-hand side operand.
-      using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
+    /// @brief Scalar type of the right-hand side operand.
+    using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-      /// @brief Range (evaluation value) type.
-      using RangeType = ScalarType;
+    /// @brief Range (evaluation value) type.
+    using RangeType = ScalarType;
   };
 }
 
@@ -219,7 +223,8 @@ namespace Rodin::Variational
        * @param rhs Right function operand
        */
       Dot(const LHSType& lhs, const RHSType& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+        : m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {}
 
       /**
@@ -228,7 +233,8 @@ namespace Rodin::Variational
        */
       Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
       /**
@@ -237,7 +243,8 @@ namespace Rodin::Variational
        */
       Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
       /**
@@ -245,8 +252,8 @@ namespace Rodin::Variational
        * @param args Attribute arguments for trace restriction
        * @returns Reference to this object
        */
-      template <class ... Args>
-      Dot& traceOf(const Args& ... args)
+      template <class... Args>
+      Dot& traceOf(const Args&... args)
       {
         m_lhs->traceOf(args...);
         m_rhs->traceOf(args...);
@@ -257,8 +264,7 @@ namespace Rodin::Variational
        * @brief Gets the left function operand.
        * @returns Reference to first function
        */
-      constexpr
-      const LHSType& getLHS() const
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
@@ -268,8 +274,7 @@ namespace Rodin::Variational
        * @brief Gets the right function operand.
        * @returns Reference to second function
        */
-      constexpr
-      const RHSType& getRHS() const
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
@@ -281,17 +286,19 @@ namespace Rodin::Variational
        * @returns @f$ f(p) \cdot g(p) @f$ (scalar result)
        */
       template <class Point>
-      constexpr
-      auto getValue(const Point& p) const
+      constexpr auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
         return Math::dot(lhs, rhs);
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -299,7 +306,6 @@ namespace Rodin::Variational
           return std::nullopt;
         return *lo + *ro;
       }
-
 
       /**
        * @brief Polymorphic copy.
@@ -317,9 +323,11 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for Dot product of two functions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
    */
   template <class LHSDerived, class RHSDerived>
-  Dot(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Dot(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
     -> Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -340,11 +348,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>> final
-    : public ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES, Space>
+    : public ShapeFunctionBase<
+        Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>, FES,
+        Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
@@ -377,104 +388,171 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_lhs)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Dot(const Dot& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_lhs)
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      Dot(Dot&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_lhs)
       {}
 
-      /// @brief Gets the left-hand side operand.
-      constexpr
-      const LHSType& getLHS() const
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      constexpr
-      const RHSType& getRHS() const
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      /// @brief Gets the left-hand side operand.
-      constexpr
-      LHSType& getLHS()
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
+      constexpr LHSType& getLHS()
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      constexpr
-      RHSType& getRHS()
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
+      constexpr RHSType& getRHS()
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return this->getRHS().getDOFs(element);
       }
 
-      /// @brief Gets the finite element space.
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return this->getRHS().getDOFIndices();
+      }
+
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       const FESType& getFiniteElementSpace() const
       {
         return this->getRHS().getFiniteElementSpace();
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return this->getRHS().getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
-      Dot& setIntegrationPoint(const IntegrationPoint& ip)
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Dot& setPolytope(const Geometry::Polytope& polytope)
       {
-        m_rhs->setIntegrationPoint(ip);
+        m_rhs->setPolytope(polytope);
+        m_cache.setPolytope(polytope);
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      constexpr
-      auto getBasis(size_t local) const
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
+      Dot& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_rhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      constexpr auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
-        const auto lhs = getLHS().getValue(ip);
+        if (const auto* lhs = m_cache.get())
+        {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          return Math::dot(*lhs, rhs);
+        }
+        decltype(auto) lhs = getLHS().getValue(ip);
         decltype(auto) rhs = getRHS().getBasis(local);
         return Math::dot(lhs, rhs);
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -491,13 +569,19 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename LHSType::Cache m_cache;
   };
 
   /**
    * @brief Deduction guide for Dot product of function and shape function.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Dot(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
+  Dot(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
     -> Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   /**
@@ -517,11 +601,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
-    : public ShapeFunctionBase<Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES, Space>
+    : public ShapeFunctionBase<
+        Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>, FES,
+        Space>
   {
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
@@ -554,88 +641,151 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Dot(const Dot& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      Dot(Dot&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
-      /// @brief Gets the left-hand side operand.
-      constexpr
-      const LHSType& getLHS() const
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      constexpr
-      const RHSType& getRHS() const
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
       }
 
-      /// @brief Gets the finite element space.
+      /// @returns The operand's bound interface numbering, when present.
+      Utility::OptionalReference<const IndexArray> getDOFIndices() const
+      {
+        return getLHS().getDOFIndices();
+      }
+
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       const FESType& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return getLHS().getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
-      Dot& setIntegrationPoint(const IntegrationPoint& ip)
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Dot& setPolytope(const Geometry::Polytope& polytope)
       {
-        m_lhs->setIntegrationPoint(ip);
+        m_lhs->setPolytope(polytope);
+        m_cache.setPolytope(polytope);
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      constexpr
-      auto getBasis(size_t local) const
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
+      Dot& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_lhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
+      constexpr auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
+        if (const auto* rhs = m_cache.get())
+        {
+          decltype(auto) lhs = getLHS().getBasis(local);
+          return Math::dot(lhs, *rhs);
+        }
+        decltype(auto) rhs = getRHS().getValue(p);
         decltype(auto) lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(p);
         return Math::dot(lhs, rhs);
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -652,13 +802,19 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_cache;
   };
 
   /**
    * @brief Deduction guide for Dot product of shape function and function.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Dot(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
+  Dot(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
     -> Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   /**
@@ -677,10 +833,9 @@ namespace Rodin::Variational
    * @tparam TestFES Test finite element space type
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Dot<
-    ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
-    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> final
-    : public FormLanguage::Base
+  class Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>
+    final : public FormLanguage::Base
   {
     public:
       /// @brief Left-hand side operand type.
@@ -712,49 +867,82 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
-        : m_trial(lhs.copy()), m_test(rhs.copy())
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
+        : m_trial(lhs.copy()),
+          m_test(rhs.copy())
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Dot(const Dot& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Dot(const Dot& other)
         : Base(other),
-          m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
+          m_trial(other.m_trial->copy()),
+          m_test(other.m_test->copy())
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      Dot(Dot&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Dot(Dot&& other)
         : Base(std::move(other)),
-          m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
+          m_trial(std::move(other.m_trial)),
+          m_test(std::move(other.m_test))
       {}
 
-      /// @brief Gets the left-hand side operand.
-      constexpr
-      const LHSType& getLHS() const
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
+      constexpr const LHSType& getLHS() const
       {
         assert(m_trial);
         return *m_trial;
       }
 
-      /// @brief Gets the right-hand side operand.
-      constexpr
-      const RHSType& getRHS() const
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
+      constexpr const RHSType& getRHS() const
       {
         assert(m_test);
         return *m_test;
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_trial->getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Starts a fresh cell binding and releases the previous point binding.
+       * @param polytope Entity whose basis will be evaluated.
+       * @returns This expression after rebinding its evaluation state.
+       */
+      Dot& setPolytope(const Geometry::Polytope& polytope)
+      {
+        m_trial->setPolytope(polytope);
+        m_test->setPolytope(polytope);
+        return *this;
+      }
+
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_trial->setIntegrationPoint(ip);
@@ -762,18 +950,25 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
-      constexpr
-      auto operator()(size_t tr, size_t te)
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Expression for the selected component.
+       */
+      constexpr auto operator()(size_t tr, size_t te)
       {
         decltype(auto) lhs = getLHS().getBasis(tr);
         decltype(auto) rhs = getRHS().getBasis(te);
         return Math::dot(lhs, rhs);
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
         const auto ro = getRHS().getOrder(poly);
@@ -794,11 +989,14 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for Dot product of trial and test shape functions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&,
-      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-  -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
+  Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
 
   /**
    * @ingroup DotSpecializations
@@ -812,15 +1010,15 @@ namespace Rodin::Variational
    * @tparam RHSDerived Type of the test shape function
    * @tparam TestFES Test finite element space type
    */
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class Dot<
-      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>
-    : public FormLanguage::Base
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
+  class Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>> : public FormLanguage::Base
   {
     public:
       /// @brief Left-hand side operand type.
-      using LHSType = Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
+      using LHSType =
+        Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>;
 
       /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
@@ -828,45 +1026,63 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::Base;
 
-      /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
-        : m_lhs(lhs.copy()), m_rhs(rhs.copy())
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
+        : m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Dot(const Dot& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      Dot(Dot&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
       {}
 
-      /// @brief Gets the left-hand side operand.
-      constexpr
-      const LHSType& getLHS() const
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
+      constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      constexpr
-      const RHSType& getRHS() const
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
+      constexpr const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -883,14 +1099,16 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for Dot product of potential and test shape function.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
    */
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  Dot(const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
-      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-  -> Dot<
-      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
+  Dot(
+    const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
-
 }
 
 #endif

@@ -36,7 +36,7 @@ namespace Rodin::Geometry
    * - owner information for non-owned entities,
    * - halo information for owned entities.
    *
-   * ## Local vs distributed indices
+   * # Local vs distributed indices
    *
    * Every entity stored in a shard has a **local shard index**. This is the
    * index used by the inherited local mesh API.
@@ -55,7 +55,7 @@ namespace Rodin::Geometry
    * - all inherited `Mesh<Context::Local>` methods use **local shard indices**,
    * - `getPolytopeMap(d)` is used to recover the corresponding distributed index.
    *
-   * ## Local state semantics
+   * # Local state semantics
    *
    * Each local shard entity is classified by two orthogonal notions:
    * - whether it belongs to the local partition, and
@@ -96,7 +96,7 @@ namespace Rodin::Geometry
    * - `isGhost(d, i)`
    * - `isLocal(d, i)` (equivalent to `Owned || Shared`)
    *
-   * ## Owner map
+   * # Owner map
    *
    * For each dimension @f$ d @f$, `getOwner(d)` stores
    *
@@ -111,7 +111,7 @@ namespace Rodin::Geometry
    * - if `i` is `Shared` or `Ghost`, then `getOwner(d).at(i)` gives the rank
    *   that owns the entity.
    *
-   * ## Halo map
+   * # Halo map
    *
    * For each dimension @f$ d @f$, `getHalo(d)` stores
    *
@@ -133,7 +133,7 @@ namespace Rodin::Geometry
    * - neighborhood-restricted communication,
    * - distributed connectivity discovery.
    *
-   * ## Geometric and topological contents
+   * # Geometric and topological contents
    *
    * A shard is not just a set of cells. It generally contains lower-dimensional
    * entities as well, for example vertices, edges, and faces needed by the local
@@ -148,7 +148,7 @@ namespace Rodin::Geometry
    *
    * Thus `Shard` is intended to be a self-consistent local mesh with overlap.
    *
-   * ## Construction model
+   * # Construction model
    *
    * `Shard::Builder` constructs a shard incrementally from either:
    * - a parent mesh (`Mode::Parent`), or
@@ -175,7 +175,7 @@ namespace Rodin::Geometry
    * - the local shard index of the entity,
    * - a boolean telling whether the entity was newly inserted.
    *
-   * ## Finalization guarantees
+   * # Finalization guarantees
    *
    * After `Builder::finalize()`:
    * - all local entity indices are stable,
@@ -188,7 +188,7 @@ namespace Rodin::Geometry
    *   `Ghost`),
    * - `getHalo(d)` is defined for owned local entities.
    *
-   * ## Important convention
+   * # Important convention
    *
    * A shard does **not** itself define a distributed global numbering of mesh
    * entities or degrees of freedom. It only provides:
@@ -225,7 +225,11 @@ namespace Rodin::Geometry
         std::vector<Index> left;             ///< Local shard index -> distributed index
         UnorderedMap<Index, Index> right;    ///< Distributed index -> local shard index
 
-        /// @brief Serializes the local/distributed index maps.
+        /**
+         * @brief Serializes the local/distributed index maps.
+         * @param ar Serialization archive.
+         * @param version Archive format version.
+         */
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version)
         {
@@ -234,19 +238,13 @@ namespace Rodin::Geometry
         }
       };
 
-      /**
-       * @brief Context type (always local for shards).
-       */
+      /// @brief Context type (always local for shards).
       using ContextType = Rodin::Context::Local;
 
-      /**
-       * @brief Parent mesh type.
-       */
+      /// @brief Parent mesh type.
       using Parent = Mesh<ContextType>;
 
-      /**
-       * @brief Local state of a shard entity.
-       */
+      /// @brief Local state of a shard entity.
       enum class State : uint8_t
       {
         Shared = 0, ///< In local partition, owned remotely
@@ -280,17 +278,17 @@ namespace Rodin::Geometry
             Direct   ///< Initialize with explicit dimension and explicit contents
           };
 
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder();
 
           /**
            * @brief Initializes the builder from a parent mesh.
            * @param[in] parent Parent mesh from which shard entities are drawn.
+           * @param[in] dimension Minimum metadata dimension, for empty shards
+           * belonging to a distributed mesh with a collective dimension.
            * @returns Reference to this builder.
            */
-          Builder& initialize(const Mesh<Context>& parent);
+          Builder& initialize(const Mesh<Context>& parent, size_t dimension = 0);
 
           /**
            * @brief Initializes the builder for direct construction.
@@ -303,7 +301,7 @@ namespace Rodin::Geometry
           /**
            * @brief Inserts a vertex in direct-construction mode.
            * @param[in] globalIdx Distributed/global vertex index.
-           * @param[in] x Vertex coordinates.
+           * @param[in] x Coordinates of the vertex.
            * @param[in] state Local shard state.
            * @returns Local shard vertex index.
            */
@@ -317,7 +315,7 @@ namespace Rodin::Geometry
            * @param[in] d Topological dimension.
            * @param[in] globalIdx Distributed/global polytope index.
            * @param[in] g Geometry type.
-           * @param[in] vs Local shard vertex indices.
+           * @param[in] vs Vertex indices defining the polytope.
            * @param[in] state Local shard state.
            * @returns Local shard polytope index.
            */
@@ -349,7 +347,7 @@ namespace Rodin::Geometry
           /**
            * @brief Sets the attribute of a local entity.
            * @param[in] p Pair `(d, localIdx)`.
-           * @param[in] attr Optional attribute.
+           * @param[in] attr Attribute to assign, or an empty optional to remove the attribute.
            * @returns Reference to this builder.
            */
           Builder& attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
@@ -399,6 +397,8 @@ namespace Rodin::Geometry
            * @f]
            *
            * and is meaningful for entities in state `Shared` or `Ghost`.
+           * @returns The owner map for dimension d.
+           * @param d Topological dimension of the entity.
            */
           UnorderedMap<Index, Index>& getOwner(size_t d);
 
@@ -412,6 +412,8 @@ namespace Rodin::Geometry
            * @f]
            *
            * and is meaningful only for owned local entities.
+           * @returns The halo map for owned entities of dimension d.
+           * @param d Topological dimension of the entity.
            */
           UnorderedMap<Index, IndexSet>& getHalo(size_t d);
 
@@ -447,9 +449,7 @@ namespace Rodin::Geometry
           PolytopeTransformationIndex m_transformations;
       };
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Shard() = default;
 
       /**

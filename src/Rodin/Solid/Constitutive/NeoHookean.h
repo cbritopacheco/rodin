@@ -53,14 +53,6 @@ namespace Rodin::Solid
   class NeoHookean final : public HyperElasticLaw<NeoHookean>
   {
     public:
-      /// Precomputed cache for the Neo-Hookean law.
-      struct Cache
-      {
-        Real I1;    ///< First invariant @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
-        Real J;     ///< Jacobian
-        Real logJ;  ///< @f$ \ln(J) @f$
-      };
-
       /**
        * @brief Constructs a Neo-Hookean law with the given Lamé parameters.
        * @param lambda First Lamé parameter @f$ \lambda @f$
@@ -71,19 +63,127 @@ namespace Rodin::Solid
           m_mu(mu)
       {}
 
-      /// @brief Copy constructor.
-      NeoHookean(const NeoHookean&) = default;
-      /// @brief Move constructor.
-      NeoHookean(NeoHookean&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      NeoHookean(const NeoHookean& other) = default;
 
-      /// @brief Gets the first Lamé parameter.
-      Real getLameFirstParameter() const { return m_lambda; }
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      NeoHookean(NeoHookean&& other) = default;
 
-      /// @brief Gets the shear modulus.
-      Real getShearModulus() const { return m_mu; }
+      /**
+       * @brief Gets the first Lamé parameter.
+       * @returns The first Lamé parameter.
+       */
+      Real getLameFirstParameter() const
+      {
+        return m_lambda;
+      }
 
-      /// @brief Populates the invariant cache at a constitutive point.
-      void setCache(Cache& cache, const ConstitutivePoint& cp) const
+      /**
+       * @brief Gets the shear modulus.
+       * @returns The shear modulus.
+       */
+      Real getShearModulus() const
+      {
+        return m_mu;
+      }
+
+      /**
+       * @brief Binds owned evaluation data, reusing unchanged constitutive inputs.
+       * @param cp Constitutive point supplying kinematics and law-specific inputs.
+       * @returns This law after successful binding.
+       */
+      NeoHookean& setConstitutivePoint(const ConstitutivePoint& cp)
+      {
+        if (m_state && hasSameKinematics(*m_state, cp.getKinematicState()))
+        {
+          return *this;
+        }
+        m_state.reset();
+        computeCache(m_cache, cp);
+        m_state.emplace(cp.getKinematicState());
+        return *this;
+      }
+
+      /**
+       * @brief Returns the owned kinematics of the prepared point.
+       * @returns Prepared kinematic state.
+       */
+      const KinematicState& getKinematicState() const
+      {
+        this->require(m_state.has_value(), __func__);
+        return *m_state;
+      }
+
+      /**
+       * @brief Returns the strain-energy density at the prepared point.
+       * @returns Stored strain-energy density.
+       */
+      Real getStrainEnergyDensity() const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const size_t d = state.getDimension();
+        return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d)) - m_mu * cache.logJ +
+          0.5 * m_lambda * cache.logJ * cache.logJ;
+      }
+
+      /**
+       * @brief Computes stress at the prepared point.
+       * @param P Output first Piola-Kirchhoff stress.
+       */
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P) const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const auto& F = state.getDeformationGradient();
+        const auto& FinvT = state.getDeformationGradientInverseTranspose();
+
+        // P = mu * F + (lambda ln(J) - mu) * F^{-T}
+        P = m_mu * F + (m_lambda * cache.logJ - m_mu) * FinvT;
+      }
+
+      /**
+       * @brief Computes the tangent action at the prepared point.
+       * @param dP Output stress increment.
+       * @param dF Deformation-gradient increment.
+       */
+      void getMaterialTangent(
+        Math::SpatialMatrix<Real>& dP, const Math::SpatialMatrix<Real>& dF) const
+      {
+        const auto& cache = m_cache;
+        const auto& state = getKinematicState();
+        const auto& FinvT = state.getDeformationGradientInverseTranspose();
+
+        // Frobenius inner product F^{-T} : dF
+        const Real FinvT_dF = FinvT.dot(dF);
+
+        // dP = mu dF + lambda (F^{-T} : dF) F^{-T}
+        //    + (mu - lambda ln J) F^{-T} dF^T F^{-T}
+        dP = m_mu * dF + m_lambda * FinvT_dF * FinvT +
+          (m_mu - m_lambda * cache.logJ) * FinvT * dF.transpose() * FinvT;
+      }
+
+    private:
+      /// Precomputed cache for the Neo-Hookean law.
+      struct Cache
+      {
+        Real I1;    ///< First invariant @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
+        Real J;     ///< Jacobian
+        Real logJ;  ///< @f$ \ln(J) @f$
+      };
+
+      /**
+       * @brief Populates the invariant cache at a constitutive point.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
+      void computeCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
         const auto& C = state.getRightCauchyGreenTensor();
@@ -92,50 +192,12 @@ namespace Rodin::Solid
         cache.logJ = state.getLogJacobian();
       }
 
-      /// @brief Returns the stored strain-energy density.
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
-      {
-        const size_t d = cp.getKinematicState().getDimension();
-        return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d))
-             - m_mu * cache.logJ
-             + 0.5 * m_lambda * cache.logJ * cache.logJ;
-      }
+      /// @brief Private intermediate values for the prepared input.
+      Cache m_cache{};
 
-      /// @brief Computes the first Piola-Kirchhoff stress.
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
-      {
-        const auto& state = cp.getKinematicState();
-        const auto& F = state.getDeformationGradient();
-        const auto& FinvT = state.getDeformationGradientInverseTranspose();
+      /// @brief Owned snapshot; empty until binding succeeds.
+      Optional<KinematicState> m_state;
 
-        // P = mu * F + (lambda ln(J) - mu) * F^{-T}
-        P = m_mu * F + (m_lambda * cache.logJ - m_mu) * FinvT;
-      }
-
-      /// @brief Computes the material tangent action.
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
-      {
-        const auto& state = cp.getKinematicState();
-        const auto& FinvT = state.getDeformationGradientInverseTranspose();
-
-        // Frobenius inner product F^{-T} : dF
-        const Real FinvT_dF = FinvT.dot(dF);
-
-        // dP = mu dF + lambda (F^{-T} : dF) F^{-T}
-        //    + (mu - lambda ln J) F^{-T} dF^T F^{-T}
-        dP = m_mu * dF
-           + m_lambda * FinvT_dF * FinvT
-           + (m_mu - m_lambda * cache.logJ) * FinvT * dF.transpose() * FinvT;
-      }
-
-    private:
       Real m_lambda;
       Real m_mu;
   };

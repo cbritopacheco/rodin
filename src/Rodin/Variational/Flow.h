@@ -13,7 +13,7 @@
  * used in advection problems, level set methods, and semi-Lagrangian time
  * integration schemes.
  *
- * ## Mathematical foundation
+ * # Mathematical foundation
  * Given a velocity field @f$ \mathbf{v}(x,t) @f$, the flow map @f$ \Phi_t @f$
  * satisfies:
  * @f[
@@ -23,7 +23,7 @@
  * The flow operator computes @f$ u(\Phi(x,t)) @f$, which represents the value
  * of function @f$ u @f$ advected along the flow.
  *
- * ## Applications
+ * # Applications
  * - **Advection-diffusion**:
  *   @f$ \partial_t u + \mathbf{v}\cdot\nabla u = f @f$
  * - **Semi-Lagrangian methods**: characteristic tracking for transport
@@ -34,8 +34,11 @@
 #ifndef RODIN_VARIATIONAL_FLOW_H
 #define RODIN_VARIATIONAL_FLOW_H
 
+#include "Rodin/Types.h"
 #include <algorithm>
 #include <cassert>
+#include <boost/container/small_vector.hpp>
+
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -56,36 +59,31 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
-  /// space, the shape function space and the operand type.
-  template <
-    class Derived,
-    class FES,
-    class VectorField,
-    class Step,
-    class BoundaryPolicy
-  >
-  struct Traits<
-    Variational::Flow<
-      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
-      VectorField, Step, BoundaryPolicy>>
+  /**
+   * @brief Type traits for @c Flow over a shape function: exposes the finite element
+   * space, the shape function space and the operand type.
+   */
+  template <class Derived, class FES, class VectorField, class Step, class BoundaryPolicy>
+  struct Traits<Variational::Flow<
+    Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>, VectorField,
+    Step, BoundaryPolicy>>
   {
-      /// @brief Finite element space type.
-      using FESType = FES;
+    /// @brief Finite element space type.
+    using FESType = FES;
 
-      /// @brief Shape function space the expression belongs to, trial or test.
-      static constexpr Variational::ShapeFunctionSpaceType SpaceType =
-        Variational::TestSpace;
+    /// @brief Shape function space the expression belongs to, trial or test.
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType =
+      Variational::TestSpace;
 
-      /// @brief Operand type.
-      using OperandType =
-        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
+    /// @brief Operand type.
+    using OperandType =
+      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
   };
 }
 
@@ -116,9 +114,9 @@ namespace Rodin::Variational
       /**
        * @brief Called when a traced trajectory reaches a boundary.
        * @returns false, indicating that the trace should stop.
+       * @param hit Boundary-hit data; this stopping policy leaves it unchanged.
        */
-      constexpr
-      bool operator()(const BoundaryHit&) const
+      constexpr bool operator()([[maybe_unused]] const BoundaryHit& hit) const
       {
         return false;
       }
@@ -162,9 +160,7 @@ namespace Rodin::Variational
       using Parent =
         FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>;
 
-      /**
-       * @brief Result of a characteristic trace.
-       */
+      /// @brief Result of a characteristic trace.
       class Trace
       {
         public:
@@ -184,6 +180,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Returns the remaining unconsumed time.
+           * @returns The remaining unconsumed time.
            */
           Real getTime() const
           {
@@ -192,6 +189,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Returns the traced point.
+           * @returns The traced point.
            */
           const Geometry::Point& getPoint() const
           {
@@ -200,6 +198,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Indicates whether the trace exited or aborted.
+           * @returns Whether tracing stopped by exiting the domain or aborting.
            */
           bool exited() const
           {
@@ -208,6 +207,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Returns the additive correction accumulated during tracing.
+           * @returns The additive correction accumulated during tracing.
            */
           Real getCorrection() const
           {
@@ -245,23 +245,19 @@ namespace Rodin::Variational
        * @param bp  Boundary policy.
        */
       template <class VVel, class S = StepType, class B = BoundaryPolicy>
-      Flow(const Real& t,
-           const Operand& u,
-           VVel&& vel,
-           S&& st = S{},
-           B&& bp = B{})
-        : m_maxZeroHops(128),
-          m_maxBisections(16),
-          m_maxSubdivisions(8),
-          m_maxOuterIterations(100000),
-          m_maxStagnations(512),
-          m_faceTrials(6),
-          m_bracketGrowth(Real(2.0)),
-          m_maxBracketExpansions(3),
-          m_stepSafety(Real(0.5)),
-          m_minStepFactor(Real(10)),
-          m_tolFactor(Real(50)),
-          m_clampFactor(Real(10)),
+      Flow(const Real& t, const Operand& u, VVel&& vel, S&& st = S{}, B&& bp = B{})
+        : m_maxZeroHops(DefaultMaxZeroHops),
+          m_maxBisections(DefaultMaxBisections),
+          m_maxSubdivisions(DefaultMaxSubdivisions),
+          m_maxOuterIterations(DefaultMaxOuterIterations),
+          m_maxStagnations(DefaultMaxStagnations),
+          m_faceTrials(DefaultFaceTrials),
+          m_bracketGrowth(DefaultBracketGrowth),
+          m_maxBracketExpansions(DefaultMaxBracketExpansions),
+          m_stepSafety(DefaultStepSafety),
+          m_minStepFactor(DefaultMinStepFactor),
+          m_tolFactor(DefaultTolFactor),
+          m_clampFactor(DefaultClampFactor),
           m_t(t),
           m_operand(u.copy()),
           m_velocity(std::forward<VVel>(vel)),
@@ -270,7 +266,10 @@ namespace Rodin::Variational
           m_p(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Flow(const Flow& other)
         : Parent(other),
           m_maxZeroHops(other.m_maxZeroHops),
@@ -293,7 +292,10 @@ namespace Rodin::Variational
           m_p(other.m_p)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Flow(Flow&& other)
         : Parent(std::move(other)),
           m_maxZeroHops(std::move(other.m_maxZeroHops)),
@@ -370,25 +372,17 @@ namespace Rodin::Variational
         const Real sqrtEps = std::sqrt(epsMachine);
         const Real vFloor = std::numeric_limits<Real>::min();
 
-        auto isFinite = [](Real v) -> bool
-        {
-          return std::isfinite(v);
-        };
+        auto isFinite = [](Real v) -> bool { return std::isfinite(v); };
 
-        auto dot = [](const auto& a, const auto& b) -> Real
-        {
-          return b.dot(a);
-        };
+        auto dot = [](const auto& a, const auto& b) -> Real { return b.dot(a); };
 
-        auto norm2 = [&](const auto& v) -> Real
-        {
+        auto norm2 = [&](const auto& v) -> Real {
           const Real v2 = dot(v, v);
           return std::max<Real>(Real(0), v2);
         };
 
         // Normalize the velocity return type in one place.
-        auto vphysOf = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real>
-        {
+        auto vphysOf = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real> {
           const auto v = m_velocity(qp);
           if constexpr (requires { v.col(0); })
           {
@@ -400,12 +394,15 @@ namespace Rodin::Variational
           }
         };
 
-        // Reuse dynamic work buffers while keeping stack-backed points local.
+        // Each active trace owns its workspace, including during nested velocity evaluation.
         Index sCell = Index(-1);
         Math::SpatialPoint sRc{{}}, sRc1{{}}, sRcTmp{{}}, sREval{{}}, sRIn{{}};
         Math::SpatialPoint sPc{{}}, sX{{}}, sXIn{{}}, sXFace{{}};
-        static thread_local std::vector<Candidate> s_candidates;
-        static thread_local std::vector<size_t> s_faceSet;
+        // Six is the maximum facet count of the supported reference cells.
+        // Larger incidence sets retain the dynamic fallback.
+        constexpr size_t InlineFaceCount = 6;
+        boost::container::small_vector<Candidate, InlineFaceCount> candidates;
+        boost::container::small_vector<size_t, InlineFaceCount> faceSet;
 
         // Locate the starting cell and reference coordinates.
         if (poly0.getDimension() == cd)
@@ -463,8 +460,7 @@ namespace Rodin::Variational
             const auto vref0 = (sgn * q0.getJacobianInverse() * vphysOf(q0));
             const Real ndv0 = dot(nref0, vref0);
 
-            auto interiorScore = [&](Index c, const Math::SpatialPoint& rproj) -> Real
-            {
+            auto interiorScore = [&](Index c, const Math::SpatialPoint& rproj) -> Real {
               const auto gc = mesh.getGeometry(cd, c);
               const Geometry::Polytope::Traits tsc(gc);
               const auto& hsc = tsc.getHalfSpace();
@@ -479,7 +475,7 @@ namespace Rodin::Variational
               return s;
             };
 
-            const Real epsNdv0 = Real(10) * sqrtEps;
+            const Real epsNdv0 = TangentialVelocityRoundoffFactor * sqrtEps;
             if (std::abs(ndv0) <= epsNdv0)
             {
               const Real s0 = interiorScore(c0, rc0);
@@ -509,7 +505,7 @@ namespace Rodin::Variational
         }
         else
         {
-          return Trace{ true, Real(0), p, correction };
+          return Trace{true, Real(0), p, correction};
         }
 
         // Resize scratch buffers.
@@ -524,20 +520,17 @@ namespace Rodin::Variational
         sXFace.resize(sPc.size());
 
         // Avoid immediate backtracking if there are alternatives.
-        std::optional<size_t> lastFace;
+        Optional<size_t> lastFace;
 
-        auto phiFace = [&](const auto& hs, size_t j, const Math::SpatialPoint& r) -> Real
-        {
+        auto phiFace = [&](
+                         const auto& hs, size_t j, const Math::SpatialPoint& r) -> Real {
           const auto n = hs.matrix.row(j);
           const Real b = hs.vector[j];
           return b - r.dot(n);
         };
 
-        auto clampIfOutside = [&](const auto& hs,
-                                  const auto& g,
-                                  Math::SpatialPoint& r,
-                                  Real epsPhi) -> void
-        {
+        auto clampIfOutside = [&](const auto& hs, const auto& g, Math::SpatialPoint& r,
+                                Real epsPhi) -> void {
           bool violated = false;
           for (size_t j = 0; j < static_cast<size_t>(hs.vector.size()); ++j)
           {
@@ -575,18 +568,15 @@ namespace Rodin::Variational
           const auto& faces = conn.getIncidence(cd, cd - 1).at(sCell);
           const auto& hs = ts.getHalfSpace();
 
-          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-          {
+          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real> {
             const Geometry::Point qp(cell, r);
             return (sgn * qp.getJacobianInverse() * vphysOf(qp));
           };
 
-          auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
-          {
-            m_step.step(
-              rout, dt, rin,
-              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
-              {
+          auto advance = [&](Math::SpatialPoint& rout, Real dt,
+                           const Math::SpatialPoint& rin) {
+            m_step.step(rout, dt, rin,
+              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real> {
                 return vref(rr);
               });
           };
@@ -646,27 +636,27 @@ namespace Rodin::Variational
 
             if (hScale > Real(0) && isFinite(hScale))
             {
-              dtCap = std::min(dtCap, stepSafety * hScale / std::max<Real>(vphysMag, vFloor));
+              dtCap =
+                std::min(dtCap, stepSafety * hScale / std::max<Real>(vphysMag, vFloor));
             }
 
             if (!(dtCap > Real(0)) || !isFinite(dtCap))
               dtCap = tau;
           }
 
-          const Real dtMin =
-            minStepFactor * sqrtEps * (Real(1) + rnorm) / std::max<Real>(Real(1), vrefMag);
+          const Real dtMin = minStepFactor * sqrtEps * (Real(1) + rnorm) /
+            std::max<Real>(Real(1), vrefMag);
 
-          std::optional<Trace> exitTrace;
+          Optional<Trace> exitTrace;
 
-          auto doZeroHops = [&]() -> bool
-          {
+          auto doZeroHops = [&]() -> bool {
             size_t hops = 0;
             while (hops++ < maxZeroHops)
             {
               const auto vz = vref(sRc);
 
-              s_faceSet.clear();
-              s_faceSet.reserve(faces.size());
+              faceSet.clear();
+              faceSet.reserve(faces.size());
 
               bool haveNonLast = false;
               for (size_t j = 0; j < faces.size(); ++j)
@@ -684,10 +674,10 @@ namespace Rodin::Variational
                 if (!isLast)
                   haveNonLast = true;
 
-                s_faceSet.push_back(j);
+                faceSet.push_back(j);
               }
 
-              if (s_faceSet.empty())
+              if (faceSet.empty())
                 break;
 
               auto key = [&](size_t j) -> std::tuple<Real, Real, Index> {
@@ -695,12 +685,12 @@ namespace Rodin::Variational
                 const auto vz2 = vref(sRc);
                 const Real ndv = vz2.dot(hs.matrix.row(j).transpose());
                 const Index fid = faces[j];
-                return { std::abs(ph), -ndv, fid };
+                return {std::abs(ph), -ndv, fid};
               };
 
               size_t best = size_t(-1);
               bool have = false;
-              for (size_t jj : s_faceSet)
+              for (size_t jj : faceSet)
               {
                 if (haveNonLast && lastFace && jj == *lastFace)
                   continue;
@@ -723,8 +713,21 @@ namespace Rodin::Variational
 
               if (mesh.isBoundary(f))
               {
+                const Real tauBeforeBp = tau;
+                const Index cellBeforeBp = sCell;
+                const Math::SpatialPoint rcBeforeBp = sRc;
+                const Real correctionBeforeBp = correction;
                 BoundaryHit bh{tau, sCell, sRc, best, correction};
                 if (!m_bp(bh))
+                {
+                  exitTrace.emplace(true, tau, Geometry::Point(cell, sRc), correction);
+                  return false;
+                }
+                const Real rcMove2 = (sRc - rcBeforeBp).squaredNorm();
+                const bool progressed = (tau < tauBeforeBp) || (sCell != cellBeforeBp) ||
+                  (rcMove2 > ReferenceProgressRoundoffFactorSquared * epsMachine) ||
+                  (correction != correctionBeforeBp);
+                if (!progressed)
                 {
                   exitTrace.emplace(true, tau, Geometry::Point(cell, sRc), correction);
                   return false;
@@ -766,7 +769,8 @@ namespace Rodin::Variational
             const Real rcMove2 = (sRc - rcBeforeLoop).squaredNorm();
             const bool sameTau = !(tau < tauBeforeLoop);
             const bool sameCell = (sCell == cellBeforeLoop);
-            const bool sameRc = rcMove2 <= Real(100) * epsMachine;
+            const bool sameRc =
+              rcMove2 <= ReferenceProgressRoundoffFactorSquared * epsMachine;
 
             if (sameTau && sameCell && sameRc)
             {
@@ -804,8 +808,7 @@ namespace Rodin::Variational
             return phiFace(hs, j, rOut);
           };
 
-          auto tryBracketFace = [&](size_t j, Real t0, Real& hiOut) -> bool
-          {
+          auto tryBracketFace = [&](size_t j, Real t0, Real& hiOut) -> bool {
             Real t = std::min(t0, tauCell);
             if (!(t > Real(0)) || !isFinite(t))
               return false;
@@ -854,8 +857,8 @@ namespace Rodin::Variational
 
           for (size_t subdiv = 0; subdiv <= maxSubdivisions; ++subdiv)
           {
-            s_candidates.clear();
-            s_candidates.reserve(faces.size());
+            candidates.clear();
+            candidates.reserve(faces.size());
 
             for (size_t j = 0; j < faces.size(); ++j)
             {
@@ -875,20 +878,17 @@ namespace Rodin::Variational
               if (tlin > tauCell)
                 continue;
 
-              s_candidates.push_back(Candidate{ tlin, j, ndv, phi0, faces[j] });
+              candidates.push_back(Candidate{tlin, j, ndv, phi0, faces[j]});
             }
 
-            if (s_candidates.empty())
+            if (candidates.empty())
             {
               foundEvent = false;
               break;
             }
 
-            std::sort(
-              s_candidates.begin(),
-              s_candidates.end(),
-              [](const Candidate& a, const Candidate& b)
-              {
+            std::sort(candidates.begin(), candidates.end(),
+              [](const Candidate& a, const Candidate& b) {
                 if (a.tlin != b.tlin)
                   return a.tlin < b.tlin;
                 if (a.ndv != b.ndv)
@@ -896,15 +896,14 @@ namespace Rodin::Variational
                 return a.fid < b.fid;
               });
 
-            const size_t ntry = std::min(faceTrials, s_candidates.size());
+            const size_t ntry = std::min(faceTrials, candidates.size());
 
-            auto consider = [&](size_t begin, size_t end)
-            {
+            auto consider = [&](size_t begin, size_t end) {
               for (size_t k = begin; k < end; ++k)
               {
-                const auto& c = s_candidates[k];
+                const auto& c = candidates[k];
 
-                if (lastFace && c.j == *lastFace && s_candidates.size() > 1)
+                if (lastFace && c.j == *lastFace && candidates.size() > 1)
                   continue;
 
                 Real hi = Real(0);
@@ -923,12 +922,12 @@ namespace Rodin::Variational
             foundEvent = false;
             consider(0, ntry);
             if (!foundEvent)
-              consider(ntry, s_candidates.size());
+              consider(ntry, candidates.size());
 
             if (foundEvent)
               break;
 
-            tauCell *= Real(0.5);
+            tauCell *= SubdivisionContraction;
             if (tauCell <= dtMin || !isFinite(tauCell))
               break;
           }
@@ -954,7 +953,8 @@ namespace Rodin::Variational
 
             const Real rcMove2 = (sRc - rcBefore).squaredNorm();
             const bool timeProgress = (tau < tauBefore);
-            const bool spaceProgress = rcMove2 > Real(100) * epsMachine;
+            const bool spaceProgress =
+              rcMove2 > ReferenceProgressRoundoffFactorSquared * epsMachine;
 
             if (!timeProgress && !spaceProgress)
             {
@@ -974,8 +974,8 @@ namespace Rodin::Variational
           }
 
           const Real ndv0 = dot(hs.matrix.row(jStar).transpose(), v0);
-          const Real dtTol =
-            std::max<Real>(Real(1e-12), epsPhi / std::max<Real>(ndv0, vFloor));
+          const Real dtTol = std::max<Real>(
+            AbsoluteBracketTimeFloor, epsPhi / std::max<Real>(ndv0, vFloor));
 
           Real lo = Real(0);
           Real hi = hiStar;
@@ -1028,7 +1028,8 @@ namespace Rodin::Variational
 
             const Real rcMove2 = (sRc - rcBeforeBp).squaredNorm();
             const bool progressed = (tau < tauBeforeBp) || (sCell != cellBeforeBp) ||
-              (rcMove2 > Real(100) * epsMachine) || (correction != correctionBeforeBp);
+              (rcMove2 > ReferenceProgressRoundoffFactorSquared * epsMachine) ||
+              (correction != correctionBeforeBp);
 
             if (!progressed)
             {
@@ -1072,26 +1073,32 @@ namespace Rodin::Variational
        * @brief Evaluates the flowed function at a point.
        *
        * If tracing exits or aborts before completion, this default implementation
-       * returns zero.
+       * returns zero in the result's scalar field.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
+        using RangeType = typename FormLanguage::Traits<Operand>::RangeType;
+        using ValueType = decltype(std::declval<RangeType>() + Real(0));
         const auto tr = this->trace(p);
         if (tr.exited())
-          return Real(0);
+          return ValueType(0);
         return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      constexpr
-      const auto& getLeaf() const
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
+      constexpr const auto& getLeaf() const
       {
         return m_operand->getLeaf();
       }
 
       /**
        * @brief Returns the operand function.
+       * @returns The operand function.
        */
       const auto& getOperand() const
       {
@@ -1101,6 +1108,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the velocity field.
+       * @returns The velocity field.
        */
       const auto& getVelocity() const
       {
@@ -1109,6 +1117,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the time integrator.
+       * @returns The time integrator.
        */
       const auto& getStep() const
       {
@@ -1117,6 +1126,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the boundary policy.
+       * @returns The boundary policy.
        */
       const auto& getBoundaryPolicy() const
       {
@@ -1127,6 +1137,8 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of zero-time face hops.
        *
        * Default value: 128.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxZeroHops(size_t value)
       {
@@ -1139,6 +1151,8 @@ namespace Rodin::Variational
        *        face hit time.
        *
        * Default value: 16.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxBisections(size_t value)
       {
@@ -1151,6 +1165,8 @@ namespace Rodin::Variational
        *        bracketing fails.
        *
        * Default value: 8.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxSubdivisions(size_t value)
       {
@@ -1162,6 +1178,8 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of outer trace loop iterations.
        *
        * Default value: 100000.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxOuterIterations(size_t value)
       {
@@ -1174,6 +1192,8 @@ namespace Rodin::Variational
        *        tolerated before aborting.
        *
        * Default value: 512.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxStagnations(size_t value)
       {
@@ -1186,6 +1206,8 @@ namespace Rodin::Variational
        *        predicted hit time.
        *
        * Default value: 6.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setFaceTrials(size_t value)
       {
@@ -1198,6 +1220,8 @@ namespace Rodin::Variational
        *        hit bracket.
        *
        * Default value: 2.0.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setBracketGrowth(Real value)
       {
@@ -1209,6 +1233,8 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of bracket expansion attempts per face.
        *
        * Default value: 3.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxBracketExpansions(size_t value)
       {
@@ -1222,6 +1248,8 @@ namespace Rodin::Variational
        * Smaller values are more conservative.
        *
        * Default value: 0.5.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setStepSafety(Real value)
       {
@@ -1233,6 +1261,8 @@ namespace Rodin::Variational
        * @brief Sets the factor used to define the minimum admissible substep.
        *
        * Default value: 10.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMinStepFactor(Real value)
       {
@@ -1245,6 +1275,8 @@ namespace Rodin::Variational
        *        geometric and directional tolerances.
        *
        * Default value: 50.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setTolFactor(Real value)
       {
@@ -1257,6 +1289,8 @@ namespace Rodin::Variational
        *        outside a cell to be clamped back inside.
        *
        * Default value: 10.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setClampFactor(Real value)
       {
@@ -1264,8 +1298,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<size_t> getOrder([[maybe_unused]] const Geometry::Polytope& polytope) const
       {
         return {};
       }
@@ -1276,6 +1314,54 @@ namespace Rodin::Variational
       }
 
     private:
+      /// @brief Heuristic sqrt(epsilon) multiplier for near-tangential reference normal velocity.
+      static constexpr Real TangentialVelocityRoundoffFactor = Real(10);
+
+      /// @brief Squared reference-motion threshold multiplier of epsilon: (10 sqrt(epsilon)) squared.
+      static constexpr Real ReferenceProgressRoundoffFactorSquared = Real(100);
+
+      /// @brief Halves a rejected cell substep during subdivision.
+      static constexpr Real SubdivisionContraction = Real(0.5);
+
+      /// @brief Absolute face-crossing bracket resolution floor in tracing-time units; heuristic.
+      static constexpr Real AbsoluteBracketTimeFloor = Real(1e-12);
+
+      /// @brief Work limit on face hops without consuming tracing time.
+      static constexpr size_t DefaultMaxZeroHops = 128;
+
+      /// @brief Work limit on face-crossing bracket bisections.
+      static constexpr size_t DefaultMaxBisections = 16;
+
+      /// @brief Work limit on halvings of a cell substep.
+      static constexpr size_t DefaultMaxSubdivisions = 8;
+
+      /// @brief Total tracing-loop work limit; not a convergence guarantee.
+      static constexpr size_t DefaultMaxOuterIterations = 100000;
+
+      /// @brief Work limit on consecutive iterations without sufficient progress.
+      static constexpr size_t DefaultMaxStagnations = 512;
+
+      /// @brief Face-crossing trial budget per face.
+      static constexpr size_t DefaultFaceTrials = 6;
+
+      /// @brief Dimensionless geometric growth factor for crossing brackets.
+      static constexpr Real DefaultBracketGrowth = Real(2.0);
+
+      /// @brief Work limit on crossing-bracket expansions.
+      static constexpr size_t DefaultMaxBracketExpansions = 3;
+
+      /// @brief Dimensionless safety multiplier of the local cell time-step cap.
+      static constexpr Real DefaultStepSafety = Real(0.5);
+
+      /// @brief sqrt(epsilon) multiplier of the reference-distance/velocity scale for minimum substeps.
+      static constexpr Real DefaultMinStepFactor = Real(10);
+
+      /// @brief sqrt(epsilon) multiplier for geometric and directional tolerances.
+      static constexpr Real DefaultTolFactor = Real(50);
+
+      /// @brief Dimensionless multiplier of the geometric tolerance before clamping.
+      static constexpr Real DefaultClampFactor = Real(10);
+
       size_t m_maxZeroHops;
       size_t m_maxBisections;
       size_t m_maxSubdivisions;
@@ -1297,28 +1383,39 @@ namespace Rodin::Variational
       const Geometry::Point* m_p;
   };
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param time Duration of the flow integration.
+   * @param operand Function transported along the flow.
+   * @param velocity Velocity field.
+   */
   template <class Derived, class Velocity>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&)
-    -> Flow<
-         FunctionBase<Derived>,
-         Velocity,
-         Math::RungeKutta::RK4,
-         DefaultBoundaryPolicy>;
+  Flow(const Real& time, const FunctionBase<Derived>& operand,
+    Velocity&& velocity) -> Flow<FunctionBase<Derived>, Velocity, Math::RungeKutta::RK4,
+                           DefaultBoundaryPolicy>;
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param time Duration of the flow integration.
+   * @param operand Function transported along the flow.
+   * @param velocity Velocity field.
+   * @param stepper Time integration method.
+   */
   template <class Derived, class Velocity, class Step>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
-    -> Flow<
-         FunctionBase<Derived>,
-         Velocity,
-         Step,
-         DefaultBoundaryPolicy>;
+  Flow(const Real& time, const FunctionBase<Derived>& operand, Velocity&& velocity,
+    Step&& stepper) -> Flow<FunctionBase<Derived>, Velocity, Step, DefaultBoundaryPolicy>;
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param t Signed tracing time.
+   * @param u Operand function.
+   * @param vel Velocity field.
+   * @param st Time integrator.
+   * @param bp Boundary policy.
+   */
   template <class Derived, class Velocity, class Step, class BBP>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&)
-    -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
+  Flow(const Real& t, const FunctionBase<Derived>& u, Velocity&& vel, Step&& st,
+    BBP&& bp) -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
 #endif

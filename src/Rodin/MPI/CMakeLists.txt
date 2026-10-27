@@ -6,10 +6,14 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 
 set(RodinMPI_HEADERS
+  Location.h
+  Location/AABB.h
   Geometry/Mesh.h
   Geometry/SubMesh.h
   Geometry/Sharder.h
   Assembly/MPI.h
+  Assembly/BoundaryDOFs.h
+  Variational/Interpolation.h
   IO/HDF5.h
   IO/MFEM.h
   IO/MEDIT.h

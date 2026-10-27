@@ -16,6 +16,10 @@
 
 #include "Sharder.h"
 
+// Instantiate exports after the packed MPI archive declarations. This single
+// translation unit owns the built-in polymorphic geometry registrations.
+#include "Rodin/Serialization/Export.h"
+
 namespace Rodin::Geometry
 {
   /// @cond

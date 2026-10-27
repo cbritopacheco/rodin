@@ -28,7 +28,7 @@ namespace Rodin::Math
    * inheriting all the unit arithmetic operations from the Unit base class.
    * Provides a conversion method to radians.
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * Deg angle(180.0);  // 180 degrees
    * Rad radians = angle.toRad();  // π radians
@@ -53,7 +53,9 @@ namespace Rodin::Math
        */
       Rad toRad() const
       {
-        return Rad(Real(*this) * Constants::pi() / Real(180));
+        // Form the radians-per-degree scale before multiplying large finite angles.
+        constexpr Real RadiansPerDegree = Constants::pi() / Real(180);
+        return Rad(Real(*this) * RadiansPerDegree);
       }
   };
 }

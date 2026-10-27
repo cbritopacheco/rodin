@@ -14,6 +14,90 @@ was abandoned. When you do performance work, the acceptance bar is *identical
 numerics* (iteration counts, final energies/fits) against a baseline run —
 not just "tests pass".
 
+**Inspect history before changing established behavior.** Use `git blame` and
+the relevant commits to find why a condition, threshold, or formula was
+introduced or removed, especially in numerical convergence and stopping logic.
+If the implementation differs from a paper or specification, establish whether
+the difference was deliberate before editing the code.
+
+## Indentation and access sections
+
+Use two spaces per indentation level, including declarations, method bodies
+and their documentation. Members and documentation following `public:`,
+`protected:` or `private:` must be indented two spaces beyond the access label;
+they must not be aligned with it. Access labels are indented two spaces beyond
+the enclosing record's brace. Members before the first explicit access label
+retain one two-space level inside the record, including assertions and friends.
+Plain records without access labels use this same two-space member level.
+Nested records follow the same rule.
+
+The repository formatter expresses this with `IndentWidth: 2`,
+`IndentAccessModifiers: true`. Since clang-format also adds an unwanted extra
+level in implicit access sections, `dev/format_cpp.py` removes that level after
+formatting.
+Use this canonical entry point rather than raw clang-format. The CI changed-line
+check uses the same operation. Keep the configuration and
+`dev/test_format_config.py` regressions consistent; do not use
+formatting-disable comments to obtain this layout. Formatting enforcement
+remains changed-lines-only rather than a whole-tree reformat. Apply the ratchet
+locally with `python3 dev/check_format.py --base REF --fix [paths...]`; reserve
+full-file formatting for new files or intentional complete-file passes.
+Comment reflow remains disabled to preserve mathematical documentation;
+existing block-comment indentation may be retained by clang-format. Align
+each documentation block with its declaration when editing it.
+
+Always leave a blank line between the end of a declaration or definition and
+the next standalone Doxygen documentation block, including `///` comments.
+This also separates individually documented aliases and data members. Keep
+the documentation attached to its own declaration, and do not insert blank
+lines within one documentation block. The canonical formatter enforces this
+spacing through the existing changed-line CI check.
+
+## Control-flow braces
+
+A `for`, `if`, or `else` body spanning multiple physical lines requires Allman
+braces, even when it contains only one statement. Only the body's line count
+matters; a wrapped condition or loop header does not require a one-line body
+to be braced. Conventional `else if` chains retain their usual layout, with
+each branch body checked independently. `dev/style_lint.py` enforces this rule.
+
+## Const correctness
+
+**`const_cast` is forbidden.** Operations that update assembly or evaluation
+state must express that requirement through non-const objects or explicitly
+borrowed non-const references. Use owned working storage when the input must
+remain read-only; never cast away constness to update it.
+
+## Numerical constants
+
+Avoid unexplained numeric thresholds, safety factors, and iteration limits.
+Use named `constexpr` constants in the owning class or method; use macros only
+when preprocessing requires them. Document each constant's purpose, units or
+scale, and the reason for its value. State when a value is a heuristic policy
+choice rather than a mathematical bound. Derive related values, such as squared
+tolerances or factors, from one named constant so they cannot drift apart.
+Literal coordinate indices, zero and one, and explicit mathematical identities
+do not need artificial names.
+
+## Optional state and sentinels
+
+Represent absence explicitly with `Optional<T>` rather than reserving a valid
+value of `T` as a sentinel. Use semantic type aliases where appropriate. For
+example, prefer:
+
+```cpp
+using Rank = int;
+Optional<Rank> m_source;
+```
+
+over `int m_sourceRank = -1;`. Initialize members in constructors rather than
+in declarations. A sentinel representation requires a demonstrated performance
+improvement over explicit optional state in a representative benchmark; presumed
+overhead is not sufficient justification. Document the reserved value, its
+exclusion from valid inputs, and the measured benefit. When an external API
+requires a sentinel, translate it at the interface rather than propagating it
+through internal state.
+
 ## Anomalies
 
 **An unexplained measurement is a finding, not a footnote. Do not ship a
@@ -25,7 +109,7 @@ whatever the reader already believes.
 The cost of skipping this is that the anomaly is usually about the
 *instrument*, not the subject. A quadrature benchmark once appeared to show
 that access on tetrahedra and pyramids cost four to six times that on
-triangles and wedges at equal order. It did not. `PolytopeQuadratureFormula`'s
+triangles and wedges at equal order. It did not. `QuadratureFormula`'s concrete-family
 thread-local hot cache holds eight entries, inserts round-robin and scans
 linearly from slot zero, so lookup cost is proportional to the slot a key
 landed in --- that is, to the order in which distinct keys were first
@@ -39,13 +123,61 @@ is an artefact, in which case the fix is to the measurement; or that it is
 real but out of scope, in which case it is recorded as its own item rather
 than folded into the current change.
 
-## Error handling in PETSc-facing code
+A large performance gap between dimensions or geometries requires investigation;
+dimension alone is not an explanation. Compare matched physical forms, field and
+geometry degrees, quadrature requirements, builds, backends, threads and ranks.
+Report raw timings together with cell, quadrature-point, local basis, global DOF
+and matrix-entry counts, and normalize by the work actually performed. Separate
+geometry evaluation, element kernels, insertion/finalization, constraints,
+solvers and error integration; record solver iterations and memory when relevant.
+Inspect profiles for the unexplained part of the gap and check cache order,
+allocation, communication and sanitizer effects. Do not weaken numerical
+requirements or classify a case as merely slow without this analysis. Preserve
+the reproducing benchmark and numerical regressions for any resulting repair.
+
+## Error handling
+
+Use Rodin's streamable `Alert::Exception` family rather than throwing standard
+library exceptions for errors diagnosed by Rodin. Prefer
+`Alert::MemberFunctionException(*this, __func__)` for member-function failures,
+or the applicable class, namespace, or domain-specific Alert exception, so the
+diagnostic retains its context. Complete the diagnostic with `Alert::Raise`.
+Use `assert` for internal invariants, not for invalid public inputs that must
+also be diagnosed in release builds. Do not replace exceptions originating
+inside third-party libraries merely to change their type.
+
+### PETSc-facing code
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
 uniform house idiom. Do not introduce a checking macro, and do not convert
 existing asserts to one. Better still: backend-independent code (form
 language, `Problem`, `LinearSolverBase`) should not touch PETSc at all —
 keep PETSc calls inside `src/Rodin/PETSc/`.
+
+## MPI collectives
+
+Use a collective only when the operation's mathematical or distributed-state
+contract is global, and document that requirement at the public entry point.
+Do not introduce collectives into local evaluation, accessors, copying, or
+rank-local Shard operations. Establish necessary global metadata during an
+explicitly collective construction or reconstruction phase and retain it for
+non-collective queries. A collective must not conceal missing connectivity,
+ownership metadata, or an incorrect caller protocol.
+
+## Implementation locality
+
+**Prefer implementation locality and monolithic method style.** The method
+that owns an operation should show its sequence and decisions. Do not create
+helper or free functions solely to shorten that method or deduplicate similar
+code in other implementations. If an algorithm has meaningful stages, separate
+them into methods of the same class and keep shared state in that class.
+Independent operations with their own contracts may still be separate
+components, such as `MatrixSetup`.
+
+For assembly backends, `execute` owns matrix setup, mesh iteration, ownership
+and attribute filtering, local kernel evaluation, entry insertion, and final
+assembly. Backend policy remains visible in each specialization; similar
+loops across backends do not by themselves justify a forwarding free function.
 
 ## Design preferences
 

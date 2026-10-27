@@ -41,7 +41,6 @@ TEST(QFUmbrellaHeaderTest, AdvertisedFormulaeAreReachable)
   const QF::TensorProduct tensor(Polytope::Type::Quadrilateral, line, line);
   EXPECT_EQ(tensor.getSize(), line.getSize() * line.getSize());
 
-  const auto& dispatched =
-    QF::PolytopeQuadratureFormula::get(3, Polytope::Type::Tetrahedron);
+  const auto& dispatched = QF::QuadratureFormula::get(3, Polytope::Type::Tetrahedron);
   EXPECT_GT(dispatched.getSize(), 0u);
 }

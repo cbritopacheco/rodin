@@ -54,7 +54,6 @@
 #include "PolytopeTransformationIndex.h"
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ to be computed.
  *
  * Throws an exception if the specified connectivity relation has not been
@@ -65,17 +64,16 @@
  * @param[in] d Source dimension
  * @param[in] dp Target dimension
  */
-#define RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, dp) \
-  if (mesh.getConnectivity().getIncidence(d, dp).size() == 0) \
-  { \
-    Rodin::Alert::MemberFunctionException(*this, __func__) \
-      << Rodin::Alert::Notation::Incidence(d, dp) \
-      << " has not been computed and is required to use this function." \
-      << Rodin::Alert::Raise; \
+#define RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, dp)                                    \
+  if (mesh.getConnectivity().getIncidence(d, dp).size() == 0)                            \
+  {                                                                                      \
+    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
+      << Rodin::Alert::Notation::Incidence(d, dp)                                        \
+      << " has not been computed and is required to use this function."                  \
+      << Rodin::Alert::Raise;                                                            \
   }
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires connectivity @f$ d \rightarrow d' @f$ (for use in member functions).
  *
  * Throws an exception if the specified connectivity relation has not been
@@ -84,30 +82,28 @@
  * @param[in] d Source dimension
  * @param[in] dp Target dimension
  */
-#define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp) \
-  if (this->getConnectivity().getIncidence(d, dp).size() == 0) \
-  { \
-    Rodin::Alert::MemberFunctionException(*this, __func__) \
-      << Rodin::Alert::Notation::Incidence(d, dp) \
-      << " has not been computed and is required to use this function." \
-      << Rodin::Alert::Raise; \
+#define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp)                                     \
+  if (this->getConnectivity().getIncidence(d, dp).size() == 0)                           \
+  {                                                                                      \
+    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
+      << Rodin::Alert::Notation::Incidence(d, dp)                                        \
+      << " has not been computed and is required to use this function."                  \
+      << Rodin::Alert::Raise;                                                            \
   }
 
 /**
- * @ingroup RodinDirectives
  * @brief Requires mesh to be a SubMesh.
  *
  * Throws an exception if the mesh is not a SubMesh instance, preventing
  * invalid downcasting operations.
  */
-#define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH() \
-  if (!this->isSubMesh()) \
-  { \
-    Rodin::Alert::MemberFunctionException(*this, __func__) \
-      << "This instance of Mesh is not a SubMesh " \
-      << Rodin::Alert::Notation::Predicate(false, "isSubMesh()") \
-      << ". Downcasting to SubMesh is ill-defined." \
-      << Rodin::Alert::Raise; \
+#define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH()                                            \
+  if (!this->isSubMesh())                                                                \
+  {                                                                                      \
+    Rodin::Alert::MemberFunctionException(*this, __func__)                               \
+      << "This instance of Mesh is not a SubMesh "                                       \
+      << Rodin::Alert::Notation::Predicate(false, "isSubMesh()")                         \
+      << ". Downcasting to SubMesh is ill-defined." << Rodin::Alert::Raise;              \
   }
 
 namespace Rodin::FormLanguage
@@ -217,6 +213,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets iterator to first component.
+       * @returns Iterator to the first entry.
        */
       auto begin()
       {
@@ -225,6 +222,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets iterator past last component.
+       * @returns Iterator past the last entry.
        */
       auto end()
       {
@@ -233,6 +231,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets const iterator to first component.
+       * @returns Iterator to the first entry.
        */
       auto begin() const
       {
@@ -241,6 +240,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets const iterator past last component.
+       * @returns Iterator past the last entry.
        */
       auto end() const
       {
@@ -249,6 +249,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets const iterator to first component.
+       * @returns Constant iterator to the first entry.
        */
       auto cbegin() const
       {
@@ -257,6 +258,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets const iterator past last component.
+       * @returns Constant iterator past the last entry.
        */
       auto cend() const
       {
@@ -319,9 +321,7 @@ namespace Rodin::Geometry
   class MeshBase
   {
     public:
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~MeshBase() = default;
 
       /**
@@ -329,8 +329,7 @@ namespace Rodin::Geometry
        * @param[in] other Mesh to compare with
        * @returns True if this is the same mesh object
        */
-      constexpr
-      bool operator==(const MeshBase& other) const
+      constexpr bool operator==(const MeshBase& other) const
       {
         return this == &other;
       }
@@ -340,8 +339,7 @@ namespace Rodin::Geometry
        * @param[in] other Mesh to compare with
        * @returns True if not the same mesh object
        */
-      constexpr
-      bool operator!=(const MeshBase& other) const
+      constexpr bool operator!=(const MeshBase& other) const
       {
         return this != &other;
       }
@@ -353,6 +351,8 @@ namespace Rodin::Geometry
        * Ordinary meshes accept only points attached directly to themselves.
        * Distributed meshes override this to also accept points attached to their
        * rank-local shard.
+       * @param p Point at which the operation is evaluated.
+       * @returns Whether the point belongs to this mesh and uses its local entity numbering.
        */
       virtual bool isLocalPoint(const Point& p) const;
 
@@ -454,8 +454,7 @@ namespace Rodin::Geometry
        * @returns Reference to this mesh
        */
       virtual MeshBase& load(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt) = 0;
+        const boost::filesystem::path& filename, IO::FileFormat fmt) = 0;
 
       /**
        * @brief Saves mesh to file.
@@ -463,8 +462,7 @@ namespace Rodin::Geometry
        * @param[in] fmt File format
        */
       virtual void save(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt) const = 0;
+        const boost::filesystem::path& filename, IO::FileFormat fmt) const = 0;
 
       /**
        * @brief Flushes cached mesh data.
@@ -706,13 +704,18 @@ namespace Rodin::Geometry
        * @param[in] idx Polytope index
        * @returns Reference to transformation @f$ x: K \rightarrow \tau @f$
        */
-      virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index idx) const = 0;
+      virtual const PolytopeTransformation& getPolytopeTransformation(
+        size_t dimension, Index idx) const = 0;
 
       /**
        * @brief Gets cached quadrature for a polytope.
+       * @param idx Index of the requested entry.
+       * @returns Cached quadrature for a polytope.
+       * @param dimension Spatial dimension.
+       * @param qf Quadrature formula defining the evaluation points.
        */
       virtual const PolytopeQuadrature& getQuadrature(
-          size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const = 0;
+        size_t dimension, Index idx, const QF::QuadratureFormula& qf) const = 0;
 
       /**
        * @brief Gets geometry type of a polytope.
@@ -736,7 +739,8 @@ namespace Rodin::Geometry
        * @param[in] attr New attribute value
        * @returns Reference to this mesh
        */
-      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) = 0;
+      virtual MeshBase& setAttribute(
+        const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) = 0;
 
       /**
        * @brief Gets reference to mesh connectivity.
@@ -746,12 +750,14 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets a constant reference to the mesh connectivity.
+       * @returns A constant reference to the mesh connectivity.
        */
       virtual const ConnectivityBase& getConnectivity() const = 0;
 
       /**
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
+       * @returns The space coordinates of the vertex at the given index.
        */
       virtual Math::SpatialPoint getVertexCoordinates(Index idx) const = 0;
 
@@ -761,6 +767,7 @@ namespace Rodin::Geometry
        * @param[in] idx Vertex index
        * @param[in] s New coordinate
        * @param[in] i Coordinate index
+       * @returns Reference to this mesh after updating the coordinate.
        *
        * For example, the following code sets the coordinates of the 0-vertex
        * to @f$ (0, 5, 10) @f$ in a mesh embedded in three dimensional space.
@@ -780,8 +787,10 @@ namespace Rodin::Geometry
        * the given coordinate index.
        * @param[in] idx Vertex index
        * @param[in] coords New coordinates
+       * @returns Reference to this mesh after updating the coordinates.
        */
-      virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) = 0;
+      virtual MeshBase& setVertexCoordinates(
+        Index idx, const Math::SpatialPoint& coords) = 0;
 
       /**
        * @brief Sets the geometric transformation for a polytope.
@@ -793,7 +802,7 @@ namespace Rodin::Geometry
        * not delete it after this call.
        */
       virtual MeshBase& setPolytopeTransformation(
-          const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
+        const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
 
       /**
        * @brief Gets the execution context of the mesh.
@@ -827,9 +836,13 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /// @brief Serializes the mesh (for boost::serialization).
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      /**
+       * @brief Serializes the mesh (for boost::serialization).
+       * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_name;
       }
@@ -839,8 +852,7 @@ namespace Rodin::Geometry
   };
 
   /// Type alias for Mesh<Context::Local>
-  using LocalMesh =
-    Mesh<Context::Local>;
+  using LocalMesh = Mesh<Context::Local>;
 
   /**
    *
@@ -861,18 +873,13 @@ namespace Rodin::Geometry
       using Context = Rodin::Context::Local;
 
       /// @brief Parent class type.
-      using Parent =
-        MeshBase;
+      using Parent = MeshBase;
 
-      /**
-       * @brief Class used to build Mesh<Context::Local> instances.
-       */
+      /// @brief Class used to build Mesh<Context::Local> instances.
       class Builder
       {
         public:
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder()
             : m_initialized(false),
               m_nodes(0)
@@ -882,32 +889,42 @@ namespace Rodin::Geometry
 
           /**
            * @brief Deleted copy constructor.
+           * @param other Object whose copying or moving is disabled.
            */
-          Builder(const Builder&) = delete;
+          Builder(const Builder& other) = delete;
 
           /**
            * @brief Move constructor.
+           * @param other Object to move from.
            */
-          Builder(Builder&&) = default;
+          Builder(Builder&& other) = default;
 
           /**
            * @brief Deleted copy assignment.
+           * @param other Object to copy from.
            */
-          Builder& operator=(const Builder&) = delete;
+          Builder& operator=(const Builder& other) = delete;
 
           /**
            * @brief Move assignment.
+           * @returns Reference to this object after the operation.
+           * @param other Object to move from.
            */
-          Builder& operator=(Builder&&) = default;
+          Builder& operator=(Builder&& other) = default;
 
           /**
            * @brief Reserves memory accross the data structure for the polytopes of
            * the given dimension.
+           * @param d Topological dimension of the entity.
+           * @param count Number of entries to reserve.
+           * @returns Reference to this object after the operation.
            */
           Builder& reserve(size_t d, size_t count);
 
           /**
            * @brief Initializes construction of the mesh object.
+           * @param sdim Dimension of the embedding space.
+           * @returns Reference to this object after the operation.
            */
           Builder& initialize(size_t sdim);
 
@@ -916,6 +933,8 @@ namespace Rodin::Geometry
            *
            * @note This method requires initialize(size_t) to be called
            * beforehand.
+           * @param n Number of entries.
+           * @returns Reference to this object after the operation.
            */
           Builder& nodes(size_t n);
 
@@ -923,6 +942,8 @@ namespace Rodin::Geometry
            * @brief Adds vertex with coordinates given by the fixed size array.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
+           * @param data Coordinates of the vertex.
+           * @returns Reference to this object after the operation.
            */
           template <size_t Size>
           Builder& vertex(const Real (&data)[Size])
@@ -938,6 +959,8 @@ namespace Rodin::Geometry
            * @brief Adds vertex with coordinates given by the initializer list.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
+           * @param l Coordinates of the vertex.
+           * @returns Reference to this object after the operation.
            */
           Builder& vertex(std::initializer_list<Real> l);
 
@@ -945,6 +968,8 @@ namespace Rodin::Geometry
            * @brief Adds vertex with coordinates given by the array pointer.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
+           * @param data Coordinates of the vertex.
+           * @returns Reference to this object after the operation.
            */
           Builder& vertex(const Real* data);
 
@@ -952,23 +977,38 @@ namespace Rodin::Geometry
            * @brief Adds vertex with coordinates given by the mapped memory.
            *
            * @note This method requires nodes(size_t) to be called beforehand.
+           * @param x Coordinates of the vertex.
+           * @returns Reference to this object after the operation.
            */
           Builder& vertex(const Math::SpatialPoint& x);
 
           /**
            * @brief Sets the attribute of the given polytope.
+           * @param attr Attribute to assign, or an empty optional to remove the attribute.
+           * @param p Entity identified by its dimension and local index.
+           * @returns Reference to this object after the operation.
            */
-          Builder& attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
+          Builder& attribute(
+            const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
 
           /**
            * @brief Adds polytope defined by the given vertices.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
            */
           Builder& polytope(Polytope::Type t, std::initializer_list<Index> vs)
           {
-            return polytope(t, IndexArray({ vs }));
+            return polytope(t, IndexArray({vs}));
           }
 
-          /// @brief Adds a polytope and returns its index via @p index.
+          /**
+           * @brief Adds a polytope and returns its index via @p index.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @param index Storage for the index of the added polytope.
+           * @returns Reference to this object after the operation.
+           */
           Builder& polytope(
             Polytope::Type t, std::initializer_list<Index> vs, Index& index)
           {
@@ -977,67 +1017,109 @@ namespace Rodin::Geometry
 
           /**
            * @brief Adds polytope defined by the given vertices.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
            */
           Builder& polytope(Polytope::Type t, const IndexArray& vs);
 
           /**
            * @brief Adds polytope defined by the given vertices and returns its index.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @param index Storage for the index of the added polytope.
+           * @returns Reference to this object after the operation.
            */
           Builder& polytope(Polytope::Type t, const IndexArray& vs, Index& index);
 
           /**
            * @brief Adds polytope defined by the given vertices.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
           /**
            * @brief Adds polytope defined by the given vertices and returns its index.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @param index Storage for the index of the added polytope.
+           * @returns Reference to this object after the operation.
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs, Index& index);
 
-          /// @brief Adds a segment from the given vertices.
+          /**
+           * @brief Adds a segment from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& segment(T&& vs)
           {
             return polytope(Polytope::Type::Segment, std::forward<T>(vs));
           }
 
-          /// @brief Adds a quadrilateral from the given vertices.
+          /**
+           * @brief Adds a quadrilateral from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& quadrilateral(T&& vs)
           {
             return polytope(Polytope::Type::Quadrilateral, std::forward<T>(vs));
           }
 
-          /// @brief Adds a triangle from the given vertices.
+          /**
+           * @brief Adds a triangle from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& triangle(T&& vs)
           {
             return polytope(Polytope::Type::Triangle, std::forward<T>(vs));
           }
 
-          /// @brief Adds a tetrahedron from the given vertices.
+          /**
+           * @brief Adds a tetrahedron from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& tetrahedron(T&& vs)
           {
             return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
           }
 
-          /// @brief Adds a pyramid from the given vertices.
+          /**
+           * @brief Adds a pyramid from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& pyramid(T&& vs)
           {
             return polytope(Polytope::Type::Pyramid, std::forward<T>(vs));
           }
 
-          /// @brief Adds a hexahedron from the given vertices.
+          /**
+           * @brief Adds a hexahedron from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& hexahedron(T&& vs)
           {
             return polytope(Polytope::Type::Hexahedron, std::forward<T>(vs));
           }
 
-          /// @brief Adds a wedge from the given vertices.
+          /**
+           * @brief Adds a wedge from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& wedge(T&& vs)
           {
@@ -1046,6 +1128,7 @@ namespace Rodin::Geometry
 
           /**
            * @brief Finalizes construction of the Mesh<Context::Local> object.
+           * @returns Mesh constructed from the accumulated vertices and entities.
            */
           Mesh finalize();
 
@@ -1091,13 +1174,19 @@ namespace Rodin::Geometry
            */
           Builder& setQuadratureIndex(PolytopeQuadratureIndex&& quadIndex);
 
-          /// @brief Returns the mesh connectivity (incidence relations).
+          /**
+           * @brief Returns the mesh connectivity (incidence relations).
+           * @returns The mesh connectivity (incidence relations).
+           */
           Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
           }
 
-          /// @brief Returns the mesh connectivity (incidence relations).
+          /**
+           * @brief Returns the mesh connectivity (incidence relations).
+           * @returns The mesh connectivity (incidence relations).
+           */
           const Connectivity<Context>& getConnectivity() const
           {
             return m_connectivity;
@@ -1119,6 +1208,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Generates a Builder instance to build a Mesh object.
+       * @returns Builder for constructing a local mesh.
        */
       static Builder Build()
       {
@@ -1133,6 +1223,7 @@ namespace Rodin::Geometry
        * @param[in] l Number of nodes in each coordinate direction
        * @throws Alert::MemberFunctionException If the shape dimension does
        * not match the geometry or an axis contains fewer than two grid points.
+       * @returns Uniform-grid mesh generated from the requested geometry and subdivisions.
        */
       static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1155,6 +1246,7 @@ namespace Rodin::Geometry
        * box boundary)
        * @param[in] l Number of nodes in each coordinate direction
        * (must have @f$ d+1 @f$ entries)
+       * @returns Mesh of the requested box.
        */
       static Mesh Box(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1171,6 +1263,7 @@ namespace Rodin::Geometry
        * @param[in] shape Number of nodes in each coordinate direction
        * @throws Alert::MemberFunctionException If the shape dimension does
        * not match the geometry or an axis contains fewer than two grid points.
+       * @returns Uniform-grid mesh generated from the requested geometry and subdivisions.
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
@@ -1185,12 +1278,11 @@ namespace Rodin::Geometry
        *
        * @param[in] g Face geometry type
        * @param[in] shape Number of nodes in each coordinate direction
+       * @returns Mesh of the requested box.
        */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);
 
-      /**
-      * @brief Constructs an empty mesh with no cells.
-      */
+      /// @brief Constructs an empty mesh with no cells.
       Mesh()
         : m_sdim(0)
       {}
@@ -1206,23 +1298,31 @@ namespace Rodin::Geometry
       }
 
       /**
-      * @brief Performs a copy of another mesh.
-      */
+       * @brief Performs a copy of another mesh.
+       * @param other Source object to copy or move from.
+       */
       Mesh(const Mesh& other);
 
       /**
-      * @brief Move constructs the mesh from another mesh.
-      */
+       * @brief Move constructs the mesh from another mesh.
+       * @param other Source object to copy or move from.
+       */
       Mesh(Mesh&& other);
 
       virtual ~Mesh() = default;
 
+      /**
+       * @brief Copy assignment is disabled.
+       * @param other Source object to copy or move from.
+       */
       Mesh& operator=(const Mesh& other) = delete;
 
       /**
-      * @brief Move assigns the mesh from another mesh.
-      */
-      Mesh& operator=(Mesh&&);
+       * @brief Move assigns the mesh from another mesh.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      Mesh& operator=([[maybe_unused]] Mesh&& other);
 
       /**
        * @brief Displaces the mesh nodes by the displacement @f$ u @f$.
@@ -1233,7 +1333,9 @@ namespace Rodin::Geometry
        * @f[
        *   x \mapsto x + \vec{u}(x)
        * @f]
-       * at each node @f$ x @f$ of the mesh.
+       * at each node @f$ x @f$ of the mesh. All displacements are evaluated
+       * against the original geometry before any vertex is replaced. A failed
+       * evaluation leaves the mesh coordinates unchanged.
        *
        * @tparam FunctionDerived Derived class of FunctionBase providing the
        *         displacement field
@@ -1246,22 +1348,29 @@ namespace Rodin::Geometry
       template <class FunctionDerived>
       Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
       {
-        Math::SpatialPoint pc;
-        const Polytope::Traits ts(Polytope::Type::Point);
-        for (auto it = getVertex(); !it.end(); ++it)
+        PointCloud vertices(m_sdim, getVertexCount());
+        const Polytope::Traits traits(Polytope::Type::Point);
+        for (auto vertex = getVertex(); vertex; ++vertex)
         {
-          pc = this->getVertexCoordinates(it->getIndex());
-          const Geometry::Point p(
-              *it,
-              ts.getVertex(0),
-              pc);
-          for (size_t i = 0; i < m_sdim; ++i)
-            m_vertices(i, it->getIndex()) += u(p)[i];
+          const auto coordinates = getVertexCoordinates(vertex->getIndex());
+          const Geometry::Point point(*vertex, traits.getVertex(0), coordinates);
+          const auto displacement = u(point);
+          if (static_cast<size_t>(displacement.size()) != m_sdim)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Displacement dimension must match the mesh ambient dimension."
+              << Alert::Raise;
+          }
+          for (size_t coordinate = 0; coordinate < m_sdim; ++coordinate)
+          {
+            vertices(coordinate, vertex->getIndex()) =
+              coordinates[coordinate] + displacement[coordinate];
+          }
         }
+        m_vertices = std::move(vertices);
         flush();
         return *this;
       }
-
 
       /**
        * @brief Flushes cached transformation and quadrature data.
@@ -1379,16 +1488,14 @@ namespace Rodin::Geometry
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const FlatSet<Attribute>& attrs) const
       {
-        return this->ccl(d, p,
-          [&attrs](const Polytope& polytope)
-          {
-            auto attr = polytope.getAttribute();
-            bool res = attrs.size() == 0;
-            if (attr)
-              return res || attrs.contains(*attr);
-            else
-              return res;
-          });
+        return this->ccl(d, p, [&attrs](const Polytope& polytope) {
+          auto attr = polytope.getAttribute();
+          bool res = attrs.size() == 0;
+          if (attr)
+            return res || attrs.contains(*attr);
+          else
+            return res;
+        });
       }
 
       /**
@@ -1453,71 +1560,71 @@ namespace Rodin::Geometry
       }
 
       /**
-      * @brief Skins the mesh to obtain its boundary mesh
-      * @returns SubMesh object to the boundary region of the mesh
-      *
-      * This function "skins" the mesh to return the boundary as a new SubMesh
-      * object. The resulting mesh will be embedded in the original space
-      * dimension.
-      *
-      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 2
-      * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
-      * is already computed in the mesh.
-      */
+       * @brief Skins the mesh to obtain its boundary mesh
+       * @returns SubMesh object to the boundary region of the mesh
+       *
+       * This function "skins" the mesh to return the boundary as a new SubMesh
+       * object. The resulting mesh will be embedded in the original space
+       * dimension.
+       *
+       * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 2
+       * @f$ are included if the connectivity @f$ (D - 1) \longrightarrow d @f$
+       * is already computed in the mesh.
+       */
       virtual SubMesh<Context> skin() const;
 
       /**
-      * @brief Trims the cells with the given attribute.
-      * @param[in] attr Attribute to trim
-      * @returns SubMesh of the remaining region mesh
-      *
-      * Convenience function to call trim(const std::FlatSet<Attribute>&) with
-      * only one attribute.
-      */
+       * @brief Trims the cells with the given attribute.
+       * @param[in] attr Attribute to trim
+       * @returns SubMesh of the remaining region mesh
+       *
+       * Convenience function to call trim(const std::FlatSet<Attribute>&) with
+       * only one attribute.
+       */
       virtual SubMesh<Context> trim(Attribute attr) const;
 
       /**
-      * @brief Trims the cells with the given attribute.
-      * @param[in] attrs Attributes to trim
-      * @returns SubMesh object to the remaining region of the mesh
-      *
-      * This function will trim discard all the cells that have an attribute
-      * in the given set of attributes.
-      *
-      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
-      * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
-      * already computed in the mesh.
-      *
-      * @returns A SubMesh object consisting of cells that have attributes
-      * not in the given set.
-      */
+       * @brief Trims the cells with the given attribute.
+       * @param[in] attrs Attributes to trim
+       * @returns SubMesh object to the remaining region of the mesh
+       *
+       * This function will trim discard all the cells that have an attribute
+       * in the given set of attributes.
+       *
+       * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
+       * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
+       * already computed in the mesh.
+       *
+       * @returns A SubMesh object consisting of cells that have attributes
+       * not in the given set.
+       */
       virtual SubMesh<Context> trim(const FlatSet<Attribute>& attrs) const;
 
       /**
-      * @brief Keeps the cells with the given attribute.
-      * @param[in] attr Attribute to keep
-      *
-      * Convenience function to call keep(const std::FlatSet<Attribute>&) with
-      * only one attribute.
-      *
-      * @returns SubMesh of the remaining region mesh
-      */
+       * @brief Keeps the cells with the given attribute.
+       * @param[in] attr Attribute to keep
+       *
+       * Convenience function to call keep(const std::FlatSet<Attribute>&) with
+       * only one attribute.
+       *
+       * @returns SubMesh of the remaining region mesh
+       */
       virtual SubMesh<Context> keep(Attribute attr) const;
 
       /**
-      * @brief Trims the cells with the given attributes.
-      * @param[in] attrs Attributes to trim
-      *
-      * This function will trim keep only the cells that have an attribute
-      * in the given set of attributes.
-      *
-      * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
-      * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
-      * already computed in the mesh.
-      *
-      * @returns A SubMesh object consisting of cells that have attributes
-      * not in the given set.
-      */
+       * @brief Trims the cells with the given attributes.
+       * @param[in] attrs Attributes to trim
+       *
+       * This function will trim keep only the cells that have an attribute
+       * in the given set of attributes.
+       *
+       * The lower dimensional polytopes of dimension @f$ 1 \leq d \leq D - 1
+       * @f$ are included if the connectivity @f$ D \longrightarrow d @f$ is
+       * already computed in the mesh.
+       *
+       * @returns A SubMesh object consisting of cells that have attributes
+       * not in the given set.
+       */
       virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
       /**
@@ -1544,7 +1651,7 @@ namespace Rodin::Geometry
        */
       Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
       {
-        return this->trace(tmap, FlatSet<Attribute>{ attr });
+        return this->trace(tmap, FlatSet<Attribute>{attr});
       }
 
       /**
@@ -1553,7 +1660,8 @@ namespace Rodin::Geometry
        * @param[in] attrs Only consider cells with attributes in this set
        * @returns Reference to this mesh
        */
-      virtual Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+      virtual Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap,
+        const FlatSet<Attribute>& attrs);
 
       /**
        * @brief Traces faces using a simple attribute mapping.
@@ -1572,30 +1680,29 @@ namespace Rodin::Geometry
        * @param[in] attrs Only consider cells with attributes in this set
        * @returns Reference to this mesh
        */
-      virtual Mesh& trace(const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+      virtual Mesh& trace(
+        const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       SubMeshBase& asSubMesh() override;
 
       const SubMeshBase& asSubMesh() const override;
 
       /**
-      * @brief Loads a mesh from file in the given format.
-      * @param[in] filename Name of file to read
-      * @param[in] fmt Mesh file format
-      * @returns Reference to this (for method chaining)
-      */
+       * @brief Loads a mesh from file in the given format.
+       * @param[in] filename Name of file to read
+       * @param[in] fmt Mesh file format
+       * @returns Reference to this (for method chaining)
+       */
       virtual Mesh& load(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt) override;
+        const boost::filesystem::path& filename, IO::FileFormat fmt) override;
 
       /**
-      * @brief Saves a mesh to file in the given format.
-      * @param[in] filename Name of file to write
-      * @param[in] fmt Mesh file format
-      */
+       * @brief Saves a mesh to file in the given format.
+       * @param[in] filename Name of file to write
+       * @param[in] fmt Mesh file format
+       */
       virtual void save(
-        const boost::filesystem::path& filename,
-        IO::FileFormat fmt) const override;
+        const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
 
       virtual Mesh& scale(Real c) override;
 
@@ -1670,15 +1777,22 @@ namespace Rodin::Geometry
 
       virtual Polytope::Type getGeometry(size_t dimension, Index idx) const override;
 
-      virtual Optional<Attribute> getAttribute(size_t dimension, Index index) const override;
+      virtual Optional<Attribute> getAttribute(
+        size_t dimension, Index index) const override;
 
-      /// @brief Returns the mesh connectivity (incidence relations).
+      /**
+       * @brief Returns the mesh connectivity (incidence relations).
+       * @returns Topological connectivity of this mesh.
+       */
       virtual Connectivity<Context>& getConnectivity() override
       {
         return m_connectivity;
       }
 
-      /// @brief Returns the mesh connectivity (incidence relations).
+      /**
+       * @brief Returns the mesh connectivity (incidence relations).
+       * @returns Topological connectivity of this mesh.
+       */
       virtual const Connectivity<Context>& getConnectivity() const override
       {
         return m_connectivity;
@@ -1686,17 +1800,19 @@ namespace Rodin::Geometry
 
       virtual Math::SpatialPoint getVertexCoordinates(Index idx) const override;
 
-      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, const Optional<Attribute>& attr) override;
+      virtual Mesh& setAttribute(
+        const std::pair<size_t, Index>&, const Optional<Attribute>& attr) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
-      virtual Mesh& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) override;
+      virtual Mesh& setVertexCoordinates(
+        Index idx, const Math::SpatialPoint& coords) override;
 
       virtual Mesh& setPolytopeTransformation(
-          const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
+        const std::pair<size_t, Index> p, PolytopeTransformation* trans) override;
 
       virtual const PolytopeTransformation& getPolytopeTransformation(
-          size_t dimension, Index idx) const override;
+        size_t dimension, Index idx) const override;
 
       /**
        * @brief Creates the default polytope transformation for a given polytope.
@@ -1708,16 +1824,21 @@ namespace Rodin::Geometry
        * coordinates and polytope geometry type. This is used internally by
        * getPolytopeTransformation() when no cached transformation exists.
        */
-      virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
+      virtual PolytopeTransformation* getDefaultPolytopeTransformation(
+        size_t d, Index i) const;
 
-      virtual const PolytopeQuadrature&
-      getQuadrature(size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const override;
+      virtual const PolytopeQuadrature& getQuadrature(
+        size_t dimension, Index idx, const QF::QuadratureFormula& qf) const override;
 
-      /// @brief Serializes the mesh (for boost::serialization).
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      /**
+       * @brief Serializes the mesh (for boost::serialization).
+       * @param ar Serialization archive used to store or restore the object.
+       * @param version Serialization format version; unused by this implementation.
+       */
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
-        ar & boost::serialization::base_object<MeshBase>(*this);
+        ar& boost::serialization::base_object<MeshBase>(*this);
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;

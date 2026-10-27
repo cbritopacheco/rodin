@@ -92,15 +92,21 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the identity matrix at a point.
        * @returns Identity matrix @f$ I_n @f$
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      Math::SpatialMatrix<Real> getValue(const Geometry::Point&) const
+      Math::SpatialMatrix<Real> getValue(
+        [[maybe_unused]] const Geometry::Point& point) const
       {
         return Math::SpatialMatrix<Real>::Identity(m_n, m_n);
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }

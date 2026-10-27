@@ -12,7 +12,7 @@
  * for integrating functions and shape-function expressions over mesh
  * polytopes.
  *
- * ## Mathematical foundation
+ * # Mathematical foundation
  *
  * A quadrature rule approximates an integral by a weighted sum:
  * @f[
@@ -27,10 +27,10 @@
  * module, while the mapped geometric points live in
  * @ref Rodin::Geometry::PolytopeQuadrature. This separation allows:
  * - canonical reuse of reference quadrature formulas,
- * - mesh-owned caching of mapped geometric quadrature points,
- * - simpler and more efficient integrator implementations.
+ * - integrator-owned mapped points for the currently bound polytope,
+ * - bounded mapped-point storage during a one-pass mesh traversal.
  *
- * ## Usage
+ * # Usage
  *
  * Typical usage is:
  * @code{.cpp}
@@ -40,19 +40,29 @@
  * @endcode
  *
  * For local element integrators, setPolytope() binds the integrator to a
- * concrete polytope, selects an appropriate quadrature formula, and retrieves
- * the corresponding cached @ref Rodin::Geometry::PolytopeQuadrature from the
- * mesh.
+ * concrete polytope, selects an appropriate quadrature formula, and owns the
+ * corresponding @ref Rodin::Geometry::PolytopeQuadrature until the next bind
+ * or destruction. Moving a rule transfers this ownership without relocating
+ * the mapped points. Copying a rule does not copy its polytope binding.
+ * For @f$ T @f$ active rules with at most @f$ Q @f$ points per cell, mapped-point
+ * storage is @f$ O(TQ) @f$, independent of the number of traversed cells.
+ * The public mesh-owned quadrature cache remains available to callers that
+ * intentionally require stable borrowed quadratures across multiple cells;
+ * assembly neither evicts nor invalidates those objects. These lifetimes are
+ * independent of the assembly backend and require no collective operation.
  */
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
+
+#include "Rodin/Alert/MemberFunctionException.h"
+#include <vector>
 
 #include "Rodin/FormLanguage/IsSpecialized.h"
 
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/PolytopeQuadrature.h"
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
@@ -90,11 +100,10 @@ namespace Rodin::Variational
    *
    * This specialization evaluates scalar-valued function integrals on a single
    * polytope using a quadrature formula and the corresponding mapped geometric
-   * quadrature points cached on the mesh.
+   * quadrature points owned by the rule.
    */
   template <class FunctionDerived>
-  class QuadratureRule<FunctionBase<FunctionDerived>> final
-    : public FormLanguage::Base
+  class QuadratureRule<FunctionBase<FunctionDerived>> final : public FormLanguage::Base
   {
     public:
       /// @brief Reports this handler as generic, not optimized.
@@ -102,10 +111,13 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = FunctionBase<FunctionDerived>;
+
       /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = FormLanguage::Base;
 
@@ -125,6 +137,7 @@ namespace Rodin::Variational
        *
        * The cached value and polytope binding are not copied. The quadrature
        * formula pointer is copied because it refers to a canonical formula.
+       * @param other Object to copy from.
        */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -136,13 +149,14 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_value(std::move(other.m_value))
       {}
 
@@ -166,20 +180,19 @@ namespace Rodin::Variational
        * @param[in] polytope Polytope on which the integral is to be evaluated
        * @returns Reference to this object
        *
-       * If no explicit quadrature formula was set previously, a default generic
-       * polytope quadrature of order 1 is selected for the polytope geometry.
-       * The corresponding mapped quadrature is then retrieved from the mesh.
+       * A generic polytope quadrature of order 1 is selected for the current
+       * polytope geometry, including when binding a different reference cell.
+       * The corresponding mapped quadrature is owned until the next bind.
        */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope)
       {
         m_polytope = &polytope;
         m_value.reset();
 
-        if (!m_qf)
-          m_qf = &QF::PolytopeQuadratureFormula::get(1, polytope.getGeometry());
+        m_qf = &QF::QuadratureFormula::get(1, polytope.getGeometry());
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
         return *this;
       }
 
@@ -199,7 +212,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, &qf, qp);
+          const IntegrationPoint ip(q, qp);
           res += qf.getWeight(qp) * p.getDistortion() * f(ip);
         }
 
@@ -229,7 +242,7 @@ namespace Rodin::Variational
        * @brief Gets the quadrature formula currently used.
        * @returns Quadrature formula reference
        */
-      const QF::QuadratureFormulaBase& getQuadratureFormula() const
+      const QF::QuadratureFormula& getQuadratureFormula() const
       {
         assert(m_qf);
         return *m_qf;
@@ -238,8 +251,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;                  ///< Integrand
       const Geometry::Polytope* m_polytope;                        ///< Bound polytope
-      const QF::QuadratureFormulaBase* m_qf;                       ///< Reference quadrature formula
-      const Geometry::PolytopeQuadrature* m_quadrature;            ///< Mapped geometric quadrature
+      const QF::QuadratureFormula* m_qf; ///< Reference quadrature formula
+      std::unique_ptr<Geometry::PolytopeQuadrature>
+        m_quadrature; ///< Mapped geometric quadrature
       Optional<ScalarType> m_value;                                ///< Cached value
   };
 
@@ -250,6 +264,12 @@ namespace Rodin::Variational
    * This specialization delegates the computation to linear forms over the
    * requested region. It is not a per-polytope quadrature rule and therefore
    * does not use @ref Geometry::PolytopeQuadrature directly.
+   * The configured order rule and attribute filter are forwarded to the
+   * auxiliary linear-form integrator. An empty order rule retains inference;
+   * explicit constant and per-polytope rules are not resolved before assembly.
+   * The auxiliary form has conjugate-linear action on complex test fields.
+   * Hence @f$\int u_h=\overline{L(u_h)}@f$; this final scalar conjugation
+   * restores linear grade-zero integration without changing form assembly.
    */
   template <class FES, class Data>
   class QuadratureRule<GridFunction<FES, Data>> : public Integrator
@@ -260,10 +280,13 @@ namespace Rodin::Variational
 
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Integrand expression type.
       using IntegrandType = GridFunction<FESType, Data>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = Integrator;
 
@@ -281,22 +304,26 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_u(other.m_u),
           m_v(other.m_u.get().getFiniteElementSpace()),
+          m_attrs(other.m_attrs),
           m_lf(m_v)
       {}
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_v(std::move(other.m_v)),
-          m_lf(std::move(other.m_lf))
+          m_attrs(std::move(other.m_attrs)),
+          m_lf(m_v)
       {}
 
       /**
@@ -310,38 +337,42 @@ namespace Rodin::Variational
           case Geometry::Region::Cells:
           {
             auto lfi = Variational::Integral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
           case Geometry::Region::Boundary:
           {
             auto lfi = Variational::BoundaryIntegral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
           case Geometry::Region::Faces:
           {
             auto lfi = Variational::FaceIntegral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
           case Geometry::Region::Interface:
           {
             auto lfi = Variational::InterfaceIntegral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
         }
         assert(false);
@@ -367,7 +398,7 @@ namespace Rodin::Variational
        */
       QuadratureRule& over(Geometry::Attribute attr)
       {
-        return over(FlatSet<Geometry::Attribute>{ attr });
+        return over(FlatSet<Geometry::Attribute>{attr});
       }
 
       /**
@@ -412,11 +443,12 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::reference_wrapper<const GridFunction<FES, Data>> m_u;   ///< Integrated grid function
-      TestFunction<FES> m_v;                                       ///< Auxiliary test function
-      FlatSet<Geometry::Attribute> m_attrs;                        ///< Region attribute filter
-      LinearForm<FES, Data> m_lf;                                  ///< Auxiliary linear form
-      Optional<ScalarType> m_value;                                ///< Cached value
+      std::reference_wrapper<const GridFunction<FES, Data>>
+        m_u;   ///< Integrated grid function
+      TestFunction<FES> m_v; ///< Auxiliary test function
+      FlatSet<Geometry::Attribute> m_attrs; ///< Region attribute filter
+      LinearForm<FES, Data> m_lf; ///< Auxiliary linear form
+      Optional<ScalarType> m_value; ///< Cached value
   };
 
   /**
@@ -430,19 +462,28 @@ namespace Rodin::Variational
    * @f]
    * or a more general integrand of the same expression-template type.
    *
+   * At each quadrature point, the test expressions are evaluated into owning
+   * values before the trial/test pair loop. For @f$N_Q@f$ points and
+   * @f$n_r,n_t@f$ local trial/test functions, this requires @f$N_Q n_t@f$
+   * test evaluations instead of @f$N_Q n_r n_t@f$, without changing the
+   * dot products or the quadrature accumulation order. Values are refreshed
+   * at every point; no expression values are cached across cell binds.
+   *
    * The quadrature formula is chosen from the integrand order if available,
    * otherwise from the finite element orders.
+   *
+   * @par Architecture
+   * The rule owns its mapped quadrature and the integration-point context
+   * borrowed by its expression tree. The context is updated in place between
+   * samples and cell binds; a move transfers its stable address. Copies are
+   * unbound and construct an independent context on their first bind.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
-      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::ScalarType>
+  class QuadratureRule<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+          ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as generic, not optimized.
@@ -450,12 +491,16 @@ namespace Rodin::Variational
 
       /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+
       /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -477,6 +522,7 @@ namespace Rodin::Variational
           m_integrand(integrand.copy()),
           m_qf(nullptr),
           m_quadrature(nullptr),
+          m_ip(nullptr),
           m_polytope(nullptr),
           m_set(false),
           m_order(0),
@@ -487,12 +533,14 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        *
        * The bound polytope and mapped quadrature are not copied.
+       * @param other Object to copy from.
        */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_qf(other.m_qf),
           m_quadrature(nullptr),
+          m_ip(nullptr),
           m_polytope(nullptr),
           m_set(false),
           m_order(0),
@@ -501,17 +549,20 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
+          m_ip(std::move(other.m_ip)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_mat(std::move(other.m_mat))
+          m_mat(std::move(other.m_mat)),
+          m_test(std::move(other.m_test))
       {}
 
       /**
@@ -544,45 +595,69 @@ namespace Rodin::Variational
       {
         m_polytope = &polytope;
 
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
 
         assert(m_integrand);
         auto& integrand = *m_integrand;
+        integrand.setPolytope(polytope);
 
         const auto& trial = integrand.getLHS();
-        const auto& test  = integrand.getRHS();
+        const auto& test = integrand.getRHS();
+        this->setDOFIndices(trial.getDOFIndices(), test.getDOFIndices());
 
         const auto& trialfes = trial.getFiniteElementSpace();
-        const auto& testfes  = test.getFiniteElementSpace();
+        const auto& testfes = test.getFiniteElementSpace();
 
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe  = testfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder()));
+        auto selectedOrder = this->getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = integrand.getOrder(polytope);
+        if (!selectedOrder)
+        {
+          auto trialOrder = trial.getLeaf().getOrder(polytope);
+          auto testOrder = test.getLeaf().getOrder(polytope);
+          if (!trialOrder)
+            trialOrder = trialfe.getDegree();
+          if (!testOrder)
+            testOrder = testfe.getDegree();
+          if (trialOrder && testOrder)
+            selectedOrder = *trialOrder + *testOrder;
+        }
+        if (!selectedOrder)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic quadrature order is established. "
+            << "Specify an integration order with setOrder()." << Alert::Raise;
+        }
+        const size_t order = *selectedOrder;
 
-        const bool recompute =
-          !m_set || (m_order != order) || (m_geometry != geometry);
+        const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
 
         if (recompute)
         {
-          m_set      = true;
-          m_order    = order;
+          m_set = true;
+          m_order = order;
           m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
-        const size_t ntr = trial.getDOFs(*m_polytope);
-        const size_t nte = test.getDOFs(*m_polytope);
+        const auto trialIndices = this->getTrialDOFIndices();
+        const auto testIndices = this->getTestDOFIndices();
+        const size_t ntr =
+          trialIndices ? trialIndices->size() : trial.getDOFs(*m_polytope);
+        const size_t nte = testIndices ? testIndices->size() : test.getDOFs(*m_polytope);
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
+        m_test.resize(nte);
 
         // Eigen is assumed ColMajor. Columns are filled contiguously.
         ScalarType* __restrict M = m_mat.data();
@@ -595,12 +670,20 @@ namespace Rodin::Variational
         {
           const auto& p = q.getPoint(qp);
 
-          const ScalarType wdet =
-            static_cast<ScalarType>(m_qf->getWeight(qp))
-            * static_cast<ScalarType>(p.getDistortion());
+          const ScalarType wdet = static_cast<ScalarType>(m_qf->getWeight(qp)) *
+            static_cast<ScalarType>(p.getDistortion());
 
-          const IntegrationPoint ip(p, m_qf, qp);
-          integrand.setIntegrationPoint(ip);
+          if (!m_ip)
+            m_ip = std::make_unique<IntegrationPoint>(q, qp);
+          else
+            *m_ip = IntegrationPoint(q, qp);
+          integrand.setIntegrationPoint(*m_ip);
+
+          // Each test basis value is evaluated once per point, not once per
+          // trial index: a test expression with coefficients would otherwise
+          // be evaluated ntr * nte times.
+          for (size_t te = 0; te < nte; ++te)
+            m_test[te] = test.getBasis(te);
 
           for (size_t tr = 0; tr < ntr; ++tr)
           {
@@ -609,7 +692,7 @@ namespace Rodin::Variational
 
             for (size_t te = 0; te < nte; ++te)
             {
-              const auto& phi_te = test.getBasis(te);
+              const auto& phi_te = m_test[te];
               col[static_cast<Eigen::Index>(te)] += wdet * Math::dot(phi_tr, phi_te);
             }
           }
@@ -642,14 +725,22 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
-      const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
-      const Geometry::PolytopeQuadrature* m_quadrature;         ///< Mapped geometric quadrature
-      const Geometry::Polytope* m_polytope;                     ///< Bound polytope
-      bool m_set;                                               ///< Whether formula selection data are initialized
-      size_t m_order;                                           ///< Cached quadrature order
-      Geometry::Polytope::Type m_geometry;                      ///< Cached geometry type
-      Math::Matrix<ScalarType> m_mat;                           ///< Local matrix, rows=test, cols=trial
+      std::unique_ptr<IntegrandType> m_integrand; ///< Integrand expression
+      const QF::QuadratureFormula* m_qf; ///< Reference quadrature formula
+      std::unique_ptr<Geometry::PolytopeQuadrature>
+        m_quadrature; ///< Mapped geometric quadrature
+      std::unique_ptr<IntegrationPoint>
+        m_ip; ///< Stable context borrowed by the integrand
+      const Geometry::Polytope* m_polytope; ///< Bound polytope
+      bool m_set; ///< Whether formula selection data are initialized
+      size_t m_order; ///< Cached quadrature order
+      Geometry::Polytope::Type m_geometry; ///< Cached geometry type
+      Math::Matrix<ScalarType> m_mat; ///< Local matrix, rows=test, cols=trial
+
+      /// @brief Test basis values at the current quadrature point.
+      std::vector<typename FormLanguage::RangeOf<
+        std::decay_t<decltype(std::declval<const RHSType&>().getBasis(size_t()))>>::Type>
+        m_test;
   };
 
   /**
@@ -661,12 +752,17 @@ namespace Rodin::Variational
    *   \int_K \phi^{\mathrm{te}} \, dx
    * @f]
    * or a more general integrand of the same expression-template type.
+   *
+   * @par Architecture
+   * The rule owns its mapped quadrature and the integration-point context
+   * borrowed by its expression tree. The context is updated in place between
+   * samples and cell binds; a move transfers its stable address. Copies are
+   * unbound and construct an independent context on their first bind.
    */
   template <class NestedDerived, class FES>
   class QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
-    : public LinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>
+    : public LinearFormIntegratorBase<typename FormLanguage::Traits<
+        ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as generic, not optimized.
@@ -674,10 +770,13 @@ namespace Rodin::Variational
 
       /// @brief Finite element space type.
       using FESType = FES;
+
       /// @brief Integrand expression type.
       using IntegrandType = ShapeFunctionBase<NestedDerived, FESType, TestSpace>;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
@@ -687,9 +786,8 @@ namespace Rodin::Variational
        * @param[in] rhs Test shape function
        */
       template <class LHSDerived, class RHSDerived>
-      constexpr QuadratureRule(
-          const FunctionBase<LHSDerived>& lhs,
-          const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+      constexpr QuadratureRule(const FunctionBase<LHSDerived>& lhs,
+        const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
@@ -702,6 +800,7 @@ namespace Rodin::Variational
           m_integrand(integrand.copy()),
           m_qf(nullptr),
           m_quadrature(nullptr),
+          m_ip(nullptr),
           m_polytope(nullptr),
           m_set(false),
           m_order(0),
@@ -712,12 +811,14 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        *
        * The bound polytope and mapped quadrature are not copied.
+       * @param other Object to copy from.
        */
       constexpr QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_qf(other.m_qf),
           m_quadrature(nullptr),
+          m_ip(nullptr),
           m_polytope(nullptr),
           m_set(false),
           m_order(0),
@@ -726,12 +827,14 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       constexpr QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
+          m_ip(std::move(other.m_ip)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -769,35 +872,50 @@ namespace Rodin::Variational
       {
         m_polytope = &polytope;
 
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
 
         assert(m_integrand);
         auto& integrand = *m_integrand;
+        integrand.setPolytope(polytope);
 
         const auto& fes = integrand.getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, idx);
+        const auto& fe = fes.getFiniteElement(d, idx);
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        auto selectedOrder = this->getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = integrand.getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = integrand.getLeaf().getOrder(polytope);
+        if (!selectedOrder)
+          selectedOrder = fe.getDegree();
+        if (!selectedOrder)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No automatic quadrature order is established. "
+            << "Specify an integration order with setOrder()." << Alert::Raise;
+        }
+        const size_t order = *selectedOrder;
 
-        const bool recompute =
-          !m_set || (m_order != order) || (m_geometry != geometry);
+        const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
 
         if (recompute)
         {
-          m_set      = true;
-          m_order    = order;
+          m_set = true;
+          m_order = order;
           m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          m_qf = &QF::QuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
-        const size_t nte = integrand.getDOFs(polytope);
+        this->setDOFIndices(integrand.getDOFIndices());
+        const auto testIndices = this->getTestDOFIndices();
+        const size_t nte =
+          testIndices ? testIndices->size() : integrand.getDOFs(polytope);
 
         m_vec.resize(static_cast<Eigen::Index>(nte));
         m_vec.setZero();
@@ -811,12 +929,14 @@ namespace Rodin::Variational
         {
           const auto& p = q.getPoint(qp);
 
-          const ScalarType wdet =
-            static_cast<ScalarType>(m_qf->getWeight(qp))
-            * static_cast<ScalarType>(p.getDistortion());
+          const ScalarType wdet = static_cast<ScalarType>(m_qf->getWeight(qp)) *
+            static_cast<ScalarType>(p.getDistortion());
 
-          const IntegrationPoint ip(p, m_qf, qp);
-          integrand.setIntegrationPoint(ip);
+          if (!m_ip)
+            m_ip = std::make_unique<IntegrationPoint>(q, qp);
+          else
+            *m_ip = IntegrationPoint(q, qp);
+          integrand.setIntegrationPoint(*m_ip);
 
           for (size_t te = 0; te < nte; ++te)
             v[static_cast<Eigen::Index>(te)] += wdet * integrand.getBasis(te);
@@ -848,14 +968,17 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
-      const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
-      const Geometry::PolytopeQuadrature* m_quadrature;         ///< Mapped geometric quadrature
-      const Geometry::Polytope* m_polytope;                     ///< Bound polytope
-      bool m_set;                                               ///< Whether formula selection data are initialized
-      size_t m_order;                                           ///< Cached quadrature order
-      Geometry::Polytope::Type m_geometry;                      ///< Cached geometry type
-      Math::Vector<ScalarType> m_vec;                           ///< Local vector
+      std::unique_ptr<IntegrandType> m_integrand; ///< Integrand expression
+      const QF::QuadratureFormula* m_qf; ///< Reference quadrature formula
+      std::unique_ptr<Geometry::PolytopeQuadrature>
+        m_quadrature; ///< Mapped geometric quadrature
+      std::unique_ptr<IntegrationPoint>
+        m_ip; ///< Stable context borrowed by the integrand
+      const Geometry::Polytope* m_polytope; ///< Bound polytope
+      bool m_set; ///< Whether formula selection data are initialized
+      size_t m_order; ///< Cached quadrature order
+      Geometry::Polytope::Type m_geometry; ///< Cached geometry type
+      Math::Vector<ScalarType> m_vec; ///< Local vector
   };
 }
 

@@ -1,0 +1,85 @@
+# Isoparametric convergence
+
+Tests in this directory validate finite-element approximation when the physical
+cell map is itself a finite-element field. Geometry and field spaces are
+refined in a controlled way so that a geometry-map error cannot be mistaken for
+a solution-space error.
+
+The shared `CurvedGeometry` class uses the regular quadratic map
+
+$$
+  \Phi(\xi)_i=\xi_i\quad(i\lt d-1),\qquad
+  \Phi(\xi)_{d-1}=\xi_{d-1}+0.1\xi_0^2.
+$$
+
+It installs P2 `ParametricTransformation`s on every positive-dimensional mesh
+entity, including boundary faces. The map is exactly in the P2 geometry space;
+the geometric patch test verifies that fact directly for every `UniformGrid`
+cell type. A separate three-level study installs the P1 vertex interpolant
+$\Phi_{1,h}$ and measures its map error on the *unwarped* unit box:
+
+$$
+G_h=\left(\int_{(0,1)^d}\lVert\Phi-\Phi_{1,h}\rVert^2\thinspace \mathrm{d}\xi\right)^{1/2}.
+$$
+
+Both adjacent rates are required to lie between 1.7 and 2.3, consistent
+with $G_h=O(h^2)$ for this regular quadratic map. The reference mesh is
+retained separately from the curved mesh, so the norm is not contaminated
+by a changing integration domain. P1 geometry uses $n=5,9,17$ points per
+axis in 1D/2D and $n=3,5,9$ in 3D. A manufactured Poisson solution in
+physical coordinates, $u(x)=\prod_i\sin(\pi x_i)$, then checks that P2
+isoparametric fields retain
+the mapped-element rates $O(h^3)$ in L2 and $O(h^2)$ in the H1 seminorm.
+
+The distinction matters: an order-`K` isoparametric map controls the accuracy
+of Jacobians, integration, traces, and curved-boundary placement. When the
+geometry is represented at compatible order and remains regular, the usual
+interpolation and Galerkin estimates apply on the mapped mesh. The
+[nonpolynomial geometry suite](GeometryApproximation/README.md) installs sine
+maps at geometry degrees $q=1,2,3$ and independently measures map and
+derivative errors against an analytic reference on the original unit box.
+Unlike the exact quadratic map, this map has an approximation error at every
+finite geometry order.
+
+The [shared diffusion suite](Diffusion/README.md) distinguishes physical
+field errors on each represented domain from errors lifted to the exact
+sine-map domain. The lift uses common reference coordinates and exact
+logical cell/vertex correspondence. Field, geometry and total errors are
+integrated separately, with mesh Jacobians supplied by cached geometry
+points and the exact Jacobian supplied by an independent analytic map.
+Smooth P1/P2 fields on Q2 geometry test interacting errors; affine physical
+P2 fields on Q1/Q2 geometry isolate the geometry contribution. Both physics
+and all seven positive-dimensional geometries share this mechanism, including
+real-PETSc local/MPI and sequential/OpenMP assembly. Case-specific levels,
+budgets, hypotheses and limitations are stated in the suite specification.
+
+The same P2 map also supports a variable-conductivity study. In physical
+coordinates, $\gamma(x)=1+\sum_{j=0}^{d-1}x_j$ and
+$u_\ast(x)=\exp(\sum_{j=0}^{d-1}x_j)$ give the manufactured load
+
+$$
+-\nabla\cdot(\gamma\nabla u_\ast)=-d(1+\gamma)u_\ast.
+$$
+
+The exact trace is imposed on the mapped boundary. On all seven cell types,
+both adjacent P2 field-error rates must match order three in $L^2$ and
+order two in the $H^1$ seminorm. Poisson and conductivity use quadrature
+order 16, an LU solve, and $n=5,9,17$ in 1D/2D or $n=3,4,5$ in 3D. The
+quadratic map is exact in the P2 geometry space in these PDE studies; their
+field-error rates must not be interpreted as convergence rates for an
+under-resolved boundary.
+
+As a negative control, replacing $\gamma\nabla u$ by $\nabla u$ in the
+conductivity stiffness while retaining the manufactured load caused all
+seven geometry rate tests to fail. The variable coefficient was restored
+before the passing run.
+
+The [complex Helmholtz suite](Helmholtz/README.md) uses the same exact P2
+geometry with P1 and P2 physical fields. All seven geometries use
+$n=5,9,17$ for P1 and $n=3,5,9$ for P2. Native local and complex-PETSc
+local/MPI drivers share field-rate, representable-patch, omitted-mass,
+quadrature/solver sensitivity, and analytic geometry/volume acceptance.
+MPI ranks 1–4 additionally check the known complex norm on curved meshes,
+including empty partitions. P1 on P2 geometry is superparametric, whereas
+P2 on P2 geometry is strictly isoparametric. The exact map fixes the domain
+at every mesh level; nonpolynomial geometry approximation remains separate.

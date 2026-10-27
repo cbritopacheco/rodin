@@ -78,8 +78,10 @@ namespace Rodin::Solver
        */
       GMRES(GMRES&& other);
 
-      /// @brief Creates a heap-allocated copy of this GMRES solver.
-      /// @returns Pointer to the cloned GMRES instance.
+      /**
+       * @brief Creates a heap-allocated copy of this GMRES solver.
+       * @returns Pointer to the cloned GMRES instance.
+       */
       GMRES* copy() const noexcept override
       {
         return new GMRES(*this);

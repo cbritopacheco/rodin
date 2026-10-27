@@ -1,3 +1,7 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
@@ -125,4 +129,25 @@ namespace Rodin::Tests::Unit
 
     [[maybe_unused]] const auto& solution = u.getSolution();
   }
+}
+
+/// @brief Owned trial copies and moves bind expression leaves to their new owner.
+TEST(TrialFunction, CopyAndMoveRetargetReferenceBase)
+{
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<Real> space(mesh);
+  TrialFunction original(space);
+  original.getSolution().getData().setConstant(2);
+  auto copy = original;
+  auto gradient = Grad(copy);
+  EXPECT_EQ(&gradient.getLeaf(), &copy);
+  copy.getSolution().getData().setConstant(3);
+  EXPECT_EQ(original.getSolution().getData()[0], 2);
+  auto moved = std::move(copy);
+  auto movedGradient = Grad(moved);
+  EXPECT_EQ(&movedGradient.getLeaf(), &moved);
+  EXPECT_EQ(moved.getSolution().getData()[0], 3);
 }

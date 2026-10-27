@@ -119,7 +119,11 @@ namespace Rodin::Variational
         return getLHS().getValue(p) && getRHS().getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -140,9 +144,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /**
-   * @brief Deduction guide for AND.
-   */
+  /// @brief Deduction guide for AND.
   template <class LHSDerived, class RHSDerived>
   AND(const BooleanFunctionBase<LHSDerived>&, const BooleanFunctionBase<RHSDerived>&)
     -> AND<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;

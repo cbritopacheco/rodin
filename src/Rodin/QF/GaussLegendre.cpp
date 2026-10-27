@@ -11,6 +11,9 @@
  */
 
 #include <Eigen/Eigenvalues>
+#include <limits>
+
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "GaussLegendre.h"
 
@@ -19,7 +22,12 @@ namespace Rodin::QF
   void GaussLegendre::gl1dUnit(
     size_t n, std::vector<Real>& x, std::vector<Real>& w, size_t maxIt, Real tol)
   {
-    assert(n >= 1);
+    if (n == 0 || n > std::vector<Real>().max_size() ||
+      n > static_cast<size_t>(std::numeric_limits<Eigen::Index>::max()) / sizeof(Real))
+    {
+      Alert::Exception() << __func__ << ": " << "Invalid Gaussian point count."
+                         << Alert::Raise;
+    }
     std::vector<Real> xi(n), wi(n);
     const size_t m = (n + 1) / 2;
 
@@ -79,6 +87,23 @@ namespace Rodin::QF
 
   void GaussLegendre::build()
   {
+    // Validate before constructing factors or multiplying directional counts.
+    const size_t dimension = Geometry::Polytope::Traits(getGeometry()).getDimension();
+    const size_t counts[] = {m_nx, m_ny, m_nz};
+    const size_t capacity = std::min(m_points.max_size(),
+      static_cast<size_t>(std::numeric_limits<Eigen::Index>::max()) / sizeof(Real));
+    size_t size = 1;
+    for (size_t direction = 0; direction < std::max<size_t>(1, dimension); ++direction)
+    {
+      if (counts[direction] < 1 || counts[direction] > capacity / size)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Invalid or unrepresentable directional quadrature point count."
+          << Alert::Raise;
+      }
+      size *= counts[direction];
+    }
+
     switch (this->getGeometry())
     {
       case Geometry::Polytope::Type::Point:
@@ -100,7 +125,7 @@ namespace Rodin::QF
         buildPyramid(m_nx, m_ny, m_nz);
         break;
       case Geometry::Polytope::Type::Wedge:
-        buildWedge(m_nx, m_ny);
+        buildWedge(m_nx, m_ny, m_nz);
         break;
       case Geometry::Polytope::Type::Hexahedron:
         buildHex(m_nx, m_ny, m_nz);
@@ -113,8 +138,6 @@ namespace Rodin::QF
     m_points.clear();
     m_weights.resize(1);
     Math::SpatialVector<Real> p;
-    p.resize(1);
-    p[0] = 0.0;
     m_points.push_back(std::move(p));
     m_weights[0] = 1.0;
   }
@@ -227,14 +250,14 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::buildWedge(size_t ntri, size_t nz)
+  void GaussLegendre::buildWedge(size_t nx, size_t ny, size_t nz)
   {
     std::vector<Real> u, wu, v, wv, z, wz;
-    gj1dUnit(ntri, 1, u, wu);
-    gl1dUnit(ntri, v, wv);
+    gj1dUnit(nx, 1, u, wu);
+    gl1dUnit(ny, v, wv);
     gl1dUnit(nz, z, wz);
 
-    const size_t N = ntri * ntri * nz;
+    const size_t N = nx * ny * nz;
     m_points.clear();
     m_points.reserve(N);
     m_weights.resize(N);
@@ -242,9 +265,9 @@ namespace Rodin::QF
     size_t k = 0;
     for (size_t kk = 0; kk < nz; ++kk)
     {
-      for (size_t j = 0; j < ntri; ++j)
+      for (size_t j = 0; j < ny; ++j)
       {
-        for (size_t i = 0; i < ntri; ++i)
+        for (size_t i = 0; i < nx; ++i)
         {
           const Real r = u[i];
           const Real s = (1.0 - u[i]) * v[j];
@@ -266,11 +289,23 @@ namespace Rodin::QF
   void GaussLegendre::gj1dUnit(
     size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w)
   {
+    gj1dUnit(n, alpha, 0, x, w);
+  }
+
+  void GaussLegendre::gj1dUnit(
+    size_t n, size_t alpha, size_t beta, std::vector<Real>& x, std::vector<Real>& w)
+  {
+    const size_t capacity =
+      static_cast<size_t>(std::numeric_limits<Eigen::Index>::max()) / sizeof(Real);
+    if (n == 0 || n > capacity / n)
+    {
+      Alert::Exception() << __func__ << ": Invalid Gaussian point count." << Alert::Raise;
+    }
     // Golub-Welsch: the nodes are the eigenvalues of the Jacobi matrix of the
     // orthogonal polynomials for the weight, and the weights are mu0 times the
     // squared first components of its eigenvectors.
     const Real a = static_cast<Real>(alpha);
-    const Real b = 0;
+    const Real b = static_cast<Real>(beta);
     Math::Matrix<Real> J(static_cast<Eigen::Index>(n), static_cast<Eigen::Index>(n));
     J.setZero();
     for (size_t k = 0; k < n; ++k)
@@ -292,8 +327,10 @@ namespace Rodin::QF
     }
 
     Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> es(J);
-    // mu0 = int_{-1}^{1} (1-t)^a dt = 2^{a+1} / (a+1).
-    const Real mu0 = std::pow(Real(2), a + 1) / (a + 1);
+    assert(es.info() == Eigen::Success);
+    const Real measure = beta == 0
+      ? Real(1) / (a + 1)
+      : std::exp(std::lgamma(a + 1) + std::lgamma(b + 1) - std::lgamma(a + b + 2));
 
     x.resize(n);
     w.resize(n);
@@ -302,9 +339,9 @@ namespace Rodin::QF
       const Real t = es.eigenvalues()(static_cast<Eigen::Index>(i));
       const Real v0 = es.eigenvectors()(0, static_cast<Eigen::Index>(i));
       // t in [-1,1] maps to z = (1+t)/2 in [0,1], under which
-      // (1-t)^a dt = 2^{a+1} (1-z)^a dz, hence the rescaling of the weights.
+      // The beta integral supplies the measure directly on [0,1].
       x[i] = Real(0.5) * (1 + t);
-      w[i] = mu0 * v0 * v0 / std::pow(Real(2), a + 1);
+      w[i] = measure * v0 * v0;
     }
   }
 

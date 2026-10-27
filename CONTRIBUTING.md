@@ -8,9 +8,9 @@ existing code, and the tooling is configured to match it.
 
 | Layer | What | Enforced by |
 |-------|------|-------------|
-| 1. Formatting | Indentation, braces, wrapping | [`.clang-format`](.clang-format) — CI checks **changed lines only** |
+| 1. Formatting | Indentation, braces, wrapping, documentation spacing | [`.clang-format`](.clang-format) + [`dev/format_cpp.py`](dev/format_cpp.py) — CI checks **changed lines only** |
 | 2. Naming | Identifier conventions | [`.clang-tidy`](.clang-tidy) + [`dev/check_clang_tidy.py`](dev/check_clang_tidy.py) — ratchet against a findings baseline |
-| 3. House rules | Include guards, license blocks, header docs, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
+| 3. House rules | Include guards, license blocks, header docs, loop braces, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
 | 4. Documentation | No new Doxygen warnings | [`dev/check_doxygen_warnings.py`](dev/check_doxygen_warnings.py) |
 | 5. Design | The semantic style | Review, guided by [`doc/agents/philosophy.md`](doc/agents/philosophy.md) |
 
@@ -20,11 +20,20 @@ line, offending source, and suggested fix.
 
 ## Quick reference: the style itself
 
-- **Formatting**: 2-space indent, Allman braces, `public:` indented inside
-  the class with members one level deeper, constructor initializers one per
+- **Formatting**: 2-space indent and Allman braces. Access labels are indented
+  two spaces beyond the class or struct brace; members and their documentation are indented two
+  spaces beyond `public:`, `protected:` or `private:`. Plain structs retain
+  one two-space member level. Constructor initializers are one per
   line starting with `: ` on their own line, empty bodies as `{}` on their
   own line, pointers/references bind left (`Base* copy()`), includes are
   **never reordered** (order is load-bearing).
+- **For loops**: A loop body may omit braces only when its entire statement
+  occupies one physical line. A statement wrapped across multiple lines must
+  use Allman braces, even if it is a single statement. An outer loop containing
+  a nested loop on subsequent lines must therefore be braced; the inner loop
+  may omit braces when its body fits on one line. The loop header's line count
+  does not affect this rule. StyleLint enforces it in library sources, tests,
+  examples, bindings, and development utilities.
 - **Naming**: types/namespaces/template parameters `CamelCase`;
   functions/methods `camelBack` (accessors `getX`/`setX`, chainable setters
   return `*this`); private/protected members `m_camelBack`; parameters,
@@ -36,6 +45,16 @@ line, offending source, and suggested fix.
   the top; a `/** @file ... @brief ... */` documentation block; a class's
   `FormLanguage::Traits` specialization, its definition, its
   specializations, and its deduction guides live together in that header.
+- **Documentation**: Use `/** ... */` for multiline Doxygen documentation
+  and `///` for single-line documentation. Use `///<` for trailing member documentation.
+  Leave a blank line between a declaration or definition and the next standalone
+  documentation block, including documented aliases and data members. Keep each
+  documentation block attached to its own declaration.
+  Integrate API contracts and explanatory prose into the relevant Doxygen block;
+  remove redundant ordinary comments beside it.
+  Document every parameter and non-void return, including unused inputs,
+  deduction guides, and internal helpers. The Doxygen check audits the generated
+  XML to enforce coverage beyond Doxygen's ordinary warnings.
 - **Boundaries**: PETSc calls only under `src/Rodin/PETSc/`
   (`assert(ierr == PETSC_SUCCESS)` after each call — no checking macros);
   third-party integrations stay in their own directories; the core never
@@ -53,7 +72,9 @@ line, offending source, and suggested fix.
 ```sh
 # 1. Formatting — check, then fix, the lines you changed:
 python3 dev/check_format.py --base origin/master
-git clang-format origin/master        # applies the fixes in place
+python3 dev/check_format.py --base origin/master --fix  # changed regions only
+# For a new file, or an intentional complete-file formatting pass:
+python3 dev/format_cpp.py -i <file>
 
 # 2. Naming — full-tree ratchet over the aggregate TU:
 python3 dev/check_clang_tidy.py --flags "-std=c++20 -Isrc -Ibuild/src \

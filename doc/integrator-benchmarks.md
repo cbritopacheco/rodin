@@ -1,6 +1,6 @@
 # Integrator benchmarks
 
-The `RodinBenchmarks` target contains two complementary integrator benchmark
+The `RodinVariationalIntegratorsBenchmarks` target contains two complementary integrator benchmark
 levels under the `Integrator/` prefix.
 
 - `Integrator/Kernel/` measures element binding, quadrature, basis evaluation,
@@ -61,18 +61,18 @@ cost.
 Build and list the repertoire with:
 
 ```sh
-cmake --build build -j --target RodinBenchmarks
-build/tests/benchmarks/RodinBenchmarks \
-  --benchmark_list_tests | grep '^Integrator/'
+cmake --build build -j --target RodinVariationalIntegratorsBenchmarks
+build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
+  --benchmark_list_tests=true | grep '^Integrator/'
 ```
 
 Run only local kernels or complete assembly with:
 
 ```sh
-build/tests/benchmarks/RodinBenchmarks \
+build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_filter='Integrator/Kernel/.*'
 
-OMP_NUM_THREADS=8 build/tests/benchmarks/RodinBenchmarks \
+OMP_NUM_THREADS=8 build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_filter='Integrator/Assembly/.*'
 ```
 
@@ -81,10 +81,9 @@ count, CPU frequency policy, and benchmark filter on both revisions, and emit
 Google Benchmark JSON:
 
 ```sh
-build/tests/benchmarks/RodinBenchmarks \
+build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_filter='Integrator/.*' \
   --benchmark_repetitions=5 \
-  --benchmark_report_aggregates_only=true \
   --benchmark_out=integrators.json \
   --benchmark_out_format=json
 ```
@@ -103,3 +102,34 @@ different polynomial degrees should use both elapsed time and throughput:
 elapsed time describes application cost, whereas entry throughput describes
 the efficiency of the integrator as its mathematically required local work
 increases.
+
+## Hyperelastic tangent kernels
+
+`RodinHyperElasticityKernelBenchmarks` measures complete warm cell-local
+`InternalVirtualWork` tangents for active contraction with a Neo-Hookean
+passive law. It covers P1 and H1 degrees two and three on triangles,
+quadrilaterals, tetrahedra and hexahedra, with static and dynamic active fields.
+The dynamic cases include midpoint fiber strain. Each iteration includes
+constitutive binding, all trial tangent actions and all test-gradient
+contractions. Mesh/field construction, sparse assembly, solving and matrix
+reads are excluded. Counters report the actual quadrature size and local DOF
+count; tensor-product elements may request more quadrature points than their
+factor degree alone suggests.
+
+Build the opt-in target with `RODIN_BUILD_BENCHMARKS=ON`. For example, run a
+single case using:
+
+```sh
+build/tests/benchmarks/RodinHyperElasticityKernelBenchmarks \
+  --benchmark_filter='^InternalVirtualWork/Tangent/Active/P3/Triangle/Static$' \
+  --benchmark_repetitions=7 --benchmark_min_time=0.25s
+```
+
+Use the CPU-time column and run benchmark processes serially. Compare the
+same compiler, optimization settings, case, quadrature and input data, with
+alternating baseline/current runs. Short runs and a sum of all matrix entries
+are insufficient validation: rigid translation modes can make that sum nearly
+zero. The benchmark checks repeatability of the complete matrix; the Solid
+unit regressions separately compare every entry against explicit component
+contraction for changed displacements, non-axis-aligned fibers, and both
+static and dynamic active data. These benchmarks are not CTest timing gates.

@@ -11,20 +11,20 @@
  * This header provides the LeastSquaresCG solver class for solving least-squares
  * problems using the conjugate gradient method applied to the normal equations.
  *
- * ## Algorithm
+ * # Algorithm
  * Solves the least-squares problem:
  * @f[
  *   \min_x \|Ax - b\|^2
  * @f]
  * by applying CG to the normal equations @f$ A^TAx = A^Tb @f$.
  *
- * ## Applicability
+ * # Applicability
  * - Overdetermined systems (more equations than unknowns)
  * - Rectangular matrices
  * - Least-squares fitting problems
  * - Problems where @f$ A^TA @f$ is well-conditioned
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -73,9 +73,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for LeastSquaresCG
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  LeastSquaresCG(Variational::ProblemBase<LinearSystem>&) -> LeastSquaresCG<LinearSystem>;
+  LeastSquaresCG(
+    Variational::ProblemBase<LinearSystem>& pb) -> LeastSquaresCG<LinearSystem>;
 
   /**
    * @ingroup LeastSquaresCGSpecializations
@@ -152,9 +154,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~LeastSquaresCG() = default;
 
       /**
@@ -274,9 +274,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~LeastSquaresCG() = default;
 
       /**

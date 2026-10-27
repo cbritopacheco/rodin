@@ -123,14 +123,16 @@ rather than extended:
 - **Vary behavior by template parameter, not by subclass or flag** (scalar
   type, range type, FES, mesh/context — every FES family and solver is
   parameterized this way).
-- **Multi-stage algorithms are classes with proper names.** The class is
-  named for the algorithm, each stage is a member function, and the context
-  the stages share — inputs, parameters, intermediate state — is retained in
-  the class rather than threaded through argument lists. Each stage stays
-  independently testable: construct the object, drive the stages, inspect the
-  result. Free functions remain the right shape for single-step operations
-  that own no context.
-- **New solvers are expressed IN the form language, not beside it.** WNGIR
+- **Prefer implementation locality and monolithic method style.** Keep an
+  operation's control flow in the method and class that own it, rather than
+  extracting helper or free functions merely to shorten the method or remove
+  similar code elsewhere. A multi-stage algorithm belongs in a class named
+  for the algorithm; its stages may be separate member functions of that same
+  class. Retain shared inputs, parameters, and intermediate state as members
+  instead of threading them through free functions. A free function is
+  appropriate for a standalone operation with its own contract and no shared
+  class context.
+- **New solvers are expressed IN the form language, not beside it.** SWIFT
   is built from `Problem` + `Integral`/`FaceIntegral` + custom integrators
   that slot into the existing assembly — a sentence in the language, not a
   parallel framework. If you need something new, add the minimal node (a
@@ -205,6 +207,12 @@ rather than extended:
 
 ## Surface style (imitate exactly)
 
+- A `for`, `if`, or `else` body may omit braces only when the entire body
+  statement occupies one physical line. Wrapped single statements and outer
+  controls containing nested statements on subsequent lines require Allman
+  braces. The condition or loop header's line count does not affect this rule.
+  Conventional `else if` chains remain unwrapped; each branch body follows
+  the same rule.
 - Boost Software License header block at the top of every file; include
   guards `RODIN_<NAMESPACE>_<FILE>_H` (no `#pragma once`).
 - Members `m_camelCase`; accessors `getX()`/`setX(...)`, setters return a
@@ -213,6 +221,17 @@ rather than extended:
 - Leaf specializations are `final`. Constructors: default/copy/move spelled
   out (copy ctor deep-copies children via `copy()`); copy assignment
   deleted or omitted.
+- Use `/** ... */` for multiline Doxygen documentation and `///` for
+  single-line documentation. Use `///<` for trailing member documentation.
+  Leave a blank line between each declaration or definition and the next
+  standalone documentation block, including individually documented aliases
+  and data members. Keep each block attached to its own declaration.
+  Integrate API contracts and explanatory prose into the relevant Doxygen block;
+  remove redundant ordinary comments beside it.
+  Document every parameter, including intentionally unused inputs and deduction
+  guides, and every non-void return. Give unused inputs names and explain why
+  they are unused; `[[maybe_unused]]` preserves compiler warning cleanliness.
+  The Doxygen check audits full-extraction XML as well as ordinary warnings.
 - Doxygen with real mathematics: `@f$ ... @f$` formulas, a "Mathematical
   Foundation"/usage section, `@defgroup <Name>Specializations` per
   specialization family. When a class page documents a family with multiple

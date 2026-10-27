@@ -5,9 +5,13 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <cmath>
+#include <vector>
 #include <Eigen/Core>
 
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/Mesh.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -112,7 +116,7 @@ namespace Rodin::Tests::Unit
     Polytope::Traits traits(Polytope::Type::Point);
     const auto& c = traits.getCentroid();
     // Point centroid should be at the origin or the single vertex
-    EXPECT_EQ(c.size(), 0);  // 0-dimensional
+    EXPECT_EQ(c.size(), 0); // 0-dimensional
   }
 
   /// @brief Verifies segment centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
@@ -311,4 +315,62 @@ namespace Rodin::Tests::Unit
     for (int i = 0; i < result.size(); ++i)
       EXPECT_LE(result(i), hs.vector(i) + 1e-14);
   }
+
+  /// @brief Unit outward half-spaces agree with ordered facets, not merely centroid inclusion.
+  TEST(Geometry_PolytopeTraitsExt, HalfSpacesMatchOrderedBoundaryFacets)
+  {
+    constexpr Real Tolerance = 1e-12;
+    for (const auto geometry : Polytope::Types)
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const Polytope::Traits traits(geometry);
+      const size_t dimension = traits.getDimension();
+      const auto& halfSpace = traits.getHalfSpace();
+      ASSERT_EQ(halfSpace.matrix.cols(), dimension);
+      ASSERT_EQ(halfSpace.matrix.rows(), halfSpace.vector.size());
+      if (dimension == 0)
+      {
+        EXPECT_EQ(halfSpace.vector.size(), 0);
+        continue;
+      }
+      auto builder = LocalMesh::Builder();
+      builder.initialize(dimension).nodes(traits.getVertexCount());
+      IndexArray vertices(traits.getVertexCount());
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+      {
+        builder.vertex(traits.getVertex(vertex));
+        vertices(vertex) = vertex;
+      }
+      builder.polytope(geometry, vertices);
+      const auto mesh = builder.finalize();
+      std::vector<Connectivity<Context::Local>::SubPolytope> facets;
+      mesh.getConnectivity().getSubPolytopes(facets, 0, dimension - 1);
+      ASSERT_EQ(halfSpace.matrix.rows(), facets.size());
+      Math::Vector<Real> center(dimension);
+      for (size_t axis = 0; axis < dimension; ++axis)
+        center(axis) = traits.getCentroid()(axis);
+      for (size_t face = 0; face < facets.size(); ++face)
+      {
+        SCOPED_TRACE(face);
+        const auto normal = halfSpace.matrix.row(face);
+        EXPECT_NEAR(normal.norm(), 1, Tolerance);
+        EXPECT_LT(normal.dot(center), halfSpace.vector(face) - Tolerance);
+        for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        {
+          SCOPED_TRACE(vertex);
+          Math::Vector<Real> coordinate(dimension);
+          for (size_t axis = 0; axis < dimension; ++axis)
+            coordinate(axis) = traits.getVertex(vertex)(axis);
+          const auto& key = facets[face].vertices;
+          const bool incident =
+            std::find(key.begin(), key.end(), static_cast<Index>(vertex)) != key.end();
+          if (incident)
+            EXPECT_NEAR(normal.dot(coordinate), halfSpace.vector(face), Tolerance);
+          else
+            EXPECT_LT(normal.dot(coordinate), halfSpace.vector(face) - Tolerance);
+        }
+      }
+    }
+  }
+
 }

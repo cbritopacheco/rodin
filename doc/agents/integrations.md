@@ -4,6 +4,24 @@ Everything outside the native Eigen path. All integrations are additive:
 they live in their own directories, mirror core interfaces, and core never
 includes them.
 
+## Bundled dependency configuration
+
+Each bundled dependency has one entry point in `cmake/RodinThirdParty.cmake`:
+`rodin_add_mmg`, `rodin_add_googletest`, `rodin_add_benchmark`,
+`rodin_add_pybind11`, `rodin_add_termcolor`, and `rodin_add_mcss`.
+Keep vendor options, target adjustments, discovery settings, and bundled-header
+installation in these functions rather than at their call sites. m.css is a
+Python tool and its wrapper creates the documentation target; the others add
+CMake subprojects. System-provided dependencies remain `find_package`
+integrations.
+
+Function scope contains normal variables, not the shared CMake cache. MMG's
+wrapper therefore saves and restores the shared cache entries that MMG writes.
+Its private Scotch option is disabled independently of `RODIN_USE_SCOTCH`.
+Optional Python/documentation checks in `CMake.ThirdPartyIsolation` follow
+Rodin's corresponding feature switches; C++-only builds need neither Python
+development headers nor LaTeX for these checks.
+
 ## PETSc
 
 Full mirror tree (`PETSc/Math`, `PETSc/Solver`, `PETSc/Assembly`,
@@ -44,8 +62,10 @@ Loader/Printer class-template pattern: `MeshLoader`/`MeshPrinter`,
 - **MFEM** (`.mesh`/`.gf`) — meshes and grid functions.
 - **XDMF + HDF5** — visualization/time series: `IO::XDMF` writes a domain
   with `xdmf.grid().setMesh(mesh).add("name", gf)` per step; heavy data in
-  HDF5 side files; auto-detects curved (order>1) transformations and
-  samples them. This is the standard example output (open in ParaView).
+  HDF5 side files; detects native geometry through `isFirstOrder()`
+  and samples it. Total polynomial degree must not classify visualization
+  topology: first-order product cells retain their native shared vertices.
+  This is the standard example output (open in ParaView).
 - **HDF5.h** — direct mesh/grid-function persistence.
 
 Examples write outputs into the CWD — run from scratch directories.

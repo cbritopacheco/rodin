@@ -26,9 +26,7 @@ namespace Rodin::Heart
   class HolzapfelReducedLaw
   {
     public:
-      /**
-       * @brief Parameters of the reduced passive-energy law.
-       */
+      /// @brief Parameters of the reduced passive-energy law.
       struct Parameters
       {
         Scalar mu1 = Scalar(0); ///< Linear coefficient for @f$ J_1 @f$.

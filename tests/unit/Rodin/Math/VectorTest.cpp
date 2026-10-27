@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
+#include <cmath>
 
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
@@ -21,12 +23,11 @@ class VectorTest : public ::testing::Test
     void TearDown() override {}
 };
 
-// Test basic vector type aliases
-/// @brief Test Vector type alias.
+/// @brief Vector ownership retains the dimension and scalar convenience aliases.
 TEST_F(VectorTest, TypeAliases)
 {
-  // Test Vector type alias
-  static_assert(std::is_same_v<Vector<Real>, Eigen::VectorX<Real>>);
+  // Rodin owns the vector interface and inherits Eigen storage.
+  static_assert(std::is_base_of_v<Eigen::VectorX<Real>, Vector<Real>>);
   static_assert(std::is_same_v<Vector<Complex>, ComplexVector>);
 
   // Test SpatialPoint type
@@ -47,17 +48,17 @@ TEST_F(VectorTest, Construction)
   // Test default construction
   Vector<Real> v1;
   EXPECT_EQ(v1.size(), 0);
-  
+
   // Test sized construction
   Vector<Real> v2(5);
   EXPECT_EQ(v2.size(), 5);
-  
+
   // Test zero initialization
   Vector<Real> v3 = Vector<Real>::Zero(3);
   EXPECT_EQ(v3.size(), 3);
   for (int i = 0; i < v3.size(); ++i)
     EXPECT_DOUBLE_EQ(v3[i], 0.0);
-  
+
   // Test ones initialization
   Vector<Real> v4 = Vector<Real>::Ones(4);
   EXPECT_EQ(v4.size(), 4);
@@ -70,22 +71,22 @@ TEST_F(VectorTest, Construction)
 TEST_F(VectorTest, AccessAndAssignment)
 {
   Vector<Real> v(3);
-  
+
   // Test element assignment using operator[]
   v[0] = 1.0;
   v[1] = 2.0;
   v[2] = 3.0;
-  
+
   // Test element access using operator[]
   EXPECT_DOUBLE_EQ(v[0], 1.0);
   EXPECT_DOUBLE_EQ(v[1], 2.0);
   EXPECT_DOUBLE_EQ(v[2], 3.0);
-  
+
   // Test element access using operator()
   EXPECT_DOUBLE_EQ(v(0), 1.0);
   EXPECT_DOUBLE_EQ(v(1), 2.0);
   EXPECT_DOUBLE_EQ(v(2), 3.0);
-  
+
   // Test assignment operator
   v(1) = 5.0;
   EXPECT_DOUBLE_EQ(v(1), 5.0);
@@ -97,28 +98,28 @@ TEST_F(VectorTest, ArithmeticOperations)
 {
   Vector<Real> v1(3);
   v1 << 1, 2, 3;
-  
+
   Vector<Real> v2(3);
   v2 << 4, 5, 6;
-  
+
   // Test vector addition
   Vector<Real> sum = v1 + v2;
   EXPECT_DOUBLE_EQ(sum[0], 5.0);
   EXPECT_DOUBLE_EQ(sum[1], 7.0);
   EXPECT_DOUBLE_EQ(sum[2], 9.0);
-  
+
   // Test vector subtraction
   Vector<Real> diff = v2 - v1;
   EXPECT_DOUBLE_EQ(diff[0], 3.0);
   EXPECT_DOUBLE_EQ(diff[1], 3.0);
   EXPECT_DOUBLE_EQ(diff[2], 3.0);
-  
+
   // Test scalar multiplication
   Vector<Real> scaled = 2.0 * v1;
   EXPECT_DOUBLE_EQ(scaled[0], 2.0);
   EXPECT_DOUBLE_EQ(scaled[1], 4.0);
   EXPECT_DOUBLE_EQ(scaled[2], 6.0);
-  
+
   // Test scalar division
   Vector<Real> divided = v2 / 2.0;
   EXPECT_DOUBLE_EQ(divided[0], 2.0);
@@ -132,22 +133,22 @@ TEST_F(VectorTest, DotProductAndNorms)
 {
   Vector<Real> v1(3);
   v1 << 1, 2, 3;
-  
+
   Vector<Real> v2(3);
   v2 << 4, 5, 6;
-  
+
   // Test dot product
   Real dotProduct = v1.dot(v2);
-  EXPECT_DOUBLE_EQ(dotProduct, 32.0);  // 1*4 + 2*5 + 3*6 = 32
-  
+  EXPECT_DOUBLE_EQ(dotProduct, 32.0); // 1*4 + 2*5 + 3*6 = 32
+
   // Test L2 norm (Euclidean norm)
   Real norm = v1.norm();
-  EXPECT_DOUBLE_EQ(norm, std::sqrt(14.0));  // sqrt(1^2 + 2^2 + 3^2) = sqrt(14)
-  
+  EXPECT_DOUBLE_EQ(norm, std::sqrt(14.0)); // sqrt(1^2 + 2^2 + 3^2) = sqrt(14)
+
   // Test squared norm
   Real squaredNorm = v1.squaredNorm();
-  EXPECT_DOUBLE_EQ(squaredNorm, 14.0);  // 1^2 + 2^2 + 3^2 = 14
-  
+  EXPECT_DOUBLE_EQ(squaredNorm, 14.0); // 1^2 + 2^2 + 3^2 = 14
+
   // Test normalized vector
   Vector<Real> normalized = v1.normalized();
   Real normalizedNorm = normalized.norm();
@@ -164,7 +165,7 @@ TEST_F(VectorTest, FixedSizeVectors)
   EXPECT_EQ(v2.size(), 2);
   EXPECT_DOUBLE_EQ(v2[0], 1.0);
   EXPECT_DOUBLE_EQ(v2[1], 2.0);
-  
+
   // Test Vector3
   Vector3<Real> v3;
   v3 << 1.0, 2.0, 3.0;
@@ -172,13 +173,13 @@ TEST_F(VectorTest, FixedSizeVectors)
   EXPECT_DOUBLE_EQ(v3[0], 1.0);
   EXPECT_DOUBLE_EQ(v3[1], 2.0);
   EXPECT_DOUBLE_EQ(v3[2], 3.0);
-  
+
   // Test Vector4
   Vector4<Real> v4;
   v4 << 1.0, 2.0, 3.0, 4.0;
   EXPECT_EQ(v4.size(), 4);
   EXPECT_DOUBLE_EQ(v4[3], 4.0);
-  
+
   // Test compile-time size
   static_assert(Vector2<Real>::SizeAtCompileTime == 2);
   static_assert(Vector3<Real>::SizeAtCompileTime == 3);
@@ -218,7 +219,7 @@ TEST_F(VectorTest, SpatialVector)
 TEST_F(VectorTest, ComplexVector)
 {
   ComplexVector cv(3);
-  cv[0] = Complex(1.0, 2.0);  // 1 + 2i
+  cv[0] = Complex(1.0, 2.0); // 1 + 2i
   cv[1] = Complex(3.0, -1.0); // 3 - i
   cv[2] = Complex(-2.0, 1.0); // -2 + i
 
@@ -230,7 +231,7 @@ TEST_F(VectorTest, ComplexVector)
   EXPECT_DOUBLE_EQ(conjugated[1].imag(), 1.0);
   EXPECT_DOUBLE_EQ(conjugated[2].real(), -2.0);
   EXPECT_DOUBLE_EQ(conjugated[2].imag(), -1.0);
-  
+
   // Test complex norm
   Real complexNorm = cv.norm();
   EXPECT_GT(complexNorm, 0.0);
@@ -242,11 +243,11 @@ TEST_F(VectorTest, Resizing)
 {
   Vector<Real> v(3);
   v << 1, 2, 3;
-  
+
   // Test resize
   v.resize(5);
   EXPECT_EQ(v.size(), 5);
-  
+
   // Test conservativeResize
   Vector<Real> v2(3);
   v2 << 1, 2, 3;
@@ -262,17 +263,17 @@ TEST_F(VectorTest, Resizing)
 TEST_F(VectorTest, CrossProduct)
 {
   Vector3<Real> v1;
-  v1 << 1, 0, 0;  // x-axis unit vector
-  
+  v1 << 1, 0, 0; // x-axis unit vector
+
   Vector3<Real> v2;
-  v2 << 0, 1, 0;  // y-axis unit vector
-  
+  v2 << 0, 1, 0; // y-axis unit vector
+
   // Cross product should give z-axis unit vector
   Vector3<Real> cross = v1.cross(v2);
   EXPECT_DOUBLE_EQ(cross[0], 0.0);
   EXPECT_DOUBLE_EQ(cross[1], 0.0);
   EXPECT_DOUBLE_EQ(cross[2], 1.0);
-  
+
   // Test anti-commutativity: v1 x v2 = -(v2 x v1)
   Vector3<Real> cross_rev = v2.cross(v1);
   EXPECT_DOUBLE_EQ(cross_rev[0], 0.0);
@@ -286,21 +287,21 @@ TEST_F(VectorTest, MaxMinOperations)
 {
   Vector<Real> v(4);
   v << 3.0, -1.0, 5.0, 2.0;
-  
+
   // Test max coefficient
   Real maxVal = v.maxCoeff();
   EXPECT_DOUBLE_EQ(maxVal, 5.0);
-  
+
   // Test min coefficient
   Real minVal = v.minCoeff();
   EXPECT_DOUBLE_EQ(minVal, -1.0);
-  
+
   // Test max coefficient with index
   int maxIndex;
   Real maxValWithIndex = v.maxCoeff(&maxIndex);
   EXPECT_DOUBLE_EQ(maxValWithIndex, 5.0);
   EXPECT_EQ(maxIndex, 2);
-  
+
   // Test min coefficient with index
   int minIndex;
   Real minValWithIndex = v.minCoeff(&minIndex);
@@ -314,23 +315,23 @@ TEST_F(VectorTest, SegmentOperations)
 {
   Vector<Real> v(6);
   v << 1, 2, 3, 4, 5, 6;
-  
+
   // Test head (first n elements)
   auto head3 = v.head(3);
   EXPECT_EQ(head3.size(), 3);
   EXPECT_DOUBLE_EQ(head3[0], 1.0);
   EXPECT_DOUBLE_EQ(head3[1], 2.0);
   EXPECT_DOUBLE_EQ(head3[2], 3.0);
-  
+
   // Test tail (last n elements)
   auto tail3 = v.tail(3);
   EXPECT_EQ(tail3.size(), 3);
   EXPECT_DOUBLE_EQ(tail3[0], 4.0);
   EXPECT_DOUBLE_EQ(tail3[1], 5.0);
   EXPECT_DOUBLE_EQ(tail3[2], 6.0);
-  
+
   // Test segment (middle elements)
-  auto segment2 = v.segment(2, 2);  // start at index 2, length 2
+  auto segment2 = v.segment(2, 2); // start at index 2, length 2
   EXPECT_EQ(segment2.size(), 2);
   EXPECT_DOUBLE_EQ(segment2[0], 3.0);
   EXPECT_DOUBLE_EQ(segment2[1], 4.0);
@@ -525,6 +526,109 @@ TEST_F(VectorTest, SpatialVectorNorms)
   EXPECT_NEAR(v.blueNorm(), 5.0, 1e-10);
 }
 
+/**
+ * @brief Complex Euclidean norms cannot cancel nonzero components.
+ *
+ * For @f$z=(1,i)@f$, the bilinear square is zero whereas
+ * @f$\|z\|_2^2=|1|^2+|i|^2=2@f$. This distinguishes the Hermitian
+ * Euclidean norm from the square root of a bilinear self-contraction.
+ */
+TEST_F(VectorTest, ComplexSpatialVectorNormDoesNotCancel)
+{
+  SpatialVector<Complex> value({Complex(1, 0), Complex(0, 1)});
+  EXPECT_TRUE((std::is_same_v<decltype(value.squaredNorm()), Real>));
+  EXPECT_TRUE((std::is_same_v<decltype(value.norm()), Real>));
+  EXPECT_TRUE((std::is_same_v<decltype(value.stableNorm()), Real>));
+  EXPECT_TRUE((std::is_same_v<decltype(value.blueNorm()), Real>));
+  EXPECT_DOUBLE_EQ(std::real(value.squaredNorm()), 2);
+  EXPECT_DOUBLE_EQ(std::imag(value.squaredNorm()), 0);
+  EXPECT_DOUBLE_EQ(std::real(value.norm()), std::sqrt(Real(2)));
+  EXPECT_DOUBLE_EQ(std::imag(value.norm()), 0);
+}
+
+/**
+ * @brief Normalization uses the positive real norm of a complex vector.
+ *
+ * Normalization must preserve the relative complex phases and must not
+ * mutate the source when a normalized copy is requested.
+ */
+TEST_F(VectorTest, ComplexSpatialVectorNormalizationPreservesPhases)
+{
+  const SpatialVector<Complex> source({Complex(1, 0), Complex(0, 1)});
+  const auto normalized = source.normalized();
+  auto inPlace = source;
+  inPlace.normalize();
+  const Real inverseNorm = Real(1) / std::sqrt(Real(2));
+  for (size_t component = 0; component < source.size(); ++component)
+  {
+    EXPECT_EQ(normalized(component), inverseNorm * source(component));
+    EXPECT_EQ(inPlace(component), normalized(component));
+  }
+  EXPECT_DOUBLE_EQ(std::real(normalized.norm()), 1);
+  EXPECT_EQ(source(0), Complex(1, 0));
+  EXPECT_EQ(source(1), Complex(0, 1));
+}
+
+/**
+ * @brief Spatial-vector norm algorithms use only the active components.
+ *
+ * Shrinking the logical dimension retains inactive storage. All norm
+ * algorithms must nevertheless agree with the active Eigen-vector view,
+ * including the empty vector, for real and complex component fields.
+ */
+TEST_F(VectorTest, SpatialVectorNormsRespectLogicalDimension)
+{
+  const auto check = []<class Scalar>(SpatialVector<Scalar> value) {
+    for (size_t dimension = 0; dimension <= SpatialVector<Scalar>::MaxSize; ++dimension)
+    {
+      SCOPED_TRACE(dimension);
+      value.resize(dimension);
+      const auto active = value.getData().head(dimension);
+      EXPECT_DOUBLE_EQ(std::real(value.squaredNorm()), active.squaredNorm());
+      EXPECT_DOUBLE_EQ(std::imag(value.squaredNorm()), 0);
+      EXPECT_DOUBLE_EQ(std::real(value.norm()), active.norm());
+      EXPECT_DOUBLE_EQ(std::imag(value.norm()), 0);
+      const Real stable = dimension == 0 ? Real(0) : active.stableNorm();
+      const Real blue = dimension == 0 ? Real(0) : active.blueNorm();
+      EXPECT_DOUBLE_EQ(std::real(value.stableNorm()), stable);
+      EXPECT_DOUBLE_EQ(std::imag(value.stableNorm()), 0);
+      EXPECT_DOUBLE_EQ(std::real(value.blueNorm()), blue);
+      EXPECT_DOUBLE_EQ(std::imag(value.blueNorm()), 0);
+    }
+  };
+  check(SpatialVector<Real>({3, 4, 12}));
+  check(SpatialVector<Complex>({Complex(3, 4), Complex(0, 12), Complex(8, 0)}));
+}
+
+/**
+ * @brief Complex component magnitudes define real spatial-vector norms.
+ *
+ * For @f$z=(3+4i,5+12i,8+15i)@f$, the component magnitudes are
+ * @f$(5,13,17)@f$. Each logical prefix is checked, including the empty
+ * vector; inactive storage must not contribute to @f$\|z\|_1@f$ or
+ * @f$\|z\|_2@f$.
+ */
+TEST_F(VectorTest, ComplexSpatialVectorLpNormRespectsLogicalDimension)
+{
+  const Math::SpatialVector<Complex> source(
+    {Complex(3, 4), Complex(5, 12), Complex(8, 15)});
+  const std::array<Real, 4> expectedL1{0, 5, 18, 35};
+  const std::array<Real, 4> expectedSquaredL2{0, 25, 194, 483};
+  for (size_t dimension = 0; dimension <= source.MaxSize; ++dimension)
+  {
+    SCOPED_TRACE(dimension);
+    auto value = source;
+    value.resize(dimension);
+    EXPECT_TRUE((std::is_same_v<decltype(value.lpNorm<1>()), Real>));
+    EXPECT_TRUE((std::is_same_v<decltype(value.lpNorm<2>()), Real>));
+    EXPECT_DOUBLE_EQ(std::real(value.lpNorm<1>()), expectedL1[dimension]);
+    EXPECT_DOUBLE_EQ(std::imag(value.lpNorm<1>()), 0);
+    EXPECT_DOUBLE_EQ(
+      std::real(value.lpNorm<2>()), std::sqrt(expectedSquaredL2[dimension]));
+    EXPECT_DOUBLE_EQ(std::imag(value.lpNorm<2>()), 0);
+  }
+}
+
 /// @brief Verifies spatial vector lp norm for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorLpNorm)
 {
@@ -596,4 +700,61 @@ TEST_F(VectorTest, SpatialVector0D)
   EXPECT_EQ(v.size(), 0);
   EXPECT_DOUBLE_EQ(v.norm(), 0.0);
   EXPECT_DOUBLE_EQ(v.squaredNorm(), 0.0);
+}
+
+/// @brief Eigen expression updates preserve active size, inactive storage and external operands.
+template <class Scalar>
+class SpatialVectorEigenExpressionTest : public ::testing::Test
+{};
+using SpatialVectorEigenExpressionScalars = ::testing::Types<Real, Complex>;
+TYPED_TEST_SUITE(SpatialVectorEigenExpressionTest, SpatialVectorEigenExpressionScalars);
+
+TYPED_TEST(SpatialVectorEigenExpressionTest, CompoundUpdatesPreserveStorageAndOperands)
+{
+  using Scalar = TypeParam;
+  for (std::uint8_t d = 0; d <= 3; ++d)
+  {
+    SCOPED_TRACE(d);
+    SpatialVector<Scalar> initial(3);
+    const Scalar inactive(91);
+    initial.setConstant(inactive);
+    initial.resize(d);
+    Eigen::Matrix<Scalar, 3, 1> external;
+    for (std::uint8_t i = 0; i < 3; ++i)
+    {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        external(i) = Scalar(i + 4, -Real(i + 1));
+      else
+        external(i) = Scalar(i + 4);
+      if (i < d)
+        initial[i] = Scalar(i + 1);
+    }
+    const auto saved = external;
+    const auto check = [&](const auto& expression) {
+      SpatialVector<Scalar> updated(initial);
+      EXPECT_EQ(&(updated += expression), &updated);
+      EXPECT_EQ(updated.size(), d);
+      for (std::uint8_t i = 0; i < d; ++i)
+      {
+        EXPECT_EQ(updated[i], Scalar(i + 1) + Scalar(2) * saved(d - i - 1));
+      }
+      for (std::uint8_t i = d; i < 3; ++i)
+      {
+        EXPECT_EQ(updated.getData()(i), inactive);
+      }
+      EXPECT_EQ(&(updated -= expression), &updated);
+      EXPECT_EQ(updated.size(), d);
+      for (std::uint8_t i = 0; i < d; ++i)
+      {
+        EXPECT_EQ(updated[i], Scalar(i + 1));
+      }
+      for (std::uint8_t i = d; i < 3; ++i)
+      {
+        EXPECT_EQ(updated.getData()(i), inactive);
+      }
+      EXPECT_EQ(external, saved);
+    };
+    check(Scalar(2) * external.head(d).reverse());
+    check(Scalar(2) * external.transpose().head(d).reverse());
+  }
 }

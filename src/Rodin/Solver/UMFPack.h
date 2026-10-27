@@ -12,7 +12,7 @@
  * a high-performance direct solver for general sparse matrices using
  * multifrontal LU factorization.
  *
- * ## Algorithm
+ * # Algorithm
  * UMFPACK computes:
  * @f[
  *   PAQ = LU
@@ -21,14 +21,14 @@
  * triangular, and @f$ U @f$ is upper triangular. The multifrontal method
  * processes the matrix using an assembly tree for efficiency.
  *
- * ## Applicability
+ * # Applicability
  * - General sparse matrices (non-symmetric, non-positive definite)
  * - Large-scale problems
  * - Circuit simulation
  * - Structural analysis
  * - Computational fluid dynamics
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -153,9 +153,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~UMFPack() = default;
 
       /**

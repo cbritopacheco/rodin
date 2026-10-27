@@ -11,46 +11,47 @@
 
 /**
  * @file
- * @brief Header containing preprocessor directives for Rodin.
+ * @brief Build configuration and feature-selection macros for Rodin.
+ *
+ * CMake generates @c Rodin/Configure.h from this template. Include the
+ * generated header to inspect the library version and enabled backends;
+ * optional feature macros are defined only when their feature is enabled.
+ *
+ * @see @ref configuration "Configuration guide"
+ *
+ * # Representative use
+ *
+ * @code{.cpp}
+ * #include <Rodin/Configure.h>
+ * #if defined(RODIN_USE_MPI)
+ * // Code requiring the MPI backend.
+ * #endif
+ * @endcode
+ *
+ * # Module-specific controls
+ *
+ * Controls declared by individual modules remain documented on their own
+ * header pages: @ref RODIN_GEOMETRY_REQUIRE_INCIDENCE for mesh connectivity,
+ * @ref RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER for quadrature capacity, and
+ * @ref RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION for H1 vector capacity.
  */
 
-/**
- * @defgroup RodinDirectives Preprocessor directives
- * @brief Preprocessor directives defined by Rodin.
- */
-
-/**
- * @ingroup RodinDirectives
- * @brief Rodin version string.
- */
+/// @brief Rodin version string.
 #define RODIN_VERSION "@RODIN_VERSION@"
 
-/**
- * @ingroup RodinDirectives
- * @brief Rodin major version number.
- */
+/// @brief Rodin major version number.
 #define RODIN_VERSION_MAJOR @RODIN_VERSION_MAJOR@
 
-/**
- * @ingroup RodinDirectives
- * @brief Rodin minor version number.
- */
+/// @brief Rodin minor version number.
 #define RODIN_VERSION_MINOR @RODIN_VERSION_MINOR@
 
-/**
- * @ingroup RodinDirectives
- * @brief Rodin patch version number.
- */
+/// @brief Rodin patch version number.
 #define RODIN_VERSION_PATCH @RODIN_VERSION_PATCH@
 
-/**
- * @ingroup RodinDirectives
- * @brief Encoded Rodin version number.
- */
+/// @brief Encoded Rodin version number.
 #define RODIN_VERSION_CODE @RODIN_VERSION_CODE@
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with Python support.
  *
  * # Utilization
@@ -64,18 +65,16 @@
 #cmakedefine RODIN_WITH_PY
 
 /**
- * @ingroup RodinDirectives
- * @brief Indicates if Rodin::Plot is built.
+ * @brief Legacy plotting feature macro; no plotting module is currently shipped.
  * @code{.cpp}
  *  #ifndef RODIN_WITH_PLOT
- *  // Code depending on Rodin::Plot support
+ *  // Legacy plotting integration
  *  #endif
  * @endcode
  */
 #cmakedefine RODIN_WITH_PLOT
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with MPI support.
  *
  * # Utilization
@@ -89,7 +88,6 @@
 #cmakedefine RODIN_USE_MPI
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with OpenMP support.
  *
  * # Utilization
@@ -103,7 +101,6 @@
 #cmakedefine RODIN_USE_OPENMP
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with SuiteSparse support.
  *
  * # Utilization
@@ -117,7 +114,6 @@
 #cmakedefine RODIN_USE_UMFPACK
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with SuiteSparse:ParU support.
  *
  * # Utilization
@@ -131,7 +127,6 @@
 #cmakedefine RODIN_USE_PARU
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with MUMPS support.
  *
  * # Utilization
@@ -145,7 +140,6 @@
 #cmakedefine RODIN_USE_MUMPS
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with SuiteSparse support.
  *
  * # Utilization
@@ -159,7 +153,6 @@
 #cmakedefine RODIN_USE_SPQR
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with SuiteSparse support.
  *
  * # Utilization
@@ -172,14 +165,10 @@
  */
 #cmakedefine RODIN_USE_CHOLMOD
 
-/**
- * @ingroup RodinDirectives
- * @brief Indicates if Rodin warnings are silenced.
- */
+/// @brief Indicates if Rodin warnings are silenced.
 #cmakedefine RODIN_SILENCE_WARNINGS
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin exceptions are silenced.
  *
  * If defined, this directive will prevent Rodin from outputting the error
@@ -188,7 +177,6 @@
 #cmakedefine RODIN_SILENCE_EXCEPTIONS
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates the Rodin resources directory.
  *
  * # Utilization
@@ -200,7 +188,6 @@
 #cmakedefine RODIN_RESOURCES_DIR "@RODIN_RESOURCES_DIR@"
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates the Rodin third-party source directory.
  *
  * # Utilization
@@ -212,7 +199,6 @@
 #cmakedefine RODIN_THIRD_PARTY_DIR "@RODIN_THIRD_PARTY_DIR@"
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with thread safety enabled.
  *
  * # Utilization
@@ -226,7 +212,6 @@
 #cmakedefine RODIN_THREAD_SAFE
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin supports multithreading.
  *
  * # Utilization
@@ -240,7 +225,6 @@
 #cmakedefine RODIN_MULTITHREADED
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with Apple Accelerate support.
  *
  * # Utilization
@@ -254,7 +238,6 @@
 #cmakedefine RODIN_USE_APPLE_ACCELERATE
 
 /**
- * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with Scotch support.
  *
  * # Utilization
@@ -267,20 +250,18 @@
  */
 #cmakedefine RODIN_USE_SCOTCH
 
-/**
- * @ingroup RodinDirectives
- * @brief Indicates the maximal space dimension.
- */
+/// @brief Indicates the maximal space dimension.
 #define RODIN_MAXIMAL_SPACE_DIMENSION 3
 
-/**
- * @ingroup RodinDirectives
- * @brief Maximum number of vertices supported by a polytope.
- */
+/// @brief Maximum number of vertices supported by a polytope.
 #define RODIN_MAXIMUM_POLYTOPE_VERTICES 8
 
 /**
- * @brief Represents the constant used for fuzzy comparison.
+ * @brief Legacy default tolerance intended for fuzzy scalar comparisons.
+ *
+ * Absolute threshold in the compared values' units; the value is a numerical
+ * policy, not a scale-independent error bound. Currently unused in Rodin's
+ * implementation; retained as a configuration macro for downstream users.
  */
 #define RODIN_FUZZY_CONSTANT 1e-5
 

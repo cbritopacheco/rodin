@@ -1,0 +1,14 @@
+{% set is_module = compound.breadcrumb[-1][1] in RODIN_MODULE_URLS %}
+{% if is_module %}{% set navbar_current = 'modules' %}{% endif %}
+{% extends 'base-reference.html' %}
+
+{% block title %}{% set j = joiner('::') %}{% for name, _ in compound.breadcrumb %}{{ j() }}{{ name }}{% endfor %} {{ 'module' if is_module else 'namespace' }} | {{ super() }}{% endblock %}
+
+{% block header %}
+        <h1>
+          {%+ for name, target in compound.breadcrumb[:-1] %}<span class="m-breadcrumb"><a href="{{ target }}">{{ name }}</a>::<wbr/></span>{% endfor %}{{ compound.breadcrumb[-1][0] }} <span class="m-thin">{{ 'module' if is_module else 'namespace' }}</span>{% if compound.is_inline %} <span class="m-label m-flat m-info">inline</span>{% endif %}{% if compound.since %} {{ compound.since }}{% endif %}
+          {% if compound.include %}
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="{{ compound.include[1] }}">{{ compound.include[0] }}</a></div>
+          {% endif %}
+        </h1>
+{% endblock %}

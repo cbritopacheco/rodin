@@ -8,22 +8,24 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinQF_HEADERS
   Centroid.h
   GaussLegendre.h
+  GaussLobatto.h
   GrundmannMoller.h
   TensorProduct.h
   XiaoGimbutas.h
   XiaoGimbutasData.h
   WitherdenVincent.h
   WitherdenVincentData.h
-  PolytopeQuadratureFormula.h
+  QuadratureFormula.h
 )
 
 set(RodinQF_SRCS
   Centroid.cpp
   GaussLegendre.cpp
+  GaussLobatto.cpp
   GrundmannMoller.cpp
   XiaoGimbutas.cpp
   WitherdenVincent.cpp
-  PolytopeQuadratureFormula.cpp
+  QuadratureFormula.cpp
 )
 
 add_library(RodinQF

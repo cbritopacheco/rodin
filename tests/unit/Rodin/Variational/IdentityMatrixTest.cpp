@@ -43,8 +43,10 @@ TEST(Rodin_Variational_IdentityMatrix, ThreeByThree)
   EXPECT_EQ(val.rows(), 3);
   EXPECT_EQ(val.cols(), 3);
   for (int i = 0; i < 3; ++i)
+  {
     for (int j = 0; j < 3; ++j)
       EXPECT_NEAR(val(i, j), (i == j) ? 1.0 : 0.0, 1e-15);
+  }
 }
 
 /// @brief Verifies rows for variational identity matrix by checking exact expected values.

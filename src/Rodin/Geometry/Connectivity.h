@@ -95,9 +95,7 @@ namespace Rodin::Geometry
       virtual const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
   };
 
-  /**
-   * @brief Type alias for sequential (non-distributed) connectivity.
-   */
+  /// @brief Type alias for sequential (non-distributed) connectivity.
   using SequentialConnectivity = Connectivity<Context::Local>;
 
   /**
@@ -292,9 +290,11 @@ namespace Rodin::Geometry
           /**
            * @brief Serialization save method.
            * @param[in,out] ar Archive object
+           * @param version Boost.Serialization class version; unused by this implementation.
            */
           template <class Archive>
-          void save(Archive& ar, const unsigned int /*version*/) const
+          void save(
+            Archive& ar, [[maybe_unused]] const unsigned int /*version*/ version) const
           {
             ar & right;
             std::vector<Polytope::Key> leftKeys;
@@ -307,9 +307,10 @@ namespace Rodin::Geometry
           /**
            * @brief Serialization load method.
            * @param[in,out] ar Archive object
+           * @param version Boost.Serialization class version; unused by this implementation.
            */
           template <class Archive>
-          void load(Archive& ar, const unsigned int /*version*/)
+          void load(Archive& ar, [[maybe_unused]] const unsigned int /*version*/ version)
           {
             ar & right;
             std::vector<Polytope::Key> leftKeys;
@@ -327,18 +328,14 @@ namespace Rodin::Geometry
           BOOST_SERIALIZATION_SPLIT_MEMBER()
       };
 
-      /**
-       * @brief Represents a sub-polytope (lower-dimensional face).
-       */
+      /// @brief Represents a sub-polytope (lower-dimensional face).
       struct SubPolytope
       {
         Polytope::Type geometry;  ///< Geometry type of the sub-polytope
         Polytope::Key vertices;    ///< Vertex indices defining the sub-polytope
       };
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Connectivity();
 
       /**
@@ -348,6 +345,7 @@ namespace Rodin::Geometry
        * A defaulted copy would leave them aliasing the source's @c right map
        * (dangling once the source dies), so relink them into this object's
        * own @c right map.
+       * @param other Source object to copy or move from.
        */
       Connectivity(const Connectivity& other)
         : m_maximalDimension(other.m_maximalDimension),
@@ -367,19 +365,23 @@ namespace Rodin::Geometry
        *
        * Moving a @c std::unordered_map preserves node addresses, so the
        * @c left pointers remain valid; a defaulted move is correct.
+       * @param other Source object to copy or move from.
        */
-      Connectivity(Connectivity&&) = default;
+      Connectivity([[maybe_unused]] Connectivity&& other) = default;
 
       /**
        * @brief Copy assignment operator.
        *
        * See the copy constructor: @c left is relinked into this object's
        * own @c right map.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
        */
       Connectivity& operator=(const Connectivity& other)
       {
         if (this != &other)
         {
+          ++m_revision;
           m_maximalDimension = other.m_maximalDimension;
           m_dimension = other.m_dimension;
           m_count = other.m_count;
@@ -395,8 +397,37 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
        */
-      Connectivity& operator=(Connectivity&&) = default;
+      Connectivity& operator=(Connectivity&& other) noexcept
+      {
+        if (this != &other)
+        {
+          ++m_revision;
+          m_maximalDimension = other.m_maximalDimension;
+          m_dimension = other.m_dimension;
+          m_count = std::move(other.m_count);
+          m_gcount = std::move(other.m_gcount);
+          m_index = std::move(other.m_index);
+          m_dirty = std::move(other.m_dirty);
+          m_geometry = std::move(other.m_geometry);
+          m_connectivity = std::move(other.m_connectivity);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Returns the revision of the stored topology.
+       * @returns Revision changed by explicit topology edits or replacement.
+       *
+       * Derived incidence computations retain this revision. Topology edits
+       * must not run concurrently with mesh evaluation.
+       */
+      size_t getRevision() const noexcept
+      {
+        return m_revision;
+      }
 
       /**
        * @brief Initializes connectivity for a mesh of given dimension.
@@ -708,6 +739,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Returns the maximal polytope dimension present in this connectivity.
+       * @returns Largest polytope dimension stored in the mesh.
        */
       size_t getMaximalDimension() const;
 
@@ -720,6 +752,8 @@ namespace Rodin::Geometry
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
+        if constexpr (Archive::is_loading::value)
+          ++m_revision;
         ar & m_maximalDimension;
         ar & m_dimension;
         ar & m_count;
@@ -752,6 +786,7 @@ namespace Rodin::Geometry
         }
       }
 
+      size_t m_revision = 0; ///< Revision of explicitly supplied topology.
       size_t m_maximalDimension;
       size_t m_dimension;
       std::vector<size_t> m_count;

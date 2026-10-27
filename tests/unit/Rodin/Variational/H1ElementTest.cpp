@@ -9,9 +9,16 @@
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
 
+#include <array>
 #include <complex>
+#include <sstream>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Rodin/Variational/P0/P0Element.h"
+#include "Rodin/Variational/P0g/P0gElement.h"
 #include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/Variational/H1/H1Element.h"
 
@@ -27,6 +34,172 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    /**
+     * @brief Counts reference-point reads for quadrature cache lifetime tests.
+     *
+     * A one-point rule isolates cache reuse from quadrature exactness. Copying,
+     * assignment, and reconstruction change the inherited logical identity.
+     */
+    class ObservedH1Formula final : public QF::QuadratureFormulaBase
+    {
+      public:
+        /**
+         * @brief Constructs a rule with one reference point.
+         * @param point Reference point returned by the rule.
+         */
+        ObservedH1Formula(Polytope::Type geometry, bool half)
+          : ObservedH1Formula(Math::SpatialPoint(
+              Polytope::Traits(geometry).getCentroid() * (half ? Real(0.5) : Real(1))))
+        {}
+
+        explicit ObservedH1Formula(const Math::SpatialPoint& point)
+          : m_point(point),
+            m_requests(0)
+        {}
+
+        /**
+         * @brief Copies a rule with an independent read counter.
+         * @param other Rule to copy.
+         */
+        ObservedH1Formula(const ObservedH1Formula& other)
+          : QF::QuadratureFormulaBase(other),
+            m_point(other.m_point),
+            m_requests(0)
+        {}
+
+        /**
+         * @brief Assigns rule contents and invalidates its previous identity.
+         * @param other Rule supplying the new reference point.
+         * @returns This rule after assignment.
+         */
+        ObservedH1Formula& operator=(const ObservedH1Formula& other)
+        {
+          if (this != &other)
+          {
+            QF::QuadratureFormulaBase::operator=(other);
+            m_point = other.m_point;
+            m_requests = 0;
+          }
+          return *this;
+        }
+
+        /**
+         * @brief Returns the number of points.
+         * @returns One.
+         */
+        size_t getSize() const override
+        {
+          return 1;
+        }
+
+        /**
+         * @brief Returns the test rule's weight.
+         * @param index Point index, unused because the weight is constant.
+         * @returns Unit weight.
+         */
+        Real getWeight([[maybe_unused]] size_t index) const override
+        {
+          return 1;
+        }
+
+        /**
+         * @brief Records a reference-point access.
+         * @param index Index of the only reference point.
+         * @returns The stored reference point.
+         */
+        const Math::SpatialPoint& getPoint([[maybe_unused]] size_t index) const override
+        {
+          assert(index == 0);
+          ++m_requests;
+          return m_point;
+        }
+
+        /**
+         * @brief Returns the number of reference-point accesses.
+         * @returns Integer access count since construction or assignment.
+         */
+        size_t getRequests() const
+        {
+          return m_requests;
+        }
+
+        /**
+         * @brief Creates an independently identified copy.
+         * @returns Owned copy of this rule.
+         */
+        ObservedH1Formula* copy() const noexcept
+        {
+          return new ObservedH1Formula(*this);
+        }
+
+      private:
+        Math::SpatialPoint m_point;
+        mutable size_t m_requests;
+    };
+  }
+
+  /**
+   * @brief Tabulation follows logical quadrature lifetimes, not reused addresses.
+   *
+   * Degrees one through four and real and complex scalar bases are exercised
+   * on every reference geometry. Integer read counts certify cache hits and
+   * invalidation; exact comparisons certify values and directional derivatives
+   * against direct basis evaluation. No coordinate tolerance defines identity.
+   */
+  TEST(Rodin_Variational_RealH1Element, TabulationQuadratureLifetimeAndAssignment)
+  {
+    Utility::ForIndex<4>([&](auto order) {
+      constexpr size_t K = order.value + 1;
+      const auto checkScalar = [&]<class Scalar>() {
+        for (const auto geometry :
+          {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+            Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+        {
+          SCOPED_TRACE(::testing::Message()
+            << "degree " << K << ", geometry " << static_cast<int>(geometry));
+          H1Element<K, Scalar> element(geometry);
+          const QF::QuadratureFormula* formula = nullptr;
+          const auto centroid = Polytope::Traits(geometry).getCentroid();
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, false);
+
+          const auto check = [&](const Math::SpatialPoint& point) {
+            const auto& table = element.getTabulation(*formula);
+
+            EXPECT_EQ(&element.getTabulation(*formula), &table);
+
+            for (size_t local = 0; local < element.getCount(); ++local)
+            {
+              const auto& basis = element.getBasis(local);
+              EXPECT_EQ(table.getBasis(0, local), basis(point));
+              for (size_t d = 0; d < Polytope::Traits(geometry).getDimension(); ++d)
+              {
+                EXPECT_EQ(table.template getDerivative<1>(0, local, d),
+                  basis.template getDerivative<1>(d)(point));
+              }
+            }
+          };
+          check(centroid);
+          const auto* previous = formula;
+          const Math::SpatialPoint replacement = centroid * Real(0.5);
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, true);
+          ASSERT_NE(formula, nullptr);
+          ASSERT_NE(formula, previous);
+          check(replacement);
+          const auto* reconstructed = formula;
+          formula = &QF::QuadratureFormula::get<ObservedH1Formula>(geometry, false);
+          ASSERT_NE(formula, nullptr);
+          ASSERT_NE(formula, reconstructed);
+          check(centroid);
+        }
+      };
+      checkScalar.template operator()<Real>();
+      checkScalar.template operator()<Complex>();
+    });
+  }
+
   /// @brief Verifies linear form triangle must be nodal for variational real H1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealH1Element, LinearForm_Triangle_MustBeNodal)
   {
@@ -38,10 +211,10 @@ namespace Rodin::Tests::Unit
 
     for (size_t i = 0; i < fe.getCount(); ++i)
     {
-      const auto& lf   = fe.getLinearForm(i);
+      const auto& lf = fe.getLinearForm(i);
       const auto& node = fe.getNode(i);
-      Real dof        = lf(f);
-      Real expected   = f(node);
+      Real dof = lf(f);
+      Real expected = f(node);
       EXPECT_NEAR(dof, expected, 1e-14) << "dof " << i << " is not nodal";
     }
   }
@@ -56,7 +229,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 1);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 0);
+    EXPECT_EQ(k.getDegree(), 0);
 
     // Check basis function value
     EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0}}), 1, RODIN_FUZZY_CONSTANT);
@@ -72,7 +245,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 3);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Test basis functions at nodes (Lagrange property)
     {
@@ -155,7 +328,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 6);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test P2 element on Quadrilateral geometry
@@ -168,7 +341,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 9);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
 
     // Test tensor product property at corner
     {
@@ -208,7 +381,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 4);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 3);
+    EXPECT_EQ(k.getDegree(), 3);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 4; i++)
@@ -253,7 +426,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 10);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test P2 element on Wedge geometry
@@ -266,7 +439,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 18);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // ========================================================================
@@ -282,7 +455,7 @@ namespace Rodin::Tests::Unit
 
     // P4 element on Segment should have 5 DOFs (k+1 = 4+1 = 5)
     EXPECT_EQ(k.getCount(), 5);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 5; i++)
@@ -348,7 +521,7 @@ namespace Rodin::Tests::Unit
 
     // P5 element on Segment should have 6 DOFs (k+1 = 5+1 = 6)
     EXPECT_EQ(k.getCount(), 6);
-    EXPECT_EQ(k.getOrder(), 5);
+    EXPECT_EQ(k.getDegree(), 5);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 6; i++)
@@ -415,7 +588,7 @@ namespace Rodin::Tests::Unit
 
     // P6 element on Segment should have 7 DOFs (k+1 = 6+1 = 7)
     EXPECT_EQ(k.getCount(), 7);
-    EXPECT_EQ(k.getOrder(), 6);
+    EXPECT_EQ(k.getDegree(), 6);
 
     // Test Lagrange property at nodes
     for (size_t i = 0; i < 7; i++)
@@ -690,11 +863,11 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies order property all orders for variational real H1 element by checking exact expected values.
   TEST(Rodin_Variational_RealH1Element, OrderProperty_AllOrders)
   {
-    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getOrder(), 2);
-    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getOrder(), 3);
-    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getOrder(), 4);
-    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getOrder(), 5);
-    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getOrder(), 6);
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getDegree(), 2);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getDegree(), 3);
+    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getDegree(), 4);
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getDegree(), 5);
+    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getDegree(), 6);
   }
 
   // ========================================================================
@@ -1107,7 +1280,7 @@ namespace Rodin::Tests::Unit
     RealH1Element<2> k(Polytope::Type::Pyramid);
 
     EXPECT_EQ(k.getCount(), 14);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_FALSE(k.getDegree());
   }
 
   /// @brief Verifies lagrange property P 2 pyramid for variational real H1 element by checking tolerance-based numerical results.
@@ -1180,8 +1353,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Wedge)
   {
     // Wedge: (k+1) * (k+1)(k+2)/2
-    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Wedge).getCount(), 75);  // 5 * 5*6/2 = 5 * 15 = 75
-    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Wedge).getCount(), 126); // 6 * 6*7/2 = 6 * 21 = 126
+    EXPECT_EQ(
+      RealH1Element<4>(Polytope::Type::Wedge).getCount(), 75); // 5 * 5*6/2 = 5 * 15 = 75
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Wedge).getCount(),
+      126); // 6 * 6*7/2 = 6 * 21 = 126
   }
 
   /// @brief Verifies DOF count higher orders pyramid for variational real H1 element by checking exact expected values.
@@ -1207,7 +1382,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Segment should have 3 DOFs
     EXPECT_EQ(k.getCount(), 3);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Test Lagrange property with complex values
     for (size_t i = 0; i < k.getCount(); i++)
@@ -1310,7 +1485,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Segment with vdim=2 should have 3*2=6 DOFs
     EXPECT_EQ(k.getCount(), 6);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Check that nodes match scalar version
     RealH1Element<2> scalar_k(Polytope::Type::Segment);
@@ -1331,7 +1506,7 @@ namespace Rodin::Tests::Unit
 
     // P3 element on Segment with vdim=3 should have 4*3=12 DOFs
     EXPECT_EQ(k.getCount(), 12);
-    EXPECT_EQ(k.getOrder(), 3);
+    EXPECT_EQ(k.getDegree(), 3);
   }
 
   // Test Vector P2 basis function structure
@@ -1358,7 +1533,8 @@ namespace Rodin::Tests::Unit
           if (c == component)
           {
             // This component should match the scalar basis
-            EXPECT_NEAR(std::abs(vec_basis(c) - scalar_k.getBasis(node_idx)(node)), 0.0, RODIN_FUZZY_CONSTANT);
+            EXPECT_NEAR(std::abs(vec_basis(c) - scalar_k.getBasis(node_idx)(node)), 0.0,
+              RODIN_FUZZY_CONSTANT);
           }
           else
           {
@@ -1379,7 +1555,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Triangle with vdim=2 should have 6*2=12 DOFs
     EXPECT_EQ(k.getCount(), 12);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test Vector P2 on Quadrilateral
@@ -1391,7 +1567,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Quadrilateral with vdim=2 should have 9*2=18 DOFs
     EXPECT_EQ(k.getCount(), 18);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // Test Vector P2 on Tetrahedron
@@ -1403,7 +1579,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Tetrahedron with vdim=3 should have 10*3=30 DOFs
     EXPECT_EQ(k.getCount(), 30);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
   }
 
   // Test Vector P2 Jacobian computation
@@ -1435,11 +1611,16 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies DOF count consistency for variational vector H1 element by checking exact expected values.
   TEST(Rodin_Variational_VectorH1Element, DOFCount_Consistency)
   {
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 2).getCount(), 6);   // 3 nodes * 2 components
-    EXPECT_EQ(VectorH1Element<3>(Polytope::Type::Segment, 2).getCount(), 8);   // 4 nodes * 2 components
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 3).getCount(), 9);   // 3 nodes * 3 components
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 2).getCount(), 12); // 6 nodes * 2 components
-    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 3).getCount(), 18); // 6 nodes * 3 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 2).getCount(),
+      6); // 3 nodes * 2 components
+    EXPECT_EQ(VectorH1Element<3>(Polytope::Type::Segment, 2).getCount(),
+      8); // 4 nodes * 2 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Segment, 3).getCount(),
+      9); // 3 nodes * 3 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 2).getCount(),
+      12); // 6 nodes * 2 components
+    EXPECT_EQ(VectorH1Element<2>(Polytope::Type::Triangle, 3).getCount(),
+      18); // 6 nodes * 3 components
   }
 
   // Test higher-order vector elements
@@ -1451,7 +1632,7 @@ namespace Rodin::Tests::Unit
 
     // P4 element on Segment with vdim=3 should have 5*3=15 DOFs
     EXPECT_EQ(k.getCount(), 15);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // Test vector P3 on higher-dimensional elements
@@ -1463,7 +1644,7 @@ namespace Rodin::Tests::Unit
 
     // P3 element on Wedge: (k+1) * (k+1)(k+2)/2 = 4 * 4*5/2 = 4 * 10 = 40 scalar DOFs
     EXPECT_EQ(k.getCount(), 120);
-    EXPECT_EQ(k.getOrder(), 6);
+    EXPECT_EQ(k.getDegree(), 6);
   }
 
   // ========================================================================
@@ -1673,7 +1854,7 @@ namespace Rodin::Tests::Unit
 
     // P4 on Tetrahedron: (k+1)(k+2)(k+3)/6 = 5*6*7/6 = 35 scalar DOFs
     EXPECT_EQ(k.getCount(), 35 * vdim);
-    EXPECT_EQ(k.getOrder(), 4);
+    EXPECT_EQ(k.getDegree(), 4);
   }
 
   // Test Vector basis sparsity in components
@@ -1764,10 +1945,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Triangle, vdim).getCount(), 21 * vdim);
 
     // P5 Quadrilateral: (k+1)^2 = 36 scalar DOFs
-    EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Quadrilateral, vdim).getCount(), 36 * vdim);
+    EXPECT_EQ(
+      VectorH1Element<5>(Polytope::Type::Quadrilateral, vdim).getCount(), 36 * vdim);
 
     // P5 Tetrahedron: (k+1)(k+2)(k+3)/6 = 6*7*8/6 = 56 scalar DOFs
-    EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Tetrahedron, vdim).getCount(), 56 * vdim);
+    EXPECT_EQ(
+      VectorH1Element<5>(Polytope::Type::Tetrahedron, vdim).getCount(), 56 * vdim);
 
     // P5 Pyramid: (K+1)(K+2)(2K+3)/6 = 6*7*13/6 = 91 scalar DOFs
     EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Pyramid, vdim).getCount(), 91 * vdim);
@@ -1797,7 +1980,8 @@ namespace Rodin::Tests::Unit
       expected(0) = a0 + b0 * x;
       expected(1) = a1 + b1 * x;
 
-      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim));
+      interpolated.setZero();
 
       for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
       {
@@ -2017,8 +2201,9 @@ namespace Rodin::Tests::Unit
     Real f0 = 1.0, f1 = 2.75, f2 = 6.0;
 
     Math::Vector<Real> p{{0.3}};
-    Real exact = 1.0 + 2.0 * 0.3 + 3.0 * 0.3 * 0.3;  // 1.87
-    Real interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
+    Real exact = 1.0 + 2.0 * 0.3 + 3.0 * 0.3 * 0.3; // 1.87
+    Real interpolated =
+      f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
 
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
@@ -2080,13 +2265,14 @@ namespace Rodin::Tests::Unit
     H1Element<2, Complex> elem(Polytope::Type::Segment);
 
     // Test complex quadratic: f(x) = (1+i) + (2+2i)*x + (3+3i)*x^2
-    Complex f0(1.0, 1.0);      // at x=0
-    Complex f1(2.75, 2.75);    // at x=0.5
-    Complex f2(6.0, 6.0);      // at x=1
+    Complex f0(1.0, 1.0); // at x=0
+    Complex f1(2.75, 2.75); // at x=0.5
+    Complex f2(6.0, 6.0); // at x=1
 
     Math::Vector<Real> p{{0.3}};
-    Complex exact(1.87, 1.87);  // (1+i) + (2+2i)*0.3 + (3+3i)*0.09
-    Complex interpolated = f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
+    Complex exact(1.87, 1.87); // (1+i) + (2+2i)*0.3 + (3+3i)*0.09
+    Complex interpolated =
+      f0 * elem.getBasis(0)(p) + f1 * elem.getBasis(1)(p) + f2 * elem.getBasis(2)(p);
 
     EXPECT_NEAR(interpolated.real(), exact.real(), RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(interpolated.imag(), exact.imag(), RODIN_FUZZY_CONSTANT);
@@ -2117,8 +2303,10 @@ namespace Rodin::Tests::Unit
         // At most one non-zero component
         size_t num_nonzero = 0;
         for (size_t j = 0; j < vdim; ++j)
+        {
           if (std::abs(val(j)) > RODIN_FUZZY_CONSTANT)
             num_nonzero++;
+        }
         EXPECT_LE(num_nonzero, 1u);
 
         // Component c matches scalar basis, others are zero
@@ -2139,25 +2327,21 @@ namespace Rodin::Tests::Unit
   {
     H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, 2);
 
-    auto v = [](Real x)
-    {
+    auto v = [](Real x) {
       return Math::Vector<Real>{
-        { 1.0 + 2.0 * x + 3.0 * x * x,  // first component
-          4.0 + 5.0 * x + 6.0 * x * x } // second component
+        {1.0 + 2.0 * x + 3.0 * x * x, // first component
+          4.0 + 5.0 * x + 6.0 * x * x} // second component
       };
     };
 
     // Nodes: x = 0, 0.5, 1
-    std::vector<Math::Vector<Real>> node_values = {
-      v(0.0),
-      v(0.5),
-      v(1.0)
-    };
+    std::vector<Math::Vector<Real>> node_values = {v(0.0), v(0.5), v(1.0)};
 
     Math::Vector<Real> p{{0.3}};
     Math::Vector<Real> exact = v(p(0));
 
-    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2));
+    interpolated.setZero();
     for (size_t node = 0; node < 3; node++)
     {
       for (size_t comp = 0; comp < 2; comp++)
@@ -2177,7 +2361,7 @@ namespace Rodin::Tests::Unit
     // P3 on Triangle with 3D vectors
     {
       H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Triangle, 3);
-      EXPECT_EQ(elem.getCount(), 30);  // 10 nodes × 3 components
+      EXPECT_EQ(elem.getCount(), 30); // 10 nodes × 3 components
 
       Math::Vector<Real> p{{0.3, 0.4}};
 
@@ -2242,10 +2426,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Pyramid).getCount(), 30);
 
     // Vector Pk Elements
-    int count = H1Element<2, Math::SpatialVector<Real>>(Polytope::Type::Segment, 2).getCount();
+    int count =
+      H1Element<2, Math::SpatialVector<Real>>(Polytope::Type::Segment, 2).getCount();
     EXPECT_EQ(count, 6);
 
-    count = H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Segment, 3).getCount();
+    count =
+      H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Segment, 3).getCount();
     EXPECT_EQ(count, 12);
   }
 
@@ -2254,17 +2440,17 @@ namespace Rodin::Tests::Unit
   {
     // Verify order property is correct
 
-    EXPECT_EQ(RealP0Element(Polytope::Type::Segment).getOrder(), 0);
-    EXPECT_EQ(RealP0Element(Polytope::Type::Triangle).getOrder(), 0);
+    EXPECT_EQ(RealP0Element(Polytope::Type::Segment).getDegree(), 0);
+    EXPECT_EQ(RealP0Element(Polytope::Type::Triangle).getDegree(), 0);
 
-    EXPECT_EQ(RealP1Element(Polytope::Type::Segment).getOrder(), 1);
-    EXPECT_EQ(RealP1Element(Polytope::Type::Triangle).getOrder(), 1);
+    EXPECT_EQ(RealP1Element(Polytope::Type::Segment).getDegree(), 1);
+    EXPECT_EQ(RealP1Element(Polytope::Type::Triangle).getDegree(), 1);
 
-    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getOrder(), 2);
-    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getOrder(), 3);
-    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getOrder(), 4);
-    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getOrder(), 5);
-    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getOrder(), 6);
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Segment).getDegree(), 2);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Segment).getDegree(), 3);
+    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Segment).getDegree(), 4);
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Segment).getDegree(), 5);
+    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Segment).getDegree(), 6);
   }
 
   /// @brief Comprehensive tests for H1Element<1> across all geometries.
@@ -2323,7 +2509,11 @@ namespace Rodin::Tests::Unit
         default:
           continue;
       }
-      EXPECT_EQ(pk.getOrder(), expected_order);
+      EXPECT_EQ(pk.getOrder(), 1);
+      if (geom == Polytope::Type::Pyramid)
+        EXPECT_FALSE(pk.getDegree());
+      else
+        EXPECT_EQ(pk.getDegree(), expected_order);
 
       // Test partition of unity
       Math::Vector<Real> p;
@@ -2924,7 +3114,8 @@ namespace Rodin::Tests::Unit
     RealH1Element<2> elem(Polytope::Type::Triangle);
 
     Math::Vector<Real> p{{0.3, 0.4}};
-    Math::SpatialVector<Real> grad_sum(2);;
+    Math::SpatialVector<Real> grad_sum(2);
+    ;
     grad_sum.setZero();
 
     for (size_t i = 0; i < elem.getCount(); i++)
@@ -3179,7 +3370,8 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim));
+            interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3196,7 +3388,8 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim));
+            interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3213,7 +3406,8 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim));
+            interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3343,10 +3537,14 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(gradient[coordinate][derivative],
             coordinate == derivative ? 1.0 : 0.0, tolerance)
             << "H1<" << K << "> geometry " << static_cast<int>(geometry);
+        }
+      }
     };
 
     Rodin::Utility::ForIndex<6>([&](auto order) {
@@ -3560,8 +3758,66 @@ namespace Rodin::Tests::Unit
     RealH1Element<1> element(Polytope::Type::Pyramid);
     const Math::SpatialPoint apex{{0.0, 0.0, 1.0}};
     for (size_t local = 0; local < element.getCount(); ++local)
+    {
       EXPECT_NEAR(
         element.getBasis(local)(apex), local == 4 ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  /**
+   * @brief Preserves the evaluated pyramid modal derivative across orders.
+   *
+   * The unpruned tensor-product expression is compared exactly with each
+   * directional evaluation at quadrature points, vertices and near-apex
+   * points. This checks arithmetic preservation, not a convergence rate.
+   * Independent polynomial and near-apex derivative tests remain separate.
+   */
+  TEST(Rodin_Variational_RealH1Element, PyramidDirectionalDerivativesPreserveArithmetic)
+  {
+    Rodin::Utility::ForIndex<6>([](auto order) {
+      constexpr size_t K = order.value + 1;
+      const auto check = [K](const Math::SpatialPoint& point) {
+        for (size_t mode = 0; mode < PyramidIndex<K>::Count; ++mode)
+        {
+          size_t i, j, k;
+          PyramidIndex<K>::decode(mode, i, j, k);
+          const Real z = point.z(), q = Real(1) - z;
+          std::array<Real, 4> expected{};
+          if (q != 0)
+          {
+            const size_t n = K - k;
+            const Real a = point.x() / q, b = point.y() / q;
+            const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
+            const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
+            const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
+            const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
+            const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
+            const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
+            expected[0] = dBa * Bb * Bz / q;
+            expected[1] = Ba * dBb * Bz / q;
+            expected[2] = (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz + Ba * Bb * dBz;
+          }
+          for (size_t direction = 0; direction < expected.size(); ++direction)
+          {
+            EXPECT_EQ(
+              PyramidModal<K>::getDerivative(mode, direction, point), expected[direction])
+              << "degree " << K << ", mode " << mode << ", direction " << direction;
+          }
+        }
+      };
+      for (const size_t quadratureOrder : {size_t(8), size_t(16)})
+      {
+        const auto& qf =
+          QF::QuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
+        for (size_t point = 0; point < qf.getSize(); ++point)
+          check(qf.getPoint(point));
+      }
+      const Polytope::Traits traits(Polytope::Type::Pyramid);
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        check(traits.getVertex(vertex));
+      const Real z = Real(1) - 1e-15, q = Real(1) - z;
+      check(Math::SpatialPoint{{q / 4, 3 * q / 4, z}});
+    });
   }
 
   /// @brief Verifies rational pyramid modal gradients retain directional limits near the apex.
@@ -3611,8 +3867,10 @@ namespace Rodin::Tests::Unit
       {
         Real xDx = 0.0;
         for (size_t local = 0; local < element.getCount(); ++local)
+        {
           xDx += element.getNode(local).x() *
-            element.getBasis(local).getDerivative<1>(0)(Math::SpatialPoint{{x}});
+            element.getBasis(local).getDerivative<1>(0)(Math::SpatialPoint{x});
+        }
         EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
       }
     }
@@ -3634,20 +3892,32 @@ namespace Rodin::Tests::Unit
         }
       }
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(gradient[coordinate][derivative],
             coordinate == derivative ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
+        }
+      }
     };
 
     for (const Real x : {0.0, 1.0})
+    {
       for (const Real y : {0.0, 1.0})
         checkTensorGradient(Polytope::Type::Quadrilateral, Math::SpatialPoint{{x, y}}, 2);
+    }
 
     for (const Real x : {0.0, 1.0})
+    {
       for (const Real y : {0.0, 1.0})
+      {
         for (const Real z : {0.0, 1.0})
+        {
           checkTensorGradient(
             Polytope::Type::Hexahedron, Math::SpatialPoint{{x, y, z}}, 3);
+        }
+      }
+    }
   }
 
   /// @brief Verifies complex H1 simplex derivatives instantiate and reproduce coordinates at collapse.
@@ -3673,15 +3943,176 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(std::abs(gradient[coordinate][derivative] -
                         Complex(coordinate == derivative ? 1.0 : 0.0, 0.0)),
             0.0, tolerance);
+        }
+      }
     };
 
     checkReferenceGradient(Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);
     checkReferenceGradient(
       Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
     checkReferenceGradient(Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
+  }
+}
+
+/**
+ * @brief Vector reference elements preserve their owned descriptors on copy assignment.
+ *
+ * Rebuilds over an existing element with a different geometry and component
+ * count. Basis values and interpolation functionals are compared to the source.
+ */
+TEST(VectorElementValueSemantics, CopyAssignmentPreservesDescriptors)
+{
+  const auto check = []<class Element>(const Element& source) {
+    Element assigned(Polytope::Type::Segment, 1);
+    assigned = source;
+    const auto& self = assigned;
+    assigned = self;
+    const auto compare = [&](const Element& actual) {
+      ASSERT_EQ(actual.getGeometry(), source.getGeometry());
+      ASSERT_EQ(actual.getCount(), source.getCount());
+      const auto point = Polytope::Traits(source.getGeometry()).getCentroid();
+      for (size_t i = 0; i < source.getCount(); ++i)
+      {
+        const auto expected = source.getBasis(i)(point);
+        const auto value = actual.getBasis(i)(point);
+        ASSERT_EQ(value.size(), expected.size());
+        for (size_t component = 0; component < expected.size(); ++component)
+          EXPECT_EQ(value[component], expected[component]);
+        const auto function = [&](const Math::SpatialPoint&) { return expected; };
+        EXPECT_EQ(actual.getLinearForm(i)(function), source.getLinearForm(i)(function));
+      }
+    };
+    compare(assigned);
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    check(H1Element<2, Math::SpatialVector<Real>>(geometry, 3));
+    check(P1Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P0Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P0gElement<Math::SpatialVector<Real>>(geometry, 3));
+    check(H1Element<2, Math::SpatialVector<Complex>>(geometry, 2));
+    check(P1Element<Math::SpatialVector<Complex>>(geometry, 2));
+    check(P0Element<Math::SpatialVector<Complex>>(geometry, 2));
+    check(P0gElement<Math::SpatialVector<Complex>>(geometry, 2));
+  }
+}
+
+/// @brief Archive loading reconstructs vector basis and functional storage from geometry and range size.
+TEST(VectorElementValueSemantics, ArchiveRebuildsDescriptors)
+{
+  const auto check = []<class Element>(const Element& source) {
+    std::stringstream stream;
+    {
+      boost::archive::text_oarchive archive(stream);
+      archive << source;
+    }
+    Element restored;
+    {
+      boost::archive::text_iarchive archive(stream);
+      archive >> restored;
+    }
+    const auto verify = [&](const Element& actual) {
+      ASSERT_EQ(actual.getCount(), source.getCount());
+      EXPECT_EQ(actual.getGeometry(), source.getGeometry());
+      const auto point = Polytope::Traits(source.getGeometry()).getCentroid();
+      for (size_t i = 0; i < source.getCount(); ++i)
+      {
+        const auto expected = source.getBasis(i)(point);
+        const auto value = actual.getBasis(i)(point);
+        ASSERT_EQ(value.size(), expected.size());
+        for (size_t j = 0; j < value.size(); ++j)
+          EXPECT_EQ(value[j], expected[j]);
+        const auto function = [&](const Math::SpatialPoint&) { return expected; };
+        EXPECT_EQ(actual.getLinearForm(i)(function), source.getLinearForm(i)(function));
+      }
+    };
+    verify(restored);
+    Element existing(Polytope::Type::Segment, 1);
+    std::stringstream second(stream.str());
+    {
+      boost::archive::text_iarchive archive(second);
+      archive >> existing;
+    }
+    verify(existing);
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    check(H1Element<2, Math::SpatialVector<Real>>(geometry, 3));
+    check(H1Element<3, Math::SpatialVector<Complex>>(geometry, 2));
+    check(P1Element<Math::SpatialVector<Real>>(geometry, 3));
+    check(P1Element<Math::SpatialVector<Complex>>(geometry, 2));
+  }
+}
+
+/// @brief Unsupported higher reference derivatives raise instead of returning incorrect zeros.
+TEST(H1ElementDerivatives, UnsupportedOrderRaises)
+{
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    H1Element<2, Real> element(geometry);
+    const auto point = Polytope::Traits(geometry).getCentroid();
+    EXPECT_THROW(element.getBasis(0).getDerivative<2>(0)(point), Alert::Exception);
+    H1Element<2, Complex> complexElement(geometry);
+    EXPECT_THROW(complexElement.getBasis(0).getDerivative<2>(0)(point), Alert::Exception);
+    H1Element<2, Math::SpatialVector<Real>> vectorElement(geometry, 2);
+    EXPECT_THROW(
+      vectorElement.getBasis(0).getDerivative<2>(0, 0)(point), Alert::Exception);
+    H1Element<2, Math::SpatialVector<Complex>> complexVectorElement(geometry, 2);
+    EXPECT_THROW(
+      complexVectorElement.getBasis(0).getDerivative<2>(0, 0)(point), Alert::Exception);
+  }
+}
+
+/// @brief Exact zeros remain supported, and degree-one rational derivatives match their analytic values.
+TEST(H1ElementDerivatives, HigherOrdersPreserveKnownValues)
+{
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+  {
+    const auto point = Polytope::Traits(geometry).getCentroid();
+    H1Element<2, Real> quadratic(geometry);
+    EXPECT_EQ(quadratic.getBasis(0).getDerivative<3>(0)(point), 0);
+    H1Element<1, Real> linear(geometry);
+    EXPECT_EQ(linear.getBasis(0).getDerivative<2>(0)(point), 0);
+  }
+  const Math::SpatialPoint point{0.2, 0.3, 0.4};
+  const Real magnitude = 2 * point.x() * point.y() / std::pow(1 - point.z(), 3);
+  H1Element<1, Real> scalar(Polytope::Type::Pyramid);
+  H1Element<1, Math::SpatialVector<Complex>> vector(Polytope::Type::Pyramid, 2);
+  for (size_t vertex = 0; vertex < 5; ++vertex)
+  {
+    SCOPED_TRACE(vertex);
+    const Real expected = vertex == 4 ? 0
+      : (vertex == 0 || vertex == 3)  ? magnitude
+                                      : -magnitude;
+    EXPECT_NEAR(scalar.getBasis(vertex).getDerivative<2>(2)(point), expected, 1e-14);
+    auto before = point, after = point;
+    constexpr Real step = 1e-6;
+    before.z() -= step;
+    after.z() += step;
+    const Real difference = (scalar.getBasis(vertex).getDerivative<1>(2)(after) -
+                              scalar.getBasis(vertex).getDerivative<1>(2)(before)) /
+      (2 * step);
+    EXPECT_NEAR(difference, expected, 1e-8);
+    EXPECT_LE(
+      std::abs(vector.getBasis(2 * vertex).getDerivative<2>(0, 2)(point) - expected),
+      1e-14);
+    EXPECT_EQ(vector.getBasis(2 * vertex).getDerivative<2>(1, 2)(point), Complex(0));
   }
 }

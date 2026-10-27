@@ -12,7 +12,7 @@
  * restriction) of functions to specified mesh boundaries. This is different from
  * the matrix trace in Trace.h - this operator restricts function domains.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * For a function @f$ u : \Omega \to \mathbb{R} @f$ and boundary @f$ \Gamma \subset \partial\Omega @f$,
  * the trace operator computes:
  * @f[
@@ -20,17 +20,17 @@
  * @f]
  * which is the restriction of @f$ u @f$ to the boundary @f$ \Gamma @f$.
  *
- * ## Trace Theorem
+ * # Trace Theorem
  * For @f$ u \in H^1(\Omega) @f$, the trace @f$ u|_{\partial\Omega} @f$ is well-defined
  * and belongs to @f$ H^{1/2}(\partial\Omega) @f$.
  *
- * ## Applications
+ * # Applications
  * - Boundary condition evaluation
  * - Surface integrals
  * - Coupling interface conditions
  * - Weak boundary term evaluation
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // Evaluate function on specific boundary
  * auto u_boundary = TraceOperator(u, boundary_attr);
@@ -66,20 +66,30 @@ namespace Rodin::Variational
   class TraceOperator<FunctionBase> : public FunctionBase
   {
     public:
-      /// @brief Constructs the trace of a function on a mesh attribute.
+      /**
+       * @brief Constructs the trace of a function on a mesh attribute.
+       * @param fn Function to evaluate.
+       * @param attr Mesh attribute selecting the region.
+       */
       TraceOperator(const FunctionBase& fn, Geometry::Attribute attr)
         : m_fn(fn.copy()),
           m_attr(attr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       TraceOperator(const TraceOperator& other)
         :  FunctionBase(other),
           m_fn(other.m_fn->copy()),
           m_attr(other.m_attr)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       TraceOperator(TraceOperator&& other)
         :  FunctionBase(std::move(other)),
           m_fn(std::move(other.m_fn)),

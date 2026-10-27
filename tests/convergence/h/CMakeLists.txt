@@ -1,0 +1,35 @@
+add_library(RodinConvergenceH INTERFACE)
+target_include_directories(RodinConvergenceH
+  INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(RodinConvergenceH
+  INTERFACE
+    RodinConvergence
+)
+
+add_subdirectory(Poisson)
+add_subdirectory(Conductivity)
+add_subdirectory(ReactionDiffusion)
+add_subdirectory(NonlinearPoisson)
+add_subdirectory(P0Projection)
+add_subdirectory(Helmholtz)
+add_subdirectory(LinearElasticity)
+add_subdirectory(Stokes)
+if (RODIN_USE_PETSC)
+  if (RODIN_CONVERGENCE_PETSC_COMPLEX)
+    add_subdirectory(PETScHelmholtz)
+  else()
+    add_subdirectory(PETScPoisson)
+    add_subdirectory(PETScConductivity)
+    add_subdirectory(PETScLinearElasticity)
+    add_subdirectory(PETScReactionDiffusion)
+    add_subdirectory(PETScNonlinearPoisson)
+    if (RODIN_CONVERGENCE_PETSC_MUMPS)
+      add_subdirectory(PETScStokes)
+    endif()
+    if (RODIN_USE_MPI)
+      add_subdirectory(PETScMPIPoisson)
+    endif()
+  endif()
+endif()

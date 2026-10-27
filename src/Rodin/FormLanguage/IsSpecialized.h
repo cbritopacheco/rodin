@@ -35,7 +35,7 @@ namespace Rodin::FormLanguage
    * handler that omits it reads as generic --- which fails a dispatch test
    * rather than passing one, and is the safe direction to be wrong in.
    *
-   * ## Usage
+   * # Usage
    * @code{.cpp}
    * static_assert(IsSpecialized<QuadratureRule<MassIntegrand>>::Value);
    * static_assert(!IsSpecialized<QuadratureRule<DivDivIntegrand>>::Value);

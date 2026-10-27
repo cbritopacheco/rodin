@@ -1,446 +1,400 @@
+# Shared builds and independent hierarchical test groups; numerical lane sources live in .github/ci/.
 name: Tests
-
-on:
+'on':
   push:
-    branches: [master, develop]
+    branches:
+    - master
+    - develop
   pull_request:
-    branches: [master, develop]
-
+    branches:
+    - master
+    - develop
 permissions:
   contents: read
-
+  actions: read
 concurrency:
   group: Tests-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
-  Unit:
+  Plan:
+    name: CMake / CI
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        compiler: [gcc-14]
-        build_type: [Debug, Release]
-        multithreaded: [ON, OFF]
-        asan: [ON, OFF]
-        ubsan: [ON, OFF]
-      fail-fast: false
-
-    env:
-      MAKEFLAGS: "-j2"
-      OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
-      # A standalone Ubuntu/Open MPI repro reports PMIx leaks under ASan even
-      # without MUMPS, including when MPI_Finalize is called. Keep MUMPS out
-      # of ASan jobs while testing it under UBSan and the SuiteSparse solvers
-      # under both sanitizers.
-      RODIN_MUMPS: ${{ matrix.asan == 'OFF' && 'ON' || 'OFF' }}
-      # The runner image packages SuiteSparse 7.6, whose ParU has no ParU.h.
-      # The ParU solver needs the C API of SuiteSparse 7.10 or newer, so those
-      # entries build SuiteSparse themselves and configure against it.
-      SUITESPARSE_VERSION: "7.14.1"
-      SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
-
+    outputs:
+      configurations_baseline: ${{ steps.common.outputs.configurations_baseline }}
+      configurations_complex: ${{ steps.common.outputs.configurations_complex }}
+      configurations_default_coverage: ${{ steps.common.outputs.configurations_default_coverage }}
+      configurations_default_sanitized: ${{ steps.common.outputs.configurations_default_sanitized }}
+      configurations_mpi: ${{ steps.common.outputs.configurations_mpi }}
+      configurations_native: ${{ steps.common.outputs.configurations_native }}
+      configurations_optional_coverage: ${{ steps.common.outputs.configurations_optional_coverage }}
+      configurations_optional_sanitized: ${{ steps.common.outputs.configurations_optional_sanitized }}
+      configurations_petsc: ${{ steps.common.outputs.configurations_petsc }}
+      configurations_ranges_complex: ${{ steps.common.outputs.configurations_ranges_complex }}
+      configurations_ranges_real: ${{ steps.common.outputs.configurations_ranges_real }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: false
-      - name: Hydrate test resources
-        run: >-
-          git lfs pull
-          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+    - uses: actions/checkout@v4
+      with:
+        lfs: false
+    - name: Install CI planning dependency
+      run: python3 dev/ci_environment.py python
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - name: Verify pinned artifact client handles interrupted streams
+      run: |
+        npm ci --prefix .github/actions/download-artifacts --ignore-scripts --no-audit --no-fund
+        node --test --test-concurrency=1 dev/test_ci_artifact_stream.js
+    - name: Verify dependency graph and publish graph navigation
+      run: python3 dev/ci_schedule.py --summary
+    - name: Verify scoped discovery and incremental coverage guards
+      run: python3 -m unittest discover -s dev -p 'test_ci_*.py' -v
+    - name: Plan current source groups
+      id: plan
+      run: python3 dev/ci_test_plan.py
+    - name: Plan common compilation configurations
+      id: common
+      run: python3 dev/ci_build_graph.py prepare
+    - uses: actions/upload-artifact@v4
+      with:
+        overwrite: true
+        name: ci-test-plan
+        path: 'ci-test-plan.json
 
-      - name: Free Disk Space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo apt-get clean
+          ci-build-plan.json
 
-      - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
+          ci-convergence-plan.json
 
-      - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          libboost1.74-all-dev
-          libsuitesparse-dev
-          libeigen3-dev
-          libscotch-dev
-          libmetis-dev
-          libhdf5-dev
-          libmumps-dev
-          libmumps-headers-dev
-          libomp-dev
-          mpi-default-bin
-          mpi-default-dev
-          petsc-dev
-          mpich
-          lcov
+          ci-coverage-targets.json
 
-      - name: Restore SuiteSparse
-        id: suitesparse
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.SUITESPARSE_PREFIX }}
-          key: suitesparse-${{ env.SUITESPARSE_VERSION }}-${{ runner.os }}-${{ matrix.compiler }}
+          ci-common-plan.json
 
-      - name: Build SuiteSparse
-        if: steps.suitesparse.outputs.cache-hit != 'true'
-        run: |
-          curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
-          cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX="${SUITESPARSE_PREFIX}" \
-            -DSUITESPARSE_ENABLE_PROJECTS="suitesparse_config;amd;camd;colamd;ccolamd;cholmod;umfpack;spqr;paru" \
-            -DSUITESPARSE_USE_CUDA=OFF \
-            -DSUITESPARSE_USE_FORTRAN=OFF \
-            -DSUITESPARSE_DEMOS=OFF
-          cmake --build suitesparse-build
-          cmake --install suitesparse-build
-
-      - name: Configure CMake
-        run: >
-          cmake -B ${{ github.workspace }}/build
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DRODIN_USE_MPI=ON
-          -DRODIN_USE_PETSC=ON
-          -DRODIN_USE_ASAN=${{ matrix.asan }}
-          -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
-          -DCMAKE_PREFIX_PATH=${{ env.SUITESPARSE_PREFIX }}
-          -DRODIN_USE_CHOLMOD=ON
-          -DRODIN_USE_MUMPS=${{ env.RODIN_MUMPS }}
-          -DRODIN_USE_PARU=ON
-          -DRODIN_USE_SPQR=ON
-          -DRODIN_USE_UMFPACK=ON
-          -DRODIN_BUILD_DOC=OFF
-          -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_USE_MCSS=OFF
-          -DRODIN_BUILD_EXAMPLES=OFF
-          -DRODIN_BUILD_BENCHMARKS=OFF
-          -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_UNIT_TESTS=ON
-          -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
-          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build
-
-      - name: Run unit tests
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE "slow|distributed"
-          --output-on-failure
-          -j ${{ env.CTEST_PARALLEL_LEVEL }}
-
-      - name: Rerun failed unit tests (verbose)
-        if: failure()
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE "slow|distributed"
-          --rerun-failed -V --output-on-failure
-
-      - name: Run distributed tests
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -L distributed -LE slow
-          --output-on-failure
-          -j 1
-
-      - name: Rerun failed distributed tests (verbose)
-        if: failure()
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -L distributed -LE slow
-          --rerun-failed -V --output-on-failure
-
-  Manufactured:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        compiler: [gcc-14]
-        build_type: [Debug, Release]
-        multithreaded: [ON, OFF]
-        asan: [ON, OFF]
-        ubsan: [ON, OFF]
-      fail-fast: false
-
-    env:
-      MAKEFLAGS: "-j2"
-      OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 1
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: false
-
-      - name: Free Disk Space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo apt-get clean
-
-      - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
-
-      - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          libboost1.74-all-dev
-          libsuitesparse-dev
-          libeigen3-dev
-          libscotch-dev
-          libmetis-dev
-          libhdf5-dev
-          libomp-dev
-          petsc-dev
-          mpich
-          lcov
-
-      - name: Configure CMake
-        run: >
-          cmake -B ${{ github.workspace }}/build
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DRODIN_USE_MPI=ON
-          -DRODIN_USE_PETSC=ON
-          -DRODIN_USE_ASAN=${{ matrix.asan }}
-          -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
-          -DRODIN_BUILD_DOC=OFF
-          -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_USE_MCSS=OFF
-          -DRODIN_BUILD_EXAMPLES=OFF
-          -DRODIN_BUILD_BENCHMARKS=OFF
-          -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_UNIT_TESTS=ON
-          -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
-          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build
-
-      - name: Run manufactured tests
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE "slow|distributed"
-          --output-on-failure
-          -j ${{ env.CTEST_PARALLEL_LEVEL }}
-
-      - name: Rerun failed manufactured tests (verbose)
-        if: failure()
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE "slow|distributed"
-          --rerun-failed -V --output-on-failure
-
-      - name: Run manufactured distributed tests
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -L distributed -LE slow
-          --output-on-failure
-          -j 1
-
-      - name: Rerun failed manufactured distributed tests (verbose)
-        if: failure()
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -L distributed -LE slow
-          --rerun-failed -V --output-on-failure
-
-  Slow:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        compiler: [gcc-14]
-        build_type: [Release]
-        multithreaded: [ON, OFF]
-        asan: [OFF]
-        ubsan: [OFF]
-      fail-fast: false
-
-    env:
-      MAKEFLAGS: "-j2"
-      OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 1
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: false
-
-      - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
-
-      - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          libboost1.74-all-dev
-          libsuitesparse-dev
-          libeigen3-dev
-          libscotch-dev
-          libmetis-dev
-          libhdf5-dev
-          libomp-dev
-          petsc-dev
-          mpich
-          lcov
-
-      - name: Configure CMake
-        run: >
-          cmake -B ${{ github.workspace }}/build
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DRODIN_USE_MPI=ON
-          -DRODIN_USE_PETSC=ON
-          -DRODIN_USE_ASAN=${{ matrix.asan }}
-          -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
-          -DRODIN_BUILD_DOC=OFF
-          -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_USE_MCSS=OFF
-          -DRODIN_BUILD_EXAMPLES=OFF
-          -DRODIN_BUILD_BENCHMARKS=OFF
-          -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_UNIT_TESTS=ON
-          -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
-          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
-
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build
-
-      - name: Run slow manufactured tests
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow
-          --output-on-failure
-          -j ${{ env.CTEST_PARALLEL_LEVEL }}
-
-      - name: Rerun failed slow manufactured tests (verbose)
-        if: failure()
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow
-          --rerun-failed -V --output-on-failure
-
-  Coverage:
-    runs-on: ubuntu-latest
-    needs: [Unit, Manufactured, Slow]
+          '
+        if-no-files-found: error
+  Configurations_baseline:
+    name: Baseline / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_baseline) }}
+    uses: ./.github/workflows/TestConfiguration_baseline.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_complex:
+    name: Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_complex) }}
+    uses: ./.github/workflows/TestConfiguration_complex.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_default_coverage:
+    name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_coverage) }}
+    uses: ./.github/workflows/TestConfiguration_default_coverage.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_default_sanitized:
+    name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_sanitized) }}
+    uses: ./.github/workflows/TestConfiguration_default_sanitized.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_mpi:
+    name: MPI / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_mpi) }}
+    uses: ./.github/workflows/TestConfiguration_mpi.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_native:
+    name: Native / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_native) }}
+    uses: ./.github/workflows/TestConfiguration_native.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_optional_coverage:
+    name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_coverage) }}
+    uses: ./.github/workflows/TestConfiguration_optional_coverage.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_optional_sanitized:
+    name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_sanitized) }}
+    uses: ./.github/workflows/TestConfiguration_optional_sanitized.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_petsc:
+    name: PETSc / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_petsc) }}
+    uses: ./.github/workflows/TestConfiguration_petsc.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_ranges_complex:
+    name: PETSc / MatrixRanges / Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_complex) }}
+    uses: ./.github/workflows/TestConfiguration_ranges_complex.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  Configurations_ranges_real:
+    name: PETSc / MatrixRanges / Real / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
+      }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
+    needs: Plan
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_real) }}
+    uses: ./.github/workflows/TestConfiguration_ranges_real.yml
+    with:
+      id: ${{ matrix.id }}
+      definition: ${{ toJSON(matrix.definition) }}
+    secrets: inherit
+  InstallationUbuntu:
+    needs:
+    - Plan
+    if: ${{ !cancelled() }}
+    runs-on: ${{ matrix.os }}
+    strategy:
       matrix:
-        compiler: [gcc-14]
-        build_type: [Release]
-        multithreaded: [ON, OFF]
-        asan: [OFF]
-        ubsan: [OFF]
-
+        os:
+        - ubuntu-latest
+        compiler:
+        - gcc-12
+        - gcc-13
+        - gcc-14
+        mpi:
+        - 'ON'
+        - 'OFF'
+        petsc:
+        - 'ON'
+        - 'OFF'
+      fail-fast: false
     env:
-      MAKEFLAGS: "-j2"
-      OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
-      GCOV: gcov-14
-
+      MAKEFLAGS: -j2
+      RODIN_INSTALL_RESOURCES: 'OFF'
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: false
-      - name: Hydrate test resources
-        run: >-
-          git lfs pull
-          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        lfs: false
+    - uses: ./.github/actions/prepare-apt
+    - name: Setup Cpp (C++ / C)
+      uses: aminya/setup-cpp@v1
+      with:
+        compiler: ${{ matrix.compiler }}
+        cmake: true
+    - name: Install dependencies
+      uses: ./.github/actions/apt-dependencies
+      with:
+        packages: libboost-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev libomp-dev petsc-dev mpich lcov
+    - name: Run installation test
+      run: bash tests/installation/test_installation.sh
+      env:
+        RODIN_USE_MPI: ${{ matrix.mpi }}
+        RODIN_USE_PETSC: ${{ matrix.petsc }}
+        RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
+    - name: Archive installation artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        overwrite: true
+        name: installation-test-failure-${{ matrix.compiler }}-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
+        path: 'build/install-test/
 
-      - name: Setup Cpp (C++ / C)
-        uses: aminya/setup-cpp@v1
-        with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
+          build/test-installation-project/
 
-      - name: Install dependencies
-        run: >-
-          sudo apt-get update && sudo apt-get install -y
-          gcc-14 g++-14
-          libboost1.74-all-dev
-          libsuitesparse-dev
-          libeigen3-dev
-          libscotch-dev
-          libmetis-dev
-          libhdf5-dev
-          libomp-dev
-          petsc-dev
-          mpich
-          lcov
+          '
+        retention-days: 7
+    name: Installation / Ubuntu (OS=${{ matrix.os }}, Compiler=${{ matrix.compiler }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc
+      }})
+  InstallationMacOS:
+    needs:
+    - Plan
+    if: ${{ !cancelled() }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+        - macos-latest
+        mpi:
+        - 'ON'
+        - 'OFF'
+        petsc:
+        - 'ON'
+        - 'OFF'
+      fail-fast: false
+    env:
+      MAKEFLAGS: -j2
+      RODIN_INSTALL_RESOURCES: 'OFF'
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        lfs: false
+    - name: Setup Python
+      run: 'brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
+        || true
 
-      - name: Configure CMake (coverage)
-        run: >
-          cmake -B ${{ github.workspace }}/build
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DRODIN_USE_MPI=ON
-          -DRODIN_USE_PETSC=ON
-          -DRODIN_USE_ASAN=${{ matrix.asan }}
-          -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
-          -DRODIN_BUILD_DOC=OFF
-          -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_USE_MCSS=OFF
-          -DRODIN_BUILD_EXAMPLES=OFF
-          -DRODIN_BUILD_BENCHMARKS=OFF
-          -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_UNIT_TESTS=ON
-          -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
-          -DRODIN_CODE_COVERAGE=ON
-          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+        '
+    - name: Update Homebrew
+      run: brew update
+    - name: Install dependencies
+      run: "BREW_PACKAGES=\"boost boost-mpi eigen libomp\"\nif [ \"${{ matrix.petsc }}\" = \"ON\" ]; then\n  BREW_PACKAGES=\"\
+        $BREW_PACKAGES petsc hdf5-mpi\"\nelif [ \"${{ matrix.mpi }}\" = \"ON\" ]; then\n  BREW_PACKAGES=\"$BREW_PACKAGES open-mpi\
+        \ hdf5-mpi\"\nelse\n  BREW_PACKAGES=\"$BREW_PACKAGES hdf5\"\nfi\nbrew install $BREW_PACKAGES\n"
+    - name: Link libomp
+      run: 'brew link --force --overwrite libomp
 
-      - name: Build
-        run: cmake --build ${{ github.workspace }}/build
+        '
+    - name: Verify dependencies
+      run: "echo \"Boost location:\"\nbrew --prefix boost\necho \"Eigen location:\"\nbrew --prefix eigen\necho \"OpenMP location:\"\
+        \nbrew --prefix libomp\nif [ \"${{ matrix.petsc }}\" = \"ON\" ]; then\n  echo \"PETSc location:\"\n  brew --prefix\
+        \ petsc\nfi\nif [ \"${{ matrix.mpi }}\" = \"ON\" ]; then\n  echo \"MPI location:\"\n  brew --prefix open-mpi 2>/dev/null\
+        \ || brew --prefix petsc\nfi\n"
+    - name: Run installation test
+      run: bash tests/installation/test_installation.sh
+      env:
+        RODIN_USE_MPI: ${{ matrix.mpi }}
+        RODIN_USE_PETSC: ${{ matrix.petsc }}
+        RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
+    - name: Archive installation artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        overwrite: true
+        name: installation-test-failure-macos-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
+        path: 'build/install-test/
 
-      - name: Run unit tests (coverage build)
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE distributed
-          --output-on-failure
-          -j ${{ env.CTEST_PARALLEL_LEVEL }}
+          build/test-installation-project/
 
-      - name: Run distributed tests (coverage build)
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L distributed -LE slow
-          --output-on-failure
-          -j 1
-
-      - name: Run manufactured tests (coverage build)
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE "slow|distributed"
-          --output-on-failure
-          -j 1
-
-      - name: Make coverage
-        run: cmake --build ${{ github.workspace }}/build --target RodinCoverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          files: ${{ github.workspace }}/build/RodinCoverage.info
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }}
-          name: cov-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
-          root_dir: ${{ github.workspace }}
-          use_pypi: true
-          verbose: true
-          fail_ci_if_error: true
+          '
+        retention-days: 7
+    name: Installation / macOS (OS=${{ matrix.os }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc }})
+  CoverageFinalize:
+    name: Coverage / Finalize
+    if: always()
+    needs:
+    - Plan
+    - Configurations_baseline
+    - Configurations_complex
+    - Configurations_default_coverage
+    - Configurations_default_sanitized
+    - Configurations_mpi
+    - Configurations_native
+    - Configurations_optional_coverage
+    - Configurations_optional_sanitized
+    - Configurations_petsc
+    - Configurations_ranges_complex
+    - Configurations_ranges_real
+    - InstallationUbuntu
+    - InstallationMacOS
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        lfs: false
+    - name: Download expected plan
+      uses: actions/download-artifact@v4
+      with:
+        name: ci-test-plan
+        path: .
+    - name: Plan exact shared-build indices
+      run: python3 dev/ci_artifacts.py indices --output ci-index-inputs.json
+    - name: Download every shared-build index
+      uses: ./.github/actions/download-artifacts
+      with:
+        names-file: ci-index-inputs.json
+        path: ci-build-indices
+    - name: Plan every required receipt, coverage report and publication
+      run: python3 dev/ci_artifacts.py final --output ci-final-inputs.json
+    - name: Download all mandatory finalization evidence
+      uses: ./.github/actions/download-artifacts
+      with:
+        names-file: ci-final-inputs.json
+        path: ci-artifacts
+    - name: Verify complete coverage and unchanged compilation inventory
+      env:
+        CI_JOB_RESULTS: ${{ toJSON(needs.*.result) }}
+      run: python3 dev/ci_coverage.py finalize
+    - name: Publish complete coverage summary
+      uses: actions/upload-artifact@v4
+      with:
+        overwrite: true
+        name: coverage-final-summary
+        path: coverage-summary.json
+        if-no-files-found: error
+    - name: Finalize Codecov status
+      uses: codecov/codecov-action@v5
+      with:
+        run_command: send-notifications
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
+        use_pypi: true
+    - name: Enforce 95 percent production coverage
+      run: python3 dev/ci_coverage.py threshold

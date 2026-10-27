@@ -27,7 +27,7 @@ namespace Rodin::Variational
    * | @ref P1Element "P1Element<Scalar>" | Scalar-valued continuous piecewise linear element. |
    * | @ref P1Element "P1Element<SpatialVector<Scalar>>" | Vector-valued continuous piecewise linear element. |
    *
-   * @see <a href="_p1_element_8h.html">P1ElementSpecializations</a>
+   * @see @ref P1ElementSpecializations "P1Element Template Specializations"
    */
   template <class Range>
   class P1Element;
@@ -55,19 +55,15 @@ namespace Rodin::Variational
    * | @ref P1 "P1<SpatialVector<Scalar>, Mesh<Context::Local>>" | Vector-valued local-mesh continuous piecewise linear space. |
    * | @ref P1 "P1<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh continuous piecewise linear space. |
    *
-   * @see <a href="_variational_2_p1_8h.html">P1Specializations</a>
+   * @see @ref P1Specializations "P1 Template Specializations"
    */
   template <class Range, class Mesh>
   class P1;
 
-  /**
-   * @brief Alias for P1Element<Real>
-   */
+  /// @brief Alias for P1Element<Real>
   using RealP1Element = P1Element<Real>;
 
-  /**
-   * @brief Alias for P1Element<Complex>
-   */
+  /// @brief Alias for P1Element<Complex>
   using ComplexP1Element = P1Element<Complex>;
 
   /**
@@ -77,9 +73,7 @@ namespace Rodin::Variational
   template <class Scalar>
   using VectorP1Element = P1Element<Math::SpatialVector<Scalar>>;
 
-  /**
-   * @brief Alias for real vector P1Element
-   */
+  /// @brief Alias for real vector P1Element
   using RealVectorP1Element = P1Element<Math::SpatialVector<Real>>;
 }
 

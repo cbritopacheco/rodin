@@ -25,30 +25,23 @@
     idiomatic pattern — prefer it to adding mutexes.
   - **Reads of immutable data are safe.** Meshes, connectivity, and
     finite element spaces are safe to *read* concurrently once fully
-    constructed and computed. Lazily-computed caches inside logically
-    const objects are the exception — they are guarded through the
-    @ref Rodin::Threads "Threads" utilities (below) when
-    `RODIN_THREAD_SAFE` is enabled.
+    constructed and computed. Concurrent access to lazily computed state requires the synchronization
+    contract documented by the owning class; const access alone does not
+    establish thread safety.
   - **Mutation is exclusive.** Any operation that mutates a mesh
     (`setVertexCoordinates`, transformation attachment, connectivity
     `compute`, builders) or a grid function's data must be externally
     synchronized. Compute all needed connectivity *before* entering
     parallel regions.
 
-  @section guides-threads-module The Threads utilities
+  @section guides-threads-module Synchronization of shared state
 
-  The @ref Rodin::Threads "Threads" module provides the primitives the
-  library itself uses:
-
-  - `Threads::Mutex` — mutual exclusion wrapper;
-  - `Threads::Mutable` — guarded mutable state inside logically const
-    objects (lazy caches);
-  - `Threads::Unsafe` — an explicit marker wrapping state that is
-    *deliberately* not synchronized, documenting the single-thread
-    assumption at the type level.
-
-  The `RODIN_THREAD_SAFE` CMake option controls whether guarded paths
-  compile to real synchronization.
+  Synchronization belongs to the class that owns shared state. For example,
+  @ref Rodin::Geometry::AttributeIndex "AttributeIndex" uses atomic attribute
+  slots and per-dimension mutexes for storage growth and writes. Its documented
+  contract distinguishes concurrent slot access from structural operations
+  requiring external synchronization. Other classes have their own contracts;
+  this guarantee does not extend to arbitrary mesh or field mutations.
 
   @section guides-threads-assembly Parallel assembly
 

@@ -32,5 +32,6 @@
 #include "MPI/Variational.h"
 #include "MPI/Geometry.h"
 #include "MPI/IO.h"
+#include "MPI/Location.h"
 
 #endif

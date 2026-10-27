@@ -25,7 +25,7 @@ namespace Rodin::QF
    * point located at the centroid (barycenter) of the reference polytope.
    * The quadrature is exact for polynomials up to degree 1 (linear functions).
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    *
    * The centroid rule approximates integrals as:
    * @f[
@@ -34,7 +34,7 @@ namespace Rodin::QF
    * where @f$ c @f$ is the centroid of the polytope @f$ K @f$ and @f$ w @f$
    * is the weight equal to the volume (measure) of the reference element.
    *
-   * ## Reference Element Centroids
+   * # Reference Element Centroids
    *
    * The quadrature points are located at:
    * - Point: @f$ (0) @f$
@@ -45,7 +45,7 @@ namespace Rodin::QF
    * - Wedge: @f$ (1/3, 1/3, 0.5) @f$
    * - Hexahedron: @f$ (0.5, 0.5, 0.5) @f$
    *
-   * ## Reference Element Weights
+   * # Reference Element Weights
    *
    * The weights correspond to the reference element measures:
    * - Point: @f$ 1 @f$
@@ -72,19 +72,24 @@ namespace Rodin::QF
        * @brief Constructs a centroid quadrature formula for the given geometry.
        * @param g Geometry type (e.g., Triangle, Quadrilateral, Tetrahedron, etc.)
        */
-      constexpr
       Centroid(Geometry::Polytope::Type g)
-        : m_geometry(g)
+        : m_geometry(g),
+          m_weight(getWeight(0))
       {}
 
       /**
        * @brief Gets the polytope geometry of this centroid rule.
        * @return Polytope geometry type.
        */
-      constexpr
-      Geometry::Polytope::Type getGeometry() const
+      constexpr Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
+      }
+
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{{&getPoint(0), 1}, &m_weight, 0};
       }
 
       /**
@@ -114,13 +119,16 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new Centroid instance (caller takes ownership)
        */
-      Centroid* copy() const noexcept override
+      Centroid* copy() const noexcept
       {
         return new Centroid(*this);
       }
 
     private:
       Geometry::Polytope::Type m_geometry;
+
+      /// @brief Uniform reference weight retained with the concrete rule.
+      Real m_weight;
   };
 }
 

@@ -112,7 +112,11 @@ namespace Rodin::Variational
         return Math::exp(this->getOperand().getValue(p));
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         // Exponential of a polynomial is not a polynomial unless operand is constant.
@@ -138,13 +142,20 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for @c Exp.
+  /**
+   * @brief Deduction guide for @c Exp.
+   * @param v Function to exponentiate
+   */
   template <class NestedDerived>
-  Exp(const FunctionBase<NestedDerived>&) -> Exp<FunctionBase<NestedDerived>>;
+  Exp(const FunctionBase<NestedDerived>& v) -> Exp<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
   constexpr auto
-  /// @brief Builds the pointwise exponential of a function expression.
+  /**
+   * @brief Builds the pointwise exponential of a function expression.
+   * @param op Function operand.
+   * @returns Pointwise exponential expression.
+   */
   exp(const FunctionBase<NestedDerived>& op)
   {
     return Exp(op);

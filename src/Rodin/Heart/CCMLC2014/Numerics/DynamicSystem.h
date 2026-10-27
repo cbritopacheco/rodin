@@ -42,6 +42,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
     public:
       /**
        * @brief Construct the dynamic system assembler.
+       * @param input Input data.
        */
       explicit DynamicSystem(const Input& input)
         : m_input(input)
@@ -49,6 +50,12 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
       /**
        * @brief Build intermediate evaluation data from candidate unknowns.
+       * @param dt Time-step size.
+       * @param candidateUnknowns Candidate vector of unknowns at the new time step.
+       * @param currentState State at the current time step.
+       * @param previousState State at the previous time step.
+       * @param tnp1 Time at the new time step.
+       * @param evalData Evaluation data for the residual or Jacobian.
        */
       template <class DenseVector, class StateType, class EvalData>
       void buildEvalData(
@@ -93,6 +100,8 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
       /**
        * @brief Evaluate the coupled 0D residual vector.
+       * @param evalData Evaluation data for the residual or Jacobian.
+       * @param residualVector Storage for the residual vector.
        */
       template <class DenseVector, class EvalData>
       void evaluateResidual(
@@ -176,10 +185,13 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
       /**
        * @brief Assemble the exact Jacobian of the coupled residual.
+       * @param evalData Evaluation data for the residual or Jacobian.
+       * @param jacobianMatrix Storage for the Jacobian matrix.
+       * @param dt Time step supplied by the solver interface; time coefficients are taken from the evaluation data.
        */
       template <class DenseMatrix, class EvalData>
       void evaluateJacobian(const EvalData& evalData, DenseMatrix& jacobianMatrix,
-        typename DenseMatrix::Scalar) const
+        [[maybe_unused]] typename DenseMatrix::Scalar dt) const
       {
         using Scalar = typename DenseMatrix::Scalar;
         jacobianMatrix.resize(Model::NumberOfVariables, Model::NumberOfVariables);
@@ -332,6 +344,11 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           Scalar rate = 0.0;
           Scalar dRateDEcDot = 0.0;
       };
+      /**
+       * @brief Selects the discrete time-derivative coefficients.
+       * @param data Evaluation data containing the current state and time history.
+       * @returns BDF2 coefficients when the history permits, otherwise backward-Euler coefficients.
+       */
 
       template <class EvalData>
       TimeCoefficients<decltype(std::declval<EvalData>().y)> getTimeCoefficients(
@@ -345,6 +362,14 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         }
         return {Scalar(1) / data.dt, -Scalar(1) / data.dt, Scalar(0)};
       }
+      /**
+       * @brief Combines three time levels using derivative coefficients.
+       * @param current Current value of the time-dependent quantity.
+       * @param previous Value at the preceding time step.
+       * @param previousPrevious Value two time steps earlier.
+       * @param tc Coefficients of the discrete time derivative.
+       * @returns Discrete time derivative of the supplied values.
+       */
 
       template <class Scalar>
       static Scalar timeDerivative(Scalar current, Scalar previous,
@@ -353,12 +378,22 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         return tc.current * current + tc.previous * previous +
           tc.previousPrevious * previousPrevious;
       }
+      /**
+       * @brief Computes active stretch from contractile strain.
+       * @param ec Contractile strain.
+       * @returns One plus twice the contractile strain.
+       */
 
       template <class Scalar>
       static Scalar activeStretch(Scalar ec)
       {
         return Scalar(1) + Scalar(2) * ec;
       }
+      /**
+       * @brief Evaluates the smooth absolute-value approximation.
+       * @param x Scalar argument of the regularized absolute value.
+       * @returns Square root of the squared argument plus the squared regularization parameter.
+       */
 
       template <class Scalar>
       Scalar regularizedAbs(Scalar x) const
@@ -366,6 +401,11 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         const Scalar eps = m_input.absRegularization;
         return std::sqrt(x * x + eps * eps);
       }
+      /**
+       * @brief Differentiates the smooth absolute-value approximation.
+       * @param x Scalar argument of the regularized absolute value.
+       * @returns Argument divided by its regularized absolute value, or zero at the guarded zero limit.
+       */
 
       template <class Scalar>
       Scalar regularizedAbsDerivative(Scalar x) const
@@ -375,6 +415,11 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           return Scalar(0);
         return x / ax;
       }
+      /**
+       * @brief Evaluates the piecewise recruitment law.
+       * @param ec Contractile strain.
+       * @returns Recruitment value and its derivative with respect to contractile strain.
+       */
 
       template <class Scalar>
       static RecruitmentData<Scalar> computeRecruitment(Scalar ec)
@@ -426,6 +471,12 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         }
         return result;
       }
+      /**
+       * @brief Evaluates recruitment and active-state rate data.
+       * @param data Evaluation data containing the current state and time history.
+       * @param ecDot Time derivative of the contractile strain.
+       * @returns Active-rate values and derivatives for the current strain and strain rate.
+       */
 
       template <class EvalData>
       ActiveRateData<decltype(std::declval<EvalData>().y)> evaluateActiveRates(
@@ -446,6 +497,10 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         result.dRateDEcDot = m_input.alpha * regularizedAbsDerivative(ecDot);
         return result;
       }
+      /**
+       * @brief Evaluates the kinematic variables and stress terms in the current state.
+       * @param data Evaluation data containing the current state and time history.
+       */
 
       template <class EvalData>
       void evaluateKinematicsAndStresses(EvalData& data) const
@@ -493,6 +548,10 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         data.active.dActiveStressWrtDisplacement =
           data.active.partialActiveStressWrtDisplacement;
       }
+      /**
+       * @brief Evaluates diagnostic quantities of the active subsystem.
+       * @param data Evaluation data containing the current state and time history.
+       */
 
       template <class EvalData>
       void evaluateActiveDiagnostics(EvalData& data) const
@@ -522,6 +581,10 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         data.active.converged = true;
         data.active.iterations = 0;
       }
+      /**
+       * @brief Evaluates the valve-flow diagnostic quantities.
+       * @param data Evaluation data containing the current state and time history.
+       */
 
       template <class EvalData>
       void evaluateValveDiagnostics(EvalData& data) const

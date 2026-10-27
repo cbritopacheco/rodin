@@ -1,0 +1,19 @@
+<p>SpatialVector represents a small vector with runtime active dimension and
+bounded storage. The suite separates arithmetic, storage lifetime, scalar
+products, norms and cross products.</p>
+<h2>Scalar products</h2>
+<p>The right-conjugated product is
+\(\langle u,v\rangle=\sum_i u_i\overline{v_i}\).
+Bilinear contractions \(\sum_i u_iv_i\) are separate cases. Complex cross
+products use the ordinary bilinear convention.</p>
+<h2>Representations and result lifetime</h2>
+<p>Spatial values are compared with bounded Eigen values, dynamic Eigen vectors
+and selected fixed vectors. Owned-result cases include materialization and
+assignment. Destination cases evaluate into prepared, disjoint storage and are
+compared separately. Compound assignments include copying the left operand.</p>
+<h2>Measurement contract</h2>
+<p>Inputs, numerical references and array allocation are excluded. Scalar-loop
+oracles check results before and after timing. Each sweep processes one or
+thirty-two inputs. Calling-thread CPU time is reported per sweep; divide by the
+operations counter for time per value. Empty shapes are retained where defined;
+normalization requires nonempty vectors.</p>

@@ -39,8 +39,9 @@ namespace Rodin::Alert
        *
        * Automatically extracts the class name using Boost.TypeIndex and
        * prepends it to the exception message with appropriate formatting.
+       * @param instance Class instance used to deduce the class type; its value is unused.
        */
-      ClassException(const T&)
+      ClassException([[maybe_unused]] const T& instance)
       {
         *this << "In class " << Identifier::Class(
             boost::typeindex::type_id_with_cvr<T>().pretty_name()) << ". ";

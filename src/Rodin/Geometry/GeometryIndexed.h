@@ -18,6 +18,8 @@
 #include <type_traits>
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Alert/Exception.h"
+
 #include "Polytope.h"
 
 namespace Rodin::Geometry
@@ -55,154 +57,179 @@ namespace Rodin::Geometry
     /// Number of different polytope types
     static constexpr size_t Count = Polytope::Types.size();
 
-    /// Storage type for proper alignment
-    using Storage = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
-
     friend class boost::serialization::access;
 
-  public:
-    /**
-     * @brief Default constructor that initializes all entries with default values.
-     */
-    GeometryIndexed()
-    {
-      for (size_t i = 0; i < Count; ++i)
-        new (&m_map[i]) T();
-    }
+    public:
+      /// @brief Default constructor that initializes all entries with default values.
+      GeometryIndexed()
+        : m_map{}
+      {}
 
-    /**
-     * @brief Constructs from an initializer list of polytope type-value pairs.
-     * @param l Initializer list of (polytope type, value) pairs
-     * @note The list must contain exactly one entry for each polytope type
-     */
-    GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> l)
-    {
-      assert(l.size() == Count);
-      for (const auto& [type, value] : l)
-        new (&m_map[static_cast<size_t>(type)]) T(std::move(value));
-    }
+      /**
+       * @brief Constructs from an initializer list of polytope type-value pairs.
+       * @param l Initializer list of (polytope type, value) pairs
+       * @note The list must contain exactly one entry for each polytope type
+       */
+      GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> l)
+        : GeometryIndexed(l, std::make_index_sequence<Count>{})
+      {}
 
-    /**
-     * @brief Copy constructor.
-     * @param other GeometryIndexed object to copy from
-     */
-    GeometryIndexed(const GeometryIndexed& other)
-    {
-      for (size_t i = 0; i < Count; ++i)
-        new (&m_map[i]) T(*other.ptr(i));
-    }
+      /**
+       * @brief Copy constructor.
+       * @param other GeometryIndexed object to copy from
+       */
+      GeometryIndexed(const GeometryIndexed& other) = default;
 
-    /**
-     * @brief Move constructor.
-     * @param other GeometryIndexed object to move from
-     */
-    GeometryIndexed(GeometryIndexed&& other) noexcept(std::is_nothrow_move_constructible<T>::value)
-    {
-      for (size_t i = 0; i < Count; ++i)
-        new (&m_map[i]) T(std::move(*other.ptr(i)));
-    }
+      /**
+       * @brief Move constructor.
+       * @param other GeometryIndexed object to move from
+       */
+      GeometryIndexed(GeometryIndexed&& other) noexcept(
+        std::is_nothrow_move_constructible<T>::value) = default;
 
-    /**
-     * @brief Destructor that properly destroys all stored objects.
-     */
-    ~GeometryIndexed()
-    {
-      for (size_t i = 0; i < Count; ++i)
-        ptr(i)->~T();
-    }
+      /// @brief Destroys all retained values, including during constructor unwinding.
+      ~GeometryIndexed() = default;
 
-    /**
-     * @brief Copy assignment operator.
-     * @param other GeometryIndexed object to copy from
-     * @return Reference to this object
-     */
-    GeometryIndexed& operator=(const GeometryIndexed& other)
-      noexcept(std::is_nothrow_copy_assignable<T>::value)
-    {
-      if (this != &other)
+      /**
+       * @brief Copy assignment operator.
+       * @param other GeometryIndexed object to copy from
+       * @return Reference to this object
+       */
+      GeometryIndexed& operator=(const GeometryIndexed& other) noexcept(
+        std::is_nothrow_copy_assignable<T>::value)
+      {
+        if (this != &other)
+        {
+          for (size_t i = 0; i < Count; ++i)
+            *ptr(i) = *other.ptr(i);
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Move assignment operator.
+       * @param other GeometryIndexed object to move from
+       * @return Reference to this object
+       */
+      GeometryIndexed& operator=(GeometryIndexed&& other) noexcept(
+        std::is_nothrow_move_assignable<T>::value)
+      {
+        if (this != &other)
+        {
+          for (size_t i = 0; i < Count; ++i)
+            *ptr(i) = std::move(*other.ptr(i));
+        }
+        return *this;
+      }
+
+      /**
+       * @brief Access operator for mutable access to data by polytope type.
+       * @param type Polytope type to access
+       * @return Reference to the associated data
+       */
+      T& operator[](Polytope::Type type)
+      {
+        return *ptr(static_cast<size_t>(type));
+      }
+
+      /**
+       * @brief Access operator for const access to data by polytope type.
+       * @param type Polytope type to access
+       * @return Const reference to the associated data
+       */
+      const T& operator[](Polytope::Type type) const
+      {
+        return *ptr(static_cast<size_t>(type));
+      }
+
+      /**
+       * @brief Gets the number of polytope types (always constant).
+       * @return Number of polytope types supported
+       */
+      constexpr size_t size() const
+      {
+        return Count;
+      }
+
+      /**
+       * @brief Serialization method for Boost.Serialization.
+       * @tparam Archive Archive type for serialization
+       * @param ar Archive object
+       * @param version Serialization version (unused)
+       */
+      template <class Archive>
+      void serialize(Archive& ar, const unsigned int version)
+      {
         for (size_t i = 0; i < Count; ++i)
-          *ptr(i) = *other.ptr(i);
-      return *this;
-    }
+          ar&* ptr(i);
+      }
 
-    /**
-     * @brief Move assignment operator.
-     * @param other GeometryIndexed object to move from
-     * @return Reference to this object
-     */
-    GeometryIndexed& operator=(GeometryIndexed&& other)
-      noexcept(std::is_nothrow_move_assignable<T>::value)
-    {
-      if (this != &other)
-        for (size_t i = 0; i < Count; ++i)
-          *ptr(i) = std::move(*other.ptr(i));
-      return *this;
-    }
+    private:
+      /**
+       * @brief Constructs entries in storage order with automatic exception cleanup.
+       * @param entries Complete geometry-value mapping.
+       * @param indices Compile-time storage indices.
+       */
+      template <size_t... Indices>
+      GeometryIndexed(std::initializer_list<std::pair<Polytope::Type, T>> entries,
+        [[maybe_unused]] std::index_sequence<Indices...> indices)
+        : m_map{getEntry(entries, Indices)...}
+      {}
 
-    /**
-     * @brief Access operator for mutable access to data by polytope type.
-     * @param type Polytope type to access
-     * @return Reference to the associated data
-     */
-    T& operator[](Polytope::Type type)
-    {
-      return *ptr(static_cast<size_t>(type));
-    }
+      /**
+       * @brief Finds a unique initializer entry for one geometry.
+       * @param entries Complete geometry-value mapping.
+       * @param index Geometry's storage index.
+       * @returns The supplied value; missing and repeated geometries raise an exception.
+       */
+      static const T& getEntry(
+        std::initializer_list<std::pair<Polytope::Type, T>> entries, size_t index)
+      {
+        const T* value = nullptr;
+        for (const auto& entry : entries)
+        {
+          if (static_cast<size_t>(entry.first) == index)
+          {
+            if (value)
+            {
+              Alert::Exception()
+                << "Repeated GeometryIndexed initializer geometry." << Alert::Raise;
+            }
+            value = &entry.second;
+          }
+        }
+        if (entries.size() != Count || !value)
+        {
+          Alert::Exception() << "Incomplete GeometryIndexed initializer mapping."
+                             << Alert::Raise;
+        }
+        return *value;
+      }
 
-    /**
-     * @brief Access operator for const access to data by polytope type.
-     * @param type Polytope type to access
-     * @return Const reference to the associated data
-     */
-    const T& operator[](Polytope::Type type) const
-    {
-      return *ptr(static_cast<size_t>(type));
-    }
+      /// Storage array for all polytope type mappings
+      std::array<T, Count> m_map;
 
-    /**
-     * @brief Gets the number of polytope types (always constant).
-     * @return Number of polytope types supported
-     */
-    constexpr size_t size() const { return Count; }
+      /**
+       * @brief Gets a pointer to the data at the given index.
+       * @param i Index into the storage array
+       * @return Pointer to the data object
+       */
+      T* ptr(size_t i)
+      {
+        assert(i < Count);
+        return &m_map[i];
+      }
 
-    /**
-     * @brief Serialization method for Boost.Serialization.
-     * @tparam Archive Archive type for serialization
-     * @param ar Archive object
-     * @param version Serialization version (unused)
-     */
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-      for (size_t i = 0; i < Count; ++i)
-        ar & *ptr(i);
-    }
-
-  private:
-    /// Storage array for all polytope type mappings
-    std::array<Storage, Count> m_map;
-
-    /**
-     * @brief Gets a pointer to the data at the given index.
-     * @param i Index into the storage array
-     * @return Pointer to the data object
-     */
-    T* ptr(size_t i)
-    {
-      assert(i < Count);
-      return reinterpret_cast<T*>(&m_map[i]);
-    }
-
-    /**
-     * @brief Gets a const pointer to the data at the given index.
-     * @param i Index into the storage array
-     * @return Const pointer to the data object
-     */
-    const T* ptr(size_t i) const
-    {
-      assert(i < Count);
-      return reinterpret_cast<const T*>(&m_map[i]);
-    }
+      /**
+       * @brief Gets a const pointer to the data at the given index.
+       * @param i Index into the storage array
+       * @return Const pointer to the data object
+       */
+      const T* ptr(size_t i) const
+      {
+        assert(i < Count);
+        return &m_map[i];
+      }
   };
 }
 

@@ -118,7 +118,11 @@ namespace Rodin::Variational
         return Math::pow(this->getBase().getValue(p), getExponent());
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto o = getBase().getOrder(polytope);
@@ -144,13 +148,19 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
-      /// @brief Gets the base of the power.
+      /**
+       * @brief Gets the base of the power.
+       * @returns The base of the power.
+       */
       const BaseType& getBase() const
       {
         return *m_s;
       }
 
-      /// @brief Gets the exponent of the power.
+      /**
+       * @brief Gets the exponent of the power.
+       * @returns The exponent of the power.
+       */
       const ExponentType& getExponent() const
       {
         return m_p;
@@ -169,11 +179,19 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c Pow.
    * @ingroup RodinCTAD
+   * @param base Base function of the power.
+   * @param exponent Exponent of the power.
    */
   template <class BaseDerived, class Number>
-  Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
+  Pow(const FunctionBase<BaseDerived>& base,
+    Number exponent) -> Pow<FunctionBase<BaseDerived>, Number>;
 
-  /// @brief Builds the pointwise power of a function expression.
+  /**
+   * @brief Builds the pointwise power of a function expression.
+   * @param f Function operand.
+   * @param exponent Exponent of the power.
+   * @returns Pointwise power expression.
+   */
   template <class NestedDerived, class Number>
   auto pow(const FunctionBase<NestedDerived>& f, Number exponent)
   {

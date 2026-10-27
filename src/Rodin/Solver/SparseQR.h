@@ -11,7 +11,7 @@
  * This header provides the SparseQR solver class, which implements QR decomposition
  * with numerical column pivoting for sparse matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   AP = QR
@@ -19,14 +19,14 @@
  * where @f$ P @f$ is a permutation matrix, @f$ Q @f$ is orthogonal, and @f$ R @f$ is
  * upper triangular. The left-looking algorithm proceeds column by column.
  *
- * ## Applicability
+ * # Applicability
  * - General sparse matrices (no symmetry required)
  * - Rank-deficient systems
  * - Least-squares problems
  * - Overdetermined systems
  * - Systems where LU factorization is numerically unstable
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -72,9 +72,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SparseQR
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  SparseQR(Variational::ProblemBase<LinearSystem>&) -> SparseQR<LinearSystem>;
+  SparseQR(Variational::ProblemBase<LinearSystem>& pb) -> SparseQR<LinearSystem>;
 
   /**
    * @ingroup SparseQRSpecializations
@@ -172,6 +173,7 @@ namespace Rodin::Solver
        *
        * Updated by every factorization and every solve, so a caller reads it
        * after the call it wants to check.
+       * @returns The outcome of the most recent operation.
        */
       const Info& getInfo() const noexcept
       {
@@ -197,8 +199,11 @@ namespace Rodin::Solver
       }
 
     private:
-      /// Underlying Eigen SparseQR solver with COLAMD ordering
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen SparseQR solver with COLAMD ordering
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

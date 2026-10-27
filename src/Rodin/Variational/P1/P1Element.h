@@ -12,27 +12,29 @@
  * @brief P1 (piecewise linear) finite element implementation.
  *
  * This file provides the P1Element class template for continuous piecewise
- * linear finite elements. P1 elements have:
+ * first-order finite elements. P1 elements have:
  * - One DOF per vertex
- * - Linear basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$ (Lagrange property)
- * - Constant gradient per element: @f$ \nabla \phi_i|_K = \text{const} @f$
+ * - Nodal basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$ (Lagrange property)
+ * - Affine simplex, tensor-product, wedge, or rational pyramid bases
  *
- * P1 elements are the most common finite elements, providing first-order
- * convergence (@f$ O(h) @f$ for L² norm, @f$ O(h^2) @f$ for energy norm) and
- * forming the foundation for many FEM applications.
+ * Simplex basis gradients are constant. Tensor-product, wedge, and rational
+ * pyramid basis gradients generally depend on the reference point.
  */
 
 #include <utility>
 
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/Variational/LagrangeFiniteElement.h"
+#include "Rodin/Variational/ReferenceTabulationCache.h"
 
 #include "ForwardDecls.h"
 
@@ -46,10 +48,11 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P1Element<Range>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+
+    /// @brief Range (evaluation value) type.
+    using RangeType = Range;
   };
 }
 
@@ -64,6 +67,7 @@ namespace Rodin::Variational
    * |----------------|-------------|
    * | @ref P1Element "P1Element<Scalar>" | Scalar-valued continuous piecewise linear element. |
    * | @ref P1Element "P1Element<SpatialVector<Scalar>>" | Vector-valued continuous piecewise linear element. |
+   * | @ref P1Element "P1Element<SpatialMatrix<Scalar>>" | Full rectangular matrix range with this family's componentwise basis. |
    */
 
   /**
@@ -73,17 +77,19 @@ namespace Rodin::Variational
    *
    * The P1Element provides a first-order finite element with:
    * - **DOF count**: One per vertex (@f$ n_v @f$ total)
-   * - **Basis functions**: Linear functions satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
-   * - **Gradient**: Constant on each element, @f$ \nabla \phi_i|_K = \text{const} @f$
+   * - **Basis functions**: Nodal functions satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
+   * - **Gradient**: Constant on simplices; generally variable on other geometries
    * - **Continuity**: Global C⁰ continuity across element interfaces
    *
    * P1 elements provide first-order convergence and are the standard choice
    * for elliptic PDEs like Poisson's equation @f$ -\Delta u = f @f$.
    *
    * @tparam Scalar Type of scalar range (e.g., Real, Complex)
+   *
+   * @see @ref P1ElementSpecializations "P1Element Template Specializations"
    */
   template <class Scalar>
-  class P1Element final : public FiniteElementBase<P1Element<Scalar>>
+  class P1Element final : public LagrangeFiniteElementBase<P1Element<Scalar>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -91,7 +97,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Scalar>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Scalar>>;
 
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -99,22 +105,61 @@ namespace Rodin::Variational
       /// Type of range
       using RangeType = ScalarType;
 
+      /// @brief Reference values and derivatives in this element's vertex order.
+      using Tabulation = ReferenceTabulation<Scalar>;
+
       /**
-       * @brief Represents a linear form of a P1 scalar element.
+       * @brief Reuses the element's own basis at quadrature reference samples.
+       *
+       * The canonical reference store is shared across cells on this thread.
+       * Tensor-product, wedge and rational pyramid basis formulas are retained;
+       * no H1 basis or coefficient-order conversion is performed.
+       *
+       * @param formula Persistent immutable reference samples.
+       * @returns A table borrowed until a later insertion evicts its slot.
        */
+      const Tabulation& getTabulation(const QF::QuadratureFormula& formula) const
+      {
+        return ReferenceTabulationCache<P1Element<Scalar>, Scalar>::get(*this, formula);
+      }
+
+      /**
+       * @brief Borrows an existing table without reading its source formula.
+       * @param formula Persistent formula defining the samples.
+       * @returns The matching table on this thread, or no value after eviction.
+       */
+      Optional<std::reference_wrapper<const Tabulation>> findTabulation(
+        const QF::QuadratureFormula& formula) const
+      {
+        return ReferenceTabulationCache<P1Element<Scalar>, Scalar>::find(*this, formula);
+      }
+
+      /// @brief Represents a linear form of a P1 scalar element.
       class LinearForm
       {
         public:
-          /// @brief Constructs the LinearForm from the given arguments.
-          constexpr
-          LinearForm(size_t i, Geometry::Polytope::Type g)
-            : m_i(i), m_g(g)
+          /**
+           * @brief Constructs the LinearForm from the given arguments.
+           * @param i Index of the requested entry.
+           * @param g Mesh entity used by this operation.
+           */
+          constexpr LinearForm(size_t i, Geometry::Polytope::Type g)
+            : m_i(i),
+              m_g(g)
           {}
 
-          constexpr
-          LinearForm(const LinearForm&) = delete;
+          /**
+           * @brief Disables copying or moving this object.
+           * @param other Object whose copying or moving is disabled.
+           */
 
-          /// @brief Applies the functional to a callable.
+          constexpr LinearForm(const LinearForm& other) = delete;
+
+          /**
+           * @brief Applies the functional to a callable.
+           * @returns Value of the expression at the supplied evaluation point.
+           * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
+           */
           template <class T>
           ScalarType operator()(const T& v) const
           {
@@ -130,13 +175,14 @@ namespace Rodin::Variational
       /**
        * @brief Represents a piecewise linear basis function of a P1 scalar element.
        *
-       * P1 basis functions are linear polynomials satisfying the Lagrange property:
+       * P1 basis functions satisfy the Lagrange property:
        * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the vertices of the element.
        *
-       * ## Properties
+       * # Properties
        * - **Lagrange property**: φ_i = 1 at vertex i, φ_i = 0 at other vertices
-       * - **Linear**: Each basis function is a linear combination of coordinates
-       * - **Gradient**: @f$ \nabla \phi_i @f$ is constant on each element
+       * - **Basis family**: Affine on simplices, tensor-product on quadrilaterals
+       *   and hexahedra, triangle-by-segment on wedges, and rational on pyramids
+       * - **Gradient**: @f$ \nabla \phi_i @f$ is constant on simplices
        * - **Partition of unity**: @f$ \sum_i \phi_i(x) = 1 @f$ for all x in element
        * - **Continuity**: C⁰ continuous across element interfaces
        *
@@ -151,8 +197,14 @@ namespace Rodin::Variational
           /**
            * @brief Represents a partial derivative of a P1 basis function.
            *
-           * For P1 elements, the gradient is constant on each element, so derivatives
-           * are piecewise constant functions.
+           * Computes the pure reference-coordinate derivative
+           * @f$ \partial_i^{\mathrm{Order}} \phi @f$. Nonpyramid bases are linear
+           * in each coordinate separately, so pure derivatives of order two or
+           * greater vanish. The four pyramid base functions contain
+           * @f$ \pm xy/(1-z) @f$, giving
+           * @f$ \partial_z^n \phi = \pm n!xy/(1-z)^{n+1} @f$ for @f$ n\ge2 @f$.
+           * At the pyramid apex, higher derivatives retain the zero convention;
+           * this value is not a continuous extension of the interior derivatives.
            *
            * @tparam Order Order of differentiation (typically 1 for first derivative)
            */
@@ -166,22 +218,25 @@ namespace Rodin::Variational
                * @param local Local index of the basis function
                * @param g Geometry type
                */
-              constexpr
-              DerivativeFunction(size_t i, size_t local, Geometry::Polytope::Type g)
-                : m_i(i), m_local(local), m_g(g)
+              constexpr DerivativeFunction(
+                size_t i, size_t local, Geometry::Polytope::Type g)
+                : m_i(i),
+                  m_local(local),
+                  m_g(g)
               {}
 
-              /// @brief Copy constructor.
-              constexpr
-              DerivativeFunction(const DerivativeFunction&) = default;
+              /**
+               * @brief Copy constructor.
+               * @param other Object to copy from.
+               */
+              constexpr DerivativeFunction(const DerivativeFunction& other) = default;
 
               /**
                * @brief Evaluates the derivative at a spatial point.
-               * @param r Reference point in the element
-               * @return Value of derivative (constant for P1)
+               * @param r Reference coordinates at which to evaluate the basis.
+               * @return Value of the pure reference-coordinate derivative.
                */
-              constexpr
-              ReturnType operator()(const Math::SpatialPoint& r) const;
+              constexpr ReturnType operator()(const Math::SpatialPoint& r) const;
 
             private:
               const size_t m_i;      ///< Coordinate index
@@ -195,30 +250,34 @@ namespace Rodin::Variational
            * The gradient is a vector of first-order partial derivatives:
            * @f$ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/\partial z) @f$
            *
-           * For P1 elements, the gradient is constant on each element.
+           * The gradient is constant on simplices and generally depends on the
+           * reference point for tensor-product, wedge, and pyramid bases.
            */
           class GradientFunction
           {
             public:
-              using ReturnType = Math::SpatialVector<ScalarType>;  ///< Gradient vector type
+              using ReturnType =
+                Math::SpatialVector<ScalarType>;  ///< Gradient vector type
 
               /**
                * @brief Constructs a gradient function.
                * @param local Local index of the basis function
                * @param g Geometry type
                */
-              constexpr
-              GradientFunction(size_t local, Geometry::Polytope::Type g)
-                : m_local(local), m_g(g)
+              constexpr GradientFunction(size_t local, Geometry::Polytope::Type g)
+                : m_local(local),
+                  m_g(g)
               {}
 
-              /// @brief Copy constructor.
-              constexpr
-              GradientFunction(const GradientFunction&) = default;
+              /**
+               * @brief Copy constructor.
+               * @param other Object to copy from.
+               */
+              constexpr GradientFunction(const GradientFunction& other) = default;
 
               /**
                * @brief Evaluates the gradient at a spatial point.
-               * @param r Reference point in the element (gradient is constant, so r doesn't affect result)
+               * @param r Reference coordinates at which to evaluate the basis.
                * @return Constant gradient vector
                */
               ReturnType operator()(const Math::SpatialPoint& r) const
@@ -235,32 +294,48 @@ namespace Rodin::Variational
               const Geometry::Polytope::Type m_g;
           };
 
-          /// @brief Constructs the BasisFunction from the given arguments.
-          constexpr
-          BasisFunction(size_t local, Geometry::Polytope::Type g)
-            : m_local(local), m_g(g)
+          /**
+           * @brief Constructs the BasisFunction from the given arguments.
+           * @param local Index in the local numbering.
+           * @param g Mesh entity used by this operation.
+           */
+          constexpr BasisFunction(size_t local, Geometry::Polytope::Type g)
+            : m_local(local),
+              m_g(g)
           {}
 
-          /// @brief Copy constructor.
-          constexpr
-          BasisFunction(const BasisFunction& other)
-            : m_local(other.m_local), m_g(other.m_g)
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          constexpr BasisFunction(const BasisFunction& other)
+            : m_local(other.m_local),
+              m_g(other.m_g)
           {}
 
-          /// @brief Evaluates at a point on the reference element.
-          constexpr
-          ReturnType operator()(const Math::SpatialPoint& r) const;
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @param r Reference coordinates at which to evaluate the basis.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
+          constexpr ReturnType operator()(const Math::SpatialPoint& r) const;
 
+          /**
+           * @brief Gets the derivative of the basis function.
+           * @param i Index of the requested entry.
+           * @returns Reference-coordinate derivative function for the basis.
+           */
           template <size_t Order>
-          /// @brief Gets the derivative of the basis function.
           constexpr DerivativeFunction<Order> getDerivative(size_t i) const
           {
             return DerivativeFunction<Order>(i, m_local, m_g);
           }
 
-          /// @brief Gets the gradient of the basis function.
-          constexpr
-          GradientFunction getGradient() const
+          /**
+           * @brief Gets the gradient of the basis function.
+           * @returns Derivative evaluated at the supplied point.
+           */
+          constexpr GradientFunction getGradient() const
           {
             return GradientFunction(m_local, m_g);
           }
@@ -270,40 +345,52 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;
       };
 
-      constexpr
-      P1Element()
+      constexpr P1Element()
         : Parent(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Constructs the P1Element from the given arguments.
-      constexpr
-      P1Element(Geometry::Polytope::Type geometry)
+      /**
+       * @brief Constructs the P1Element from the given arguments.
+       * @param geometry Reference geometry.
+       */
+      constexpr P1Element(Geometry::Polytope::Type geometry)
         : Parent(geometry)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      P1Element(const P1Element& other)
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr P1Element(const P1Element& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      P1Element(P1Element&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr P1Element(P1Element&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Copy assignment.
-      constexpr
-      P1Element& operator=(const P1Element& other)
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
+      constexpr P1Element& operator=(const P1Element& other)
       {
         Parent::operator=(other);
         return *this;
       }
-      /// @brief Move assignment.
 
-      constexpr
-      P1Element& operator=(P1Element&& other)
+      /**
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
+
+      constexpr P1Element& operator=(P1Element&& other)
       {
         Parent::operator=(std::move(other));
         return *this;
@@ -313,20 +400,26 @@ namespace Rodin::Variational
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
        */
-      constexpr
-      size_t getCount() const
+      constexpr size_t getCount() const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getVertexCount();
       }
 
-      /// @brief Gets the node of a local degree of freedom.
-      constexpr
-      const Math::SpatialPoint& getNode(size_t i) const
+      /**
+       * @brief Gets the node of a local degree of freedom.
+       * @param i Index of the requested entry.
+       * @returns The node of a local degree of freedom.
+       */
+      constexpr const Math::SpatialPoint& getNode(size_t i) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(i);
       }
 
-      /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
+      /**
+       * @brief Gets the degree-of-freedom functional of a local degree of freedom.
+       * @param i Index of the requested entry.
+       * @returns The degree-of-freedom functional of a local degree of freedom.
+       */
       const LinearForm& getLinearForm(size_t i) const
       {
         const Geometry::Polytope::Type g = this->getGeometry();
@@ -591,7 +684,11 @@ namespace Rodin::Variational
         return s_null;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param i Local basis-function index.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       const BasisFunction& getBasis(size_t i) const
       {
         const Geometry::Polytope::Type g = this->getGeometry();
@@ -599,9 +696,9 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static const BasisFunction s_basis(0, g);
+            static constexpr BasisFunction basis(0, Geometry::Polytope::Type::Point);
             assert(i == 0);
-            return s_basis;
+            return basis;
           }
           case Geometry::Polytope::Type::Segment:
           {
@@ -609,13 +706,15 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Segment);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Segment);
+                return basis;
               }
               default:
               {
@@ -631,18 +730,21 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Triangle);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Triangle);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Triangle);
+                return basis;
               }
               default:
               {
@@ -658,23 +760,27 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Tetrahedron);
+                return basis;
               }
               default:
               {
@@ -690,23 +796,27 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Quadrilateral);
+                return basis;
               }
               default:
               {
@@ -722,28 +832,33 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               case 4:
               {
-                static const BasisFunction s_basis(4, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  4, Geometry::Polytope::Type::Pyramid);
+                return basis;
               }
               default:
               {
@@ -759,33 +874,33 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(0, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(1, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(2, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(3, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 4:
               {
-                static const BasisFunction s_basis(4, g);
-                return s_basis;
+                static constexpr BasisFunction basis(4, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               case 5:
               {
-                static const BasisFunction s_basis(5, g);
-                return s_basis;
+                static constexpr BasisFunction basis(5, Geometry::Polytope::Type::Wedge);
+                return basis;
               }
               default:
               {
@@ -802,43 +917,51 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static const BasisFunction s_basis(0, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  0, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 1:
               {
-                static const BasisFunction s_basis(1, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  1, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 2:
               {
-                static const BasisFunction s_basis(2, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  2, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 3:
               {
-                static const BasisFunction s_basis(3, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  3, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 4:
               {
-                static const BasisFunction s_basis(4, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  4, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 5:
               {
-                static const BasisFunction s_basis(5, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  5, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 6:
               {
-                static const BasisFunction s_basis(6, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  6, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               case 7:
               {
-                static const BasisFunction s_basis(7, g);
-                return s_basis;
+                static constexpr BasisFunction basis(
+                  7, Geometry::Polytope::Type::Hexahedron);
+                return basis;
               }
               default:
               {
@@ -854,8 +977,11 @@ namespace Rodin::Variational
         return s_null;
       }
 
-      /// @brief Returns the polynomial order.
-      size_t getOrder() const
+      /**
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
+       */
+      constexpr Optional<size_t> getDegree() const
       {
         switch (this->getGeometry())
         {
@@ -867,20 +993,45 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Pyramid:
             return 2;
+          case Geometry::Polytope::Type::Pyramid:
+            return std::nullopt;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
         }
         assert(false);
         return 0;
       }
-      /// @brief Serializes the object through a Boost archive.
 
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        ar & boost::serialization::base_object<Parent>(*this);
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 1;
+      }
+
+      /**
+       * @brief Serializes the object through a Boost archive.
+       * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
+
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
+      {
+        ar& boost::serialization::base_object<typename Parent::Parent>(*this);
       }
   };
 
@@ -892,7 +1043,7 @@ namespace Rodin::Variational
    * Vector-valued P1 element with:
    * - **DOF count**: @f$ d \cdot n_v @f$ where @f$ d @f$ is vector dimension, @f$ n_v @f$ is vertex count
    * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
-   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$ constant per element
+   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$, constant on simplices
    * - **Continuity**: C⁰ continuous vector field
    *
    * Used for elasticity, fluid mechanics, and vector-valued PDEs. Each component
@@ -902,7 +1053,7 @@ namespace Rodin::Variational
    */
   template <class Scalar>
   class P1Element<Math::SpatialVector<Scalar>> final
-    : public FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>
+    : public LagrangeFiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -910,7 +1061,7 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
+      using Parent = LagrangeFiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
 
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -921,22 +1072,38 @@ namespace Rodin::Variational
       /// @brief Degree-of-freedom functional of the vector-valued P1 element.
       class LinearForm
       {
-          /// @brief Constructs the functional of a local degree of freedom.
+        /**
+         * @brief Constructs the functional of a local degree of freedom.
+         * @param vdim Number of components in the value range.
+         * @param local Index in the local numbering.
+         * @param g Mesh entity used by this operation.
+         */
 
         public:
-          constexpr
-          LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
-            : m_vdim(vdim), m_local(local), m_g(g)
+          constexpr LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim),
+              m_local(local),
+              m_g(g)
           {}
 
-          constexpr
-          LinearForm(const LinearForm&) = delete;
+          /**
+           * @brief Disables copying or moving this object.
+           * @param other Object whose copying or moving is disabled.
+           */
 
-          /// @brief Move constructor.
-          constexpr
-          LinearForm(LinearForm&&) = default;
+          constexpr LinearForm(const LinearForm& other) = delete;
 
-          /// @brief Applies the functional to a callable.
+          /**
+           * @brief Move constructor.
+           * @param other Object to move from.
+           */
+          constexpr LinearForm(LinearForm&& other) = default;
+
+          /**
+           * @brief Applies the functional to a callable.
+           * @returns Value of the nodal functional applied to the selected component of the callable.
+           * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
+           */
           template <class T>
           ScalarType operator()(const T& v) const
           {
@@ -975,25 +1142,38 @@ namespace Rodin::Variational
                * @param local Local index of the basis function
                * @param g Geometry type of the polytope
                */
-              constexpr
-              DerivativeFunction(size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
-                : m_i(i), m_j(j), m_vdim(vdim), m_local(local), m_g(g)
+              constexpr DerivativeFunction(
+                size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
+                : m_i(i),
+                  m_j(j),
+                  m_vdim(vdim),
+                  m_local(local),
+                  m_g(g)
               {}
 
-              /// @brief Copy constructor.
-              constexpr
-              DerivativeFunction(const DerivativeFunction&) = default;
-              /// @brief Evaluates into the output argument at a reference point.
+              /**
+               * @brief Copy constructor.
+               * @param other Object to copy from.
+               */
+              constexpr DerivativeFunction(const DerivativeFunction& other) = default;
 
-              constexpr
-              void operator()(Scalar& out, const Math::SpatialPoint& r) const
+              /**
+               * @brief Evaluates into the output argument at a reference point.
+               * @param out Storage for the computed result.
+               * @param r Reference coordinates at which to evaluate the basis.
+               */
+
+              constexpr void operator()(Scalar& out, const Math::SpatialPoint& r) const
               {
                 out = this->operator()(r);
               }
 
-              /// @brief Evaluates at a point on the reference element.
-              constexpr
-              Scalar operator()(const Math::SpatialPoint& rc) const
+              /**
+               * @brief Evaluates at a point on the reference element.
+               * @param rc Coordinates in the reference element.
+               * @returns Basis or reference-coordinate derivative value at the supplied reference point.
+               */
+              constexpr Scalar operator()(const Math::SpatialPoint& rc) const
               {
                 if constexpr (Order == 0)
                 {
@@ -1010,7 +1190,9 @@ namespace Rodin::Variational
                 {
                   if (m_i == m_local % m_vdim)
                   {
-                    return P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim).template getDerivative<1>(m_j)(rc);
+                    return P1Element<ScalarType>(m_g)
+                      .getBasis(m_local / m_vdim)
+                      .template getDerivative<1>(m_j)(rc);
                   }
                   else
                   {
@@ -1019,7 +1201,16 @@ namespace Rodin::Variational
                 }
                 else
                 {
-                  return 0;
+                  if (m_i == m_local % m_vdim)
+                  {
+                    return P1Element<ScalarType>(m_g)
+                      .getBasis(m_local / m_vdim)
+                      .template getDerivative<Order>(m_j)(rc);
+                  }
+                  else
+                  {
+                    return 0;
+                  }
                 }
               }
 
@@ -1036,22 +1227,38 @@ namespace Rodin::Variational
             public:
               /// @brief Type returned by the callable.
               using ReturnType = Math::SpatialMatrix<ScalarType>;
-              /// @brief Constructs the Jacobian of a local basis function.
 
-              constexpr
-              JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
-                : m_vdim(vdim), m_local(local), m_g(g)
+              /**
+               * @brief Constructs the Jacobian of a local basis function.
+               * @param vdim Number of components in the value range.
+               * @param local Index in the local numbering.
+               * @param g Mesh entity used by this operation.
+               */
+
+              constexpr JacobianFunction(
+                size_t vdim, size_t local, Geometry::Polytope::Type g)
+                : m_vdim(vdim),
+                  m_local(local),
+                  m_g(g)
               {}
 
-              /// @brief Copy constructor.
-              constexpr
-              JacobianFunction(const JacobianFunction&) = default;
+              /**
+               * @brief Copy constructor.
+               * @param other Object to copy from.
+               */
+              constexpr JacobianFunction(const JacobianFunction& other) = default;
 
-              /// @brief Move constructor.
-              constexpr
-              JacobianFunction(JacobianFunction&&) = default;
+              /**
+               * @brief Move constructor.
+               * @param other Object to move from.
+               */
+              constexpr JacobianFunction(JacobianFunction&& other) = default;
 
-              /// @brief Evaluates at a point on the reference element.
+              /**
+               * @brief Evaluates at a point on the reference element.
+               * @param r Reference coordinates at which to evaluate the basis.
+               * @returns Basis or reference-coordinate derivative value at the supplied reference point.
+               */
               ReturnType operator()(const Math::SpatialPoint& r) const
               {
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
@@ -1065,26 +1272,63 @@ namespace Rodin::Variational
                 return out;
               }
 
+              /**
+               * @brief Evaluates the reference basis Jacobian at a formula sample.
+               * @param formula Immutable formula defining the reference coordinates.
+               * @param sample Index of the formula sample.
+               * @returns Owned reference Jacobian of this vector basis.
+               */
+              ReturnType operator()(
+                const QF::QuadratureFormula& formula, size_t sample) const
+              {
+                const size_t dimension = Geometry::Polytope::Traits(m_g).getDimension();
+                ReturnType out(m_vdim, dimension);
+                out.setZero();
+                const P1Element<ScalarType> scalar(m_g);
+                const auto gradient =
+                  scalar.getTabulation(formula).getGradient(sample, m_local / m_vdim);
+                for (size_t axis = 0; axis < dimension; ++axis)
+                  out(m_local % m_vdim, axis) = gradient[axis];
+                return out;
+              }
+
             private:
               const size_t m_vdim;
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
           };
-          /// @brief Constructs the basis function of a local degree of freedom.
 
-          constexpr
-          BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
-            : m_vdim(vdim), m_local(local), m_g(g)
+          /**
+           * @brief Constructs the basis function of a local degree of freedom.
+           * @param vdim Number of components in the value range.
+           * @param local Index in the local numbering.
+           * @param g Mesh entity used by this operation.
+           */
+
+          constexpr BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
+            : m_vdim(vdim),
+              m_local(local),
+              m_g(g)
           {}
 
-          constexpr
-          BasisFunction(const BasisFunction&) = delete;
+          /**
+           * @brief Disables copying or moving this object.
+           * @param other Object whose copying or moving is disabled.
+           */
 
-          /// @brief Move constructor.
-          constexpr
-          BasisFunction(BasisFunction&&) = default;
+          constexpr BasisFunction(const BasisFunction& other) = delete;
 
-          /// @brief Evaluates at a point on the reference element.
+          /**
+           * @brief Move constructor.
+           * @param other Object to move from.
+           */
+          constexpr BasisFunction(BasisFunction&& other) = default;
+
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @param rc Coordinates in the reference element.
+           * @returns Basis or reference-coordinate derivative value at the supplied reference point.
+           */
           ReturnType operator()(const Math::SpatialPoint& rc) const
           {
             ReturnType out(static_cast<std::uint8_t>(m_vdim));
@@ -1094,16 +1338,23 @@ namespace Rodin::Variational
             return out;
           }
 
+          /**
+           * @brief Gets the derivative of the basis function.
+           * @param i Index of the requested entry.
+           * @param j Index of the second coordinate.
+           * @returns Reference-coordinate derivative function for the basis.
+           */
           template <size_t Order>
-          /// @brief Gets the derivative of the basis function.
           constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
             return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }
 
-          /// @brief Gets the Jacobian of the basis function.
-          constexpr
-          JacobianFunction getJacobian() const
+          /**
+           * @brief Gets the Jacobian of the basis function.
+           * @returns Derivative evaluated at the supplied point.
+           */
+          constexpr JacobianFunction getJacobian() const
           {
             return JacobianFunction(m_vdim, m_local, m_g);
           }
@@ -1115,13 +1366,18 @@ namespace Rodin::Variational
       };
 
       P1Element()
-        : Parent(Geometry::Polytope::Type::Point), m_vdim(0)
+        : Parent(Geometry::Polytope::Type::Point),
+          m_vdim(0)
       {}
 
-      /// @brief Constructs the P1Element from the given arguments.
-      constexpr
-      P1Element(Geometry::Polytope::Type geometry, size_t vdim)
-        : Parent(geometry), m_vdim(vdim)
+      /**
+       * @brief Constructs the P1Element from the given arguments.
+       * @param geometry Reference polytope geometry.
+       * @param vdim Number of components in the vector-valued range.
+       */
+      constexpr P1Element(Geometry::Polytope::Type geometry, size_t vdim)
+        : Parent(geometry),
+          m_vdim(vdim)
       {
         const size_t count = this->getCount();
         m_lfs.reserve(count);
@@ -1133,38 +1389,43 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Copy constructor.
-      constexpr
-      P1Element(const P1Element& other)
-        : Parent(other),
-          m_vdim(other.m_vdim),
-          m_lfs(other.m_lfs),
-          m_bs(other.m_bs)
+      /**
+       * @brief Copy constructor.
+       * @param other Source object to copy or move from.
+       */
+      constexpr P1Element(const P1Element& other)
+        : P1Element(other.getGeometry(), other.m_vdim)
       {}
 
-      /// @brief Move constructor.
-      constexpr
-      P1Element(P1Element&& other)
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
+      constexpr P1Element(P1Element&& other)
         : Parent(std::move(other)),
           m_vdim(std::exchange(other.m_vdim, 0)),
           m_lfs(std::move(other.m_lfs)),
           m_bs(std::move(other.m_bs))
       {}
 
-      /// @brief Copy assignment.
-      constexpr
-      P1Element& operator=(const P1Element& other)
+      /**
+       * @brief Copy assignment.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      constexpr P1Element& operator=(const P1Element& other)
       {
-        Parent::operator=(other);
-        m_vdim = other.m_vdim;
-        m_lfs = other.m_lfs;
-        m_bs = other.m_bs;
+        if (this != &other)
+          *this = P1Element(other);
         return *this;
       }
 
-      /// @brief Move assignment.
-      constexpr
-      P1Element& operator=(P1Element&& other)
+      /**
+       * @brief Move assignment.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      constexpr P1Element& operator=(P1Element&& other)
       {
         Parent::operator=(std::move(other));
         m_vdim = std::exchange(other.m_vdim, 0);
@@ -1173,35 +1434,51 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the number of degrees of freedom of the element.
-      constexpr
-      size_t getCount() const
+      /**
+       * @brief Gets the number of degrees of freedom of the element.
+       * @returns Number of degrees of freedom for the requested entity or element.
+       */
+      constexpr size_t getCount() const
       {
         return m_vdim * Geometry::Polytope::Traits(this->getGeometry()).getVertexCount();
       }
 
-      /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
-      constexpr
-      const LinearForm& getLinearForm(size_t local) const
+      /**
+       * @brief Gets the degree-of-freedom functional of a local degree of freedom.
+       * @param local Local degree-of-freedom index.
+       * @returns Degree-of-freedom functional associated with the local index.
+       */
+      constexpr const LinearForm& getLinearForm(size_t local) const
       {
         return m_lfs[local];
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      constexpr
-      const BasisFunction& getBasis(size_t local) const
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Local degree-of-freedom index.
+       * @returns Basis function associated with the local degree of freedom.
+       */
+      constexpr const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];
       }
 
-      /// @brief Gets the node of a local degree of freedom.
-      constexpr
-      const Math::SpatialPoint& getNode(size_t local) const
+      /**
+       * @brief Gets the node of a local degree of freedom.
+       * @param local Local degree-of-freedom index.
+       * @returns Reference node associated with the local degree of freedom.
+       */
+      constexpr const Math::SpatialPoint& getNode(size_t local) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(local / m_vdim);
       }
 
-      /// @brief Evaluates the integrand into the output argument.
+      /**
+       * @brief Evaluates the integrand into the output argument.
+       * @param out Output value receiving the basis-coefficient contraction.
+       * @param coefficient Callable returning the coefficient associated with a local basis index.
+       * @param rc Reference coordinates of the evaluation point.
+       */
       template <class Coefficient>
       constexpr void evaluate(
         RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
@@ -1223,9 +1500,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order.
-      constexpr
-      size_t getOrder() const
+      /**
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
+       */
+      constexpr Optional<size_t> getDegree() const
       {
         switch (this->getGeometry())
         {
@@ -1237,21 +1516,48 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Pyramid:
             return 2;
+          case Geometry::Polytope::Type::Pyramid:
+            return std::nullopt;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
         }
         assert(false);
         return 0;
       }
-      /// @brief Serializes the object through a Boost archive.
 
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        ar & boost::serialization::base_object<Parent>(*this);
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 1;
+      }
+
+      /**
+       * @brief Serializes the object through a Boost archive.
+       * @param ar Serialization archive used to store or restore the object.
+       * @param version Serialization format version; unused by this implementation.
+       */
+
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
+      {
+        ar& boost::serialization::base_object<typename Parent::Parent>(*this);
         ar & m_vdim;
+        if constexpr (Archive::is_loading::value)
+          *this = P1Element(this->getGeometry(), m_vdim);
       }
 
     private:
@@ -1263,5 +1569,309 @@ namespace Rodin::Variational
 }
 
 #include "P1Element.hpp"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued reference element built from scalar nodal functionals.
+  template <class Scalar>
+  class P1Element<Math::SpatialMatrix<Scalar>> final
+    : public LagrangeFiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>
+  {
+    public:
+      /// @brief Scalar reference element for this family.
+      using ScalarElement = P1Element<Scalar>;
+
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<ScalarElement>::ScalarType;
+
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+
+      /// @brief CRTP or finite element base class.
+      using Parent = LagrangeFiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>;
+
+      /// @brief Basis type of the underlying scalar element.
+      using ScalarBasis = decltype(std::declval<ScalarElement>().getBasis(0));
+
+      /// @brief Nodal functional type of the underlying scalar element.
+      using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
+
+      /**
+       * @brief Replicates a scalar reference element for a rectangular matrix range.
+       * @param geometry Reference polytope geometry.
+       * @param rows Number of rows in the matrix-valued range.
+       * @param cols Number of columns in the matrix-valued range.
+       */
+      P1Element(Geometry::Polytope::Type geometry, size_t rows, size_t cols)
+        : P1Element(ScalarElement(geometry), rows, cols)
+      {}
+
+      /**
+       * @brief Replicates a scalar reference element for a rectangular matrix range.
+       * @param scalar Scalar finite element used for the componentwise construction.
+       * @param rows Number of rows in the matrix-valued range.
+       * @param cols Number of columns in the matrix-valued range.
+       */
+      P1Element(const ScalarElement& scalar, size_t rows, size_t cols)
+        : Parent(scalar.getGeometry()),
+          m_scalar(scalar),
+          m_rows(rows),
+          m_cols(cols)
+      {
+        if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
+          cols > RODIN_MAXIMAL_SPACE_DIMENSION)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "SpatialMatrix ranges require 1 to 3 rows and columns." << Alert::Raise;
+        }
+      }
+
+      /**
+       * @brief Copies the element and its component extents.
+       * @param other Source object to copy or move from.
+       */
+      P1Element([[maybe_unused]] const P1Element& other) = default;
+
+      /**
+       * @brief Moves the element and its component extents.
+       * @param other Source object to copy or move from.
+       */
+      P1Element([[maybe_unused]] P1Element&& other) = default;
+
+      /**
+       * @brief Copies the element and its component extents.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      P1Element& operator=([[maybe_unused]] const P1Element& other) = default;
+
+      /**
+       * @brief Moves the element and its component extents.
+       * @param other Source object to copy or move from.
+       * @returns Reference to this object after assignment.
+       */
+      P1Element& operator=([[maybe_unused]] P1Element&& other) = default;
+
+      /// @brief Matrix basis with one nonzero entry.
+      class BasisFunction
+      {
+        public:
+          /**
+           * @brief Selects a matrix unit multiplied by a scalar basis function.
+           * @param basis Basis used by the operation.
+           * @param rows Number of rows.
+           * @param cols Number of columns.
+           * @param component Component of the value range.
+           */
+          BasisFunction(ScalarBasis basis, size_t rows, size_t cols, size_t component)
+            : m_basis(std::move(basis)),
+              m_rows(rows),
+              m_cols(cols),
+              m_component(component)
+          {}
+
+          /**
+           * @brief Evaluates the selected matrix basis or its component nodal functional.
+           * @param point Point at which the operation is evaluated.
+           * @returns Matrix basis value with only the selected component nonzero.
+           */
+          RangeType operator()(const Math::SpatialPoint& point) const
+          {
+            RangeType value(m_rows, m_cols);
+            value.setZero();
+            value(m_component / m_cols, m_component % m_cols) = m_basis(point);
+            return value;
+          }
+
+          /**
+           * @brief Returns a reference-coordinate derivative of the basis.
+           * @param direction Direction in which the derivative is evaluated.
+           * @returns Reference-coordinate derivative function for the basis.
+           */
+          template <size_t Order>
+          auto getDerivative(size_t direction) const
+          {
+            return [derivative = m_basis.template getDerivative<Order>(direction),
+                     rows = m_rows, cols = m_cols, component = m_component](
+                     const Math::SpatialPoint& point) -> RangeType {
+              RangeType value(rows, cols);
+              value.setZero();
+              value(component / cols, component % cols) = derivative(point);
+              return value;
+            };
+          }
+
+        private:
+          ScalarBasis m_basis;
+          size_t m_rows, m_cols, m_component;
+      };
+
+      /// @brief Matrix-range finite element or expression specialization.
+      class LinearForm
+      {
+        public:
+          /**
+           * @brief Selects a matrix entry for the scalar nodal functional.
+           * @param rows Number of rows.
+           * @param cols Number of columns.
+           * @param component Component of the value range.
+           * @param form Scalar linear form used to construct the component form.
+           */
+          LinearForm(ScalarLinearForm form, size_t rows, size_t cols, size_t component)
+            : m_form(std::move(form)),
+              m_rows(rows),
+              m_cols(cols),
+              m_component(component)
+          {}
+
+          /**
+           * @brief Evaluates the selected matrix basis or its component nodal functional.
+           * @param function Function to evaluate.
+           * @returns Value of the nodal functional applied to the selected component of the callable.
+           */
+          template <class Callable>
+          ScalarType operator()(const Callable& function) const
+          {
+            return m_form([&](const Math::SpatialPoint& point) -> ScalarType {
+              const auto value = function(point);
+              if (value.rows() != m_rows || value.cols() != m_cols)
+              {
+                Alert::MemberFunctionException(*this, __func__)
+                  << "Matrix value does not match the finite element range."
+                  << Alert::Raise;
+              }
+              return value(m_component / m_cols, m_component % m_cols);
+            });
+          }
+
+        private:
+          ScalarLinearForm m_form;
+          size_t m_rows, m_cols, m_component;
+      };
+
+      /**
+       * @brief Contracts each matrix entry with the scalar reference element.
+       * @param out Output value receiving the basis-coefficient contraction.
+       * @param coefficient Callable returning the coefficient associated with a local basis index.
+       * @param point Reference coordinates of the evaluation point.
+       */
+      template <class Coefficient>
+      void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& point) const
+      {
+        out.resize(m_rows, m_cols);
+        const size_t components = m_rows * m_cols;
+        for (size_t c = 0; c < components; ++c)
+        {
+          m_scalar.evaluate(
+            out(c / m_cols, c % m_cols),
+            [&](size_t a) { return coefficient(a * components + c); }, point);
+        }
+      }
+
+      /**
+       * @brief Returns the number of local matrix basis functions.
+       * @returns Number of degrees of freedom for the requested entity or element.
+       */
+      size_t getCount() const
+      {
+        return m_scalar.getCount() * m_rows * m_cols;
+      }
+
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return m_scalar.getDegree();
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      size_t getOrder() const
+      {
+        return m_scalar.getOrder();
+      }
+
+      /**
+       * @brief Returns the number of matrix rows.
+       * @returns Number of rows in the matrix-valued range.
+       */
+      size_t getRows() const
+      {
+        return m_rows;
+      }
+
+      /**
+       * @brief Returns the number of matrix columns.
+       * @returns Number of columns in the matrix-valued range.
+       */
+      size_t getColumns() const
+      {
+        return m_cols;
+      }
+
+      /**
+       * @brief Returns the scalar element whose basis is replicated for matrix entries.
+       * @returns Underlying scalar finite element.
+       */
+      const ScalarElement& getScalarElement() const
+      {
+        return m_scalar;
+      }
+
+      /**
+       * @brief Returns the scalar reference node for the selected component DOF.
+       * @param local Local degree-of-freedom index.
+       * @returns Reference node associated with the local degree of freedom.
+       */
+      decltype(auto) getNode(size_t local) const
+      {
+        assert(local < getCount());
+        return m_scalar.getNode(local / (m_rows * m_cols));
+      }
+
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Local degree-of-freedom index.
+       * @returns Basis function associated with the local degree of freedom.
+       */
+      BasisFunction getBasis(size_t local) const
+      {
+        assert(local < getCount());
+        return {m_scalar.getBasis(local / (m_rows * m_cols)), m_rows, m_cols,
+          local % (m_rows * m_cols)};
+      }
+
+      /**
+       * @brief Returns the scalar nodal functional applied to the selected matrix entry.
+       * @param local Local degree-of-freedom index.
+       * @returns Degree-of-freedom functional associated with the local index.
+       */
+      LinearForm getLinearForm(size_t local) const
+      {
+        assert(local < getCount());
+        return {m_scalar.getLinearForm(local / (m_rows * m_cols)), m_rows, m_cols,
+          local % (m_rows * m_cols)};
+      }
+
+    private:
+      ScalarElement m_scalar;
+      size_t m_rows, m_cols;
+  };
+}
 
 #endif

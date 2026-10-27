@@ -143,8 +143,10 @@ int main()
     }
   }
   for (const auto& [v, nbr] : adj)
+  {
     if (nbr.size() != 2)
       throw std::runtime_error("Loop requirement not satisfied!");
+  }
 
   std::vector<int> loop;
   int current = adj.begin()->first;

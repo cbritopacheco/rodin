@@ -32,9 +32,7 @@ namespace Rodin::Geometry
   class BalancedCompactPartitioner : public Partitioner
   {
     public:
-      /**
-       * @brief Type of mesh used by this partitioner.
-       */
+      /// @brief Type of mesh used by this partitioner.
       using MeshType = Mesh<Context::Local>;
 
       /**
@@ -43,9 +41,7 @@ namespace Rodin::Geometry
        */
       BalancedCompactPartitioner(const MeshType& mesh);
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~BalancedCompactPartitioner() = default;
 
       /**

@@ -58,19 +58,26 @@ namespace Rodin::Eikonal
    * @tparam SpeedFunction Type of the speed function
    */
   template <class Data, class SpeedFunction>
-  class FMM<Variational::GridFunction<Variational::P1<Real, Geometry::Mesh<Context::Local>>, Data>, SpeedFunction>
+  class FMM<Variational::GridFunction<
+              Variational::P1<Real, Geometry::Mesh<Context::Local>>, Data>,
+    SpeedFunction>
   {
     public:
       /// Scalar type for computations
       using ScalarType = Real;
+
       /// Computation context (local, non-distributed)
       using Context = Context::Local;
+
       /// Mesh type
       using Mesh = Geometry::Mesh<Context>;
+
       /// Finite element space type (P1)
       using FES = Variational::P1<ScalarType, Mesh>;
+
       /// Solution type: grid function storing arrival times
       using SolutionType = Variational::GridFunction<FES, Math::Vector<ScalarType>>;
+
       /// Speed function type
       using SpeedFunctionType = SpeedFunction;
 
@@ -94,7 +101,16 @@ namespace Rodin::Eikonal
       {
         Index nodeIndex;
         Real value;
-        bool operator>(const PQItem& other) const { return value > other.value; }
+
+        /**
+         * @brief Compares priority-queue arrival values.
+         * @param other Object compared with this object.
+         * @returns True when this item has a larger arrival value than the other item.
+         */
+        bool operator>(const PQItem& other) const
+        {
+          return value > other.value;
+        }
       };
 
       using PriorityQueue =
@@ -110,7 +126,8 @@ namespace Rodin::Eikonal
        */
       template <class Callable>
       FMM(SolutionType& u, Callable&& speed)
-        : m_u(u), m_speed(std::forward<Callable>(speed))
+        : m_u(u),
+          m_speed(std::forward<Callable>(speed))
       {}
 
       /**
@@ -118,6 +135,9 @@ namespace Rodin::Eikonal
        *
        * Seeds are the starting vertices where the arrival time is set to zero.
        * The method will propagate from these points throughout the domain.
+       * All valid seeds are accepted before neighboring trial values are
+       * computed, so seed ordering and duplicate indices do not affect the
+       * initialized interface.
        *
        * @tparam Seed Type of seed container (e.g., std::vector<Index>)
        * @param[in] seed Container of vertex indices to use as seeds
@@ -145,7 +165,12 @@ namespace Rodin::Eikonal
           m_labels[s] = Label::Accepted;
           u[s] = 0.0;
           assert(!std::isnan(u[s]));
+        }
 
+        for (Index s = 0; s < nV; ++s)
+        {
+          if (m_labels[s] != Label::Accepted)
+            continue;
           assert(s < conn.getIncidence(0, 0).size());
           const auto& N = conn.getIncidence(0, 0).at(s);
           for (Index nb : N)
@@ -163,7 +188,7 @@ namespace Rodin::Eikonal
               assert(!std::isnan(u[nb]));
               assert(nb < m_labels.size());
               m_labels[nb] = Label::Considered;
-              m_pq.push({ nb, arr });
+              m_pq.push({nb, arr});
             }
           }
         }
@@ -177,7 +202,7 @@ namespace Rodin::Eikonal
        * repeatedly accepting the vertex with the smallest arrival time from
        * the priority queue and updating its neighbors.
        *
-       * ## Algorithm
+       * # Algorithm
        * 1. Initialize: seed points have time 0, all others have time ∞
        * 2. Extract vertex with minimum arrival time from priority queue
        * 3. Mark it as Accepted
@@ -202,7 +227,8 @@ namespace Rodin::Eikonal
         // March
         while (!m_pq.empty())
         {
-          const auto cur = m_pq.top(); m_pq.pop();
+          const auto cur = m_pq.top();
+          m_pq.pop();
           const Index i = cur.nodeIndex;
 
           if (i >= nV)
@@ -225,32 +251,47 @@ namespace Rodin::Eikonal
             if (std::isnan(arr))
               continue;
             assert(!std::isnan(arr));
-            if (arr < u[j]) {
+            if (arr < u[j])
+            {
               u[j] = arr;
               assert(!std::isnan(u[j]));
-              if (m_labels[j] == Label::Far) m_labels[j] = Label::Considered;
-              m_pq.push({ j, arr });
+              if (m_labels[j] == Label::Far)
+                m_labels[j] = Label::Considered;
+              m_pq.push({j, arr});
             }
           }
         }
       }
 
     private:
+      /**
+       * @brief Computes the best local arrival-time update at a vertex.
+       * @param p Vertex being updated or physical point being assigned.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Minimum candidate arrival time from the incident accepted configurations.
+       *
+       * The local simplex update minimizes linearly interpolated accepted
+       * arrival time plus travel distance over the accepted face. An interior
+       * admissible minimizer also minimizes over every boundary subset. If it
+       * is rejected, the minimizing subset may instead be a face, edge or
+       * vertex, especially on obtuse cells. All pairs and uncovered vertices
+       * are therefore considered after a rejected full-face update. At most
+       * three accepted vertices are involved, with no dynamic workspace.
+       */
       Real local(Index p, const SolutionType& u, const Mesh& mesh) const
       {
         Math::SpatialPoint dummy(mesh.getSpaceDimension());
 
         const int D = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
-        const auto& v2c  = conn.getIncidence(0, D);
-        const auto& c2v  = conn.getIncidence(D, 0);
+        const auto& v2c = conn.getIncidence(0, D);
+        const auto& c2v = conn.getIncidence(D, 0);
 
         const Geometry::VertexIterator vertex = mesh.getVertex(p);
-        const Real s =
-          m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
-        const Real F =
-          std::isnan(s) ?
-            std::numeric_limits<Real>::infinity() : std::max(std::numeric_limits<Real>::min(), s);
+        const Real s = m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
+        const Real F = std::isnan(s) ? std::numeric_limits<Real>::infinity()
+                                     : std::max(std::numeric_limits<Real>::min(), s);
 
         if (!(F > 0) || std::isnan(F))
           return std::numeric_limits<Real>::infinity();
@@ -261,7 +302,8 @@ namespace Rodin::Eikonal
         {
           const auto& verts = c2v.at(cid);
 
-          Index A[3]; int k = 0;
+          Index A[3];
+          int k = 0;
           for (Index q : verts)
           {
             if (q == p)
@@ -277,45 +319,54 @@ namespace Rodin::Eikonal
           if (k == 0)
             continue;
 
-
-          if (k == 1)
+          // An admissible interior minimizer dominates its boundary subsets.
+          // Rejecting it on an obtuse stencil still requires those subsets.
+          if (D == 3 && k == 3)
           {
-            // Use improved distance computation
-            const Real d = computeEdgeDistance(p, A[0], mesh);
-            if (std::isnan(d))
-              continue;
-            assert(!std::isnan(d));
-            best = std::min(best, u[A[0]] + d / F);
-          }
-          else if (D == 1) // 1D curve mesh (possibly embedded in higher dimensions)
-          {
-            // For 1D meshes, only use single neighbor updates
-            const Real d = computeEdgeDistance(p, A[0], mesh);
-            if (!std::isnan(d))
-              best = std::min(best, u[A[0]] + d / F);
-          }
-          else if (D == 2) // 2D surface mesh (possibly embedded in 3D)
-          {
-            const Real t = surfaceTriangleUpdate(p, A[0], A[1], u, mesh, F);
-            if (!std::isnan(t))
-              best = std::min(best, t);
-          }
-          else if (D == 3) // 3D volume mesh
-          {
-            const Real t2 = volumeTetrahedronUpdate(p, A[0], A[1], u, mesh, F);
-            if (!std::isnan(t2))
-              best = std::min(best, t2);
-            if (k == 3)
+            const Real candidate =
+              volumeTetrahedronUpdate(p, A[0], A[1], A[2], u, mesh, F);
+            if (std::isfinite(candidate))
             {
-              const Real t3 = volumeTetrahedronUpdate(p, A[0], A[1], A[2], u, mesh, F);
-              if (!std::isnan(t3))
-                best = std::min(best, t3);
+              best = std::min(best, candidate);
+              continue;
+            }
+          }
+          bool covered[3] = {};
+          for (int first = 0; first < k; ++first)
+          {
+            for (int second = first + 1; second < k; ++second)
+            {
+              const Real candidate = D == 2
+                ? surfaceTriangleUpdate(p, A[first], A[second], u, mesh, F)
+                : volumeTetrahedronUpdate(p, A[first], A[second], u, mesh, F);
+              if (std::isfinite(candidate))
+              {
+                best = std::min(best, candidate);
+                covered[first] = covered[second] = true;
+              }
+            }
+          }
+          for (int neighbor = 0; neighbor < k; ++neighbor)
+          {
+            if (!covered[neighbor])
+            {
+              const Real distance = computeEdgeDistance(p, A[neighbor], mesh);
+              if (!std::isnan(distance))
+                best = std::min(best, u[A[neighbor]] + distance / F);
             }
           }
         }
         assert(!std::isnan(best));
         return best;
       }
+
+      /**
+       * @brief Measures distance between mesh vertices.
+       * @param a First vertex index.
+       * @param b Second vertex index.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Euclidean distance between the vertex coordinates.
+       */
 
       static Real computeGeometricDistance(Index a, Index b, const Mesh& mesh)
       {
@@ -330,9 +381,16 @@ namespace Rodin::Eikonal
         return distance;
       }
 
+      /**
+       * @brief Measures the geometric length between edge vertices.
+       * @param a First vertex index.
+       * @param b Second vertex index.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Edge distance evaluated with the available geometric transformation.
+       */
+
       static Real computeEdgeDistance(Index a, Index b, const Mesh& mesh)
       {
-
         return computeGeometricDistance(a, b, mesh);
         // // Check if there's a direct edge between vertices a and b
         // // If so, compute the geodesic distance along the edge
@@ -361,6 +419,15 @@ namespace Rodin::Eikonal
         // return computeGeometricDistance(a, b, mesh);
       }
 
+      /**
+       * @brief Measures the physical length of a mapped mesh edge.
+       * @param a First vertex index.
+       * @param b Second vertex index.
+       * @param edgeIdx Index of the mesh edge.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Edge length obtained by quadrature along the mapped edge.
+       */
+
       static Real computeEdgeGeodesicDistance(
         Index a, Index b, Index edgeIdx, const Mesh& mesh)
       {
@@ -369,9 +436,21 @@ namespace Rodin::Eikonal
         return computeGeometricDistance(a, b, mesh);
       }
 
-      // Surface triangle update - works for 2D triangles embedded in any dimension
-      Real surfaceTriangleUpdate(Index p, Index i, Index j,
-                                 const SolutionType& u, const Mesh& mesh, Real F) const
+      /**
+       * @brief Computes an arrival-time update on a surface triangle.
+       *
+       * The update applies to two-dimensional triangles embedded in any dimension.
+       *
+       * @param p Vertex being updated or physical point being assigned.
+       * @param i Index of a supporting accepted vertex.
+       * @param j Index of a supporting accepted vertex.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @param F Local propagation cost multiplying geometric distance.
+       * @returns Candidate arrival time obtained from the accepted supporting vertices.
+       */
+      Real surfaceTriangleUpdate(
+        Index p, Index i, Index j, const SolutionType& u, const Mesh& mesh, Real F) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -391,8 +470,8 @@ namespace Rodin::Eikonal
         if (!(det > 0) || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real inv11 =  g22 / det;
-        const Real inv22 =  g11 / det;
+        const Real inv11 = g22 / det;
+        const Real inv22 = g11 / det;
         const Real inv12 = -g12 / det;
 
         const Real ui = u[i], uj = u[j];
@@ -401,7 +480,7 @@ namespace Rodin::Eikonal
 
         // Same structure as the 2-neighbor tetra update
         const Real alpha = inv11 + inv22 + 2 * inv12;
-        const Real beta  = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
+        const Real beta = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
         const Real gamma = inv11 * ui * ui + 2 * inv12 * ui * uj + inv22 * uj * uj;
 
         if (!(alpha > 0) || std::isnan(alpha) || std::isnan(beta) || std::isnan(gamma))
@@ -438,10 +517,21 @@ namespace Rodin::Eikonal
         return t;
       }
 
-      // 3D volume element 2-neighbor update using geometric infrastructure
+      /**
+       * @brief Computes an arrival-time update in a volume cell.
+       *
+       * The update uses two accepted neighbors in a three-dimensional volume cell.
+       *
+       * @param p Vertex being updated or physical point being assigned.
+       * @param i Index of a supporting accepted vertex.
+       * @param j Index of a supporting accepted vertex.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @param F Local propagation cost multiplying geometric distance.
+       * @returns Candidate arrival time obtained from the accepted supporting vertices.
+       */
       Real volumeTetrahedronUpdate(
-          Index p, Index i, Index j,
-          const SolutionType& u, const Mesh& mesh, Real F) const
+        Index p, Index i, Index j, const SolutionType& u, const Mesh& mesh, Real F) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -461,8 +551,8 @@ namespace Rodin::Eikonal
         if (!(det > 0) || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real inv11 =  g22 / det;
-        const Real inv22 =  g11 / det;
+        const Real inv11 = g22 / det;
+        const Real inv22 = g11 / det;
         const Real inv12 = -g12 / det;
 
         const Real ui = u[i], uj = u[j];
@@ -471,7 +561,7 @@ namespace Rodin::Eikonal
 
         // Quadratic in t: alpha t^2 - 2 beta t + (gamma - 1/F^2) = 0
         const Real alpha = inv11 + inv22 + 2 * inv12;
-        const Real beta  = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
+        const Real beta = (inv11 + inv12) * ui + (inv12 + inv22) * uj;
         const Real gamma = inv11 * ui * ui + 2 * inv12 * ui * uj + inv22 * uj * uj;
 
         if (!(alpha > 0) || std::isnan(alpha) || std::isnan(beta) || std::isnan(gamma))
@@ -501,7 +591,8 @@ namespace Rodin::Eikonal
         const Real mu1 = inv11 * s1 + inv12 * s2;
         const Real mu2 = inv12 * s1 + inv22 * s2;
 
-        // Allow tiny numerical noise if you want: eps ~ 1e-14 * t
+        // Strict upwind admissibility: no negative barycentric contribution
+        // is accepted, even when its magnitude could arise from roundoff.
         const Real eps = Real(0);
         if (std::isnan(mu1) || std::isnan(mu2) || mu1 < -eps || mu2 < -eps)
           return std::numeric_limits<Real>::infinity();
@@ -509,12 +600,26 @@ namespace Rodin::Eikonal
         return t;
       }
 
-      // 3D volume element 3-neighbor update (tetra) with "inside-simplex" (upwind) check.
-      // If the 3-neighbor minimizer lies outside the tetrahedron (in barycentric sense),
-      // return +inf so caller naturally falls back to 2-neighbor / 1-neighbor updates.
-      Real volumeTetrahedronUpdate(
-          Index p, Index i, Index j, Index k,
-          const SolutionType& u, const Mesh& mesh, Real F) const
+      /**
+       * @brief Computes an arrival-time update in a volume cell.
+       *
+       * The update uses three accepted neighbors in a tetrahedron and checks the
+       * upwind condition using barycentric coordinates.
+       *
+       * @note A minimizer outside the tetrahedron yields positive infinity,
+       * allowing the caller to use a two-neighbor or one-neighbor update.
+       *
+       * @param p Vertex being updated or physical point being assigned.
+       * @param i Index of a supporting accepted vertex.
+       * @param j Index of a supporting accepted vertex.
+       * @param k Index of a supporting accepted vertex.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @param F Local propagation cost multiplying geometric distance.
+       * @returns Candidate arrival time obtained from the accepted supporting vertices.
+       */
+      Real volumeTetrahedronUpdate(Index p, Index i, Index j, Index k,
+        const SolutionType& u, const Mesh& mesh, Real F) const
       {
         const auto xp = mesh.getVertexCoordinates(p);
         const auto xi = mesh.getVertexCoordinates(i);
@@ -535,19 +640,17 @@ namespace Rodin::Eikonal
         if (!(g11 > 0 && g22 > 0 && g33 > 0))
           return std::numeric_limits<Real>::infinity();
 
-        const Real det =
-            g11 * (g22 * g33 - g23 * g23)
-          - g12 * (g12 * g33 - g13 * g23)
-          + g13 * (g12 * g23 - g13 * g22);
+        const Real det = g11 * (g22 * g33 - g23 * g23) - g12 * (g12 * g33 - g13 * g23) +
+          g13 * (g12 * g23 - g13 * g22);
 
         if (!(det > 0) || std::isnan(det))
           return std::numeric_limits<Real>::infinity();
 
-        const Real c11 =  (g22 * g33 - g23 * g23);
-        const Real c22 =  (g11 * g33 - g13 * g13);
-        const Real c33 =  (g11 * g22 - g12 * g12);
+        const Real c11 = (g22 * g33 - g23 * g23);
+        const Real c22 = (g11 * g33 - g13 * g13);
+        const Real c33 = (g11 * g22 - g12 * g12);
         const Real c12 = -(g12 * g33 - g13 * g23);
-        const Real c13 =  (g12 * g23 - g13 * g22);
+        const Real c13 = (g12 * g23 - g13 * g22);
         const Real c23 = -(g11 * g23 - g12 * g13);
 
         const Real inv11 = c11 / det, inv22 = c22 / det, inv33 = c33 / det;
@@ -560,13 +663,10 @@ namespace Rodin::Eikonal
         // Quadratic in t:
         // alpha t^2 - 2 beta t + (gamma - 1/F^2) = 0
         const Real alpha = inv11 + inv22 + inv33 + 2 * (inv12 + inv13 + inv23);
-        const Real beta  =
-            (inv11 * ui + inv12 * uj + inv13 * uk)
-          + (inv12 * ui + inv22 * uj + inv23 * uk)
-          + (inv13 * ui + inv23 * uj + inv33 * uk);
-        const Real gamma =
-            inv11 * ui * ui + inv22 * uj * uj + inv33 * uk * uk
-          + 2 * (inv12 * ui * uj + inv13 * ui * uk + inv23 * uj * uk);
+        const Real beta = (inv11 * ui + inv12 * uj + inv13 * uk) +
+          (inv12 * ui + inv22 * uj + inv23 * uk) + (inv13 * ui + inv23 * uj + inv33 * uk);
+        const Real gamma = inv11 * ui * ui + inv22 * uj * uj + inv33 * uk * uk +
+          2 * (inv12 * ui * uj + inv13 * ui * uk + inv23 * uj * uk);
 
         if (std::isnan(alpha) || std::isnan(beta) || std::isnan(gamma))
           return std::numeric_limits<Real>::infinity();
@@ -624,6 +724,8 @@ namespace Rodin::Eikonal
    * @brief Deduction guide for FMM constructor.
    *
    * Allows template argument deduction when constructing FMM objects.
+   * @param speed Function operand.
+   * @param u Solution field updated by the fast marching method.
    */
   template <class Solution, class SpeedFunction>
   FMM(Solution& u, SpeedFunction&& speed) -> FMM<Solution, SpeedFunction>;

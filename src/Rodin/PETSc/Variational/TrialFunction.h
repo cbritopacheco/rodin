@@ -63,6 +63,7 @@ namespace Rodin::PETSc::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc::Variational::TrialFunction.
+   * @param fes Finite element space.
    */
   template <class FES>
   TrialFunction(const FES& fes) -> TrialFunction<GridFunction<FES>, FES>;

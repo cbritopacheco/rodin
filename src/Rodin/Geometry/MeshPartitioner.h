@@ -29,14 +29,10 @@ namespace Rodin::Geometry
   class Partitioner
   {
     public:
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Partitioner() = default;
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~Partitioner() = default;
 
       /**

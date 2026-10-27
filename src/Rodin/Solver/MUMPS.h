@@ -28,6 +28,7 @@
 
 #ifdef RODIN_USE_MUMPS
 
+#include <algorithm>
 #include <limits>
 
 #include <dmumps_c.h>
@@ -48,8 +49,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::MUMPS<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 }
 
@@ -131,22 +132,24 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /** @brief Factorization stage, shared by the factorization solvers. */
+      /// @brief Factorization stage, shared by the factorization solvers.
       using Factorization = Rodin::Solver::Factorization;
 
-      /** @brief Matrix symmetry declared to MUMPS. */
+      /// @brief Matrix symmetry declared to MUMPS.
       enum class Symmetry : int
       {
         /// @brief No symmetry; the whole matrix is factorized as @f$ LU @f$.
         Unsymmetric = 0,
-        /// @brief Symmetric positive definite; factorized as @f$ LDL^T @f$
-        /// without pivoting.
+        /**
+         * @brief Symmetric positive definite; factorized as @f$ LDL^T @f$
+         * without pivoting.
+         */
         PositiveDefinite = 1,
         /// @brief Symmetric, possibly indefinite; factorized as @f$ LDL^T @f$.
         General = 2
       };
 
-      /** @brief Fill-reducing ordering used during symbolic analysis. */
+      /// @brief Fill-reducing ordering used during symbolic analysis.
       enum class Ordering : int
       {
         AMD = 0,
@@ -159,92 +162,99 @@ namespace Rodin::Solver
         Automatic = 7
       };
 
-      /** @brief Factorization stages retained between solves. */
+      /// @brief Factorization stages retained between solves.
       struct Resources
       {
-          Resources() = default;
-          Resources(const Resources&) = delete;
-          Resources& operator=(const Resources&) = delete;
+        Resources() = default;
+        Resources(const Resources&) = delete;
+        Resources& operator=(const Resources&) = delete;
 
-          /// @brief MUMPS instance, valid while @ref initialized is true.
-          DMUMPS_STRUC_C instance{};
-          /// @brief Whether the MUMPS instance has been initialized.
-          bool initialized = false;
-          /// @brief Whether reusable symbolic analysis is retained.
-          bool symbolic = false;
-          /// @brief Whether a reusable numeric factorization is retained.
-          bool numeric = false;
+        /// @brief MUMPS instance, valid while @ref initialized is true.
+        DMUMPS_STRUC_C instance{};
 
-          void initialize(const MUMPS& solver, Symmetry symmetry)
+        /// @brief Whether the MUMPS instance has been initialized.
+        bool initialized = false;
+
+        /// @brief Whether reusable symbolic analysis is retained.
+        bool symbolic = false;
+
+        /// @brief Whether a reusable numeric factorization is retained.
+        bool numeric = false;
+
+        /// @brief Backend workspace margin established by JOB=-1.
+        MUMPS_INT defaultWorkspacePercentage = 0;
+
+        void initialize(const MUMPS& solver, Symmetry symmetry)
+        {
+          if (initialized)
+            return;
+          // This specialization is nailed to the process-local linear system
+          // type, which only Local-context assembly produces, so the solve is
+          // private to this process. MPI_COMM_WORLD would instead make it
+          // collective over ranks that each hold a different matrix. This
+          // mirrors the PETSc backend, which creates its objects on
+          // PETSC_COMM_SELF for a Context::Local mesh.
+          instance.comm_fortran = static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF));
+          instance.par = 1;
+          instance.sym = static_cast<MUMPS_INT>(symmetry);
+          instance.job = JobInitialize;
+          dmumps_c(&instance);
+          initialized = true;
+          solver.check("initialization");
+          defaultWorkspacePercentage = instance.icntl[13];
+        }
+
+        /**
+         * @brief Releases retained factorization resources.
+         *
+         * Clearing Factorization::Numeric sends JOB=-4, which releases MUMPS
+         * factorization and solve data while retaining the initialized
+         * instance and its symbolic analysis. A later JOB=2 can therefore
+         * rebuild the numeric factorization without repeating analysis.
+         *
+         * Clearing Factorization::Symbolic destroys the MUMPS instance
+         * through JOB=-2 and consequently releases both retained stages.
+         */
+        void clear(Factorization factorization) noexcept
+        {
+          if (factorization == Factorization::Numeric)
           {
-            if (initialized)
-              return;
-            // This specialization is nailed to the process-local linear system
-            // type, which only Local-context assembly produces, so the solve is
-            // private to this process. MPI_COMM_WORLD would instead make it
-            // collective over ranks that each hold a different matrix. This
-            // mirrors the PETSc backend, which creates its objects on
-            // PETSC_COMM_SELF for a Context::Local mesh.
-            instance.comm_fortran = static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF));
-            instance.par = 1;
-            instance.sym = static_cast<MUMPS_INT>(symmetry);
-            instance.job = JobInitialize;
-            dmumps_c(&instance);
-            initialized = true;
-            solver.check("initialization");
-          }
-
-          /**
-           * @brief Releases retained factorization resources.
-           *
-           * Clearing Factorization::Numeric sends JOB=-4, which releases MUMPS
-           * factorization and solve data while retaining the initialized
-           * instance and its symbolic analysis. A later JOB=2 can therefore
-           * rebuild the numeric factorization without repeating analysis.
-           *
-           * Clearing Factorization::Symbolic destroys the MUMPS instance
-           * through JOB=-2 and consequently releases both retained stages.
-           */
-          void clear(Factorization factorization) noexcept
-          {
-            if (factorization == Factorization::Numeric)
+            if (!numeric)
             {
-              if (!numeric)
-              {
-                numeric = false;
-                return;
-              }
-
-              if (initialized)
-              {
-                instance.job = JobDiscardFactors;
-                dmumps_c(&instance);
-              }
               numeric = false;
               return;
             }
 
-            destroy();
-          }
-
-          void destroy() noexcept
-          {
+            if (initialized)
+            {
+              instance.job = JobDiscardFactors;
+              dmumps_c(&instance);
+            }
             numeric = false;
-            symbolic = false;
-            if (!initialized)
-              return;
-            instance.job = JobDestroy;
-            dmumps_c(&instance);
-            initialized = false;
+            return;
           }
 
-          ~Resources()
-          {
-            destroy();
-          }
+          destroy();
+        }
+
+        void destroy() noexcept
+        {
+          numeric = false;
+          symbolic = false;
+          if (!initialized)
+            return;
+          instance.job = JobDestroy;
+          dmumps_c(&instance);
+          initialized = false;
+        }
+
+        ~Resources()
+        {
+          destroy();
+        }
       };
 
-      /** @brief Constructs a MUMPS solver for the given problem. */
+      /// @brief Constructs a MUMPS solver for the given problem.
       MUMPS(ProblemBaseType& pb)
         : Parent(pb)
       {}
@@ -289,7 +299,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the declared symmetry of the system matrix. */
+      /// @brief Returns the declared symmetry of the system matrix.
       Symmetry getSymmetric() const noexcept
       {
         return m_symmetry;
@@ -312,7 +322,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the configured maximum thread count. */
+      /// @brief Returns the configured maximum thread count.
       Index getMaxThreads() const noexcept
       {
         return m_maxThreads;
@@ -334,7 +344,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the configured fill-reducing ordering. */
+      /// @brief Returns the configured fill-reducing ordering.
       Ordering getOrdering() const noexcept
       {
         return m_ordering;
@@ -347,16 +357,17 @@ namespace Rodin::Solver
        */
       MUMPS& setWorkspacePercentage(Integer percentage)
       {
-        if (percentage < 0)
+        if (percentage < 0 || percentage > std::numeric_limits<MUMPS_INT>::max())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "The working space percentage must not be negative." << Alert::Raise;
+            << "The working space percentage must fit a nonnegative MUMPS integer."
+            << Alert::Raise;
         }
         m_workspacePercentage = percentage;
         return *this;
       }
 
-      /** @brief Returns the configured working space percentage. */
+      /// @brief Returns the configured working space percentage.
       Integer getWorkspacePercentage() const noexcept
       {
         return m_workspacePercentage;
@@ -366,7 +377,10 @@ namespace Rodin::Solver
        * @brief Analyzes and numerically factorizes the system matrix.
        *
        * Reuses existing symbolic analysis and replaces any previous numeric
-       * factorization. The matrix sparsity pattern must remain unchanged until
+       * factorization. Workspace exhaustion (INFOG(1)=-9) retries numeric
+       * factorization at most three times with increasing workspace, retaining
+       * symbolic analysis. Other failures are returned without retry.
+       * The matrix sparsity pattern must remain unchanged until
        * the symbolic factorization is cleared.
        */
       void factorize(LinearSystemType& axb)
@@ -398,8 +412,8 @@ namespace Rodin::Solver
         instance.jcn = m_columnIndices.data();
         if (m_symmetry == Symmetry::Unsymmetric)
         {
-          // The values of an unsymmetric matrix are read in place.
-          instance.a = const_cast<ScalarType*>(matrix.valuePtr());
+          // The non-const system lends its writable values to the external API.
+          instance.a = matrix.valuePtr();
         }
         else
         {
@@ -425,6 +439,15 @@ namespace Rodin::Solver
         m_resources.clear(Factorization::Numeric);
         instance.job = JobFactorize;
         dmumps_c(&instance);
+        for (size_t retry = 0; instance.infog[0] == -9 && retry < 3; ++retry)
+        {
+          const auto margin = instance.icntl[13];
+          if (margin > (std::numeric_limits<MUMPS_INT>::max() - 20) / 2)
+            break;
+          instance.icntl[13] = 2 * std::max<MUMPS_INT>(0, margin) + 20;
+          instance.job = JobFactorize;
+          dmumps_c(&instance);
+        }
         if (instance.infog[0] < 0)
           return record(Factorization::Symbolic);
         m_resources.numeric = true;
@@ -613,9 +636,7 @@ namespace Rodin::Solver
         }
       }
 
-      /**
-       * @brief Copies the lower triangle values in the order of @ref buildIndices.
-       */
+      /// @brief Copies the lower triangle values in the order of @ref buildIndices.
       void copyLowerTriangle(const OperatorType& matrix)
       {
         const auto* outer = matrix.outerIndexPtr();
@@ -654,7 +675,9 @@ namespace Rodin::Solver
         instance.icntl[3] = 0;
         instance.icntl[6] = static_cast<MUMPS_INT>(m_ordering);
         instance.icntl[15] = static_cast<MUMPS_INT>(m_maxThreads);
-        instance.icntl[13] = static_cast<MUMPS_INT>(m_workspacePercentage);
+        instance.icntl[13] = m_workspacePercentage > 0
+          ? static_cast<MUMPS_INT>(m_workspacePercentage)
+          : m_resources.defaultWorkspacePercentage;
       }
 
       void dropConvertedState()

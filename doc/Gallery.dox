@@ -86,8 +86,8 @@
 
   @image html LevelSetCantilever.png width=360px
 
-  The @ref examples-shapeoptimization-levelset_cantilever "level-set
-  cantilever" example combines body-fitted meshing with level-set
+  The @ref examples-shapeoptimization-levelset_cantilever "level-set cantilever"
+  example combines body-fitted meshing with level-set
   techniques. The optimizer advects a signed-distance function and recovers
   the implicit domain at each iteration using the
   @ref Rodin::MMG "MMG" level-set discretizer.

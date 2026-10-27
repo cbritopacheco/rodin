@@ -9,564 +9,134 @@
 
 /**
  * @file
- * @brief MFEM-format grid function printers for PETSc-backed grid functions.
+ * @brief MFEM serialization of PETSc fields through the native serializer.
  */
-
 #include <petscvec.h>
-
-#include <iomanip>
-#include <limits>
 #include <type_traits>
-#include <vector>
-#include <algorithm>
 
-#include "Rodin/IO/MFEM.h"                // for MFEM::Ordering, Vandermonde*, Nodes*
-#include "Rodin/IO/GridFunctionPrinter.h" // primary template + base templates
-#include "Rodin/FormLanguage/Traits.h"
-
-#include "Rodin/Context/Local.h"
-#include "Rodin/MPI/Context/ForwardDecls.h"
+#include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/GridFunctionPrinter.h"
+#include "Rodin/Math/Vector.h"
 
 namespace Rodin::IO
 {
   /**
-   * @brief MFEM printer for PETSc-backed P0 grid functions.
+   * @brief PETSc storage adapter for supported MFEM finite element collections.
+   * @tparam FES Finite element space with an MFEM data-printer interface.
    *
-   * @tparam Range Scalar or vector range type.
-   * @tparam Ctx   Mesh context type (Local or MPI).
+   * # Architecture
+   *
+   * Select the shard-local space when present, copy its coefficients through
+   * the source field's read view, then restore that view before serialization.
+   * The native serializer owns node ordering, component layout and changes of
+   * basis. The working field borrows its space from the source field, whose
+   * lifetime already bounds this printer.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GridFunctionPrinter "MFEM with PETSc Vec storage" | Local and MPI P0, P1 and H1 fields with scalar, vector or matrix ranges. |
    */
-  // --------------------------------------------------------------------------
-  // P0 MFEM printer for PETSc Vec
-  // --------------------------------------------------------------------------
-  template <class Range, class Ctx>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::P0<Range, Geometry::Mesh<Ctx>>,
-      ::Vec> final
-    : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::P0<Range, Geometry::Mesh<Ctx>>,
-        ::Vec>
+  template <class FES>
+    requires requires(GridFunctionPrinterBase<FileFormat::MFEM, FES, ::Vec>& printer,
+      std::ostream& stream) { printer.printData(stream); }
+  class GridFunctionPrinter<FileFormat::MFEM, FES, ::Vec> final
+    : public GridFunctionPrinterBase<FileFormat::MFEM, FES, ::Vec>
   {
     public:
       /// @brief Finite element space type.
-      using FESType    = Variational::P0<Range, Geometry::Mesh<Ctx>>;
-      /// @brief PETSc vector data type (@c Vec).
-      using DataType   = ::Vec;
-      /// @brief Grid function type being printed.
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-      /// @brief Parent printer base class.
-      using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+      using FESType = FES;
 
-      /// @brief Scalar type underlying the range.
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+      /// @brief PETSc coefficient storage type.
+      using DataType = ::Vec;
+
+      /// @brief Printed grid function type.
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+
+      /// @brief Format-specific printer interface.
+      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+
+      /// @brief Scalar field of the finite element space.
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      /// @brief Context of the source finite element mesh.
+      using FESMeshContextType =
+        typename FormLanguage::Traits<typename FESType::MeshType>::ContextType;
+      using Parent::Parent;
+
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");
 
+    private:
       /**
-       * @brief Constructs a PETSc-backed P0 MFEM printer.
-       * @param[in] gf Grid function to print.
+       * @brief Copies local coefficients without assuming a component layout.
+       * @returns Working field borrowing the source's local finite element space.
        */
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
-      {}
-
-      /**
-       * @brief Writes P0 coefficients in MFEM node ordering.
-       * @param[in,out] os Output stream receiving coefficient data.
-       */
-      void printData(std::ostream& os) override
+      auto makeLocalField() const
       {
-        os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);
-
-        const auto& gf   = this->getObject();
-        const auto& fes  = gf.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-
-        // MFEM P0: one scalar DOF per element per component.
-        // Base prints Ordering: Nodes, but for P0 that’s effectively "block by component":
-        // emit all scalar dofs for comp 0, then comp 1, ...
-        const size_t vdim = fes.getVectorDimension();
-
-        const size_t totalSize  = fes.getSize();
-        const size_t scalarSize = totalSize / vdim;
-
-        // We assume Rodin stores component-blocked: [u0...uN | v0...vN | ...]
-        // So MFEM "Nodes" layout matches printing by component blocks.
-        if constexpr (std::is_same_v<Ctx, Context::MPI>)
-        {
-          gf.acquire();
-        }
-
-        for (size_t c = 0; c < vdim; ++c)
-        {
-          const Index base = static_cast<Index>(c * scalarSize);
-          for (Index i = 0; i < static_cast<Index>(scalarSize); ++i)
-          {
-            // For P0, scalar dof index corresponds to cell index ordering
-            const Index dof = base + i;
-            os << gf[dof] << '\n';
-          }
-        }
-
-        if constexpr (std::is_same_v<Ctx, Context::MPI>)
-        {
-          gf.flush();
-        }
-      }
-  };
-
-  // --------------------------------------------------------------------------
-  // P1 MFEM printer for PETSc Vec
-  // --------------------------------------------------------------------------
-  /**
-   * @brief MFEM printer for PETSc-backed P1 grid functions.
-   *
-   * @tparam Range Scalar or vector range type.
-   * @tparam Ctx   Mesh context type (Local or MPI).
-   */
-  template <class Range, class Ctx>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::P1<Range, Geometry::Mesh<Ctx>>,
-      ::Vec> final
-    : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::P1<Range, Geometry::Mesh<Ctx>>,
-        ::Vec>
-  {
-    public:
-      /// @brief Finite element space type.
-      using FESType    = Variational::P1<Range, Geometry::Mesh<Ctx>>;
-      /// @brief PETSc vector data type (@c Vec).
-      using DataType   = ::Vec;
-      /// @brief Grid function type being printed.
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-      /// @brief Parent printer base class.
-      using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
-
-      /// @brief Scalar type underlying the range.
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-      static_assert(std::is_same_v<ScalarType, PetscScalar>,
-        "PETSc MFEM printer: Range scalar must be PetscScalar.");
-
-      /// @brief Context type (Local or MPI) of the finite element space mesh.
-      using FESMeshContextType = typename FormLanguage::Traits<typename FESType::MeshType>::ContextType;
-
-      /**
-       * @brief Constructs a PETSc-backed P1 MFEM printer.
-       * @param[in] gf Grid function to print.
-       */
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
-      {}
-
-      /**
-       * @brief Writes P1 coefficients in MFEM node ordering.
-       * @param[in,out] os Output stream receiving coefficient data.
-       */
-      void printData(std::ostream& os) override
-      {
-        const auto& gf = this->getObject();
-
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          const size_t sz = gf.getSize();
-          for (size_t i = 0; i < sz; ++i)
-            os << gf[i] << '\n';
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          const auto& fes   = gf.getFiniteElementSpace();
-          const auto& shard = fes.getShard();
-
-          const size_t localSz = shard.getSize();
-
-          // Force read-acquire, not write-acquire:
-          const auto& cgf = static_cast<const std::decay_t<decltype(gf)>&>(gf);
-          cgf.acquire();
-
-          for (size_t i = 0; i < localSz; ++i)
-          {
-            const Index g = fes.getGlobalIndex(i);   // IMPORTANT: shard-local dof i -> global dof
-            os << cgf[g] << '\n';
-          }
-
-          cgf.flush();
-        }
-        else
-        {
-          assert(false);
-        }
-      }
-  };
-
-  // --------------------------------------------------------------------------
-  // H1<K> MFEM printer for PETSc Vec (Context::Local and Context::MPI)
-  // Matches the Math::Vector version, but reads coefficients from Vec.
-  // Base prints Ordering: VectorDimension (1) for H1, so we emit components
-  // per MFEM scalar node in MFEM node order.
-  // --------------------------------------------------------------------------
-  /**
-   * @brief MFEM printer for PETSc-backed H1 (order @f$ K @f$) grid functions.
-   *
-   * Handles the Rodin-to-MFEM node reordering using Vandermonde change-of-basis
-   * matrices, for both simplex and non-simplex element geometries.
-   *
-   * @tparam K     Polynomial order.
-   * @tparam Range Scalar or vector range type.
-   * @tparam Ctx   Mesh context type (Local or MPI).
-   */
-  template <size_t K, class Range, class Ctx>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::H1<K, Range, Geometry::Mesh<Ctx>>,
-      ::Vec> final
-    : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::H1<K, Range, Geometry::Mesh<Ctx>>,
-        ::Vec>
-  {
-    public:
-      /// @brief Finite element space type.
-      using FESType    = Variational::H1<K, Range, Geometry::Mesh<Ctx>>;
-      /// @brief PETSc vector data type (@c Vec).
-      using DataType   = ::Vec;
-      /// @brief Grid function type being printed.
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
-      /// @brief Parent printer base class.
-      using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
-
-      /// @brief Scalar type underlying the range.
-      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-      static_assert(std::is_same_v<ScalarType, PetscScalar>,
-        "PETSc MFEM printer: Range scalar must be PetscScalar.");
-
-      /**
-       * @brief Constructs a PETSc-backed H1 MFEM printer.
-       * @param[in] gf Grid function to print.
-       */
-      GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
-      {}
-
-      /**
-       * @brief Writes high-order H1 coefficients in MFEM node ordering.
-       * @param[in,out] os Output stream receiving coefficient data.
-       */
-      void printData(std::ostream& os) override
-      {
-        os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);
-
-        const auto& gf   = this->getObject();
-        const auto& fes  = gf.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-
-        const size_t vdim       = fes.getVectorDimension();
-        const size_t D          = mesh.getDimension();
-        const size_t totalSize  = fes.getSize();
-        const size_t scalarSize = totalSize / vdim;
-
-        std::vector<uint8_t> written(scalarSize, false);
-
-        const auto to_scalar_dof = [&](Index dof) -> Index
-        {
-          if (vdim > 1 && static_cast<size_t>(dof) >= scalarSize)
-            return dof % static_cast<Index>(scalarSize);
-          return dof;
-        };
-
-        // Read a Rodin DOF (already component-blocked index) from PETSc Vec
-        const auto read = [&](Index dof) -> PetscScalar
-        {
-          return gf[dof];
-        };
-
-        // Emit in MFEM Ordering::VectorDimension: for each MFEM scalar node, write all components
-        const auto emit_scalar_dof = [&](Index rodin_scalar_dof)
-        {
-          const Index sdof = to_scalar_dof(rodin_scalar_dof);
-          const size_t s = static_cast<size_t>(sdof);
-          if (s >= scalarSize || written[s])
-            return;
-
-          for (size_t c = 0; c < vdim; ++c)
-          {
-            const Index dof = sdof + static_cast<Index>(c * scalarSize);
-            os << read(dof) << '\n';
-          }
-          written[s] = true;
-        };
-
-        // Change-of-nodes matrices (Rodin Fekete -> MFEM nodes) for triangle/tet.
-        // We only need them to output MFEM face/cell interior values for simplex elements,
-        // like your Math::Vector implementation.
-        const auto& tri_change = []() -> const Math::Matrix<PetscScalar>&
-        {
-          static thread_local Math::Matrix<PetscScalar> C;
-          if (C.size() == 0)
-          {
-            const auto& V_mfem   = MFEM::VandermondeTriangle<K>::getMatrix();
-            const auto& V_rodInv = Variational::VandermondeTriangle<K>::getInverse();
-            const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
-            C = C_real.template cast<PetscScalar>();
-          }
-          return C;
+        const auto& field = this->getObject();
+        const auto& fes = field.getFiniteElementSpace();
+        const auto& local = [&]() -> const auto& {
+          if constexpr (requires { fes.getShard(); })
+            return fes.getShard();
+          else
+            return fes;
         }();
-
-        const auto& tet_change = []() -> const Math::Matrix<PetscScalar>&
+        using LocalFES = std::remove_cvref_t<decltype(local)>;
+        Variational::GridFunction<LocalFES, Math::Vector<PetscScalar>> result(local);
+        field.acquire();
+        for (size_t a = 0; a < local.getSize(); ++a)
         {
-          static thread_local Math::Matrix<PetscScalar> C;
-          if (C.size() == 0)
-          {
-            const auto& V_mfem   = MFEM::VandermondeTetrahedron<K>::getMatrix();
-            const auto& V_rodInv = Variational::VandermondeTetrahedron<K>::getInverse();
-            const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
-            C = C_real.template cast<PetscScalar>();
-          }
-          return C;
-        }();
-
-        if constexpr (std::is_same_v<Ctx, Context::MPI>)
-        {
-          // Ensure ghosted values are available if your GridFunction uses ghosts.
-          gf.acquire();
-        }
-
-        // --------------------------------------------------------------------
-        // 1) Vertices
-        // --------------------------------------------------------------------
-        const size_t nVertices = mesh.getConnectivity().getCount(0);
-        std::vector<Index> vertexScalarDof(nVertices);
-        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
-        {
-          const auto& vdofs = fes.getDOFs(0, v);
-          vertexScalarDof[static_cast<size_t>(v)] = to_scalar_dof(vdofs(0));
-        }
-        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
-          emit_scalar_dof(vertexScalarDof[static_cast<size_t>(v)]);
-
-        // --------------------------------------------------------------------
-        // 2) Edges: oriented vmin -> vmax, emit interior edge nodes in MFEM order
-        // --------------------------------------------------------------------
-        if (D >= 1)
-        {
-          const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
-          const size_t nEdges = mesh.getConnectivity().getCount(1);
-
-          std::vector<Index> interior;
-          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
-          {
-            const auto& edgeVerts = conn10[e];
-            const Index v0 = edgeVerts[0];
-            const Index v1 = edgeVerts[1];
-
-            const Index vmin = std::min(v0, v1);
-            const Index vmax = std::max(v0, v1);
-
-            const Index vminDof = vertexScalarDof[static_cast<size_t>(vmin)];
-            const Index vmaxDof = vertexScalarDof[static_cast<size_t>(vmax)];
-
-            const auto& edofs = fes.getDOFs(1, e);
-
-            interior.clear();
-            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
-            {
-              const Index sd = to_scalar_dof(edofs(k));
-              if (sd != vminDof && sd != vmaxDof)
-                interior.push_back(sd);
-            }
-
-            if (v0 > v1)
-              std::reverse(interior.begin(), interior.end());
-
-            for (Index sd : interior)
-              emit_scalar_dof(sd);
-          }
-        }
-
-        // --------------------------------------------------------------------
-        // 3) Faces (only special handling for 3D triangle faces)
-        // --------------------------------------------------------------------
-        if (D == 3)
-        {
-          const size_t faceCount = mesh.getConnectivity().getCount(2);
-
-          constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-          const int p  = static_cast<int>(K);
-          const int nV = 3;
-          const int nE = 3 * (p - 1);
-          const int triInteriorOffset = nV + nE;
-
-          Math::Vector<PetscScalar> uR(TriN);
-          std::vector<Math::Vector<PetscScalar>> uM(vdim, Math::Vector<PetscScalar>(TriN));
-
-          for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
-          {
-            const auto faceGeom = mesh.getGeometry(2, f);
-            const auto& fdofs   = fes.getDOFs(2, f);
-
-            if (faceGeom == Geometry::Polytope::Type::Triangle)
-            {
-              // Convert Rodin nodal values -> MFEM nodal values, then emit MFEM face-interior nodes.
-              assert(static_cast<size_t>(fdofs.size()) == TriN);
-
-              for (size_t c = 0; c < vdim; ++c)
-              {
-                for (size_t k = 0; k < TriN; ++k)
-                {
-                  const Index sd = to_scalar_dof(fdofs(static_cast<Index>(k)));
-                  uR(static_cast<Index>(k)) = read(sd + static_cast<Index>(c * scalarSize));
-                }
-                uM[c] = tri_change * uR;
-              }
-
-              // Face interior nodes in MFEM ordering (after vertices+edges)
-              int loc = 0;
-              for (int j = 1; j < p; ++j)
-              {
-                for (int i = 1; i + j < p; ++i)
-                {
-                  const int idx = triInteriorOffset + loc++;
-                  for (size_t c = 0; c < vdim; ++c)
-                    os << uM[c](static_cast<Index>(idx)) << '\n';
-                }
-              }
-            }
+          const Index global = [&]() {
+            if constexpr (requires { fes.getShard(); })
+              return fes.getGlobalIndex(a);
             else
-            {
-              // Fallback: emit all face DOFs by scalar-dof
-              for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                emit_scalar_dof(fdofs(k));
-            }
-          }
+              return static_cast<Index>(a);
+          }();
+          result.getData()[a] = field[global];
         }
+        field.flush();
+        return result;
+      }
 
-        // --------------------------------------------------------------------
-        // 4) Element interiors (special handling for triangles / tetrahedra)
-        // --------------------------------------------------------------------
-        const size_t nCells = mesh.getConnectivity().getCount(D);
+    public:
+      /**
+       * @brief Writes the MFEM collection header and coefficient payload.
+       * @param os Output stream receiving the serialized field.
+       */
+      void print(std::ostream& os) override
+      {
+        auto localField = makeLocalField();
+        using LocalFES =
+          std::remove_cvref_t<decltype(localField.getFiniteElementSpace())>;
+        GridFunctionPrinter<FileFormat::MFEM, LocalFES, Math::Vector<PetscScalar>>(
+          localField)
+          .print(os);
+      }
 
-        if (D == 2)
-        {
-          constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-          const int p  = static_cast<int>(K);
-          const int nV = 3;
-          const int nE = 3 * (p - 1);
-          const int triInteriorOffset = nV + nE;
-
-          Math::Vector<PetscScalar> uR(TriN);
-          std::vector<Math::Vector<PetscScalar>> uM(vdim, Math::Vector<PetscScalar>(TriN));
-
-          for (Index cidx = 0; cidx < static_cast<Index>(nCells); ++cidx)
-          {
-            const auto geom   = mesh.getGeometry(2, cidx);
-            const auto& cdofs = fes.getDOFs(2, cidx);
-
-            if (geom == Geometry::Polytope::Type::Triangle)
-            {
-              assert(static_cast<size_t>(cdofs.size()) == TriN);
-
-              for (size_t comp = 0; comp < vdim; ++comp)
-              {
-                for (size_t k = 0; k < TriN; ++k)
-                {
-                  const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
-                  uR(static_cast<Index>(k)) = read(sd + static_cast<Index>(comp * scalarSize));
-                }
-                uM[comp] = tri_change * uR;
-              }
-
-              int loc = 0;
-              for (int j = 1; j < p; ++j)
-              {
-                for (int i = 1; i + j < p; ++i)
-                {
-                  const int idx = triInteriorOffset + loc++;
-                  for (size_t comp = 0; comp < vdim; ++comp)
-                    os << uM[comp](static_cast<Index>(idx)) << '\n';
-                }
-              }
-            }
-            else
-            {
-              for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-                emit_scalar_dof(cdofs(k));
-            }
-          }
-        }
-        else if (D == 3)
-        {
-          constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
-          const int p = static_cast<int>(K);
-
-          const int nV = 4;
-          const int nE = 6 * (p - 1);
-          const int nF = 2 * (p - 1) * (p - 2);
-          const int tetInteriorOffset = nV + nE + nF;
-
-          Math::Vector<PetscScalar> uR(TetN);
-          std::vector<Math::Vector<PetscScalar>> uM(vdim, Math::Vector<PetscScalar>(TetN));
-
-          for (Index cidx = 0; cidx < static_cast<Index>(nCells); ++cidx)
-          {
-            const auto geom   = mesh.getGeometry(3, cidx);
-            const auto& cdofs = fes.getDOFs(3, cidx);
-
-            if (geom == Geometry::Polytope::Type::Tetrahedron)
-            {
-              assert(static_cast<size_t>(cdofs.size()) == TetN);
-
-              for (size_t comp = 0; comp < vdim; ++comp)
-              {
-                for (size_t k = 0; k < TetN; ++k)
-                {
-                  const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
-                  uR(static_cast<Index>(k)) = read(sd + static_cast<Index>(comp * scalarSize));
-                }
-                uM[comp] = tet_change * uR;
-              }
-
-              for (int idx = tetInteriorOffset; idx < static_cast<int>(TetN); ++idx)
-              {
-                for (size_t comp = 0; comp < vdim; ++comp)
-                  os << uM[comp](static_cast<Index>(idx)) << '\n';
-              }
-            }
-            else
-            {
-              // Wedge/hex/etc: fallback scalar-dof traversal
-              for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-                emit_scalar_dof(cdofs(k));
-            }
-          }
-        }
-        else
-        {
-          for (Index cidx = 0; cidx < static_cast<Index>(nCells); ++cidx)
-          {
-            const auto& cdofs = fes.getDOFs(D, cidx);
-            for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-              emit_scalar_dof(cdofs(k));
-          }
-        }
-
-        if constexpr (std::is_same_v<Ctx, Context::MPI>)
-        {
-          gf.flush();
-        }
+      /**
+       * @brief Writes the native collection's coefficient payload.
+       * @param os Output stream receiving coefficient data.
+       */
+      void printData(std::ostream& os) override
+      {
+        auto localField = makeLocalField();
+        using LocalFES =
+          std::remove_cvref_t<decltype(localField.getFiniteElementSpace())>;
+        GridFunctionPrinter<FileFormat::MFEM, LocalFES, Math::Vector<PetscScalar>>(
+          localField)
+          .printData(os);
       }
   };
 
-  /// @brief Convenience alias for local PETSc-backed H1 MFEM printers.
+  /// @brief Local PETSc-backed H1 MFEM printer.
   template <size_t K, class Range>
-  using MFEM_H1_PETSc_Local_Printer =
-    GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, ::Vec>;
+  using MFEM_H1_PETSc_Local_Printer = GridFunctionPrinter<FileFormat::MFEM,
+    Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, ::Vec>;
 
-  /// @brief Convenience alias for MPI PETSc-backed H1 MFEM printers.
+  /// @brief MPI PETSc-backed H1 MFEM printer.
   template <size_t K, class Range>
-  using MFEM_H1_PETSc_MPI_Printer =
-    GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::MPI>>, ::Vec>;
+  using MFEM_H1_PETSc_MPI_Printer = GridFunctionPrinter<FileFormat::MFEM,
+    Variational::H1<K, Range, Geometry::Mesh<Context::MPI>>, ::Vec>;
 }
 
 #endif

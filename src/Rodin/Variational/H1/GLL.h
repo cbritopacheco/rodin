@@ -14,6 +14,8 @@
 
 #include "LegendrePolynomial.h"
 
+// Absolute Newton node-update tolerance in dimensionless reference coordinates.
+// Numerical policy retained for compatibility; not a bound on interpolation error.
 #define RODIN_VARIATIONAL_H1_GLL_TOLERANCE 1e-14
 #define RODIN_VARIATIONAL_H1_GLL_TAYLOR_TERMS 14
 #define RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS 25
@@ -42,25 +44,40 @@ namespace Rodin::Variational
       /// @brief Number of entries.
       static constexpr size_t Count = K + 1;
 
-      /// Number of GLL nodes (K + 1).
+      /**
+       * Number of GLL nodes (K + 1).
+       * @returns The count.
+       */
       static constexpr size_t getCount()
       {
         return Count;
       }
 
-      /// i-th GLL node in [-1, 1], 0 <= i <= K.
+      /**
+       * i-th GLL node in [-1, 1], 0 <= i <= K.
+       * @param i Index of the requested entry.
+       * @returns The node.
+       */
       static constexpr Real getNode(size_t i)
       {
         return s_nodes[i];
       }
 
-      /// Full array of GLL nodes in ascending order.
+      /**
+       * Full array of GLL nodes in ascending order.
+       * @returns The nodes.
+       */
       static constexpr const std::array<Real, K + 1>& getNodes()
       {
         return s_nodes;
       }
 
     private:
+      /**
+       * @brief Approximates cosine during constant evaluation.
+       * @param x Scalar evaluation argument.
+       * @returns Cosine approximation obtained from the implemented Taylor series.
+       */
       static constexpr Real constexprCos(Real x)
       {
         constexpr Real pi = Math::Constants::pi();
@@ -85,8 +102,12 @@ namespace Rodin::Variational
 
         return sum;
       }
+      /**
+       * @brief Constructs the reference interpolation nodes.
+       * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
+       */
 
-      static constexpr std::array<Real, K + 1> compute()
+      static std::array<Real, K + 1> compute()
       {
         std::array<Real, K + 1> nodes{};
 
@@ -137,6 +158,8 @@ namespace Rodin::Variational
         return nodes;
       }
 
+      // Keep initialization consistent across translation units and avoid
+      // imposing a constant-evaluation limit on higher orders.
       inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 
@@ -156,26 +179,40 @@ namespace Rodin::Variational
   class GLL01
   {
     public:
-      /// Number of GLL nodes (K + 1).
+      /**
+       * Number of GLL nodes (K + 1).
+       * @returns The count.
+       */
       static constexpr size_t getCount()
       {
         return K + 1;
       }
 
-      /// i-th mapped GLL node in [0, 1], 0 <= i <= K.
+      /**
+       * i-th mapped GLL node in [0, 1], 0 <= i <= K.
+       * @param i Index of the requested entry.
+       * @returns The node.
+       */
       static constexpr Real getNode(size_t i)
       {
         return s_nodes[i];
       }
 
-      /// Full array of mapped GLL nodes in ascending order.
+      /**
+       * Full array of mapped GLL nodes in ascending order.
+       * @returns The nodes.
+       */
       static constexpr const std::array<Real, K + 1>& getNodes()
       {
         return s_nodes;
       }
 
     private:
-      static constexpr std::array<Real, K + 1> compute()
+      /**
+       * @brief Constructs the reference interpolation nodes.
+       * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
+       */
+      static std::array<Real, K + 1> compute()
       {
         std::array<Real, K + 1> nodes{};
 
@@ -190,6 +227,7 @@ namespace Rodin::Variational
         return nodes;
       }
 
+      // GLL<K> is initialized at runtime, so map its nodes at runtime too.
       inline static const std::array<Real, K + 1> s_nodes = compute();
   };
 }

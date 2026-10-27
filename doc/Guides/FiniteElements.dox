@@ -12,7 +12,7 @@
 
   The finite element method (FEM) is a powerful technique for numerically
   solving partial differential equations. At its heart lies the concept of a
-  **finite element**, which provides a systematic way to construct
+  finite element, which provides a systematic way to construct
   piecewise-polynomial approximations on a mesh.
 
   The most widely used formal definition of a finite element was introduced by
@@ -53,7 +53,7 @@
     @f$ \dim \mathbb{P}_2 = 10 @f$.
 
   - @f$ \Sigma = \{ \sigma_1, \sigma_2, \ldots, \sigma_n \} @f$ is a set of
-    **degrees of freedom** (DOFs) — linear functionals
+    degrees of freedom (DOFs) — linear functionals
     @f$ \sigma_i : P \to \mathbb{R} @f$ — such that any function
     @f$ p \in P @f$ is uniquely determined by the values
     @f$ \sigma_1(p), \ldots, \sigma_n(p) @f$.
@@ -70,14 +70,14 @@
   @section fem-ciarlet-basis Basis Functions
 
   Given a Ciarlet triple @f$ (K, P, \Sigma) @f$, there exists a unique set of
-  **basis functions** @f$ \{ \phi_1, \ldots, \phi_n \} \subset P @f$ such that:
+  basis functions @f$ \{ \phi_1, \ldots, \phi_n \} \subset P @f$ such that:
 
   @f[
     \sigma_i(\phi_j) = \delta_{ij}
   @f]
 
   where @f$ \delta_{ij} @f$ is the Kronecker delta. This is called the
-  **nodal basis** of the finite element. These basis functions are the shape
+  nodal basis of the finite element. These basis functions are the shape
   functions that are used to represent any function in the finite element
   space.
 

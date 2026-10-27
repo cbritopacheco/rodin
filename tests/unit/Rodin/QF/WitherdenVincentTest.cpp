@@ -69,12 +69,14 @@ TEST(WitherdenVincentTest, ShippedRulesAreExactAtEveryDegree)
 TEST(WitherdenVincentTest, ShippedWeightsArePositive)
 {
   for (const auto g : kElements)
+  {
     for (size_t p = 1; p <= WitherdenVincent::getMaxDegree(g); ++p)
     {
       const WitherdenVincent qf(p, g);
       EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " degree " << p;
       EXPECT_NEAR(weightAmplification(qf), 1.0, 1e-14) << name(g) << " degree " << p;
     }
+  }
 }
 
 /// @brief Every shipped node lies inside its reference element, checked
@@ -82,9 +84,13 @@ TEST(WitherdenVincentTest, ShippedWeightsArePositive)
 TEST(WitherdenVincentTest, ShippedNodesAreInterior)
 {
   for (const auto g : kElements)
+  {
     for (size_t p = 1; p <= WitherdenVincent::getMaxDegree(g); ++p)
+    {
       EXPECT_TRUE(allPointsInside(WitherdenVincent(p, g), g))
         << name(g) << " degree " << p;
+    }
+  }
 }
 
 /**
@@ -126,8 +132,10 @@ TEST(WitherdenVincentTest, ShippedRulesAreFullySymmetric)
     {
       const WitherdenVincent qf(p, g);
       for (size_t s = 0; s < group.size(); ++s)
+      {
         EXPECT_TRUE(isInvariantUnder(qf, group[s]))
           << name(g) << " degree " << p << " is not invariant under symmetry " << s;
+      }
     }
   }
 }
@@ -173,9 +181,13 @@ TEST(WitherdenVincentTest, SymmetryCheckRejectsADisplacedNode)
 TEST(WitherdenVincentTest, ShippedWeightsSumToTheMeasure)
 {
   for (const auto g : kElements)
+  {
     for (size_t p = 1; p <= WitherdenVincent::getMaxDegree(g); ++p)
+    {
       EXPECT_NEAR(weightSum(WitherdenVincent(p, g)), referenceMeasure(g), 1e-12)
         << name(g) << " degree " << p;
+    }
+  }
 }
 
 /// @brief Availability is reported honestly, and the tables are non-empty

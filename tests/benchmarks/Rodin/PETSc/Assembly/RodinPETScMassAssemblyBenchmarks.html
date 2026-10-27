@@ -1,0 +1,7 @@
+<p>PETSc local/MPI mass and reaction operator/load assembly.</p>
+<h2>Measured operation</h2>
+<p>Measures full operator/load assembly with aligned MPI collectives.</p>
+<h3>Architecture</h3>
+<p>Exact geometry is installed before explicit root partitioning and fixed space construction. Untimed geometry, matrix, load and constant-field checks certify each output. Three iterations align collectives; maximum-rank elapsed assembly time excludes barriers, reductions and checks. Reaction coefficients are doubled after timing to verify replacement and cache invalidation. Geometry evaluation is rank-local; its result participates in the existing explicitly global numerical oracle, with no additional collective.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

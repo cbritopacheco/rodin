@@ -8,38 +8,45 @@
 
 namespace Rodin::Geometry
 {
-  SubMesh<Context::Local>::Builder&
-  SubMesh<Context::Local>::Builder::initialize(const Mesh<Context>& parent)
+  SubMesh<Context::Local>::Builder& SubMesh<Context::Local>::Builder::initialize(
+    const Mesh<Context>& parent)
   {
     const size_t dim = parent.getDimension();
     const size_t sdim = parent.getSpaceDimension();
     m_parent = parent;
+    m_dimension = 0;
+    m_build = Mesh<Context>::Builder();
     m_build.initialize(sdim);
+    m_s2ps.clear();
     m_s2ps.resize(dim + 1);
-    m_sidx.resize(dim + 1, 0);
+    m_sidx.assign(dim + 1, 0);
     return *this;
   }
 
-  SubMesh<Context::Local>::Builder&
-  SubMesh<Context::Local>::Builder::include(size_t d, Index parentIdx)
+  SubMesh<Context::Local>::Builder& SubMesh<Context::Local>::Builder::include(
+    size_t d, Index parentIdx)
   {
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
-    const auto& conn   = parent.getConnectivity();
+    const auto& conn = parent.getConnectivity();
 
     // Fast path: entity already included -> only ensure attribute (optional), then return.
     if (auto it = m_s2ps[d].right.find(parentIdx); it != m_s2ps[d].right.end())
     {
       if (auto attr = parent.getAttribute(d, parentIdx))
-        m_build.attribute({ d, it->second }, *attr);
+        m_build.attribute({d, it->second}, *attr);
       return *this;
     }
 
     // First time we see this entity: create child index now
     const Index childIdx = m_sidx[d];
     m_s2ps[d].left.push_back(parentIdx);
-    m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
+    m_s2ps[d].right.insert(std::pair<Index, Index>{parentIdx, childIdx});
     ++m_sidx[d];
+
+    // finalize() emits vertices through nodes()/vertex(), not polytope insertion.
+    if (d == 0)
+      return *this;
 
     // Remap vertices and emit polytope ONCE
     const auto& parentPolytope = conn.getPolytope(d, parentIdx);
@@ -50,7 +57,8 @@ namespace Rodin::Geometry
       const Index pv = parentPolytope(i);
 
       // Vertex map check (same idea can be optimized further; see section 2)
-      auto [vit, vinserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ pv, m_sidx[0] });
+      auto [vit, vinserted] =
+        m_s2ps[0].right.insert(std::pair<Index, Index>{pv, m_sidx[0]});
       if (vinserted)
       {
         m_s2ps[0].left.push_back(pv);
@@ -62,14 +70,14 @@ namespace Rodin::Geometry
     m_build.polytope(conn.getGeometry(d, parentIdx), std::move(childPolytope));
 
     if (auto attr = parent.getAttribute(d, parentIdx))
-      m_build.attribute({ d, childIdx }, *attr);
+      m_build.attribute({d, childIdx}, *attr);
 
     m_dimension = std::max(m_dimension, d);
     return *this;
   }
 
-  SubMesh<Context::Local>::Builder&
-  SubMesh<Context::Local>::Builder::include(size_t d, const IndexVector& indices)
+  SubMesh<Context::Local>::Builder& SubMesh<Context::Local>::Builder::include(
+    size_t d, const IndexVector& indices)
   {
     for (const Index parentIdx : indices)
       this->include(d, parentIdx);
@@ -84,8 +92,13 @@ namespace Rodin::Geometry
 
     // Build the mesh object.
     m_build.nodes(nodes);
-    for (const Index& pIdx : m_s2ps[0].left)
+    for (Index child = 0; child < nodes; ++child)
+    {
+      const Index pIdx = m_s2ps[0].left[child];
       m_build.vertex(parent.getVertexCoordinates(pIdx));
+      if (const auto attribute = parent.getAttribute(0, pIdx))
+        m_build.attribute({0, child}, *attribute);
+    }
 
     // Build the connectivity for the submesh from the parent mesh.
     auto& conn = m_build.getConnectivity();
@@ -113,7 +126,7 @@ namespace Rodin::Geometry
             }
           }
           // Manually set the incidence
-          conn.setIncidence({ d, dp }, std::move(cInc));
+          conn.setIncidence({d, dp}, std::move(cInc));
         }
       }
     }

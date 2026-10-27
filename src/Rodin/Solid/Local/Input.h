@@ -14,11 +14,13 @@
  * region-wise material properties, etc.) without hard-coding them into the
  * integrator or the constitutive law.
  *
- * ## Usage with CRTP
+ * # Usage with CRTP
  *
  * @code
  * struct MyInput : Solid::Input<MyInput>
  * {
+ *   MyInput() = default;
+ *
  *   void populate(Solid::ConstitutivePoint& cp) const
  *   {
  *     // e.g., interpolate fiber direction from a GridFunction
@@ -28,10 +30,13 @@
  * };
  *
  * Solid::InternalVirtualWorkResidual force(law, v, displacement);
- * force.setInput(MyInput{});
+ * force.setInput([input = MyInput{}](Solid::ConstitutivePoint& cp) {
+ *   const Solid::Input<MyInput>& base = input;
+ *   base.populate(cp);
+ * });
  * @endcode
  *
- * ## Usage with lambda / std::function
+ * # Usage with lambda / std::function
  *
  * @code
  * force.setInput([&](Solid::ConstitutivePoint& cp) {
@@ -77,14 +82,32 @@ namespace Rodin::Solid
     protected:
       /// @brief Default constructor for derived CRTP inputs.
       Input() = default;
-      /// @brief Copy constructor.
-      Input(const Input&) = default;
-      /// @brief Move constructor.
-      Input(Input&&) = default;
-      /// @brief Copy assignment operator.
-      Input& operator=(const Input&) = default;
-      /// @brief Move assignment operator.
-      Input& operator=(Input&&) = default;
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      Input(const Input& other) = default;
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      Input(Input&& other) = default;
+
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      Input& operator=(const Input& other) = default;
+
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      Input& operator=(Input&& other) = default;
   };
 
   /// @brief Type-erased callable for input injection into ConstitutivePoint.

@@ -20,8 +20,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c TestFunction: exposes the finite element space and the
-  /// shape function space.
+  /**
+   * @brief Type traits for @c TestFunction: exposes the finite element space and the
+   * shape function space.
+   */
   template <class FES>
   struct Traits<Variational::TestFunction<FES>>
   {
@@ -44,7 +46,7 @@ namespace Rodin::Variational
    * variational problem. Given a finite element space @f$ V_h @f$, the test
    * function @f$ v \in V_h @f$ is chosen from this space.
    *
-   * ## Mathematical Foundation
+   * # Mathematical Foundation
    * The weak formulation seeks @f$ u \in U_h @f$ such that:
    * @f[
    *   a(u, v) = l(v) \quad \forall v \in V_h
@@ -55,7 +57,7 @@ namespace Rodin::Variational
    * - @f$ l(\cdot) @f$ is a linear functional
    * - @f$ V_h @f$ is the test space (typically equal to the trial space @f$ U_h @f$)
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);                    // Define finite element space
    * TestFunction v(Vh);              // Define test function
@@ -110,11 +112,17 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      /// @brief Copy assignment is deleted
-      void operator=(const TestFunction&) = delete;
+      /**
+       * @brief Copy assignment is deleted
+       * @param other Object to copy from.
+       */
+      void operator=(const TestFunction& other) = delete;
 
-      /// @brief Move assignment is deleted
-      void operator=(TestFunction&&) = delete;
+      /**
+       * @brief Move assignment is deleted
+       * @param other Object to move from.
+       */
+      void operator=(TestFunction&& other) = delete;
 
       /**
        * @brief Gets the x-component of a vector-valued test function.
@@ -177,9 +185,10 @@ namespace Rodin::Variational
    * P1 Vh(mesh);
    * TestFunction v(Vh);  // Type deduced as TestFunction<P1>
    * ```
+   * @param fes Finite element space
    */
   template <class FES>
-  TestFunction(const FES&) -> TestFunction<FES>;
+  TestFunction(const FES& fes) -> TestFunction<FES>;
 }
 
 #endif

@@ -95,6 +95,8 @@ Match the surrounding code. The rules the tooling enforces:
 - **Files**: one header = one concept; guard `RODIN_<PATH>_H` derived from the
   path (never `#pragma once`; `.hpp` companions end in `_HPP`); Boost license
   block on top; a `/** @file … @brief … */` block.
+- **Documentation**: Use `/** ... */` for multiline Doxygen documentation
+  and `///` for single-line documentation. Use `///<` for trailing member documentation.
 - **Idioms**: `using`, never `typedef`. Explicit return types, not `auto`, in
   declarations. `Alert::Exception … << Alert::Raise`, never raw `throw`.
   `static thread_local` caches, never mutexes in evaluation paths. `const`
@@ -113,7 +115,7 @@ you claim a change is finished:
 python3 dev/check_format.py --base origin/develop   # then: git clang-format origin/develop
 python3 dev/style_lint.py                           # guards, license, @file, PETSc containment
 python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
-python3 dev/check_doxygen_warnings.py               # needs doxygen 1.14.0 exactly
+python3 dev/check_doxygen_warnings.py               # needs doxygen 1.15.0 exactly
 ```
 
 For documentation changes, also preserve the rendered Doxygen/m.css contract:

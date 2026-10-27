@@ -15,20 +15,20 @@
  * @f]
  * where @f$ A @f$ is symmetric (and may be indefinite).
  *
- * ## Algorithm
+ * # Algorithm
  * MINRES is a Lanczos-based Krylov method that minimizes the residual norm
  * over the generated Krylov subspace, while preserving short recurrences for
  * symmetric operators.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite (works, but CG is usually preferable)
  * - Symmetric indefinite systems (e.g., some mixed formulations, saddle-point after
  *   suitable transformations, Helmholtz-type operators, etc.)
  *
- * ## Notes
+ * # Notes
  * - This implementation uses Eigen's unsupported MINRES.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -63,8 +63,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::MINRES<LinearSystem>>
   {
-      /// @brief Linear system type.
-      using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+    using LinearSystemType = LinearSystem;
   };
 }
 
@@ -84,9 +84,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for MINRES
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  MINRES(Variational::ProblemBase<LinearSystem>&) -> MINRES<LinearSystem>;
+  MINRES(Variational::ProblemBase<LinearSystem>& pb) -> MINRES<LinearSystem>;
 
   /**
    * @ingroup MINRESSpecializations
@@ -96,59 +97,92 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class MINRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       MINRES(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       MINRES(const MINRES& other)
-        : Parent(other),
-          m_solver(other.m_solver)
-      {}
+        : Parent(other)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       MINRES(MINRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
       /// @brief Destructor.
       ~MINRES() = default;
 
-      /// @brief Sets the convergence tolerance; returns a reference to this solver.
+      /**
+       * @brief Sets the convergence tolerance; returns a reference to this solver.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       MINRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
+      /**
+       * @brief Sets the maximum number of iterations; returns a reference to this solver.
+       * @param maxIt Maximum number of solver iterations.
+       * @returns Reference to this object after the operation.
+       */
       MINRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
@@ -158,19 +192,26 @@ namespace Rodin::Solver
           axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      /// @brief Returns whether the most recent solve converged successfully.
+      /**
+       * @brief Returns whether the most recent solve converged successfully.
+       * @returns Whether the operation completed successfully.
+       */
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MINRES* copy() const noexcept override
       {
         return new MINRES(*this);
       }
 
     private:
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
       Eigen::MINRES<OperatorType> m_solver;
   };
 
@@ -182,59 +223,92 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class MINRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+
       /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
+
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+
       /// @brief Problem type solved by this solver.
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
+
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       MINRES(ProblemType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       MINRES(const MINRES& other)
-        : Parent(other),
-          m_solver(other.m_solver)
-      {}
+        : Parent(other)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       MINRES(MINRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
       /// @brief Destructor.
       ~MINRES() = default;
 
-      /// @brief Sets the convergence tolerance; returns a reference to this solver.
+      /**
+       * @brief Sets the convergence tolerance; returns a reference to this solver.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       MINRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
+      /**
+       * @brief Sets the maximum number of iterations; returns a reference to this solver.
+       * @param maxIt Maximum number of solver iterations.
+       * @returns Reference to this object after the operation.
+       */
       MINRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
@@ -244,19 +318,26 @@ namespace Rodin::Solver
           axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      /// @brief Returns whether the most recent solve converged successfully.
+      /**
+       * @brief Returns whether the most recent solve converged successfully.
+       * @returns Whether the operation completed successfully.
+       */
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MINRES* copy() const noexcept override
       {
         return new MINRES(*this);
       }
 
     private:
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
       Eigen::MINRES<OperatorType> m_solver;
   };
 }

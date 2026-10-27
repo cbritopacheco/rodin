@@ -17,7 +17,7 @@
  * the right-hand side @f$ \mathbf{b} @f$ of a discrete finite element
  * system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
- * ## Mathematical Background
+ * # Mathematical Background
  *
  * A form @f$ L : V_h \to \mathbb{K} @f$ takes a test function @f$ v \in V_h
  * @f$ and produces a scalar. It is linear over the reals and conjugate-linear
@@ -74,20 +74,23 @@ namespace Rodin::Variational
       /// @brief PETSc vector type (@c Vec) used to store the load vector @f$ \mathbf{b} @f$.
       using VectorType = ::Vec;
 
-      /// @brief Context type (either @ref Rodin::Context::Local or
-      ///        @ref Rodin::Context::MPI) determined by the mesh.
+      /**
+       * @brief Context type (either @ref Rodin::Context::Local or
+       *        @ref Rodin::Context::MPI) determined by the mesh.
+       */
       using ContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
-      /// @brief Default assembly strategy deduced from the context type.
-      ///        Sequential assembly for local contexts, MPI assembly for
-      ///        distributed contexts.
+      /**
+       * @brief Default assembly strategy deduced from the context type.
+       *        Sequential assembly for local contexts, MPI assembly for
+       *        distributed contexts.
+       */
       using DefaultAssembly =
         typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
 
       /// @brief Parent class providing the generic `LinearFormBase<Vec>` interface.
       using Parent = LinearFormBase<VectorType>;
 
-      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;
@@ -110,7 +113,10 @@ namespace Rodin::Variational
         createVector();
       }
 
-      /// @brief Copy constructor (deep-copies the PETSc vector).
+      /**
+       * @brief Copy constructor (deep-copies the PETSc vector).
+       * @param other Source object to copy or move from.
+       */
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
@@ -133,7 +139,10 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Source object to copy or move from.
+       */
       LinearForm(LinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
@@ -206,7 +215,7 @@ namespace Rodin::Variational
        * @brief Evaluates the linear form at a grid function @f$ u_h @f$.
        *
        * Computes the action @f$ L(u_h) = \mathbf{u}^* \mathbf{b} @f$
-       * via `VecDot(u, b, &result)`.
+       * via `VecDot(b, u, &result)`; PETSc conjugates the second operand.
        *
        * @param[in] u The grid function @f$ u_h @f$ to evaluate at.
        * @returns The scalar value @f$ L(u_h) @f$.
@@ -215,39 +224,53 @@ namespace Rodin::Variational
       {
         ScalarType result;
         PetscErrorCode ierr;
-        ierr = VecDot(u.getData(), this->getVector(), &result);
+        ierr = VecDot(this->getVector(), u.getData(), &result);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
         return result;
       }
 
-      /// @brief Assembles the linear form into the owned PETSc vector
-      ///        using the @ref DefaultAssembly strategy.
+      /**
+       * @brief Assembles the linear form into the owned PETSc vector
+       *        using the @ref DefaultAssembly strategy.
+       */
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
-      /// @brief Returns a mutable reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+      /**
+       * @brief Returns a mutable reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+       * @returns PETSc vector storing the assembled linear form.
+       */
       VectorType& getVector() override
       {
         return m_vector;
       }
 
-      /// @brief Returns a read-only reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+      /**
+       * @brief Returns a read-only reference to the assembled PETSc load vector @f$ \mathbf{b} @f$.
+       * @returns PETSc vector storing the assembled linear form.
+       */
       const VectorType& getVector() const override
       {
         return m_vector;
       }
 
-      /// @brief Returns a reference to the associated test function.
+      /**
+       * @brief Returns a reference to the associated test function.
+       * @returns Test function used by the assembled form.
+       */
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
-      /// @brief Creates a heap-allocated copy of this linear form.
+      /**
+       * @brief Creates a heap-allocated copy of this linear form.
+       * @returns Pointer to a newly allocated copy of this object.
+       */
       LinearForm* copy() const noexcept override
       {
         return new LinearForm(*this);
@@ -291,16 +314,15 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc-backed LinearForm.
+   * @param test Test function.
    */
   template <class FES>
-  LinearForm(const PETSc::Variational::TestFunction<FES>&) -> LinearForm<FES, ::Vec>;
+  LinearForm(const PETSc::Variational::TestFunction<FES>& test) -> LinearForm<FES, ::Vec>;
 }
 
 namespace Rodin::PETSc::Variational
 {
-  /**
-   * @brief Convenient PETSc alias for Rodin::Variational::LinearForm.
-   */
+  /// @brief Convenient PETSc alias for Rodin::Variational::LinearForm.
   template <class FES>
   using LinearForm = Rodin::Variational::LinearForm<FES, ::Vec>;
 }

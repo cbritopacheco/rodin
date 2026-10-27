@@ -64,6 +64,9 @@
   - @subpage guides-quadrature — Quadrature families, exactness ranges,
     positive arbitrary-order fallbacks, and curved-element considerations
 
+  - @subpage guides-ordering — Matrix storage, tensor indexing and
+    finite-element component numbering
+
   @section guides-variational-index Weak formulations and variational problems
 
   From continuous PDEs to discrete linear systems:
@@ -90,6 +93,9 @@
   @section guides-applications-index Application modules
 
   Higher-level functionality built on the variational core:
+
+  - @subpage guides-swift - Marked-interface mesh fitting, quality budgets,
+    solver controls, diagnostics, and metric extension points
 
   - @subpage guides-shape-optimization — Shape derivatives, Hilbertian
     regularization (@ref Rodin::Hilbert::H1a "H1a"), level-set evolution,
@@ -121,9 +127,7 @@
   - @subpage guides-petsc — PETSc-backed variational forms, distributed
     linear algebra, KSP/SNES solvers, and multi-field problems
 
-  - @subpage guides-thread-safety — The thread-safety model, the
-    @ref Rodin::Threads "Threads" utilities, and how parallel assembly
-    scales
+  - @subpage guides-thread-safety — The thread-safety model, synchronization requirements, and how parallel assembly scales
 
   @section guides-getting-started-help Getting Help
 

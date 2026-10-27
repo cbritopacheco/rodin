@@ -34,14 +34,10 @@ namespace Rodin::Variational
     : public FiniteElementSpaceBase
   {
     public:
-      /**
-       * @brief Distributed mesh type attached to this finite-element space.
-       */
+      /// @brief Distributed mesh type attached to this finite-element space.
       using MeshType = Geometry::Mesh<Context::MPI>;
 
-      /**
-       * @brief Base finite-element-space interface.
-       */
+      /// @brief Base finite-element-space interface.
       using Parent = FiniteElementSpaceBase;
 
       using Parent::getGlobalIndex;
@@ -119,44 +115,6 @@ namespace Rodin::Variational
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return static_cast<const Derived&>(*this).geInverseMapping(idx, v);
-      }
-
-      /**
-       * @brief Evaluates a distributed finite element expansion on a physical element.
-       *
-       * The local reference expansion is formed from the shard coefficients and
-       * the derived space pushforward is applied once to the complete function:
-       * @f[
-       *   u_h(x)
-       *   =
-       *   \psi_K^{-1}
-       *   \left(
-       *     \sum_i c_i \widehat{\varphi}_i
-       *   \right)(x).
-       * @f]
-       * The operation is independent of the range transformation used by the
-       * space and therefore also applies to Piola-mapped finite elements.
-       *
-       * @tparam Range Range type of the finite element expansion.
-       * @tparam Coefficient Callable returning a local shard coefficient.
-       * @param[out] out Value of the expansion.
-       * @param[in] idx Dimension and local index of the physical element.
-       * @param[in] coefficient Local coefficient accessor.
-       * @param[in] p Point on the physical element.
-       */
-      template <class Range, class Coefficient>
-      void evaluate(Range& out, const std::pair<size_t, Index>& idx,
-        Coefficient&& coefficient, const Geometry::Point& p) const
-      {
-        const auto& derived = static_cast<const Derived&>(*this);
-        const auto& fe = derived.getFiniteElement(idx.first, idx.second);
-        const auto expansion = [&](const Math::SpatialPoint& rc) {
-          Range value;
-          fe.evaluate(value, coefficient, rc);
-          return value;
-        };
-        const auto mapping = derived.getPushforward(idx, expansion);
-        out = mapping(p);
       }
   };
 }

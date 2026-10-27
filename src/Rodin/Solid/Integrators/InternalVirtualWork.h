@@ -58,6 +58,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 #define RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORK_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <functional>
 #include <type_traits>
 
@@ -93,12 +94,12 @@ namespace Rodin::Solid
     public:
       /// @brief Constitutive law type.
       using LawType = Law;
+
       /// @brief Current displacement state type.
       using StateType = State;
-      /// @brief The law's cache type, handed to the output by @c commit().
-      using CacheType = typename Law::Cache;
+
       /// @brief Type-erased output callable for this law.
-      using OutputFunctionType = OutputFunction<CacheType>;
+      using OutputFunctionType = OutputFunction<LawType>;
 
       /**
        * @brief Constructs the internal virtual work object.
@@ -111,7 +112,11 @@ namespace Rodin::Solid
           m_quadOrder(0)
       {}
 
-      /// @brief Rebinds the current displacement state.
+      /**
+       * @brief Rebinds the current displacement state.
+       * @param displacement Displacement field.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWork& setDisplacement(const State& displacement)
       {
         m_displacement = std::cref(displacement);
@@ -121,6 +126,7 @@ namespace Rodin::Solid
       /**
        * @brief Sets the quadrature order for both residual and tangent.
        * @param order Polynomial order (0 = auto: 2 * max(fe order))
+       * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setQuadratureOrder(size_t order)
       {
@@ -134,6 +140,8 @@ namespace Rodin::Solid
        * The input is propagated to every quadrature point in both
        * @c Residual() and @c Tangent() integrators, ensuring they see the
        * same fiber directions, activation parameters, etc.
+       * @param input Input data.
+       * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setInput(InputFunction input)
       {
@@ -144,13 +152,15 @@ namespace Rodin::Solid
       /**
        * @brief Sets the output invoked at each quadrature point by @c commit().
        *
-       * The output is the dual of @c setInput(): it reads the law's cache
+       * The output is the dual of @c setInput(): it reads the prepared law
        * after evaluation, and is the extraction site for committed internal
        * variables, recovered stresses or diagnostics. It is invoked only by
        * @c commit(), never during assembly, so a caller controls exactly when
        * derived quantities are taken.
        *
        * @see <a href="class_rodin_1_1_solid_1_1_output.html">Solid::Output</a>
+       * @param output Function operand.
+       * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setOutput(OutputFunctionType output)
       {
@@ -166,7 +176,7 @@ namespace Rodin::Solid
        * constitutive evaluation of @c Residual() and @c Tangent() at the
        * current displacement -- the same kinematics, the same
        * @c ConstitutivePoint, the same @c Input -- and hands each resulting
-       * cache to the output. Callers use this to commit internal variables
+       * prepared law to the output. Callers use this to commit internal variables
        * once a nonlinear solve has converged, without recomputing the
        * kinematics themselves.
        *
@@ -190,24 +200,34 @@ namespace Rodin::Solid
         const size_t d = mesh.getSpaceDimension();
 
         auto stateGradient = Variational::Jacobian(displacement);
+        auto law = m_law;
 
         for (auto it = mesh.getCell(); it; ++it)
         {
           const auto& polytope = *it;
           const Index idx = polytope.getIndex();
-          const auto& stateFE = fes.getFiniteElement(d, idx);
 
-          const size_t effectiveOrder =
-            (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
+          size_t effectiveOrder = m_quadOrder;
+          if (effectiveOrder == 0)
+          {
+            const auto stateOrder = m_displacement.get().getOrder(polytope);
+            if (!stateOrder)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No automatic constitutive quadrature order is established. "
+                << "Specify it with setQuadratureOrder()." << Alert::Raise;
+            }
+            effectiveOrder = 2 * *stateOrder;
+          }
           const auto& qf =
-            QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+            QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
           const auto& quadrature = polytope.getQuadrature(qf);
           const size_t nqp = quadrature.getSize();
 
           for (size_t q = 0; q < nqp; ++q)
           {
             const auto& pt = quadrature.getPoint(q);
-            const Variational::IntegrationPoint ip(pt, &qf, q);
+            const Variational::IntegrationPoint ip(quadrature, q);
             const auto H = stateGradient.getValue(ip);
 
             KinematicState state(d);
@@ -220,15 +240,16 @@ namespace Rodin::Solid
             if (m_input)
               m_input(cp);
 
-            typename LawType::Cache cache;
-            m_law.setCache(cache, cp);
-
-            m_output(cp, cache);
+            law.setConstitutivePoint(cp);
+            m_output(cp, law);
           }
         }
       }
 
-      /// @brief Gets the constitutive law.
+      /**
+       * @brief Gets the constitutive law.
+       * @returns The constitutive law.
+       */
       const Law& getLaw() const
       {
         return m_law;
@@ -242,6 +263,8 @@ namespace Rodin::Solid
        *   \delta W^{\text{int}}(\mathbf{v})
        *     = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
        * @f]
+       * @param v Test shape function.
+       * @returns Internal-virtual-work residual integrator.
        */
       template <class Test>
       auto Residual(const Test& v) const
@@ -264,6 +287,9 @@ namespace Rodin::Solid
        *       : \nabla_0 \mathbf{v} \, dX
        * @f]
        * where @f$ \mathbf{A} = \partial\mathbf{P}/\partial\mathbf{F} @f$.
+       * @param u Trial shape function.
+       * @param v Test shape function.
+       * @returns Internal-virtual-work tangent integrator.
        */
       template <class Trial, class Test>
       auto Tangent(const Trial& u, const Test& v) const
@@ -276,8 +302,8 @@ namespace Rodin::Solid
         return integrator;
       }
 
-      // operator()(u, v) → ProblemBody{Tangent, Residual} is provided by the
-      // NonLinearFormIntegrator CRTP base.
+    // operator()(u, v) → ProblemBody{Tangent, Residual} is provided by the
+    // NonLinearFormIntegrator CRTP base.
 
     private:
       Law m_law;
@@ -287,10 +313,14 @@ namespace Rodin::Solid
       OutputFunctionType m_output;
   };
 
-  /// CTAD deduction guide for InternalVirtualWork
+  /**
+   * CTAD deduction guide for InternalVirtualWork
+   * @param law The constitutive law (stored by value)
+   * @param displacement The current displacement (stored by reference)
+   */
   template <class Law, class State>
-  InternalVirtualWork(const Law&,
-    const State&) -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
+  InternalVirtualWork(const Law& law, const State& displacement)
+    -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
 }
 
 #endif

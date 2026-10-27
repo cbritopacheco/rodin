@@ -168,9 +168,7 @@ TEST_F(LinearSystemTest, DenseMatrixEliminate)
   ls.getVector().resize(3);
 
   // Set up matrix and vector
-  ls.getOperator() << 2, 1, 0,
-                       1, 3, 1,
-                       0, 1, 2;
+  ls.getOperator() << 2, 1, 0, 1, 3, 1, 0, 1, 2;
 
   ls.getVector() << 1, 2, 3;
 
@@ -211,7 +209,7 @@ TEST_F(LinearSystemTest, ComplexLinearSystem)
   x.resize(2);
   b.resize(2);
 
-  Complex i(0, 1);  // imaginary unit
+  Complex i(0, 1); // imaginary unit
   A(0, 0) = Complex(1, 0);
   A(0, 1) = i;
   A(1, 0) = -i;
@@ -373,10 +371,7 @@ TEST_F(LinearSystemTest, MultipleDOFElimination)
   ls.getVector().resize(4);
   ls.getSolution().resize(4);
 
-  ls.getOperator() << 4, 1, 0, 0,
-                       1, 4, 1, 0,
-                       0, 1, 4, 1,
-                       0, 0, 1, 4;
+  ls.getOperator() << 4, 1, 0, 0, 1, 4, 1, 0, 0, 1, 4, 1, 0, 0, 1, 4;
   ls.getVector() << 1, 2, 3, 4;
 
   // Eliminate DOFs 0 and 3 simultaneously
@@ -453,9 +448,7 @@ TEST_F(LinearSystemTest, DenseEliminateThenSolve)
   ls.getVector().resize(3);
   ls.getSolution().resize(3);
 
-  ls.getOperator() << 2, -1, 0,
-                       -1, 2, -1,
-                        0, -1, 2;
+  ls.getOperator() << 2, -1, 0, -1, 2, -1, 0, -1, 2;
   ls.getVector() << 0, 1, 0;
 
   // Eliminate DOFs 0 and 2 with value 0
@@ -471,4 +464,287 @@ TEST_F(LinearSystemTest, DenseEliminateThenSolve)
   // So x = [0, 0.5, 0]
   EXPECT_DOUBLE_EQ(ls.getOperator()(1, 1), 2.0);
   EXPECT_NEAR(ls.getVector()(1), 1.0, 1e-10);
+}
+
+namespace
+{
+  template <class Operator>
+  class LinearSystemMergeTest : public ::testing::Test
+  {};
+
+  using MergeOperators = ::testing::Types<Matrix<Real>, SparseMatrix<Real>,
+    Matrix<Complex>, SparseMatrix<Complex>>;
+  TYPED_TEST_SUITE(LinearSystemMergeTest, MergeOperators);
+
+  /// @brief Constraint merging agrees with an independent change of coordinates, including block offsets.
+  TYPED_TEST(LinearSystemMergeTest, WeightedConstraintMatchesIndependentTransformation)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    constexpr Index Size = 6;
+    Matrix<Scalar> original = Matrix<Scalar>::Zero(Size, Size);
+    Vector<Scalar> rhs(Size);
+    for (Index i = 0; i < Size; ++i)
+    {
+      original(i, i) = Scalar(4 + i);
+      rhs(i) = Scalar(1 + 2 * i);
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        rhs(i) += Scalar(0, Real(i + 1) / 4);
+      if (i + 1 < Size)
+      {
+        Scalar coupling(-1);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          coupling += Scalar(0, 0.125);
+        original(i, i + 1) = coupling;
+        original(i + 1, i) = Math::conj(coupling);
+      }
+    }
+    for (const size_t offset : {0u, 2u})
+    {
+      SCOPED_TRACE(offset);
+      LinearSystem<Operator, Vector<Scalar>> system;
+      if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+        system.getOperator() = original.sparseView();
+      else
+        system.getOperator() = original;
+      system.getVector() = rhs;
+      system.getSolution() = Vector<Scalar>::Constant(Size, Scalar(-7));
+      IndexMap<std::pair<IndexArray, Vector<Scalar>>> constraints;
+      EXPECT_EQ(&system.merge(constraints, offset), &system);
+      EXPECT_EQ((Matrix<Scalar>(system.getOperator()) - original).norm(), 0);
+      EXPECT_EQ((system.getVector() - rhs).norm(), 0);
+      IndexArray children(2);
+      children << 1, 2;
+      Vector<Scalar> coefficients(2);
+      coefficients << Scalar(0.25), Scalar(-0.5);
+      if constexpr (std::is_same_v<Scalar, Complex>)
+      {
+        coefficients[0] += Scalar(0, 0.5);
+        coefficients[1] -= Scalar(0, 0.25);
+      }
+      constraints.emplace(0, std::pair{children, coefficients});
+
+      const Index parent = static_cast<Index>(offset);
+      Matrix<Scalar> transform = Matrix<Scalar>::Identity(Size, Size);
+      transform.row(parent).setZero();
+      transform(parent, parent + 1) = coefficients[0];
+      transform(parent, parent + 2) = coefficients[1];
+      Matrix<Scalar> expected = transform.adjoint() * original * transform;
+      Vector<Scalar> expectedRHS = transform.adjoint() * rhs;
+      expected.row(parent).setZero();
+      expected(parent, parent) = Scalar(1);
+      expected(parent, parent + 1) = -coefficients[0];
+      expected(parent, parent + 2) = -coefficients[1];
+      const Vector<Scalar> expectedSolution = expected.fullPivLu().solve(expectedRHS);
+
+      EXPECT_EQ(&system.merge(constraints, offset), &system);
+      const Matrix<Scalar> actual = system.getOperator();
+      EXPECT_LT((actual - expected).norm(), 1e-12);
+      EXPECT_LT((system.getVector() - expectedRHS).norm(), 1e-12);
+      const Vector<Scalar> solution = actual.fullPivLu().solve(system.getVector());
+      EXPECT_LT((solution - expectedSolution).norm(), 1e-12);
+      EXPECT_LT((transform.adjoint() * (original * solution - rhs)).norm(), 1e-12);
+      EXPECT_LT(std::abs(solution(parent) - coefficients[0] * solution(parent + 1) -
+                  coefficients[1] * solution(parent + 2)),
+        1e-12);
+      EXPECT_EQ(
+        (system.getSolution() - Vector<Scalar>::Constant(Size, Scalar(-7))).norm(), 0);
+    }
+  }
+
+  /// @brief Unit-modulus identifications preserve a unique identity-system solution.
+  TYPED_TEST(LinearSystemMergeTest, PhaseConstraintPreservesUniqueSolution)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    const Scalar phase = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(0, 1);
+      else
+        return Scalar(-1);
+    }();
+    LinearSystem<Operator, Vector<Scalar>> system;
+    const Matrix<Scalar> identity = Matrix<Scalar>::Identity(2, 2);
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      system.getOperator() = identity.sparseView();
+    else
+      system.getOperator() = identity;
+    Vector<Scalar> exact(2);
+    exact << phase, Scalar(1);
+    system.getVector() = exact;
+    IndexArray children(1);
+    children << 1;
+    Vector<Scalar> coefficients(1);
+    coefficients << phase;
+    IndexMap<std::pair<IndexArray, Vector<Scalar>>> constraints;
+    constraints.emplace(0, std::pair{children, coefficients});
+    system.merge(constraints);
+    const Matrix<Scalar> actual = system.getOperator();
+    EXPECT_EQ(actual(1, 1), Scalar(2));
+    EXPECT_EQ(system.getVector()[1], Scalar(2));
+    const auto factorization = actual.fullPivLu();
+    ASSERT_EQ(factorization.rank(), 2);
+    const Vector<Scalar> solution = factorization.solve(system.getVector());
+    EXPECT_LT((solution - exact).norm(), 1e-13);
+  }
+
+  /// @brief Copies own all three arrays and moves retain their values for dense and sparse scalar types.
+  TYPED_TEST(LinearSystemMergeTest, CopyAndMoveOwnOperatorLoadAndStoredSolution)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    using System = LinearSystem<Operator, Vector<Scalar>>;
+    Matrix<Scalar> expected(3, 3);
+    expected << 4, -1, 0, -1, 5, 2, 0, 2, 6;
+    Vector<Scalar> load(3), solution(3);
+    load << 1, 2, 3;
+    solution << -1, -2, -3;
+    if constexpr (std::is_same_v<Scalar, Complex>)
+    {
+      expected(0, 1) += Scalar(0, 0.25);
+      expected(1, 0) -= Scalar(0, 0.25);
+      load(0) += Scalar(0, 0.5);
+      solution(2) += Scalar(0, 0.75);
+    }
+    const auto verify = [&](const System& value) {
+      EXPECT_EQ((Matrix<Scalar>(value.getOperator()) - expected).norm(), 0);
+      EXPECT_EQ((value.getVector() - load).norm(), 0);
+      EXPECT_EQ((value.getSolution() - solution).norm(), 0);
+    };
+    System original;
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      original.getOperator() = expected.sparseView();
+    else
+      original.getOperator() = expected;
+    original.getVector() = load;
+    original.getSolution() = solution;
+    System copied(original);
+    original.getOperator().setZero();
+    original.getVector().setZero();
+    original.getSolution().setZero();
+    verify(copied);
+    System assigned;
+    EXPECT_EQ(&(assigned = copied), &assigned);
+    copied.getOperator().setZero();
+    copied.getVector().setZero();
+    copied.getSolution().setZero();
+    verify(assigned);
+    System moved(std::move(assigned));
+    verify(moved);
+    System destination;
+    EXPECT_EQ(&(destination = std::move(moved)), &destination);
+    verify(destination);
+    auto* alias = &destination;
+    EXPECT_EQ(&(destination = *alias), &destination);
+    verify(destination);
+    EXPECT_EQ(&(destination = std::move(*alias)), &destination);
+    verify(destination);
+  }
+
+  /// @brief The public base interface forwards mutable/const access and offset constraints to the concrete system.
+  TYPED_TEST(LinearSystemMergeTest, BaseInterfaceForwardsAccessAndConstraints)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    using System = LinearSystem<Operator, Vector<Scalar>>;
+    System system;
+    typename System::Parent& base = system;
+    const typename System::Parent& constBase = base;
+    const System& constSystem = system;
+    EXPECT_EQ(&base.getOperator(), &system.getOperator());
+    EXPECT_EQ(&base.getVector(), &system.getVector());
+    EXPECT_EQ(&base.getSolution(), &system.getSolution());
+    EXPECT_EQ(&constBase.getOperator(), &constSystem.getOperator());
+    EXPECT_EQ(&constBase.getVector(), &constSystem.getVector());
+    EXPECT_EQ(&constBase.getSolution(), &constSystem.getSolution());
+    Matrix<Scalar> original(4, 4);
+    original << 4, -1, 0, 0, -1, 4, -0.5, 0, 0, -0.5, 4, -1, 0, 0, -1, 4;
+    Vector<Scalar> rhs(4);
+    rhs << 1, 3, 5, 7;
+    Scalar prescribed(2);
+    if constexpr (std::is_same_v<Scalar, Complex>)
+    {
+      rhs(1) += Scalar(0, 0.5);
+      prescribed += Scalar(0, 1);
+    }
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      base.getOperator() = original.sparseView();
+    else
+      base.getOperator() = original;
+    base.getVector() = rhs;
+    base.getSolution() = Vector<Scalar>::Constant(4, Scalar(-9));
+    EXPECT_EQ((Matrix<Scalar>(constBase.getOperator()) - original).norm(), 0);
+    EXPECT_EQ((constBase.getVector() - rhs).norm(), 0);
+    IndexArray children(1);
+    children << 1;
+    Vector<Real> weights(1);
+    weights << 0.5;
+    IndexMap<std::pair<IndexArray, Vector<Real>>> constraints;
+    constraints.emplace(0, std::pair{children, weights});
+    Matrix<Scalar> transform = Matrix<Scalar>::Identity(4, 4);
+    transform.row(1).setZero();
+    transform(1, 2) = Scalar(0.5);
+    Matrix<Scalar> expected = transform.adjoint() * original * transform;
+    Vector<Scalar> expectedRHS = transform.adjoint() * rhs;
+    expected.row(1).setZero();
+    expected(1, 1) = Scalar(1);
+    expected(1, 2) = Scalar(-0.5);
+    EXPECT_EQ(&base.merge(constraints, 1), &base);
+    EXPECT_LT((Matrix<Scalar>(constBase.getOperator()) - expected).norm(), 1e-12);
+    EXPECT_LT((constBase.getVector() - expectedRHS).norm(), 1e-12);
+    IndexMap<Scalar> essential;
+    essential.emplace(0, prescribed);
+    expectedRHS -= expected.col(3) * prescribed;
+    expectedRHS(3) = prescribed;
+    expected.row(3).setZero();
+    expected.col(3).setZero();
+    expected(3, 3) = Scalar(1);
+    EXPECT_EQ(&base.eliminate(essential, 3), &base);
+    const Matrix<Scalar> actual = constBase.getOperator();
+    EXPECT_LT((actual - expected).norm(), 1e-12);
+    EXPECT_LT((constBase.getVector() - expectedRHS).norm(), 1e-12);
+    const Vector<Scalar> result = actual.fullPivLu().solve(constBase.getVector());
+    EXPECT_LT((actual * result - expectedRHS).norm(), 1e-12);
+    EXPECT_LT(std::abs(result(1) - Scalar(0.5) * result(2)), 1e-12);
+    EXPECT_LT(std::abs(result(3) - prescribed), 1e-12);
+    EXPECT_EQ(
+      (constBase.getSolution() - Vector<Scalar>::Constant(4, Scalar(-9))).norm(), 0);
+  }
+}
+
+/// @brief Repeated master entries have the same meaning as their summed coefficient.
+TYPED_TEST(LinearSystemMergeTest, RepeatedMasters)
+{
+  using Operator = TypeParam;
+  using Scalar = typename Operator::Scalar;
+  const Matrix<Scalar> matrix = Matrix<Scalar>::Identity(3, 3);
+  LinearSystem<Operator, Vector<Scalar>> repeated, unique;
+  for (auto* system : {&repeated, &unique})
+  {
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      system->getOperator() = matrix.sparseView();
+    else
+      system->getOperator() = matrix;
+    system->getVector() = Vector<Scalar>::Ones(3);
+  }
+  IndexMap<std::pair<IndexArray, Vector<Scalar>>> constraints;
+  IndexArray masters(3);
+  masters << 1, 1, 2;
+  Vector<Scalar> coefficients(3);
+  coefficients << Scalar(0.25), Scalar(0.5), Scalar(0.25);
+  if constexpr (std::is_same_v<Scalar, Complex>)
+    coefficients[0] += Scalar(0, 0.125);
+  constraints[0] = {masters, coefficients};
+  repeated.merge(constraints);
+  masters.resize(2);
+  masters << 1, 2;
+  Vector<Scalar> combined(2);
+  combined << coefficients[0] + coefficients[1], coefficients[2];
+  constraints[0] = {masters, combined};
+  unique.merge(constraints);
+  EXPECT_LT(
+    (Matrix<Scalar>(repeated.getOperator()) - Matrix<Scalar>(unique.getOperator()))
+      .norm(),
+    1e-14);
+  EXPECT_LT((repeated.getVector() - unique.getVector()).norm(), 1e-14);
 }

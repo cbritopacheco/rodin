@@ -31,10 +31,19 @@ namespace Rodin::QF
   class WitherdenVincent final : public QuadratureFormulaBase
   {
     public:
-      /// @brief Highest tabulated degree for @p g, or zero if unsupported.
+      /**
+       * @brief Highest tabulated degree for @p g, or zero if unsupported.
+       * @param g Mesh entity used by this operation.
+       * @returns The max degree.
+       */
       static size_t getMaxDegree(Geometry::Polytope::Type g);
 
-      /// @brief Whether a rule of strength @p degree is tabulated for @p g.
+      /**
+       * @brief Whether a rule of strength @p degree is tabulated for @p g.
+       * @param degree Polynomial degree.
+       * @param g Mesh entity used by this operation.
+       * @returns Whether a quadrature formula of the requested strength is available for the geometry.
+       */
       static bool isAvailable(size_t degree, Geometry::Polytope::Type g)
       {
         return degree >= 1 && degree <= getMaxDegree(g);
@@ -43,11 +52,22 @@ namespace Rodin::QF
       /**
        * @brief Constructs the rule of strength @p degree on @p g.
        * @pre isAvailable(degree, g)
+       * @param degree Polynomial degree.
+       * @param g Mesh entity used by this operation.
        */
       WitherdenVincent(size_t degree, Geometry::Polytope::Type g);
 
-      /// @brief Copies a tabulated quadrature formula.
-      WitherdenVincent(const WitherdenVincent&) = default;
+      /// @returns Read-only views of the retained reference samples.
+      Optional<Samples> getSamples() const override
+      {
+        return Samples{m_points, m_data + m_dimension, m_dimension + 1};
+      }
+
+      /**
+       * @brief Copies a tabulated quadrature formula.
+       * @param other Object to copy from.
+       */
+      WitherdenVincent(const WitherdenVincent& other) = default;
 
       size_t getSize() const override
       {
@@ -66,13 +86,20 @@ namespace Rodin::QF
         return m_points[i];
       }
 
-      /// @brief The element this rule is defined on.
+      /**
+       * @brief The element this rule is defined on.
+       * @returns The geometry.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;
       }
 
-      WitherdenVincent* copy() const noexcept override
+      /**
+       * @brief Copies the concrete formula without regenerating its samples.
+       * @returns A new formula owned by the caller.
+       */
+      WitherdenVincent* copy() const noexcept
       {
         return new WitherdenVincent(*this);
       }

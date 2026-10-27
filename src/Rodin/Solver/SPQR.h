@@ -11,7 +11,7 @@
  * This header provides a wrapper for SPQR (SuiteSparseQR) from SuiteSparse,
  * a high-performance direct solver using multifrontal sparse QR factorization.
  *
- * ## Algorithm
+ * # Algorithm
  * SPQR computes:
  * @f[
  *   AP = QR
@@ -20,14 +20,14 @@
  * and @f$ R @f$ is upper triangular. The multifrontal method processes the
  * matrix efficiently using an elimination tree.
  *
- * ## Applicability
+ * # Applicability
  * - General sparse matrices
  * - Rank-deficient systems
  * - Least-squares problems
  * - Overdetermined systems
  * - Problems requiring excellent numerical stability
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -179,9 +179,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~SPQR() = default;
 
       /**
@@ -258,8 +256,10 @@ namespace Rodin::Solver
       }
 
     private:
-      /// Underlying Eigen SPQR solver
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen SPQR solver
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

@@ -39,7 +39,7 @@ namespace Rodin::Assembly
    * and test finite element spaces, as well as lists of local and global
    * bilinear form integrators.
    *
-   * ## Local vs Global Integrators
+   * # Local vs Global Integrators
    * - **Local integrators**: Operate on individual elements @f$ K @f$, computing
    *   contributions @f$ a_K(\phi_j, \psi_i) @f$ for basis functions with support
    *   on @f$ K @f$.
@@ -49,7 +49,7 @@ namespace Rodin::Assembly
    * @tparam TrialFES Trial finite element space type
    * @tparam TestFES Test finite element space type
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Uh(mesh), Vh(mesh);
    * auto lbfis = // list of local integrators
@@ -151,20 +151,21 @@ namespace Rodin::Assembly
       std::reference_wrapper<GlobalBilinearFormIntegratorBaseListType>  m_gbfis;   ///< Global integrators
   };
 
-  /// @brief Template argument deduction guide for BilinearFormAssemblyInput
+  /**
+   * @brief Template argument deduction guide for BilinearFormAssemblyInput
+   * @param trialFES Trial finite element space
+   * @param testFES Test finite element space
+   * @param lbfis List of local bilinear form integrators
+   * @param gbfis List of global bilinear form integrators
+   */
   template <class TrialFES, class TestFES>
-  BilinearFormAssemblyInput(
-      const TrialFES&, const TestFES&,
-      FormLanguage::List<
-        Variational::LocalBilinearFormIntegratorBase<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&,
-      FormLanguage::List<
-        Variational::GlobalBilinearFormIntegratorBase<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&)
+  BilinearFormAssemblyInput(const TrialFES& trialFES, const TestFES& testFES,
+    FormLanguage::List<Variational::LocalBilinearFormIntegratorBase<
+      decltype(std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>& lbfis,
+    FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase<
+      decltype(std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>& gbfis)
     -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
   /**
@@ -179,7 +180,7 @@ namespace Rodin::Assembly
    *
    * @tparam FES Finite element space type
    *
-   * ## Usage Example
+   * # Usage Example
    * ```cpp
    * P1 Vh(mesh);
    * auto lfis = // list of linear form integrators
@@ -495,11 +496,11 @@ namespace Rodin::Assembly
        * @brief Constructs identification Dirichlet BC assembly input.
        *
        * @param u Slave trial function to constrain.
-       * @param v Shape-function expression used as the master value.
+       * @param v Shape-function expression with writable evaluation state.
        * @param essBdr Boundary attributes where the condition applies.
        */
-      DirichletBCShapeFunctionAssemblyInput(const OperandType& u, const ValueType& v,
-        const FlatSet<Geometry::Attribute>& essBdr)
+      DirichletBCShapeFunctionAssemblyInput(
+        const OperandType& u, ValueType& v, const FlatSet<Geometry::Attribute>& essBdr)
         : m_u(u),
           m_v(v),
           m_essBdr(essBdr)
@@ -516,9 +517,12 @@ namespace Rodin::Assembly
 
       /**
        * @brief Gets the shape-function expression on the right-hand side.
-       * @return Reference to the master expression.
+       * @return Non-const reference to the borrowed master expression.
+       *
+       * The input keeps its bindings fixed; assembly updates the expression
+       * through setIntegrationPoint() while evaluating its basis.
        */
-      const ValueType& getShapeFunction() const
+      ValueType& getShapeFunction() const
       {
         return m_v.get();
       }
@@ -534,7 +538,7 @@ namespace Rodin::Assembly
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-      std::reference_wrapper<const ValueType> m_v;
+      std::reference_wrapper<ValueType> m_v;
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
   };
 

@@ -36,9 +36,9 @@ namespace Rodin::Alert
    *
    * Enables terminal colorization for the output stream using the
    * termcolor library.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const StylizeT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const StylizeT& tag)
   {
     os << termcolor::colorize;
     return os;

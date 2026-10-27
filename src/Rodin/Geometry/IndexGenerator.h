@@ -25,14 +25,11 @@
 
 namespace Rodin
 {
-  /**
-   * @brief Sentinel type for default-constructed iterators.
-   */
-  struct DefaultSentinelT {};
+  /// @brief Sentinel type for default-constructed iterators.
+  struct DefaultSentinelT
+  {};
 
-  /**
-   * @brief Default sentinel value.
-   */
+  /// @brief Default sentinel value.
   inline constexpr DefaultSentinelT DefaultSentinel;
 }
 
@@ -52,9 +49,7 @@ namespace Rodin::Geometry
   class IndexGeneratorBase : public Copyable, public Moveable
   {
     public:
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~IndexGeneratorBase() = default;
 
       /**
@@ -77,6 +72,10 @@ namespace Rodin::Geometry
 
       /**
        * @brief Creates a copy of this generator.
+       *
+       * The copy retains the current position. Owned index containers are
+       * copied independently; iterator-backed generators continue to borrow
+       * their external range.
        * @returns Pointer to a new generator
        */
       virtual IndexGeneratorBase* copy() const noexcept override = 0;
@@ -97,23 +96,23 @@ namespace Rodin::Geometry
   class EmptyIndexGenerator final : public IndexGeneratorBase
   {
     public:
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       constexpr EmptyIndexGenerator() = default;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       constexpr EmptyIndexGenerator(EmptyIndexGenerator&& other)
-        :  IndexGeneratorBase(std::move(other))
+        : IndexGeneratorBase(std::move(other))
       {}
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       constexpr EmptyIndexGenerator(const EmptyIndexGenerator& other)
-        :  IndexGeneratorBase(other)
+        : IndexGeneratorBase(other)
       {}
 
       /**
@@ -178,27 +177,32 @@ namespace Rodin::Geometry
        * @param[in] start First index (inclusive)
        * @param[in] end Last index (exclusive)
        */
-      constexpr
-      BoundedIndexGenerator(Index start, Index end)
-        : m_start(start), m_end(end), m_curr(start)
+      constexpr BoundedIndexGenerator(Index start, Index end)
+        : m_start(start),
+          m_end(end),
+          m_curr(start)
       {}
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      constexpr
-      BoundedIndexGenerator(BoundedIndexGenerator&& other)
-        :  IndexGeneratorBase(std::move(other)),
-          m_start(other.m_start), m_end(other.m_end), m_curr(other.m_curr)
+      constexpr BoundedIndexGenerator(BoundedIndexGenerator&& other)
+        : IndexGeneratorBase(std::move(other)),
+          m_start(other.m_start),
+          m_end(other.m_end),
+          m_curr(other.m_curr)
       {}
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
-      constexpr
-      BoundedIndexGenerator(const BoundedIndexGenerator& other)
-        :  IndexGeneratorBase(other),
-          m_start(other.m_start), m_end(other.m_end), m_curr(other.m_end)
+      constexpr BoundedIndexGenerator(const BoundedIndexGenerator& other)
+        : IndexGeneratorBase(other),
+          m_start(other.m_start),
+          m_end(other.m_end),
+          m_curr(other.m_curr)
       {}
 
       /**
@@ -272,23 +276,28 @@ namespace Rodin::Geometry
        * @param[in] end End iterator
        */
       IteratorIndexGenerator(Iterator it, Iterator end)
-        : m_it(it), m_end(end)
+        : m_it(it),
+          m_end(end)
       {}
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       IteratorIndexGenerator(IteratorIndexGenerator&& other)
         : IndexGeneratorBase(std::move(other)),
-          m_it(std::move(other.m_it)), m_end(std::move(other.m_end))
+          m_it(std::move(other.m_it)),
+          m_end(std::move(other.m_end))
       {}
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       IteratorIndexGenerator(const IteratorIndexGenerator& other)
         : IndexGeneratorBase(other),
-          m_it(other.m_it), m_end(other.m_end)
+          m_it(other.m_it),
+          m_end(other.m_end)
       {}
 
       /**
@@ -363,6 +372,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       VectorIndexGenerator(VectorIndexGenerator&& other)
         : IndexGeneratorBase(std::move(other)),
@@ -372,11 +382,12 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       VectorIndexGenerator(const VectorIndexGenerator& other)
         : IndexGeneratorBase(other),
           m_indices(other.m_indices),
-          m_it(other.m_it)
+          m_it(m_indices.begin() + (other.m_it - other.m_indices.begin()))
       {}
 
       /**
@@ -460,6 +471,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       SetIndexGenerator(SetIndexGenerator&& other)
         : IndexGeneratorBase(std::move(other)),
@@ -469,11 +481,12 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       SetIndexGenerator(const SetIndexGenerator& other)
         : IndexGeneratorBase(other),
           m_indices(other.m_indices),
-          m_it(other.m_it)
+          m_it(m_indices.begin() + (other.m_it - other.m_indices.begin()))
       {}
 
       /**

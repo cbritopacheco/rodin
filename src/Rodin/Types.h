@@ -88,65 +88,91 @@ namespace Rodin
   template <class T>
   using Deque = boost::container::deque<T>;
 
-  /// Standard type for representing stacks.
-  /// @ingroup RodinTypes
+  /**
+   * Standard type for representing stacks.
+   * @ingroup RodinTypes
+   */
   template <class T, class Container = Deque<T>>
   using Stack = std::stack<T, Container>;
 
-  /// Standard flat set type.
-  /// @ingroup RodinTypes
+  /**
+   * Standard flat set type.
+   * @ingroup RodinTypes
+   */
   template <class T>
   using FlatSet = boost::container::flat_set<T>;
 
-  /// Standard unordered set type.
-  /// @ingroup RodinTypes
+  /**
+   * Standard unordered set type.
+   * @ingroup RodinTypes
+   */
   template <class T>
   using UnorderedSet = boost::unordered_set<T>;
 
-  /// Standard ordered map type.
-  /// @ingroup RodinTypes
+  /**
+   * Standard ordered map type.
+   * @ingroup RodinTypes
+   */
   template <class K, class T>
   using Map = boost::container::map<K, T>;
 
-  /// Standard unordered map type.
-  /// @ingroup RodinTypes
+  /**
+   * Standard unordered map type.
+   * @ingroup RodinTypes
+   */
   template <class ... Params>
   using UnorderedMap = boost::unordered_map<Params...>;
 
-  /// Standard flat map type.
-  /// @ingroup RodinTypes
+  /**
+   * Standard flat map type.
+   * @ingroup RodinTypes
+   */
   template <class K, class T>
   using FlatMap = boost::container::flat_map<K, T>;
 
-  /// Standard set of indices.
-  /// @ingroup RodinTypes
+  /**
+   * Standard set of indices.
+   * @ingroup RodinTypes
+   */
   using IndexSet = FlatSet<Index>;
 
-  /// Standard vector of indices.
-  /// @ingroup RodinTypes
+  /**
+   * Standard vector of indices.
+   * @ingroup RodinTypes
+   */
   using IndexVector = std::vector<Index>;
 
-  /// Standard map of indices to arbitrary types.
-  /// @ingroup RodinTypes
+  /**
+   * Standard map of indices to arbitrary types.
+   * @ingroup RodinTypes
+   */
   template <class T>
   using IndexMap = FlatMap<Index, T>;
 
-  /// Standard bitset template with fixed size.
-  /// @ingroup RodinTypes
+  /**
+   * Standard bitset template with fixed size.
+   * @ingroup RodinTypes
+   */
   template <size_t Size>
   using BitSet = std::bitset<Size>;
 
-  /// Standard bitset with 2 bits.
-  /// @ingroup RodinTypes
+  /**
+   * Standard bitset with 2 bits.
+   * @ingroup RodinTypes
+   */
   using BitSet2 = std::bitset<2>;
 
-  /// Standard optional type wrapper.
-  /// @ingroup RodinTypes
+  /**
+   * Standard optional type wrapper.
+   * @ingroup RodinTypes
+   */
   template <class T>
   using Optional = std::optional<T>;
 
-  /// Standard string view type.
-  /// @ingroup RodinTypes
+  /**
+   * Standard string view type.
+   * @ingroup RodinTypes
+   */
   using StringView = std::string_view;
 
 #if __cpp_size_t_suffix < 202011L

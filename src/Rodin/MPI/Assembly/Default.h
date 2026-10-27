@@ -22,9 +22,7 @@
 
 namespace Rodin::Assembly
 {
-  /**
-   * @brief Selects MPI assembly when only the trial/test context is MPI.
-   */
+  /// @brief Selects MPI assembly when only the trial/test context is MPI.
   template <>
   class Default<Context::MPI>
   {
@@ -39,9 +37,7 @@ namespace Rodin::Assembly
       using Type = MPI<LinearAlgebraType, Object>;
   };
 
-  /**
-   * @brief Selects MPI assembly when both operand and assembly contexts are MPI.
-   */
+  /// @brief Selects MPI assembly when both operand and assembly contexts are MPI.
   template <>
   class Default<Context::MPI, Context::MPI>
   {

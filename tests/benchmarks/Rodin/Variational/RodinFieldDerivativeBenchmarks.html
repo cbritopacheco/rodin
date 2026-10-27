@@ -1,0 +1,9 @@
+<p>Public grid-function differential evaluation across binding protocols.</p>
+<h2>Measured operation</h2>
+<p>Measures field derivatives rather than individual shape derivatives.</p>
+<h3>Mathematical foundation</h3>
+<p>Degree-one scopes interpolate the affine field \(f(x)=\eta(1+\sum_j(j+1)x_j)\). Higher-order scopes use \(f(x)=\eta(1+\sum_j(j+1)(x_j+x_j^2))\), whose varying derivative checks sample dependence. Vector fields have components \(u_c=(c+1)f\). Here \(\eta=1\) or \(1+i/2\). Interpolation applies the space&#x27;s DOF functionals; no coefficient layout or nodal-value interpretation is assumed. Analytic gradients/Jacobians, perturbation rejection and coefficient scaling \(1\to2\to1\) are checked outside timing. Repeating the timed protocol must reproduce every retained entry exactly; different protocols are not required to have identical floating-point association.</p>
+<h3>Architecture</h3>
+<p>The same retained cell and mapped samples are used by direct geometric-point, provenance-only integration-point and owner/index-associated protocols. Geometry, scalar reference tables, interpolation and output buffers are prepared before timing. Public differential evaluation and output assignment remain timed. This isolates the source fallback consumed by error integration without changing convergence quadrature, meshes, norms or solver requirements. Native P1 remains a separate control: an associated binding does not promise that every differential implementation consumes reference tables. These are local, opt-in component benchmarks, not CTest or CI timing gates.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

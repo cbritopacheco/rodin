@@ -12,14 +12,14 @@
  * family. These are high-order-stable elements with continuous (H¹) basis
  * functions across element boundaries.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  * The H1-conforming Lagrange space of degree k is defined as:
  * @f[
  *   V_h^k = \{u \in H^1(\Omega) : u|_K \in \mathbb{P}_k(K) \, \forall K \in \mathcal{T}_h\}
  * @f]
  * where @f$ \mathbb{P}_k(K) @f$ denotes polynomials of degree at most k on element @f$ K @f$.
  *
- * ## Features
+ * # Features
  * - Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)
  * - H¹-conforming (continuous across element boundaries)
  * - Lagrange nodal basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$
@@ -27,14 +27,14 @@
  * - Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge
  * - High-order-stable implementation
  *
- * ## Degree of Freedom (DOF) Formulas
+ * # Degree of Freedom (DOF) Formulas
  * - Segment: @f$ k+1 @f$
  * - Triangle: @f$ \frac{(k+1)(k+2)}{2} @f$
  * - Quadrilateral: @f$ (k+1)^2 @f$
  * - Tetrahedron: @f$ \frac{(k+1)(k+2)(k+3)}{6} @f$
  * - Wedge: @f$ (k+1) \cdot \frac{(k+1)(k+2)}{2} @f$
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * // H1 element of degree 2 (quadratic)
  * RealH1Element<2> h1_2(Polytope::Type::Triangle);

@@ -23,6 +23,8 @@ add_library(Rodin::FormLanguage ALIAS RodinFormLanguage)
 set_target_properties(RodinFormLanguage PROPERTIES EXPORT_NAME FormLanguage)
 
 # ---- Link targets ----------------------------------------------------------
+target_link_libraries(RodinFormLanguage PUBLIC Rodin::Alert)
+
 target_include_directories(RodinFormLanguage
   PUBLIC
     $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>

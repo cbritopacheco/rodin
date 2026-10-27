@@ -8,10 +8,25 @@ contracts that assembly/solver changes are expected to preserve.
 
 ## Assembly (src/Rodin/Assembly/)
 
+Named kernels return entries with test rows and trial columns, already using
+the trial-linear/test-conjugate-linear convention. `ScatterMap` and the PETSc
+named insertion paths insert these values unchanged on both first assembly
+and reassembly. Conjugating at insertion changes complex coefficients and is
+not a storage conversion. See the complex named-form regressions for matched
+Integral operators and the PETSc local/distributed variants.
+
 - Backends are mesh-iteration strategies: `Sequential` and `OpenMP`
   (per-thread local evaluation, then merge). `Default.h` selects by build
   configuration. The MPI and PETSc trees provide their own mirrored
   backends.
+- `AssemblyBase::execute` is non-const across all backends. Assemblers may
+  retain sparsity maps and working storage between calls. Input wrappers
+  remain const; identification inputs explicitly borrow a non-const
+  shape-function expression for updating its integration-point cursor.
+  Local named-form kernels also use non-const `compute`, with
+  one copy per assembly or OpenMP worker. Concurrent executions must use
+  separate assembler instances. Custom backends must override non-const
+  `execute`; const assembler callers must hold a non-const instance instead.
 - Inputs are typed bundles: `BilinearFormAssemblyInput<TrialFES, TestFES>`
   (and the linear counterpart) carry the spaces plus **two integrator
   lists: local (per-polytope quadrature) and global** (whole-mesh

@@ -89,23 +89,30 @@ namespace Rodin::Advection
    *
    * @par Parameters
    * - @p epsInPhys: desired inward physical offset when the boundary is hit. The effective
-   *   offset is @c max(epsInPhys, 50*sqrt(machine_epsilon)).
+   *   offset is @c max(10*machine_epsilon, min(epsInPhys, 0.1*abs(dt))).
    *
    * @par Complexity
    * Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.
    */
   class StopInsideBoundaryPolicy
   {
+      /// @brief Desired physical inward offset in mesh-coordinate units; legacy absolute default.
+      static constexpr Real DefaultInwardOffset = Real(1e-12);
+      /// @brief Heuristic multiplier of machine epsilon for the absolute inward-offset floor.
+      static constexpr Real NudgeRoundoffFactor = Real(10);
+      /// @brief Heuristic cap at one tenth of |dt|; assumes compatible numerical coordinate/time scales.
+      static constexpr Real NudgeTimeStepFraction = Real(0.1);
+
     public:
       /**
        * @brief Constructs the boundary policy.
        *
-       * @param[in] dt          Signed time step used by the tracer (kept for API symmetry).
+       * @param[in] dt          Signed time step used to cap the inward offset.
        * @param[in] mesh        @ref Geometry::Mesh "Mesh" on which tracing occurs.
        * @param[in] epsInPhys Inward physical offset used to place the footpoint strictly inside.
        */
-      StopInsideBoundaryPolicy(
-        Real dt, const Geometry::Mesh<Context::Local>& mesh, Real epsInPhys = Real(1e-12))
+      StopInsideBoundaryPolicy(Real dt, const Geometry::Mesh<Context::Local>& mesh,
+        Real epsInPhys = DefaultInwardOffset)
         : m_dt(dt),
           m_mesh(mesh),
           m_epsInPhys(epsInPhys)
@@ -191,8 +198,8 @@ namespace Rodin::Advection
 
         // -------- (4) nudge inside in physical space (inside = -nhat) --------
         const Real epsMachine = std::numeric_limits<Real>::epsilon();
-        const Real epsFloor = Real(10) * epsMachine;
-        const Real epsDt = Real(0.1) * std::abs(m_dt);
+        const Real epsFloor = NudgeRoundoffFactor * epsMachine;
+        const Real epsDt = NudgeTimeStepFraction * std::abs(m_dt);
         const Real epsIn = std::max(epsFloor, std::min(m_epsInPhys, epsDt));
 
         x -= epsIn * nhat;
@@ -268,15 +275,22 @@ namespace Rodin::Advection
    *   too large relative to local mesh size or curvature of `phi`, the correction will be poor.
    *
    * @par Parameters
-   * - `dt`: Signed step size of the tracer (kept for API symmetry; not used directly here).
+   * - `dt`: Signed step size used to cap the inward offset.
    * - `mesh`: @ref Geometry::Mesh "Mesh" on which tracing occurs.
    * - `phi`: Scalar field/function to correct (typically the advected field itself in level-set use).
    * - `epsInPhys`: Desired inward physical offset. The effective shift is
-   *   `max(epsInPhys, 50*sqrt(machine_epsilon))`.
+   *   `max(10*machine_epsilon, min(epsInPhys, 0.1*abs(dt)))`.
    */
   template <class Field>
   class TaylorBoundaryShiftPolicy
   {
+      /// @brief Desired physical inward offset in mesh-coordinate units; legacy absolute default.
+      static constexpr Real DefaultInwardOffset = Real(1e-12);
+      /// @brief Heuristic multiplier of machine epsilon for the absolute inward-offset floor.
+      static constexpr Real NudgeRoundoffFactor = Real(10);
+      /// @brief Heuristic cap at one tenth of |dt|; assumes compatible numerical coordinate/time scales.
+      static constexpr Real NudgeTimeStepFraction = Real(0.1);
+
     public:
       /**
        * @brief Constructs the boundary policy.
@@ -286,7 +300,7 @@ namespace Rodin::Advection
        * @param epsInPhys Inward physical offset used after a boundary hit.
        */
       TaylorBoundaryShiftPolicy(Real dt, const Geometry::Mesh<Context::Local>& mesh,
-        const Field& phi, Real epsInPhys = Real(1e-12))
+        const Field& phi, Real epsInPhys = DefaultInwardOffset)
         : m_dt(dt),
           m_mesh(mesh),
           m_phi(phi),
@@ -361,8 +375,8 @@ namespace Rodin::Advection
 
         // ---- (4) inward nudge: xNew = xHit - epsIn * nD
         const Real epsMachine = std::numeric_limits<Real>::epsilon();
-        const Real epsFloor = Real(10) * epsMachine;
-        const Real epsDt = Real(0.1) * std::abs(m_dt);
+        const Real epsFloor = NudgeRoundoffFactor * epsMachine;
+        const Real epsDt = NudgeTimeStepFraction * std::abs(m_dt);
         const Real epsIn = std::max(epsFloor, std::min(m_epsInPhys, epsDt));
 
         Math::SpatialPoint xNew = xHit;
@@ -412,7 +426,7 @@ namespace Rodin::Advection
    * where @f$ u @f$ is the scalar field and @f$ \mathbf{v} @f$ is the velocity
    * field.
    *
-   * ## Semi-Lagrangian Method
+   * # Semi-Lagrangian Method
    * At each time step, the method:
    * 1. Traces characteristics backwards: @f$ \mathbf{X}(t) = \mathbf{x} - \int_0^{\Delta t} \mathbf{v} \, ds @f$
    * 2. Interpolates the solution at departure points
@@ -423,7 +437,7 @@ namespace Rodin::Advection
    *   \int_\Omega u^{n+1} v \, dx = \int_\Omega u^n(\mathbf{X}) v \, dx
    * @f]
    *
-   * ## Advantages
+   * # Advantages
    * - Unconditionally stable for large CFL numbers
    * - Naturally handles complex geometries
    * - Mass-conservative in variational form
@@ -563,36 +577,32 @@ namespace Rodin::Advection
    * @brief Deduction guide for Lagrangian with default RK4 stepper.
    *
    * Allows construction without explicitly specifying the Step template parameter.
+   * @param trial Trial function storing the advected field.
+   * @param test Test function for the transport problem.
+   * @param initial Initial field.
+   * @param velocity Velocity field.
    */
   template <class FES, class Data, class Initial, class VVel>
-  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
-             Variational::TestFunction<FES>&,
-             Initial&&,
-             VVel&&)
-  -> Lagrangian<
-       Variational::TrialFunction<Variational::GridFunction<FES,Data>,FES>,
-       Variational::TestFunction<FES>,
-       Initial,
-       VVel,
-       Math::RungeKutta::RK4>;
+  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>& trial,
+    Variational::TestFunction<FES>& test, Initial&& initial, VVel&& velocity)
+    -> Lagrangian<Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+      Variational::TestFunction<FES>, Initial, VVel, Math::RungeKutta::RK4>;
 
   /**
    * @brief Deduction guide for Lagrangian with custom stepper.
    *
    * Allows construction with explicit time-stepping scheme specification.
+   * @param u Trial function holding the solution
+   * @param v Test function for variational formulation
+   * @param u0 Initial condition
+   * @param vel Velocity field
+   * @param st Time-stepping scheme (default: RK4)
    */
   template <class FES, class Data, class Initial, class VVel, class SStep>
-  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>,FES>&,
-             Variational::TestFunction<FES>&,
-             Initial&&,
-             VVel&&,
-             SStep&&)
-  -> Lagrangian<
-       Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
-       Variational::TestFunction<FES>,
-       Initial,
-       VVel,
-       SStep>;
+  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>& u,
+    Variational::TestFunction<FES>& v, Initial&& u0, VVel&& vel, SStep&& st)
+    -> Lagrangian<Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+      Variational::TestFunction<FES>, Initial, VVel, SStep>;
 }
 
 #endif

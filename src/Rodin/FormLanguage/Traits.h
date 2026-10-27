@@ -13,7 +13,7 @@
  * Specialized versions of Traits are defined throughout the library for
  * specific form language types.
  *
- * ## Design Pattern
+ * # Design Pattern
  * The Traits system follows the trait-based design pattern common in C++
  * template metaprogramming. Each form language type can specialize the
  * Traits template to expose:
@@ -21,7 +21,7 @@
  * - Compile-time properties (e.g., space type, dimension)
  * - Type transformations
  *
- * ## Usage
+ * # Usage
  * @code{.cpp}
  * // Query traits of a form language object
  * using MyFES = typename Traits<MyFormObject>::FESType;
@@ -32,6 +32,7 @@
 #define RODIN_FORMLANGUAGE_TRAITS_H
 
 #include <type_traits>
+#include <utility>
 #include <boost/type_index.hpp>
 
 #include <Eigen/Core>
@@ -51,20 +52,20 @@ namespace Rodin::FormLanguage
    * the primary (unspecialized) template; specific types require explicit
    * specializations to be useful.
    *
-   * ## Common Trait Members
+   * # Common Trait Members
    * While the primary template is intentionally incomplete, specializations
    * typically provide some or all of the following:
    *
-   * ### Type Members
+   * ## Type Members
    * - **FESType**: Associated finite element space type
    * - **ScalarType**: Scalar type for numerical values
    * - **RangeType**: Range type for function evaluations
    *
-   * ### Static Constants
+   * ## Static Constants
    * - **SpaceType**: Indicates trial space, test space, or other
    * - **Dimension**: Spatial or value dimension
    *
-   * ## Specialization Example
+   * # Specialization Example
    * @code{.cpp}
    * template <class Derived, class FES>
    * struct Traits<MyFormType<Derived, FES>>
@@ -81,6 +82,59 @@ namespace Rodin::FormLanguage
    */
   template <class T, class Enable = void>
   struct Traits;
+
+  /**
+   * @brief Derived type @c D of the Variational::FunctionBase<D> that @c T
+   * inherits from.
+   *
+   * Function expressions do not name themselves as their FunctionBase
+   * parameter: a RealFunction, for one, derives from a FunctionBase over a
+   * ScalarFunctionBase. Anything that stores a function through its
+   * FunctionBase, the way the form language's own operators do, needs this
+   * type rather than the function's.
+   */
+  template <class T>
+  struct FunctionDerived
+  {
+    private:
+      /**
+       * @brief Deduces the derived parameter of a function base.
+       *
+       * A pointer return type permits abstract base parameters on compilers
+       * that reject abstract value returns during template substitution.
+       * The declaration is used only in an unevaluated expression; no pointer
+       * is constructed and no allocation is performed.
+       *
+       * @param function Function whose base parameter is deduced.
+       * @returns A pointer to the deduced derived type.
+       */
+      template <class D>
+      static D* deduce(const Variational::FunctionBase<D>& function);
+
+    public:
+      /// @brief The FunctionBase parameter of @c T.
+      using Type = std::remove_pointer_t<decltype(deduce(std::declval<const T&>()))>;
+  };
+
+  /**
+   * @brief Type trait: whether @c T is a named bilinear form.
+   *
+   * A named form names its integrand instead of building it through the form
+   * language and brings its own local kernel, which lets it be assembled
+   * through Assembly::ScatterMap. Each named form specializes this trait next
+   * to its declaration.
+   *
+   * The trait is matched on the form's template rather than detected from
+   * its members because the assembly is selected while the form's own class
+   * definition is still being instantiated, when none of its members can be
+   * looked up yet.
+   */
+  template <class T>
+  struct IsNamedForm : std::false_type
+  {
+    /// @brief False for types that are not named forms.
+    static constexpr bool Value = false;
+  };
 }
 
 #endif

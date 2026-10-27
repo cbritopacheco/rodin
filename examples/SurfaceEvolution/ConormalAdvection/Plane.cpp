@@ -91,44 +91,64 @@ int main(int argc, char** argv)
 {
   size_t N = 32;
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.1, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.2, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.3, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.4, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.5, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.6, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.7, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.8, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 0.9, M_PI / 2 - 0.1, 0.01});
+  }
 
   for (size_t i = 0; i < N; i++)
+  {
     experiments.push_back(
         {0.1, 0.02 + (1 - 0.02) * float(i) / float(N), 1.0, M_PI / 2 - 0.1, 0.01});
+  }
 
   const size_t hwc = std::thread::hardware_concurrency();
   const size_t n = hwc - 2;

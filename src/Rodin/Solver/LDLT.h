@@ -11,7 +11,7 @@
  * This header provides the LDLT solver class for dense matrices, implementing
  * Cholesky decomposition with pivoting for numerical stability.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   PAP^T = LDL^T
@@ -19,13 +19,13 @@
  * where @f$ P @f$ is a permutation matrix, @f$ L @f$ is unit lower triangular,
  * and @f$ D @f$ is diagonal. Pivoting improves numerical stability.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric indefinite dense matrices
  * - When numerical stability is critical
  * - Small to medium-sized systems
  * - Systems requiring robust factorization
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -72,9 +72,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for LDLT
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  LDLT(Variational::ProblemBase<LinearSystem>&) -> LDLT<LinearSystem>;
+  LDLT(Variational::ProblemBase<LinearSystem>& pb) -> LDLT<LinearSystem>;
 
   /**
    * @ingroup LDLTSpecializations
@@ -167,6 +168,7 @@ namespace Rodin::Solver
        *
        * Updated by every factorization and every solve, so a caller reads it
        * after the call it wants to check.
+       * @returns The outcome of the most recent operation.
        */
       const Info& getInfo() const noexcept
       {
@@ -192,8 +194,11 @@ namespace Rodin::Solver
       }
 
     private:
-      /// Underlying Eigen LDLT solver
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen LDLT solver
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

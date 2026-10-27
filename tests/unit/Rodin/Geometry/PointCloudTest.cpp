@@ -96,9 +96,12 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, ElementAccessReadWrite)
   {
     PointCloud pc(2, 3);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
-    pc(0, 2) = 5.0; pc(1, 2) = 6.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
+    pc(0, 2) = 5.0;
+    pc(1, 2) = 6.0;
 
     EXPECT_NEAR(pc(0, 0), 1.0, 1e-14);
     EXPECT_NEAR(pc(1, 0), 2.0, 1e-14);
@@ -114,8 +117,10 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, CopyConstruction)
   {
     PointCloud pc(2, 2);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
 
     PointCloud copy(pc);
     EXPECT_EQ(copy.getDimension(), 2);
@@ -128,7 +133,8 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, MoveConstruction)
   {
     PointCloud pc(2, 2);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
 
     PointCloud moved(std::move(pc));
     EXPECT_EQ(moved.getDimension(), 2);
@@ -162,9 +168,12 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, GetMatrix)
   {
     PointCloud pc(2, 3);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
-    pc(0, 2) = 5.0; pc(1, 2) = 6.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
+    pc(0, 2) = 5.0;
+    pc(1, 2) = 6.0;
 
     auto mat = pc.getMatrix();
     EXPECT_EQ(mat.rows(), 2);
@@ -177,8 +186,10 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PointCloud, GetPackedMatrix)
   {
     PointCloud pc(2, 2);
-    pc(0, 0) = 1.0; pc(1, 0) = 2.0;
-    pc(0, 1) = 3.0; pc(1, 1) = 4.0;
+    pc(0, 0) = 1.0;
+    pc(1, 0) = 2.0;
+    pc(0, 1) = 3.0;
+    pc(1, 1) = 4.0;
 
     auto pmat = pc.getPackedMatrix();
     EXPECT_EQ(pmat.rows(), 3);
@@ -200,5 +211,100 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(pc.getCount(), 100);
     EXPECT_NEAR(pc(0, 50), 50.0, 1e-14);
     EXPECT_NEAR(pc(1, 50), 100.0, 1e-14);
+  }
+
+  /// @brief Empty and zero-dimensional coordinate sets preserve shape and inactive packed rows.
+  TEST(Geometry_PointCloud, EmptyCoordinateOperationsPreserveShapeAndInactiveRows)
+  {
+    for (auto dimension :
+      {std::uint8_t{0}, std::uint8_t{1}, std::uint8_t{2}, std::uint8_t{3}})
+    {
+      for (size_t count : {size_t{0}, size_t{3}})
+      {
+        SCOPED_TRACE(static_cast<unsigned>(dimension));
+        SCOPED_TRACE(count);
+        PointCloud cloud(dimension, count);
+        cloud.getPackedMatrix().setConstant(9);
+        cloud.setZero();
+        for (size_t point = 0; point < count; ++point)
+        {
+          EXPECT_EQ(cloud[point].size(), dimension);
+          for (size_t row = 0; row < 3; ++row)
+            EXPECT_EQ(cloud.getPackedMatrix()(row, point), row < dimension ? 0 : 9);
+        }
+        cloud.setConstant(5);
+        for (size_t point = 0; point < count; ++point)
+        {
+          for (size_t row = 0; row < 3; ++row)
+            EXPECT_EQ(cloud.getPackedMatrix()(row, point), row < dimension ? 5 : 9);
+          for (size_t row = 0; row < dimension; ++row)
+            cloud(row, point) = static_cast<Real>(1 + 10 * point + row);
+        }
+        EXPECT_EQ(&(cloud *= Real(2)), &cloud);
+        const auto left = Real(3) * cloud;
+        const auto right = cloud * Real(3);
+        for (const auto* result : {&left, &right})
+        {
+          EXPECT_EQ(result->getDimension(), dimension);
+          EXPECT_EQ(result->getCount(), count);
+          EXPECT_EQ(result->getMatrix().rows(), dimension);
+          EXPECT_EQ(result->getMatrix().cols(), static_cast<Eigen::Index>(count));
+          for (size_t point = 0; point < count; ++point)
+          {
+            for (size_t row = 0; row < dimension; ++row)
+            {
+              EXPECT_EQ(
+                (*result)(row, point), Real(6) * static_cast<Real>(1 + 10 * point + row));
+            }
+            if (dimension != 0)
+            {
+              for (size_t row = dimension; row < 3; ++row)
+                EXPECT_EQ(result->getPackedMatrix()(row, point), 9);
+            }
+          }
+        }
+        for (size_t point = 0; point < count; ++point)
+        {
+          for (size_t row = 0; row < 3; ++row)
+          {
+            EXPECT_EQ(cloud.getPackedMatrix()(row, point),
+              row < dimension ? Real(2) * static_cast<Real>(1 + 10 * point + row)
+                              : Real(9));
+          }
+        }
+      }
+    }
+  }
+
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Eigen operands use right conjugation and retain complex result types.
+  TEST(Geometry_PointCloud, DotConjugatesEigenOperand)
+  {
+    for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
+      for (size_t count : {size_t(0), size_t(2)})
+      {
+        PointCloud cloud(rows, count);
+        cloud.getPackedMatrix().setConstant(std::numeric_limits<Real>::quiet_NaN());
+        Eigen::Matrix<Complex, Eigen::Dynamic, Eigen::Dynamic> other(rows, count);
+        Complex expected(0);
+        Real square = 0;
+        for (size_t i = 0; i < rows; ++i)
+        {
+          for (size_t j = 0; j < count; ++j)
+          {
+            cloud(i, j) = Real(i + 2 * j + 1);
+            other(i, j) = Complex(i + j + 2, 1 + j);
+            expected += cloud(i, j) * std::conj(other(i, j));
+            square += cloud(i, j) * cloud(i, j);
+          }
+        }
+        EXPECT_EQ(cloud.dot(other), expected);
+        EXPECT_EQ(cloud.dot(cloud), square);
+      }
+    }
   }
 }

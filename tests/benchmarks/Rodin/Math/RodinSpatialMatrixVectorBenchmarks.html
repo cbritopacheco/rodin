@@ -1,0 +1,8 @@
+<p>Runtime-shape spatial matrix-vector products used by gradient mapping.</p>
+<h2>Measured operation</h2>
+<p>Measures the canonical fixed-capacity product with runtime extents.</p>
+<h3>Architecture</h3>
+<p>All rectangular shapes with zero through three rows/columns and all real/complex operand pairs are measured. Input padding is poisoned; the logical contraction must not consume it and inactive result storage must be zero. Bounded dyadic operands give an exact independent reference sum, including genuinely complex values and mixed scalar promotion.</p>
+<p>Timed calls include result construction and its storage initialization. Escaping operand/result addresses and memory barriers prevent constant folding and discarded padding stores. Guards and operand setup are untimed. The owning Variational physical-gradient benchmark measures the consumer; these primitive timings are not assembly or gradient-sweep timings.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

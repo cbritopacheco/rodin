@@ -1,0 +1,5 @@
+add_executable(RodinP1QuadratureBindingBenchmarks EXCLUDE_FROM_ALL QuadratureBinding.cpp)
+target_link_libraries(RodinP1QuadratureBindingBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
+include(registrations.benchmarks.cmake)

@@ -11,7 +11,7 @@
  * This file provides the explicit implementations of P1 basis functions
  * and their first derivatives for each supported polytope geometry.
  *
- * ## Basis Functions by Geometry
+ * # Basis Functions by Geometry
  *
  * **Point** (0D): @f$ \phi_0 = 1 @f$
  *
@@ -51,8 +51,8 @@
 namespace Rodin::Variational
 {
   template <class Scalar>
-  constexpr
-  Scalar P1Element<Scalar>::BasisFunction::operator()(const Math::SpatialPoint& r) const
+  constexpr Scalar P1Element<Scalar>::BasisFunction::operator()(
+    const Math::SpatialPoint& r) const
   {
     switch (m_g)
     {
@@ -72,11 +72,12 @@ namespace Rodin::Variational
           {
             return r.x();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Triangle:
@@ -95,11 +96,12 @@ namespace Rodin::Variational
           {
             return r.y();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Quadrilateral:
@@ -124,11 +126,12 @@ namespace Rodin::Variational
           {
             return r.y() * (1 - r.x());
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Tetrahedron:
@@ -137,7 +140,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return - r.x() - r.y() - r.z() + 1;
+            return -r.x() - r.y() - r.z() + 1;
           }
           case 1:
           {
@@ -151,11 +154,12 @@ namespace Rodin::Variational
           {
             return r.z();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Pyramid:
@@ -203,7 +207,7 @@ namespace Rodin::Variational
         {
           case 0:
           {
-            return r.x() * r.z() - r.x()  + r.y() * r.z() - r.y() - r.z() + 1;
+            return r.x() * r.z() - r.x() + r.y() * r.z() - r.y() - r.z() + 1;
           }
           case 1:
           {
@@ -225,11 +229,12 @@ namespace Rodin::Variational
           {
             return r.y() * r.z();
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
 
@@ -281,11 +286,12 @@ namespace Rodin::Variational
             // (1 - x) y z
             return (1 - x) * y * z;
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
     }
@@ -295,9 +301,9 @@ namespace Rodin::Variational
 
   template <class Scalar>
   template <size_t Order>
-  constexpr
-  Scalar P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
-      const Math::SpatialPoint& r) const
+  constexpr Scalar
+  P1Element<Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
+    const Math::SpatialPoint& r) const
   {
     if constexpr (Order == 0)
     {
@@ -324,11 +330,12 @@ namespace Rodin::Variational
             {
               return 1;
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Triangle:
@@ -383,11 +390,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Quadrilateral:
@@ -549,11 +557,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Pyramid:
@@ -563,12 +572,12 @@ namespace Rodin::Variational
           const auto& z = r.z();
           const auto q = 1 - z;
 
-          if (q == 0)
-          {
-            if (m_local == 4 && m_i == 2)
-              return 1;
-            return 0;
-          }
+          // At the apex use the symmetric centreline trace. Individual rational
+          // basis gradients have direction-dependent limits, but affine fields
+          // must reproduce their unique gradient, including at the apex.
+          constexpr Real centreline = Real(0.5);
+          const auto u = q == 0 ? centreline : x / q;
+          const auto v = q == 0 ? centreline : y / q;
 
           switch (m_local)
           {
@@ -576,15 +585,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return -1 + y / q;
+                return -1 + v;
               }
               else if (m_i == 1)
               {
-                return -1 + x / q;
+                return -1 + u;
               }
               else if (m_i == 2)
               {
-                return -1 + x * y / (q * q);
+                return -1 + u * v;
               }
               else [[unlikely]]
               {
@@ -596,15 +605,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return 1 - y / q;
+                return 1 - v;
               }
               else if (m_i == 1)
               {
-                return -x / q;
+                return -u;
               }
               else if (m_i == 2)
               {
-                return -x * y / (q * q);
+                return -u * v;
               }
               else [[unlikely]]
               {
@@ -616,15 +625,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return y / q;
+                return v;
               }
               else if (m_i == 1)
               {
-                return x / q;
+                return u;
               }
               else if (m_i == 2)
               {
-                return x * y / (q * q);
+                return u * v;
               }
               else [[unlikely]]
               {
@@ -636,15 +645,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return -y / q;
+                return -v;
               }
               else if (m_i == 1)
               {
-                return 1 - x / q;
+                return 1 - u;
               }
               else if (m_i == 2)
               {
-                return -x * y / (q * q);
+                return -u * v;
               }
               else [[unlikely]]
               {
@@ -800,11 +809,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
 
@@ -992,11 +1002,12 @@ namespace Rodin::Variational
               }
             }
 
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
       }
@@ -1005,6 +1016,17 @@ namespace Rodin::Variational
     }
     else
     {
+      if (m_g == Geometry::Polytope::Type::Pyramid && m_i == 2 && m_local < 4)
+      {
+        const Real q = 1 - r.z();
+        if (q != 0)
+        {
+          Real value = r.x() * r.y() / q;
+          for (size_t order = 0; order < Order; ++order)
+            value *= Real(order + 1) / q;
+          return m_local % 2 == 0 ? value : -value;
+        }
+      }
       return 0;
     }
   }

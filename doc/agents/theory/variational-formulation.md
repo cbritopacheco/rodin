@@ -80,9 +80,9 @@ lemma says the Galerkin solution is (up to a constant) the best
 approximation in $V_h$; convergence rates then come from interpolation
 theory: for degree-$K$ elements and a smooth solution,
 $\|u-u_h\|_{H^1} = O(h^K)$ and $\|u-u_h\|_{L^2} = O(h^{K+1})$.
-**tests/manufactured asserts exactly these orders** — a failing
-manufactured test usually means a quadrature order, mapping, or conformity
-bug, not a "tolerance issue".
+**tests/convergence asserts exactly these orders** — a failing convergence
+test usually means a quadrature order, mapping, or conformity bug, not a
+"tolerance issue".
 
 In Rodin's type system the grading of the algebra mirrors the tensor
 structure of forms (see philosophy.md): a grade-1 integrand is an element

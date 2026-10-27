@@ -26,6 +26,8 @@
 
 namespace Rodin::Geometry
 {
+  class Bounds;
+
   /**
    * @brief Template container indexed by polytope geometry types.
    * @tparam T Type of values to store
@@ -67,6 +69,13 @@ namespace Rodin::Geometry
    * @see <a href="_polytope_8h.html">Polytope.h</a>
    */
   class Polytope;
+
+  /**
+   * @brief Mesh-aware binary Potts classifier selected by mesh type.
+   * @tparam MeshType Mesh type, including its execution context.
+   */
+  template <class MeshType>
+  class MinSTCut;
 
   class PolytopeQuadrature;
 
@@ -164,6 +173,8 @@ namespace Rodin::Geometry
    * @tparam ContextType Execution context (default: Context::Local)
    * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
    * @see <a href="_geometry_2_mesh_8h.html">Mesh.h</a>
+   *
+   * @see @ref MeshTypes "Mesh Types and Template Specializations"
    */
   template <class ContextType = Context::Local>
   class Mesh;
@@ -214,6 +225,8 @@ namespace Rodin::Geometry
    * @tparam Context Execution context type
    * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a>
    * @see <a href="_geometry_2_sub_mesh_8h.html">SubMesh.h</a>
+   *
+   * @see @ref SubMeshSpecializations "SubMesh Template Specializations"
    */
   template <class Context>
   class SubMesh;

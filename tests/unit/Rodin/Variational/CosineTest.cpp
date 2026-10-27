@@ -18,7 +18,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -34,7 +34,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.3, 0.7}};
@@ -50,7 +50,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.8, 0.2}};
@@ -66,7 +66,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.1, 0.9}};
@@ -82,7 +82,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.6, 0.4}};
@@ -98,7 +98,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.2, 0.8}};
@@ -114,7 +114,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.7, 0.3}};
@@ -130,7 +130,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.9, 0.1}};
@@ -146,7 +146,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 0.0}};
@@ -158,7 +158,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies grid function cos wave for variational cos by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Cos, GridFunction_CosWave)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     P1 fes(mesh);
     GridFunction gf(fes);
 
@@ -181,11 +181,11 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Cos, ChainedOperations)
   {
     RealFunction f(M_PI / 3.0);
-    auto cos_f = cos(f);          // cos(π/3) = 0.5
-    auto cos_cos_f = cos(cos_f);  // cos(0.5) ≈ 0.877583
+    auto cos_f = cos(f); // cos(π/3) = 0.5
+    auto cos_cos_f = cos(cos_f); // cos(0.5) ≈ 0.877583
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.4, 0.6}};
@@ -203,7 +203,7 @@ namespace Rodin::Tests::Unit
     auto cos2 = Cos(f2);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{1.0, 0.0}};
@@ -216,13 +216,13 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies cos of sum for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosOfSum)
   {
-    RealFunction f1(M_PI / 6.0);  // π/6
-    RealFunction f2(M_PI / 3.0);  // π/3
-    auto sum = f1 + f2;           // π/6 + π/3 = π/2
-    auto cos_sum = Cos(sum);   // cos(π/2) = 0
+    RealFunction f1(M_PI / 6.0); // π/6
+    RealFunction f2(M_PI / 3.0); // π/3
+    auto sum = f1 + f2; // π/6 + π/3 = π/2
+    auto cos_sum = Cos(sum); // cos(π/2) = 0
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.5, 0.5}};
@@ -234,11 +234,11 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies small angle for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, SmallAngle)
   {
-    RealFunction f(0.1);  // Small angle in radians
+    RealFunction f(0.1); // Small angle in radians
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.8, 0.8}};
@@ -246,7 +246,7 @@ namespace Rodin::Tests::Unit
 
     // For small angles, cos(x) ≈ 1 - x²/2
     EXPECT_NEAR(cos_result.getValue(p), std::cos(0.1), 1e-10);
-    EXPECT_NEAR(cos_result.getValue(p), 1.0 - 0.01/2.0, 1e-4);  // Approximate equality
+    EXPECT_NEAR(cos_result.getValue(p), 1.0 - 0.01 / 2.0, 1e-4); // Approximate equality
   }
 
   /// @brief Verifies large angle for variational cos by checking tolerance-based numerical results.
@@ -256,7 +256,7 @@ namespace Rodin::Tests::Unit
     auto cos_result = Cos(f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.1, 0.1}};
@@ -276,7 +276,7 @@ namespace Rodin::Tests::Unit
     // cos²(π/6) = (√3/2)² = 3/4
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.3, 0.7}};
@@ -290,11 +290,11 @@ namespace Rodin::Tests::Unit
   {
     RealFunction f(M_PI / 6.0);
     RealFunction scalar(2.0);
-    auto product = scalar * f;  // 2 * π/6 = π/3
-    auto cos_product = Cos(product);  // cos(π/3) = 1/2
+    auto product = scalar * f; // 2 * π/6 = π/3
+    auto cos_product = Cos(product); // cos(π/3) = 1/2
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.6, 0.4}};
@@ -312,7 +312,7 @@ namespace Rodin::Tests::Unit
     auto cos_neg_f = Cos(neg_f);
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.0, 1.0}};
@@ -330,10 +330,10 @@ namespace Rodin::Tests::Unit
     auto cos_f = Cos(f);
     auto sin_squared = sin_f * sin_f;
     auto cos_squared = cos_f * cos_f;
-    auto identity = sin_squared + cos_squared;  // Should equal 1
+    auto identity = sin_squared + cos_squared; // Should equal 1
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.7, 0.7}};
@@ -348,11 +348,11 @@ namespace Rodin::Tests::Unit
   {
     RealFunction f(M_PI / 6.0);
     RealFunction phase_shift(M_PI / 2.0);
-    auto shifted = f + phase_shift;  // π/6 + π/2 = 2π/3
-    auto cos_shifted = Cos(shifted);  // cos(2π/3) = -1/2
+    auto shifted = f + phase_shift; // π/6 + π/2 = 2π/3
+    auto cos_shifted = Cos(shifted); // cos(2π/3) = -1/2
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.2, 0.2}};
@@ -365,13 +365,13 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_Cos, CosPythagoreanIdentity)
   {
     RealFunction f(M_PI / 3.0);
-    auto sin_f = Sin(f);     // sin(π/3) = √3/2
-    auto cos_f = Cos(f);   // cos(π/3) = 1/2
+    auto sin_f = Sin(f); // sin(π/3) = √3/2
+    auto cos_f = Cos(f); // cos(π/3) = 1/2
 
     auto sin_sq_plus_cos_sq = sin_f * sin_f + cos_f * cos_f;
 
     // Create a simple point for testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
     const Math::Vector<Real> rc{{0.9, 0.9}};
@@ -380,4 +380,55 @@ namespace Rodin::Tests::Unit
     // Fundamental trigonometric identity
     EXPECT_NEAR(sin_sq_plus_cos_sq.getValue(p), 1.0, 1e-10);
   }
+}
+
+/// @brief Cosine preserves known constant order but does not invent polynomial metadata.
+TEST(Rodin_Variational_Cos, PolynomialOrderDistinguishesConstantLinearAndUnknownOperands)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  P0 constants(mesh);
+  GridFunction constantField(constants);
+  constantField = RealFunction(0.25);
+  P1 linears(mesh);
+  GridFunction linearField(linears);
+  linearField = RealFunction([](const Point& point) { return 1 + point.x(); });
+  const RealFunction known(0.25);
+  const RealFunction unknown([](const Point&) { return Real(0.25); });
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    const Point point(*cell, Math::SpatialPoint{0.3});
+    const auto check = [&](const auto& operand, Optional<size_t> order) {
+      const auto expression = Cos(operand);
+      EXPECT_EQ(expression.getOrder(*cell), order);
+      EXPECT_EQ(GetOrderIfConstant(operand, *cell), order);
+      EXPECT_NEAR(expression(point), std::cos(operand(point)), 1e-12);
+    };
+    check(known, size_t(0));
+    check(constantField, size_t(0));
+    check(linearField, std::nullopt);
+    check(unknown, std::nullopt);
+    EXPECT_EQ(linearField.getOrder(*cell), Optional<size_t>(1));
+    EXPECT_EQ(unknown(point), known(point));
+    EXPECT_FALSE(unknown.getOrder(*cell));
+  }
+}
+
+/// @brief Automatic quadrature integrates the cosine of cellwise constant data exactly.
+TEST(Rodin_Variational_Cos, ConstantOrderControlsAutomaticQuadrature)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.scale(Real(0.5));
+  mesh.getConnectivity().compute(0, 1);
+  P0 space(mesh);
+  GridFunction field(space);
+  field = RealFunction([](const Point& point) { return point.x(); });
+  const auto expression = Cos(field);
+  TestFunction v(space);
+  LinearForm load(v);
+  load = Integral(expression, v);
+  load.assemble();
+  const Real expected = Real(0.5) * (std::cos(Real(0.25)) + std::cos(Real(0.75)));
+  EXPECT_NEAR(load.getVector().sum(), expected, 1e-12);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    EXPECT_EQ(expression.getOrder(*cell), Optional<size_t>(0));
 }

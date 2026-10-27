@@ -13,10 +13,18 @@ concurrency:
 permissions:
   deployments: write
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   IncludeDependencyGraph:
+    concurrency:
+      group: rodin-gh-pages-publication
+      cancel-in-progress: false
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,3 +58,14 @@ jobs:
           publish_branch: gh-pages
           publish_dir: static/dev/${{ github.ref }}
           destination_dir: static/dev/${{ github.ref }}/IncludeDependencyGraph
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: .ci-pages
+          lfs: false
+      - name: Deploy and verify the published Pages snapshot
+        id: deployment
+        uses: ./.github/actions/publish-pages
+        with:
+          checkout: .ci-pages
+          artifact-name: include-graph-pages

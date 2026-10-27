@@ -612,9 +612,13 @@ TEST(QuadratureRuleSpecializationTest, CoincidentTriangleTermIsExactEntrywise)
 
   const Real expected = (area / 3) * (area / 3);
   for (Eigen::Index i = 0; i < P.rows(); ++i)
+  {
     for (Eigen::Index j = 0; j < P.cols(); ++j)
+    {
       EXPECT_NEAR(P(i, j), expected, tolerance)
         << "entry (" << i << ", " << j << ") of the coincident term";
+    }
+  }
 }
 
 /**

@@ -1,4 +1,11 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
+#include <type_traits>
 
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
@@ -10,18 +17,186 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  /// @brief Verifies linear form scalar linear coefficient uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
+  /// @brief A constant nonlocal kernel has an independently known rank-one matrix.
+  TEST(Rodin_Variational_P1QuadratureRule, NonlocalDenseAndSparseFormsMatchExactMoments)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<Real> space(mesh);
+    TrialFunction u(space);
+    TestFunction v(space);
+    BilinearForm sparse(u, v);
+    BilinearForm<typename decltype(u)::SolutionType, decltype(space), decltype(space),
+      Math::Matrix<Real>>
+      dense(u, v);
+    auto kernel = [](const Point&, const Point&) { return 2.0; };
+    auto integral = Integral(Potential(kernel, u), v);
+    Math::Vector<Real> moments(3);
+    moments << 0.5, 1.0, 0.5;
+    const Math::Matrix<Real> expected = 2 * moments * moments.transpose();
+    sparse += integral;
+    dense += integral;
+    for (int repeat = 0; repeat < 2; ++repeat)
+    {
+      sparse.assemble();
+      dense.assemble();
+      EXPECT_LT((Math::Matrix<Real>(sparse.getOperator()) - expected).norm(), 1e-12);
+      EXPECT_LT((dense.getOperator() - expected).norm(), 1e-12) << dense.getOperator();
+    }
+    auto excluded = integral;
+    excluded.setTrialAttributes({999});
+    sparse.getGlobalIntegrators().clear();
+    sparse += excluded;
+    dense.getGlobalIntegrators().clear();
+    dense += excluded;
+    sparse.assemble();
+    dense.assemble();
+    EXPECT_EQ(sparse.getOperator().norm(), 0);
+    EXPECT_EQ(dense.getOperator().norm(), 0);
+    auto excludedTest = integral;
+    excludedTest.setTestAttributes({999});
+    sparse.getGlobalIntegrators().clear();
+    sparse += excludedTest;
+    dense.getGlobalIntegrators().clear();
+    dense += excludedTest;
+    sparse.assemble();
+    dense.assemble();
+    EXPECT_EQ(sparse.getOperator().norm(), 0);
+    EXPECT_EQ(dense.getOperator().norm(), 0);
+    Problem problem(u, v);
+    problem = integral;
+    problem.assemble();
+    EXPECT_LT(
+      (Math::Matrix<Real>(problem.getLinearSystem().getOperator()) - expected).norm(),
+      1e-12);
+  }
+
+  /**
+   * @brief Checks empty component ranges and scalar-cache publication on rebinding.
+   *
+   * For @f$V_h=P_1\otimes\mathbb K^0=\{0\}@f$, the mass, weighted mass
+   * and directional-derivative forms have no local entries. Binding must not
+   * evaluate coefficients or divide by the component count. Point cells are
+   * embedded in three dimensions; all positive-dimensional cell families are
+   * also included, over real and complex fields.
+   *
+   * ## State transitions
+   *
+   * A local integrator is rebound after changes between zero, two and three
+   * components and quadrature orders zero and four. No global linear system
+   * is retained across space changes. Every nonempty entry must equal a fresh
+   * integrator exactly. Logical entity indices and coefficient-call counts
+   * check the binding contract without coordinate comparisons or tolerances.
+   */
+  TEST(Rodin_Variational_P1QuadratureRule, EmptyComponentsAndRebinding)
+  {
+    const auto checkScalar = []<class Scalar>() {
+      using Range = Math::SpatialVector<Scalar>;
+      for (const auto geometry :
+        {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+          Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+          Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+      {
+        SCOPED_TRACE(int(geometry));
+        SCOPED_TRACE((std::is_same_v<Scalar, Complex> ? "Complex" : "Real"));
+        const size_t dimension = Polytope::Traits(geometry).getDimension();
+        auto mesh = [&]() {
+          if (dimension == 0)
+          {
+            auto builder = LocalMesh::Builder();
+            builder.initialize(3).nodes(1).vertex({0, 0, 0});
+            return builder.finalize();
+          }
+          const Array<size_t> shape = Array<size_t>::Constant(dimension, 2);
+          return LocalMesh::UniformGrid(geometry, shape);
+        }();
+        for (size_t d = 1; d <= dimension; ++d)
+        {
+          for (size_t lower = 0; lower < d; ++lower)
+            mesh.getConnectivity().compute(d, lower);
+        }
+        P1<Range> space(mesh, 0);
+        TrialFunction u(space);
+        TestFunction v(space);
+        size_t coefficientCalls = 0;
+        const auto coefficientCallable = [&](const Point&) -> Scalar {
+          ++coefficientCalls;
+          return Scalar(2);
+        };
+        const auto coefficient = [&]() {
+          if constexpr (std::is_same_v<Scalar, Real>)
+            return RealFunction(coefficientCallable);
+          else
+            return ComplexFunction(coefficientCallable);
+        }();
+        const size_t ambient = mesh.getSpaceDimension();
+        const VectorFunction direction(ambient, [&](const Point&) {
+          ++coefficientCalls;
+          Math::SpatialVector<Real> value(ambient);
+          for (size_t axis = 0; axis < ambient; ++axis)
+            value[axis] = Real(axis + 1);
+          return value;
+        });
+        const auto check = [&](auto makeForm, bool hasCoefficient) {
+          auto reused = makeForm();
+          for (const size_t components :
+            {size_t(0), size_t(2), size_t(0), size_t(3), size_t(0)})
+          {
+            SCOPED_TRACE(components);
+            space = P1<Range>(mesh, components);
+            ASSERT_EQ(space.getSize(), mesh.getVertexCount() * components);
+            for (const size_t order : {size_t(0), size_t(4), size_t(0)})
+            {
+              SCOPED_TRACE(order);
+              reused.setOrder(order);
+              for (auto cell = mesh.getCell(); cell; ++cell)
+              {
+                SCOPED_TRACE(cell->getIndex());
+                const size_t expectedCalls = components == 0 || !hasCoefficient
+                  ? 0
+                  : QF::QuadratureFormula::get(order, geometry).getSize();
+                coefficientCalls = 0;
+                ASSERT_NO_THROW(reused.setPolytope(*cell));
+                EXPECT_EQ(coefficientCalls, expectedCalls);
+                EXPECT_EQ(reused.getPolytope().getDimension(), cell->getDimension());
+                EXPECT_EQ(reused.getPolytope().getIndex(), cell->getIndex());
+                auto fresh = makeForm();
+                fresh.setOrder(order);
+                coefficientCalls = 0;
+                ASSERT_NO_THROW(fresh.setPolytope(*cell));
+                EXPECT_EQ(coefficientCalls, expectedCalls);
+                for (size_t te = 0; te < v.getDOFs(*cell); ++te)
+                {
+                  for (size_t tr = 0; tr < u.getDOFs(*cell); ++tr)
+                  {
+                    const auto actual = reused.integrate(tr, te);
+                    EXPECT_EQ(actual, fresh.integrate(tr, te));
+                  }
+                }
+              }
+            }
+          }
+        };
+        check([&]() { return Integral(u, v); }, false);
+        check([&]() { return Integral(coefficient * u, v); }, true);
+        check([&]() { return Integral(Jacobian(u) * direction, v); }, true);
+      }
+    };
+    checkScalar.template operator()<Real>();
+    checkScalar.template operator()<Complex>();
+  }
+
+  /// @brief Verifies linear form scalar linear coefficient uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
+  TEST(Rodin_Variational_P1QuadratureRule,
+    LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
+  {
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     P1 fes(mesh);
     TestFunction v(fes);
@@ -48,17 +223,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies bilinear form linear coefficient mass uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, BilinearForm_LinearCoefficientMass_UsesMultiPointQuadrature)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    BilinearForm_LinearCoefficientMass_UsesMultiPointQuadrature)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     P1 fes(mesh);
     TrialFunction u(fes);
@@ -185,8 +360,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(residual.norm(), 0.0, 1e-14);
   }
 
-  /// @brief Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  /// @brief Verifies optimized P1 divergence couplings on a sheared tetrahedron.
+  /// @brief Checks weighted vector mass against the grid-function linear form.
   TEST(Rodin_Variational_P1QuadratureRule,
     ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
@@ -423,8 +597,10 @@ namespace Rodin::Tests::Unit
     auto kernel = [&](Math::SpatialMatrix<Complex>& out, const Point&, const Point&) {
       out.resize(2, 2);
       for (size_t i = 0; i < 2; ++i)
+      {
         for (size_t j = 0; j < 2; ++j)
           out(i, j) = entries[i][j];
+      }
     };
 
     DenseProblem problem(u, v);

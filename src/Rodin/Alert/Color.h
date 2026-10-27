@@ -133,21 +133,31 @@ namespace Rodin::Alert
     constexpr
     RGB() = default;
 
-    /// @brief Copy constructor.
-    constexpr
-    RGB(const RGB&) = default;
+    /**
+     * @brief Copy constructor.
+     * @param other Object to copy from.
+     */
+    constexpr RGB(const RGB& other) = default;
 
-    /// @brief Move constructor.
-    constexpr
-    RGB(RGB&&) = default;
+    /**
+     * @brief Move constructor.
+     * @param other Object to move from.
+     */
+    constexpr RGB(RGB&& other) = default;
 
-    /// @brief Copy assignment operator.
-    constexpr
-    RGB& operator=(const RGB&) = default;
+    /**
+     * @brief Copy assignment operator.
+     * @returns Reference to this object after the operation.
+     * @param other Object to copy from.
+     */
+    constexpr RGB& operator=(const RGB& other) = default;
 
-    /// @brief Move assignment operator.
-    constexpr
-    RGB& operator=(RGB&&) = default;
+    /**
+     * @brief Move assignment operator.
+     * @returns Reference to this object after the operation.
+     * @param other Object to move from.
+     */
+    constexpr RGB& operator=(RGB&& other) = default;
 
     /**
      * @brief Gets the red component value.
@@ -206,13 +216,17 @@ namespace Rodin::Alert
     constexpr
     NoColorT() = default;
 
-    /// @brief Copy constructor.
-    constexpr
-    NoColorT(const NoColorT&) = default;
+    /**
+     * @brief Copy constructor.
+     * @param other Object to copy from.
+     */
+    constexpr NoColorT(const NoColorT& other) = default;
 
-    /// @brief Move constructor.
-    constexpr
-    NoColorT(NoColorT&&) = default;
+    /**
+     * @brief Move constructor.
+     * @param other Object to move from.
+     */
+    constexpr NoColorT(NoColorT&& other) = default;
   };
 
   /**
@@ -245,21 +259,31 @@ namespace Rodin::Alert
         : m_code(code)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Color(const Color&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Color(const Color& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      Color(Color&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Color(Color&& other) = default;
 
-      /// @brief Copy assignment operator.
-      constexpr
-      Color& operator=(const Color&) = default;
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr Color& operator=(const Color& other) = default;
 
-      /// @brief Move assignment operator.
-      constexpr
-      Color& operator=(Color&&) = default;
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr Color& operator=(Color&& other) = default;
 
       /**
        * @brief Gets the RGB color code.
@@ -279,9 +303,10 @@ namespace Rodin::Alert
   /**
    * @brief Deduction guide for Color.
    * @tparam Code The color code type.
+   * @param code The RGB color code (defaults to default-constructed Code).
    */
   template <class Code>
-  Color(const Code&) -> Color<Code>;
+  Color(const Code& code) -> Color<Code>;
 
   /**
    * @brief Stream insertion operator for custom RGB colors.
@@ -291,210 +316,193 @@ namespace Rodin::Alert
    *
    * Applies a custom RGB color to the output stream using the termcolor
    * library's color template.
+   * @param tag Formatting or action tag selected through its type.
    */
   template <class Code>
-  inline
-  std::ostream& operator<<(std::ostream& os, const Color<Code>&)
+  inline std::ostream& operator<<(
+    std::ostream& os, [[maybe_unused]] const Color<Code>& tag)
   {
     os << termcolor::color<Code::R, Code::G, Code::B>;
     return os;
   }
 
-  /**
-   * @brief Tag type for red terminal color.
-   */
+  /// @brief Tag type for red terminal color.
   struct RedT {};
 
-  /**
-   * @brief Instance of RedT tag type.
-   */
+  /// @brief Instance of RedT tag type.
   static constexpr RedT Red;
 
   /**
    * @brief Stream insertion operator for red color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const RedT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const RedT& tag)
   {
     os << Color16::Red;
     return os;
   }
 
-  /**
-   * @brief Tag type for green terminal color.
-   */
+  /// @brief Tag type for green terminal color.
   struct GreenT {};
 
-  /**
-   * @brief Instance of GreenT tag type.
-   */
+  /// @brief Instance of GreenT tag type.
   static constexpr GreenT Green;
 
   /**
    * @brief Stream insertion operator for green color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const GreenT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const GreenT& tag)
   {
     os << Color16::Green;
     return os;
   }
 
-  /**
-   * @brief Tag type for blue terminal color.
-   */
+  /// @brief Tag type for blue terminal color.
   struct BlueT {};
 
-  /**
-   * @brief Instance of BlueT tag type.
-   */
+  /// @brief Instance of BlueT tag type.
   static constexpr BlueT Blue;
 
   /**
    * @brief Stream insertion operator for blue color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const BlueT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const BlueT& tag)
   {
     os << Color16::Blue;
     return os;
   }
 
-  /**
-   * @brief Tag type for yellow terminal color.
-   */
+  /// @brief Tag type for yellow terminal color.
   struct YellowT {};
 
-  /**
-   * @brief Instance of YellowT tag type.
-   */
+  /// @brief Instance of YellowT tag type.
   static constexpr YellowT Yellow;
 
   /**
    * @brief Stream insertion operator for yellow color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const YellowT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const YellowT& tag)
   {
     os << Color16::Yellow;
     return os;
   }
 
-  /**
-   * @brief Tag type for magenta terminal color.
-   */
+  /// @brief Tag type for magenta terminal color.
   struct MagentaT {};
 
-  /**
-   * @brief Instance of MagentaT tag type.
-   */
+  /// @brief Instance of MagentaT tag type.
   static constexpr MagentaT Magenta;
 
   /**
    * @brief Stream insertion operator for magenta color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const MagentaT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const MagentaT& tag)
   {
     os << Color16::Magenta;
     return os;
   }
 
-  /**
-   * @brief Tag type for cyan terminal color.
-   */
+  /// @brief Tag type for cyan terminal color.
   struct CyanT {};
 
-  /**
-   * @brief Instance of CyanT tag type.
-   */
+  /// @brief Instance of CyanT tag type.
   static constexpr CyanT Cyan;
 
   /**
    * @brief Stream insertion operator for cyan color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const CyanT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const CyanT& tag)
   {
     os << Color16::Cyan;
     return os;
   }
 
-  /**
-   * @brief Tag type for white terminal color.
-   */
+  /// @brief Tag type for white terminal color.
   struct WhiteT {};
 
-  /**
-   * @brief Instance of WhiteT tag type.
-   */
+  /// @brief Instance of WhiteT tag type.
   static constexpr WhiteT White;
 
   /**
    * @brief Stream insertion operator for white color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const WhiteT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const WhiteT& tag)
   {
     os << Color16::White;
     return os;
   }
 
-  /**
-   * @brief Tag type for gray terminal color.
-   */
+  /// @brief Tag type for gray terminal color.
   struct GrayT {};
 
-  /**
-   * @brief Instance of GrayT tag type.
-   */
+  /// @brief Instance of GrayT tag type.
   static constexpr GrayT Gray;
 
   /**
    * @brief Stream insertion operator for gray color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const GrayT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const GrayT& tag)
   {
     os << Color16::Gray;
     return os;
   }
 
-  /**
-   * @brief Tag type for bright gray terminal color.
-   */
+  /// @brief Tag type for bright gray terminal color.
   struct BrightGrayT {};
 
-  /**
-   * @brief Instance of BrightGrayT tag type.
-   */
+  /// @brief Instance of BrightGrayT tag type.
   static constexpr BrightGrayT BrightGray;
 
   /**
    * @brief Stream insertion operator for bright gray color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const BrightGrayT&)
+  inline std::ostream& operator<<(
+    std::ostream& os, [[maybe_unused]] const BrightGrayT& tag)
   {
     os << Color16::BrightGray;
     return os;
   }
 
-  /**
-   * @brief Tag type for bright white terminal color.
-   */
+  /// @brief Tag type for bright white terminal color.
   struct BrightWhiteT {};
 
-  /**
-   * @brief Instance of BrightWhiteT tag type.
-   */
+  /// @brief Instance of BrightWhiteT tag type.
   static constexpr BrightWhiteT BrightWhite;
 
   /**
    * @brief Stream insertion operator for bright white color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const BrightWhiteT&)
+  inline std::ostream& operator<<(
+    std::ostream& os, [[maybe_unused]] const BrightWhiteT& tag)
   {
     os << Color16::BrightWhite;
     return os;

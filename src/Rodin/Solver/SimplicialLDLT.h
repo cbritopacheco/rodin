@@ -11,7 +11,7 @@
  * This header provides the SimplicialLDLT solver class, which implements Cholesky
  * decomposition without square root for symmetric positive definite sparse matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   A = LDL^T
@@ -19,13 +19,13 @@
  * where @f$ L @f$ is unit lower triangular and @f$ D @f$ is diagonal. This variant
  * avoids square root operations, improving numerical stability.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite sparse matrices
  * - When numerical stability is a concern
  * - Problems requiring higher precision
  * - Systems where LLT might encounter numerical issues
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -70,10 +70,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SimplicialLDLT
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystemType>
   SimplicialLDLT(
-    Variational::ProblemBase<LinearSystemType>&) -> SimplicialLDLT<LinearSystemType>;
+    Variational::ProblemBase<LinearSystemType>& pb) -> SimplicialLDLT<LinearSystemType>;
 
   /**
    * @ingroup SimplicialLDLTSpecializations
@@ -167,6 +168,7 @@ namespace Rodin::Solver
        *
        * Updated by every factorization and every solve, so a caller reads it
        * after the call it wants to check.
+       * @returns The outcome of the most recent operation.
        */
       const Info& getInfo() const noexcept
       {
@@ -193,8 +195,11 @@ namespace Rodin::Solver
       }
 
     private:
-      /// Underlying Eigen SimplicialLDLT solver
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen SimplicialLDLT solver
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

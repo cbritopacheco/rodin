@@ -27,7 +27,7 @@ namespace Rodin::Math::RungeKutta
    *   \frac{dq}{dt} = f(q, t)
    * @f]
    *
-   * ## Algorithm
+   * # Algorithm
    * Given a time step @f$ \Delta t @f$ and current state @f$ q_n @f$, the
    * method computes @f$ q_{n+1} @f$ using:
    * @f[
@@ -38,17 +38,17 @@ namespace Rodin::Math::RungeKutta
    *   \end{aligned}
    * @f]
    *
-   * ## Properties
+   * # Properties
    * - **Order of accuracy**: 2 (error @f$ \sim O(\Delta t^3) @f$ per step)
    * - **Stages**: 2 function evaluations per step
    * - **Stability**: A-stable for linear problems
    *
-   * ## Typical Use Cases
+   * # Typical Use Cases
    * - Time-dependent PDEs (heat equation, wave equation)
    * - Particle dynamics
    * - Systems requiring better accuracy than forward Euler
    *
-   * ## Example Usage
+   * # Example Usage
    * ```cpp
    * RK2 integrator;
    * Vector<Real> q = initial_state;

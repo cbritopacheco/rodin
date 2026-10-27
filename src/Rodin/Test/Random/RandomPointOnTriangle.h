@@ -17,9 +17,7 @@
 
 namespace Rodin::Test::Random
 {
-  /**
-   * @brief Random point generator on the reference triangle.
-   */
+  /// @brief Random point generator on the reference triangle.
   class PointOnTriangle
   {
     public:

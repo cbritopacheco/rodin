@@ -10,6 +10,8 @@
 #include <omp.h>
 #include <utility>
 
+#include "Rodin/FormLanguage/Traits.h"
+
 #include "Rodin/Math/Vector.h"
 
 #include "Rodin/Math/Matrix.h"
@@ -27,9 +29,67 @@
 #include "Sequential.h"
 
 #include "ForwardDecls.h"
+#include "ScatterMap.h"
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief Assembly of a named bilinear form into a sparse matrix over OpenMP
+   * threads.
+   *
+   * Runs the form's own local kernel over the polytopes of the form's region
+   * and attributes and scatters the local matrices through a ScatterMap, so
+   * that every assembly after the first reuses the sparsity pattern of the
+   * operator.
+   *
+   * @tparam Scalar Scalar value type of the operator.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
+   */
+  template <class Scalar, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class OpenMP<Math::SparseMatrix<Scalar>, Form> final
+    : public AssemblyBase<Math::SparseMatrix<Scalar>, Form>
+  {
+    public:
+      /// @brief Assembled operator type.
+      using OperatorType = Math::SparseMatrix<Scalar>;
+
+      /// @brief Named form type being assembled.
+      using FormType = Form;
+
+      /// @brief Parent assembly base class.
+      using Parent = AssemblyBase<OperatorType, FormType>;
+
+      /// @brief Input data type for the assembly pipeline.
+      using InputType = typename Parent::InputType;
+
+      /**
+       * @brief Assembles the named form into @p out.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
+       */
+      void execute(OperatorType& out, const InputType& input) override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        OpenMPIteration seq(trialFES.getMesh(), input.getRegion());
+        m_scatterMap.assemble(out, input.getKernel(), trialFES, testFES, seq,
+          input.getAttributes(), omp_get_max_threads());
+      }
+
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new copy.
+       */
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
+
+    private:
+      ScatterMap<Scalar> m_scatterMap;
+  };
+
   /**
    * @brief OpenMP-based parallel mesh iteration for multi-threaded assembly.
    *
@@ -40,7 +100,7 @@ namespace Rodin::Assembly
    *
    * @tparam MeshType Type of mesh to iterate over (specialized for local context)
    *
-   * ## Parallelization Strategy
+   * # Parallelization Strategy
    * The implementation uses OpenMP to parallelize element-wise assembly:
    * - Each thread processes a subset of mesh elements
    * - Local contributions are computed independently
@@ -100,9 +160,13 @@ namespace Rodin::Assembly
       Geometry::Region m_region;                      ///< Region to iterate over
   };
 
-  /// @brief Template argument deduction guide for OpenMPIteration
-  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
-    -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
+  /**
+   * @brief Template argument deduction guide for OpenMPIteration
+   * @param mesh Mesh on which the object is defined.
+   * @param region Geometric region defining the iteration domain
+   */
+  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh,
+    const Geometry::Region& region) -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
   /**
    * @brief OpenMP-based parallel assembly for bilinear forms.
@@ -116,7 +180,7 @@ namespace Rodin::Assembly
    * @tparam TrialFES Trial finite element space type  
    * @tparam TestFES Test finite element space type
    *
-   * ## Parallel Assembly Algorithm
+   * # Parallel Assembly Algorithm
    * 1. **Element Distribution**: Distribute elements across OpenMP threads
    * 2. **Local Assembly**: Each thread computes local element matrices independently
    * 3. **Triplet Accumulation**: Store contributions as Eigen triplets for thread safety
@@ -144,8 +208,7 @@ namespace Rodin::Assembly
     public:
       /// @brief Scalar value type.
       using ScalarType =
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       /// @brief Assembled operator type.
@@ -182,26 +245,51 @@ namespace Rodin::Assembly
         assert(threadCount > 0);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
       /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
+
+      /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
-        const size_t capacity =
-          input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
+        const size_t trialSize = input.getTrialFES().getSize();
+        const size_t testSize = input.getTestFES().getSize();
+        const size_t capacity = trialSize == 0 || testSize == 0
+          ? size_t(0)
+          : size_t(testSize * std::log(trialSize));
         res.clear();
         res.reserve(capacity);
 
@@ -213,8 +301,9 @@ namespace Rodin::Assembly
           OpenMPIteration seq(mesh, bfi.getRegion());
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
-          const int tc =
-            m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
+          const int tc = m_threadCount.has_value()
+            ? static_cast<int>(m_threadCount.value())
+            : omp_get_max_threads();
 
           std::vector<OperatorType> chunks(static_cast<size_t>(tc));
 
@@ -228,7 +317,8 @@ namespace Rodin::Assembly
 #pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (!seq.filter(i)) continue;
+              if (!seq.filter(i))
+                continue;
               if (!attrs.empty())
               {
                 const auto a = mesh.getAttribute(d, i); // Optional<Attribute>
@@ -239,8 +329,12 @@ namespace Rodin::Assembly
               const auto polytope = seq.getPolytope(i);
               integrator->setPolytope(polytope);
 
-              const auto& rows = input.getTestFES().getDOFs(d, i);
-              const auto& cols = input.getTrialFES().getDOFs(d, i);
+              const auto& rows = integrator->getTestDOFIndices()
+                ? *integrator->getTestDOFIndices()
+                : input.getTestFES().getDOFs(d, i);
+              const auto& cols = integrator->getTrialDOFIndices()
+                ? *integrator->getTrialDOFIndices()
+                : input.getTrialFES().getDOFs(d, i);
               assert(rows.size() >= 0);
               for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
               {
@@ -261,12 +355,77 @@ namespace Rodin::Assembly
             {
               for (auto& v : chunks)
               {
-                res.insert(res.end(),
-                           std::make_move_iterator(v.begin()),
-                           std::make_move_iterator(v.end()));
+                res.insert(res.end(), std::make_move_iterator(v.begin()),
+                  std::make_move_iterator(v.end()));
               }
             }
           } // end parallel
+        }
+
+        for (auto& bfi : input.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
+          OpenMPIteration testseq(mesh, bfi.getTestRegion());
+          const Index td = testseq.getDimension();
+          const Index count = testseq.getCount();
+          const int tc = static_cast<int>(getThreadCount());
+          std::vector<OperatorType> chunks(static_cast<size_t>(tc));
+
+#pragma omp parallel num_threads(tc)
+          {
+            const int tid = omp_get_thread_num();
+            std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+            OperatorType local;
+            OpenMPIteration trialseq(mesh, integrator->getTrialRegion());
+            const Index rd = trialseq.getDimension();
+            const Index rcount = trialseq.getCount();
+
+#pragma omp for
+            for (Index te = 0; te < count; ++te)
+            {
+              if (!testseq.filter(te))
+                continue;
+              if (!testAttrs.empty())
+              {
+                const auto attribute = mesh.getAttribute(td, te);
+                if (!attribute || !testAttrs.contains(*attribute))
+                  continue;
+              }
+              const auto testPolytope = testseq.getPolytope(te);
+              // A subsequent DOF lookup may reuse the same scratch storage.
+              const auto rows = input.getTestFES().getDOFs(td, te);
+              for (Index tr = 0; tr < rcount; ++tr)
+              {
+                if (!trialseq.filter(tr))
+                  continue;
+                if (!trialAttrs.empty())
+                {
+                  const auto attribute = mesh.getAttribute(rd, tr);
+                  if (!attribute || !trialAttrs.contains(*attribute))
+                    continue;
+                }
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                integrator->setPolytope(trialPolytope, testPolytope);
+                const auto& cols = input.getTrialFES().getDOFs(rd, tr);
+                for (Eigen::Index r = 0; r < rows.size(); ++r)
+                {
+                  for (Eigen::Index c = 0; c < cols.size(); ++c)
+                  {
+                    const ScalarType value = integrator->integrate(c, r);
+                    if (value != ScalarType(0))
+                      local.emplace_back(rows(r), cols(c), value);
+                  }
+                }
+              }
+            }
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+          }
+          for (auto& chunk : chunks)
+          {
+            res.insert(res.end(), std::make_move_iterator(chunk.begin()),
+              std::make_move_iterator(chunk.end()));
+          }
         }
       }
 
@@ -308,43 +467,34 @@ namespace Rodin::Assembly
    * BilinearFormBase object.
    */
   template <class Solution, class TrialFES, class TestFES>
-  class OpenMP<
-    Math::SparseMatrix<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Variational::BilinearForm<
-      Solution,
-      TrialFES, TestFES,
+  class OpenMP<Math::SparseMatrix<typename FormLanguage::Dot<
+                 typename FormLanguage::Traits<TrialFES>::ScalarType,
+                 typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+    Variational::BilinearForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>> final
-    : public AssemblyBase<
-        Math::SparseMatrix<
-          typename FormLanguage::Dot<
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
+    final
+    : public AssemblyBase<Math::SparseMatrix<typename FormLanguage::Dot<
+                            typename FormLanguage::Traits<TrialFES>::ScalarType,
+                            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+        Variational::BilinearForm<Solution, TrialFES, TestFES,
+          Math::SparseMatrix<typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-        Variational::BilinearForm<
-          Solution,
-          TrialFES, TestFES,
-          Math::SparseMatrix<
-            typename FormLanguage::Dot<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType =
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
       /// @brief Bilinear form type assembled by this backend.
-      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
@@ -365,28 +515,50 @@ namespace Rodin::Assembly
         assert(threadCount > 0);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_assembly(std::move(other.m_assembly))
       {}
 
       /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
+
+      /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         std::vector<Math::SparseTriplet<ScalarType>> triplets;
-        m_assembly.execute(triplets, {
-            input.getTrialFES(), input.getTestFES(),
-            input.getLocalBFIs(), input.getGlobalBFIs() });
+        m_assembly.execute(triplets,
+          {input.getTrialFES(), input.getTestFES(), input.getLocalBFIs(),
+            input.getGlobalBFIs()});
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setFromTriplets(triplets.begin(), triplets.end());
       }
@@ -427,53 +599,44 @@ namespace Rodin::Assembly
         m_assembly;
   };
 
-  /**
-   * @brief OpenMP bilinear form assembly into a dense matrix.
-   */
+  /// @brief OpenMP bilinear form assembly into a dense matrix.
   template <class Solution, class TrialFES, class TestFES>
-  class OpenMP<
-    Math::Matrix<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Variational::BilinearForm<
-      Solution,
-      TrialFES, TestFES,
+  class OpenMP<Math::Matrix<typename FormLanguage::Dot<
+                 typename FormLanguage::Traits<TrialFES>::ScalarType,
+                 typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+    Variational::BilinearForm<Solution, TrialFES, TestFES,
       Math::Matrix<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>> final
-    : public AssemblyBase<
-        Math::Matrix<
-          typename FormLanguage::Dot<
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
+    final
+    : public AssemblyBase<Math::Matrix<typename FormLanguage::Dot<
+                            typename FormLanguage::Traits<TrialFES>::ScalarType,
+                            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+        Variational::BilinearForm<Solution, TrialFES, TestFES,
+          Math::Matrix<typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-        Variational::BilinearForm<
-          Solution,
-          TrialFES, TestFES,
-          Math::Matrix<
-            typename FormLanguage::Dot<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType =
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
 
       /// @brief Local bilinear form integrator base type.
-      using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
       /// @brief Global bilinear form integrator base type.
-      using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       /// @brief Bilinear form type assembled by this backend.
-      using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+      using BilinearFormType =
+        Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
@@ -484,38 +647,58 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
       /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
+
+      /**
        * @brief Executes dense matrix assembly.
        * @param res Output dense matrix.
        * @param input Bilinear form assembly input.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
 
         const auto& mesh = input.getTestFES().getMesh();
-        const int tc =
-          m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
+        const int tc = m_threadCount.has_value() ? static_cast<int>(m_threadCount.value())
+                                                 : omp_get_max_threads();
 
         // --- Local contributions ---
         for (auto& bfi : input.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
           OpenMPIteration seq(mesh, bfi.getRegion());
-          const Index d     = seq.getDimension();
+          const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
           std::vector<OperatorType> chunks(static_cast<size_t>(tc));
@@ -531,21 +714,29 @@ namespace Rodin::Assembly
 #pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (!seq.filter(i)) continue;
+              if (!seq.filter(i))
+                continue;
               if (!attrs.empty())
               {
                 const auto a = mesh.getAttribute(d, i);
-                if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                if (!a || !attrs.contains(*a))
+                  continue; // or attrs.count(*a)==0
               }
 
               const auto polytope = seq.getPolytope(i);
               lbfi->setPolytope(polytope);
 
-              const auto& rows = input.getTestFES().getDOFs(d, i);
-              const auto& cols = input.getTrialFES().getDOFs(d, i);
-              for (size_t r = 0; r < rows.size(); ++r)
-                for (size_t c = 0; c < cols.size(); ++c)
+              const auto& rows = lbfi->getTestDOFIndices()
+                ? *lbfi->getTestDOFIndices()
+                : input.getTestFES().getDOFs(d, i);
+              const auto& cols = lbfi->getTrialDOFIndices()
+                ? *lbfi->getTrialDOFIndices()
+                : input.getTrialFES().getDOFs(d, i);
+              for (Eigen::Index r = 0; r < rows.size(); ++r)
+              {
+                for (Eigen::Index c = 0; c < cols.size(); ++c)
                   local(rows(r), cols(c)) += lbfi->integrate(c, r);
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -553,7 +744,8 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& M : chunks) res += M;
+              for (auto& M : chunks)
+                res += M;
             }
           } // end parallel
         }
@@ -561,10 +753,10 @@ namespace Rodin::Assembly
         // --- Global (coupling) contributions ---
         for (auto& bfi : input.getGlobalBFIs())
         {
-          const auto& testAttrs  = bfi.getTestAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
           const auto& trialAttrs = bfi.getTrialAttributes();
           OpenMPIteration testseq(mesh, bfi.getTestRegion());
-          const Index d     = testseq.getDimension();
+          const Index d = testseq.getDimension();
           const Index count = testseq.getCount();
 
           std::vector<OperatorType> chunks(static_cast<size_t>(tc));
@@ -580,11 +772,13 @@ namespace Rodin::Assembly
 #pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (!testseq.filter(i)) continue;
+              if (!testseq.filter(i))
+                continue;
               if (!testAttrs.empty())
               {
                 const auto a = mesh.getAttribute(d, i);
-                if (!a || !testAttrs.contains(*a)) continue;
+                if (!a || !testAttrs.contains(*a))
+                  continue;
               }
 
               const auto testPolytope = testseq.getPolytope(i);
@@ -599,17 +793,21 @@ namespace Rodin::Assembly
                 if (!trialAttrs.empty())
                 {
                   const auto a = mesh.getAttribute(rd, tr);
-                  if (!a || !trialAttrs.contains(*a)) continue; // or trialAttrs.count(*a)==0
+                  if (!a || !trialAttrs.contains(*a))
+                    continue; // or trialAttrs.count(*a)==0
                 }
 
                 const auto trialPolytope = trialseq.getPolytope(tr);
                 gbfi->setPolytope(trialPolytope, testPolytope);
 
-                const auto& rows = input.getTestFES().getDOFs(d, i);
+                // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+                const auto rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
-                for (size_t r = 0; r < rows.size(); ++r)
-                  for (size_t c = 0; c < cols.size(); ++c)
+                for (Eigen::Index r = 0; r < rows.size(); ++r)
+                {
+                  for (Eigen::Index c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += gbfi->integrate(c, r);
+                }
               }
             }
 
@@ -618,7 +816,8 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& M : chunks) res += M;
+              for (auto& M : chunks)
+                res += M;
             }
           } // end parallel
         }
@@ -653,12 +852,12 @@ namespace Rodin::Assembly
    * LinearForm object.
    */
   template <class FES>
-  class OpenMP<
-    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
-    Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
-    : public AssemblyBase<
-        Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
-        Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
+  class OpenMP<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
+    Variational::LinearForm<FES,
+      Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
+    : public AssemblyBase<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>,
+        Variational::LinearForm<FES,
+          Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
     public:
       /// @brief Finite element space type.
@@ -682,31 +881,51 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
       /**
+       * @brief Assigns the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the assembly policy and working storage.
+       * @param other Source assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
+
+      /**
        * @brief Executes vector assembly.
        * @param res Output vector.
        * @param input Linear form assembly input.
        */
-      void execute(VectorType& res, const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) override
       {
         res.resize(input.getFES().getSize());
         res.setZero();
 
         const auto& mesh = input.getFES().getMesh();
-        const int tc =
-          m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
+        const int tc = m_threadCount.has_value() ? static_cast<int>(m_threadCount.value())
+                                                 : omp_get_max_threads();
 
         for (auto& lfi : input.getLFIs())
         {
@@ -722,24 +941,29 @@ namespace Rodin::Assembly
           {
             const int tid = omp_get_thread_num();
             auto integrator =
-              std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
+              std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(
+                lfi.copy());
             std::vector<VectorEntry> local;
             local.reserve(static_cast<size_t>(count));
 
 #pragma omp for
             for (Index i = 0; i < count; ++i)
             {
-              if (!seq.filter(i)) continue;
+              if (!seq.filter(i))
+                continue;
               if (!attrs.empty())
               {
                 const auto a = mesh.getAttribute(d, i);
-                if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                if (!a || !attrs.contains(*a))
+                  continue; // or attrs.count(*a)==0
               }
 
               const auto polytope = seq.getPolytope(i);
               integrator->setPolytope(polytope);
 
-              const auto& dofs = input.getFES().getDOFs(d, i);
+              const auto& dofs = integrator->getTestDOFIndices()
+                ? *integrator->getTestDOFIndices()
+                : input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
               for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
               {
@@ -797,18 +1021,14 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
-  /**
-   * @brief OpenMP value Dirichlet boundary condition assembly.
-   */
+  /// @brief OpenMP value Dirichlet boundary condition assembly.
   template <class Scalar, class Solution, class FES, class ValueDerived>
-  class OpenMP<
-    IndexMap<Scalar>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>> final
-    : public AssemblyBase<
-        IndexMap<Scalar>,
-        Variational::DirichletBC<
-          Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
+  class OpenMP<IndexMap<Scalar>,
+    Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
+      Variational::FunctionBase<ValueDerived>>>
+    final : public AssemblyBase<IndexMap<Scalar>,
+              Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
+                Variational::FunctionBase<ValueDerived>>>
   {
     public:
       /// @brief Finite element space type.
@@ -835,13 +1055,19 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -852,7 +1078,7 @@ namespace Rodin::Assembly
        * @param res Output map from constrained DOFs to values.
        * @param input Boundary condition input.
        */
-      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      void execute(IndexMap<Scalar>& res, const InputType& input) override
       {
         const auto& u = input.getOperand();
         const auto& value = input.getValue();
@@ -861,8 +1087,8 @@ namespace Rodin::Assembly
         const auto& mesh = fes.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
         const size_t faceCount = mesh.getFaceCount();
-        const int tc =
-          m_threadCount.has_value() ? static_cast<int>(m_threadCount.value()) : omp_get_max_threads();
+        const int tc = m_threadCount.has_value() ? static_cast<int>(m_threadCount.value())
+                                                 : omp_get_max_threads();
 
         res.clear();
         std::vector<IndexMap<Scalar>> chunks(static_cast<size_t>(tc));
@@ -880,17 +1106,18 @@ namespace Rodin::Assembly
             if (!essBdr.empty())
             {
               const auto a = mesh.getAttribute(faceDim, i);
-              if (!a || !essBdr.contains(*a)) continue; // or essBdr.count(*a)==0
+              if (!a || !essBdr.contains(*a))
+                continue; // or essBdr.count(*a)==0
             }
 
             const auto& fe = fes.getFiniteElement(faceDim, i);
-            const auto& mapping = fes.getPullback({ faceDim, i }, value);
+            const auto& mapping = fes.getPullback({faceDim, i}, value);
             for (Index k = 0; k < fe.getCount(); ++k)
             {
-              const Index g = fes.getGlobalIndex({ faceDim, i }, k);
+              const Index g = fes.getGlobalIndex({faceDim, i}, k);
               auto it = local.find(g);
               if (it == local.end())
-                local.insert(it, std::pair{ g, fe.getLinearForm(k)(mapping) });
+                local.insert(it, std::pair{g, fe.getLinearForm(k)(mapping)});
             }
           }
 
@@ -901,7 +1128,10 @@ namespace Rodin::Assembly
           {
             // ordered merge guarded by implicit single barrier
             for (auto& partial : chunks)
-              res.insert(boost::container::ordered_unique_range, partial.begin(), partial.end());
+            {
+              res.insert(
+                boost::container::ordered_unique_range, partial.begin(), partial.end());
+            }
           }
         } // end parallel
       }
@@ -939,41 +1169,32 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
-  /**
-   * @brief OpenMP single-field problem assembly.
-   */
+  /// @brief OpenMP single-field problem assembly.
   template <class LinearSystem, class TrialFunction, class TestFunction>
-  class OpenMP<
-    LinearSystem,
-    Variational::Problem<LinearSystem, TrialFunction, TestFunction>> final
-    : public AssemblyBase<
-        LinearSystem,
-        Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+  class OpenMP<LinearSystem,
+    Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+    final : public AssemblyBase<LinearSystem,
+              Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
   {
     public:
       /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
       /// @brief Parent class type.
-      using Parent =
-        AssemblyBase<
-          LinearSystemType,
-          Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
+      using Parent = AssemblyBase<LinearSystemType,
+        Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
 
       /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
@@ -990,23 +1211,44 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
-        : Parent(std::move(other)), m_threadCount(other.m_threadCount)
+        : Parent(std::move(other)),
+          m_threadCount(other.m_threadCount)
       {}
+
+      /**
+       * @brief Copies the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
 
       /**
        * @brief Executes full problem assembly.
        * @param axb Output linear system.
        * @param input Problem assembly input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -1016,8 +1258,8 @@ namespace Rodin::Assembly
         const auto& v = input.getTestFunction();
 
         const auto& trialFES = u.getFiniteElementSpace();
-        const auto& testFES  = v.getFiniteElementSpace();
-        const auto& mesh     = trialFES.getMesh();
+        const auto& testFES = v.getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
 
         const size_t cols = static_cast<size_t>(trialFES.getSize());
         const size_t rows = static_cast<size_t>(testFES.getSize());
@@ -1028,10 +1270,8 @@ namespace Rodin::Assembly
         constexpr bool IsSparse =
           std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
-        const int tc =
-          m_threadCount.has_value()
-            ? static_cast<int>(m_threadCount.value())
-            : omp_get_max_threads();
+        const int tc = m_threadCount.has_value() ? static_cast<int>(m_threadCount.value())
+                                                 : omp_get_max_threads();
 
         // ---- Dirichlet fixed values + identification ----
         ConstraintMap<ScalarType> constraints(std::max(rows, cols));
@@ -1084,6 +1324,9 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
+
 
         if constexpr (IsSparse)
         {
@@ -1106,10 +1349,15 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
+              {
+                localRhs.emplace_back(
+                  r.index, -Math::conj(r.coefficient) * val * colValue);
+              }
               for (const auto& c : constraints.expand(col))
+              {
                 localT.emplace_back(
-                  r.index, c.index, r.coefficient * val * c.coefficient);
+                  r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
+              }
             }
           };
 
@@ -1119,7 +1367,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              localRhs.emplace_back(r.index, r.coefficient * val);
+              localRhs.emplace_back(r.index, Math::conj(r.coefficient) * val);
           };
 
           // ---------------- Local BFIs ----------------
@@ -1141,18 +1389,24 @@ namespace Rodin::Assembly
 #pragma omp for
               for (Index p = 0; p < count; ++p)
               {
-                if (!seq.filter(p)) continue;
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
                   const auto a = mesh.getAttribute(d, p);
-                  if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                  if (!a || !attrs.contains(*a))
+                    continue; // or attrs.count(*a)==0
                 }
 
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& rowsDOF = testFES.getDOFs(d, p);
-                const auto& colsDOF = trialFES.getDOFs(d, p);
+                const auto& rowsDOF = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
+                const auto& colsDOF = integrator->getTrialDOFIndices()
+                  ? *integrator->getTrialDOFIndices()
+                  : trialFES.getDOFs(d, p);
 
                 for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                 {
@@ -1172,7 +1426,7 @@ namespace Rodin::Assembly
           for (auto& bfi : pb.getGlobalBFIs())
           {
             const auto& trialAttrs = bfi.getTrialAttributes();
-            const auto& testAttrs  = bfi.getTestAttributes();
+            const auto& testAttrs = bfi.getTestAttributes();
 
             OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
             OpenMPIteration testseq(mesh, bfi.getTestRegion());
@@ -1186,19 +1440,22 @@ namespace Rodin::Assembly
               auto& localT = tchunks[static_cast<size_t>(tid)];
               auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
 
-              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(
+                bfi.copy());
 
 #pragma omp for
               for (Index te = 0; te < tcount; ++te)
               {
-                if (!testseq.filter(te)) continue;
+                if (!testseq.filter(te))
+                  continue;
                 if (!testAttrs.empty())
                 {
                   const auto a = mesh.getAttribute(td, te);
-                  if (!a || !testAttrs.contains(*a)) continue; // or attrs.count(*a)==0
+                  if (!a || !testAttrs.contains(*a))
+                    continue; // or attrs.count(*a)==0
                 }
 
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
                 const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
@@ -1206,11 +1463,13 @@ namespace Rodin::Assembly
 
                 for (Index tr = 0; tr < rcount; ++tr)
                 {
-                  if (!trialseq.filter(tr)) continue;
+                  if (!trialseq.filter(tr))
+                    continue;
                   if (!trialAttrs.empty())
                   {
                     const auto a = mesh.getAttribute(rd, tr);
-                    if (!a || !trialAttrs.contains(*a)) continue; // or attrs.count(*a)==0
+                    if (!a || !trialAttrs.contains(*a))
+                      continue; // or attrs.count(*a)==0
                   }
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
@@ -1238,8 +1497,10 @@ namespace Rodin::Assembly
           {
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
+            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
                 sparseEntry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
+            }
           }
 
           // ---------------- LFIs ----------------
@@ -1260,17 +1521,21 @@ namespace Rodin::Assembly
 #pragma omp for
               for (Index p = 0; p < count; ++p)
               {
-                if (!seq.filter(p)) continue;
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
                   const auto a = mesh.getAttribute(d, p);
-                  if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                  if (!a || !attrs.contains(*a))
+                    continue; // or attrs.count(*a)==0
                 }
 
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& dofs = testFES.getDOFs(d, p);
+                const auto& dofs = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = dofs(l);
@@ -1286,8 +1551,10 @@ namespace Rodin::Assembly
           {
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
+            {
               vectorEntry(rhsChunks[0], static_cast<Index>(i),
                 static_cast<ScalarType>(vec.coeff(i)));
+            }
           }
 
           // ---------------- Reduce RHS chunks into b ----------------
@@ -1300,16 +1567,16 @@ namespace Rodin::Assembly
 
           // ---------------- Merge triplets ----------------
           size_t totalTriplets = 0;
-          for (auto& v0 : tchunks) totalTriplets += v0.size();
+          for (auto& v0 : tchunks)
+            totalTriplets += v0.size();
 
           std::vector<Math::SparseTriplet<ScalarType>> all;
           all.reserve(totalTriplets + rows);
 
           for (auto& v0 : tchunks)
           {
-            all.insert(all.end(),
-                       std::make_move_iterator(v0.begin()),
-                       std::make_move_iterator(v0.end()));
+            all.insert(all.end(), std::make_move_iterator(v0.begin()),
+              std::make_move_iterator(v0.end()));
             std::vector<Math::SparseTriplet<ScalarType>>().swap(v0);
           }
 
@@ -1364,9 +1631,7 @@ namespace Rodin::Assembly
 
           std::vector<OperatorType> Achunks(static_cast<size_t>(tc));
           std::vector<std::vector<ScalarType>> rhsChunks(
-            static_cast<size_t>(tc),
-            std::vector<ScalarType>(rows, ScalarType(0))
-          );
+            static_cast<size_t>(tc), std::vector<ScalarType>(rows, ScalarType(0)));
 
           for (int tid = 0; tid < tc; ++tid)
           {
@@ -1393,18 +1658,24 @@ namespace Rodin::Assembly
 #pragma omp for
               for (Index p = 0; p < count; ++p)
               {
-                if (!seq.filter(p)) continue;
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
                   const auto a = mesh.getAttribute(d, p);
-                  if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                  if (!a || !attrs.contains(*a))
+                    continue; // or attrs.count(*a)==0
                 }
 
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& rowsDOF = testFES.getDOFs(d, p);
-                const auto& colsDOF = trialFES.getDOFs(d, p);
+                const auto& rowsDOF = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
+                const auto& colsDOF = integrator->getTrialDOFIndices()
+                  ? *integrator->getTrialDOFIndices()
+                  : trialFES.getDOFs(d, p);
 
                 for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                 {
@@ -1421,10 +1692,15 @@ namespace Rodin::Assembly
                       for (const auto& r : constraints.expand(I))
                       {
                         if (colValue != ScalarType(0))
+                        {
                           localRhs[static_cast<size_t>(r.index)] -=
-                            r.coefficient * val * colValue;
+                            Math::conj(r.coefficient) * val * colValue;
+                        }
                         for (const auto& c : constraints.expand(J))
-                          Alocal(r.index, c.index) += r.coefficient * val * c.coefficient;
+                        {
+                          Alocal(r.index, c.index) +=
+                            Math::conj(r.coefficient) * val * c.coefficient;
+                        }
                       }
                     }
                   }
@@ -1437,7 +1713,7 @@ namespace Rodin::Assembly
           for (auto& bfi : pb.getGlobalBFIs())
           {
             const auto& trialAttrs = bfi.getTrialAttributes();
-            const auto& testAttrs  = bfi.getTestAttributes();
+            const auto& testAttrs = bfi.getTestAttributes();
 
             OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
             OpenMPIteration testseq(mesh, bfi.getTestRegion());
@@ -1451,19 +1727,22 @@ namespace Rodin::Assembly
               auto& Alocal = Achunks[static_cast<size_t>(tid)];
               auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
 
-              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(
+                bfi.copy());
 
 #pragma omp for
               for (Index te = 0; te < tcount; ++te)
               {
-                if (!testseq.filter(te)) continue;
+                if (!testseq.filter(te))
+                  continue;
                 if (!testAttrs.empty())
                 {
                   const auto a = mesh.getAttribute(td, te);
-                  if (!a || !testAttrs.contains(*a)) continue; // or testAttrs.count(*a)==0
+                  if (!a || !testAttrs.contains(*a))
+                    continue; // or testAttrs.count(*a)==0
                 }
 
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
                 const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
@@ -1471,11 +1750,13 @@ namespace Rodin::Assembly
 
                 for (Index tr = 0; tr < rcount; ++tr)
                 {
-                  if (!trialseq.filter(tr)) continue;
+                  if (!trialseq.filter(tr))
+                    continue;
                   if (!trialAttrs.empty())
                   {
                     const auto a = mesh.getAttribute(rd, tr);
-                    if (!a || !trialAttrs.contains(*a)) continue;
+                    if (!a || !trialAttrs.contains(*a))
+                      continue;
                   }
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
@@ -1498,11 +1779,15 @@ namespace Rodin::Assembly
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
+                          {
                             localRhs[static_cast<size_t>(r.index)] -=
-                              r.coefficient * val * colValue;
+                              Math::conj(r.coefficient) * val * colValue;
+                          }
                           for (const auto& c : constraints.expand(J))
+                          {
                             Alocal(r.index, c.index) +=
-                              r.coefficient * val * c.coefficient;
+                              Math::conj(r.coefficient) * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -1519,6 +1804,7 @@ namespace Rodin::Assembly
             const auto opRows = op.rows();
             const auto opCols = op.cols();
             for (Eigen::Index i = 0; i < opRows; ++i)
+            {
               for (Eigen::Index j = 0; j < opCols; ++j)
               {
                 const auto val = op(i, j);
@@ -1531,12 +1817,16 @@ namespace Rodin::Assembly
                   for (const auto& r : constraints.expand(static_cast<Index>(i)))
                   {
                     if (colValue != ScalarType(0))
-                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                      b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                     for (const auto& c : constraints.expand(static_cast<Index>(j)))
-                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                    {
+                      A(r.index, c.index) +=
+                        Math::conj(r.coefficient) * val * c.coefficient;
+                    }
                   }
                 }
               }
+            }
           }
 
           // Reduce dense matrices
@@ -1561,24 +1851,31 @@ namespace Rodin::Assembly
 #pragma omp for
               for (Index p = 0; p < count; ++p)
               {
-                if (!seq.filter(p)) continue;
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
                   const auto a = mesh.getAttribute(d, p);
-                  if (!a || !attrs.contains(*a)) continue;
+                  if (!a || !attrs.contains(*a))
+                    continue;
                 }
 
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& dofs = testFES.getDOFs(d, p);
+                const auto& dofs = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = dofs(l);
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs[static_cast<size_t>(r.index)] += r.coefficient * val;
+                  {
+                    localRhs[static_cast<size_t>(r.index)] +=
+                      Math::conj(r.coefficient) * val;
+                  }
                 }
               }
             }
@@ -1600,7 +1897,7 @@ namespace Rodin::Assembly
             {
               const ScalarType val = static_cast<ScalarType>(vec.coeff(i));
               for (const auto& r : constraints.expand(static_cast<Index>(i)))
-                b.coeffRef(r.index) += r.coefficient * val;
+                b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
             }
           }
 
@@ -1625,14 +1922,16 @@ namespace Rodin::Assembly
 
             for (size_t r = 0; r < rows; ++r)
             {
-              if (r == static_cast<size_t>(idx)) continue;
+              if (r == static_cast<size_t>(idx))
+                continue;
               b.coeffRef(r) -= A(r, idx) * value;
               A(r, idx) = ScalarType(0);
             }
 
             for (size_t c = 0; c < cols; ++c)
             {
-              if (c == static_cast<size_t>(idx)) continue;
+              if (c == static_cast<size_t>(idx))
+                continue;
               A(idx, c) = ScalarType(0);
             }
 
@@ -1642,19 +1941,19 @@ namespace Rodin::Assembly
         }
       }
 
-      // Targeted (LHS-only / RHS-only) assembly. The parallel Eigen backend
-      // assembles the full system into a scratch object and exposes only the
-      // requested side, leaving the other operand untouched (the targeted
-      // contract). This keeps the intricate parallel BC-elimination logic in a
-      // single code path instead of duplicating a gated variant.
       /**
        * @brief Executes targeted problem assembly.
+       *
+       * The full system is assembled into temporary storage. Only the requested
+       * side is transferred to the output system; the other side is preserved.
+       * This uses the same boundary-condition elimination as full assembly.
+       *
        * @param axb Output linear system.
        * @param input Problem assembly input.
        * @param target Side of the system to assemble.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -1668,21 +1967,19 @@ namespace Rodin::Assembly
        * @brief Creates a polymorphic copy.
        * @return Pointer to a new copy.
        */
-      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
 
     private:
       Optional<size_t> m_threadCount;
   };
 
-  /**
-   * @brief OpenMP mixed problem assembly.
-   */
-  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
-  class OpenMP<
-    LinearSystem,
-    Variational::Problem<LinearSystem, U1, U2, U3, Us...>> final
-    : public AssemblyBase<
-        LinearSystem,
+  /// @brief OpenMP mixed problem assembly.
+  template <class LinearSystem, class U1, class U2, class U3, class... Us>
+  class OpenMP<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>> final
+    : public AssemblyBase<LinearSystem,
         Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
   {
     public:
@@ -1690,25 +1987,20 @@ namespace Rodin::Assembly
       using LinearSystemType = LinearSystem;
 
       /// @brief Parent class type.
-      using Parent =
-        AssemblyBase<
-          LinearSystemType,
-          Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
+      using Parent = AssemblyBase<LinearSystemType,
+        Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
       /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
       /// @brief Assembled operator type.
-      using OperatorType =
-        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+      using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+      using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
@@ -1725,35 +2017,55 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(other.m_threadCount)
       {}
 
       /**
+       * @brief Copies the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(const OpenMP& other) = default;
+
+      /**
+       * @brief Moves the execution policy, retaining the destination identity.
+       * @param other Source complete-problem assembler.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& operator=(OpenMP&& other) = default;
+
+      /**
        * @brief Executes full mixed problem assembly.
        * @param axb Output linear system.
        * @param input Mixed problem input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
 
         auto& pb = input.getProblemBody();
-        auto&       us           = input.getTrialFunctions();
-        auto&       vs           = input.getTestFunctions();
+        auto& us = input.getTrialFunctions();
+        auto& vs = input.getTestFunctions();
         const auto& trialOffsets = input.getTrialOffsets();
-        const auto& testOffsets  = input.getTestOffsets();
-        auto&       trialUUIDMap = input.getTrialUUIDMap();
-        auto&       testUUIDMap  = input.getTestUUIDMap();
+        const auto& testOffsets = input.getTestOffsets();
+        auto& trialUUIDMap = input.getTrialUUIDMap();
+        auto& testUUIDMap = input.getTestUUIDMap();
 
         const size_t ncols = input.getTotalTrialSize();
         const size_t nrows = input.getTotalTestSize();
@@ -1764,38 +2076,35 @@ namespace Rodin::Assembly
         constexpr bool IsSparse =
           std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
-        const int tc =
-          m_threadCount.has_value()
-            ? static_cast<int>(m_threadCount.value())
-            : omp_get_max_threads();
+        const int tc = m_threadCount.has_value() ? static_cast<int>(m_threadCount.value())
+                                                 : omp_get_max_threads();
 
-        const auto findTrialBlock = [&](const auto& uuid) -> size_t
-        {
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t {
           auto it = trialUUIDMap.left.find(uuid);
           assert(it != trialUUIDMap.left.end());
           return it->second;
         };
 
-        const auto findTestBlock = [&](const auto& uuid) -> size_t
-        {
+        const auto findTestBlock = [&](const auto& uuid) -> size_t {
           auto it = testUUIDMap.left.find(uuid);
           assert(it != testUUIDMap.left.end());
           return it->second;
         };
 
         // Mesh (assume common)
-        const auto& mesh = [&]() -> const auto&
-        {
+        const auto& mesh = [&]() -> const auto& {
           const void* addr = nullptr;
-          us.apply([&](const auto& uref)
-          {
+          us.apply([&](const auto& uref) {
             if (!addr)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+            {
+              addr =
+                static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+            }
           });
           assert(addr);
-          return *static_cast<
-            const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*
-          >(addr);
+          return *static_cast<const std::decay_t<
+            decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(
+            addr);
         }();
 
         // ------------------------------------------------------------------
@@ -1811,7 +2120,7 @@ namespace Rodin::Assembly
         {
           const auto uUUID = dbc.getOperand().getUUID();
           const size_t uBlock = findTrialBlock(uUUID);
-          const size_t uOff   = trialOffsets[uBlock];
+          const size_t uOff = trialOffsets[uBlock];
 
           dbc.assemble();
           std::visit(
@@ -1856,6 +2165,9 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        if (!constraints.getIdentifiedRows().empty())
+          constraints.finalize();
+
 
         // ------------------------------------------------------------------
         // Thread-local accumulators
@@ -1892,11 +2204,15 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != ScalarType(0))
+            {
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                r.index, -r.coefficient * val * colValue);
+                r.index, -Math::conj(r.coefficient) * val * colValue);
+            }
             for (const auto& c : constraints.expand(col))
+            {
               tchunks[static_cast<size_t>(tid)].emplace_back(
-                r.index, c.index, r.coefficient * val * c.coefficient);
+                r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
+            }
           }
         };
 
@@ -1919,21 +2235,22 @@ namespace Rodin::Assembly
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
-          us.iapply([&](size_t ui, const auto& uref)
-          {
-            if (ui != uBlock) return;
+          us.iapply([&](size_t ui, const auto& uref) {
+            if (ui != uBlock)
+              return;
             const auto& uFES = uref.get().getFiniteElementSpace();
 
-            vs.iapply([&](size_t vi, const auto& vref)
-            {
-              if (vi != vBlock) return;
+            vs.iapply([&](size_t vi, const auto& vref) {
+              if (vi != vBlock)
+                return;
               const auto& vFES = vref.get().getFiniteElementSpace();
 
 #pragma omp parallel num_threads(tc)
               {
                 const int tid = omp_get_thread_num();
 
-                std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+                std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(
+                  bfi.copy());
                 OperatorType* Alocal = nullptr;
                 if constexpr (!IsSparse)
                   Alocal = &Achunks[static_cast<size_t>(tid)];
@@ -1941,25 +2258,33 @@ namespace Rodin::Assembly
 #pragma omp for
                 for (Index p = 0; p < count; ++p)
                 {
-                  if (!seq.filter(p)) continue;
+                  if (!seq.filter(p))
+                    continue;
                   if (!attrs.empty())
                   {
                     const auto a = mesh.getAttribute(d, p);
-                    if (!a || !attrs.contains(*a)) continue;
+                    if (!a || !attrs.contains(*a))
+                      continue;
                   }
 
                   const auto polytope = seq.getPolytope(p);
                   integrator->setPolytope(polytope);
 
-                  const auto& rows = vFES.getDOFs(d, p);
-                  const auto& cols = uFES.getDOFs(d, p);
+                  const auto& rows = integrator->getTestDOFIndices()
+                    ? *integrator->getTestDOFIndices()
+                    : vFES.getDOFs(d, p);
+                  const auto& cols = integrator->getTrialDOFIndices()
+                    ? *integrator->getTrialDOFIndices()
+                    : uFES.getDOFs(d, p);
 
                   for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                   {
-                    const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
+                    const Index I =
+                      static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
                     for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
                     {
-                      const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
+                      const Index J =
+                        static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
                       const ScalarType val = integrator->integrate(j, i);
                       if (val == ScalarType(0))
                         continue;
@@ -1974,11 +2299,15 @@ namespace Rodin::Assembly
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
+                          {
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                              r.index, -r.coefficient * val * colValue);
+                              r.index, -Math::conj(r.coefficient) * val * colValue);
+                          }
                           for (const auto& c : constraints.expand(J))
+                          {
                             (*Alocal)(r.index, c.index) +=
-                              r.coefficient * val * c.coefficient;
+                              Math::conj(r.coefficient) * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -2004,7 +2333,7 @@ namespace Rodin::Assembly
           const size_t vOff = testOffsets[vBlock];
 
           const auto& trialAttrs = bfi.getTrialAttributes();
-          const auto& testAttrs  = bfi.getTestAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
 
           OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
           OpenMPIteration testseq(mesh, bfi.getTestRegion());
@@ -2012,21 +2341,22 @@ namespace Rodin::Assembly
           const Index td = testseq.getDimension();
           const Index tcount = testseq.getCount();
 
-          us.iapply([&](size_t ui, const auto& uref)
-          {
-            if (ui != uBlock) return;
+          us.iapply([&](size_t ui, const auto& uref) {
+            if (ui != uBlock)
+              return;
             const auto& uFES = uref.get().getFiniteElementSpace();
 
-            vs.iapply([&](size_t vi, const auto& vref)
-            {
-              if (vi != vBlock) return;
+            vs.iapply([&](size_t vi, const auto& vref) {
+              if (vi != vBlock)
+                return;
               const auto& vFES = vref.get().getFiniteElementSpace();
 
 #pragma omp parallel num_threads(tc)
               {
                 const int tid = omp_get_thread_num();
 
-                std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+                std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(
+                  bfi.copy());
                 OperatorType* Alocal = nullptr;
                 if constexpr (!IsSparse)
                   Alocal = &Achunks[static_cast<size_t>(tid)];
@@ -2034,14 +2364,16 @@ namespace Rodin::Assembly
 #pragma omp for
                 for (Index te = 0; te < tcount; ++te)
                 {
-                  if (!testseq.filter(te)) continue;
+                  if (!testseq.filter(te))
+                    continue;
                   if (!testAttrs.empty())
                   {
                     const auto a = mesh.getAttribute(td, te);
-                    if (!a || !testAttrs.contains(*a)) continue;
+                    if (!a || !testAttrs.contains(*a))
+                      continue;
                   }
 
-                  const auto& rows = vFES.getDOFs(td, te);
+                  const auto rows = vFES.getDOFs(td, te);
                   const auto testPolytope = testseq.getPolytope(te);
 
                   const Index rd = trialseq.getDimension();
@@ -2049,11 +2381,13 @@ namespace Rodin::Assembly
 
                   for (Index tr = 0; tr < rcount; ++tr)
                   {
-                    if (!trialseq.filter(tr)) continue;
+                    if (!trialseq.filter(tr))
+                      continue;
                     if (!trialAttrs.empty())
                     {
                       const auto a = mesh.getAttribute(rd, tr);
-                      if (!a || !trialAttrs.contains(*a)) continue;
+                      if (!a || !trialAttrs.contains(*a))
+                        continue;
                     }
 
                     const auto& cols = uFES.getDOFs(rd, tr);
@@ -2063,10 +2397,12 @@ namespace Rodin::Assembly
 
                     for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                     {
-                      const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
+                      const Index I =
+                        static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
                       for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
                       {
-                        const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
+                        const Index J =
+                          static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
                         const ScalarType val = integrator->integrate(j, i);
                         if (val == ScalarType(0))
                           continue;
@@ -2081,11 +2417,15 @@ namespace Rodin::Assembly
                           for (const auto& r : constraints.expand(I))
                           {
                             if (colValue != ScalarType(0))
+                            {
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                r.index, -r.coefficient * val * colValue);
+                                r.index, -Math::conj(r.coefficient) * val * colValue);
+                            }
                             for (const auto& c : constraints.expand(J))
+                            {
                               (*Alocal)(r.index, c.index) +=
-                                r.coefficient * val * c.coefficient;
+                                Math::conj(r.coefficient) * val * c.coefficient;
+                            }
                           }
                         }
                       }
@@ -2104,16 +2444,16 @@ namespace Rodin::Assembly
         {
           const auto vUUID = lfi.getTestFunction().getUUID();
           const size_t vBlock = findTestBlock(vUUID);
-          const size_t vOff   = testOffsets[vBlock];
+          const size_t vOff = testOffsets[vBlock];
 
           const auto& attrs = lfi.getAttributes();
           OpenMPIteration seq(mesh, lfi.getRegion());
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
-          vs.iapply([&](size_t vi, const auto& vref)
-          {
-            if (vi != vBlock) return;
+          vs.iapply([&](size_t vi, const auto& vref) {
+            if (vi != vBlock)
+              return;
             const auto& vFES = vref.get().getFiniteElementSpace();
 
 #pragma omp parallel num_threads(tc)
@@ -2126,24 +2466,28 @@ namespace Rodin::Assembly
 #pragma omp for
               for (Index p = 0; p < count; ++p)
               {
-                if (!seq.filter(p)) continue;
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
                   const auto a = mesh.getAttribute(d, p);
-                  if (!a || !attrs.contains(*a)) continue;
+                  if (!a || !attrs.contains(*a))
+                    continue;
                 }
 
                 const auto polytope = seq.getPolytope(p);
                 integrator->setPolytope(polytope);
 
-                const auto& dofs = vFES.getDOFs(d, p);
+                const auto& dofs = integrator->getTestDOFIndices()
+                  ? *integrator->getTestDOFIndices()
+                  : vFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs(l)));
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs.emplace_back(r.index, r.coefficient * val);
+                    localRhs.emplace_back(r.index, Math::conj(r.coefficient) * val);
                 }
               }
             } // omp parallel
@@ -2168,14 +2512,14 @@ namespace Rodin::Assembly
         {
           const auto vUUID = lf.getTestFunction().getUUID();
           const size_t vBlock = findTestBlock(vUUID);
-          const size_t vOff   = testOffsets[vBlock];
+          const size_t vOff = testOffsets[vBlock];
 
           const auto& vec = lf.getVector();
           for (Eigen::Index i = 0; i < vec.size(); ++i)
           {
             const ScalarType val = static_cast<ScalarType>(vec.coeff(i));
             for (const auto& r : constraints.expand(static_cast<Index>(vOff) + i))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           }
         }
 
@@ -2198,9 +2542,13 @@ namespace Rodin::Assembly
 
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
+            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+              {
                 sparseEntry(0, static_cast<Index>(vOff) + it.row(),
                   static_cast<Index>(uOff) + it.col(), it.value());
+              }
+            }
           }
 
           for (int tid = 0; tid < tc; ++tid)
@@ -2215,16 +2563,16 @@ namespace Rodin::Assembly
 
           // Merge triplets
           size_t totalTriplets = 0;
-          for (auto& v0 : tchunks) totalTriplets += v0.size();
+          for (auto& v0 : tchunks)
+            totalTriplets += v0.size();
 
           std::vector<Math::SparseTriplet<ScalarType>> all;
           all.reserve(totalTriplets + nrows);
 
           for (auto& v0 : tchunks)
           {
-            all.insert(all.end(),
-                       std::make_move_iterator(v0.begin()),
-                       std::make_move_iterator(v0.end()));
+            all.insert(all.end(), std::make_move_iterator(v0.begin()),
+              std::make_move_iterator(v0.end()));
             std::vector<Math::SparseTriplet<ScalarType>>().swap(v0);
           }
 
@@ -2295,6 +2643,7 @@ namespace Rodin::Assembly
             const auto opRows = op.rows();
             const auto opCols = op.cols();
             for (Eigen::Index i = 0; i < opRows; ++i)
+            {
               for (Eigen::Index j = 0; j < opCols; ++j)
               {
                 const auto val = op(i, j);
@@ -2308,12 +2657,16 @@ namespace Rodin::Assembly
                   for (const auto& r : constraints.expand(I))
                   {
                     if (colValue != ScalarType(0))
-                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                      b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                     for (const auto& c : constraints.expand(J))
-                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                    {
+                      A(r.index, c.index) +=
+                        Math::conj(r.coefficient) * val * c.coefficient;
+                    }
                   }
                 }
               }
+            }
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -2337,14 +2690,16 @@ namespace Rodin::Assembly
 
             for (size_t r = 0; r < nrows; ++r)
             {
-              if (r == static_cast<size_t>(idx)) continue;
+              if (r == static_cast<size_t>(idx))
+                continue;
               b.coeffRef(r) -= A(r, idx) * value;
               A(r, idx) = ScalarType(0);
             }
 
             for (size_t c = 0; c < ncols; ++c)
             {
-              if (c == static_cast<size_t>(idx)) continue;
+              if (c == static_cast<size_t>(idx))
+                continue;
               A(idx, c) = ScalarType(0);
             }
 
@@ -2354,18 +2709,19 @@ namespace Rodin::Assembly
         }
       }
 
-      // Targeted (LHS-only / RHS-only) assembly for the parallel block Eigen
-      // backend: assemble the full system into a scratch object and expose only
-      // the requested side, leaving the other operand untouched (the targeted
-      // contract). Keeps the parallel block BC-elimination logic in one path.
       /**
        * @brief Executes targeted mixed problem assembly.
+       *
+       * The full system is assembled into temporary storage. Only the requested
+       * side is transferred to the output system; the other side is preserved.
+       * This uses the same boundary-condition elimination as full assembly.
+       *
        * @param axb Output linear system.
        * @param input Mixed problem input.
        * @param target Side of the system to assemble.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -2379,7 +2735,10 @@ namespace Rodin::Assembly
        * @brief Creates a polymorphic copy.
        * @return Pointer to a new copy.
        */
-      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
 
     private:
       Optional<size_t> m_threadCount;
@@ -2426,12 +2785,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other))
       {}
@@ -2441,10 +2806,10 @@ namespace Rodin::Assembly
        * @param res Output map from slave DOFs to master DOF coefficients.
        * @param input Boundary condition input.
        */
-      void execute(OutputType& res, const InputType& input) const override
+      void execute(OutputType& res, const InputType& input) override
       {
         const auto& u = input.getOperand();
-        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+        auto& Av = input.getShapeFunction();
         const auto& essBdr = input.getEssentialBoundary();
 
         const auto& fesU = u.getFiniteElementSpace();
@@ -2498,12 +2863,10 @@ namespace Rodin::Assembly
               }
             }
 
-            if (mIdx.empty())
-              continue;
-            const Index n = static_cast<Index>(mIdx.size());
+            const Eigen::Index n = static_cast<Eigen::Index>(mIdx.size());
             IndexArray masters(n);
             Math::Vector<Scalar> coeffs(n);
-            for (Index k = 0; k < n; k++)
+            for (Eigen::Index k = 0; k < n; k++)
             {
               masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
               coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];

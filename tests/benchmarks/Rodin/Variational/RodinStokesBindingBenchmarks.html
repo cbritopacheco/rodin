@@ -1,0 +1,7 @@
+<p>Isolates the three local operator kernels consumed by mixed Stokes assembly.</p>
+<h2>Measured operation</h2>
+<h3>Architecture</h3>
+<p>The terms are \((\nabla u,\nabla v)\), \((\nabla\cdot u,q)\) and \((p,\nabla\cdot v)\), with velocity degree K and pressure degree K-1. Public integral binding includes owned mapped quadrature, basis transforms and eager local contraction. Mesh traversal and one entry read remain timed; global insertion, constraints and solving do not. Order 16 remains the default and matches the Assembly-owned Stokes workload. Separately named boundary studies hold each mesh and mixed pair fixed while varying only the integration order; they do not change convergence tests. The original generic entry loop qualifies every cell matrix before timing; an entry perturbation must be rejected. A final sweep must reproduce each retained entry exactly. Both mixed orientations are measured rather than inferred from transposition.</p>
+<p>or three for explicitly unit-weighted vector diffusion.</p>
+<h2>Recorded results</h2>
+<p>Each case retains its original inputs, iteration policy and correctness checks. Raw reports preserve counters, repetitions and the Google Benchmark context. CPU, wall and manually supplied times are labeled separately; unlike operations and configurations are not averaged together.</p>

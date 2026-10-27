@@ -69,11 +69,16 @@ int main(int, char**)
   std::vector<Data> grid;
   grid.reserve(m_r.size() * epsilon_r.size() * waveNumber_r.size() * conductivity_r.size());
   for (const Real m : m_r)
+  {
     for (const Real epsilon : epsilon_r)
+    {
       for (const Real waveNumber : waveNumber_r)
+      {
         for (const Real g : conductivity_r)
           grid.push_back({ m, epsilon, waveNumber, g });
-
+      }
+    }
+  }
 }
 
 void run(int id, const std::vector<Data>& grid)

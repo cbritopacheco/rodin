@@ -1,11 +1,11 @@
-add_executable(RodinLocationAABBTest AABBTest.cpp)
+add_executable(RodinLocationAABBTest AABBTest.cpp AABBCandidatesTest.cpp AABBHeaderTest.cpp)
 target_link_libraries(RodinLocationAABBTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Location
   Rodin::Variational)
-gtest_discover_tests(RodinLocationAABBTest
+rodin_discover_tests(RodinLocationAABBTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit

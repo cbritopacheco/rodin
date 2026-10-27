@@ -12,7 +12,7 @@
  * decomposition using simplicial factorization for symmetric positive definite
  * sparse matrices.
  *
- * ## Algorithm
+ * # Algorithm
  * The solver computes:
  * @f[
  *   A = LL^T
@@ -20,13 +20,13 @@
  * where @f$ L @f$ is a lower triangular matrix. The simplicial algorithm processes
  * the matrix column by column without forming supernodes.
  *
- * ## Applicability
+ * # Applicability
  * - Symmetric positive definite sparse matrices
  * - Problems from elliptic PDEs
  * - Structural mechanics
  * - Heat transfer problems
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * Problem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
@@ -72,9 +72,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SimplicialLLT
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  SimplicialLLT(Variational::ProblemBase<LinearSystem>&) -> SimplicialLLT<LinearSystem>;
+  SimplicialLLT(
+    Variational::ProblemBase<LinearSystem>& pb) -> SimplicialLLT<LinearSystem>;
 
   /**
    * @ingroup SimplicialLLTSpecializations
@@ -168,6 +170,7 @@ namespace Rodin::Solver
        *
        * Updated by every factorization and every solve, so a caller reads it
        * after the call it wants to check.
+       * @returns The outcome of the most recent operation.
        */
       const Info& getInfo() const noexcept
       {
@@ -193,8 +196,11 @@ namespace Rodin::Solver
       }
 
     private:
-      /// Underlying Eigen SimplicialLLT solver
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen SimplicialLLT solver
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

@@ -24,6 +24,7 @@
 #include <algorithm>
 
 #include "Rodin/QF/QuadratureFormula.h"
+#include "Rodin/Alert/Exception.h"
 
 namespace Rodin::Tests::QF
 {
@@ -85,8 +86,12 @@ namespace Rodin::Tests::QF
     return exactMoment(g, 0, 0, 0);
   }
 
-  /// @brief Spatial dimension of the reference polytope.
-  /// @see Rodin::Geometry::Polytope::Traits::getDimension
+  /**
+   * @brief Gets the spatial dimension of the reference polytope.
+   * @param g Reference geometry.
+   * @returns Reference-coordinate dimension.
+   * @see @ref Rodin::Geometry::Polytope::Traits::getDimension
+   */
   inline size_t dimensionOf(Geometry::Polytope::Type g)
   {
     return Geometry::Polytope::Traits(g).getDimension();
@@ -95,10 +100,18 @@ namespace Rodin::Tests::QF
   /// @brief Outcome of an exactness sweep over all monomials of a given degree.
   struct ExactnessReport
   {
-      Real worstAbsoluteError = 0;   ///< Largest @f$ |Q(m) - I(m)| @f$ observed.
-      Real worstRelativeError = 0;   ///< Largest error relative to @f$ |I(m)| @f$.
-      size_t worstExponents[3] = {0, 0, 0}; ///< Monomial attaining the worst error.
-      size_t monomialsTested = 0;    ///< Number of monomials in the sweep.
+    /// @brief Initializes an empty report before any monomial is visited.
+    ExactnessReport()
+      : worstAbsoluteError(0),
+        worstRelativeError(0),
+        worstExponents{0, 0, 0},
+        monomialsTested(0)
+    {}
+
+    Real worstAbsoluteError; ///< Largest @f$ |Q(m) - I(m)| @f$ observed.
+    Real worstRelativeError; ///< Largest error relative to @f$ |I(m)| @f$.
+    size_t worstExponents[3]; ///< Monomial attaining the worst error.
+    size_t monomialsTested; ///< Number of monomials in the sweep.
   };
 
   /**
@@ -108,12 +121,41 @@ namespace Rodin::Tests::QF
    * This is the table-integrity instrument: a rule whose coefficients are
    * corrupted, mistyped, or solved to the wrong branch fails here, whereas
    * inspecting the numbers by eye does not.
+   * Samples must have the reference dimension and finite coordinates and
+   * weights. Nonfinite data or moment arithmetic is rejected before it can
+   * leave a zero worst-error report through unordered NaN comparisons.
+   * Finite signed weights and finite exterior nodes remain admissible to this
+   * exactness check; positivity and domain membership are separate invariants.
+   *
+   * @param qf Immutable quadrature samples.
+   * @param g Reference geometry defining the exact moments.
+   * @param p Maximum total polynomial degree.
+   * @returns Relative moment-error report for valid finite samples.
+   * @throws Rodin::Alert::Exception For malformed samples or nonfinite arithmetic.
    */
   template <class Rule>
   ExactnessReport exactnessSweep(const Rule& qf, Geometry::Polytope::Type g, size_t p)
   {
     ExactnessReport report;
     const size_t d = dimensionOf(g);
+    const size_t nqp = qf.getSize();
+    for (size_t qp = 0; qp < nqp; ++qp)
+    {
+      const auto& point = qf.getPoint(qp);
+      if (static_cast<size_t>(point.size()) != d || !std::isfinite(qf.getWeight(qp)))
+      {
+        Alert::Exception() << "exactnessSweep: malformed quadrature sample " << qp
+                           << " for reference dimension " << d << Alert::Raise;
+      }
+      for (size_t axis = 0; axis < d; ++axis)
+      {
+        if (!std::isfinite(point[axis]))
+        {
+          Alert::Exception() << "exactnessSweep: nonfinite coordinate at sample " << qp
+                             << ", axis " << axis << Alert::Raise;
+        }
+      }
+    }
     const size_t amax = (d >= 1) ? p : 0;
     for (size_t a = 0; a <= amax; ++a)
     {
@@ -124,7 +166,7 @@ namespace Rodin::Tests::QF
         for (size_t c = 0; c + b + a <= p && c <= cmax; ++c)
         {
           Real numeric = 0;
-          for (size_t i = 0; i < qf.getSize(); ++i)
+          for (size_t i = 0; i < nqp; ++i)
           {
             const auto& x = qf.getPoint(i);
             Real m = 1;
@@ -137,6 +179,11 @@ namespace Rodin::Tests::QF
             numeric += qf.getWeight(i) * m;
           }
           const Real exact = exactMoment(g, a, b, c);
+          if (!std::isfinite(numeric) || !std::isfinite(exact))
+          {
+            Alert::Exception() << "exactnessSweep: nonfinite moment for exponents " << a
+                               << ", " << b << ", " << c << Alert::Raise;
+          }
           const Real abserr = std::abs(numeric - exact);
           const Real relerr = abserr / std::max(std::abs(exact), Real(1e-300));
           ++report.monomialsTested;
@@ -189,8 +236,10 @@ namespace Rodin::Tests::QF
   bool allWeightsPositive(const Rule& qf)
   {
     for (size_t i = 0; i < qf.getSize(); ++i)
+    {
       if (!(qf.getWeight(i) > Real(0)))
         return false;
+    }
     return true;
   }
 
@@ -202,22 +251,37 @@ namespace Rodin::Tests::QF
    * reference elements are defined there and nowhere else, so a test that
    * hard-codes them would pass against its own assumptions instead of against
    * the library.
+   * Coordinate dimension and finiteness are checked before half-space
+   * evaluation; a nonempty tuple is not an element of @f$\mathbb{R}^0@f$.
+   *
+   * @param g Reference geometry.
+   * @param x Reference-coordinate tuple.
+   * @param tol Allowed half-space residual.
+   * @returns Whether the finite tuple has the correct dimension and lies inside.
    */
   inline bool isInside(
     Geometry::Polytope::Type g, const Math::SpatialVector<Real>& x, Real tol)
   {
     const Geometry::Polytope::Traits traits(g);
     const size_t d = traits.getDimension();
+    if (static_cast<size_t>(x.size()) != d)
+      return false;
     if (d == 0)
       return true;
     const auto& hs = traits.getHalfSpace();
     Math::Vector<Real> p(static_cast<Eigen::Index>(d));
     for (size_t i = 0; i < d; ++i)
+    {
+      if (!std::isfinite(x[i]))
+        return false;
       p(static_cast<Eigen::Index>(i)) = x[i];
+    }
     const Math::Vector<Real> r = hs.matrix * p - hs.vector;
     for (Eigen::Index i = 0; i < r.size(); ++i)
+    {
       if (r(i) > tol)
         return false;
+    }
     return true;
   }
 
@@ -226,16 +290,18 @@ namespace Rodin::Tests::QF
   bool allPointsInside(const Rule& qf, Geometry::Polytope::Type g, Real tol = 1e-13)
   {
     for (size_t i = 0; i < qf.getSize(); ++i)
+    {
       if (!isInside(g, qf.getPoint(i), tol))
         return false;
+    }
     return true;
   }
 
   /// @brief An affine map @f$ x \mapsto A x + b @f$ of the reference element.
   struct AffineMap
   {
-      Math::Matrix<Real> matrix; ///< The linear part @f$ A @f$.
-      Math::Vector<Real> vector; ///< The translation @f$ b @f$.
+    Math::Matrix<Real> matrix; ///< The linear part @f$ A @f$.
+    Math::Vector<Real> vector; ///< The translation @f$ b @f$.
   };
 
   /**
@@ -337,8 +403,10 @@ namespace Rodin::Tests::QF
   bool isFullySymmetric(const Rule& qf, Geometry::Polytope::Type g, Real tol = 1e-12)
   {
     for (const auto& map : symmetryGroup(g))
+    {
       if (!isInvariantUnder(qf, map, tol))
         return false;
+    }
     return true;
   }
 }

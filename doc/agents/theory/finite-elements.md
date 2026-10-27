@@ -120,7 +120,7 @@ let a manufactured test confirm the rate.
 
 Two structural quadrature facts:
 
-- Rules live on *reference* polytopes; `PolytopeQuadratureFormula`
+- Rules live on *reference* polytopes; `QuadratureFormula`
   dispatches per `Polytope::Type`; `Geometry::PolytopeQuadrature` caches
   per-polytope data.
 - The per-cell hot path is `bind(polytope)` (setPolytope) then

@@ -105,10 +105,10 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /** @brief Factorization stage, shared by the factorization solvers. */
+      /// @brief Factorization stage, shared by the factorization solvers.
       using Factorization = Rodin::Solver::Factorization;
 
-      /** @brief Fill-reducing ordering used during symbolic analysis. */
+      /// @brief Fill-reducing ordering used during symbolic analysis.
       enum class Ordering : std::int64_t
       {
         Default = -1,
@@ -120,7 +120,7 @@ namespace Rodin::Solver
         Natural = PARU_ORDERING_NONE
       };
 
-      /** @brief Factorization stages retained between solves. */
+      /// @brief Factorization stages retained between solves.
       struct Resources
       {
           Resources() = default;
@@ -162,7 +162,7 @@ namespace Rodin::Solver
           }
       };
 
-      /** @brief Constructs a ParU solver for the given problem. */
+      /// @brief Constructs a ParU solver for the given problem.
       ParU(ProblemBaseType& pb)
         : Parent(pb)
       {}
@@ -197,7 +197,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns ParU's configured maximum thread count. */
+      /// @brief Returns ParU's configured maximum thread count.
       Index getMaxThreads() const noexcept
       {
         return m_maxThreads;
@@ -218,7 +218,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the configured fill-reducing ordering. */
+      /// @brief Returns the configured fill-reducing ordering.
       Ordering getOrdering() const noexcept
       {
         return m_ordering;

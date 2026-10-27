@@ -9,7 +9,7 @@
 
 #include <functional>
 
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -52,13 +52,16 @@ namespace Rodin::IO
 
       void load(std::istream&) override
       {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "No GridFunctionLoader specialization for this format/FES/Data combination."
           << Alert::Raise;
       }
 
     protected:
-      ObjectType& getObject() override { return m_gf.get(); }
+      ObjectType& getObject() override
+      {
+        return m_gf.get();
+      }
 
     private:
       std::reference_wrapper<ObjectType> m_gf;
@@ -74,24 +77,16 @@ namespace Rodin::IO
   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {
     public:
-      /**
-       * @brief Finite element space type.
-       */
+      /// @brief Finite element space type.
       using FESType = FES;
 
-      /**
-       * @brief Data storage type.
-       */
+      /// @brief Data storage type.
       using DataType = Data;
 
-      /**
-       * @brief Type of grid function object being loaded.
-       */
+      /// @brief Type of grid function object being loaded.
       using ObjectType = Variational::GridFunction<FESType, Data>;
 
-      /**
-       * @brief Parent Loader class type.
-       */
+      /// @brief Parent Loader class type.
       using Parent = IO::Loader<ObjectType>;
 
       /**

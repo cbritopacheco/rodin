@@ -14,7 +14,7 @@
  * in Discontinuous Galerkin (DG) methods where numerical fluxes, jumps, and
  * averages depend on a consistent face orientation.
  *
- * ## Mathematical Foundation
+ * # Mathematical Foundation
  *
  * Let @f$ F @f$ be a codimension-one polytope of the mesh. A face normal is a
  * vector field @f$ \mathbf{n}_F @f$ such that
@@ -22,6 +22,12 @@
  *   \|\mathbf{n}_F\| = 1.
  * @f]
  * Geometrically, the normal is orthogonal to the tangent space of the face.
+ * On a two-dimensional surface embedded in three dimensions, it is the
+ * outward unit conormal in the selected incident cell's tangent plane. At
+ * the physical face point, with cell Jacobian columns @f$J_0,J_1@f$ and
+ * edge tangent @f$t@f$, its direction is
+ * @f$(J_0\times J_1)\times t@f$, oriented away from the cell interior.
+ * Across a fold, conormals from the two cells need not be opposites.
  *
  * For an interior face shared by two adjacent cells @f$ K_1 @f$ and
  * @f$ K_2 @f$, the normal is defined only up to sign unless one chooses which
@@ -31,7 +37,7 @@
  * For a boundary face, there is a unique adjacent cell @f$ K @f$, and the
  * normal is oriented automatically outward from that cell.
  *
- * ## Orientation Convention
+ * # Orientation Convention
  *
  * The orientation is chosen as follows:
  *
@@ -45,7 +51,7 @@
  * Consequently, on interior faces the normal is trace-dependent, while on
  * boundary faces it is determined geometrically from the unique incident cell.
  *
- * ## Trace Semantics
+ * # Trace Semantics
  *
  * The FaceNormal object supports both boundary and interior codimension-one
  * entities, but the meaning differs slightly:
@@ -61,7 +67,7 @@
  * This behavior makes FaceNormal suitable for DG interface terms where one
  * needs a normal consistent with a chosen side of the interface.
  *
- * ## Applications in DG Methods
+ * # Applications in DG Methods
  *
  * Typical uses include:
  *
@@ -74,7 +80,7 @@
  * - **Penalty terms**:
  *   @f$ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] @f$
  *
- * ## Difference from BoundaryNormal
+ * # Difference from BoundaryNormal
  *
  * - **FaceNormal**:
  *   defined on all codimension-one mesh entities; on interior faces its
@@ -83,7 +89,7 @@
  * - **BoundaryNormal**:
  *   defined only on the boundary of the domain and always oriented outward.
  *
- * ## Manifold Assumption
+ * # Manifold Assumption
  *
  * This implementation assumes that a codimension-one mesh entity is incident
  * to either:
@@ -93,7 +99,7 @@
  *
  * Non-manifold situations with more than two incident cells are not supported.
  *
- * ## Usage Example
+ * # Usage Example
  * ```cpp
  * FaceNormal n(mesh);
  *
@@ -140,10 +146,13 @@ namespace Rodin::Variational
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
+
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
+
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
       /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
 
@@ -160,32 +169,43 @@ namespace Rodin::Variational
         assert(m_sdim > 0);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       FaceNormal(const FaceNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim))
       {}
 
-      /// @brief Gets the topological dimension.
-      constexpr
-      size_t getDimension() const
+      /**
+       * @brief Gets the spatial vector dimension.
+       * @returns The spatial vector dimension.
+       */
+      constexpr size_t getDimension() const
       {
         return m_sdim;
       }
 
-      /// @brief Evaluates the expression at a geometric point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
-        const auto& vs = polytope.getVertices();
-        const auto  d = polytope.getDimension();
-        const auto  i = polytope.getIndex();
+        const auto d = polytope.getDimension();
+        const auto i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const auto& jacobian = p.getJacobian();
 
@@ -201,49 +221,17 @@ namespace Rodin::Variational
         }
         else if (jacobian.rows() == 3)
         {
-          if (jacobian.cols() == 1)
+          if (jacobian.cols() == 2)
           {
-            const Index v1 = vs[0];
-            const Index v2 = vs[1];
-
-            const Math::SpatialVector<ScalarType> a =
-              mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
-
-            Math::SpatialVector<ScalarType> n(3);
-            n[0] = jacobian(1, 0);
-            n[1] = -jacobian(0, 0);
-            n[2] = jacobian(2, 0);
-            n = n.cross(a);
-            const auto nNorm = n.norm();
-            if (!std::isfinite(nNorm) || !(nNorm > ScalarType(0)))
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Cannot normalize FaceNormal tangent helper on polytope ("
-                << d << ", " << i << "). Computed norm is " << nNorm << "."
-                << Alert::Raise;
-              assert(false);
-              res.setConstant(Math::nan<ScalarType>());
-              return res;
-            }
-            n /= nNorm;
-
-            res = n.cross(a) + n * (n.dot(a));
+            res[0] = jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+            res[1] = jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+            res[2] = jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
-          else if (jacobian.cols() == 2)
-          {
-            res[0] =
-              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
-            res[1] =
-              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
-            res[2] =
-              jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
-          }
-          else
+          else if (jacobian.cols() != 1)
           {
             Alert::MemberFunctionException(*this, __func__)
-              << "Cannot compute FaceNormal from a 3D Jacobian with "
-              << jacobian.cols() << " columns on polytope (" << d << ", " << i << ")."
-              << Alert::Raise;
+              << "Cannot compute FaceNormal from a 3D Jacobian with " << jacobian.cols()
+              << " columns on polytope (" << d << ", " << i << ")." << Alert::Raise;
             assert(false);
             res.setConstant(Math::nan<ScalarType>());
             return res;
@@ -252,43 +240,55 @@ namespace Rodin::Variational
         else
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Cannot compute FaceNormal from a Jacobian with "
-            << jacobian.rows() << " rows on polytope (" << d << ", " << i << ")."
-            << Alert::Raise;
+            << "Cannot compute FaceNormal from a Jacobian with " << jacobian.rows()
+            << " rows on polytope (" << d << ", " << i << ")." << Alert::Raise;
           assert(false);
           res.setConstant(Math::nan<ScalarType>());
           return res;
         }
 
-        const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
+        const auto& incidence = mesh.getConnectivity().getIncidence({d, d + 1}, i);
         assert(incidence.size() == 1 || incidence.size() == 2);
 
-        const auto orientFromCell =
-          [&](const Geometry::Polytope& cellPoly)
+        const auto orientFromCell = [&](const Geometry::Polytope& cellPoly) {
+          const auto xf = p.getCoordinates();
+
+          if (jacobian.rows() == 3 && jacobian.cols() == 1)
           {
-            const auto xf = p.getCoordinates();
-
-            const auto rc =
-              Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
-            Geometry::Point pc(cellPoly, rc);
-            const auto xc = pc.getCoordinates();
-
-            if (res.dot(xc - xf) > 0)
-              res *= ScalarType(-1);
-
-            const auto norm = res.norm();
-            if (!std::isfinite(norm) || !(norm > ScalarType(0)))
+            Math::SpatialPoint cellCoordinates;
+            cellPoly.getTransformation().inverse(cellCoordinates, xf);
+            const Geometry::Point cellPoint(cellPoly, std::cref(cellCoordinates), xf);
+            const auto& cellJacobian = cellPoint.getJacobian();
+            SpatialVectorType first(3), second(3), tangent(3);
+            for (size_t axis = 0; axis < 3; ++axis)
             {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Cannot normalize FaceNormal on polytope (" << d << ", " << i
-                << "). Computed norm is " << norm << "."
-                << Alert::Raise;
-              assert(false);
-              res.setConstant(Math::nan<ScalarType>());
-              return;
+              first[axis] = cellJacobian(axis, 0);
+              second[axis] = cellJacobian(axis, 1);
+              tangent[axis] = jacobian(axis, 0);
             }
-            res /= norm;
-          };
+            res = first.cross(second).cross(tangent);
+          }
+
+          const auto rc =
+            Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+          Geometry::Point pc(cellPoly, rc);
+          const auto xc = pc.getCoordinates();
+
+          if (res.dot(xc - xf) > 0)
+            res *= ScalarType(-1);
+
+          const auto norm = res.norm();
+          if (!std::isfinite(norm) || !(norm > ScalarType(0)))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Cannot normalize FaceNormal on polytope (" << d << ", " << i
+              << "). Computed norm is " << norm << "." << Alert::Raise;
+            assert(false);
+            res.setConstant(Math::nan<ScalarType>());
+            return;
+          }
+          res /= norm;
+        };
 
         if (incidence.size() == 1)
         {
@@ -328,16 +328,21 @@ namespace Rodin::Variational
           if (!matched)
           {
             UndeterminedTraceDomainException(
-              *this, __func__, { d, i }, traceDomain.begin(), traceDomain.end()).raise();
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+              .raise();
           }
         }
 
         return res;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }

@@ -27,7 +27,7 @@ namespace Rodin::MMG
    */
   class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Local>
   {
-   public:
+    public:
       /// Base MEDIT loader type.
       using Parent = IO::MeshLoader<IO::FileFormat::MEDIT, Context::Local>;
 
@@ -53,9 +53,18 @@ namespace Rodin::MMG
       MMG::Mesh& getObject() override
       {
         return m_mesh.get();
-     }
+      }
 
     private:
+      /**
+       * @brief Reads and converts a one-based metadata index.
+       * @param is Stream positioned at the metadata entry.
+       * @param keyword Section containing the entry.
+       * @return Index converted to zero-based numbering.
+       * @throws Alert::Exception If unsigned integer conversion fails.
+       */
+      Index readIndex(std::istream& is, IO::MEDIT::Keyword keyword);
+
       std::reference_wrapper<MMG::Mesh> m_mesh; ///< Destination mesh reference.
   };
 }

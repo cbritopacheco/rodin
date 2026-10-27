@@ -118,7 +118,8 @@ namespace Rodin::Geometry
 
     // Define the compactness factor. Only cells within compactFactor * (current cluster radius)
     // from the cluster centroid are accepted. (For a seed with zero radius, we always accept.)
-    const Real compactFactor = 2.0;
+    // Dimensionless heuristic radius allowance; not an optimality bound.
+    constexpr Real compactFactor = 2.0;
 
     // PQ item holds a candidate cell assignment.
     struct PQItem

@@ -83,9 +83,7 @@ namespace Rodin::FormLanguage
   template <class T>
   struct RangeOf;
 
-  /**
-   * @brief Range type for Boolean values
-   */
+  /// @brief Range type for Boolean values
   template <>
   struct RangeOf<Boolean>
   {
@@ -93,9 +91,7 @@ namespace Rodin::FormLanguage
       using Type = Boolean;
   };
 
-  /**
-   * @brief Range type for Integer values
-   */
+  /// @brief Range type for Integer values
   template <>
   struct RangeOf<Integer>
   {
@@ -103,9 +99,7 @@ namespace Rodin::FormLanguage
       using Type = Integer;
   };
 
-  /**
-   * @brief Range type for Real values
-   */
+  /// @brief Range type for Real values
   template <>
   struct RangeOf<Real>
   {
@@ -113,9 +107,7 @@ namespace Rodin::FormLanguage
       using Type = Real;
   };
 
-  /**
-   * @brief Range type for Complex values
-   */
+  /// @brief Range type for Complex values
   template <>
   struct RangeOf<Complex>
   {
@@ -193,6 +185,14 @@ namespace Rodin::FormLanguage
    *
    * Deduces the range by first determining the result type, then mapping it to a range type.
    */
+  template <class Scalar, size_t Rank>
+  struct RangeOf<Math::SpatialTensor<Scalar, Rank>>
+  {
+      /// @brief Deduced range type.
+      using Type = Math::SpatialTensor<Scalar, Rank>;
+  };
+
+  /// @brief Type traits for the matrix or tensor expression specialization.
   template <class Derived>
   struct RangeOf<Variational::FunctionBase<Derived>>
   {

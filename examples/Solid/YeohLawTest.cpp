@@ -59,8 +59,10 @@ namespace
     while (true)
     {
       for (size_t i = 0; i < d; ++i)
+      {
         for (size_t j = 0; j < d; ++j)
           H(i, j) = scale * dist(gen);
+      }
       Math::SpatialMatrix<Real> F = H;
       for (size_t i = 0; i < d; ++i)
         F(i, i) += 1.0;
@@ -75,9 +77,9 @@ namespace
     KinematicState state(d);
     state.setDisplacementGradient(H);
     ConstitutivePoint cp(state);
-    typename Law::Cache cache;
-    law.setCache(cache, cp);
-    return law.getStrainEnergyDensity(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
+    return prepared.getStrainEnergyDensity();
   }
 
   template <class Law>
@@ -87,10 +89,10 @@ namespace
     KinematicState state(d);
     state.setDisplacementGradient(H);
     ConstitutivePoint cp(state);
-    typename Law::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
     Math::SpatialMatrix<Real> P(d, d);
-    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    prepared.getFirstPiolaKirchhoffStress(P);
     return P;
   }
 
@@ -101,10 +103,10 @@ namespace
     KinematicState state(d);
     state.setDisplacementGradient(H);
     ConstitutivePoint cp(state);
-    typename Law::Cache cache;
-    law.setCache(cache, cp);
+    auto prepared = law;
+    prepared.setConstitutivePoint(cp);
     Math::SpatialMatrix<Real> dP(d, d);
-    law.getMaterialTangent(dP, cache, cp, dF);
+    prepared.getMaterialTangent(dP, dF);
     return dP;
   }
 
@@ -157,9 +159,13 @@ namespace
   {
     Real maxErr = 0.0;
     for (int i = 0; i < A.rows(); ++i)
+    {
       for (int j = 0; j < A.cols(); ++j)
+      {
         maxErr =
           std::max(maxErr, std::abs(A(i, j) - B(i, j)) / (1.0 + std::abs(B(i, j))));
+      }
+    }
     return maxErr;
   }
 }

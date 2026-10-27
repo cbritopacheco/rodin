@@ -7,7 +7,13 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinVariational_HEADERS
   FiniteElement.h
+  LagrangeFiniteElement.h
+  ReferenceTabulation.h
+  ReferenceTabulationCache.h
   BilinearForm.h
+  MassForm.h
+  DiffusionForm.h
+  HelmholtzForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
   Derivative.h
@@ -20,10 +26,13 @@ set(RodinVariational_HEADERS
   Function.h
   GridFunction.h
   ShapeFunction.h
+  InterfaceShapeFunction.h
+  DOFMapping.h
   TrialFunction.h
   TestFunction.h
   IdentityMatrix.h
   Integral.h
+  Interpolation.h
   Sum.h
   UnaryMinus.h
   Mult.h
@@ -32,6 +41,7 @@ set(RodinVariational_HEADERS
   LinearFormIntegrator.h
   NonLinearFormIntegrator.h
   MatrixFunction.h
+  TensorFunction.h
   Problem.h
   ProblemBody.h
   RealFunction.h

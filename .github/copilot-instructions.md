@@ -131,7 +131,7 @@ src/Rodin/
 ├── Distance/           # Distance / redistancing models (header-only)
 ├── Eikonal/            # Fast Marching Method (header-only)
 ├── Hilbert/            # H1 extension-regularization, H1a (header-only)
-├── Adaptation/         # Moving-interface mesh adaptation, WNGIR (header-only)
+├── Adaptation/         # Moving-interface mesh adaptation, SWIFT (header-only)
 ├── Solid/              # Hyperelastic solid mechanics (header-only)
 │   └── Linear/         # Small-strain elasticity integrators
 ├── Heart/              # Reduced-order (0D) cardiac models (header-only)
@@ -317,10 +317,14 @@ Use `override` on all overrides, `= 0` for pure virtuals, `virtual` destructors 
 
 ### Doxygen documentation
 
-- Use `/** */` for multi-line documentation blocks, `///` or `///<` for inline/trailing comments.
+- Use `/** ... */` for multiline Doxygen documentation and `///` for
+  single-line documentation. Use `///<` for trailing member documentation.
 - File-level: `@file`, `@brief`.
 - Classes: `@brief`, `@tparam`.
 - Methods: `@param[in]`, `@param[out]`, `@returns`.
+- Document every parameter, including named unused inputs, deduction guides,
+  and internal helpers, and every non-void return. The Doxygen check also audits
+  full-extraction XML; a clean warning log alone does not establish coverage.
 - Math: `@f$ ... @f$` for inline LaTeX.
 - Class pages documenting multiple supported specializations include a complete
   `Specialization` / `Description` table with linked specialization entries.
@@ -494,7 +498,7 @@ inline on the pull request. Run them before claiming a change is finished:
 python3 dev/check_format.py --base origin/develop   # then: git clang-format origin/develop
 python3 dev/style_lint.py                           # guards, license blocks, @file docs, PETSc containment
 python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
-python3 dev/check_doxygen_warnings.py               # requires doxygen 1.14.0 exactly
+python3 dev/check_doxygen_warnings.py               # requires doxygen 1.15.0 exactly
 ```
 
 Each compares against a committed baseline in `dev/`. **A baseline may only

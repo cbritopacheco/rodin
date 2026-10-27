@@ -27,10 +27,11 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::RealFunctionBase<Derived>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = Real;
-      /// @brief Derived CRTP function type.
-      using DerivedType = Derived;
+    /// @brief Scalar value type.
+    using ScalarType = Real;
+
+    /// @brief Derived CRTP function type.
+    using DerivedType = Derived;
   };
 }
 
@@ -59,7 +60,7 @@ namespace Rodin::Variational
    *
    * @tparam Derived The derived class following CRTP pattern
    *
-   * ## Usage Examples
+   * # Usage Examples
    * ```
    * // Constant real function
    * RealFunction<Real> f(3.14);
@@ -83,23 +84,27 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = ScalarFunctionBase<ScalarType, RealFunctionBase<Derived>>;
 
-      /// @brief Import traceOf methods from parent
+      // Import traceOf methods from parent.
       using Parent::traceOf;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
       RealFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Function to copy from
+       */
       RealFunctionBase(const RealFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Function to move from
+       */
       RealFunctionBase(RealFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -115,8 +120,7 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Real value at the point
        */
-      constexpr
-      auto getValue(const Geometry::Point& p) const
+      constexpr auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
@@ -126,10 +130,10 @@ namespace Rodin::Variational
        * @param[in] ip Integration point at which to evaluate
        * @returns Real value at the integration point
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+        if constexpr (requires(
+                        const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
           return static_cast<const Derived&>(*this).getValue(ip);
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
@@ -143,10 +147,10 @@ namespace Rodin::Variational
        *
        * @tparam Args Variadic template for trace domain specification
        * @returns Reference to derived object (for method chaining)
+       * @param args Arguments forwarded to the constructed object.
        */
-      template <class ... Args>
-      constexpr
-      Derived& traceOf(const Args& ... args)
+      template <class... Args>
+      constexpr Derived& traceOf(const Args&... args)
       {
         return static_cast<Derived&>(*this).traceOf(args...);
       }
@@ -156,8 +160,7 @@ namespace Rodin::Variational
        * @param[in] geom Entity whose local polynomial order is requested
        * @returns Polynomial order when known
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
@@ -175,20 +178,23 @@ namespace Rodin::Variational
    */
   template <class NestedDerived>
   class RealFunction<FunctionBase<NestedDerived>> final
-    : public RealFunctionBase<FunctionBase<NestedDerived>>
+    : public RealFunctionBase<RealFunction<FunctionBase<NestedDerived>>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
 
+      static_assert(std::is_same_v<
+        typename FormLanguage::Traits<FunctionBase<NestedDerived>>::RangeType, Real>);
+
       /// @brief Parent class type.
-      using Parent = RealFunctionBase<FunctionBase<NestedDerived>>;
+      using Parent = RealFunctionBase<RealFunction<FunctionBase<NestedDerived>>>;
 
       /**
        * @brief Constructs a real function wrapper around an existing expression.
        * @param[in] nested Real-valued expression to clone
        */
-      RealFunction(const RealFunctionBase<NestedDerived>& nested)
+      RealFunction(const FunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
       {}
 
@@ -215,8 +221,7 @@ namespace Rodin::Variational
        * @param[in] v Point at which to evaluate
        * @returns Wrapped function value
        */
-      constexpr
-      auto getValue(const Geometry::Point& v) const
+      constexpr auto getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
@@ -226,10 +231,21 @@ namespace Rodin::Variational
        * @param[in] ip Integration point at which to evaluate
        * @returns Wrapped function value
        */
-      constexpr
-      auto getValue(const IntegrationPoint& ip) const
+      constexpr auto getValue(const IntegrationPoint& ip) const
       {
         return m_nested->getValue(ip);
+      }
+
+      /**
+       * @brief Forwards trace selection to the owned expression.
+       * @param args Trace attributes forwarded to the expression.
+       * @returns Reference to this wrapper.
+       */
+      template <class... Args>
+      constexpr RealFunction& traceOf(const Args&... args)
+      {
+        m_nested->traceOf(args...);
+        return *this;
       }
 
       /**
@@ -237,8 +253,7 @@ namespace Rodin::Variational
        * @param[in] geom Entity whose local polynomial order is requested
        * @returns Polynomial order when known
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return m_nested->getOrder(geom);
       }
@@ -254,17 +269,26 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for RealFunction.
+   * @param nested Real-valued expression to clone
    */
   template <class Derived>
-  RealFunction(const RealFunctionBase<Derived>&) -> RealFunction<FunctionBase<Derived>>;
+  RealFunction(
+    const FunctionBase<Derived>& nested) -> RealFunction<FunctionBase<Derived>>;
+
+  /**
+   * @brief CTAD for a typed real-function base.
+   * @param nested Real-valued expression to clone.
+   */
+  template <class Derived>
+  RealFunction(const RealFunctionBase<Derived>& nested)
+    -> RealFunction<FunctionBase<typename RealFunctionBase<Derived>::Parent>>;
 
   /**
    * @ingroup RealFunctionSpecializations
    * @brief Represents a constant scalar function with type Real.
    */
   template <>
-  class RealFunction<Real> final
-    : public RealFunctionBase<RealFunction<Real>>
+  class RealFunction<Real> final : public RealFunctionBase<RealFunction<Real>>
   {
     public:
       /// @brief Scalar value type.
@@ -302,9 +326,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Constant real value
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Real getValue(const Geometry::Point&) const
+      constexpr Real getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_x;
       }
@@ -312,8 +336,9 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
-      template <class ... Args>
+      template <class... Args>
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
@@ -322,9 +347,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of a constant function.
        * @returns Zero polynomial order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return size_t(0);
       }
@@ -340,16 +366,16 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for RealFunction.
+   * @param x Constant scalar value
    */
-  RealFunction(Real) -> RealFunction<Real>;
+  RealFunction(Real x) -> RealFunction<Real>;
 
   /**
    * @ingroup RealFunctionSpecializations
    * @brief Represents a constant scalar function initialized from an Integer.
    */
   template <>
-  class RealFunction<Integer> final
-    : public RealFunctionBase<RealFunction<Integer>>
+  class RealFunction<Integer> final : public RealFunctionBase<RealFunction<Integer>>
   {
     public:
       /// @brief Scalar value type.
@@ -387,9 +413,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Constant value converted to Real
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Real getValue(const Geometry::Point&) const
+      constexpr Real getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_x;
       }
@@ -397,8 +423,9 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
-      template <class ... Args>
+      template <class... Args>
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
@@ -407,9 +434,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of a constant function.
        * @returns Zero polynomial order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return size_t(0);
       }
@@ -423,8 +451,11 @@ namespace Rodin::Variational
       const Integer m_x;
   };
 
-  /// @brief CTAD for integer constants.
-  RealFunction(Integer) -> RealFunction<Integer>;
+  /**
+   * @brief CTAD for integer constants.
+   * @param x Constant integer value
+   */
+  RealFunction(Integer x) -> RealFunction<Integer>;
 
   /**
    * @ingroup RealFunctionSpecializations
@@ -473,8 +504,7 @@ namespace Rodin::Variational
        * @param[in] v Point at which to evaluate
        * @returns Callable value
        */
-      constexpr
-      Real getValue(const Geometry::Point& v) const
+      constexpr Real getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
@@ -484,8 +514,7 @@ namespace Rodin::Variational
        * @param[in] ip Integration point at which to evaluate
        * @returns Callable value
        */
-      constexpr
-      Real getValue(const IntegrationPoint& ip) const
+      constexpr Real getValue(const IntegrationPoint& ip) const
       {
         if constexpr (std::is_invocable_r_v<Real, F, const IntegrationPoint&>)
           return m_f(ip);
@@ -496,8 +525,9 @@ namespace Rodin::Variational
       /**
        * @brief Leaves callable functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
-      template <class ... Args>
+      template <class... Args>
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
@@ -506,9 +536,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of the callable.
        * @returns std::nullopt because arbitrary callables have unknown order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -524,9 +555,11 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for RealFunction.
+   * @param f Callable returning a Real from a Geometry::Point
    */
-  template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
-  RealFunction(F) -> RealFunction<F>;
+  template <class F,
+    typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
+  RealFunction(F f) -> RealFunction<F>;
 }
 
 #endif

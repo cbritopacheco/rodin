@@ -46,6 +46,7 @@ jobs:
           submodules: recursive
           lfs: false
 
+      - uses: ./.github/actions/prepare-apt
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
@@ -80,6 +81,6 @@ jobs:
       - name: Install pinned doxygen
         run: |
           curl -sSL -o doxygen.tar.gz \
-            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+            https://github.com/doxygen/doxygen/releases/download/Release_1_15_0/doxygen-1.15.0.linux.bin.tar.gz
           tar -xzf doxygen.tar.gz
-          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
+          echo "$PWD/doxygen-1.15.0/bin" >> "$GITHUB_PATH"

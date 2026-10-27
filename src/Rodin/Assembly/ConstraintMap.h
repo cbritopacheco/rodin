@@ -43,11 +43,11 @@ namespace Rodin::Assembly
       /// @brief One master DOF contribution in an expansion row.
       struct Entry
       {
-          /// @brief Master DOF index.
-          Index index;
+        /// @brief Master DOF index.
+        Index index;
 
-          /// @brief Coefficient multiplying the master DOF.
-          Scalar coefficient;
+        /// @brief Coefficient multiplying the master DOF.
+        Scalar coefficient;
       };
 
       /// @brief Expansion row for a constrained DOF.
@@ -93,6 +93,7 @@ namespace Rodin::Assembly
       /**
        * @brief Tests whether a DOF is fixed to a value.
        * @param i DOF index.
+       * @returns Whether the degree of freedom has a prescribed value.
        */
       bool isFixed(Index i) const
       {
@@ -103,6 +104,7 @@ namespace Rodin::Assembly
       /**
        * @brief Tests whether a DOF is identified with master DOFs.
        * @param i DOF index.
+       * @returns Whether the degree of freedom is identified with master degrees of freedom.
        */
       bool isIdentified(Index i) const
       {
@@ -267,6 +269,7 @@ namespace Rodin::Assembly
           state[idx] = State::Visiting;
 
           Expansion flattened;
+          Scalar value = m_identificationValues[idx];
           for (const auto& e : m_expansions[idx])
           {
             check(e.index);
@@ -275,6 +278,12 @@ namespace Rodin::Assembly
               continue;
 
             const Expansion masterExpansion = self(self, e.index);
+            if (isFixed(e.index))
+            {
+              value += e.coefficient * getFixedValue(e.index);
+              continue;
+            }
+            value += e.coefficient * getIdentificationValue(e.index);
             for (const auto& me : masterExpansion)
             {
               if (me.coefficient == Scalar(0))
@@ -284,6 +293,7 @@ namespace Rodin::Assembly
             }
           }
 
+          m_identificationValues[idx] = value;
           canonicalize(i, flattened);
 
           state[idx] = State::Done;
@@ -301,6 +311,10 @@ namespace Rodin::Assembly
       }
 
     private:
+      /**
+       * @brief Checks that a degree-of-freedom index is in range.
+       * @param i Degree-of-freedom index to validate.
+       */
       void check(Index i) const
       {
         if (static_cast<size_t>(i) >= m_expansions.size())
@@ -310,6 +324,13 @@ namespace Rodin::Assembly
             << m_expansions.size() << ")." << Alert::Raise;
         }
       }
+
+      /**
+       * @brief Adds a coefficient to the matching constraint entry.
+       * @param expansion Constraint expansion to update.
+       * @param index Degree-of-freedom index.
+       * @param coefficient Coefficient of the constraint entry.
+       */
 
       static void accumulate(Expansion& expansion, Index index, Scalar coefficient)
       {
@@ -329,12 +350,23 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Removes constraint entries with zero coefficients.
+       * @param expansion Constraint expansion to update.
+       */
+
       static void prune(Expansion& expansion)
       {
         expansion.erase(std::remove_if(expansion.begin(), expansion.end(),
                           [](const Entry& e) { return e.coefficient == Scalar(0); }),
           expansion.end());
       }
+
+      /**
+       * @brief Combines repeated constraint entries and removes zero coefficients.
+       * @param entries Constraint entries to combine or canonicalize.
+       * @returns Merged constraint expansion containing the nonzero combined entries.
+       */
 
       template <class Entries>
       Expansion merge(const Entries& entries)
@@ -375,6 +407,10 @@ namespace Rodin::Assembly
        * - @f$ x_s = c x_s + d_s @f$, @f$ c \ne 1 @f$, becomes
        *   @f$ x_s = d_s/(1-c) @f$;
        * - @f$ x_s = x_s + \sum_m c_m x_m + d_s @f$ is rejected.
+       * @param slave Index of the constrained degree of freedom.
+       * @param entries Constraint entries to combine or canonicalize.
+       * @param value Affine offset, updated during row canonicalization.
+       * @returns Canonical constraint expansion with self terms eliminated; the affine offset is updated separately.
        */
       template <class Entries>
       Expansion canonicalize(Index slave, const Entries& entries, Scalar& value)
@@ -446,10 +482,13 @@ namespace Rodin::Assembly
        * @brief Canonicalizes and stores an already merged expansion row.
        *
        * Used by @ref finalize after recursive flattening.
+       * @param slave Index of the constrained degree of freedom.
+       * @param expansion Constraint expansion to update.
        */
       void canonicalize(Index slave, Expansion& expansion)
       {
         Scalar value = m_identificationValues[static_cast<size_t>(slave)];
+        m_isIdentified[static_cast<size_t>(slave)] = false;
         Expansion canonical = canonicalize(slave, expansion, value);
 
         if (canonical.empty())

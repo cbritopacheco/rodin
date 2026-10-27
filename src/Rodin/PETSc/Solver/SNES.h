@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <petscsystypes.h>
+#include <utility>
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
@@ -63,6 +64,15 @@ namespace Rodin::Solver
    *
    * Supports both programmatic configuration (`setType`, `setTolerances`)
    * and PETSc command-line overrides (`-snes_type`, `-snes_rtol`, …).
+   *
+   * @par Architecture
+   * The state callback synchronizes the variational fields from the iterate;
+   * targeted assembly then evaluates the residual or Jacobian. With PETSc
+   * 3.20 and newer, synchronization is keyed by the unique vector object ID
+   * and its change counter. A changed key invalidates both assembly caches:
+   * equal counters on different vectors do not denote the same iterate.
+   * PETSc 3.19 uses uncached synchronization and assembly. Each solve resets
+   * these caches and synchronizes the final state before returning.
    *
    * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
    * @see <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html">Rodin::Solver::NewtonSolverBase</a>
@@ -213,26 +223,62 @@ namespace Rodin::Solver
        */
       ::SNESConvergedReason getConvergedReason() const;
 
-      /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
-      /// @returns Mutable reference to the SNES handle.
+      /**
+       * @brief Returns a mutable reference to the underlying PETSc SNES handle.
+       * @returns Mutable reference to the SNES handle.
+       */
       HandleType& getHandle() noexcept override;
 
-      /// @brief Returns a read-only reference to the underlying PETSc SNES handle.
-      /// @returns Const reference to the SNES handle.
+      /**
+       * @brief Returns a read-only reference to the underlying PETSc SNES handle.
+       * @returns Const reference to the SNES handle.
+       */
       const HandleType& getHandle() const noexcept override;
 
-      /// @brief Creates a heap-allocated copy of this SNES solver.
-      /// @returns Pointer to the cloned SNES instance.
+      /**
+       * @brief Creates a heap-allocated copy of this SNES solver.
+       * @returns Pointer to the cloned SNES instance.
+       */
       virtual SNES* copy() const noexcept override
       {
         return new SNES(*this);
       }
 
     private:
+      /**
+       * @brief Updates the problem unknowns from the PETSc solution vector.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Update(::Vec x, void* ctx);
+      /**
+       * @brief Updates the unknowns and assembles the requested system target.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @param target Requested operator or vector assembly target.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Assemble(
         ::Vec x, void* ctx, Variational::AssemblyTarget target);
+      /**
+       * @brief Assembles the nonlinear residual for the PETSc callback.
+       * @param snes PETSc nonlinear solver invoking the callback.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param f Residual vector receiving the assembled residual.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
+      /**
+       * @brief Assembles the Jacobian for the PETSc nonlinear-solver callback.
+       * @param snes PETSc nonlinear solver invoking the callback.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param J Jacobian matrix receiving the assembled tangent.
+       * @param P Preconditioning matrix associated with the Jacobian.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
@@ -246,15 +292,14 @@ namespace Rodin::Solver
       StateUpdate m_update; ///< Optional state synchronization callback.
       Optional<::PetscObjectState> m_lhsAssembled;
       Optional<::PetscObjectState> m_rhsAssembled;
-      Optional<::PetscObjectState> m_updated;
+      // Object state is a per-object counter, not an iterate identity.
+      Optional<std::pair<::PetscObjectId, ::PetscObjectState>> m_updated;
   };
 }
 
 namespace Rodin::PETSc::Solver
 {
-  /**
-   * @brief PETSc namespace alias to @ref Rodin::Solver::SNES.
-   */
+  /// @brief PETSc namespace alias to @ref Rodin::Solver::SNES.
   using SNES = Rodin::Solver::SNES;
 }
 
