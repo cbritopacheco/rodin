@@ -419,11 +419,28 @@ publication and successful pooling, a separate publisher updates only complete
 benchmark histories; it cannot replace newer documentation. Missing or failed
 benchmark contributions leave the previous complete results intact. Both
 publishers and Static Analysis hold the same `rodin-gh-pages-publication` lock
-while writing and deploying. A push made with `GITHUB_TOKEN` does not trigger legacy Pages builds:
-`dev/deploy_pages.py` explicitly requests a build using `pages: write`, then waits
-for a successful build of the exact published `gh-pages` commit. A stale success,
-failed build or timeout fails publication. No personal access token is needed;
-repository Pages must remain configured to publish `gh-pages` from `/`.
+while writing and deploying. Each publisher uploads the locked `gh-pages`
+checkout as its own Pages artifact and uses `actions/deploy-pages` in that
+same job. This avoids a second hosted-runner queue for a legacy Pages build;
+that queue delayed one deployment by almost eleven hours. A successful branch
+push alone is never treated as deployment success. After the deployment action
+succeeds, `dev/deploy_pages.py` checks the served `rodin-publication.json` marker
+against the exact published `gh-pages` commit, allowing five minutes for CDN
+propagation. Documentation and benchmark publication use distinct artifact
+names and retain both branch versions and existing complete histories.
+
+Repository setup for these publishers:
+
+- Set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**.
+- In **Settings → Environments → github-pages**, permit both `develop` and
+  `master` under deployment branches. Preserve the existing `gh-pages` rule if
+  other workflows need it. Publication jobs retain this protected environment
+  and require `pages: write` and `id-token: write`.
+
+The local workflow repair does not change these repository settings. A legacy
+Pages source fails preparation with an actionable diagnostic. All three Pages
+writers—documentation, complete benchmarks, and the include-dependency graph—
+use the same artifact deployment path.
 
 Component histories live
 under `benchmark-data/<ref>/`; documentation and its benchmark navigation live

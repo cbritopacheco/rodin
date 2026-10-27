@@ -1,0 +1,37 @@
+name: Publish Pages snapshot
+description: Deploy the locked gh-pages checkout without queuing a second runner.
+inputs:
+  checkout:
+    description: Checkout of the exact published gh-pages commit.
+    required: true
+  artifact-name:
+    description: Unique Pages artifact name within this workflow run.
+    required: true
+outputs:
+  page_url:
+    description: Verified deployed site URL.
+    value: ${{ steps.deployment.outputs.page_url }}
+runs:
+  using: composite
+  steps:
+    - name: Validate and identify the Pages snapshot
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        CHECKOUT: ${{ inputs.checkout }}
+      run: python3 dev/deploy_pages.py prepare --checkout "$CHECKOUT"
+    - uses: actions/upload-pages-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.checkout }}
+    - name: Deploy the exact uploaded artifact
+      id: deployment
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: ${{ inputs.artifact-name }}
+    - name: Verify the served publication marker
+      shell: bash
+      env:
+        CHECKOUT: ${{ inputs.checkout }}
+        PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+      run: python3 dev/deploy_pages.py verify --checkout "$CHECKOUT" --url "$PAGE_URL"
