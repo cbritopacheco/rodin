@@ -175,6 +175,35 @@ When changing a fast path, compare against the generic quadrature path or a
 manufactured solution. Identical-looking formulas can differ through mapping,
 weights, or shape-function derivatives.
 
+### Family order, degree and geometry
+
+Concrete `P0`, `P0g`, `P1` and `H1` elements report their family index through
+`getOrder()`. `FiniteElementBase::getDegree()` instead reports an optional
+upper bound on total polynomial degree of reference basis components.
+Tensor products therefore have different orders and degrees. The overload
+`getDegree({directions...})` bounds the joint degree in selected reference
+coordinates, treating unselected coordinates as coefficients. On a wedge,
+`{0, 1}` preserves the triangular total-degree bound and `{2}` the segment
+bound. Invalid directions and unknown bounds return an empty optional;
+repeated directions are ignored. Rational pyramid bases have a family order
+but no established total polynomial degree bound; their horizontal coordinates
+have known bounds when the vertical coordinate is treated as a coefficient.
+
+Expressions retain `getOrder(polytope)` as an integration recommendation,
+including documented nonpolynomial estimates. Zero additionally certifies an
+elementwise constant expression; constant-value caches rely on this contract.
+Do not substitute a family index for an existing total-degree estimate without
+examining the operator, geometry and selected rule. Generic rules can consume
+`getDegree()` without requiring a family index; unknown estimates require an
+accuracy policy or an explicit integration override.
+
+Transformations expose total and directional `getDegree()`, `isFirstOrder()`
+and `getBounds()`.
+Native first-order product and rational pyramid maps need not be affine.
+`Bounds` owns a conservative convex enclosure with outward support bounds;
+its pyramid construction uses certified collapsed-reference-space containment,
+never a polynomial inference from samples. Unsupported maps remain unpruned.
+
 ## Residual/tangent consistency
 
 Every residual/tangent pair must satisfy a finite-difference consistency

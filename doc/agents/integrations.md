@@ -62,7 +62,7 @@ Loader/Printer class-template pattern: `MeshLoader`/`MeshPrinter`,
 - **MFEM** (`.mesh`/`.gf`) — meshes and grid functions.
 - **XDMF + HDF5** — visualization/time series: `IO::XDMF` writes a domain
   with `xdmf.grid().setMesh(mesh).add("name", gf)` per step; heavy data in
-  HDF5 side files; detects higher-order geometry through `getFactorOrder()`
+  HDF5 side files; detects native geometry through `isFirstOrder()`
   and samples it. Total polynomial degree must not classify visualization
   topology: first-order product cells retain their native shared vertices.
   This is the standard example output (open in ParaView).

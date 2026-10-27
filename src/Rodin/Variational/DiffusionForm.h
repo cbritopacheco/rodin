@@ -179,8 +179,9 @@ namespace Rodin::Variational
             const Index i = polytope.getIndex();
             const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
-            const size_t kTrial = trialFE.getOrder();
-            const size_t kTest = testFE.getOrder();
+
+            const size_t kTrial = Integrator::getDefaultOrder(trialFE, polytope);
+            const size_t kTest = Integrator::getDefaultOrder(testFE, polytope);
             // The same order Integral(a * Grad(u), Grad(v)) picks: the
             // integrand's order when the coefficient knows its own, the order
             // of the gradients otherwise.

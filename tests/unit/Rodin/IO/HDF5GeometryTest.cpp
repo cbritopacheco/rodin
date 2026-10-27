@@ -79,7 +79,8 @@ namespace
     MeshLoader<FileFormat::HDF5, Context::Local>(loaded).load(file);
     const auto& source = mesh.getCell()->getTransformation();
     const auto& restored = loaded.getCell()->getTransformation();
-    EXPECT_EQ(restored.getFactorOrder(), Degree);
+    EXPECT_EQ(restored.getDegree(), source.getDegree());
+    EXPECT_EQ(restored.getDegree(), Degree);
     for (const auto& reference :
       {Math::SpatialPoint{0.2, 0.3}, Math::SpatialPoint{0.6, 0.1}})
     {

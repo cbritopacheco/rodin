@@ -101,7 +101,8 @@ namespace
         EXPECT_LT((b - expected.getVector()).norm() /
             std::max<Real>(1, expected.getVector().norm()),
           assemblyTolerance);
-        GridFunction firstExact(first), secondExact(second);
+        GridFunction firstExact(first);
+        GridFunction secondExact(second);
         firstExact = exactU;
         secondExact = exactP;
         Math::Vector<Real> exact(a.cols());

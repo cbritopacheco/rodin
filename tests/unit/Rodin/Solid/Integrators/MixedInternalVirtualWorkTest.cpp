@@ -167,7 +167,8 @@ namespace
       pressure[global] = saved;
     }
     // Clones retain borrowed states and can be configured and rebound independently.
-    GridFunction replacement(displacement), replacementPressure(pressure);
+    GridFunction replacement(displacement);
+    GridFunction replacementPressure(pressure);
     size_t callbackCalls = 0;
     const auto input = [&](Solid::ConstitutivePoint& point) {
       ++callbackCalls;

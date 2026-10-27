@@ -978,10 +978,10 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
-       * @returns Polynomial order of the finite element.
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
        */
-      size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
         switch (this->getGeometry())
         {
@@ -993,8 +993,9 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Pyramid:
             return 2;
+          case Geometry::Polytope::Type::Pyramid:
+            return std::nullopt;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
         }
@@ -1003,12 +1004,22 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
-       * @returns The factor order.
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
        */
-      constexpr size_t getFactorOrder() const
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : 1;
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 1;
       }
 
       /**
@@ -1490,10 +1501,10 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the polynomial order.
-       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       * @brief Returns a total polynomial degree bound for the reference basis.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
        */
-      constexpr size_t getOrder() const
+      constexpr Optional<size_t> getDegree() const
       {
         switch (this->getGeometry())
         {
@@ -1505,8 +1516,9 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Pyramid:
             return 2;
+          case Geometry::Polytope::Type::Pyramid:
+            return std::nullopt;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
         }
@@ -1515,12 +1527,22 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
-       * @returns Polynomial degree of each reference-coordinate factor.
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
        */
-      constexpr size_t getFactorOrder() const
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
       {
-        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : 1;
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
+       */
+      constexpr size_t getOrder() const
+      {
+        return 1;
       }
 
       /**
@@ -1758,7 +1780,26 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the polynomial order when it is known.
-       * @returns Polynomial order on the requested polytope, or no value when unavailable.
+       * @returns A total degree bound, or no polynomial bound for rational pyramids.
+       */
+      constexpr Optional<size_t> getDegree() const
+      {
+        return m_scalar.getDegree();
+      }
+
+      /**
+       * @brief Returns a degree bound in selected reference coordinates.
+       * @param directions Reference-coordinate indices; duplicates are ignored.
+       * @returns The bound, or no value for invalid or unsupported selections.
+       */
+      Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+      {
+        return this->getLagrangeDegree(1, directions);
+      }
+
+      /**
+       * @brief Returns the finite-element family index.
+       * @returns The family index, independently of the reference geometry.
        */
       size_t getOrder() const
       {

@@ -42,8 +42,8 @@ namespace Rodin::Tests::Unit
       using Range = typename FormLanguage::Traits<Space>::RangeType;
       auto& mesh = space.getMesh();
       const auto cell = *mesh.getCell();
-      const size_t degree =
-        space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder();
+      const size_t degree = Integrator::getDefaultOrder(
+        space.getFiniteElement(cell.getDimension(), cell.getIndex()), cell);
       const size_t massOrder = 2 * degree;
       const size_t diffusionOrder = degree == 0 ? 0 : 2 * degree - 2;
       const ComplexFunction diffusion([](const Point& point) {

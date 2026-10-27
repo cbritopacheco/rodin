@@ -115,7 +115,7 @@ namespace Rodin::Adaptation::SWIFT
                 geometry != Geometry::Polytope::Type::Triangle &&
                 geometry != Geometry::Polytope::Type::Tetrahedron) ||
             mesh.getPolytopeTransformation(mesh.getDimension(), cell->getIndex())
-                .getOrder() != 1)
+                .getDegree() != Optional<size_t>(1))
           {
             Alert::MemberFunctionException(*this, __func__)
               << "SWIFT::Adapt requires affine simplicial geometry. "

@@ -241,7 +241,8 @@ namespace Rodin::Variational
             const size_t order =
               std::max(m_lambda->getOrder(polytope).value_or(size_t(0)),
                 m_mu->getOrder(polytope).value_or(size_t(0))) +
-              trialFE.getOrder() + testFE.getOrder();
+              Variational::Integrator::getDefaultOrder(trialFE, polytope) +
+              Variational::Integrator::getDefaultOrder(testFE, polytope);
             const auto& qf = QF::QuadratureFormula::get(order, geometry);
             const auto& quadrature = polytope.getQuadrature(qf);
 

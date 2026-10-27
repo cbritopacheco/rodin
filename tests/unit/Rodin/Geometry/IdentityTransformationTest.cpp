@@ -58,7 +58,7 @@ namespace Rodin::Tests::Unit
        * @brief Returns the affine map order.
        * @returns One.
        */
-      size_t getOrder() const override
+      Optional<size_t> getDegree() const override
       {
         return 1;
       }
@@ -154,7 +154,7 @@ namespace Rodin::Tests::Unit
     IdentityTransformation t(2);
     EXPECT_EQ(t.getReferenceDimension(), 2);
     EXPECT_EQ(t.getPhysicalDimension(), 2);
-    EXPECT_EQ(t.getOrder(), 1);
+    EXPECT_EQ(t.getDegree(), 1);
   }
 
   /// @brief Verifies construction 3 D for geometry identity transformation by checking exact expected values.
@@ -253,7 +253,7 @@ namespace Rodin::Tests::Unit
     auto* c = t.copy();
     EXPECT_EQ(c->getReferenceDimension(), 2);
     EXPECT_EQ(c->getPhysicalDimension(), 2);
-    EXPECT_EQ(c->getOrder(), 1);
+    EXPECT_EQ(c->getDegree(), 1);
 
     Math::SpatialPoint rc{0.4, 0.6};
     Math::SpatialPoint pc(2);

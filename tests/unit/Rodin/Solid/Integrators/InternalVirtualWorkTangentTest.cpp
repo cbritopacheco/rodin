@@ -56,7 +56,8 @@ namespace Rodin::Tests::Unit
       const auto cell = *mesh.getCell();
       const auto& element = space.getFiniteElement(cell.getDimension(), cell.getIndex());
       const size_t count = element.getCount();
-      const auto& formula = QF::QuadratureFormula::get(2 * element.getOrder(), geometry);
+      const auto& formula = QF::QuadratureFormula::get(
+        2 * Variational::Integrator::getDefaultOrder(element, cell), geometry);
       const auto& quadrature = cell.getQuadrature(formula);
       for (bool dynamic : {false, true})
       {

@@ -303,9 +303,11 @@ namespace Rodin::Solid
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0)
-          ? m_quadOrder
-          : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
+        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
+                                                        : 2 *
+            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
+              Variational::Integrator::getDefaultOrder(testFE, polytope),
+              Variational::Integrator::getDefaultOrder(stateFE, polytope)});
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -578,8 +580,10 @@ namespace Rodin::Solid
 
         const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
                                                         : 2 *
-            std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder(),
-              pressFE.getOrder()});
+            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
+              Variational::Integrator::getDefaultOrder(testFE, polytope),
+              Variational::Integrator::getDefaultOrder(stateFE, polytope),
+              Variational::Integrator::getDefaultOrder(pressFE, polytope)});
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -878,9 +882,11 @@ namespace Rodin::Solid
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0)
-          ? m_quadOrder
-          : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
+        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
+                                                        : 2 *
+            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
+              Variational::Integrator::getDefaultOrder(testFE, polytope),
+              Variational::Integrator::getDefaultOrder(stateFE, polytope)});
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -1127,9 +1133,11 @@ namespace Rodin::Solid
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0)
-          ? m_quadOrder
-          : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
+        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
+                                                        : 2 *
+            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
+              Variational::Integrator::getDefaultOrder(testFE, polytope),
+              Variational::Integrator::getDefaultOrder(stateFE, polytope)});
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);

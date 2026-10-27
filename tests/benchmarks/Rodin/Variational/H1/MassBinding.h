@@ -257,8 +257,7 @@ namespace Rodin::Tests::Benchmarks
         state.counters["cells"] = 1;
         state.counters["fixture_cells"] = mesh.getPolytopeCount(dimension);
         state.counters["global_dofs"] = space.getSize();
-        state.counters["geometry_factor_order"] =
-          cell.getTransformation().getFactorOrder();
+        state.counters["first_order_geometry"] = cell.getTransformation().isFirstOrder();
         state.counters["scalar_basis"] = nb;
         state.counters["local_basis"] = n;
         state.counters["local_entries"] = n * n;

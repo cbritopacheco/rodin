@@ -207,8 +207,9 @@ namespace Rodin::Solid
           const Index idx = polytope.getIndex();
           const auto& stateFE = fes.getFiniteElement(d, idx);
 
-          const size_t effectiveOrder =
-            (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
+          const size_t effectiveOrder = (m_quadOrder > 0)
+            ? m_quadOrder
+            : 2 * Variational::Integrator::getDefaultOrder(stateFE, polytope);
           const auto& qf =
             QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
           const auto& quadrature = polytope.getQuadrature(qf);

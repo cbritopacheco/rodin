@@ -42,7 +42,7 @@ namespace Rodin::Tests::Unit
       }
 
       /// @returns The affine order.
-      size_t getOrder() const override
+      Optional<size_t> getDegree() const override
       {
         return 1;
       }
@@ -331,6 +331,40 @@ namespace Rodin::Tests::Unit
     snapshot.setIntegrationPoint(point);
     ASSERT_NE(snapshot.get(), nullptr);
     EXPECT_EQ(*snapshot.get(), 8);
+  }
+
+  /**
+   * @brief Curved maps must not identify varying P1 gradients as constants.
+   */
+  TEST(Variational_Binding, CurvedPhysicalGradientIsNotConstant)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto cell = *mesh.getCell();
+    const RealH1Element<2> element(Polytope::Type::Triangle);
+    PointCloud coefficients(2, element.getCount());
+    for (size_t a = 0; a < element.getCount(); ++a)
+    {
+      const auto reference = element.getNode(a);
+      Math::SpatialPoint physical;
+      cell.getTransformation().transform(physical, reference);
+      coefficients(0, a) = physical[0] + Real(0.25) * reference[0] * reference[0];
+      coefficients(1, a) = physical[1];
+    }
+    mesh.setPolytopeTransformation({2, cell.getIndex()},
+      new ParametricTransformation(std::move(coefficients), element));
+    P1<Real> space(mesh);
+    GridFunction field(space);
+    field = RealFunction([](const Point& p) { return p.x(); });
+    const auto gradient = Grad(field);
+    const auto first = gradient(Point(cell, Math::SpatialPoint{0.2, 0.2}));
+    const auto second = gradient(Point(cell, Math::SpatialPoint{0.6, 0.2}));
+    EXPECT_GT((first - second).norm(), Real(1e-3));
+    ASSERT_TRUE(gradient.getOrder(cell));
+    EXPECT_GT(*gradient.getOrder(cell), 0);
+    TestFunction test(space);
+    const auto testOrder = Grad(test).getOrder(cell);
+    ASSERT_TRUE(testOrder);
+    EXPECT_GT(*testOrder, 0);
   }
 
 }

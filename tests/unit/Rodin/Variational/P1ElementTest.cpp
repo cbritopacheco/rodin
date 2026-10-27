@@ -35,7 +35,7 @@ namespace Rodin::Tests::Unit
     const P1Element<Scalar> element(Polytope::Type::Point);
     const Math::SpatialPoint reference(0);
     ASSERT_EQ(element.getCount(), 1u);
-    EXPECT_EQ(element.getOrder(), 0u);
+    EXPECT_EQ(element.getDegree(), 0u);
     const auto& basis = element.getBasis(0);
     EXPECT_EQ(basis(reference), Scalar(1));
     EXPECT_EQ(basis.getGradient()(reference).size(), 0u);
@@ -74,7 +74,7 @@ namespace Rodin::Tests::Unit
       const P1Element<Math::SpatialVector<Scalar>> element(
         Polytope::Type::Point, dimension);
       EXPECT_EQ(element.getCount(), dimension);
-      EXPECT_EQ(element.getOrder(), 0u);
+      EXPECT_EQ(element.getDegree(), 0u);
       const auto data = [&](const Math::SpatialPoint& node) {
         EXPECT_EQ(node.size(), 0u);
         Math::SpatialVector<Scalar> value(dimension);
@@ -107,7 +107,7 @@ namespace Rodin::Tests::Unit
     const P1Element<Math::SpatialMatrix<Scalar>> element(Polytope::Type::Point, 2, 3);
     const Math::SpatialPoint reference(0);
     ASSERT_EQ(element.getCount(), 6u);
-    EXPECT_EQ(element.getOrder(), 0u);
+    EXPECT_EQ(element.getDegree(), 0u);
     const Scalar coefficient = [] {
       if constexpr (std::is_same_v<Scalar, Complex>)
         return Scalar(2, -3);
@@ -373,7 +373,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 2);
 
     // Check order (linear = order 1)
-    EXPECT_EQ(k.getOrder(), 1);
+    EXPECT_EQ(k.getDegree(), 1);
 
     // Check nodes (vertices of reference segment)
     const auto& node0 = k.getNode(0);
@@ -391,7 +391,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 3);
 
     // Check order (linear = order 1)
-    EXPECT_EQ(k.getOrder(), 1);
+    EXPECT_EQ(k.getDegree(), 1);
 
     // Check nodes (vertices of reference triangle)
     const auto& node0 = k.getNode(0);
@@ -544,7 +544,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 4);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 1);
+    EXPECT_EQ(k.getDegree(), 1);
 
     // Test at vertices
     {
@@ -605,7 +605,7 @@ namespace Rodin::Tests::Unit
     RealP1Element k(Polytope::Type::Pyramid);
 
     EXPECT_EQ(k.getCount(), 5);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_FALSE(k.getDegree());
 
     for (size_t i = 0; i < k.getCount(); ++i)
     {
@@ -659,7 +659,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 4);
 
     // Check order (bilinear = order 2 for quadrilateral)
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getDegree(), 2);
 
     // Test at vertices
     {
@@ -942,7 +942,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getCount(), 6);
 
     // Check order
-    EXPECT_EQ(k.getOrder(), 2); // Wedge is tensor product, so order 2
+    EXPECT_EQ(k.getDegree(), 2); // Wedge is tensor product, so order 2
 
     // Test Lagrange property at vertices
     // Bottom triangle vertices: (0,0,0), (1,0,0), (0,1,0)

@@ -84,10 +84,26 @@ namespace Rodin::Tests::Unit
             return m_element.get().getCount();
           }
 
-          /// @brief Returns the unchanged total polynomial order.
+          /// @brief Returns the finite-element family index.
           size_t getOrder() const
           {
             return m_element.get().getOrder();
+          }
+
+          /// @brief Returns the reference basis total-degree bound when known.
+          Optional<size_t> getDegree() const
+          {
+            return m_element.get().getDegree();
+          }
+
+          /**
+           * @brief Returns a degree bound in selected reference coordinates.
+           * @param directions Reference-coordinate indices.
+           * @returns The bound, or no established bound.
+           */
+          Optional<size_t> getDegree(std::initializer_list<size_t> directions) const
+          {
+            return m_element.get().getDegree(directions);
           }
 
           /**
@@ -237,8 +253,11 @@ namespace Rodin::Tests::Unit
       const auto cell = *mesh.getCell();
       const auto trialElement = trial.getFiniteElement(dimension, cell.getIndex());
       const auto testElement = test.getFiniteElement(dimension, cell.getIndex());
-      const auto& formula = QF::QuadratureFormula::get(
-        trialElement.getOrder() + testElement.getOrder(), geometry);
+      const auto trialOrder = trialElement.getDegree().value_or(
+        trialElement.getDegree({0, 1}).value_or(Integrator::DefaultOrder));
+      const auto testOrder = testElement.getDegree().value_or(
+        testElement.getDegree({0, 1}).value_or(Integrator::DefaultOrder));
+      const auto& formula = QF::QuadratureFormula::get(trialOrder + testOrder, geometry);
       const size_t trialCount = formula.getSize() * trialElement.getCount();
       const size_t testCount = formula.getSize() * testElement.getCount();
       Math::Matrix<Scalar> first, repeated, transferred;

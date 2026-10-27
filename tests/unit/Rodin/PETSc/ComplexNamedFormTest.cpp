@@ -77,8 +77,8 @@ namespace
     DiffusionForm diffusion(coefficient, trial, test);
     HelmholtzForm helmholtz(coefficient, Real(3), trial, test);
     const auto cell = *space.getMesh().getCell();
-    const size_t degree =
-      space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder();
+    const size_t degree = Integrator::getDefaultOrder(
+      space.getFiniteElement(cell.getDimension(), cell.getIndex()), cell);
     auto massIntegral = Integral(coefficient * trial, test);
     massIntegral.setOrder(2 * degree);
     auto diffusionIntegral = Integral(coefficient * Grad(trial), Grad(test));

@@ -52,6 +52,43 @@ namespace Rodin::Variational
   class Integrator : public FormLanguage::Base
   {
     public:
+      /**
+       * @brief Accuracy request when neither expression nor element supplies an estimate.
+       *
+       * This is a nonpolynomial accuracy policy, not an exactness guarantee.
+       * Explicit setOrder() overrides it.
+       */
+      static constexpr size_t DefaultOrder = 8;
+
+      /**
+       * @brief Recommends a fallback integration order for a reference element.
+       *
+       * A polynomial degree supplies a general bound. For rational pyramid
+       * elements, horizontal degree preserves the established family accuracy
+       * estimate; it does not certify exactness in the vertical coordinate.
+       * Other unknown spaces use DefaultOrder. Explicit setOrder() remains
+       * authoritative for a particular integrator.
+       * @param element Reference finite element.
+       * @param polytope Entity supplying the reference geometry.
+       * @returns An automatic integration-order estimate.
+       */
+      template <class Element>
+      static size_t getDefaultOrder(
+        const Element& element, const Geometry::Polytope& polytope)
+      {
+        if (const auto degree = element.getDegree())
+          return *degree;
+        if (polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+        {
+          if constexpr (requires { element.getDegree({0, 1}); })
+          {
+            if (const auto degree = element.getDegree({0, 1}))
+              return *degree;
+          }
+        }
+        return DefaultOrder;
+      }
+
       /// @brief Parent class type
       using Parent = FormLanguage::Base;
 

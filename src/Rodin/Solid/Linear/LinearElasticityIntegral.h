@@ -207,8 +207,9 @@ namespace Rodin::Variational
 
         const size_t muOrder = getShearModulus().getOrder(polytope).value_or(size_t(0));
 
-        const size_t order =
-          std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
+        const size_t order = std::max(lambdaOrder, muOrder) +
+          Variational::Integrator::getDefaultOrder(trialfe, polytope) +
+          Variational::Integrator::getDefaultOrder(testfe, polytope);
 
         m_qf = &QF::QuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);

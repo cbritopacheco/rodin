@@ -36,7 +36,9 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, DirectQualityHeaderUsesGeometryOrd
     if (curved)
       geometry.install<2>();
     const auto cell = *mesh.getCell();
-    const size_t order = cell.getTransformation().getOrder();
+    const auto degree = cell.getTransformation().getDegree();
+    ASSERT_TRUE(degree);
+    const size_t order = *degree;
     EXPECT_EQ(order, curved ? size_t(2) : size_t(1));
     const Adaptation::SWIFT::Parameters parameters;
     const auto& formula = Adaptation::SWIFT::QualityCovering::get(

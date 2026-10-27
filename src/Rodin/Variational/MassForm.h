@@ -188,7 +188,9 @@ namespace Rodin::Variational
             const Index i = polytope.getIndex();
             const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
-            const size_t base = trialFE.getOrder() + testFE.getOrder();
+
+            const size_t base = Integrator::getDefaultOrder(trialFE, polytope) +
+              Integrator::getDefaultOrder(testFE, polytope);
             // The same order Integral(c * u, v) picks: the integrand's order
             // when the coefficient knows its own, the bases' otherwise.
             size_t order = base;

@@ -40,6 +40,8 @@ namespace Rodin::Tests::Unit
     : public Variational::FiniteElementBase<ModalVectorElement>
   {
     public:
+      using Variational::FiniteElementBase<ModalVectorElement>::getDegree;
+
       ModalVectorElement()
         : FiniteElementBase(Geometry::Polytope::Type::Triangle)
       {}
@@ -62,6 +64,11 @@ namespace Rodin::Tests::Unit
           }
         }
       };
+
+      Optional<size_t> getDegree() const
+      {
+        return 2;
+      }
 
       size_t getCount() const
       {
@@ -173,6 +180,11 @@ namespace Rodin::Tests::Unit
         Variational::GridFunction field(space);
         field.getData() << 2, -3, 5;
         const auto cell = *mesh.getCell();
+        // This modal element has no family getOrder(): its polynomial degree
+        // is sufficient for a grid function's integration recommendation.
+        EXPECT_EQ(field.getOrder(cell), 2);
+        EXPECT_EQ(
+          space.getFiniteElement(cell.getDimension(), cell.getIndex()).getDegree({0}), 2);
         const auto& formula = QF::QuadratureFormula::get(4, cell.getGeometry());
         for (size_t mutation = 0; mutation < 2; ++mutation)
         {

@@ -76,7 +76,7 @@ TEST(Geometry_MetadataLifecycle, IdempotentAttributesAndSparseChartClones)
     EXPECT_EQ(transformations.find(dimension, 0), nullptr);
     const auto* chart = transformations.find(dimension, Slot);
     ASSERT_NE(chart, nullptr);
-    EXPECT_EQ(chart->getOrder(), 1u);
+    EXPECT_EQ(chart->getDegree(), 1u);
     Math::SpatialPoint reference(dimension), physical;
     for (size_t i = 0; i < dimension; ++i)
       reference[i] = Real(i + 1) / 2;

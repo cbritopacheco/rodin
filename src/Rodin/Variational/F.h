@@ -77,7 +77,7 @@ namespace Rodin::Variational::F
        */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
-        return polytope.getTransformation().getOrder();
+        return polytope.getTransformation().getDegree();
       }
 
       /**
@@ -155,7 +155,7 @@ namespace Rodin::Variational::F
        */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
-        return polytope.getTransformation().getOrder();
+        return polytope.getTransformation().getDegree();
       }
 
       /**
@@ -233,7 +233,7 @@ namespace Rodin::Variational::F
        */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
-        return polytope.getTransformation().getOrder();
+        return polytope.getTransformation().getDegree();
       }
 
       /**

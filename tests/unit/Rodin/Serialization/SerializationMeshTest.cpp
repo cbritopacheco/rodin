@@ -146,7 +146,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(loaded->getReferenceDimension(), 2);
     EXPECT_EQ(loaded->getPhysicalDimension(), 2);
-    EXPECT_EQ(loaded->getOrder(), 1);
+    EXPECT_EQ(loaded->getDegree(), Optional<size_t>(1));
     EXPECT_NEAR((actual - expected).norm(), 0, RODIN_FUZZY_CONSTANT);
   }
 }

@@ -26,6 +26,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Math/Common.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
 #include "H1.h"
@@ -165,8 +166,9 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            Integrator::getDefaultOrder(fe, polytope)));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -416,8 +418,9 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
-        const size_t order = this->getOrder(polytope).value_or(
-          integrand.getOrder(polytope).value_or(fe.getOrder()));
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            Integrator::getDefaultOrder(fe, polytope)));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -714,8 +717,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order = this->getOrder(polytope).value_or(
           getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
@@ -1201,8 +1204,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order = this->getOrder(polytope).value_or(
           getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
@@ -1640,8 +1643,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -2052,8 +2055,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order = this->getOrder(polytope).value_or(
           getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
@@ -2323,8 +2326,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             (k_tr == 0) ? 0 : (k_tr + k_te - 1)));
@@ -2661,8 +2664,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             (k_te == 0) ? 0 : (k_tr + k_te - 1)));
@@ -3040,8 +3043,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -3553,8 +3556,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
             (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)));
@@ -4024,8 +4027,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
             ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
@@ -4374,8 +4377,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t kTrial = trialfe.getOrder();
-        const size_t kTest = testfe.getOrder();
+        const size_t kTrial = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t kTest = Integrator::getDefaultOrder(testfe, polytope);
         const auto requestedOrder = this->getOrder(polytope);
         const size_t order = requestedOrder
           ? *requestedOrder
@@ -4701,8 +4704,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
 
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe.getOrder();
+        const size_t k_tr = Integrator::getDefaultOrder(trialfe, polytope);
+        const size_t k_te = Integrator::getDefaultOrder(testfe, polytope);
         // Gradient of trial (k_tr - 1) times value of test (k_te)
         const size_t order =
           this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(

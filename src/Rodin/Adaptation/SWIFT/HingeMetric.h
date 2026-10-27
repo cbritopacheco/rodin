@@ -5,6 +5,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_HINGEMETRIC_H
 #define RODIN_ADAPTATION_SWIFT_HINGEMETRIC_H
 
+#include "Rodin/Variational/Integrator.h"
 #include "../CellDeformation.h"
 #include "Hinge.h"
 #include "QualitySamples.h"
@@ -78,7 +79,8 @@ namespace Rodin::Adaptation::SWIFT
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const QualitySamples samples(polytope, trialFE.getOrder(), parameters);
+        const QualitySamples samples(polytope,
+          Variational::Integrator::getDefaultOrder(trialFE, polytope), parameters);
         const std::size_t nTrial = trialFE.getCount();
         const std::size_t nTest = testFE.getCount();
 
