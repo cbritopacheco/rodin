@@ -61,6 +61,9 @@ namespace Rodin::IO
       /// @brief Type of object being loaded.
       using ObjectType = T;
 
+      /// @brief Destroys the loader through its polymorphic interface.
+      virtual ~Loader() = default;
+
       /**
        * @brief Loads object from an input stream.
        * @param[in] is Input stream to read from
