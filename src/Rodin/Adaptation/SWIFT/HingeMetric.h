@@ -79,8 +79,8 @@ namespace Rodin::Adaptation::SWIFT
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const QualitySamples samples(polytope,
-          Variational::Integrator::getDefaultOrder(trialFE, polytope), parameters);
+        const QualitySamples samples(
+          polytope, trialFE.getDegree().value_or(2 * trialFE.getOrder()), parameters);
         const std::size_t nTrial = trialFE.getCount();
         const std::size_t nTest = testFE.getCount();
 

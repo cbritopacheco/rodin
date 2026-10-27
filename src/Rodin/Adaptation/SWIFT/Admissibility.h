@@ -71,7 +71,7 @@ namespace Rodin::Adaptation::SWIFT
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
       const QualitySamples samples(
-        cell, Variational::Integrator::getDefaultOrder(fe, cell), parameters);
+        cell, fe.getDegree().value_or(2 * fe.getOrder()), parameters);
       samples.forEach([&](const IntegrationPoint& ip, Real) {
         deformation.setDisplacementGradient(gradU.getValue(ip));
         const Real j = deformation.getJacobian();

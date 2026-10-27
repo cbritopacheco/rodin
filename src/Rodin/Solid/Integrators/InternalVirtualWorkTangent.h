@@ -294,20 +294,27 @@ namespace Rodin::Solid
         const Index idx = polytope.getIndex();
         const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
         const size_t vdim = Dimension == 2 ? Dimension : testFES.getVectorDimension();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
-                                                        : 2 *
-            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
-              Variational::Integrator::getDefaultOrder(testFE, polytope),
-              Variational::Integrator::getDefaultOrder(stateFE, polytope)});
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto trialOrder = m_trial.get().getOrder(polytope);
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          if (!trialOrder || !testOrder || !stateOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder = 2 * std::max({*trialOrder, *testOrder, *stateOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -567,23 +574,29 @@ namespace Rodin::Solid
         const Index idx = polytope.getIndex();
         const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
-        const auto& pressFES = m_pressfes.get();
         const size_t vdim = testFES.getVectorDimension();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
-        const auto& pressFE = pressFES.getFiniteElement(d, idx);
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
-                                                        : 2 *
-            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
-              Variational::Integrator::getDefaultOrder(testFE, polytope),
-              Variational::Integrator::getDefaultOrder(stateFE, polytope),
-              Variational::Integrator::getDefaultOrder(pressFE, polytope)});
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto trialOrder = m_trial.get().getOrder(polytope);
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          const auto pressureOrder = m_pressure.get().getOrder(polytope);
+          if (!trialOrder || !testOrder || !stateOrder || !pressureOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder =
+            2 * std::max({*trialOrder, *testOrder, *stateOrder, *pressureOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -873,20 +886,27 @@ namespace Rodin::Solid
         const Index idx = polytope.getIndex();
         const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
         const size_t vdim = testFES.getVectorDimension();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
-                                                        : 2 *
-            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
-              Variational::Integrator::getDefaultOrder(testFE, polytope),
-              Variational::Integrator::getDefaultOrder(stateFE, polytope)});
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto trialOrder = m_trial.get().getOrder(polytope);
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          if (!trialOrder || !testOrder || !stateOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder = 2 * std::max({*trialOrder, *testOrder, *stateOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -1124,20 +1144,27 @@ namespace Rodin::Solid
         const Index idx = polytope.getIndex();
         const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
-        const auto& stateFES = m_statefes.get();
         const size_t vdim = trialFES.getVectorDimension();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
         const auto& testFE = testFES.getFiniteElement(d, idx);
-        const auto& stateFE = stateFES.getFiniteElement(d, idx);
         const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
-        const size_t effectiveOrder = (m_quadOrder > 0) ? m_quadOrder
-                                                        : 2 *
-            std::max({Variational::Integrator::getDefaultOrder(trialFE, polytope),
-              Variational::Integrator::getDefaultOrder(testFE, polytope),
-              Variational::Integrator::getDefaultOrder(stateFE, polytope)});
+        size_t effectiveOrder = m_quadOrder;
+        if (effectiveOrder == 0)
+        {
+          const auto trialOrder = m_trial.get().getOrder(polytope);
+          const auto testOrder = m_test.get().getOrder(polytope);
+          const auto stateOrder = m_displacement.get().getOrder(polytope);
+          if (!trialOrder || !testOrder || !stateOrder)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No automatic constitutive quadrature order is established. "
+              << "Specify it with setQuadratureOrder()." << Alert::Raise;
+          }
+          effectiveOrder = 2 * std::max({*trialOrder, *testOrder, *stateOrder});
+        }
         const auto& qf =
           QF::QuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);

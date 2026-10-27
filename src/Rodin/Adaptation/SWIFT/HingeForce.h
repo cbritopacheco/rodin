@@ -75,7 +75,7 @@ namespace Rodin::Adaptation::SWIFT
         const auto& fe = fes.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
         const QualitySamples samples(
-          polytope, Variational::Integrator::getDefaultOrder(fe, polytope), parameters);
+          polytope, fe.getDegree().value_or(2 * fe.getOrder()), parameters);
 
         m_vector.resize(static_cast<Eigen::Index>(fe.getCount()));
         m_vector.setZero();

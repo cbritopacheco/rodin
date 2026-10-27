@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
       const size_t dimension = cell.getDimension();
       const auto& element = space.getFiniteElement(dimension, cell.getIndex());
       const size_t count = element.getCount();
-      const size_t order = 2 * Variational::Integrator::getDefaultOrder(element, cell) +
+      const size_t order = 2 * element.getDegree().value_or(2 * element.getOrder()) +
         std::max(lambda.getOrder(cell).value_or(size_t(0)),
           mu.getOrder(cell).value_or(size_t(0)));
       const auto& formula = QF::QuadratureFormula::get(order, cell.getGeometry());
@@ -155,8 +155,10 @@ namespace Rodin::Tests::Unit
           EXPECT_TRUE((actual.array() == Scalar(0)).all());
         }
         const size_t order = 2 *
-          Variational::Integrator::getDefaultOrder(
-            space.getFiniteElement(cell.getDimension(), cell.getIndex()), cell);
+          space.getFiniteElement(cell.getDimension(), cell.getIndex())
+            .getDegree()
+            .value_or(2 *
+              space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder());
         const auto& formula = QF::QuadratureFormula::get(order, cell.getGeometry());
         EXPECT_EQ(lambdaCalls, formula.getSize());
         EXPECT_EQ(muCalls, formula.getSize());

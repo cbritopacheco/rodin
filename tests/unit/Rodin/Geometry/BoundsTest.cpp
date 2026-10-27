@@ -12,7 +12,6 @@
 #include <Rodin/Alert/Exception.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational/H1/H1Element.h>
-#include <Rodin/Variational/Integrator.h>
 #include <Rodin/Variational/P0/P0Element.h>
 #include <Rodin/Variational/P0g/P0gElement.h>
 #include <Rodin/Variational/P1/P1Element.h>
@@ -325,26 +324,4 @@ TEST(Rodin_Variational_Degree, PyramidHorizontalBoundsMatchReferenceBasis)
   check.template operator()<2>();
   check.template operator()<3>();
   check.template operator()<4>();
-}
-
-TEST(Rodin_Variational_Degree, IntegrationFallbackUsesKnownStructure)
-{
-  struct UnknownElement
-  {
-    Optional<size_t> getDegree() const
-    {
-      return std::nullopt;
-    }
-  };
-  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Pyramid})
-  {
-    const size_t dimension = Polytope::Traits(geometry).getDimension();
-    auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
-    const auto cell = *mesh.getCell();
-    const H1Element<2, Real> element(geometry);
-    EXPECT_EQ(
-      Integrator::getDefaultOrder(UnknownElement{}, cell), Integrator::DefaultOrder);
-    EXPECT_EQ(Integrator::getDefaultOrder(element, cell),
-      geometry == Polytope::Type::Pyramid ? 4 : 2);
-  }
 }

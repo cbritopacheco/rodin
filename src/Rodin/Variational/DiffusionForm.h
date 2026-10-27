@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_DIFFUSIONFORM_H
 #define RODIN_VARIATIONAL_DIFFUSIONFORM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -180,8 +181,29 @@ namespace Rodin::Variational
             const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
 
-            const size_t kTrial = Integrator::getDefaultOrder(trialFE, polytope);
-            const size_t kTest = Integrator::getDefaultOrder(testFE, polytope);
+            auto trialDegree = trialFE.getDegree();
+            if constexpr (requires { trialFE.getDegree({0, 1}); })
+            {
+              if (!trialDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                trialDegree = trialFE.getDegree({0, 1});
+            }
+            auto testDegree = testFE.getDegree();
+            if constexpr (requires { testFE.getDegree({0, 1}); })
+            {
+              if (!testDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                testDegree = testFE.getDegree({0, 1});
+            }
+            if (!trialDegree || !testDegree)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Cannot infer quadrature order for these finite elements. "
+                << "Use Integral with an explicit setOrder()." << Alert::Raise;
+            }
+
+            const size_t kTrial = *trialDegree;
+            const size_t kTest = *testDegree;
             // The same order Integral(a * Grad(u), Grad(v)) picks: the
             // integrand's order when the coefficient knows its own, the order
             // of the gradients otherwise.

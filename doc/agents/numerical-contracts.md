@@ -194,8 +194,11 @@ including documented nonpolynomial estimates. Zero additionally certifies an
 elementwise constant expression; constant-value caches rely on this contract.
 Do not substitute a family index for an existing total-degree estimate without
 examining the operator, geometry and selected rule. Generic rules can consume
-`getDegree()` without requiring a family index; unknown estimates require an
-accuracy policy or an explicit integration override.
+`getDegree()` without requiring a family index. Quadrature selection belongs to
+expressions and the applicable rules; native P1/H1 rules retain their documented
+rational-pyramid estimates. If neither the expression nor the rule establishes
+an order, require an explicit integration override. Do not replace an unknown
+estimate with a universal numerical fallback.
 
 Transformations expose total and directional `getDegree()`, `isFirstOrder()`
 and `getBounds()`.

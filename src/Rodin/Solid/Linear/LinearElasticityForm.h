@@ -11,6 +11,7 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYFORM_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYFORM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <functional>
 #include <memory>
@@ -238,11 +239,31 @@ namespace Rodin::Variational
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
             const size_t trialCount = trialFE.getCount();
             const size_t testCount = testFE.getCount();
+            auto trialDegree = trialFE.getDegree();
+            if constexpr (requires { trialFE.getDegree({0, 1}); })
+            {
+              if (!trialDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                trialDegree = trialFE.getDegree({0, 1});
+            }
+            auto testDegree = testFE.getDegree();
+            if constexpr (requires { testFE.getDegree({0, 1}); })
+            {
+              if (!testDegree &&
+                polytope.getGeometry() == Geometry::Polytope::Type::Pyramid)
+                testDegree = testFE.getDegree({0, 1});
+            }
+            if (!trialDegree || !testDegree)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Cannot infer quadrature order for these finite elements. "
+                << "Use Integral with an explicit setOrder()." << Alert::Raise;
+            }
+
             const size_t order =
               std::max(m_lambda->getOrder(polytope).value_or(size_t(0)),
                 m_mu->getOrder(polytope).value_or(size_t(0))) +
-              Variational::Integrator::getDefaultOrder(trialFE, polytope) +
-              Variational::Integrator::getDefaultOrder(testFE, polytope);
+              *trialDegree + *testDegree;
             const auto& qf = QF::QuadratureFormula::get(order, geometry);
             const auto& quadrature = polytope.getQuadrature(qf);
 
