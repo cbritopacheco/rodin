@@ -415,8 +415,8 @@ current-commit receipt. Documentation generation runs in parallel using the
 same descriptions. Documentation publishes immediately after its own validated
 build, reconnecting the new pages to the latest complete benchmark histories.
 It does not wait for benchmark builds, execution or pooling. After documentation
-publication and successful pooling, a separate publisher updates only complete
-benchmark histories; it cannot replace newer documentation. Missing or failed
+publication and successful pooling, **Publish documentation and benchmarks**
+updates only complete benchmark histories; it cannot replace newer documentation. Missing or failed
 benchmark contributions leave the previous complete results intact. Both
 automatic publishers and the manual documentation publisher hold the same `rodin-gh-pages-publication` lock
 while writing and deploying. Each publisher uploads the locked `gh-pages`

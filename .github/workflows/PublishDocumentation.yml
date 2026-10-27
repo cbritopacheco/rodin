@@ -53,7 +53,7 @@ jobs:
             git commit -m "Publish documentation $SHA"
             git push origin HEAD:gh-pages
           fi
-      - name: Deploy and verify the published Pages snapshot
+      - name: Publish documentation and benchmarks
         id: deployment
         uses: ./.github/actions/publish-pages
         with:
